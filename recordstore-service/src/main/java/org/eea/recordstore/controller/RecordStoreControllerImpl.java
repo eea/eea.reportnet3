@@ -151,6 +151,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
+      LOG.info(
+          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {}",
+          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+      LOG.info("The user set on threadPropertiesManager is {}",
+          (String) ThreadPropertiesManager.getVariable("user"));
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException e) {

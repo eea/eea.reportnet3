@@ -381,4 +381,17 @@ public class IntegrationServiceImplTest {
     integrationService.releasePopulateEUDatasetLock(1L);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
+
+  @Test
+  public void createIntegrationsTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
+    integrationVO.getInternalParameters().put("dataflowId", "1");
+    Mockito.doNothing().when(crudManager).create(integrationVO);
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    integrationService.createIntegrations(Arrays.asList(integrationVO));
+    Mockito.verify(crudManager, times(1)).create(Mockito.any());
+  }
+
+
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 /** The Interface RepresentativeController. */
 public interface RepresentativeController {
@@ -100,4 +101,39 @@ public interface RepresentativeController {
    */
   @GetMapping("/private/dataProvider")
   List<DataProviderVO> findDataProvidersByIds(@RequestParam("id") List<Long> dataProviderIds);
+
+
+  /**
+   * Export file of all lead reporters.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> exportLeadReportersFile(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Export template reporters file.
+   *
+   * @param groupId the group id
+   * @return the response entity
+   */
+  @GetMapping(value = "/exportTemplateReportersFile/{groupId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> exportTemplateReportersFile(@PathVariable("groupId") Long groupId);
+
+  /**
+   * Import file country template.With that controller we can download a country template to import
+   * data with the countrys with this group id
+   *
+   * @param dataflowId the dataflow id
+   * @param groupId the group id
+   * @param file the file
+   * @return the response entity
+   */
+  @PostMapping("/import/{dataflowId}/group/{groupId}")
+  ResponseEntity<byte[]> importFileCountryTemplate(
+      @PathVariable(value = "dataflowId") Long dataflowId,
+      @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
+
 }
