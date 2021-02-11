@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -362,7 +363,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
           integrationId, datasetId, e.getMessage());
-      lockService.removeLockByCriteria(Arrays.asList(datasetId));
+      lockService.removeLockByCriteria(
+          Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(), datasetId));
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
