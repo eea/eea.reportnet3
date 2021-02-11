@@ -102,7 +102,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (user == null) {
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
-    if (representativeRepository.existsByDataflowIdAndDataProviderIdAndUserMail(dataflowId,
+    if (null != representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(dataflowId,
         representativeVO.getDataProviderId(), email)) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
@@ -423,26 +423,44 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         String[] dataLine = representativeData.split("[|]");
         String email = dataLine[0].replaceAll("\"", "");
         String contryCode = dataLine[1].replaceAll("\"", "");
-        if (!countryCodeList.contains(contryCode)
-            && null == userManagementControllerZull.getUserByEmail(email)) {
+        UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
+        if (!countryCodeList.contains(contryCode) && null == user) {
           fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
         } else if (!countryCodeList.contains(contryCode)) {
           fieldsToWrite[2] = "KO imported country doesn't exist";
-        } else if (null == userManagementControllerZull.getUserByEmail(email)) {
+        } else if (null == user) {
           fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
+
           Long dataProviderId = dataProviderList.stream()
               .filter(dataProvider -> contryCode.equalsIgnoreCase(dataProvider.getCode()))
               .findFirst().get().getId();
 
-          if (!representativeRepository.existsByDataflowIdAndDataProviderIdAndUserMail(dataflowId,
-              dataProviderId, email)) {
+          if (null != representativeRepository
+              .findOneByDataflowIdAndDataProviderIdUserMail(dataflowId, dataProviderId, email)) {
 
-            Representative representative = new Representative();
+            Representative representative = representativeRepository
+                .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProviderId);
+
+            // if exist we dont create representative
+            if (null == representative) {
+              DataProvider dataProvider = new DataProvider();
+              dataProvider.setId(dataProviderId);
+              representative = new Representative();
+              representative.setDataflow(dataflow);
+              representative.setDataProvider(dataProvider);
+              representative.setReceiptDownloaded(false);
+              representative.setReceiptOutdated(false);
+              representative.setHasDatasets(false);
+            }
+            representative.getReporters().stream().findFirst()
+                .ifPresent(reporter -> reporter.setId(user.getId()));
+            representativeList.add(representative);
             fieldsToWrite[2] = "OK imported";
           } else {
             fieldsToWrite[2] = "KO imported already exist in reportnet";
           }
+
         }
         fieldsToWrite[0] = email;
         fieldsToWrite[1] = contryCode;
@@ -451,7 +469,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       // if (!Collections.isEmpty(representativeList)) {
       // representativeRepository.saveAll(representativeList);
       // }
-    } catch (IOException e) {
+    } catch (
+
+    IOException e) {
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
     }
     // Once read we convert it to string
