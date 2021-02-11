@@ -6,7 +6,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.PartitionInfo;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +48,8 @@ public class KafkaSender {
 
   public void sendMessage(final EEAEventVO event) {
 
-    kafkaTemplate.executeInTransaction(operations -> {
-      if (!event.getData().containsKey("user") || StringUtils
-          .isEmpty(event.getData().get("user"))) {
-        LOG.info("user not found on event {}, getting it from context", event);
-        event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
-      }
+    kafkaTemplate.executeInTransaction(operations -> {     
+      event.getData().put("user", SecurityContextHolder.getContext().getAuthentication().getName());
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 
