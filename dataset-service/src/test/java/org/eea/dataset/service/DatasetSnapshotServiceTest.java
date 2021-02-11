@@ -416,6 +416,8 @@ public class DatasetSnapshotServiceTest {
     DataCollection dataCollection = new DataCollection();
     dataCollection.setId(1L);
     metabase.setDataProviderId(1L);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
@@ -447,6 +449,8 @@ public class DatasetSnapshotServiceTest {
     metabase.setDataProviderId(1L);
     DataFlowVO dataFlowVO = new DataFlowVO();
     dataFlowVO.setManualAcceptance(false);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
@@ -482,6 +486,8 @@ public class DatasetSnapshotServiceTest {
     representatives.add(rep);
     dataCollection.setId(1L);
     metabase.setDataProviderId(1L);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
@@ -501,6 +507,8 @@ public class DatasetSnapshotServiceTest {
   public void releaseSnapshotDataCollectionNull() throws Exception {
     DataSetMetabaseVO metabase = new DataSetMetabaseVO();
     metabase.setDataProviderId(1L);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
@@ -521,6 +529,8 @@ public class DatasetSnapshotServiceTest {
     metabase.setDataProviderId(1L);
     DataFlowVO dataFlowVO = new DataFlowVO();
     dataFlowVO.setManualAcceptance(true);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
