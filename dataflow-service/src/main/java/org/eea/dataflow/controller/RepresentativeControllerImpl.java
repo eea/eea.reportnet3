@@ -132,6 +132,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
   public List<DataProviderCodeVO> findAllDataProviderTypes() {
