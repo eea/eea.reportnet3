@@ -3,6 +3,7 @@ package org.eea.validation.util;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
@@ -45,6 +47,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -725,8 +728,6 @@ public class ValidationHelper implements DisposableBean {
      */
     private ValidationTask validationTask;
 
-    private SecurityContext securityContext;
-    private SecurityContext originalContext;
 
     /**
      * Instantiates a new validation tasks executor thread.
@@ -734,7 +735,6 @@ public class ValidationHelper implements DisposableBean {
      * @param validationTask the validation task
      */
     public ValidationTasksExecutorThread(ValidationTask validationTask) {
-      this.securityContext = SecurityContextHolder.getContext();
       this.validationTask = validationTask;
     }
 
@@ -748,8 +748,13 @@ public class ValidationHelper implements DisposableBean {
       Long currentTime = System.currentTimeMillis();
       int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
 
-      originalContext = SecurityContextHolder.getContext();
-      SecurityContextHolder.setContext(this.securityContext);
+      SecurityContextHolder.clearContext();
+
+      SecurityContextHolder.getContext()
+          .setAuthentication(new UsernamePasswordAuthenticationToken(
+              EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
+                  new HashSet<>()),
+              validationTask.eeaEventVO.getData().get("token").toString(), null));
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
@@ -792,7 +797,6 @@ public class ValidationHelper implements DisposableBean {
         Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Validation task {} finished, it has taken taken {} seconds",
             validationTask.eeaEventVO, totalTime);
-        SecurityContextHolder.setContext(this.originalContext);
       }
     }
 
