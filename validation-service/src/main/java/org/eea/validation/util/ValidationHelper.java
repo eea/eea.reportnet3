@@ -8,11 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -46,6 +42,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import lombok.AllArgsConstructor;
 
 /**
  * The Class ValidationHelper.
@@ -228,7 +225,7 @@ public class ValidationHelper implements DisposableBean {
    */
   public void initializeProcess(String processId, boolean isCoordinator, boolean released) {
     ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
-        isCoordinator, (String) ThreadPropertiesManager.getVariable("user"), released);
+        isCoordinator, SecurityContextHolder.getContext().getAuthentication().getName(), released);
 
     synchronized (processesMap) {
       processesMap.put(processId, process);
@@ -269,7 +266,7 @@ public class ValidationHelper implements DisposableBean {
           SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
       LOG.info("The user set on the event is {}", values.get("user"));
       LOG.info("The user set on threadPropertiesManager is {}",
-          (String) ThreadPropertiesManager.getVariable("user"));
+          ThreadPropertiesManager.getVariable("user"));
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
 
     }
@@ -343,7 +340,7 @@ public class ValidationHelper implements DisposableBean {
         LOG.info("The user set on the event is {}",
             processesMap.get(processId).getRequestingUser());
         LOG.info("The user set on threadPropertiesManager is {}",
-            (String) ThreadPropertiesManager.getVariable("user"));
+            ThreadPropertiesManager.getVariable("user"));
         this.kafkaSenderUtils
             .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
         sentTasks++;
@@ -430,7 +427,7 @@ public class ValidationHelper implements DisposableBean {
                 SecurityContextHolder.getContext().getAuthentication().getName());
             LOG.info("The user set on the event is {}", event.getData().get("user"));
             LOG.info("The user set on threadPropertiesManager is {}",
-                (String) ThreadPropertiesManager.getVariable("user"));
+                ThreadPropertiesManager.getVariable("user"));
             kafkaSenderUtils.releaseKafkaEvent(event);
           }
           initialTasks--;
@@ -609,7 +606,7 @@ public class ValidationHelper implements DisposableBean {
           SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
       LOG.info("The user set on the event is {}", value.get("user"));
       LOG.info("The user set on threadPropertiesManager is {}",
-          (String) ThreadPropertiesManager.getVariable("user"));
+          ThreadPropertiesManager.getVariable("user"));
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       if (isRelease) {
         Long nextDatasetId =
@@ -622,7 +619,7 @@ public class ValidationHelper implements DisposableBean {
               SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
           LOG.info("The user set on the event is {}", value.get("user"));
           LOG.info("The user set on threadPropertiesManager is {}",
-              (String) ThreadPropertiesManager.getVariable("user"));
+              ThreadPropertiesManager.getVariable("user"));
           kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
         }
 
@@ -774,7 +771,7 @@ public class ValidationHelper implements DisposableBean {
           LOG.info("The user set on the event is {}",
               validationTask.eeaEventVO.getData().get("user"));
           LOG.info("The user set on threadPropertiesManager is {}",
-              (String) ThreadPropertiesManager.getVariable("user"));
+              ThreadPropertiesManager.getVariable("user"));
           kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
               validationTask.eeaEventVO.getData());
         }
