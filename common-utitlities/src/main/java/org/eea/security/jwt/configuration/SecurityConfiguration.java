@@ -61,10 +61,10 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
   /**
    * Inits the security.
    */
-//  @PostConstruct
-//  private void initSecurity() {
-//    SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
-//  }
+  @PostConstruct
+  private void initSecurity() {
+    SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+  }
 
 
   /**
