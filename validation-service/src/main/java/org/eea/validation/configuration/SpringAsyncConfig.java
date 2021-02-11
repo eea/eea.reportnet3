@@ -14,7 +14,15 @@ import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecu
 public class SpringAsyncConfig {
 
   @Bean
-  public DelegatingSecurityContextAsyncTaskExecutor taskExecutor(ThreadPoolTaskExecutor delegate) {
-    return new DelegatingSecurityContextAsyncTaskExecutor(delegate);
+  public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setThreadNamePrefix("asynchronous-taskExecutor-thread-");
+    return executor;
+  }
+
+  @Bean
+  public DelegatingSecurityContextAsyncTaskExecutor taskExecutor() {
+
+    return new DelegatingSecurityContextAsyncTaskExecutor(threadPoolTaskExecutor());
   }
 }
