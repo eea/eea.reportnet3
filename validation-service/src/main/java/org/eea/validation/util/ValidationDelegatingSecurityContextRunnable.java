@@ -1,5 +1,7 @@
 package org.eea.validation.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +16,8 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
    */
   private final SecurityContext delegateSecurityContext;
 
+  private static final Logger LOG = LoggerFactory
+      .getLogger(ValidationDelegatingSecurityContextRunnable.class);
 
   /**
    * Creates a new {@link ValidationDelegatingSecurityContextRunnable} with a specific {@link
@@ -30,6 +34,10 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
     Assert.notNull(securityContext, "securityContext cannot be null");
     this.delegate = delegate;
     this.delegateSecurityContext = securityContext;
+    LOG.info(
+        " creating new ValidationDelegatingSecurityContextRunnable with security context {} {}",
+        securityContext.getAuthentication().getPrincipal(),
+        securityContext.getAuthentication().getCredentials());
   }
 
   /**
@@ -41,13 +49,20 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
    */
   public ValidationDelegatingSecurityContextRunnable(Runnable delegate) {
     this(delegate, SecurityContextHolder.getContext());
+    LOG.info(
+        " creating new ValidationDelegatingSecurityContextRunnable with BRAND NEW security context {} {}",
+        SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
+        SecurityContextHolder.getContext().getAuthentication().getCredentials());
   }
 
   @Override
   public void run() {
 
     try {
-      SecurityContextHolder.setContext(delegateSecurityContext);
+      LOG.info(
+          " executing task with security context {} {}",
+          SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
+          SecurityContextHolder.getContext().getAuthentication().getCredentials());
       delegate.run();
     } finally {
 
