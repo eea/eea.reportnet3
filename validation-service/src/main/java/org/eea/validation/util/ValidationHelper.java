@@ -10,7 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -156,7 +159,10 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    ThreadFactory tf = Executors.defaultThreadFactory();
+
+    validationExecutorService = new ThreadPoolExecutor(0, maxRunningTasks, 0, TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue<>());
   }
 
   /**
@@ -750,8 +756,8 @@ public class ValidationHelper implements DisposableBean {
 
       LOG.info(
           " executing task with security context {} {}",
-          SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
-          SecurityContextHolder.getContext().getAuthentication().getCredentials());
+          SecurityContextHolder.getContext().getAuthentication().getName(),
+          SecurityContextHolder.getContext().getAuthentication().getDetails());
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
