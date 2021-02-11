@@ -1,3 +1,4 @@
+ALTER TABLE public.representative ADD CONSTRAINT representative_primarykey PRIMARY KEY (id);
 
 CREATE TABLE IF NOT EXISTS public."user" (
 	id varchar NOT NULL,
