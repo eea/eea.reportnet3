@@ -717,12 +717,18 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     String[] palabras = query.split("\\s+");
     for (String palabra : palabras) {
       if (palabra.contains(DATASET)) {
-        String datasetIdFromotherSchemas =
-            palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
-        datasetSchamasMap.put(
-            datasetMetabaseController
-                .findDatasetSchemaIdById(Long.parseLong(datasetIdFromotherSchemas)),
-            Long.parseLong(datasetIdFromotherSchemas));
+        try {
+          String datasetIdFromotherSchemas =
+              palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
+
+          datasetSchamasMap.put(
+              datasetMetabaseController
+                  .findDatasetSchemaIdById(Long.parseLong(datasetIdFromotherSchemas)),
+              Long.parseLong(datasetIdFromotherSchemas));
+        } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
+          LOG_ERROR.error("Error validating SQL rule, processing the sentence {}. Message {}",
+              query, e.getMessage(), e);
+        }
       }
     }
     return datasetSchamasMap;
