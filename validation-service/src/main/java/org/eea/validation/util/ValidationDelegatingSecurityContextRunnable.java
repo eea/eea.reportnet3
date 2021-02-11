@@ -59,7 +59,7 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
   public void run() {
 
     try {
-
+      SecurityContextHolder.setContext(delegateSecurityContext);
       delegate.run();
     } finally {
 

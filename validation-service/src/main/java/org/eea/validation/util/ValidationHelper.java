@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -40,6 +43,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
@@ -129,7 +133,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * The validation executor service.
    */
-  private ThreadPoolTaskExecutor validationExecutorService;
+  private ExecutorService validationExecutorService;
 
 
   /**
@@ -152,15 +156,7 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(maxRunningTasks);
-    executor.setMaxPoolSize(maxRunningTasks);
-    executor.setQueueCapacity(Integer.MAX_VALUE);
-    executor.setThreadNamePrefix("asynchronous-validation-thread-");
-    executor
-        .setTaskDecorator(runnable -> new ValidationDelegatingSecurityContextRunnable(runnable));
-    executor.initialize();
-    validationExecutorService = executor;
+    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
   }
 
   /**
@@ -384,7 +380,7 @@ public class ValidationHelper implements DisposableBean {
 
     // first every task is always queued up to ensure the order
 
-    if (validationExecutorService.getActiveCount() == maxRunningTasks) {
+    if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
       LOG.info(
           "Event {} will be queued up as there are no validating threads available at the moment",
           eeaEventVO);
@@ -723,12 +719,16 @@ public class ValidationHelper implements DisposableBean {
      */
     private ValidationTask validationTask;
 
+    private SecurityContext securityContext;
+    private SecurityContext originalContext;
+
     /**
      * Instantiates a new validation tasks executor thread.
      *
      * @param validationTask the validation task
      */
     public ValidationTasksExecutorThread(ValidationTask validationTask) {
+      this.securityContext = SecurityContextHolder.getContext();
       this.validationTask = validationTask;
     }
 
@@ -740,11 +740,14 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
 
       Long currentTime = System.currentTimeMillis();
-      int workingThreads = validationExecutorService.getActiveCount();
+      int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
 
+      originalContext = SecurityContextHolder.getContext();
+      SecurityContextHolder.setContext(this.securityContext);
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
+
       LOG.info(
           " executing task with security context {} {}",
           SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
@@ -783,6 +786,7 @@ public class ValidationHelper implements DisposableBean {
         Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Validation task {} finished, it has taken taken {} seconds",
             validationTask.eeaEventVO, totalTime);
+        SecurityContextHolder.setContext(this.originalContext);
       }
     }
 
