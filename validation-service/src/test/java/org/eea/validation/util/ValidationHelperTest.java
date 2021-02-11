@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -211,9 +212,11 @@ public class ValidationHelperTest {
 
   /**
    * Execute validation.
+   * 
+   * @throws EEAException
    */
   @Test
-  public void executeValidation() {
+  public void executeValidation() throws EEAException {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "initialTax", 2);
@@ -282,6 +285,8 @@ public class ValidationHelperTest {
         new ValidationProcessVO(1, pendingValidations, null, true, "user1", false));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
 
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     validationHelper.reducePendingTasks(1l, "1");
 
     Mockito.verify(kafkaSenderUtils, Mockito.times(1))
