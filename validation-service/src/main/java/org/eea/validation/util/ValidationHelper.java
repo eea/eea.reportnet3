@@ -157,7 +157,8 @@ public class ValidationHelper implements DisposableBean {
     executor.setMaxPoolSize(maxRunningTasks);
     executor.setQueueCapacity(Integer.MAX_VALUE);
     executor.setThreadNamePrefix("asynchronous-validation-thread-");
-    executor.setTaskDecorator(runnable -> new DelegatingSecurityContextRunnable(runnable));
+    executor
+        .setTaskDecorator(runnable -> new ValidationDelegatingSecurityContextRunnable(runnable));
     executor.initialize();
     validationExecutorService = executor;
   }
