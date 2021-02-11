@@ -208,9 +208,9 @@ const DataViewer = withRouter(
 
     const actionTemplate = () => (
       <ActionsColumn
+        disabledButtons={isDataflowOpen}
         hideDeletion={tableFixedNumber}
         hideEdition={RecordUtils.allAttachments(colsSchema)}
-        isDataflowOpen={isDataflowOpen}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
         onEditClick={() => setEditDialogVisible(true)}
       />
