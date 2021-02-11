@@ -56,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     String jwt = getJwtFromRequest(request);
-    if (jwt.startsWith("FEING_")) {
+    if (!StringUtils.isEmpty(jwt) && jwt.startsWith("FEING_")) {
       String feignInvocationUser = request.getHeader("FeignInvocationUser");
       String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
       createFeignSecurity(feignInvocationUser, feignInvocationUserId);
@@ -109,16 +109,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    * @return the jwt from request
    */
   private String getJwtFromRequest(HttpServletRequest request) {
-    String jwt = request
-        .getHeader("FeignInvocationUser");
-    if (StringUtils
-        .isEmpty(jwt)) {//if invocation comes from outside then it needs to be authenticated
+    String jwt = request.getHeader("FeignInvocationUser");
+    if (StringUtils.isEmpty(jwt)) {// if invocation comes from outside then it needs to be
+                                   // authenticated
       String bearerToken = request.getHeader("Authorization");
 
       if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TOKEN)) {
         jwt = bearerToken.substring(7, bearerToken.length());
       }
-    } else {//if FeignInvocationUser comes then let it go
+    } else {// if FeignInvocationUser comes then let it go
       jwt = "FEING_" + jwt;
     }
 
