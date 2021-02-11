@@ -61,6 +61,8 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
 
+
+
   /**
    * Validate data set data. The lock should be released on
    * ValidationHelper.checkFinishedValidations(..)
@@ -82,7 +84,15 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
+    try {
+
+      // Add lock to the release process if necessary
+      validationHelper.addLockToReleaseProcess(datasetId);
+
+      validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
+    }
   }
 
   /**
