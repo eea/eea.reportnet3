@@ -58,7 +58,6 @@ import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -298,11 +297,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /**
-   * The dataset schema service.
-   */
-  @Autowired
-  private DatasetSchemaService datasetSchemaService;
 
   /**
    * The paM service.
@@ -818,8 +812,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    TableSchema tableSchema =
-        datasetSchemaService.getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
+    TableSchema tableSchema = getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
 
     if (null == tableSchema) {
       throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
@@ -973,7 +966,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException {
-    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(datasetId)
+            .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+    String datasetSchemaId = datasetMetabase.getDatasetSchema();
     IntegrationVO integrationVO =
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
     integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
@@ -3200,4 +3196,19 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  private TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId) {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema tableSchema = null;
+
+    if (null != datasetSchema && null != datasetSchema.getTableSchemas()
+        && ObjectId.isValid(tableSchemaId)) {
+      ObjectId oid = new ObjectId(tableSchemaId);
+      tableSchema = datasetSchema.getTableSchemas().stream()
+          .filter(ts -> oid.equals(ts.getIdTableSchema())).findFirst().orElse(null);
+    }
+
+    return tableSchema;
+  }
 }
