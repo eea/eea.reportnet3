@@ -103,7 +103,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (user == null) {
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
-    if (null == representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(dataflowId,
+    if (null != representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(dataflowId,
         representativeVO.getDataProviderId(), email)) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
