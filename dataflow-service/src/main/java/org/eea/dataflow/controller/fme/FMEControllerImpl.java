@@ -117,8 +117,8 @@ public class FMEControllerImpl implements FMEController {
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
-      integrationService.releaseLocks(fmeOperationInfoVO.getDatasetId());
               fmeOperationInfoVO.getDatasetId()));
+      integrationService.releaseLocks(fmeOperationInfoVO.getDatasetId());
     } catch (EEAForbiddenException e) {
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
