@@ -762,7 +762,7 @@ public class ValidationHelper implements DisposableBean {
       LOG.info(
           " executing task with security context {} {}",
           SecurityContextHolder.getContext().getAuthentication().getName(),
-          SecurityContextHolder.getContext().getAuthentication().getDetails());
+          SecurityContextHolder.getContext().getAuthentication().getCredentials());
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
@@ -785,12 +785,7 @@ public class ValidationHelper implements DisposableBean {
           }
         } else {
           // send the message to coordinator validation instance
-          LOG.info("The user releasing kafka event on ValidationHelper.run is {}",
-              SecurityContextHolder.getContext().getAuthentication().getName());
-          LOG.info("The user set on the event is {}",
-              validationTask.eeaEventVO.getData().get("user"));
-          LOG.info("The user set on threadPropertiesManager is {}",
-              ThreadPropertiesManager.getVariable("user"));
+
           kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
               validationTask.eeaEventVO.getData());
         }
