@@ -5,8 +5,8 @@ CREATE TABLE public."user" (
 	CONSTRAINT user_pk PRIMARY KEY (user_mail)
 );
 
-ALTER TABLE public."user" OWNER TO root;
-GRANT ALL ON TABLE public."user" TO root;
+ALTER TABLE public."user" OWNER TO testuser;
+GRANT ALL ON TABLE public."user" TO testuser;
 
 CREATE TABLE public.representative_user (
 	representative_id int8 NOT NULL,
@@ -16,5 +16,5 @@ CREATE TABLE public.representative_user (
 	CONSTRAINT representative_user_fk_1 FOREIGN KEY (user_mail) REFERENCES "user"(user_mail)
 );
 
-ALTER TABLE public.representative_user OWNER TO root;
-GRANT ALL ON TABLE public.representative_user TO root;
+ALTER TABLE public.representative_user OWNER TO testuser;
+GRANT ALL ON TABLE public.representative_user TO testuser;
