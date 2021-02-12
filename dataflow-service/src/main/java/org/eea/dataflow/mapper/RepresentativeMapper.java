@@ -49,7 +49,7 @@ public interface RepresentativeMapper extends IMapper<Representative, Representa
   default void fillEmails(RepresentativeVO representativeVO,
       @MappingTarget Representative representative) {
     representative.setReporters(representativeVO.getProviderAccounts().stream()
-        .map(email -> new User(null, email, null)).collect(Collectors.toSet()));
+        .map(email -> new User(email, null)).collect(Collectors.toSet()));
   }
 
 }

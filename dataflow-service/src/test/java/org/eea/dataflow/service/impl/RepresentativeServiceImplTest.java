@@ -99,7 +99,7 @@ public class RepresentativeServiceImplTest {
     arrayId.add(new Representative());
     Set<Representative> representatives = new HashSet<>();
     representatives.add(representative);
-    user = new User("id", "email@host.com", representatives);
+    user = new User("email@host.com", representatives);
     users = new HashSet<>();
     users.add(user);
     MockitoAnnotations.initMocks(this);

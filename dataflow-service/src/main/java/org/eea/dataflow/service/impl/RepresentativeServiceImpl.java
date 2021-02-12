@@ -107,7 +107,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeVO.getDataProviderId(), email)) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
-
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
     Representative representative = representativeMapper.classToEntity(representativeVO);
@@ -117,8 +116,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
     representative.getReporters().stream().findFirst()
-        .ifPresent(reporter -> reporter.setId(user.getId()));
-
+        .ifPresent(reporter -> reporter.setUserMail(email));
 
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();
@@ -169,7 +167,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           usersToInsert.add(user.get());
         } else {
           UserRepresentationVO newUser = userManagementControllerZull.getUserByEmail(email);
-          usersToInsert.add(new User(newUser.getId(), newUser.getEmail(), null));
+          usersToInsert.add(new User(newUser.getEmail(), null));
         }
       }
       representative.setReporters(usersToInsert);
@@ -456,16 +454,15 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             }
             if (!Collections.isEmpty(representative.getReporters())) {
               representative.getReporters().stream().findFirst()
-                  .ifPresent(reporter -> reporter.setId(user.getId()));
+                  .ifPresent(reporter -> reporter.setUserMail(email));
             } else {
               Set<User> reporters = new HashSet();
               User userNew = new User();
-              userNew.setId(user.getId());
               userNew.setUserMail(user.getEmail());
               reporters.add(userNew);
               representative.setReporters(reporters);
               representative.getReporters().stream().findFirst()
-                  .ifPresent(reporter -> reporter.setId(user.getId()));
+                  .ifPresent(reporter -> reporter.setUserMail(user.getEmail()));
             }
             representativeList.add(representative);
             fieldsToWrite[2] = "OK imported";

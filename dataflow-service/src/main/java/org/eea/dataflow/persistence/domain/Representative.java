@@ -49,7 +49,7 @@ public class Representative {
   /** The lead reporters. */
   @ManyToMany(cascade = {CascadeType.MERGE})
   @JoinTable(name = "representative_user", joinColumns = @JoinColumn(name = "representative_id"),
-      inverseJoinColumns = @JoinColumn(name = "user_id"))
+      inverseJoinColumns = @JoinColumn(name = "user_mail"))
   private Set<User> reporters;
 
   /** The receipt downloaded. */
