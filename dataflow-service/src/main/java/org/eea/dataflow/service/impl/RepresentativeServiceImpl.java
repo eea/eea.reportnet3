@@ -115,6 +115,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptDownloaded(false);
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
+    representative.setId(0L);
     representative.getReporters().stream().findFirst()
         .ifPresent(reporter -> reporter.setUserMail(email));
 
