@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
+import io.jsonwebtoken.lang.Collections;
 
 /** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
@@ -102,7 +103,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (user == null) {
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
-    if (null != representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(dataflowId,
+    if (null == representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(dataflowId,
         representativeVO.getDataProviderId(), email)) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
@@ -436,7 +437,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               .filter(dataProvider -> contryCode.equalsIgnoreCase(dataProvider.getCode()))
               .findFirst().get().getId();
 
-          if (null != representativeRepository
+          if (null == representativeRepository
               .findOneByDataflowIdAndDataProviderIdUserMail(dataflowId, dataProviderId, email)) {
 
             Representative representative = representativeRepository
@@ -445,16 +446,27 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             // if exist we dont create representative
             if (null == representative) {
               DataProvider dataProvider = new DataProvider();
-              dataProvider.setId(dataProviderId);
               representative = new Representative();
+              dataProvider.setId(dataProviderId);
               representative.setDataflow(dataflow);
               representative.setDataProvider(dataProvider);
               representative.setReceiptDownloaded(false);
               representative.setReceiptOutdated(false);
               representative.setHasDatasets(false);
             }
-            representative.getReporters().stream().findFirst()
-                .ifPresent(reporter -> reporter.setId(user.getId()));
+            if (!Collections.isEmpty(representative.getReporters())) {
+              representative.getReporters().stream().findFirst()
+                  .ifPresent(reporter -> reporter.setId(user.getId()));
+            } else {
+              Set<User> reporters = new HashSet();
+              User userNew = new User();
+              userNew.setId(user.getId());
+              userNew.setUserMail(user.getEmail());
+              reporters.add(userNew);
+              representative.setReporters(reporters);
+              representative.getReporters().stream().findFirst()
+                  .ifPresent(reporter -> reporter.setId(user.getId()));
+            }
             representativeList.add(representative);
             fieldsToWrite[2] = "OK imported";
           } else {
@@ -466,9 +478,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         fieldsToWrite[1] = contryCode;
         csvWriter.writeNext(fieldsToWrite);
       }
-      // if (!Collections.isEmpty(representativeList)) {
-      // representativeRepository.saveAll(representativeList);
-      // }
+      if (!Collections.isEmpty(representativeList)) {
+        representativeRepository.saveAll(representativeList);
+      }
     } catch (
 
     IOException e) {
