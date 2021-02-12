@@ -106,7 +106,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeVO.getDataProviderId(), email)) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
-
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
     Representative representative = representativeMapper.classToEntity(representativeVO);
@@ -116,8 +115,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
     representative.getReporters().stream().findFirst()
-        .ifPresent(reporter -> reporter.setId(user.getId()));
-
+        .ifPresent(reporter -> reporter.setUserMail(email));
 
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();
@@ -168,7 +166,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           usersToInsert.add(user.get());
         } else {
           UserRepresentationVO newUser = userManagementControllerZull.getUserByEmail(email);
-          usersToInsert.add(new User(newUser.getId(), newUser.getEmail(), null));
+          usersToInsert.add(new User(newUser.getEmail(), null));
         }
       }
       representative.setReporters(usersToInsert);
@@ -454,7 +452,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               representative.setHasDatasets(false);
             }
             representative.getReporters().stream().findFirst()
-                .ifPresent(reporter -> reporter.setId(user.getId()));
+                .ifPresent(reporter -> reporter.setUserMail(user.getEmail()));
             representativeList.add(representative);
             fieldsToWrite[2] = "OK imported";
           } else {

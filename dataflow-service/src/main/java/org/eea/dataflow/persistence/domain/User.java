@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * The Class User.
+ */
 @Entity
 @Getter
 @Setter
@@ -22,14 +25,12 @@ import lombok.ToString;
 @Table(name = "user", schema = "public")
 public class User {
 
+  /** The user mail. */
   @Id
-  @Column(name = "ID")
-  private String id;
-
-  /** The label. */
-  @Column(name = "userMail")
+  @Column(name = "user_mail")
   private String userMail;
 
+  /** The representatives. */
   @ManyToMany(mappedBy = "reporters", fetch = FetchType.EAGER)
   private Set<Representative> representatives;
 
