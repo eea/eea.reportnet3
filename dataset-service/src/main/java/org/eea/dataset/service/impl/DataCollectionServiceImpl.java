@@ -303,8 +303,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      boolean stopAndNotifySQLErrors, boolean manualCheck) {
-    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
+
+    dataflowControllerZuul.
+
+        manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
   }
 
   /**
