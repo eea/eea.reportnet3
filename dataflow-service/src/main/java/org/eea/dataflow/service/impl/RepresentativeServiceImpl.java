@@ -451,6 +451,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               representative.setReceiptDownloaded(false);
               representative.setReceiptOutdated(false);
               representative.setHasDatasets(false);
+              representative.setId(0L);
             }
             if (!Collections.isEmpty(representative.getReporters())) {
               representative.getReporters().stream().findFirst()

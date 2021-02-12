@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,7 +48,7 @@ public class Representative {
   private DataProvider dataProvider;
 
   /** The lead reporters. */
-  @ManyToMany(cascade = {CascadeType.MERGE})
+  @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
   @JoinTable(name = "representative_user", joinColumns = @JoinColumn(name = "representative_id"),
       inverseJoinColumns = @JoinColumn(name = "user_mail"))
   private Set<User> reporters;
