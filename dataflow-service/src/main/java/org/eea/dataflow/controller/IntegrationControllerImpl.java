@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller;
 
+import java.util.Arrays;
 import java.util.List;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
@@ -10,8 +11,10 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.service.LockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,10 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Autowired
   private IntegrationExecutorFactory integrationExecutorFactory;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
   /**
    * The Constant LOG_ERROR.
@@ -340,12 +347,13 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
   @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
   @ApiOperation(
       value = "Run an external integration process providing the integration id and the dataset where applies",
       response = ExecutionResultVO.class)
   public void executeExternalIntegration(@PathVariable(value = "integrationId") Long integrationId,
-      @PathVariable("datasetId") Long datasetId,
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "replace", defaultValue = "false") Boolean replace) {
 
     try {
@@ -355,6 +363,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
           integrationId, datasetId, e.getMessage());
+      lockService.removeLockByCriteria(
+          Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(), datasetId));
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 

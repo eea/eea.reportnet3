@@ -70,7 +70,10 @@ public enum LockSignature {
   IMPORT_ETL("DataSetControllerImpl.etlImportDataset(..)"),
 
   /** The delete field schema. */
-  DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)");
+  DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)"),
+
+  /** The execute external integration. */
+  EXECUTE_EXTERNAL_INTEGRATION("IntegrationControllerImpl.executeExternalIntegration(..)");
 
 
 
