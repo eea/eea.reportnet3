@@ -363,6 +363,7 @@ public class IntegrationControllerImpl implements IntegrationController {
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
           integrationId, datasetId, e.getMessage());
       lockService.removeLockByCriteria(Arrays.asList(datasetId));
+      integrationService.releaseLocks(datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 

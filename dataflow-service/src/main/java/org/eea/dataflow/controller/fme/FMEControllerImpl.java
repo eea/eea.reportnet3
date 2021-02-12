@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.utils.StreamingUtil;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
@@ -50,6 +51,12 @@ public class FMEControllerImpl implements FMEController {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /**
+   * The integration service.
+   */
+  @Autowired
+  private IntegrationService integrationService;
 
 
   /**
@@ -108,6 +115,7 @@ public class FMEControllerImpl implements FMEController {
           fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
       lockService.removeLockByCriteria(Arrays.asList(fmeOperationInfoVO.getDatasetId()));
+      integrationService.releaseLocks(fmeOperationInfoVO.getDatasetId());
     } catch (EEAForbiddenException e) {
       lockService.removeLockByCriteria(Arrays.asList(fmeOperationInfoVO.getDatasetId()));
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);

@@ -60,6 +60,9 @@ public enum LockSignature {
   /** The insert records. */
   INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)"),
 
+  /** The insert records multitable. */
+  INSERT_RECORDS_MULTITABLE("DataSetControllerImpl.insertRecordsMultiTable(..)"),
+
   /** The update records. */
   UPDATE_RECORDS("DataSetControllerImpl.updateRecords(..)"),
 
