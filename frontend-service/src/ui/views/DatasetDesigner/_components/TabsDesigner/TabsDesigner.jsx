@@ -36,6 +36,7 @@ export const TabsDesigner = withRouter(
     getIsTableCreated,
     getUpdatedTabs,
     history,
+    isDataflowOpen,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isValidationSelected,
@@ -352,6 +353,7 @@ export const TabsDesigner = withRouter(
           history={history}
           initialTabIndexDrag={initialTabIndexDrag}
           isErrorDialogVisible={isErrorDialogVisible}
+          isDataflowOpen={isDataflowOpen}
           onTabAdd={onTabAdd}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTableAdd}
@@ -386,6 +388,7 @@ export const TabsDesigner = withRouter(
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
+                        isDataflowOpen={isDataflowOpen}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}
