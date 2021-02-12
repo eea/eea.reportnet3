@@ -968,7 +968,7 @@
     "releasingLeftSideBarButton": "Releasing status",
     "isReleasableDataflowCheckboxLabel":"Dataflow is opened for releases",
     "isReleasableDataflowDialogHeader":"Open/close release period",
-    "releaseButtonTooltip": "Releasing period is closed",
+    "releaseButtonTooltip": "Reporting is closed for this dataflow - If necessary, contact helpdesk for information about resubmission",
     "moreElements": "There are more elements, use the search to limit results",
     "getReferencedLinkValuesError": "Error while loading the referenced field values",
     "updateReleasableFailedEvent": "Error updating the dataflow release status"
