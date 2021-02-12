@@ -456,7 +456,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               representative.getReporters().stream().findFirst()
                   .ifPresent(reporter -> reporter.setUserMail(email));
             } else {
-              Set<User> reporters = new HashSet();
+              Set<User> reporters = new HashSet<>();
               User userNew = new User();
               userNew.setUserMail(user.getEmail());
               reporters.add(userNew);

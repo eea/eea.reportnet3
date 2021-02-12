@@ -26,7 +26,7 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param dataflowId the dataflow id
    * @return true, if successful
    */
-  @Query("SELECT r from Representative r JOIN FETCH r.reporters WHERE r.dataProvider.id = :dataProviderId AND r.dataflow.id= :dataflowId")
+  @Query("SELECT distinct r from Representative r JOIN FETCH r.reporters WHERE r.dataProvider.id = :dataProviderId AND r.dataflow.id= :dataflowId")
   Optional<List<Representative>> findByDataProviderIdAndDataflowId(
       @Param("dataProviderId") Long dataProviderId, @Param("dataflowId") Long dataflowId);
 
@@ -37,7 +37,7 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param email the email
    * @return the list
    */
-  @Query("SELECT r from Representative r JOIN FETCH r.reporters rep WHERE rep.userMail= :email AND r.dataflow.id= :dataflowId")
+  @Query("SELECT distinct r from Representative r JOIN FETCH r.reporters rep WHERE rep.userMail= :email AND r.dataflow.id= :dataflowId")
   List<Representative> findByDataflowIdAndEmail(@Param("dataflowId") Long dataflowId,
       @Param("email") String email);
 
