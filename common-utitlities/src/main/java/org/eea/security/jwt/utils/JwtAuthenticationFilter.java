@@ -56,39 +56,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     String jwt = getJwtFromRequest(request);
-    try {
-      TokenDataVO token = null;
-      if (StringUtils.hasText(jwt) && (token = tokenProvider.retrieveToken(jwt)) != null) {
-        AuthenticationUtils.performAuthentication(token, BEARER_TOKEN + jwt);
-      }
-    } catch (VerificationException e) {
-      // before showing error check if invocation came from feign client and toke was dued during
-      // the previous process
+    if (!StringUtils.isEmpty(jwt) && jwt.startsWith("FEING_")) {
       String feignInvocationUser = request.getHeader("FeignInvocationUser");
       String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
+      createFeignSecurity(feignInvocationUser, feignInvocationUserId);
+    } else {
+      try {
+        TokenDataVO token = null;
+        if (StringUtils.hasText(jwt) && (token = tokenProvider.retrieveToken(jwt)) != null) {
+          AuthenticationUtils.performAuthentication(token, BEARER_TOKEN + jwt);
+        }
+      } catch (VerificationException e) {
+        // before showing error check if invocation came from feign client and toke was dued during
+        // the previous process
+        String feignInvocationUser = request.getHeader("FeignInvocationUser");
+        String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
 
-      if (!StringUtils.isEmpty(feignInvocationUser)) {
-        log.info(
-            "Invocation came from a feign client, setting security context with user {} and user id {} ",
-            feignInvocationUser, feignInvocationUserId);
-        Set<String> authorities = new HashSet<>();
-        authorities.add("FEIGN");
-        UserDetails userDetails = EeaUserDetails.create(feignInvocationUser, authorities);
-
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-        Map<String, String> details = new HashMap<>();
-        details.put(AuthenticationDetails.USER_ID, feignInvocationUserId);
-        authentication.setDetails(details);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      } else {
-        LOG_ERROR.error(
-            "Could not set authentication security context: uri={}, token={}, feignInvocationUser={}",
-            request.getRequestURI(), jwt, request.getHeader("FeignInvocationUser"), e);
+        if (!StringUtils.isEmpty(feignInvocationUser)) {
+          createFeignSecurity(feignInvocationUser, feignInvocationUserId);
+        } else {
+          LOG_ERROR.error(
+              "Could not set authentication security context: uri={}, token={}, feignInvocationUser={}",
+              request.getRequestURI(), jwt, request.getHeader("FeignInvocationUser"), e);
+        }
       }
     }
 
     filterChain.doFilter(request, response);
+  }
+
+  private void createFeignSecurity(String feignInvocationUser, String feignInvocationUserId) {
+    log.info(
+        "Invocation came from a feign client, setting security context with user {} and user id {} ",
+        feignInvocationUser, feignInvocationUserId);
+    Set<String> authorities = new HashSet<>();
+    authorities.add("FEIGN");
+    UserDetails userDetails = EeaUserDetails.create(feignInvocationUser, authorities);
+
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, feignInvocationUserId);
+    authentication.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 
   /**
@@ -99,11 +109,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    * @return the jwt from request
    */
   private String getJwtFromRequest(HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    String jwt = null;
-    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TOKEN)) {
-      jwt = bearerToken.substring(7, bearerToken.length());
+    String jwt = request.getHeader("FeignInvocationUser");
+    if (StringUtils.isEmpty(jwt)) {// if invocation comes from outside then it needs to be
+                                   // authenticated
+      String bearerToken = request.getHeader("Authorization");
+
+      if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TOKEN)) {
+        jwt = bearerToken.substring(7, bearerToken.length());
+      }
+    } else {// if FeignInvocationUser comes then let it go
+      jwt = "FEING_" + jwt;
     }
+
     return jwt;
   }
 }

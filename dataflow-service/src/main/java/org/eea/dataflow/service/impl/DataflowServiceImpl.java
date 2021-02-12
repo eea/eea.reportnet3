@@ -730,7 +730,7 @@ public class DataflowServiceImpl implements DataflowService {
     }
     if (!CollectionUtils.isEmpty(dataflowVO.getDocuments())) {
       dataflowVO.getDocuments()
-          .sort(Comparator.comparing(DocumentVO::getName, String.CASE_INSENSITIVE_ORDER));
+          .sort(Comparator.comparing(DocumentVO::getDescription, String.CASE_INSENSITIVE_ORDER));
     }
     LOG.info("Get the dataflow information with id {}", id);
 

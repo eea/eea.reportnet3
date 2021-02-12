@@ -62,7 +62,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     List<DesignDatasetVO> desingDataset = datasetMetabaseController
         .findDesignDataSetIdByDataflowId(dataSetMetabaseVO.getDataflowId());
 
-    // we find the name of the dataset to asing it for the notiicaion
+    // we find the name of the dataset to asing it for the notiFicaion
     String datasetName = "";
     for (DesignDatasetVO designDatasetVO : desingDataset) {
       if (designDatasetVO.getDatasetSchema()
@@ -71,7 +71,11 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
       }
     }
 
-    String country = dataSetMetabaseVO.getDataSetName();
+    // we find if the the dataset i in DESIGN or REPORTING
+    String country =
+        "DESIGN".equalsIgnoreCase(dataSetMetabaseVO.getDatasetTypeEnum().getValue()) ? "DESIGN"
+            : dataSetMetabaseVO.getDataSetName();
+
     DatasetTypeEnum type = dataSetMetabaseVO.getDatasetTypeEnum();
     String dataflowName =
         dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName();
