@@ -616,7 +616,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), idDataset);
     LOG.info("The user set on threadPropertiesManager is {}",
-        (String) ThreadPropertiesManager.getVariable("user"));
+        ThreadPropertiesManager.getVariable("user"));
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
@@ -988,7 +988,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       public List<String> extractData(ResultSet resultSet) throws SQLException {
         List<String> datasets = new ArrayList<>();
         while (resultSet.next()) {
-          datasets.add(resultSet.getString(1));
+          datasets.add(resultSet.getString("nspname"));
         }
         return datasets;
       }
