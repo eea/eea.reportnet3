@@ -50,11 +50,7 @@ public class KafkaSender {
   public void sendMessage(final EEAEventVO event) {
 
     kafkaTemplate.executeInTransaction(operations -> {
-      if (!event.getData().containsKey("user") || StringUtils
-          .isEmpty(event.getData().get("user"))) {
-        LOG.info("user not found on event {}, getting it from context", event);
-        event.getData().put("user", String.valueOf(ThreadPropertiesManager.getVariable("user")));
-      }
+      event.getData().put("user", SecurityContextHolder.getContext().getAuthentication().getName());
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,6 +32,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
@@ -46,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
@@ -224,7 +227,7 @@ public class ValidationHelper implements DisposableBean {
    */
   public void initializeProcess(String processId, boolean isCoordinator, boolean released) {
     ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
-        isCoordinator, (String) ThreadPropertiesManager.getVariable("user"), released);
+        isCoordinator, SecurityContextHolder.getContext().getAuthentication().getName(), released);
 
     synchronized (processesMap) {
       processesMap.put(processId, process);
@@ -238,6 +241,7 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the uu id
    * @param released the released
    * @param updateViews the update views
+   *
    * @throws EEAException
    */
   @Async
@@ -385,6 +389,7 @@ public class ValidationHelper implements DisposableBean {
    * @param lockSignature the lock signature
    * @param mapCriteria the map criteria
    * @param userName the user name
+   *
    * @throws EEAException the EEA exception
    */
   public void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
@@ -402,6 +407,7 @@ public class ValidationHelper implements DisposableBean {
    * Adds the lock to release process.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   public void addLockToReleaseProcess(Long datasetId) throws EEAException {
@@ -680,7 +686,6 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
-
   /**
    * Check started process.
    *
@@ -696,7 +701,6 @@ public class ValidationHelper implements DisposableBean {
     }
     return isProcessStarted;
   }
-
 
 
   @AllArgsConstructor
@@ -763,6 +767,14 @@ public class ValidationHelper implements DisposableBean {
       Long currentTime = System.currentTimeMillis();
       int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
 
+      SecurityContextHolder.clearContext();
+
+      SecurityContextHolder.getContext()
+          .setAuthentication(new UsernamePasswordAuthenticationToken(
+              EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
+                  new HashSet<>()),
+              validationTask.eeaEventVO.getData().get("token").toString(), null));
+
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
@@ -771,7 +783,7 @@ public class ValidationHelper implements DisposableBean {
             validationTask.datasetId, validationTask.kieBase);
       } catch (EEAException e) {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
-            validationTask.datasetId, e);
+            validationTask.datasetId, e.getMessage(), e);
         validationTask.eeaEventVO.getData().put("error", e);
       } finally {
 

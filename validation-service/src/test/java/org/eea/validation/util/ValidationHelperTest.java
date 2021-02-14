@@ -38,6 +38,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -88,7 +91,9 @@ public class ValidationHelperTest {
   @Mock
   private LockService lockService;
 
-  /** The dataset metabase controller zuul. */
+  /**
+   * The dataset metabase controller zuul.
+   */
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
@@ -107,8 +112,15 @@ public class ValidationHelperTest {
    */
   private Map<String, ValidationProcessVO> processesMap;
 
-  /** The executor service. */
+  /**
+   * The executor service.
+   */
   private ExecutorService executorService;
+
+  @Mock
+  private SecurityContext securityContext;
+  @Mock
+  private Authentication authentication;
 
   /**
    * Inits the mocks.
@@ -126,6 +138,7 @@ public class ValidationHelperTest {
     processesMap = new ConcurrentHashMap<>();
     executorService = Executors.newFixedThreadPool(2);
     MockitoAnnotations.initMocks(this);
+    SecurityContextHolder.setContext(securityContext);
   }
 
   /**
@@ -146,6 +159,9 @@ public class ValidationHelperTest {
   @Test
   public void getKieBase() throws EEAException {
     Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l))).thenReturn(kieBase);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     KieBase result = validationHelper.getKieBase("", 1l);
     Assert.assertNotNull(result);
   }
@@ -159,6 +175,9 @@ public class ValidationHelperTest {
    */
   @Test(expected = EEAException.class)
   public void getKieBaseException() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     Mockito.doThrow(new EEAException("error")).when(validationService)
         .loadRulesKnowledgeBase(Mockito.eq(1l));
     validationHelper.getKieBase("", 1l);
@@ -194,6 +213,8 @@ public class ValidationHelperTest {
   @Test
   public void initializeProcessAsCoordinator() {
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     validationHelper.initializeProcess("1", true, false);
     Assert.assertNotNull(processesMap.get("1"));
     Assert.assertTrue(processesMap.get("1").isCoordinatorProcess());
@@ -205,6 +226,9 @@ public class ValidationHelperTest {
   @Test
   public void initializeProcessAsWorker() {
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
     validationHelper.initializeProcess("1", false, false);
     Assert.assertNotNull(processesMap.get("1"));
     Assert.assertFalse(processesMap.get("1").isCoordinatorProcess());
@@ -212,7 +236,7 @@ public class ValidationHelperTest {
 
   /**
    * Execute validation.
-   * 
+   *
    * @throws EEAException
    */
   @Test
@@ -233,6 +257,8 @@ public class ValidationHelperTest {
     members.add(member);
     consumerGroups.setMembers(members);
     Mockito.when(kafkaAdminUtils.getConsumerGroupInfo()).thenReturn(consumerGroups);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     Mockito.when(datasetMetabaseControllerZuul.getType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
@@ -360,7 +386,10 @@ public class ValidationHelperTest {
     ReflectionTestUtils.setField(validationHelper, "validationExecutorService",
         Executors.newFixedThreadPool(2));
     ReflectionTestUtils.setField(validationHelper, "maxRunningTasks", 2);
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    eeaEventVO.getData().put("user", "user");
+    eeaEventVO.getData().put("token", "credentials");
     Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
       try {
         // Thiss counter will be usefull to verify how many threads has been executed simultaneously
@@ -405,8 +434,11 @@ public class ValidationHelperTest {
   @Test
   public void processValidationOneTaskAsNotCoordinator() throws EEAException, InterruptedException {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
+    eeaEventVO.getData().put("user", "user");
+    eeaEventVO.getData().put("token", "credentials");
     pendingValidations.add(eeaEventVO);
     pendingValidations.add(eeaEventVO);
+
     processesMap.put("1",
         new ValidationProcessVO(2, pendingValidations, null, false, "user1", false));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
@@ -440,6 +472,8 @@ public class ValidationHelperTest {
     Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
     pendingValidations.add(eeaEventVO);
     pendingValidations.add(eeaEventVO);
+    eeaEventVO.getData().put("user", "user");
+    eeaEventVO.getData().put("token", "credentials");
     processesMap.put("1",
         new ValidationProcessVO(2, pendingValidations, null, true, "user1", false));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
@@ -448,7 +482,7 @@ public class ValidationHelperTest {
     ReflectionTestUtils.setField(validationHelper, "validationExecutorService", executorService);
 
     Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
-      // Thiss counter will be usefull to verify how many threads has been executed simultaneously
+      // This counter will be usefull to verify how many threads has been executed simultaneously
       // before the test ends
       eeaEventVO.getData().put("counter", 0);
     };

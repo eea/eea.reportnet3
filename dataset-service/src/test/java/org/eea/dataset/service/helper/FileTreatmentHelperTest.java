@@ -1,6 +1,7 @@
 package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -141,6 +142,7 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
     FileUtils
@@ -226,6 +228,7 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
@@ -269,7 +272,7 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
@@ -328,7 +331,8 @@ public class FileTreatmentHelperTest {
 class CurrentThreadExecutor extends AbstractExecutorService {
 
   @Override
-  public void shutdown() {}
+  public void shutdown() {
+  }
 
   @Override
   public List<Runnable> shutdownNow() {
