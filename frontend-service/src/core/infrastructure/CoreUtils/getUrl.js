@@ -8,7 +8,7 @@ export const getUrl = (url, urlParams = {}, isRoute = false) => {
     keys.forEach(key => {
       if (isUndefined(urlParams[key])) {
         let i = cUrl.indexOf(`{:${key}}`);
-        while (cUrl.charAt(i) !== '&' && cUrl.charAt(i) !== '?' && i>0) {
+        while (cUrl.charAt(i) !== '&' && cUrl.charAt(i) !== '?' && i > 0) {
           i--;
         }
         if (i === 0) {
