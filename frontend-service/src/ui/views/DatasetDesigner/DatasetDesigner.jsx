@@ -574,6 +574,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     false
   );
 
+  const notifyValidateDataInit = () => {
+    notificationContext.add({
+      type: 'VALIDATE_DATA_INIT',
+      content: {
+        countryName: 'DESIGN',
+        dataflowId,
+        dataflowName: designerState.dataflowName,
+        datasetId,
+        datasetName: designerState.datasetSchemaName
+      }
+    });
+  };
+
+  useCheckNotifications(
+    [
+      'IMPORT_DESIGN_COMPLETED_EVENT',
+      'EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT',
+      'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT'
+    ],
+    notifyValidateDataInit
+  );
+
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
       validationContext.onResetOpener();

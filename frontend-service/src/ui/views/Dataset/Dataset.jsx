@@ -446,6 +446,28 @@ export const Dataset = withRouter(({ match, history }) => {
     false
   );
 
+  const notifyValidateDataInit = () => {
+    notificationContext.add({
+      type: 'VALIDATE_DATA_INIT',
+      content: {
+        countryName: 'REPORTING',
+        dataflowId,
+        dataflowName,
+        datasetId,
+        datasetName: datasetSchemaName
+      }
+    });
+  };
+
+  useCheckNotifications(
+    [
+      'IMPORT_REPORTING_COMPLETED_EVENT',
+      'EXTERNAL_IMPORT_REPORTING_COMPLETED_EVENT',
+      'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT'
+    ],
+    notifyValidateDataInit
+  );
+
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
