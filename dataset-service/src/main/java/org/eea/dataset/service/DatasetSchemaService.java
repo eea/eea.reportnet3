@@ -511,4 +511,13 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   void importSchemas(Long dataflowId, MultipartFile multipartFile) throws IOException, EEAException;
+
+
+  /**
+   * Update dataset schema exportable.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param isExportable the is exportable
+   */
+  void updateDatasetSchemaExportable(String datasetSchemaId, boolean isExportable);
 }

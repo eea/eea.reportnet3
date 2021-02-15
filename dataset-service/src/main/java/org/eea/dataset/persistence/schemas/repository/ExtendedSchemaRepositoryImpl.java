@@ -346,6 +346,22 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
         new Document("$set", new Document("description", description)));
   }
 
+
+  /**
+   * Update dataset schema exportable.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param isExportable the is exportable
+   * @return the update result
+   */
+  @Override
+  public UpdateResult updateDatasetSchemaExportable(String datasetSchemaId, boolean isExportable) {
+    return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
+        new Document("_id", new ObjectId(datasetSchemaId)),
+        new Document("$set", new Document("isExportable", isExportable)));
+  }
+
+
   /**
    * Find record schema.
    *

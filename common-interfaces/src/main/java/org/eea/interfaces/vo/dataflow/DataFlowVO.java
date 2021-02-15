@@ -92,6 +92,9 @@ public class DataFlowVO implements Serializable {
   /** The releasable. */
   private boolean releasable;
 
+  /** The isPublic. */
+  private boolean isPublic;
+
   /**
    * Equals.
    *

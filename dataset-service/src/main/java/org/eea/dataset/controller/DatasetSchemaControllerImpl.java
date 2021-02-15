@@ -663,6 +663,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       if (null != datasetSchemaVO.getWebform()) {
         dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
       }
+      dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
+          datasetSchemaVO.isExportable());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
           e);
