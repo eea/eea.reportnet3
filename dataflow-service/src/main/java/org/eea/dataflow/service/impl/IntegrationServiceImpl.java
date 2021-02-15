@@ -440,6 +440,9 @@ public class IntegrationServiceImpl implements IntegrationService {
     // Impor file
     lockService
         .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
+    // Import multitable
+    lockService.removeLockByCriteria(
+        Arrays.asList(LockSignature.INSERT_RECORDS_MULTITABLE.getValue(), datasetId));
   }
 
   /**
