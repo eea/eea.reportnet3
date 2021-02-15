@@ -143,5 +143,12 @@ public interface IntegrationService {
    */
   void createIntegrations(List<IntegrationVO> integrationsVO) throws EEAException;
 
+  /**
+   * Release locks.
+   *
+   * @param datasetId the dataset id
+   */
+  void releaseLocks(Long datasetId);
+
 
 }

@@ -3,6 +3,7 @@ package org.eea.dataflow.controller.fme;
 import static org.mockito.Mockito.times;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
@@ -32,6 +33,9 @@ public class FMEControllerImplTest {
 
   @Mock
   private FMECommunicationService fmeCommunicationService;
+
+  @Mock
+  private IntegrationService integrationService;
 
   @Mock
   private LockService lockService;
