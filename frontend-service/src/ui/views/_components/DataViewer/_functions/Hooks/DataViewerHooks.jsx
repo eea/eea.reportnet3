@@ -90,6 +90,7 @@ export const useSetColumns = (
   hasWebformWritePermissions,
   hasWritePermissions,
   initialCellValue,
+  isDataflowOpen,
   onFileDeleteVisible,
   onFileDownload,
   onFileUploadVisible,
@@ -351,7 +352,7 @@ export const useSetColumns = (
           body={dataTemplate}
           className={`${invisibleColumn} ${readOnlyColumn}`}
           editor={
-            hasWebformWritePermissions && hasWritePermissions && column.type !== 'ATTACHMENT'
+            hasWebformWritePermissions && hasWritePermissions && column.type !== 'ATTACHMENT' && !isDataflowOpen
               ? row => cellDataEditor(row, records.selectedRecord)
               : null
           }
