@@ -864,14 +864,20 @@
 
   "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
   "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"],
-  "bannedFieldNames": [
-    "attachment",
-    "point",
-    "multiple points",
-    "polygon",
-    "multiple lines",
-    "line",
-    "multiple polygons"
-  ],
-  "bannedTypes": ["attachment", "point", "multipoint", "polygon", "multilinestring", "linestring", "multipolygon"]
+  "bannedFieldsNames": {
+    "nonSqlFields": [
+      "attachment",
+      "point",
+      "multiple points",
+      "polygon",
+      "multiple lines",
+      "line",
+      "multiple polygons"
+    ],
+    "sqlFields": ["attachment"]
+  },
+  "bannedTypes": {
+    "sqlHelp": ["attachment"],
+    "nonSql": ["attachment", "point", "multiple points", "polygon", "multiple lines", "line", "multiple polygons"]
+  }
 }
