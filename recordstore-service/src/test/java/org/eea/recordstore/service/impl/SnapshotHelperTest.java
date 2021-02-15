@@ -2,7 +2,6 @@ package org.eea.recordstore.service.impl;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -93,7 +92,6 @@ public class SnapshotHelperTest {
         return null;
       }
     };
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     MockitoAnnotations.initMocks(this);
     SecurityContextHolder.setContext(securityContext);
   }

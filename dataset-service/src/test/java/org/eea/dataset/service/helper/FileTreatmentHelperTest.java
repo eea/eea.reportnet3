@@ -1,12 +1,10 @@
 package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -50,7 +47,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -93,51 +89,8 @@ public class FileTreatmentHelperTest {
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
     securityContext = Mockito.mock(SecurityContext.class);
-    authentication = new Authentication() {
-
-      @Override
-      public String getName() {
-        return null;
-      }
-
-      @Override
-      public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {}
-
-      @Override
-      public boolean isAuthenticated() {
-        return false;
-      }
-
-      @Override
-      public Object getPrincipal() {
-        return null;
-      }
-
-      @Override
-      public Object getDetails() {
-        return null;
-      }
-
-      @Override
-      public Object getCredentials() {
-        List<CredentialRepresentation> credentials = new ArrayList<>();
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType("password");
-        credential.setTemporary(false);
-        credential.setValue("1234");
-        credentials.add(credential);
-        return credentials;
-      }
-
-      @Override
-      public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-      }
-    };
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-
     ReflectionTestUtils.setField(fileTreatmentHelper, "importPath",
         this.getClass().getClassLoader().getResource("").getPath());
     ReflectionTestUtils.setField(fileTreatmentHelper, "importExecutorService",
@@ -464,8 +417,7 @@ public class FileTreatmentHelperTest {
 class CurrentThreadExecutor extends AbstractExecutorService {
 
   @Override
-  public void shutdown() {
-  }
+  public void shutdown() {}
 
   @Override
   public List<Runnable> shutdownNow() {
