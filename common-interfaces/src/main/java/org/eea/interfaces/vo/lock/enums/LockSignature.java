@@ -60,6 +60,9 @@ public enum LockSignature {
   /** The insert records. */
   INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)"),
 
+  /** The insert records multitable. */
+  INSERT_RECORDS_MULTITABLE("DataSetControllerImpl.insertRecordsMultiTable(..)"),
+
   /** The update records. */
   UPDATE_RECORDS("DataSetControllerImpl.updateRecords(..)"),
 
@@ -72,8 +75,8 @@ public enum LockSignature {
   /** The delete field schema. */
   DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)"),
 
-  /** The insert records multitable. */
-  INSERT_RECORDS_MULTITABLE("DataSetControllerImpl.insertRecordsMultiTable(..)");
+  /** The execute external integration. */
+  EXECUTE_EXTERNAL_INTEGRATION("IntegrationControllerImpl.executeExternalIntegration(..)");
 
 
 

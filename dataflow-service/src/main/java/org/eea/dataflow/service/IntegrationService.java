@@ -136,4 +136,20 @@ public interface IntegrationService {
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException;
 
 
+  /**
+   * Release locks.
+   *
+   * @param datasetId the dataset id
+   */
+  void releaseLocks(Long datasetId);
+
+  /**
+   * Adds the locks.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  void addLocks(Long datasetId) throws EEAException;
+
+
 }
