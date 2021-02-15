@@ -132,7 +132,10 @@ const Dataflows = withRouter(({ match, history }) => {
   };
 
   const onLoadPermissions = () => {
-    const isCustodian = userContext.hasPermission([config.permissions.DATA_CUSTODIAN]);
+    const isCustodian =
+      userContext.hasPermission([config.permissions.DATA_CUSTODIAN]) ||
+      userContext.hasPermission([config.permissions.DATA_STEWARD]);
+
     dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian } });
   };
 

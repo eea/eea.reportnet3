@@ -2,6 +2,7 @@ package org.eea.validation.kafka.command;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.validation.util.ValidationHelper;
@@ -32,7 +33,7 @@ public class ExecuteValidationProcessCommandTest {
   }
 
   @Test
-  public void testExecute() {
+  public void testExecute() throws EEAException {
     Map<String, Object> data = new HashMap<>();
     data.put("uuid", "uuid");
     data.put("dataset_id", "1");
