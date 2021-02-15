@@ -985,7 +985,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       public List<String> extractData(ResultSet resultSet) throws SQLException {
         List<String> datasets = new ArrayList<>();
         while (resultSet.next()) {
-          datasets.add(resultSet.getString(1));
+          datasets.add(resultSet.getString("nspname"));
         }
         return datasets;
       }

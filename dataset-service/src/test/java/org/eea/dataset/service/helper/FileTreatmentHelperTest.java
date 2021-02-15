@@ -148,6 +148,10 @@ public class FileTreatmentHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
+
+
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
@@ -234,6 +238,9 @@ public class FileTreatmentHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
+
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
@@ -278,6 +285,9 @@ public class FileTreatmentHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
+
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));

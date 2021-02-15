@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -38,6 +39,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,34 +59,50 @@ import feign.FeignException;
 @Component
 public class FileTreatmentHelper implements DisposableBean {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The max running tasks. */
+  /**
+   * The max running tasks.
+   */
   @Value("${dataset.task.parallelism}")
   private int maxRunningTasks;
 
-  /** The import path. */
+  /**
+   * The import path.
+   */
   @Value("${importPath}")
   private String importPath;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The integration controller. */
+  /**
+   * The integration controller.
+   */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
@@ -96,7 +115,9 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The import executor service. */
   private ExecutorService importExecutorService;
 
-  /** The batch size. */
+  /**
+   * The batch size.
+   */
   private int batchSize = 1000;
 
   /**
@@ -126,6 +147,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   *
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
@@ -192,6 +214,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param multipartFile the multipart file
    * @param delete the delete
+   *
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
@@ -281,7 +304,9 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param folder the folder
    * @param saveLocationPath the save location path
    * @param zip the zip
+   *
    * @return the list
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -327,6 +352,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param files the files
    * @param originalFileName the original file name
    * @param integrationVO the integration VO
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
@@ -335,11 +361,19 @@ public class FileTreatmentHelper implements DisposableBean {
       List<File> files, String originalFileName, IntegrationVO integrationVO)
       throws IOException, EEAException {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    String credentials =
+        SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
-      importExecutorService.submit(
-          () -> rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user));
+      importExecutorService.submit(() -> {
+        SecurityContextHolder.clearContext();
+
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+                credentials, null));
+        rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user);
+      });
     }
   }
 
@@ -349,6 +383,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param file the file
    * @param integrationVO the integration VO
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
@@ -468,7 +503,9 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param schema the schema
    * @param fileName the file name
+   *
    * @return the table schema id from file name
+   *
    * @throws EEAException the EEA exception
    */
   private String getTableSchemaIdFromFileName(DataSetSchema schema, String fileName)
@@ -529,6 +566,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * Integration VO copy constructor.
    *
    * @param integrationVO the integration VO
+   *
    * @return the integration VO
    */
   private IntegrationVO integrationVOCopyConstructor(IntegrationVO integrationVO) {
@@ -559,6 +597,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetSchema the dataset schema
    * @param mimeType the mime type
+   *
    * @return the integration VO
    */
   private IntegrationVO getIntegrationVO(DataSetSchema datasetSchema, String mimeType) {
@@ -609,6 +648,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * Gets the list of records.
    *
    * @param allRecords the all records
+   *
    * @return the list of records
    */
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
