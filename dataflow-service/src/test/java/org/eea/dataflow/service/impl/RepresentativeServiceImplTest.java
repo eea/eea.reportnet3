@@ -329,7 +329,7 @@ public class RepresentativeServiceImplTest {
     Mockito.when(representativeMapper.classToEntity(Mockito.any())).thenReturn(representative);
     Mockito.when(representativeRepository.save(Mockito.any())).thenReturn(representative);
 
-    Assert.assertEquals(1,
+    Assert.assertEquals(0,
         representativeServiceImpl.createRepresentative(1L, representativeVO).longValue());
   }
 

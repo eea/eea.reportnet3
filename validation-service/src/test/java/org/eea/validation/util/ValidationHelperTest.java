@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -29,14 +31,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.kie.api.KieBase;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -106,7 +111,13 @@ public class ValidationHelperTest {
    */
   private Map<String, ValidationProcessVO> processesMap;
 
-  private ThreadPoolTaskExecutor validationExecutorService;
+  private ExecutorService validationExecutorService;
+
+  @Mock
+  private SecurityContext securityContext;
+
+  @Mock
+  private Authentication authentication;
 
   /**
    * Inits the mocks.
@@ -122,14 +133,57 @@ public class ValidationHelperTest {
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_RECORD);
     eeaEventVO.setData(data);
     processesMap = new ConcurrentHashMap<>();
-    validationExecutorService = new ThreadPoolTaskExecutor();
-    validationExecutorService.setCorePoolSize(2);
-    validationExecutorService.setMaxPoolSize(2);
-    validationExecutorService.setQueueCapacity(Integer.MAX_VALUE);
-    validationExecutorService.setThreadNamePrefix("asynchronous-validation-thread-");
-    validationExecutorService
-        .setTaskDecorator(runnable -> new DelegatingSecurityContextRunnable(runnable));
-    validationExecutorService.initialize();
+    validationExecutorService = Executors.newFixedThreadPool(2);
+    // validationExecutorService.setCorePoolSize(2);
+    // validationExecutorService.setMaxPoolSize(2);
+    // validationExecutorService.setQueueCapacity(Integer.MAX_VALUE);
+    // validationExecutorService.setThreadNamePrefix("asynchronous-validation-thread-");
+    // validationExecutorService
+    // .setTaskDecorator(runnable -> new DelegatingSecurityContextRunnable(runnable));
+    // validationExecutorService.initialize();
+    SecurityContextHolder.setContext(securityContext);
+    authentication = new Authentication() {
+
+      @Override
+      public String getName() {
+        return "name";
+      }
+
+      @Override
+      public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {}
+
+      @Override
+      public boolean isAuthenticated() {
+        return false;
+      }
+
+      @Override
+      public Object getPrincipal() {
+        return null;
+      }
+
+      @Override
+      public Object getDetails() {
+        return null;
+      }
+
+      @Override
+      public Object getCredentials() {
+        List<CredentialRepresentation> credentials = new ArrayList<>();
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType("password");
+        credential.setTemporary(false);
+        credential.setValue("1234");
+        credentials.add(credential);
+        return credentials;
+      }
+
+      @Override
+      public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+      }
+    };
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     MockitoAnnotations.initMocks(this);
   }
 
