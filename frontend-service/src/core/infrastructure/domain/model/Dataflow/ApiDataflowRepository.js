@@ -94,8 +94,13 @@ const all = async userData => {
 
     for (let i = 0; i < pendingDataflowsDTO.length; i++) {
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-      if (pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN']) {
+      if (pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN'] && pendingDataflowsDTO[i].releasable) {
         pendingDataflowsDTO[i].status = 'OPEN';
+      } else if (
+        pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN'] &&
+        !pendingDataflowsDTO[i].releasable
+      ) {
+        pendingDataflowsDTO[i].status = 'CLOSED';
       }
       dataflows.push({
         ...pendingDataflowsDTO[i],

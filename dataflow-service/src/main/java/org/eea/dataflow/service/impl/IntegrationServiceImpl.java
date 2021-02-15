@@ -393,8 +393,6 @@ public class IntegrationServiceImpl implements IntegrationService {
   public void executeExternalIntegration(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException {
 
-    addLocks(datasetId);
-
     // Delete the previous data in the dataset if we have chosen it before the call to FME
     if (Boolean.TRUE.equals(replace)) {
       LOG.info("Replacing the data previous the execution of an external integration in dataset {}",
@@ -481,7 +479,8 @@ public class IntegrationServiceImpl implements IntegrationService {
    * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  private void addLocks(Long datasetId) throws EEAException {
+  @Override
+  public void addLocks(Long datasetId) throws EEAException {
     // We have to lock all the dataset operations (insert, delete, update...)
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     Map<String, Object> mapCriteria = new HashMap<>();

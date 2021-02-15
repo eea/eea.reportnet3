@@ -150,5 +150,13 @@ public interface IntegrationService {
    */
   void releaseLocks(Long datasetId);
 
+  /**
+   * Adds the locks.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  void addLocks(Long datasetId) throws EEAException;
+
 
 }
