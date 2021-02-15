@@ -550,7 +550,10 @@
           "key": "EXPORT_DATASET_SCHEMA_FAILED_EVENT"
         },
         {
-          "key": "GET_REFERENCED_LINK_VALUES_ERROR"
+          "key": "GET_REFERENCED_LINK_VALUES_ERROR"          
+        },
+        {
+          "key": "RELEASE_BLOCKED_EVENT"
         }
       ]
     },
