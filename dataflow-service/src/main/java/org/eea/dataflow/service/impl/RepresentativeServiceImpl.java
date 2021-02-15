@@ -390,7 +390,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  // @Transactional
+  @Transactional
   public byte[] importFile(Long dataflowId, Long groupId, MultipartFile file)
       throws EEAException, IOException {
 
