@@ -1065,6 +1065,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Import Etl
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_ETL.getValue(), datasetId));
+      // Multiple table insert records (PAMS)
+      lockService.removeLockByCriteria(
+          Arrays.asList(LockSignature.INSERT_RECORDS_MULTITABLE.getValue(), datasetId));
       // Delete tables and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {
@@ -1117,6 +1120,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       createLockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
       // Delete dataset
       createLockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
+      // Multiple table insert records (PAMS)
+      createLockWithSignature(LockSignature.INSERT_RECORDS_MULTITABLE, mapCriteria, userName);
 
       // Delete table and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
