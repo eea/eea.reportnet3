@@ -24,12 +24,14 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -104,9 +106,13 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /**
-   * The import executor service.
-   */
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+
+  /** The import executor service. */
   private ExecutorService importExecutorService;
 
   /**
@@ -154,6 +160,16 @@ public class FileTreatmentHelper implements DisposableBean {
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
+    // We add a lock to the Release process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
+    mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
     fileManagement(datasetId, tableSchemaId, schema, file, replace);
   }
 
@@ -166,10 +182,29 @@ public class FileTreatmentHelper implements DisposableBean {
     try {
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
       FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+
+      releaseLockReleasingProcess(datasetId);
     } catch (IOException e) {
       LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
     }
   }
+
+
+  /**
+   * Release lock releasing process.
+   *
+   * @param datasetId the dataset id
+   */
+  private void releaseLockReleasingProcess(Long datasetId) {
+    // Release lock to the releasing process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      datasetService.releaseLock(LockSignature.RELEASE_SNAPSHOTS.getValue(),
+          datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId());
+    }
+
+  }
+
 
   /**
    * File management.
@@ -326,22 +361,19 @@ public class FileTreatmentHelper implements DisposableBean {
       List<File> files, String originalFileName, IntegrationVO integrationVO)
       throws IOException, EEAException {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    String credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials()
-        .toString();
+    String credentials =
+        SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
-      importExecutorService.submit(
-          () -> {
-            SecurityContextHolder.clearContext();
+      importExecutorService.submit(() -> {
+        SecurityContextHolder.clearContext();
 
-            SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(user,
-                        new HashSet<>()),
-                    credentials, null));
-            rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user);
-          });
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+                credentials, null));
+        rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user);
+      });
     }
   }
 
@@ -375,6 +407,7 @@ public class FileTreatmentHelper implements DisposableBean {
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
         datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+        releaseLockReleasingProcess(datasetId);
       }
 
       if ((Integer) integrationController
@@ -391,6 +424,7 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
           datasetId, file.getName(), integrationVO);
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      releaseLockReleasingProcess(datasetId);
       throw new EEAException("Error executing integration");
     }
   }
@@ -584,7 +618,7 @@ public class FileTreatmentHelper implements DisposableBean {
         .findAllIntegrationsByCriteria(criteria)) {
       if (IntegrationOperationTypeEnum.IMPORT.equals(integrationVO.getOperation())
           && mimeType.equalsIgnoreCase(
-          integrationVO.getInternalParameters().get(IntegrationParams.FILE_EXTENSION))) {
+              integrationVO.getInternalParameters().get(IntegrationParams.FILE_EXTENSION))) {
         rtn = integrationVO;
         break;
       }
