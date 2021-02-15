@@ -1,42 +1,22 @@
-[
-  {
-  manholes: [
-  {
-  id,
-  distance,
-  cotaTerreno,
-  rasante,
-  fondo,
-  cotaEntrada,
-  cotaSalida,
-  keyValues
-  },
-  {
-  },
-  {
-  }
-  ],
-  pipes: [
-  {
-  id,
-  pendiente,
-  keyValues
-  },
-  {
-  },
-  {
-  }
-  ]
-  }
-  ]
-  
-  {
-  texts: {
-  rasante: "Rasante del pozo",
-  fondo: "Fondo del pozo",
-  ...,
-  keys: [{ key1, "Texto del keyvalue"}]
-  },
-  maxChar;
-  maxDec;
-  }
+{
+  "acceptDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
+  "allSchemas": "/dataschema/getSchemas/dataflow/{:dataflowId}",
+  "cloneDatasetSchemas": "/dataschema/copy?sourceDataflow={:sourceDataflowId}&targetDataflow={:targetDataflowId}",
+  "createDataflow": "/dataflow",
+  "dataflowDetails": "/dataflow/{:dataflowId}/getmetabase",
+  "dataSchemasValidation": "/dataschema/validate/dataflow/{:dataflowId}",
+  "datasetsFinalFeedback": "/datasetmetabase/dataflow/{:dataflowId}",
+  "datasetsReleasedStatus": "/datasetmetabase/dataflow/{:dataflowId}",
+  "deleteDataflow": "/dataflow/{:dataflowId}",
+  "exportSchema": "/dataschema/export?dataflowId={:dataflowId}",
+  "generateApiKey": "/user/createApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}",
+  "generateApiKeyCustodian": "/user/createApiKey?dataflowId={:dataflowId}",
+  "getApiKey": "/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}",
+  "getApiKeyCustodian": "/user/getApiKey?dataflowId={:dataflowId}",
+  "getDataflows": "/dataflow/getDataflows",
+  "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
+  "importSchema": "/dataschema/import?dataflowId={:dataflowId}",
+  "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
+  "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
+  "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
+}
