@@ -255,8 +255,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const getLeftSidebarButtonsVisibility = () => {
     const { userRoles } = dataflowState;
 
-    const isLeadDesigner = userRoles.includes(
-      config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']
+    const isLeadDesigner = userRoles.some(
+      userRole => userRole === config.permissions['DATA_STEWARD'] || config.permissions['DATA_CUSTODIAN']
     );
 
     const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
@@ -403,7 +403,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
     const userRoles = userContext.getUserRole(entity);
 
-    const isCustodian = userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']);
+    const isCustodian = userRoles.some(
+      userRole => userRole === config.permissions['DATA_STEWARD'] || config.permissions['DATA_CUSTODIAN']
+    );
 
     dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };

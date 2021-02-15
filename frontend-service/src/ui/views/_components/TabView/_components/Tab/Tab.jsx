@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 
-import { isUndefined } from 'lodash';
+import { isNil, isUndefined } from 'lodash';
 import { config } from 'conf';
 
 import styles from './Tab.module.css';
@@ -29,6 +29,7 @@ const Tab = ({
   header,
   headerStyle,
   id,
+  isDataflowOpen,
   index,
   initialTabIndexDrag,
   isNavigationHidden,
@@ -367,7 +368,7 @@ const Tab = ({
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
           {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
-          {designMode && !hasPKReferenced ? (
+          {designMode && !hasPKReferenced && !isDataflowOpen ? (
             <div
               onClick={e => {
                 e.preventDefault();
