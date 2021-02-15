@@ -213,8 +213,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         integration.getInternalParameters().get(IntegrationParams.NOTIFICATION_REQUIRED)) ? "true"
             : "false");
     Directive datasetIdDirective = new Directive();
-    apiKeyDirective.setName(IntegrationParams.DATASET_ID);
-    apiKeyDirective.setValue(datasetId.toString());
+    datasetIdDirective.setName(IntegrationParams.DATASET_ID);
+    datasetIdDirective.setValue(datasetId.toString());
 
     List<String> topics = Arrays.asList(topic);
     NMDirectives nmDirectives = new NMDirectives();
