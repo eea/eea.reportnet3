@@ -93,7 +93,8 @@ export const createValidationReducer = (state, { type, payload }) => {
     case 'SET_FIELDS':
       return {
         ...state,
-        tableFields: payload,
+        tableFields: payload.tableNonSqlFields,
+        tableSqlFields: payload.tableSqlFields,
         candidateRule: {
           ...state.candidateRule,
           field: null

@@ -1089,7 +1089,9 @@ export const FieldDesigner = ({
             }`}
             disabled={
               !isUndefined(fieldDesignerState.fieldTypeValue) &&
-              config.validations.bannedFieldNames.includes(fieldDesignerState.fieldTypeValue.value.toLowerCase())
+              config.validations.bannedFieldsNames.sqlFields.includes(
+                fieldDesignerState.fieldTypeValue.value.toLowerCase()
+              )
             }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}

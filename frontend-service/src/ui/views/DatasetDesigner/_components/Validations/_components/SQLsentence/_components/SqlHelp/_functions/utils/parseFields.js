@@ -6,12 +6,14 @@ export const parseFields = rawFields => {
   const fields = [];
   const fieldsOptions = [];
   const {
-    validations: { bannedTypes }
+    validations: {
+      bannedTypes: { sqlHelp }
+    }
   } = config;
 
   for (const field of rawFields) {
     const { name, fieldId, type } = field;
-    if (!bannedTypes.includes(lowerCase(type))) {
+    if (!sqlHelp.includes(lowerCase(type))) {
       fieldsOptions.push({ label: `${name} (${lowerCase(type)})`, value: fieldId });
       fields.push({ name, fieldId });
     }
