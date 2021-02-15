@@ -357,6 +357,7 @@ public class IntegrationControllerImpl implements IntegrationController {
       @RequestParam(value = "replace", defaultValue = "false") Boolean replace) {
 
     try {
+      integrationService.addLocks(datasetId);
       integrationService.executeExternalIntegration(datasetId, integrationId,
           IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, replace);
     } catch (EEAException e) {
