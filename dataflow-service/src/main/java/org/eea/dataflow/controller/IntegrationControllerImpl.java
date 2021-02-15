@@ -365,6 +365,7 @@ public class IntegrationControllerImpl implements IntegrationController {
           integrationId, datasetId, e.getMessage());
       lockService.removeLockByCriteria(
           Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(), datasetId));
+      integrationService.releaseLocks(datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 

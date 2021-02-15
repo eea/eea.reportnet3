@@ -2,6 +2,7 @@ package org.eea.recordstore.service.impl;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -10,12 +11,15 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
 
@@ -167,12 +171,18 @@ public class SnapshotHelper implements DisposableBean {
      */
     private RestorationTask restorationTask;
 
+    private String user;
+    private String credentials;
+
     /**
      * Instantiates a new restoration tasks executor thread.
      *
      * @param restorationTask the restoration task
      */
     public RestorationTasksExecutorThread(RestorationTask restorationTask) {
+      user = SecurityContextHolder.getContext().getAuthentication().getName();
+      credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials()
+          .toString();
       this.restorationTask = restorationTask;
     }
 
@@ -189,6 +199,13 @@ public class SnapshotHelper implements DisposableBean {
           restorationTask.idSnapshot, workingThreads, maxRunningTasks - workingThreads);
       try {
         ThreadPropertiesManager.setVariable("user", restorationTask.user);
+        SecurityContextHolder.clearContext();
+
+        SecurityContextHolder.getContext()
+            .setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(user,
+                    new HashSet<>()),
+                credentials, null));
         recordStoreService.restoreDataSnapshot(restorationTask.datasetId,
             restorationTask.idSnapshot, restorationTask.idPartition, restorationTask.datasetType,
             restorationTask.isSchemaSnapshot, restorationTask.deleteData);

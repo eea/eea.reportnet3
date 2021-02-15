@@ -164,8 +164,7 @@ public class ValidationHelper implements DisposableBean {
   private void init() {
     ThreadFactory tf = Executors.defaultThreadFactory();
 
-    validationExecutorService = new ThreadPoolExecutor(0, maxRunningTasks, 0, TimeUnit.MILLISECONDS,
-        new LinkedBlockingQueue<>());
+    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
   }
 
   /**
