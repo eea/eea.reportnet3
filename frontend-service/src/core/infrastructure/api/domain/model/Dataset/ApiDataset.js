@@ -75,16 +75,11 @@ export const apiDataset = {
     }
   },
   deleteRecordById: async (datasetId, recordId, deleteInCascade = false) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
-      });
-
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset table record: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
+    });
+    console.log(response);
+    return response;
   },
   deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
     const response = await HTTPRequester.delete({

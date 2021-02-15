@@ -124,14 +124,20 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       }
     } catch (error) {
       console.error('error', error);
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'ADD_RECORDS_ERROR',
-        content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'ADD_RECORDS_BLOCKED_ERROR'
+        });
+      } else {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'ADD_RECORDS_ERROR',
+          content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
+        });
+      }
       if (type === 'single') {
         setIsAddingSingleRecord(false);
       } else if (type === 'group') {
@@ -149,14 +155,20 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
         onUpdateData();
       }
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'ADD_RECORDS_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'ADD_RECORDS_BLOCKED_ERROR'
+        });
+      } else {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'ADD_RECORDS_ERROR',
+          content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
+        });
+      }
     }
   };
 
