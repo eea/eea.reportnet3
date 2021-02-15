@@ -1,10 +1,12 @@
 package org.eea.dataflow.service;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /** The Interface RepresentativeService. */
 public interface RepresentativeService {
@@ -85,4 +87,40 @@ public interface RepresentativeService {
    * @return the represetatives by dataflow id and email
    */
   List<RepresentativeVO> getRepresetativesByDataflowIdAndEmail(Long dataflowId, String email);
+
+
+  /**
+   * Export file.
+   *
+   * @param dataflowId the dataflow id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  byte[] exportFile(Long dataflowId) throws EEAException, IOException;
+
+
+
+  /**
+   * Export template reporters file.
+   *
+   * @param groupId the group id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  byte[] exportTemplateReportersFile(Long groupId) throws EEAException, IOException;
+
+  /**
+   * Import file.
+   *
+   * @param dataflowId the dataflow id
+   * @param groupId the group id
+   * @param file the file
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  byte[] importFile(Long dataflowId, Long groupId, MultipartFile file)
+      throws EEAException, IOException;
 }

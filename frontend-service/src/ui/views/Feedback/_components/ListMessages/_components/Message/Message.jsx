@@ -11,7 +11,9 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 export const Message = ({ hasSeparator, message }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-  const isCustodian = userContext.hasPermission([config.permissions.DATA_CUSTODIAN]);
+  const isCustodian =
+    userContext.hasPermission([config.permissions.DATA_CUSTODIAN]) ||
+    userContext.hasPermission([config.permissions.DATA_STEWARD]);
 
   const getStyles = () => {
     if (isCustodian) {

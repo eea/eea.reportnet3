@@ -340,4 +340,25 @@ public class IntegrationControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void createIntegrationsTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
+    integrationVO.getInternalParameters().put("dataflowId", "1");
+    integrationControllerImpl.createIntegrations(Arrays.asList(integrationVO));
+    Mockito.verify(integrationService, times(1)).createIntegrations(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createIntegrationsExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(integrationService)
+          .createIntegrations(Mockito.any());
+      integrationControllerImpl.createIntegrations(Arrays.asList(new IntegrationVO()));
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
 }

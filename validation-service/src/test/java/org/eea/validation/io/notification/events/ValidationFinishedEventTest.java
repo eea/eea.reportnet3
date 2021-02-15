@@ -1,5 +1,7 @@
 package org.eea.validation.io.notification.events;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -7,6 +9,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -56,14 +59,25 @@ public class ValidationFinishedEventTest {
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetVO);
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
+    Mockito.when(datasetVO.getDatasetSchema()).thenReturn("602154a699827a6a72828ef2");
     Mockito.when(datasetVO.getDatasetTypeEnum()).thenReturn(DatasetTypeEnum.REPORTING);
     Mockito.when(datasetVO.getDataflowId()).thenReturn(2L);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
 
+    List<DesignDatasetVO> desingDatasetList = new ArrayList();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVO.setDatasetSchema("602154a699827a6a72828ef2");
+    designDatasetVO.setDataSetName("datasetName");
+    desingDatasetList.add(designDatasetVO);
+    Mockito.when(datasetMetabaseController.findDesignDataSetIdByDataflowId(Mockito.anyLong()))
+        .thenReturn(desingDatasetList);
+
+
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Map<String, Object> result = validationFinishedEvent
-        .getMap(NotificationVO.builder().user("user").datasetId(1L).build());
-    Assert.assertEquals(6, result.size());
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Map<String, Object> result =
+        validationFinishedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L).build());
+    Assert.assertEquals(7, result.size());
     Assert.assertEquals("user", result.get("user"));
     Assert.assertEquals(1L, result.get("datasetId"));
     Assert.assertEquals(2L, result.get("dataflowId"));
