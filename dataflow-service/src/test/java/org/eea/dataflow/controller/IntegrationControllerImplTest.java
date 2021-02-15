@@ -12,6 +12,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,10 +35,13 @@ public class IntegrationControllerImplTest {
   @InjectMocks
   private IntegrationControllerImpl integrationControllerImpl;
 
-
   /** The integration service. */
   @Mock
   private IntegrationService integrationService;
+
+  /** The Lock service. */
+  @Mock
+  private LockService LockService;
 
 
 
@@ -320,6 +324,11 @@ public class IntegrationControllerImplTest {
     Mockito.verify(integrationService, times(1)).deleteSchemaIntegrations(Mockito.anyString());
   }
 
+  /**
+   * Execute external integration test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeExternalIntegrationTest() throws EEAException {
 
@@ -328,6 +337,11 @@ public class IntegrationControllerImplTest {
         Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Execute external integration exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void executeExternalIntegrationExceptionTest() throws EEAException {
 
@@ -337,6 +351,37 @@ public class IntegrationControllerImplTest {
       integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the integrations test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createIntegrationsTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
+    integrationVO.getInternalParameters().put("dataflowId", "1");
+    integrationControllerImpl.createIntegrations(Arrays.asList(integrationVO));
+    Mockito.verify(integrationService, times(1)).createIntegrations(Mockito.any());
+  }
+
+  /**
+   * Creates the integrations exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createIntegrationsExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(integrationService)
+          .createIntegrations(Mockito.any());
+      integrationControllerImpl.createIntegrations(Arrays.asList(new IntegrationVO()));
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
   }

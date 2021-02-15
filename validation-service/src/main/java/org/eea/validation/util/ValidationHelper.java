@@ -3,6 +3,7 @@ package org.eea.validation.util;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -10,11 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.ConsumerGroupVO;
@@ -27,6 +30,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
@@ -42,6 +46,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
@@ -140,11 +148,6 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
-  /**
-   * The validation controller.
-   */
-  @Autowired
-  private ValidationController validationController;
 
   /**
    * Instantiates a new file loader helper.
@@ -159,6 +162,8 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
+    ThreadFactory tf = Executors.defaultThreadFactory();
+
     validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
   }
 
@@ -225,7 +230,7 @@ public class ValidationHelper implements DisposableBean {
    */
   public void initializeProcess(String processId, boolean isCoordinator, boolean released) {
     ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
-        isCoordinator, (String) ThreadPropertiesManager.getVariable("user"), released);
+        isCoordinator, SecurityContextHolder.getContext().getAuthentication().getName(), released);
 
     synchronized (processesMap) {
       processesMap.put(processId, process);
@@ -247,6 +252,10 @@ public class ValidationHelper implements DisposableBean {
 
     DatasetTypeEnum type = datasetMetabaseControllerZuul.getType(datasetId);
 
+    LOG.info(
+        "The user executing validations in ValidationHelper.executeValidation is {} and datasetId {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+
     if (type.equals(DatasetTypeEnum.DESIGN)) {
       executeValidationProcess(datasetId, processId, released);
     } else if (Boolean.FALSE.equals(updateViews)) {
@@ -257,6 +266,12 @@ public class ValidationHelper implements DisposableBean {
       values.put(LiteralConstants.USER,
           SecurityContextHolder.getContext().getAuthentication().getName());
       values.put("released", released);
+      LOG.info(
+          "The user releasing kafka event on ValidationHelper.startProcess is {} and the datasetId {}",
+          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+      LOG.info("The user set on the event is {}", values.get("user"));
+      LOG.info("The user set on threadPropertiesManager is {}",
+          ThreadPropertiesManager.getVariable("user"));
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
 
     }
@@ -325,6 +340,12 @@ public class ValidationHelper implements DisposableBean {
     int sentTasks = 0;
     while (tasksToBeSent > 0) {
       if (!processesMap.get(processId).getPendingValidations().isEmpty()) {
+        LOG.info("The user releasing kafka event on ValidationHelper.startProcess is {}",
+            SecurityContextHolder.getContext().getAuthentication().getName());
+        LOG.info("The user set on the event is {}",
+            processesMap.get(processId).getRequestingUser());
+        LOG.info("The user set on threadPropertiesManager is {}",
+            ThreadPropertiesManager.getVariable("user"));
         this.kafkaSenderUtils
             .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
         sentTasks++;
@@ -391,6 +412,9 @@ public class ValidationHelper implements DisposableBean {
       Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
       synchronized (processesMap) {
 
+        LOG.info("The user invoking ValidationHelper.startProcess is {}",
+            SecurityContextHolder.getContext().getAuthentication().getName());
+
         // Sending initial tasks, 1 per validation instance in the system
         // Due to this initial work load there will be always more pendingOks to be received than
         // pendingValidation to be sent
@@ -404,6 +428,11 @@ public class ValidationHelper implements DisposableBean {
         while (initialTasks > 0) {
           EEAEventVO event = (EEAEventVO) pendingTasks.poll();
           if (null != event) {
+            LOG.info("The user releasing kafka event on ValidationHelper.startProcess is {}",
+                SecurityContextHolder.getContext().getAuthentication().getName());
+            LOG.info("The user set on the event is {}", event.getData().get("user"));
+            LOG.info("The user set on threadPropertiesManager is {}",
+                ThreadPropertiesManager.getVariable("user"));
             kafkaSenderUtils.releaseKafkaEvent(event);
           }
           initialTasks--;
@@ -577,6 +606,12 @@ public class ValidationHelper implements DisposableBean {
       boolean isRelease = processesMap.get(processId).isReleased();
       this.finishProcess(processId);
 
+      LOG.info(
+          "The user releasing kafka event on ValidationHelper.checkFinishedValidations is {} and the datasetId is {}",
+          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+      LOG.info("The user set on the event is {}", value.get("user"));
+      LOG.info("The user set on threadPropertiesManager is {}",
+          ThreadPropertiesManager.getVariable("user"));
       kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
       if (isRelease) {
         Long nextDatasetId =
@@ -584,6 +619,12 @@ public class ValidationHelper implements DisposableBean {
         if (null != nextDatasetId) {
           this.executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, true);
         } else {
+          LOG.info(
+              "The user releasing kafka event on ValidationHelper.checkFinishedValidations is {} and the datasetId is {}",
+              SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+          LOG.info("The user set on the event is {}", value.get("user"));
+          LOG.info("The user set on threadPropertiesManager is {}",
+              ThreadPropertiesManager.getVariable("user"));
           kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
         }
 
@@ -686,6 +727,7 @@ public class ValidationHelper implements DisposableBean {
      */
     private ValidationTask validationTask;
 
+
     /**
      * Instantiates a new validation tasks executor thread.
      *
@@ -705,15 +747,27 @@ public class ValidationHelper implements DisposableBean {
       Long currentTime = System.currentTimeMillis();
       int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
 
+      SecurityContextHolder.clearContext();
+
+      SecurityContextHolder.getContext()
+          .setAuthentication(new UsernamePasswordAuthenticationToken(
+              EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
+                  new HashSet<>()),
+              validationTask.eeaEventVO.getData().get("token").toString(), null));
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
+
+      LOG.info(
+          " executing task with security context {} {}",
+          SecurityContextHolder.getContext().getAuthentication().getName(),
+          SecurityContextHolder.getContext().getAuthentication().getCredentials());
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
       } catch (EEAException e) {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
-            validationTask.datasetId, e);
+            validationTask.datasetId, e.getMessage(), e);
         validationTask.eeaEventVO.getData().put("error", e);
       } finally {
 
@@ -730,6 +784,7 @@ public class ValidationHelper implements DisposableBean {
           }
         } else {
           // send the message to coordinator validation instance
+
           kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
               validationTask.eeaEventVO.getData());
         }

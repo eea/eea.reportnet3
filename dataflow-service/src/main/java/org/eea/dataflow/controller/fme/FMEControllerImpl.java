@@ -1,14 +1,18 @@
 package org.eea.dataflow.controller.fme;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.utils.StreamingUtil;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.lock.service.LockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -44,6 +48,17 @@ public class FMEControllerImpl implements FMEController {
   /** The streaming util. */
   @Autowired
   private StreamingUtil streamingUtil;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
+
+  /**
+   * The integration service.
+   */
+  @Autowired
+  private IntegrationService integrationService;
+
 
   /**
    * Find repositories.
@@ -100,9 +115,19 @@ public class FMEControllerImpl implements FMEController {
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
           fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
+              fmeOperationInfoVO.getDatasetId()));
+      integrationService.releaseLocks(fmeOperationInfoVO.getDatasetId());
     } catch (EEAForbiddenException e) {
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
+              fmeOperationInfoVO.getDatasetId()));
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (EEAUnauthorizedException e) {
+      lockService
+          .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
+              fmeOperationInfoVO.getDatasetId()));
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
     }
   }
@@ -118,7 +143,7 @@ public class FMEControllerImpl implements FMEController {
    */
   @Override
   @GetMapping(value = "/downloadExportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN', 'DATASET_CUSTODIAN', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE','DATASET_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN', 'DATASET_CUSTODIAN', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE','DATASET_NATIONAL_COORDINATOR')")
   @ApiOperation(value = "Download an exported data file from FME")
   public ResponseEntity<StreamingResponseBody> downloadExportFile(
       @RequestParam("datasetId") Long datasetId,

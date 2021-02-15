@@ -60,6 +60,7 @@ const DataViewer = withRouter(
   ({
     hasCountryCode,
     hasWritePermissions,
+    isDataflowOpen,
     isDatasetDeleted = false,
     isExportable,
     isFilterable,
@@ -207,6 +208,7 @@ const DataViewer = withRouter(
 
     const actionTemplate = () => (
       <ActionsColumn
+        disabledButtons={isDataflowOpen}
         hideDeletion={tableFixedNumber}
         hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
@@ -255,6 +257,7 @@ const DataViewer = withRouter(
       hasWebformWritePermissions,
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
+      isDataflowOpen,
       onFileDeleteVisible,
       onFileDownload,
       onFileUploadVisible,
@@ -846,6 +849,7 @@ const DataViewer = withRouter(
         }
       } else {
         try {
+          setIsSaving(true);
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
         } catch (error) {
@@ -1120,6 +1124,7 @@ const DataViewer = withRouter(
           hasCountryCode={hasCountryCode}
           hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
           hideValidationFilter={hideValidationFilter}
+          isDataflowOpen={isDataflowOpen}
           isExportable={isExportable}
           isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
@@ -1159,6 +1164,7 @@ const DataViewer = withRouter(
               hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
+                  isDataflowOpen={isDataflowOpen}
                   onAddClick={() => {
                     setIsNewRecord(true);
                     setAddDialogVisible(true);
@@ -1170,7 +1176,7 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !isEditing
+              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !isEditing && !isDataflowOpen
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);
@@ -1332,6 +1338,7 @@ const DataViewer = withRouter(
                   formType="NEW"
                   getTooltipMessage={getTooltipMessage}
                   hasWritePermissions={hasWritePermissions}
+                  isSaving={isSaving}
                   onChangeForm={onEditAddFormInput}
                   onConditionalChange={onConditionalChange}
                   onShowFieldInfo={onShowFieldInfo}
@@ -1363,6 +1370,7 @@ const DataViewer = withRouter(
                 formType="EDIT"
                 getTooltipMessage={getTooltipMessage}
                 hasWritePermissions={hasWritePermissions}
+                isSaving={isSaving}
                 onChangeForm={onEditAddFormInput}
                 onConditionalChange={onConditionalChange}
                 onShowCoordinateError={onShowCoordinateError}

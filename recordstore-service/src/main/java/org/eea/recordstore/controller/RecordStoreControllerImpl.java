@@ -44,7 +44,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Autowired
   private RecordStoreService recordStoreService;
 
-  /** The restore snapshot helper. */
+  /**
+   * The restore snapshot helper.
+   */
   @Autowired
   private SnapshotHelper restoreSnapshotHelper;
 
@@ -91,7 +93,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
-
 
 
   /**
@@ -151,6 +152,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
+      LOG.info(
+          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {}",
+          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+      LOG.info("The user set on threadPropertiesManager is {}",
+          (String) ThreadPropertiesManager.getVariable("user"));
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException e) {
@@ -175,6 +181,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @PostMapping("/dataset/{datasetId}/snapshot/restore")
+  @PreAuthorize("isAuthenticated()")
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long idPartition,

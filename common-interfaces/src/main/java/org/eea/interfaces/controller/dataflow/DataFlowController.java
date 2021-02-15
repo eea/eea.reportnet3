@@ -153,4 +153,12 @@ public interface DataFlowController {
   void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("status") TypeStatusEnum status,
       @RequestParam(value = "deadLineDate", required = false) Date deadLineDate);
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  @GetMapping("/getPublicDataflows")
+  List<DataFlowVO> getPublicDataflows();
 }

@@ -58,7 +58,6 @@ import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -121,7 +120,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private static final String USER = "root";
 
-  /** The Constant HEADER_NAME. */
+  /**
+   * The Constant HEADER_NAME.
+   */
   private static final String HEADER_NAME = "headerName";
 
   /**
@@ -296,11 +297,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /**
-   * The dataset schema service.
-   */
-  @Autowired
-  private DatasetSchemaService datasetSchemaService;
 
   /**
    * The paM service.
@@ -324,7 +320,6 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
-
 
 
   /**
@@ -817,8 +812,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    TableSchema tableSchema =
-        datasetSchemaService.getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
+    TableSchema tableSchema = getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
 
     if (null == tableSchema) {
       throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
@@ -827,7 +821,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-            .getCode()
+        .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -972,7 +966,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException {
-    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(datasetId)
+            .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+    String datasetSchemaId = datasetMetabase.getDatasetSchema();
     IntegrationVO integrationVO =
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
     integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
@@ -1666,7 +1663,7 @@ public class DatasetServiceImpl implements DatasetService {
         List<TableSchema> listOfTablesFiltered = getTableFromSchema(originDesign);
         // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
-          LOG.info("There is data to copy. Copy data from datasetId {} to datasetId {}",
+          LOG.info("There are data to copy. Copy data from datasetId {} to datasetId {}",
               originDataset, targetDataset);
           List<RecordValue> recordDesignValuesList = new ArrayList<>();
           List<AttachmentValue> attachments = new ArrayList<>();
@@ -1949,7 +1946,7 @@ public class DatasetServiceImpl implements DatasetService {
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
+          .size() > 0) {
 
         processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
             dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
@@ -1963,6 +1960,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
+
   /**
    * Process record page.
    *
@@ -2212,6 +2210,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table VO
    */
   private TableVO calculatedErrorsAndRecordsToSee(final Long datasetId, final String idTableSchema,
@@ -2248,6 +2247,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table VO
    */
   private TableVO fieldsMap(final Long datasetId, final String idTableSchema, Pageable pageable,
@@ -2844,8 +2844,12 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
-
+          .size() > 0) {
+        LOG.info(
+            "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
+            fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
+            numberOfFieldsInRecord, desingTable.getNameTableSchema(),
+            desingTable.getIdTableSchema(), originDataset, targetDataset);
         // For this, the best is getting fields in big completed sets and assign them to the records
         // to avoid excessive queries to bd
 
@@ -2915,7 +2919,8 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-
+    // Force last database pointer position
+    recordRepository.findLastRecord();
     return recordValues;
   }
 
@@ -3191,4 +3196,19 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  private TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId) {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema tableSchema = null;
+
+    if (null != datasetSchema && null != datasetSchema.getTableSchemas()
+        && ObjectId.isValid(tableSchemaId)) {
+      ObjectId oid = new ObjectId(tableSchemaId);
+      tableSchema = datasetSchema.getTableSchemas().stream()
+          .filter(ts -> oid.equals(ts.getIdTableSchema())).findFirst().orElse(null);
+    }
+
+    return tableSchema;
+  }
 }

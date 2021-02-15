@@ -272,13 +272,16 @@ public class ContributorServiceImplTest {
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(1L)))
             .thenReturn(usersEmpty);
     when(userManagementControllerZull
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(1L)))
+            .thenReturn(usersEmpty);
+    when(userManagementControllerZull
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(1L)))
             .thenReturn(usersEmpty);
     when(userManagementControllerZull
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1L)))
             .thenReturn(usersEmpty);
     contributorServiceImpl.createAssociatedPermissions(1L, 1L);
-    Mockito.verify(userManagementControllerZull, times(3)).getUsersByGroup((Mockito.any()));
+    Mockito.verify(userManagementControllerZull, times(4)).getUsersByGroup((Mockito.any()));
   }
 
 

@@ -46,8 +46,14 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_UNIQUES':
       return { ...state, uniqueConstraintsList: payload.data };
 
+    case 'HAS_WRITE_PERMISSIONS':
+      return { ...state, hasWritePermissions: payload.hasWritePermissions };
+
     case 'HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
+
+    case 'IS_DATAFLOW_OPEN':
+      return { ...state, isDataflowOpen: payload.isDataflowOpen };
 
     case 'UPDATED_IS_DUPLICATED':
       return { ...state, isDuplicatedToManageUnique: payload.value };
@@ -192,7 +198,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, selectedWebform: undefined };
 
     case 'ON_UPDATE_TABS':
-      return { ...state, schemaTables: payload.data };
+      return { ...state, schemaTables: payload.data, tabs: payload.tabs };
 
     default:
       return state;

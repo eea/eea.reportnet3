@@ -613,7 +613,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
-
+    LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), idDataset);
+    LOG.info("The user set on threadPropertiesManager is {}",
+        ThreadPropertiesManager.getVariable("user"));
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
@@ -985,7 +988,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       public List<String> extractData(ResultSet resultSet) throws SQLException {
         List<String> datasets = new ArrayList<>();
         while (resultSet.next()) {
-          datasets.add(resultSet.getString(1));
+          datasets.add(resultSet.getString("nspname"));
         }
         return datasets;
       }
@@ -1150,6 +1153,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         SecurityContextHolder.getContext().getAuthentication().getName());
     values.put("released", released);
     values.put("updateViews", false);
+    LOG.info(
+        "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
+        ThreadPropertiesManager.getVariable("user"), datasetId);
+    LOG.info("The user set on securityContext is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
   }
 

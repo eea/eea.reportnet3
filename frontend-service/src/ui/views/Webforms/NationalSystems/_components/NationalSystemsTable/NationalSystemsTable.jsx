@@ -32,17 +32,30 @@ export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, t
     onLoadTableData();
   }, []);
 
+  const getFieldSchemaColumnIdByHeader = (records, fieldName) => {
+    if (!isEmpty(records)) {
+      const filtered = records[0].fields.filter(field => TextUtils.areEquals(field.name, fieldName));
+
+      return !isNil(filtered) && !isEmpty(filtered) ? filtered[0].fieldId : '';
+    }
+  };
+
   const getTableErrors = errors => setHasErrors(errors);
 
   const onLoadTableData = async () => {
     try {
-      const response = await DatasetService.tableDataById(datasetId, schemaTables?.tableSchemaId, '', 100, undefined, [
-        'CORRECT',
-        'INFO',
-        'WARNING',
-        'ERROR',
-        'BLOCKER'
-      ]);
+      const sortFieldSchemaId = !isNil(tables.sortBy)
+        ? getFieldSchemaColumnIdByHeader(schemaTables.records, tables.sortBy)
+        : undefined;
+
+      const response = await DatasetService.tableDataById(
+        datasetId,
+        schemaTables?.tableSchemaId,
+        '',
+        100,
+        sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+        ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+      );
 
       setData(parseData(response.records, tables, schemaTables));
       setSchemaData(response);

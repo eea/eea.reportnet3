@@ -95,6 +95,9 @@ public final class PaMConstants {
   /** The Constant UNION_POLICY: {@value}. */
   public static final String UNION_POLICY = "UnionPolicy";
 
+  /** The Constant UNION_POLICY_T1: {@value}. */
+  public static final String UNION_POLICY_T1 = "UnionPolicyT1";
+
   /** The Constant OTHER_POLICY_INSTRUMENT: {@value}. */
   public static final String OTHER_POLICY_INSTRUMENT = "OtherPolicyInstrument";
 

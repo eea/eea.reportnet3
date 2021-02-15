@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -392,6 +393,8 @@ public class IntegrationServiceImpl implements IntegrationService {
   public void executeExternalIntegration(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException {
 
+    addLocks(datasetId);
+
     // Delete the previous data in the dataset if we have chosen it before the call to FME
     if (Boolean.TRUE.equals(replace)) {
       LOG.info("Replacing the data previous the execution of an external integration in dataset {}",
@@ -406,6 +409,100 @@ public class IntegrationServiceImpl implements IntegrationService {
             datasetId, integrations.get(0));
       }
     }
+  }
+
+
+  /**
+   * Creates the integrations.
+   *
+   * @param integrationsVO the integrations VO
+   * @throws EEAException the EEA exception
+   */
+  @Transactional
+  @Override
+  public void createIntegrations(List<IntegrationVO> integrationsVO) throws EEAException {
+
+    for (IntegrationVO integrationVO : integrationsVO) {
+      CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
+      crudManager.create(integrationVO);
+    }
+  }
+
+  /**
+   * Release locks.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void releaseLocks(Long datasetId) {
+    // Insert
+    lockService
+        .removeLockByCriteria(Arrays.asList(LockSignature.INSERT_RECORDS.getValue(), datasetId));
+    // Delete
+    lockService
+        .removeLockByCriteria(Arrays.asList(LockSignature.DELETE_RECORDS.getValue(), datasetId));
+    // Update field
+    lockService
+        .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_FIELD.getValue(), datasetId));
+    // Update records
+    lockService
+        .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_RECORDS.getValue(), datasetId));
+    // Delete dataset
+    lockService.removeLockByCriteria(
+        Arrays.asList(LockSignature.DELETE_DATASET_VALUES.getValue(), datasetId));
+    // Import
+    lockService
+        .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
+    // Import Etl
+    lockService.removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_ETL.getValue(), datasetId));
+    // Impor file
+    lockService
+        .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
+  }
+
+  /**
+   * Creates the lock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @param userName the user name
+   * @throws EEAException the EEA exception
+   */
+  private void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
+      String userName) throws EEAException {
+    mapCriteria.put("signature", lockSignature.getValue());
+    lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
+        mapCriteria);
+  }
+
+  /**
+   * Adds the locks.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  private void addLocks(Long datasetId) throws EEAException {
+    // We have to lock all the dataset operations (insert, delete, update...)
+    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("datasetId", datasetId);
+    // Insert
+    createLockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria, userName);
+    // Insert multitable
+    createLockWithSignature(LockSignature.INSERT_RECORDS_MULTITABLE, mapCriteria, userName);
+    // Delete
+    createLockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria, userName);
+    // Update field
+    createLockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria, userName);
+    // Update record
+    createLockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
+    // Delete dataset
+    createLockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
+    // Import
+    createLockWithSignature(LockSignature.IMPORT_FILE_DATA, mapCriteria, userName);
+    // ETL Import
+    createLockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
+
   }
 
 
