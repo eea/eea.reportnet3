@@ -103,14 +103,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    * @return the jwt from request
    */
   private String getJwtFromRequest(HttpServletRequest request) {
-    String jwt = request
-        .getHeader("FeignInvocationUser"); //if FeignInvocationUser comes then let it go
-    if (StringUtils.isEmpty(jwt)) {
-      String bearerToken = request.getHeader("Authorization");
 
-      if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TOKEN)) {
-        jwt = bearerToken.substring(7, bearerToken.length());
-      }
+    String bearerToken = request.getHeader("Authorization");
+    String jwt = null;
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TOKEN)) {
+      jwt = bearerToken.substring(7, bearerToken.length());
     }
 
     return jwt;
