@@ -59,6 +59,7 @@ export const Filters = ({
     checkboxes: [],
     data: data,
     filterBy: {},
+    previousState: {},
     filtered: false,
     filteredData: data,
     filteredSearched: false,
@@ -72,11 +73,13 @@ export const Filters = ({
 
   useEffect(() => {
     getInitialState();
+  }, [data]);
 
+  useEffect(() => {
     if (filterState.filtered) {
       onReApplyFilters();
     }
-  }, [data, filterByList]);
+  }, [filterState.data]);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filterState.filteredData);
@@ -246,6 +249,8 @@ export const Filters = ({
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
 
+    console.log('filter, value', filter, value);
+
     const filteredData = ApplyFilterUtils.onApplyFilters({
       dateOptions,
       dropdownOptions,
@@ -294,13 +299,57 @@ export const Filters = ({
   const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
 
   const onReApplyFilters = () => {
-    const keys = Object.keys(filterState.filterBy);
-    for (let index = 0; index < keys.length; index++) {
-      const filter = keys[index];
-      const value = filterState.filterBy[filter];
+    let filterBy = { ...filterState.filterBy };
+
+    const filterKeys = Object.keys(filterBy);
+
+    if (!isEmpty(filterBy)) {
+      filterBy = filterState.previousState.filterBy;
+      const possibleOptions = new Map();
+      filterKeys.forEach(key => possibleOptions.set(key, new Set()));
+
+      const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
+
+      console.log('initialFilteredData', initialFilteredData);
+
+      initialFilteredData.forEach(item =>
+        selectOptions.forEach(filterKey => {
+          let currentValue = possibleOptions.get(filterKey);
+
+          currentValue.add(item[filterKey]);
+        })
+      );
+
+      let filterByAsKeyValueArray = Object.entries(filterBy);
+
+      //Remove inexistent filter possibleOptions from filterBy object
+      const parsedResult = filterByAsKeyValueArray.map(keyValue => {
+        selectOptions.forEach(key => {
+          // key [0], value [1]
+          if (key === keyValue[0]) {
+            keyValue[1] = keyValue[1].filter(value => {
+              const option = possibleOptions.get(key);
+
+              if (key === 'pinned') {
+                return option.has(value.toLowerCase());
+              }
+              return option.has(value);
+            });
+          }
+        });
+
+        return keyValue;
+      });
+
+      filterBy = Object.fromEntries(parsedResult);
+    }
+
+    for (let index = 0; index < filterKeys.length; index++) {
+      const filter = filterKeys[index];
+      const value = filterBy[filter];
 
       if (!isEmpty(value)) {
-        onFilterData(filter, filterState.filterBy[filter]);
+        onFilterData(filter, filterBy[filter]);
       }
     }
   };
