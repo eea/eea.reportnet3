@@ -869,7 +869,7 @@
     "sqlFields": ["attachment"]
   },
   "bannedTypes": {
-    "sqlHelp": ["attachment"],
+    "sqlFields": ["attachment"],
     "nonSql": ["attachment", "point", "multipoint", "polygon", "multilinestring", "linestring", "multipolygon"]
   }
 }

@@ -7,7 +7,7 @@ export const getDatasetSchemaTableFields = (candidateTable, tables) => {
   const [selectedTable] = tables.filter(table => table.tableSchemaId === candidateTable.code);
   const {
     validations: {
-      bannedTypes: { sqlHelp, nonSql }
+      bannedTypes: { sqlFields, nonSql }
     }
   } = config;
   let bannedFields;
@@ -15,7 +15,7 @@ export const getDatasetSchemaTableFields = (candidateTable, tables) => {
   if (!isNil(selectedTable) && !isEmpty(selectedTable) && !isNil(selectedTable.records)) {
     const fields = { tableSqlFields: [], tableNonSqlFields: [] };
     fields.tableSqlFields = selectedTable.records[0].fields
-      .filter(field => !sqlHelp.includes(field.type.toLowerCase()))
+      .filter(field => !sqlFields.includes(field.type.toLowerCase()))
       .map(field => ({
         label: field.name,
         code: field.fieldId
