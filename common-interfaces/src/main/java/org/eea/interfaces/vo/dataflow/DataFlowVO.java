@@ -23,8 +23,25 @@ import lombok.ToString;
  * The type Data flow vo.
  */
 
+/**
+ * Checks if is available.
+ *
+ * @return true, if is available
+ */
 @Getter
+
+/**
+ * Sets the available.
+ *
+ * @param available the new available
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 public class DataFlowVO implements Serializable {
 
@@ -92,7 +109,7 @@ public class DataFlowVO implements Serializable {
   /** The releasable. */
   private boolean releasable;
 
-  /** The isPublic. */
+  /** The available. */
   private boolean available;
 
   /**

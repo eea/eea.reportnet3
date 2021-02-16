@@ -76,7 +76,7 @@ public class DataSetMetabase {
   @Column(name = "RELEASING")
   private Boolean releasing;
 
-  /** The isrestricted. */
+  /** The restricted. */
   @Column(name = "RESTRICTED")
   private boolean restricted;
 

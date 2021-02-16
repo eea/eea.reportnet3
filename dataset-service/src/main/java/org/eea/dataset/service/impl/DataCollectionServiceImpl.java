@@ -305,7 +305,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
 
-    DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId);
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
     dataFlowVO.setAvailable(showPublicInfo);
     dataflowControllerZuul.updateDataFlow(dataFlowVO);
 
