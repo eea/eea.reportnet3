@@ -133,7 +133,7 @@ public interface ExtendedSchemaRepository {
    * @param isExportable the is exportable
    * @return the update result
    */
-  UpdateResult updateDatasetSchemaExportable(String datasetSchemaId, boolean isExportable);
+  UpdateResult updateDatasetSchemaExportable(String datasetSchemaId, boolean exportable);
 
   /**
    * Find record schema.

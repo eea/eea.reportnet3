@@ -1001,8 +1001,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param isExportable the is exportable
    */
   @Override
-  public void updateDatasetSchemaExportable(String datasetSchemaId, boolean isExportable) {
-    schemasRepository.updateDatasetSchemaExportable(datasetSchemaId, isExportable);
+  public void updateDatasetSchemaExportable(String datasetSchemaId, boolean exportable) {
+    schemasRepository.updateDatasetSchemaExportable(datasetSchemaId, exportable);
   }
 
   /**
