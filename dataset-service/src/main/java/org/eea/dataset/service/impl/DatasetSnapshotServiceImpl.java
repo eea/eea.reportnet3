@@ -63,6 +63,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
@@ -1070,6 +1071,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Import Etl
       lockService
           .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_ETL.getValue(), datasetId));
+      // Multiple table insert records (PAMS)
+      lockService.removeLockByCriteria(
+          Arrays.asList(LockSignature.INSERT_RECORDS_MULTITABLE.getValue(), datasetId));
       // Delete tables and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {
@@ -1122,6 +1126,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       createLockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
       // Delete dataset
       createLockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
+      // Multiple table insert records (PAMS)
+      createLockWithSignature(LockSignature.INSERT_RECORDS_MULTITABLE, mapCriteria, userName);
 
       // Delete table and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
@@ -1162,7 +1168,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   private void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
       String userName) throws EEAException {
     mapCriteria.put("signature", lockSignature.getValue());
-    lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
-        mapCriteria);
+    LockVO lockVO = lockService.findByCriteria(mapCriteria);
+    if (lockVO == null) {
+      lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
+          mapCriteria);
+    }
   }
+
 }

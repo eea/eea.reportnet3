@@ -385,4 +385,5 @@ public class IntegrationControllerImplTest {
       throw e;
     }
   }
+
 }

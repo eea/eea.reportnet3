@@ -16,6 +16,7 @@ public interface IntegrationService {
    * Creates the integration.
    *
    * @param integrationVO the integration VO
+   *
    * @throws EEAException the EEA exception
    */
   void createIntegration(IntegrationVO integrationVO) throws EEAException;
@@ -24,6 +25,7 @@ public interface IntegrationService {
    * Delete integration.
    *
    * @param integrationId the integration id
+   *
    * @throws EEAException the EEA exception
    */
   void deleteIntegration(Long integrationId) throws EEAException;
@@ -32,6 +34,7 @@ public interface IntegrationService {
    * Update integration.
    *
    * @param integrationVO the integration VO
+   *
    * @throws EEAException the EEA exception
    */
   void updateIntegration(IntegrationVO integrationVO) throws EEAException;
@@ -40,7 +43,9 @@ public interface IntegrationService {
    * Gets the all integrations by criteria.
    *
    * @param integrationVO the integration VO
+   *
    * @return the all integrations by criteria
+   *
    * @throws EEAException the EEA exception
    */
   List<IntegrationVO> getAllIntegrationsByCriteria(IntegrationVO integrationVO) throws EEAException;
@@ -49,6 +54,7 @@ public interface IntegrationService {
    * Gets only extensions and operations.
    *
    * @param integrationVOList the integration VO list
+   *
    * @return the only extensions and operations
    */
   List<IntegrationVO> getOnlyExtensionsAndOperations(List<IntegrationVO> integrationVOList);
@@ -59,6 +65,7 @@ public interface IntegrationService {
    * @param dataflowIdDestination the dataflow id destination
    * @param originDatasetSchemaIds the origin dataset schema ids
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   *
    * @throws EEAException the EEA exception
    */
   void copyIntegrations(Long dataflowIdDestination, List<String> originDatasetSchemaIds,
@@ -68,7 +75,9 @@ public interface IntegrationService {
    * Execute EU dataset export.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the list
+   *
    * @throws EEAException the EEA exception
    */
   List<ExecutionResultVO> executeEUDatasetExport(Long dataflowId) throws EEAException;
@@ -85,6 +94,7 @@ public interface IntegrationService {
    * Gets the export EU dataset integration.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the export EU dataset integration
    */
   IntegrationVO getExportEUDatasetIntegration(String datasetSchemaId);
@@ -93,6 +103,7 @@ public interface IntegrationService {
    * Adds the populate EU dataset lock.
    *
    * @param dataflowId the dataflow id
+   *
    * @throws EEAException the EEA exception
    */
   void addPopulateEUDatasetLock(Long dataflowId) throws EEAException;
@@ -109,6 +120,7 @@ public interface IntegrationService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param integrationId the integration id
+   *
    * @return the export integration
    */
   IntegrationVO getExportIntegration(String datasetSchemaId, Long integrationId);
@@ -121,7 +133,6 @@ public interface IntegrationService {
   void deleteSchemaIntegrations(String datasetSchemaId);
 
 
-
   /**
    * Execute external integration.
    *
@@ -129,7 +140,9 @@ public interface IntegrationService {
    * @param integrationId the integration id
    * @param operation the operation
    * @param replace the replace
+   *
    * @return the execution result VO
+   *
    * @throws EEAException the EEA exception
    */
   void executeExternalIntegration(Long datasetId, Long integrationId,
@@ -139,6 +152,7 @@ public interface IntegrationService {
    * Creates the integrations.
    *
    * @param integrationsVO the integrations VO
+   *
    * @throws EEAException the EEA exception
    */
   void createIntegrations(List<IntegrationVO> integrationsVO) throws EEAException;
@@ -154,6 +168,7 @@ public interface IntegrationService {
    * Adds the locks.
    *
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   void addLocks(Long datasetId) throws EEAException;
