@@ -8,8 +8,11 @@ export const getUrl = (url, urlParams = {}, isRoute = false) => {
     keys.forEach(key => {
       if (isUndefined(urlParams[key])) {
         let i = cUrl.indexOf(`{:${key}}`);
-        while (cUrl.charAt(i) !== '&' && cUrl.charAt(i) !== '?') {
+        while (cUrl.charAt(i) !== '&' && cUrl.charAt(i) !== '?' && i > 0) {
           i--;
+        }
+        if (i === 0) {
+          return;
         }
         let min = i;
         let max = cUrl.indexOf(`{:${key}}`) + `{:${key}}`.length;
