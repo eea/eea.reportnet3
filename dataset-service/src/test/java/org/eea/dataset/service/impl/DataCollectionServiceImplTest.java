@@ -340,7 +340,8 @@ public class DataCollectionServiceImplTest {
         Mockito.anyBoolean(), Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -361,7 +362,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(designs);
     Mockito.when(rulesControllerZuul.getAllDisabledRules(Mockito.any(), Mockito.any()))
         .thenReturn(1);
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
@@ -370,7 +372,8 @@ public class DataCollectionServiceImplTest {
     List<DesignDatasetVO> designs = new ArrayList<>();
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
@@ -405,7 +408,8 @@ public class DataCollectionServiceImplTest {
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.doNothing().when(connection).rollback();
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -445,7 +449,8 @@ public class DataCollectionServiceImplTest {
         .deleteResourceByDatasetId(Mockito.any());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false);
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }
 

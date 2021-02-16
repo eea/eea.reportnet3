@@ -305,10 +305,13 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   * @param showNotification the show notification
    */
   @PostMapping("/validateSqlRules")
   public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId);
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "showNotification", required = false,
+          defaultValue = "true") Boolean showNotification);
 
 
 
@@ -367,6 +370,12 @@ public interface RulesController {
   void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO);
 
 
+  /**
+   * Import rules schema.
+   *
+   * @param importRules the import rules
+   * @return the map
+   */
   @PostMapping("/private/importRulesSchema")
   Map<String, String> importRulesSchema(@RequestBody ImportSchemaVO importRules);
 

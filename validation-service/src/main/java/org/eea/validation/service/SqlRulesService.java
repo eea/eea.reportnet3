@@ -56,6 +56,7 @@ public interface SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   * @param showNotification the show notification
    */
-  void validateSQLRules(Long datasetId, String datasetSchemaId);
+  void validateSQLRules(Long datasetId, String datasetSchemaId, Boolean showNotification);
 }

@@ -509,8 +509,10 @@ public class RulesControllerImpl implements RulesController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PostMapping("/validateSqlRules")
   public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    sqlRulesService.validateSQLRules(datasetId, datasetSchemaId);
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "showNotification", required = false,
+          defaultValue = "true") Boolean showNotification) {
+    sqlRulesService.validateSQLRules(datasetId, datasetSchemaId, showNotification);
   }
 
   /**

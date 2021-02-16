@@ -43,6 +43,7 @@ public interface DataCollectionController {
       @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
       @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+      @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
       @RequestBody DataCollectionVO dataCollectionVO);
 
 
