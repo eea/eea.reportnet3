@@ -1,5 +1,9 @@
 import React, { Fragment, useContext, useEffect } from 'react';
 
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
+
+import { DatasetService } from 'core/services/Dataset';
+
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
@@ -8,6 +12,57 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 const GlobalNotifications = () => {
   const notificationContext = useContext(NotificationContext);
+
+  useEffect(() => {
+    if (findHiddenNotification()) downloadExportFMEFile();
+  }, [notificationContext.hidden]);
+
+  const findHiddenNotification = () => {
+    return notificationContext.hidden.find(
+      notification =>
+        notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' || 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+    );
+  };
+
+  const downloadExportFMEFile = async () => {
+    try {
+      const [notification] = notificationContext.hidden.filter(
+        notification =>
+          notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
+          notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+      );
+
+      const getFileName = () => {
+        const extension = notification.content.fileName.split('.').pop();
+        return `${notification.content.datasetName}.${extension}`;
+      };
+
+      let datasetData;
+
+      if (notification) {
+        notification.content.providerId
+          ? (datasetData = await DatasetService.downloadExportFile(
+              notification.content.datasetId,
+              notification.content.fileName,
+              notification.content.providerId
+            ))
+          : (datasetData = await DatasetService.downloadExportFile(
+              notification.content.datasetId,
+              notification.content.fileName
+            ));
+
+        notificationContext.add({
+          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
+          onClick: () => DownloadFile(datasetData, getFileName())
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
 
   const notifyValidateDataInitReporting = async () => {
     const notification = notificationContext.toShow.find(
