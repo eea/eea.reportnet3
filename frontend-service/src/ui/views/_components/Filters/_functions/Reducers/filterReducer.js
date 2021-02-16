@@ -45,7 +45,7 @@ export const filterReducer = (state, { type, payload }) => {
     case 'INITIAL_STATE':
       const getFilterBy = () => {
         if (state?.previousState?.filtered) {
-          return { ...state.previousState.filterBy };
+          return { ...state.previousState.filterBy, ...state.filterBy };
         }
         return payload.initialFilterBy;
       };
