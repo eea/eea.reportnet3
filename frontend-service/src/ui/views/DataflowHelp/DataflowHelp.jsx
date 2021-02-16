@@ -199,7 +199,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     try {
       let loadedDocuments = await DocumentService.all(`${dataflowId}`);
 
-      loadedDocuments = loadedDocuments.sort(sortByProperty('title'));
+      loadedDocuments = loadedDocuments.sort(sortByProperty('description'));
 
       setDocuments(loadedDocuments);
     } catch (error) {
@@ -266,7 +266,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           <TabPanel headerClassName="dataflowHelp-weblinks-help-step" header={resources.messages['webLinks']}>
             <WebLinks
               dataflowId={dataflowId}
-              isCustodian={isCustodian}
               isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWeblinks={setSortFieldWeblinks}

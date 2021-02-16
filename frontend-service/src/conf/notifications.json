@@ -12,6 +12,13 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },  
+        {
+          "key": "UPDATE_RELEASABLE_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         },
         {
           "key": "RESTORE_DATASET_SNAPSHOT_FAILED_EVENT",

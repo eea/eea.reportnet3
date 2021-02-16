@@ -23,6 +23,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class RestoreDataCollectionSnapshotCommandTest.
@@ -56,6 +59,12 @@ public class CheckBlockersDataSnapshotCommandTest {
   /** The data. */
   private Map<String, Object> data;
 
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
@@ -63,6 +72,10 @@ public class CheckBlockersDataSnapshotCommandTest {
   public void initMocks() {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.VALIDATION_RELEASE_FINISHED_EVENT);
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -84,6 +97,8 @@ public class CheckBlockersDataSnapshotCommandTest {
     List<Long> datasetsId = new ArrayList<>();
     datasetsId.add(1L);
     datasetsId.add(2L);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
     Mockito
         .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
@@ -114,6 +129,8 @@ public class CheckBlockersDataSnapshotCommandTest {
     List<Long> datasetsId = new ArrayList<>();
     datasetsId.add(1L);
     datasetsId.add(2L);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
     Mockito
         .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
