@@ -29,8 +29,8 @@ public class DataSetSchemaVO {
   /** The webform. */
   private WebformVO webform;
 
-  /** The is exportable. */
-  private boolean isExportable;
+  /** The exportable. */
+  private boolean exportable;
 
   /**
    * Hash code.
@@ -40,7 +40,7 @@ public class DataSetSchemaVO {
   @Override
   public int hashCode() {
     return Objects.hash(idDataSetSchema, description, nameDatasetSchema, tableSchemas, webform,
-        isExportable);
+        exportable);
   }
 
   /**
@@ -62,7 +62,6 @@ public class DataSetSchemaVO {
         && Objects.equals(description, other.description)
         && Objects.equals(nameDatasetSchema, other.nameDatasetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas)
-        && Objects.equals(webform, other.webform)
-        && Objects.equals(isExportable, other.isExportable);
+        && Objects.equals(webform, other.webform) && Objects.equals(exportable, other.exportable);
   }
 }

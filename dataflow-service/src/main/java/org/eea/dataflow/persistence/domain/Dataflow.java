@@ -74,9 +74,9 @@ public class Dataflow {
   @Column(name = "RELEASABLE")
   private boolean releasable;
 
-  /** The isPublic. */
-  @Column(name = "ISPUBLIC")
-  private boolean isPublic;
+  /** The public. */
+  @Column(name = "AVAILABLE")
+  private boolean available;
 
   /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
