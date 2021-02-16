@@ -30,6 +30,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -41,6 +42,7 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
@@ -119,6 +121,14 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private DataSetMapper dataSetMapper;
 
+
+  /**
+   * The dataset metabase service.
+   */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+
   /**
    * The import executor service.
    */
@@ -189,6 +199,16 @@ public class FileTreatmentHelper implements DisposableBean {
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
+    // We add a lock to the Release process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
+    mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
     fileManagement(datasetId, tableSchemaId, schema, file, replace);
   }
 
@@ -685,10 +705,29 @@ public class FileTreatmentHelper implements DisposableBean {
     try {
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
       FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+
+      releaseLockReleasingProcess(datasetId);
     } catch (IOException e) {
       LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
     }
   }
+
+
+  /**
+   * Release lock releasing process.
+   *
+   * @param datasetId the dataset id
+   */
+  private void releaseLockReleasingProcess(Long datasetId) {
+    // Release lock to the releasing process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      datasetService.releaseLock(LockSignature.RELEASE_SNAPSHOTS.getValue(),
+          datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId());
+    }
+
+  }
+
 
   /**
    * File management.
@@ -845,22 +884,19 @@ public class FileTreatmentHelper implements DisposableBean {
       List<File> files, String originalFileName, IntegrationVO integrationVO)
       throws IOException, EEAException {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    String credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials()
-        .toString();
+    String credentials =
+        SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
-      importExecutorService.submit(
-          () -> {
-            SecurityContextHolder.clearContext();
+      importExecutorService.submit(() -> {
+        SecurityContextHolder.clearContext();
 
-            SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(user,
-                        new HashSet<>()),
-                    credentials, null));
-            rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user);
-          });
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+                credentials, null));
+        rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user);
+      });
     }
   }
 
@@ -894,6 +930,7 @@ public class FileTreatmentHelper implements DisposableBean {
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
         datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+        releaseLockReleasingProcess(datasetId);
       }
 
       if ((Integer) integrationController
@@ -910,6 +947,7 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
           datasetId, file.getName(), integrationVO);
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      releaseLockReleasingProcess(datasetId);
       throw new EEAException("Error executing integration");
     }
   }
