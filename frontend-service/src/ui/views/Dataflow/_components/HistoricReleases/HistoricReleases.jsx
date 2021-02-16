@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import dayjs from 'dayjs';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
 import styles from './HistoricReleases.module.scss';
@@ -68,11 +69,14 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     try {
       isLoading(true);
       let response = null;
-      Array.isArray(datasetId)
-        ? datasetId.length === 1
-          ? (response = await HistoricReleaseService.allHistoricReleases(datasetId[0]))
-          : (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
+      isNil(datasetId)
+        ? (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
         : (response = await HistoricReleaseService.allHistoricReleases(datasetId));
+      // Array.isArray(datasetId)
+      //   ? datasetId.length === 1
+      //     ? (response = await HistoricReleaseService.allHistoricReleases(datasetId[0]))
+      //     : (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
+      //   : (response = await HistoricReleaseService.allHistoricReleases(datasetId));
       response.sort((a, b) => b.releasedDate - a.releasedDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',

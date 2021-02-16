@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -18,6 +19,7 @@ const useBigButtonList = ({
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
+  getDataHistoricReleasesByRepresentatives,
   getDatasetData,
   getDeleteSchemaIndex,
   handleExportEuDataset,
@@ -243,24 +245,21 @@ const useBigButtonList = ({
         visibility: buttonsVisibility.designDatasets || buttonsVisibility.designDatasetsOpen
       }));
 
-  const buildGroupByRepresentativeModels = dataflowData => {
-    const { datasets } = dataflowData;
+  const buildGroupByRepresentativeModels = (datasets = []) => {
+    const allDatasets = datasets.map(dataset => {
+      return {
+        datasetId: dataset.datasetId,
+        datasetName: dataset.name,
+        dataProviderId: dataset.dataProviderId,
+        name: dataset.datasetSchemaName
+      };
+    });
 
-    const allDatasets = isNil(datasets)
-      ? []
-      : datasets.map(dataset => {
-          return {
-            name: dataset.datasetSchemaName,
-            id: dataset.dataProviderId,
-            datasetId: dataset.datasetId,
-            datasetName: dataset.name
-          };
-        });
+    const dataProviderIds = allDatasets.map(dataset => dataset.dataProviderId);
+    const isUniqRepresentative = uniq(dataProviderIds).length === dataProviderIds.length;
 
-    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
-
-    if (isUniqRepresentative && !buttonsVisibility.groupByRepresentative) {
-      return datasets.map(dataset => {
+    if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
+      return allDatasets.map(dataset => {
         const datasetName = dataset.name;
         const datasetId = dataset.datasetId;
         return {
@@ -290,18 +289,18 @@ const useBigButtonList = ({
       });
     }
 
-    const datasetsIdsArray = [];
-
-    return allDatasets.map(representative => {
-      datasetsIdsArray.push(representative.datasetId);
-
+    return uniqBy(allDatasets, 'dataProviderId').map(representative => {
       return {
         buttonClass: 'dataset',
         buttonIcon: 'representative',
         caption: representative.name,
         handleRedirect: () => {
           handleRedirect(
-            getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
+            getUrl(
+              routes.DATAFLOW_REPRESENTATIVE,
+              { dataflowId, representativeId: representative.dataProviderId },
+              true
+            )
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
@@ -311,17 +310,17 @@ const useBigButtonList = ({
             label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset');
-              getDataHistoricReleases(datasetsIdsArray, representative.name, representative.id);
+              getDataHistoricReleasesByRepresentatives(representative.name, representative.dataProviderId);
             }
           }
         ],
-        onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
+        onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.dataProviderId }, true),
         visibility: true
       };
     });
   };
 
-  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets);
 
   const checkDisabledDataCollectionButton = () =>
     isEmpty(dataflowState.data.dataCollections) &&

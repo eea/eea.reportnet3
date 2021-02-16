@@ -10,7 +10,7 @@ const apiRepresentative = {
       }),
       data: {
         dataProviderId,
-        providerAccount
+        providerAccounts: [providerAccount]
       }
     });
     return response;
@@ -72,7 +72,7 @@ const apiRepresentative = {
       url: getUrl(RepresentativeConfig.updateProviderAccount, {}),
       data: {
         id: representativeId,
-        providerAccount: providerAccount
+        providerAccounts: [providerAccount]
       }
     });
     return response;

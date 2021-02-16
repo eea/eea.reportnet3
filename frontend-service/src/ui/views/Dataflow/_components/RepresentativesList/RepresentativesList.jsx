@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -36,7 +36,6 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const RepresentativesList = ({
-  dataflowRepresentatives,
   dataflowId,
   isActiveManageRolesDialog,
   representativesImport = false,
@@ -51,7 +50,6 @@ const RepresentativesList = ({
   const initialState = {
     allPossibleDataProviders: [],
     allPossibleDataProvidersNoSelect: [],
-    dataflowRepresentatives: dataflowRepresentatives,
     dataProvidersTypesList: [],
     initialRepresentatives: [],
     isLoading: false,
@@ -78,9 +76,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
-      formDispatcher({
-        type: 'REFRESH'
-      });
+      formDispatcher({ type: 'REFRESH' });
     }
   }, [isActiveManageRolesDialog]);
 
@@ -309,14 +305,12 @@ const RepresentativesList = ({
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          onConfirm={() => {
-            onDeleteConfirm(formDispatcher, formState);
-          }}
-          onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
-          visible={formState.isVisibleConfirmDeleteDialog}
           header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
+          onConfirm={() => onDeleteConfirm(formDispatcher, formState)}
+          onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
+          visible={formState.isVisibleConfirmDeleteDialog}>
           {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
         </ConfirmDialog>
       )}
