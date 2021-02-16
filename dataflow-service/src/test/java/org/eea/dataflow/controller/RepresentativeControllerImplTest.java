@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -51,6 +52,9 @@ public class RepresentativeControllerImplTest {
   /** The users. */
   private List<UserRepresentationVO> users;
 
+  /** The emails. */
+  private List<String> emails;
+
   /** The user. */
   private UserRepresentationVO user;
 
@@ -66,8 +70,10 @@ public class RepresentativeControllerImplTest {
     user.setEmail("email@host.com");
     users = new ArrayList<>();
     users.add(user);
+    emails = new ArrayList<>();
+    emails.add("email@host.com");
     representativeVO = new RepresentativeVO();
-    representativeVO.setProviderAccount("email@host.com");
+    representativeVO.setProviderAccounts(emails);
     representativeVOs = new ArrayList<>();
     representativeVOs.add(representativeVO);
     MockitoAnnotations.initMocks(this);
@@ -158,7 +164,6 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeSuccessTest() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
     representativeControllerImpl.updateRepresentative(representativeVO);
     Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
   }
@@ -170,7 +175,7 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeSuccessNoAccountTest() throws EEAException {
-    representativeVO.setProviderAccount(null);
+    representativeVO.setProviderAccounts(null);
     representativeControllerImpl.updateRepresentative(representativeVO);
     Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
 
@@ -181,8 +186,7 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeException1Test() {
-    representativeVO.setProviderAccount("otro@host.com");
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
+    representativeVO.setProviderAccounts(Arrays.asList("otro@host.com"));
     try {
       representativeControllerImpl.updateRepresentative(representativeVO);
     } catch (ResponseStatusException e) {
@@ -198,7 +202,6 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeException2Test() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
     when(representativeService.updateDataflowRepresentative(Mockito.any()))
         .thenThrow(EEAException.class);
     try {
@@ -216,7 +219,6 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeException3Test() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
     when(representativeService.updateDataflowRepresentative(Mockito.any()))
         .thenThrow(new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED));
     try {

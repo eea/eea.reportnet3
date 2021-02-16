@@ -863,7 +863,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);
 
-      receipt.setProviderEmail(representative.getProviderAccount());
+      receipt.setProviderEmail(user.getEmail());
 
       // Check if it's needed to update the status of the button (i.e I only want to download the
       // receipt twice, but no state is changed)

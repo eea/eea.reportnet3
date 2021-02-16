@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -66,83 +65,52 @@ import io.netty.util.internal.StringUtil;
 @RequestMapping("/dataschema")
 public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSchemaControllerImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The dataschema service.
-   */
+  /** The dataschema service. */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The dataset snapshot service.
-   */
+  /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /**
-   * The record store controller zuul.
-   */
+  /** The record store controller zuul. */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /**
-   * The dataflow controller zuul.
-   */
+  /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /**
-   * The rules controller zuul.
-   */
+  /** The rules controller zuul. */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-  /**
-   * The design dataset service.
-   */
+  /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /**
-   * The contributor controller zuul.
-   */
+  /** The contributor controller zuul. */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
 
-  /**
-   * The integration controller zuul.
-   */
+  /** The integration controller zuul. */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
-
-  /**
-   * The data set metabase repository.
-   */
-  @Autowired
-  private DataSetMetabaseRepository dataSetMetabaseRepository;
-
 
   /**
    * Creates the empty dataset schema.
@@ -156,6 +124,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') AND hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
       @RequestParam("datasetSchemaName") final String datasetSchemaName) {
+
+    if (!TypeStatusEnum.DESIGN
+        .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
 
     if (0 != datasetMetabaseService.countDatasetNameByDataflowId(dataflowId, datasetSchemaName)) {
       LOG.error("Error creating duplicated dataset : {}", datasetSchemaName);
@@ -331,6 +304,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/{datasetId}/tableSchema", produces = MediaType.APPLICATION_JSON_VALUE)
   public TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
+
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
@@ -359,6 +338,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/tableSchema")
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -401,6 +385,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @DeleteMapping("/{datasetId}/tableSchema/{tableSchemaId}")
   public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
+
     try {
       final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
 
@@ -437,6 +427,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/tableSchema/order")
   public void orderTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody OrderVO orderVO) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
+
     try {
       // Update the fieldSchema from the datasetSchema
       if (Boolean.FALSE.equals(
@@ -463,6 +459,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping("/{datasetId}/fieldSchema")
   public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody final FieldSchemaVO fieldSchemaVO) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
 
     if (StringUtil.isNullOrEmpty(fieldSchemaVO.getName())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
@@ -518,6 +519,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/fieldSchema")
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -576,6 +582,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void deleteFieldSchema(
       @PathVariable("datasetId") @LockCriteria(name = "datasetId") Long datasetId,
       @PathVariable("fieldSchemaId") @LockCriteria(name = "fieldSchemaId") String fieldSchemaId) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
+
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       FieldSchemaVO fieldVO = dataschemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
@@ -629,6 +641,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/fieldSchema/order")
   public void orderFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody OrderVO orderVO) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
+
     try {
       // Update the fieldSchema from the datasetSchema
       if (Boolean.FALSE.equals(
@@ -654,6 +672,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/datasetSchema")
   public void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
+
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       if (null != datasetSchemaVO.getDescription()) {
@@ -788,6 +812,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/createUniqueConstraint")
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
+      if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+          .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+      }
       if (uniqueConstraint.getDatasetSchemaId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
@@ -816,9 +844,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
   public void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
       @PathVariable("dataflowId") Long dataflowId) {
-    if (uniqueConstraintId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT);
+    if (!TypeStatusEnum.DESIGN
+        .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
@@ -838,6 +866,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
+    }
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
     if (uniqueConstraint.getDatasetSchemaId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -945,8 +977,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
-
-
   /**
    * Import schemas.
    *
@@ -959,6 +989,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   public void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam("file") MultipartFile file) {
+    if (!TypeStatusEnum.DESIGN
+        .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+    }
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",

@@ -249,7 +249,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccount("providerAccount_");
+    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
     representative.setHasDatasets(false);
     designs.add(design);
     representatives.add(representative);
@@ -298,7 +298,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccount("providerAccount_");
+    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
     representative.setDataProviderId(1L);
     representative.setHasDatasets(false);
     dataProvider.setId(1L);
@@ -394,7 +394,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccount("providerAccount_");
+    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
     representative.setHasDatasets(false);
     designs.add(design);
     representatives.add(representative);
@@ -427,7 +427,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccount("providerAccount_");
+    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
     representative.setHasDatasets(false);
     designs.add(design);
     representatives.add(representative);

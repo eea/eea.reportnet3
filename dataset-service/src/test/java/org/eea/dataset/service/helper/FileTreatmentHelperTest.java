@@ -1,7 +1,6 @@
 package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -83,6 +82,7 @@ public class FileTreatmentHelperTest {
   @Mock
   private Authentication authentication;
 
+  @Mock
   private SecurityContext securityContext;
 
   @Before
@@ -155,7 +155,6 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
@@ -241,7 +240,6 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
@@ -285,7 +283,6 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(authentication.getCredentials()).thenReturn("credentials");
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
     FileUtils
@@ -381,7 +378,7 @@ public class FileTreatmentHelperTest {
   /**
    * @throws IOException
    * @throws EEAException
-   * 
+   *
    */
   @Test
   public void unzipSchemaTest() throws EEAException, IOException {
@@ -420,8 +417,7 @@ public class FileTreatmentHelperTest {
 class CurrentThreadExecutor extends AbstractExecutorService {
 
   @Override
-  public void shutdown() {
-  }
+  public void shutdown() {}
 
   @Override
   public List<Runnable> shutdownNow() {
