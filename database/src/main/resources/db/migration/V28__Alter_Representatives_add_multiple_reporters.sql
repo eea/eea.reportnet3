@@ -6,7 +6,7 @@ CREATE TABLE public."user" (
 );
 
 ALTER TABLE public."user" OWNER TO testuser;
-GRANT ALL ON TABLE public."user" TO testuser;
+GRANT ALL ON TABLE public."user" TO testuser, dataflow, dataset, recordstore, validation;
 
 CREATE TABLE public.representative_user (
 	representative_id int8 NOT NULL,
@@ -17,4 +17,4 @@ CREATE TABLE public.representative_user (
 );
 
 ALTER TABLE public.representative_user OWNER TO testuser;
-GRANT ALL ON TABLE public.representative_user TO testuser;
+GRANT ALL ON TABLE public.representative_user TO testuser, dataflow, dataset, recordstore, validation;

@@ -22,7 +22,6 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
-
 @Getter
 @Setter
 @ToString
@@ -91,6 +90,9 @@ public class DataFlowVO implements Serializable {
 
   /** The releasable. */
   private boolean releasable;
+
+  /** The available. */
+  private boolean available;
 
   /**
    * Equals.
