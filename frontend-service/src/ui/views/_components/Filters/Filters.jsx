@@ -330,7 +330,7 @@ export const Filters = ({
             keyValue[1] = keyValue[1].filter(value => {
               const option = possibleOptions.get(key);
 
-              if (key === 'pinned') {
+              if (key === 'pinned' || key === 'table' || key === 'field') {
                 return option.has(value.toLowerCase());
               }
               return option.has(value);
@@ -342,6 +342,7 @@ export const Filters = ({
       });
 
       filterBy = Object.fromEntries(parsedResult);
+      filterDispatch({ type: 'UPDATE_FILTER_BY', payload: { filterBy } });
     }
 
     for (let index = 0; index < filterKeys.length; index++) {
