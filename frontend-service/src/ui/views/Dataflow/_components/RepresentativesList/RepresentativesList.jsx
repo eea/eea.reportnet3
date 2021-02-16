@@ -33,7 +33,6 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const RepresentativesList = ({
-  dataflowRepresentatives,
   dataflowId,
   isActiveManageRolesDialog,
   setFormHasRepresentatives,
@@ -44,7 +43,6 @@ const RepresentativesList = ({
   const initialState = {
     allPossibleDataProviders: [],
     allPossibleDataProvidersNoSelect: [],
-    dataflowRepresentatives: dataflowRepresentatives,
     dataProvidersTypesList: [],
     initialRepresentatives: [],
     isVisibleConfirmDeleteDialog: false,
@@ -275,14 +273,12 @@ const RepresentativesList = ({
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          onConfirm={() => {
-            onDeleteConfirm(formDispatcher, formState);
-          }}
-          onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
-          visible={formState.isVisibleConfirmDeleteDialog}
           header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          labelCancel={resources.messages['no']}>
+          onConfirm={() => onDeleteConfirm(formDispatcher, formState)}
+          onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
+          visible={formState.isVisibleConfirmDeleteDialog}>
           {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
         </ConfirmDialog>
       )}

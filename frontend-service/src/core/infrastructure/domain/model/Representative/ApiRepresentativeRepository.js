@@ -7,7 +7,18 @@ const allRepresentatives = async dataflowId => {
   const representativesDTO = await apiRepresentative.allRepresentatives(dataflowId);
 
   const representativesList = !isEmpty(representativesDTO.data)
-    ? representativesDTO.data.map(representativeDTO => new Representative(representativeDTO))
+    ? representativesDTO.data.map(
+        representativeDTO =>
+          new Representative({
+            dataProviderGroupId: representativeDTO.dataProviderGroupId,
+            dataProviderId: representativeDTO.dataProviderId,
+            id: representativeDTO.id,
+            isReceiptDownloaded: representativeDTO.receiptDownloaded,
+            isReceiptOutdated: representativeDTO.receiptOutdated,
+            providerAccount: representativeDTO.providerAccounts,
+            hasDatasets: representativeDTO.hasDatasets
+          })
+      )
     : [];
 
   const dataToConsume = {
