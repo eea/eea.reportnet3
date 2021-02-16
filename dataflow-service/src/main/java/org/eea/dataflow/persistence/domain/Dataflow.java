@@ -74,6 +74,10 @@ public class Dataflow {
   @Column(name = "RELEASABLE")
   private boolean releasable;
 
+  /** The available. */
+  @Column(name = "AVAILABLE")
+  private boolean available;
+
   /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private SubmissionAgreement submissionAgreement;
@@ -100,7 +104,7 @@ public class Dataflow {
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private Set<Representative> representatives;
 
-
+  /** The integrations. */
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private Set<Integration> integrations;
 

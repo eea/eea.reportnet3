@@ -538,7 +538,7 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L);
+    dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, false);
     Mockito.verify(datasetSnapshotService, times(1)).createReleaseSnapshots(1L, 1L);
   }
 
@@ -556,7 +556,7 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L);
     try {
-      dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L);
+      dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
