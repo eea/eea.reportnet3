@@ -376,22 +376,12 @@ export const Dataset = withRouter(({ match, history }) => {
       await DatasetService.validateDataById(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
       notificationContext.add({
         type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     }
   };
@@ -1007,6 +997,7 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetId={datasetId}
             datasetName={datasetName}
             hasWritePermissions={hasWritePermissions}
+            isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
             schemaTables={schemaTables}
