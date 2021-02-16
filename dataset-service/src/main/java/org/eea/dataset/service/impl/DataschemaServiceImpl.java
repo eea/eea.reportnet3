@@ -2163,7 +2163,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
         recordStoreControllerZuul.createUpdateQueryView(datasetCreated, false);
         rulesControllerZuul.validateSqlRules(datasetCreated,
-            dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()));
+            dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()), false);
       });
 
       // Success notification
