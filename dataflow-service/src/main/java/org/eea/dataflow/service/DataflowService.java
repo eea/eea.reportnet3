@@ -163,4 +163,11 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadline) throws EEAException;
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  List<DataFlowVO> getPublicDataflows();
 }

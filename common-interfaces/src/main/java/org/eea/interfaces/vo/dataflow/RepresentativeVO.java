@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -23,7 +24,7 @@ public class RepresentativeVO implements Serializable {
   private Long dataProviderId;
 
   /** The provider account. */
-  private String providerAccount;
+  private List<String> providerAccounts;
 
   /** The data provider group id. */
   private Long dataProviderGroupId;

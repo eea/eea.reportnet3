@@ -21,16 +21,18 @@ import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
 import { BigButtonListRepresentative } from './_components/BigButtonListRepresentative';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox/';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { Title } from '../_components/Title/Title';
+import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -77,16 +79,21 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
+    isExportDialogVisible: false,
     isExportEuDatasetLoading: false,
+    isExporting: false,
+    isFetchingData: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
+    isReleasable: false,
+    isReleaseableDialogVisible: false,
+    isReleaseDialogVisible: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
-    isReleaseDialogVisible: false,
     name: '',
     obligations: {},
     status: '',
@@ -163,6 +170,15 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'edit'
       };
 
+      const exportSchemaBtn = {
+        className: 'dataflow-export-schema-help-step',
+        icon: 'download',
+        isVisible: buttonsVisibility.exportBtn,
+        label: 'exportSchema',
+        onClick: () => manageDialogs('isExportDialogVisible', true),
+        title: 'exportSchema'
+      };
+
       const manageEditorsBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
@@ -190,11 +206,34 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'properties'
       };
 
-      const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageReportersBtn, manageEditorsBtn];
+      const releaseableBtn = {
+        className: 'dataflow-releasable-help-step',
+        icon: 'released',
+        isVisible: buttonsVisibility.releaseableBtn,
+        label: 'releasingLeftSideBarButton',
+        onClick: () => manageDialogs('isReleaseableDialogVisible', true),
+        title: 'releasingLeftSideBarButton'
+      };
+
+      const allButtons = [
+        propertiesBtn,
+        editBtn,
+        releaseableBtn,
+        exportSchemaBtn,
+        apiKeyBtn,
+        manageReportersBtn,
+        manageEditorsBtn
+      ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     }
-  }, [dataflowState.userRoles, dataflowState.status, representativeId, dataflowState.datasetId]);
+  }, [
+    dataflowState.userRoles,
+    dataflowState.status,
+    representativeId,
+    dataflowState.datasetId,
+    dataflowState.designDatasetSchemas.length
+  ]);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
@@ -216,8 +255,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const getLeftSidebarButtonsVisibility = () => {
     const { userRoles } = dataflowState;
 
-    const isLeadDesigner = userRoles.includes(
-      config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']
+    const isLeadDesigner = userRoles.some(
+      userRole => userRole === config.permissions['DATA_STEWARD'] || config.permissions['DATA_CUSTODIAN']
     );
 
     const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
@@ -226,6 +265,8 @@ const Dataflow = withRouter(({ history, match }) => {
       return {
         apiKeyBtn: false,
         editBtn: false,
+        exportBtn: false,
+        releaseableBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
         propertiesBtn: false
@@ -235,6 +276,8 @@ const Dataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
+      exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
+      releaseableBtn: !isDesign && isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true
@@ -251,6 +294,7 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
     />
   );
+
   const manageRightsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -290,6 +334,12 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { isExportEuDatasetLoading: value }
     });
 
+  const setIsReleaseable = isReleasable =>
+    dataflowDispatch({
+      type: 'SET_IS_RELEASABLE',
+      payload: { isReleasable: isReleasable }
+    });
+
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const setIsPageLoading = isPageLoading =>
@@ -322,7 +372,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onEditDataflow = (newName, newDescription) => {
     dataflowDispatch({
       type: 'ON_EDIT_DATA',
-      payload: { name: newName, description: newDescription, isEditDialogVisible: false }
+      payload: { name: newName, description: newDescription, isEditDialogVisible: false, isExportDialogVisible: false }
     });
     onLoadReportingDataflow();
   };
@@ -353,7 +403,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
     const userRoles = userContext.getUserRole(entity);
 
-    const isCustodian = userRoles.includes(config.permissions['DATA_CUSTODIAN'] || config.permissions['DATA_STEWARD']);
+    const isCustodian = userRoles.some(
+      userRole => userRole === config.permissions['DATA_STEWARD'] || config.permissions['DATA_CUSTODIAN']
+    );
 
     dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
   };
@@ -361,12 +413,19 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.reporting(dataflowId);
+      Promise.resolve(dataflow).then(res => {
+        dataflowDispatch({
+          type: 'SET_IS_FETCHING_DATA',
+          payload: { isFetchingData: false }
+        });
+      });
 
       dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
           data: dataflow,
           description: dataflow.description,
+          isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
           status: dataflow.status
@@ -386,6 +445,8 @@ const Dataflow = withRouter(({ history, match }) => {
         });
 
         setUpdatedDatasetSchema(datasetSchemaInfo);
+      } else {
+        dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: [] } });
       }
 
       if (!isNil(dataProviderId)) {
@@ -470,6 +531,27 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isReleaseDialogVisible', true);
   };
 
+  const onConfirmExport = async () => {
+    try {
+      dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
+      const response = await DataflowService.downloadById(dataflowId);
+      if (!isNil(response)) {
+        DownloadFile(
+          response,
+          `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT'
+      });
+    } finally {
+      manageDialogs('isExportDialogVisible', false);
+      dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: false });
+    }
+  };
+
   const onConfirmRelease = async () => {
     try {
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
@@ -489,9 +571,49 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   useCheckNotifications(
-    ['ADD_DATACOLLECTION_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'],
+    [
+      'ADD_DATACOLLECTION_COMPLETED_EVENT',
+      'COPY_DATASET_SCHEMA_COMPLETED_EVENT',
+      'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'
+    ],
     setIsDataUpdated
   );
+
+  useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
+
+  const onConfirmUpdateIsReleaseable = async () => {
+    manageDialogs('isReleaseableDialogVisible', false);
+    try {
+      dataflowDispatch({
+        type: 'SET_IS_FETCHING_DATA',
+        payload: { isFetchingData: true }
+      });
+      await DataflowService.update(
+        dataflowId,
+        dataflowState.data.name,
+        dataflowState.data.description,
+        dataflowState.obligations.obligationId,
+        dataflowState.isReleasable
+      );
+      onLoadReportingDataflow();
+    } catch (error) {
+      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
+      dataflowDispatch({
+        type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
+        payload: { isReleasable: dataflowState.data.isReleasable, isFetchingData: false }
+      });
+    }
+  };
+
+  const onCloseIsReleaseableDialog = () => {
+    manageDialogs('isReleaseableDialogVisible', false);
+    if (dataflowState.data.isReleasable !== dataflowState.isReleasable) {
+      dataflowDispatch({
+        type: 'SET_IS_RELEASABLE',
+        payload: { isReleasable: dataflowState.data.isReleasable }
+      });
+    }
+  };
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
@@ -606,6 +728,46 @@ const Dataflow = withRouter(({ history, match }) => {
               representativeId={representativeId}
             />
           </Dialog>
+        )}
+
+        {dataflowState.isExportDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={dataflowState.isExporting}
+            header={resources.messages['exportSchema']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={onConfirmExport}
+            onHide={() => manageDialogs('isExportDialogVisible', false)}
+            visible={dataflowState.isExportDialogVisible}>
+            {resources.messages['confirmExportSchema']}
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isReleaseableDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={
+              dataflowState.data.isReleasable === dataflowState.isReleasable || dataflowState.isFetchingData
+            }
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
+            header={resources.messages['isReleasableDataflowDialogHeader']}
+            labelCancel={resources.messages['cancel']}
+            labelConfirm={resources.messages['save']}
+            onConfirm={onConfirmUpdateIsReleaseable}
+            onHide={() => onCloseIsReleaseableDialog()}
+            visible={dataflowState.isReleaseableDialogVisible}>
+            <Checkbox
+              id="isReleasableCheckbox"
+              inputId="isReleasableCheckbox"
+              isChecked={dataflowState.isReleasable}
+              onChange={() => setIsReleaseable(!dataflowState.isReleasable)}
+              role="checkbox"
+            />
+            <label htmlFor="isReleasableCheckbox" className={styles.isReleasableLabel}>
+              <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
+                {resources.messages['isReleasableDataflowCheckboxLabel']}
+              </a>
+            </label>
+          </ConfirmDialog>
         )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />

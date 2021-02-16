@@ -55,5 +55,8 @@ public class SinglePaMVO {
   /** The other policy instrument. */
   private String otherPolicyInstrument;
 
+  /** The union policy. */
+  private String unionPolicy;
+
 
 }

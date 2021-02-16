@@ -91,11 +91,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   public void createEmptyDataCollection(
       @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
       @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+      @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
       @RequestBody @LockCriteria(name = "dataflowId",
           path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
@@ -120,7 +121,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     // This method will release the lock
     dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-        manualCheck);
+        manualCheck, showPublicInfo);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 
@@ -133,7 +134,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PutMapping("/update/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public void updateDataCollection(
       @PathVariable("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
 

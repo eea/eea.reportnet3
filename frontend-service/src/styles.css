@@ -435,6 +435,9 @@ body .p-multiselect-panel .p-multiselect-items .p-multiselect-item label {
   display: inline-block;
   vertical-align: middle;
 }
+body .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-disabled) label {
+  cursor: pointer;
+}
 body .p-editor-container .p-editor-toolbar {
   border: 1px solid #c8c8c8;
   background-color: #f4f4f4;

@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -140,6 +141,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The design dataset service. */
   @Autowired
+  @Lazy
   private DesignDatasetService designDatasetService;
 
   /** The representative controller zuul. */
@@ -301,7 +303,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      boolean stopAndNotifySQLErrors, boolean manualCheck) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
+
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+    dataFlowVO.setAvailable(showPublicInfo);
+    dataflowControllerZuul.updateDataFlow(dataFlowVO);
+
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
   }
 
@@ -568,7 +575,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
-      datasetIdsEmails.put(datasetId, representative.getProviderAccount());
+      for (String email : representative.getProviderAccounts()) {
+        datasetIdsEmails.put(datasetId, email);
+      }
       datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
 
       FKDataCollection newReporting = new FKDataCollection();

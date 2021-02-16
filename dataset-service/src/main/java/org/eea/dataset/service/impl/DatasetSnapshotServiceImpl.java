@@ -74,13 +74,12 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.security.jwt.utils.AuthenticationDetails;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -159,7 +158,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   /** The dataset service. */
   @Autowired
-  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
   /** The schema service. */
@@ -347,11 +345,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     try {
       if (error == null) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).build());
       } else {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).error(error).build());
       }
     } catch (EEAException e) {
@@ -401,8 +401,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        DatasetTypeEnum.REPORTING, (String) ThreadPropertiesManager.getVariable("user"), false,
-        deleteData);
+        DatasetTypeEnum.REPORTING, SecurityContextHolder.getContext().getAuthentication().getName(),
+        false, deleteData);
   }
 
   /**
@@ -475,6 +475,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
+    value.put(LiteralConstants.USER,
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
   }
 
@@ -492,6 +496,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       DataProviderVO provider, Long idDataCollection) throws EEAException {
     Long idDataflow = datasetService.getDataFlowIdById(idDataset);
     if (provider != null && idDataCollection != null) {
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
       datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
@@ -859,7 +864,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);
 
-      receipt.setProviderEmail(representative.getProviderAccount());
+      receipt.setProviderEmail(user.getEmail());
 
       // Check if it's needed to update the status of the button (i.e I only want to download the
       // receipt twice, but no state is changed)

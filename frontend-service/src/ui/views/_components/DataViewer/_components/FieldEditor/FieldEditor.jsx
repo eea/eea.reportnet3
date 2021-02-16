@@ -18,6 +18,7 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
@@ -51,7 +52,9 @@ const FieldEditor = ({
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
   const [currentCRS, setCurrentCRS] = useState(
@@ -66,7 +69,7 @@ const FieldEditor = ({
       : {}
   );
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-  const [isFilledDateValue, setIsFilledDateValue] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const [isMapDisabled, setIsMapDisabled] = useState(
     RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
       ? !MapUtils.checkValidCoordinates(
@@ -120,40 +123,58 @@ const FieldEditor = ({
     }
 
     const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
-    const referencedFieldValues = await DatasetService.getReferencedFieldValues(
-      datasetId,
-      colSchema.field,
-      // isUndefined(colSchema.referencedField.name)
-      //   ? colSchema.referencedField.idPk
-      //   : colSchema.referencedField.referencedField.fieldSchemaId,
-      filter,
-      RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
-      datasetSchemaId,
-      100
-    );
+    try {
+      setIsLoadingData(true);
+      const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+        datasetId,
+        colSchema.field,
+        // isUndefined(colSchema.referencedField.name)
+        //   ? colSchema.referencedField.idPk
+        //   : colSchema.referencedField.referencedField.fieldSchemaId,
+        filter,
+        RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
+        datasetSchemaId,
+        100
+      );
 
-    const linkItems = referencedFieldValues
-      .map(referencedField => {
-        return {
-          itemType: `${referencedField.value}${
-            !isNil(referencedField.label) &&
-            referencedField.label !== '' &&
-            referencedField.label !== referencedField.value
-              ? ` - ${referencedField.label}`
-              : ''
-          }`,
-          value: referencedField.value
+      const linkItems = referencedFieldValues
+        .map(referencedField => {
+          return {
+            itemType: `${referencedField.value}${
+              !isNil(referencedField.label) &&
+              referencedField.label !== '' &&
+              referencedField.label !== referencedField.value
+                ? ` - ${referencedField.label}`
+                : ''
+            }`,
+            value: referencedField.value
+          };
+        })
+        .sort((a, b) => a.value - b.value);
+
+      if (!hasMultipleValues) {
+        linkItems.unshift({
+          itemType: resources.messages['noneCodelist'],
+          value: ''
+        });
+      }
+
+      if (referencedFieldValues.length > 99) {
+        linkItems[linkItems.length - 1] = {
+          disabled: true,
+          itemType: resources.messages['moreElements'],
+          value: ''
         };
-      })
-      .sort((a, b) => a.value - b.value);
-
-    if (!hasMultipleValues) {
-      linkItems.unshift({
-        itemType: resources.messages['noneCodelist'],
-        value: ''
+      }
+      setLinkItemsOptions(linkItems);
+    } catch (error) {
+      console.error(`Error getting referenced link values: ${error}`);
+      notificationContext.add({
+        type: 'GET_REFERENCED_LINK_VALUES_ERROR'
       });
+    } finally {
+      setIsLoadingData(false);
     }
-    setLinkItemsOptions(linkItems);
   };
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
@@ -617,8 +638,10 @@ const FieldEditor = ({
               addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
+              disabled={isLoadingData}
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              isLoadingData={isLoadingData}
               maxSelectedLabels={10}
               onChange={e => {
                 try {
@@ -650,9 +673,11 @@ const FieldEditor = ({
             <Dropdown
               appendTo={document.body}
               currentValue={RecordUtils.getCellValue(cells, cells.field)}
+              disabled={isLoadingData}
               filter={true}
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
+              isLoadingData={isLoadingData}
               onChange={e => {
                 setLinkItemsValue(e.target.value.value);
                 onEditorValueChange(cells, e.target.value.value);

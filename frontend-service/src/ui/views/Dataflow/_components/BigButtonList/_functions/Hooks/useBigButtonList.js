@@ -24,8 +24,10 @@ const useBigButtonList = ({
   handleRedirect,
   isActiveButton,
   isCloningDataflow,
+  isImportingDataflow,
   isLeadReporterOfCountry,
   onCloneDataflow,
+  onImportSchema,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -81,16 +83,17 @@ const useBigButtonList = ({
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
+      designDatasetsOpen: isLeadDesigner && isDraftStatus,
       feedback:
         (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner,
+      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry,
-      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
+      release: isLeadReporterOfCountry
     };
   };
 
@@ -145,21 +148,30 @@ const useBigButtonList = ({
     },
     {
       label: resources.messages['cloneSchemasFromDataflow'],
-      icon: 'add',
+      icon: 'clone',
       command: () => onCloneDataflow()
+    },
+    {
+      label: resources.messages['importSchema'],
+      icon: 'import',
+      command: () => onImportSchema()
     }
   ];
 
   const newSchemaBigButton = [
     {
       buttonClass: 'newItem',
-      buttonIcon: isCloningDataflow ? 'spinner' : 'plus',
-      buttonIconClass: isCloningDataflow ? 'spinner' : 'newItemCross',
+      buttonIcon: isCloningDataflow || isImportingDataflow ? 'spinner' : 'plus',
+      buttonIconClass: isCloningDataflow || isImportingDataflow ? 'spinner' : 'newItemCross',
       caption: resources.messages['newSchema'],
-      handleRedirect: !isCloningDataflow ? () => onShowNewSchemaDialog() : () => {},
+      handleRedirect: !isCloningDataflow && !isImportingDataflow ? () => onShowNewSchemaDialog() : () => {},
       helpClassName: 'dataflow-new-schema-help-step',
-      layout: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? 'menuBigButton' : 'defaultBigButton',
-      model: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? newSchemaModel : [],
+      layout:
+        buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow
+          ? 'menuBigButton'
+          : 'defaultBigButton',
+      model:
+        buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema
     }
   ];
@@ -173,14 +185,15 @@ const useBigButtonList = ({
         caption: newDatasetSchema.datasetSchemaName,
         dataflowStatus: dataflowState.status,
         datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-        enabled: buttonsVisibility.designDatasetsActions,
-        handleRedirect: buttonsVisibility.designDatasetsActions
-          ? () => {
-              handleRedirect(
-                getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
-              );
-            }
-          : () => {},
+        enabled: buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen,
+        handleRedirect:
+          buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen
+            ? () => {
+                handleRedirect(
+                  getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+                );
+              }
+            : () => {},
 
         helpClassName: 'dataflow-schema-help-step',
         index: newDatasetSchema.index,
@@ -223,8 +236,11 @@ const useBigButtonList = ({
         onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
         placeholder: resources.messages['datasetSchemaNamePlaceholder'],
         setErrorDialogData: setErrorDialogData,
-        tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
-        visibility: buttonsVisibility.designDatasets
+        tooltip:
+          !buttonsVisibility.designDatasetsActions && !buttonsVisibility.designDatasetsOpen
+            ? resources.messages['accessDenied']
+            : '',
+        visibility: buttonsVisibility.designDatasets || buttonsVisibility.designDatasetsOpen
       }));
 
   const buildGroupByRepresentativeModels = dataflowData => {
@@ -440,9 +456,11 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
+        enabled: dataflowState.isReleasable,
+        handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];
