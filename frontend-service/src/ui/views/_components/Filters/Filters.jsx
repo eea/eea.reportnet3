@@ -309,8 +309,6 @@ export const Filters = ({
 
       const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
 
-      console.log('initialFilteredData', initialFilteredData);
-
       initialFilteredData.forEach(item =>
         selectOptions.forEach(filterKey => {
           let currentValue = possibleOptions.get(filterKey);
