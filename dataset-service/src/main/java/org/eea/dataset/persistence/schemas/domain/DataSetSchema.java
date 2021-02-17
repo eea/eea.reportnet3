@@ -17,8 +17,44 @@ import lombok.ToString;
  * The Class DataSetSchema.
  *
  */
+
+/**
+ * Gets the webform.
+ *
+ * @return the webform
+ */
+
+/**
+ * Gets the webform.
+ *
+ * @return the webform
+ */
 @Getter
+
+/**
+ * Sets the webform.
+ *
+ * @param webform the new webform
+ */
+
+/**
+ * Sets the webform.
+ *
+ * @param webform the new webform
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 
 /**
  * To string.
@@ -48,7 +84,7 @@ public class DataSetSchema {
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
 
-  /** The exportable. */
+  /** The available in public. */
   @Field(value = "availableInPublic")
   private boolean availableInPublic;
 
