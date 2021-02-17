@@ -28,26 +28,8 @@ import lombok.ToString;
  * The type Dataflow.
  */
 @Entity
-
-/**
- * Gets the integrations.
- *
- * @return the integrations
- */
 @Getter
-
-/**
- * Sets the integrations.
- *
- * @param integrations the new integrations
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {

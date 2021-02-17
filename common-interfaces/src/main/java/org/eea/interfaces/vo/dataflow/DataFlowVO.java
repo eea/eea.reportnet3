@@ -22,26 +22,8 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
-
-/**
- * Checks if is show public info.
- *
- * @return true, if is show public info
- */
 @Getter
-
-/**
- * Sets the show public info.
- *
- * @param showPublicInfo the new show public info
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class DataFlowVO implements Serializable {
 

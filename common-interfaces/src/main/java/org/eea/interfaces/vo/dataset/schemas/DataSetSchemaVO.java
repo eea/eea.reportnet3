@@ -9,26 +9,8 @@ import lombok.ToString;
 /**
  * The Class DataSetSchemaVO.
  */
-
-/**
- * Checks if is available in public.
- *
- * @return true, if is available in public
- */
 @Getter
-
-/**
- * Sets the available in public.
- *
- * @param availableInPublic the new available in public
- */
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 public class DataSetSchemaVO {
 
