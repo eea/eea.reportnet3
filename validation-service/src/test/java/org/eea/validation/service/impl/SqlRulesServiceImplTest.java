@@ -672,7 +672,7 @@ public class SqlRulesServiceImplTest {
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
 
-    sqlRulesServiceImpl.validateSQLRules(1L, "5ce524fad31fc52540abae73");
+    sqlRulesServiceImpl.validateSQLRules(1L, "5ce524fad31fc52540abae73", true);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
@@ -758,7 +758,7 @@ public class SqlRulesServiceImplTest {
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
 
-    sqlRulesServiceImpl.validateSQLRules(1L, "5ce524fad31fc52540abae73");
+    sqlRulesServiceImpl.validateSQLRules(1L, "5ce524fad31fc52540abae73", true);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 }

@@ -7,12 +7,10 @@
     <groupId>org.eea</groupId>
     <version>3.0-SNAPSHOT</version>
     <relativePath>../parent-poms/microservice</relativePath>
-
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eea.apigateway</groupId>
   <artifactId>api-gateway</artifactId>
-
   <version>${api-gateway.version}</version>
   <properties>
     <sonar.moduleKey>org.eea:reportnet:api-gateway:${sonar.jenkins.branch}</sonar.moduleKey>
@@ -30,5 +28,4 @@
       <url>https://nexus-oami.altia.es/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-
 </project>

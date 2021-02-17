@@ -972,6 +972,6 @@
     "moreElements": "There are more elements, use the search to limit results",
     "getReferencedLinkValuesError": "Error while loading the referenced field values",
     "updateReleasableFailedEvent": "Error updating the dataflow release status",
-    "sqlSentenceSpatialNote" : "<i>Note: Spatial QC functions must contain <strong>public.</strong> before the funtion:</i><br />&nbsp;&nbsp&nbsp;&nbsp;SELECT * FROM <strong>tableName</strong> WHERE public.ST_Distance (field1, field2) > X "
+    "releaseBlockedEvent": "Releasing process is being blocked by another action, please wait"
   }
 }

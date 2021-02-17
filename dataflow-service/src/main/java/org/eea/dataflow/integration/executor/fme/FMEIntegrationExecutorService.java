@@ -212,12 +212,16 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     notificationRequired.setValue("true".equals(
         integration.getInternalParameters().get(IntegrationParams.NOTIFICATION_REQUIRED)) ? "true"
             : "false");
+    Directive datasetIdDirective = new Directive();
+    datasetIdDirective.setName(IntegrationParams.DATASET_ID);
+    datasetIdDirective.setValue(datasetId.toString());
 
     List<String> topics = Arrays.asList(topic);
     NMDirectives nmDirectives = new NMDirectives();
     nmDirectives.setSuccessTopics(topics);
     nmDirectives.setFailureTopics(topics);
-    nmDirectives.setDirectives(Arrays.asList(apiKeyDirective, rn3JobId, notificationRequired));
+    nmDirectives.setDirectives(
+        Arrays.asList(apiKeyDirective, rn3JobId, notificationRequired, datasetIdDirective));
 
     fmeAsyncJob.setNmDirectives(nmDirectives);
 

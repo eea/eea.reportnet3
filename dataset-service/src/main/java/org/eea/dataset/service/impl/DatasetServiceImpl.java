@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,7 +59,6 @@ import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -95,6 +95,8 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -298,11 +300,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /**
-   * The dataset schema service.
-   */
-  @Autowired
-  private DatasetSchemaService datasetSchemaService;
 
   /**
    * The paM service.
@@ -818,8 +815,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    TableSchema tableSchema =
-        datasetSchemaService.getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
+    TableSchema tableSchema = getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
 
     if (null == tableSchema) {
       throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
@@ -973,7 +969,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException {
-    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    DataSetMetabase datasetMetabase =
+        dataSetMetabaseRepository.findById(datasetId)
+            .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+    String datasetSchemaId = datasetMetabase.getDatasetSchema();
     IntegrationVO integrationVO =
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
     integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
@@ -1909,6 +1908,23 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     }
+  }
+
+
+  /**
+   * Creates the lock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @param userName the user name
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
+      String userName) throws EEAException {
+    mapCriteria.put("signature", lockSignature.getValue());
+    lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
+        mapCriteria);
   }
 
 
@@ -3200,4 +3216,19 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  private TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId) {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema tableSchema = null;
+
+    if (null != datasetSchema && null != datasetSchema.getTableSchemas()
+        && ObjectId.isValid(tableSchemaId)) {
+      ObjectId oid = new ObjectId(tableSchemaId);
+      tableSchema = datasetSchema.getTableSchemas().stream()
+          .filter(ts -> oid.equals(ts.getIdTableSchema())).findFirst().orElse(null);
+    }
+
+    return tableSchema;
+  }
 }
