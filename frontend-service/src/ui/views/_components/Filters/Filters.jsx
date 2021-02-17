@@ -320,28 +320,32 @@ export const Filters = ({
         })
       );
 
-      let filterByAsKeyValueArray = Object.entries(filterBy);
+      const filterByAsKeyValueArray = Object.entries(filterBy);
 
-      //Remove inexistent filter possibleOptions from filterBy object
-      const parsedResult = filterByAsKeyValueArray.map(keyValue => {
-        selectOptions.forEach(key => {
-          // key [0], value [1]
-          if (key === keyValue[0]) {
-            keyValue[1] = keyValue[1].filter(value => {
-              const option = possibleOptions.get(key);
+      const removeInexistentFilters = () => {
+        return filterByAsKeyValueArray.map(keyValue => {
+          selectOptions.forEach(key => {
+            // key [0], value [1]
+            if (key === keyValue[0]) {
+              keyValue[1] = keyValue[1].filter(value => {
+                const option = possibleOptions.get(key);
 
-              if (key === 'pinned' || key === 'table' || key === 'field') {
-                return option.has(value.toLowerCase());
-              }
-              return option.has(value);
-            });
-          }
+                if (key === 'pinned' || key === 'table' || key === 'field') {
+                  return option.has(value.toLowerCase());
+                }
+                return option.has(value);
+              });
+            }
+          });
+
+          return keyValue;
         });
+      };
 
-        return keyValue;
-      });
+      const parsedResult = removeInexistentFilters();
 
       filterBy = Object.fromEntries(parsedResult);
+
       filterDispatch({ type: 'UPDATE_FILTER_BY', payload: { filterBy } });
     }
 
