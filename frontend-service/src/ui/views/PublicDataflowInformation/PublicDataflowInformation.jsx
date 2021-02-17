@@ -19,7 +19,7 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
 
   const onLoadDataflowData = async () => {
     try {
-      setDataflowData(await DataflowService.reporting(params.dataflowId));
+      setDataflowData(await DataflowService.getPublicDataflowInformation(params.dataflowId));
     } catch (error) {}
   };
 
