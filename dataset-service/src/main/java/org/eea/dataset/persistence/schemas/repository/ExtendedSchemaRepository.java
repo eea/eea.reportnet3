@@ -127,6 +127,15 @@ public interface ExtendedSchemaRepository {
   UpdateResult updateDatasetSchemaDescription(String datasetSchemaId, String description);
 
   /**
+   * Update dataset schema exportable.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param isExportable the is exportable
+   * @return the update result
+   */
+  UpdateResult updateDatasetSchemaExportable(String datasetSchemaId, boolean exportable);
+
+  /**
    * Find record schema.
    *
    * @param datasetSchemaId the dataset schema id

@@ -61,4 +61,7 @@ public class DataSetMetabaseVO implements Serializable {
   /** The status. */
   private DatasetStatusEnum status;
 
+  /** The restrict from public. */
+  private boolean restrictFromPublic;
+
 }

@@ -1138,7 +1138,7 @@ public class DataSetControllerImplTest {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean());
-    Mockito.when(file.getName()).thenReturn("fileName.csv");
+    Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     try {
       dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (ResponseStatusException e) {

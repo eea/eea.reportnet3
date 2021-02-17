@@ -84,7 +84,7 @@ public class ViewHelperTest {
     ReflectionTestUtils.setField(viewHelper, "maxRunningTasks", 2);
     processesList.add(1L);
     ReflectionTestUtils.setField(viewHelper, "processesList", processesList);
-    viewHelper.insertViewProcces(1L, true, "user", true);
+    viewHelper.insertViewProcces(1L, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseDatasetKafkaEvent(Mockito.any(),
@@ -109,7 +109,7 @@ public class ViewHelperTest {
     ReflectionTestUtils.setField(viewHelper, "maxRunningTasks", 2);
     processesList.add(0L);
     ReflectionTestUtils.setField(viewHelper, "processesList", processesList);
-    viewHelper.insertViewProcces(1L, true, "user", true);
+    viewHelper.insertViewProcces(1L, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseDatasetKafkaEvent(Mockito.any(),
@@ -150,7 +150,7 @@ public class ViewHelperTest {
     processesList.add(1L);
     processesList.add(1L);
     ReflectionTestUtils.setField(viewHelper, "processesList", processesList);
-    viewHelper.finishProcces(1L, true, "user", true);
+    viewHelper.finishProcces(1L, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseDatasetKafkaEvent(Mockito.any(),

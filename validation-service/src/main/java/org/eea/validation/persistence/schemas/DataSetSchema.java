@@ -37,6 +37,10 @@ public class DataSetSchema {
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
 
+  /** The available in public. */
+  @Field(value = "availableInPublic")
+  private boolean availableInPublic;
+
   /**
    * Hash code.
    *

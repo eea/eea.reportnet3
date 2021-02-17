@@ -519,7 +519,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   useCheckNotifications(
-    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
     onLoadDataflow
   );
 
