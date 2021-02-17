@@ -643,6 +643,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   private EventType importFromOtherSystemNotification(boolean isReporting,
       boolean isStatusCompleted, Long datasetId, String userName) {
     EventType eventType;
+    // Release lock related to Releasing Process
+    releaseLockReleasingProcess(datasetId);
     if (isStatusCompleted) {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
