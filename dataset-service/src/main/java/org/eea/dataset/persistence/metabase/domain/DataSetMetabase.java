@@ -26,6 +26,10 @@ import lombok.Data;
 /**
  * Instantiates a new data set metabase.
  */
+
+/**
+ * Instantiates a new data set metabase.
+ */
 @Data
 @Entity
 @Table(name = "DATASET")
@@ -84,6 +88,10 @@ public class DataSetMetabase {
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;
 
+  /** The public file name. */
+  @Column(name = "PUBLIC_FILE_NAME")
+  private String publicFileName;
+
   /**
    * Hash code.
    *
@@ -92,7 +100,7 @@ public class DataSetMetabase {
   @Override
   public int hashCode() {
     return Objects.hash(dataSetName, id, creationDate, visibility, urlConnection, status,
-        partitions);
+        partitions, publicFileName);
   }
 
   /**
@@ -111,6 +119,10 @@ public class DataSetMetabase {
     }
     DataSetMetabase other = (DataSetMetabase) obj;
     return Objects.equals(dataSetName, other.dataSetName) && Objects.equals(id, other.id)
-        && Objects.equals(partitions, other.partitions);
+        && Objects.equals(creationDate, other.creationDate)
+        && Objects.equals(visibility, other.visibility)
+        && Objects.equals(urlConnection, other.urlConnection)
+        && Objects.equals(status, other.status) && Objects.equals(partitions, other.partitions)
+        && Objects.equals(publicFileName, other.publicFileName);
   }
 }

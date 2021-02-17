@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +111,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   /** The Constant FILE_PATTERN_NAME_INTEGRITY. */
   private static final String FILE_PATTERN_NAME_INTEGRITY = "integritySnapshot_%s-DesignDataset_%s";
+
+  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
+  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s.xlsx";
 
   /** The partition data set metabase repository. */
   @Autowired
@@ -457,10 +461,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataSetMetabase designDataset = metabaseRepository.findById(idDataset).orElse(null);
 
     // Mark the released dataset with the status
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
     String datasetSchema = "";
     if (designDataset != null) {
       datasetSchema = designDataset.getDatasetSchema();
-      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
       designDataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
           : DatasetStatusEnum.RELEASED);
       metabaseRepository.save(designDataset);
@@ -479,6 +483,23 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
+
+    // We create file public
+    if (!designDataset.isRestricted() && dataflow.isAvailable()) {
+      try {
+        byte[] file = datasetService.exportFile(idDataset, "xlsx", null);
+
+        Date myDate = new Date();
+        String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME, provider.getLabel(),
+            designDataset.getDataSetName());
+        designDataset.setPublicFileName(nameFileUnique);
+        metabaseRepository.save(designDataset);
+
+      } catch (IOException e) {
+        LOG.info("Error creating public file : dataflowId={}, datasetId={}, providerId={}",
+            dataflow.getId(), idDataset, provider.getId());
+      }
+    }
   }
 
   /**
