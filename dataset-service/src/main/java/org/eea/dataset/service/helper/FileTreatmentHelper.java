@@ -30,10 +30,10 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
-import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.exception.EEAException;
@@ -241,7 +241,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
       if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
         try (ZipInputStream zip = new ZipInputStream(input)) {
-          for (ZipEntry entry; (entry = zip.getNextEntry()) != null; ) {
+          for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
 
             String entryName = entry.getName();
             String mimeType = datasetService.getMimetype(entryName);
@@ -1142,7 +1142,7 @@ public class FileTreatmentHelper implements DisposableBean {
         .findAllIntegrationsByCriteria(criteria)) {
       if (IntegrationOperationTypeEnum.IMPORT.equals(integrationVO.getOperation())
           && mimeType.equalsIgnoreCase(
-          integrationVO.getInternalParameters().get(IntegrationParams.FILE_EXTENSION))) {
+              integrationVO.getInternalParameters().get(IntegrationParams.FILE_EXTENSION))) {
         rtn = integrationVO;
         break;
       }
