@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -94,6 +95,9 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -821,7 +825,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -966,9 +970,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException {
-    DataSetMetabase datasetMetabase =
-        dataSetMetabaseRepository.findById(datasetId)
-            .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId)
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
     String datasetSchemaId = datasetMetabase.getDatasetSchema();
     IntegrationVO integrationVO =
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
@@ -1909,6 +1912,26 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
+   * Creates the lock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @param userName the user name
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
+      String userName) throws EEAException {
+    mapCriteria.put("signature", lockSignature.getValue());
+    LockVO lockVO = lockService.findByCriteria(mapCriteria);
+    if (lockVO == null) {
+      lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
+          mapCriteria);
+    }
+  }
+
+
+  /**
    * Record desing assignation.
    *
    * @param targetDatasetId the target dataset id
@@ -1946,7 +1969,7 @@ public class DatasetServiceImpl implements DatasetService {
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-          .size() > 0) {
+              .size() > 0) {
 
         processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
             dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
@@ -2844,7 +2867,7 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-          .size() > 0) {
+              .size() > 0) {
         LOG.info(
             "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
             fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
