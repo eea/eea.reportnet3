@@ -202,7 +202,7 @@ public class DataSetControllerImpl implements DatasetController {
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace);
     } catch (EEAException e) {
       LOG_ERROR.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
-          tableSchemaId, file.getName());
+          tableSchemaId, file.getOriginalFilename());
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
     }
