@@ -2,6 +2,7 @@ package org.eea.recordstore.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -11,12 +12,15 @@ import javax.annotation.PostConstruct;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,24 +60,24 @@ public class ViewHelper implements DisposableBean {
     processesList = new ArrayList<>();
   }
 
-
   /**
    * Insert view procces.
    *
    * @param datasetId the dataset id
-   * @param isMaterialized
-   * @param user the username
+   * @param isMaterialized the is materialized
    * @param checkSQL the check SQL
    */
-  public void insertViewProcces(Long datasetId, Boolean isMaterialized, String user,
-      Boolean checkSQL) {
+  public void insertViewProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // Check the number of views per dataset in this moment queued
     switch (processesList.stream().filter(x -> datasetId.equals(x)).collect(Collectors.counting())
         .toString()) {
       case "0":
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        String credentials =
+            SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
         // no processes running, then we should queue it
         viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
-            isMaterialized, user, checkSQL));
+            isMaterialized, user, credentials, checkSQL));
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       case "1":
@@ -107,12 +111,15 @@ public class ViewHelper implements DisposableBean {
    * @param user the user
    * @param checkSQL the check SQL
    */
-  public void finishProcces(Long datasetId, Boolean isMaterialized, String user, Boolean checkSQL) {
+  public void finishProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // If we hace two dataset view generating process we have to execute it again
     if (2 == processesList.stream().filter(x -> datasetId.equals(x))
         .collect(Collectors.counting())) {
+      String user = SecurityContextHolder.getContext().getAuthentication().getName();
+      String credentials =
+          SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
       viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
-          isMaterialized, user, checkSQL));
+          isMaterialized, user, credentials, checkSQL));
     }
     // update the proesses list in every recordstore instance
     releaseDeleteViewProccesEvent(datasetId);
@@ -130,18 +137,22 @@ public class ViewHelper implements DisposableBean {
     }
   }
 
-
-
   /**
    * Initialize create update materialized query view.
    *
    * @param datasetId the dataset id
    * @param isMaterialized the is materialized
    * @param user the user
+   * @param credentials the credentials
    * @param checkSQL the check SQL
    */
   public void executeCreateUpdateMaterializedQueryView(Long datasetId, Boolean isMaterialized,
-      String user, Boolean checkSQL) {
+      String user, String credentials, Boolean checkSQL) {
+
+    SecurityContextHolder.clearContext();
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+        EeaUserDetails.create(user, new HashSet<>()), credentials, null));
+
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
     if (Boolean.TRUE.equals(checkSQL)) {
       releaseValidateManualQCEvent(datasetId, user, true);
