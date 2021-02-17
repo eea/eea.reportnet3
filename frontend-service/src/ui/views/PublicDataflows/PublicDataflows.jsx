@@ -10,6 +10,7 @@ import { routes } from 'ui/routes';
 import styles from './PublicDataflows.module.scss';
 
 import { PublicCard } from 'ui/views/_components/PublicCard';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
@@ -22,6 +23,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
   const [publicDataflows, setPublicDataflows] = useState([]);
 
   useEffect(() => {
@@ -37,32 +39,39 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   }, [themeContext.headerCollapse]);
 
   const onLoadPublicDataflows = async () => {
-    const publicData = await DataflowService.publicData();
-    setPublicDataflows(publicData);
+    try {
+      const publicData = await DataflowService.publicData();
+      setPublicDataflows(publicData);
+    } catch (error) {
+      console.error('error', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onOpenDataflow = dataflowId => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: 77 }));
 
-  console.log('publicDataflows', publicDataflows);
+  // if (isLoading) return <Spinner />;
 
   return (
     <PublicLayout>
-      <div style={contentStyles}>
-        <h3>Public dataflows:</h3>
+      <div className={styles.wrap} style={contentStyles}>
+        <h3 className={styles.title}>Public dataflows:</h3>
         <div className={styles.dataflowsList}>
-          {!isEmpty(publicDataflows) ? (
+          {!isLoading ? (
             publicDataflows.map(dataflow => (
               <PublicCard
-                key={dataflow.id}
-                title={{ text: dataflow.name, url: '' }}
-                subtitle={{ text: dataflow.description, url: '' }}
+                animation
                 card={dataflow}
                 dueDate={dataflow.deadlineDate > 0 ? dayjs(dataflow.deadlineDate * 1000).format('YYYY-MM-DD') : '-'}
+                key={dataflow.id}
                 onCardClick={onOpenDataflow}
+                subtitle={{ text: dataflow.description, url: '' }}
+                title={{ text: dataflow.name, url: '' }}
               />
             ))
           ) : (
-            <span>No public dataflows available</span>
+            <Spinner style={{ top: 0, left: 0 }} />
           )}
         </div>
       </div>

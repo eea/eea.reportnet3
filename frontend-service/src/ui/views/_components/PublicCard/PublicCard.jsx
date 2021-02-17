@@ -10,7 +10,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const PublicCard = ({ dataflowId, dueDate, frequency, onCardClick, pilotScenarioAmbition, subtitle, title }) => {
+export const PublicCard = ({ animation, dataflowId, dueDate, frequency, onCardClick, scenario, subtitle, title }) => {
   const resources = useContext(ResourcesContext);
 
   const renderRedirectText = (text, url) => (
@@ -23,7 +23,7 @@ export const PublicCard = ({ dataflowId, dueDate, frequency, onCardClick, pilotS
 
   return (
     <div
-      className={`${styles.card} ${!isNil(onCardClick) ? styles.clickable : undefined}`}
+      className={`${styles.card} ${animation ? styles.clickable : undefined}`}
       onClick={() => onCardClick(dataflowId)}>
       <div className={styles.content}>
         <div className={styles.text}>
@@ -36,7 +36,7 @@ export const PublicCard = ({ dataflowId, dueDate, frequency, onCardClick, pilotS
         </div>
         <div className={styles.pilotScenarioAmbition}>
           <p>
-            <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
+            <strong>Pilot scenario ambition: </strong> {scenario}
           </p>
         </div>
 
@@ -57,6 +57,16 @@ export const PublicCard = ({ dataflowId, dueDate, frequency, onCardClick, pilotS
   );
 };
 
-PublicCard.propTypes = { onCardClick: PropTypes.func, subtitle: PropTypes.object, title: PropTypes.object };
+PublicCard.propTypes = {
+  animation: PropTypes.bool,
+  onCardClick: PropTypes.func,
+  subtitle: PropTypes.object,
+  title: PropTypes.object
+};
 
-PublicCard.defaultProps = { onCardClick: null, subtitle: { text: '', url: '' }, title: { text: '', url: '' } };
+PublicCard.defaultProps = {
+  animation: false,
+  onCardClick: () => {},
+  subtitle: { text: '', url: '' },
+  title: { text: '', url: '' }
+};

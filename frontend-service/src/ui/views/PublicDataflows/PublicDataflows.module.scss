@@ -1,9 +1,17 @@
-.dataflowsList {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-  @media (max-width: 1349px) {
-    justify-content: space-between;
+.wrap {
+  // display: flex;
+  .title {
+  }
+
+  .dataflowsList {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    margin: auto;
+
+    @media (max-width: 1349px) {
+      justify-content: space-between;
+    }
   }
 }
