@@ -130,6 +130,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private static final String GET_RESOURCE_SET =
       "/auth/realms/{realm}/authz/protection/resource_set";
+  ///auth/admin/realms/{realm}/clients/{clientId}/authz/resource-server/resource --> TO BE USED Instead protection/resource_set
 
   /**
    * The Constant GET_RESOURCE_INFO: {@value}.
@@ -281,10 +282,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (clientInfo != null) {
       this.internalClientId = clientInfo.getId();
     }
-    List<ResourceInfo> resources = this.getResourceInfo(adminToken);
+    //List<ResourceInfo> resources = this.getResourceInfo(adminToken);
     resourceTypes = new HashMap<>();
-    resources.stream()
-        .forEach(resource -> resourceTypes.put(resource.getName(), resource.getType()));
+    /*resources.stream()
+        .forEach(resource -> resourceTypes.put(resource.getName(), resource.getType()));*/
   }
 
   /**
