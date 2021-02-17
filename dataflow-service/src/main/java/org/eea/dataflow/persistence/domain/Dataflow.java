@@ -28,8 +28,26 @@ import lombok.ToString;
  * The type Dataflow.
  */
 @Entity
+
+/**
+ * Gets the integrations.
+ *
+ * @return the integrations
+ */
 @Getter
+
+/**
+ * Sets the integrations.
+ *
+ * @param integrations the new integrations
+ */
 @Setter
+
+/**
+ * To string.
+ *
+ * @return the java.lang. string
+ */
 @ToString
 @Table(name = "DATAFLOW")
 public class Dataflow {
@@ -74,9 +92,9 @@ public class Dataflow {
   @Column(name = "RELEASABLE")
   private boolean releasable;
 
-  /** The available. */
-  @Column(name = "AVAILABLE")
-  private boolean available;
+  /** The show public info. */
+  @Column(name = "SHOW_PUBLIC_INFO")
+  private boolean showPublicInfo;
 
   /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)

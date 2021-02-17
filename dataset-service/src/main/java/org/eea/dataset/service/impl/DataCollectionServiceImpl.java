@@ -306,7 +306,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
 
     DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-    dataFlowVO.setAvailable(showPublicInfo);
+    dataFlowVO.setShowPublicInfo(showPublicInfo);
     dataflowControllerZuul.updateDataFlow(dataFlowVO);
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);

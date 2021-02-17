@@ -49,8 +49,8 @@ public class DataSetSchema {
   private List<TableSchema> tableSchemas;
 
   /** The exportable. */
-  @Field(value = "exportable")
-  private boolean exportable;
+  @Field(value = "availableInPublic")
+  private boolean availableInPublic;
 
   /** The web form. */
   @Field(value = "webform")
