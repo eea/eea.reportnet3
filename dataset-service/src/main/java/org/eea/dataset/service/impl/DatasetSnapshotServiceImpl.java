@@ -486,7 +486,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
 
     // We create file public
-    if (!designDataset.isRestricted() && dataflow.isAvailable()) {
+    if (!designDataset.isRestrictFromPublic() && dataflow.isShowPublicInfo()) {
       try {
         byte[] file = datasetService.exportFile(idDataset, "xlsx", null);
 
