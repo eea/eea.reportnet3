@@ -13,6 +13,7 @@ export class Dataset {
     isValid = false,
     levelErrorTypes,
     name,
+    releaseDate,
     tables,
     tableStatisticPercentages,
     tableStatisticValues,
@@ -34,6 +35,7 @@ export class Dataset {
     this.isValid = isValid;
     this.levelErrorTypes = levelErrorTypes;
     this.name = name;
+    this.releaseDate = releaseDate;
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;
