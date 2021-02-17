@@ -140,6 +140,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refresh: false,
     replaceData: false,
     schemaTables: [],
+    showPublicInfo: false,
     tabs: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
@@ -279,9 +280,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const callSetMetaData = async () => {
     const metaData = await getMetadata({ datasetId, dataflowId });
+    console.log({ metaData });
     designerDispatch({
       type: 'GET_METADATA',
-      payload: { metaData, dataflowName: metaData.dataflow.name, schemaName: metaData.dataset.name }
+      payload: {
+        metaData,
+        dataflowName: metaData.dataflow.name,
+        schemaName: metaData.dataset.name,
+        showPublicInfo: metaData.dataflow.showPublicInfo
+      }
     });
   };
 
@@ -1124,32 +1131,34 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
 
             <div className={styles.datasetConfigurationButtons}>
-              <div>
-                <Checkbox
-                  id={`available_in_public_view_checkbox`}
-                  inputId={`available_in_public_view_checkbox`}
-                  isChecked={designerState.availablePublicView}
-                  onChange={e => onChangeAvailableInPublicView(e.checked)}
-                  role="checkbox"
-                />
-                <label
-                  onClick={() => {
-                    designerDispatch({
-                      type: 'SET_AVAILABLE_PUBLIC_VIEW',
-                      payload: !designerState.availablePublicView
-                    });
-                    onChangeAvailableInPublicView(!designerState.availablePublicView);
-                  }}
-                  style={{
-                    cursor: 'pointer',
-                    fontSize: '11pt',
-                    fontWeight: 'bold',
-                    marginLeft: '6px',
-                    marginRight: '6px'
-                  }}>
-                  {resources.messages['availableInPublicView']}
-                </label>
-              </div>
+              {designerState.showPublicInfo && (
+                <div>
+                  <Checkbox
+                    id={`available_in_public_view_checkbox`}
+                    inputId={`available_in_public_view_checkbox`}
+                    isChecked={designerState.availablePublicView}
+                    onChange={e => onChangeAvailableInPublicView(e.checked)}
+                    role="checkbox"
+                  />
+                  <label
+                    onClick={() => {
+                      designerDispatch({
+                        type: 'SET_AVAILABLE_PUBLIC_VIEW',
+                        payload: !designerState.availablePublicView
+                      });
+                      onChangeAvailableInPublicView(!designerState.availablePublicView);
+                    }}
+                    style={{
+                      cursor: 'pointer',
+                      fontSize: '11pt',
+                      fontWeight: 'bold',
+                      marginLeft: '6px',
+                      marginRight: '6px'
+                    }}>
+                    {resources.messages['availableInPublicView']}
+                  </label>
+                </div>
+              )}
               <Button
                 className={`p-button-secondary ${
                   !designerState.isDataflowOpen ? 'p-button-animated-blink' : null

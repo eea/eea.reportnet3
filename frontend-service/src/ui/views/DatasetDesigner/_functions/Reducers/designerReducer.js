@@ -40,7 +40,8 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataflowName: payload.dataflowName,
         datasetSchemaName: payload.schemaName,
-        metaData: payload.metaData
+        metaData: payload.metaData,
+        showPublicInfo: payload.showPublicInfo
       };
 
     case 'GET_UNIQUES':
