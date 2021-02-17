@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
+import { config } from 'conf';
+
 import styles from './ExpressionSelector.module.scss';
 
 import { Dropdown } from 'primereact/dropdown';
@@ -51,6 +53,17 @@ export const ExpressionSelector = ({
 
   const getOptions = () => {
     if (validationContext.level === 'field') {
+      const {
+        validations: {
+          bannedTypes: { nonSql }
+        }
+      } = config;
+      const {
+        candidateRule: { fieldType }
+      } = creationFormState;
+      if (nonSql.includes(fieldType?.toLowerCase())) {
+        return [{ label: resources.messages['sqlSentence'], value: 'sqlSentence' }];
+      }
       return [
         { label: resources.messages['fieldComparisonLabel'], value: 'fieldTab' },
         { label: resources.messages['sqlSentence'], value: 'sqlSentence' }

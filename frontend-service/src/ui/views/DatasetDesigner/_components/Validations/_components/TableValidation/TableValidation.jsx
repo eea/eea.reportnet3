@@ -325,25 +325,30 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
         table => table.tableSchemaId === originTableSchemaId
       );
 
-      const filteredOriginFields =
-        rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
-          ? filteredOriginTable[0].records[0].fields.map(field => {
-              return { code: field.fieldId, label: field.name };
-            })
-          : getDatasetSchemaTableFields(rule.relations.table, tabs);
+      let filteredOriginFields;
+      if (rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema) {
+        filteredOriginFields = filteredOriginTable[0].records[0].fields.map(field => {
+          return { code: field.fieldId, label: field.name };
+        });
+      } else {
+        const { tableNonSqlFields } = getDatasetSchemaTableFields(rule.relations.table, tabs);
+        filteredOriginFields = tableNonSqlFields;
+      }
 
       inmRuleToEdit.relations.tableFields = filteredOriginFields;
 
       const filteredReferencedTable = filteredReferencedDatasetSchema[0].tables.filter(
         table => table.tableSchemaId === referencedTableSchemaId
       );
-
-      const filteredReferencedFields =
-        rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema
-          ? filteredReferencedTable[0].records[0].fields.map(field => {
-              return { code: field.fieldId, label: field.name };
-            })
-          : getDatasetSchemaTableFields(rule.relations.referencedTable, tabs);
+      let filteredReferencedFields;
+      if (rule.relations.referencedDatasetSchema.code !== rule.relations.originDatasetSchema) {
+        filteredReferencedFields = filteredReferencedTable[0].records[0].fields.map(field => {
+          return { code: field.fieldId, label: field.name };
+        });
+      } else {
+        const { tableNonSqlFields } = getDatasetSchemaTableFields(rule.relations.referencedTable, tabs);
+        filteredReferencedFields = tableNonSqlFields;
+      }
 
       inmRuleToEdit.relations.referencedFields = filteredReferencedFields;
 
@@ -494,18 +499,24 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
   };
 
   const onReferencedTableChange = referencedTable => {
+    let referencedFields;
+    if (
+      creationFormState.candidateRule.relations.referencedDatasetSchema.code !==
+      creationFormState.candidateRule.relations.originDatasetSchema
+    ) {
+      referencedFields = getDatasetSchemaTableFieldsBySchema(
+        referencedTable,
+        datasetSchemas,
+        creationFormState.candidateRule.relations.referencedDatasetSchema.code
+      );
+    } else {
+      const { tableNonSqlFields } = getDatasetSchemaTableFields(referencedTable, tabs);
+      referencedFields = tableNonSqlFields;
+    }
     creationFormDispatch({
       type: 'SET_REFERENCED_FIELDS',
       payload: {
-        referencedFields:
-          creationFormState.candidateRule.relations.referencedDatasetSchema.code !==
-          creationFormState.candidateRule.relations.originDatasetSchema
-            ? getDatasetSchemaTableFieldsBySchema(
-                referencedTable,
-                datasetSchemas,
-                creationFormState.candidateRule.relations.referencedDatasetSchema.code
-              )
-            : getDatasetSchemaTableFields(referencedTable, tabs),
+        referencedFields,
         referencedTable
       }
     });

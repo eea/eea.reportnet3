@@ -8,6 +8,7 @@ import styles from './MainLayout.module.css';
 
 import { EuFooter } from './_components/EuFooter';
 import { Footer } from './_components';
+import { GlobalNotifications } from './_components/GlobalNotifications';
 import { Header } from './_components/Header';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
@@ -180,6 +181,7 @@ const MainLayout = ({ children, isPublic = false }) => {
 
       <Footer leftMargin={margin} />
       <EuFooter leftMargin={margin} />
+      <GlobalNotifications />
     </div>
   );
 };
