@@ -19,12 +19,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Document(collection = "DataSetSchema")
 public class DataSetSchema {
@@ -48,9 +42,9 @@ public class DataSetSchema {
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
 
-  /** The exportable. */
-  @Field(value = "exportable")
-  private boolean exportable;
+  /** The available in public. */
+  @Field(value = "availableInPublic")
+  private boolean availableInPublic;
 
   /** The web form. */
   @Field(value = "webform")
