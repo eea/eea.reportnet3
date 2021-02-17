@@ -70,7 +70,7 @@ public class DocumentControllerImpl implements DocumentController {
    * @param isPublic the is public
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @HystrixCommand
   @PostMapping(value = "/upload/{dataflowId}")
   public void uploadDocument(@RequestPart("file") final MultipartFile file,

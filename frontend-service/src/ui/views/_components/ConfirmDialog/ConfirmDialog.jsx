@@ -92,7 +92,9 @@ const ConfirmDialog = forwardRef((props, _) => {
           {footerAddon}
           <Button
             className={`${
-              !isUndefined(classNameConfirm) ? classNameConfirm : 'p-button-primary p-button-animated-blink'
+              !isUndefined(classNameConfirm)
+                ? classNameConfirm
+                : `p-button-primary ${!disabledConfirm ? 'p-button-animated-blink' : ''}`
             } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
             disabled={disabledConfirm}
             icon={iconConfirm ? iconConfirm : 'check'}

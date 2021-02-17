@@ -89,6 +89,9 @@ public class DataFlowVO implements Serializable {
   /** The reporting status. */
   private DatasetStatusEnum reportingStatus;
 
+  /** The releasable. */
+  private boolean releasable;
+
   /**
    * Equals.
    *
