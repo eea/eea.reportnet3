@@ -407,10 +407,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
-  const onChangeAvailableInPublicView = async e => {
+  const onChangeAvailableInPublicView = async checked => {
     try {
-      designerDispatch({ type: 'SET_AVAILABLE_PUBLIC_VIEW', payload: e.checked });
-      await DatasetService.updateDatasetSchemaDesign(datasetId, { availableInPublic: e.checked });
+      designerDispatch({ type: 'SET_AVAILABLE_PUBLIC_VIEW', payload: checked });
+      await DatasetService.updateDatasetSchemaDesign(datasetId, { availableInPublic: checked });
     } catch (error) {
       console.error('Error during datasetSchema Available in public view update: ', error);
     }
@@ -1085,21 +1085,34 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
               value={designerState.datasetDescription || ''}
             />
+
             <div className={styles.datasetConfigurationButtons}>
-              <Checkbox
-                id={`available_in_public_view_checkbox`}
-                inputId={`available_in_public_view_checkbox`}
-                isChecked={designerState.availablePublicView}
-                onChange={onChangeAvailableInPublicView}
-                role="checkbox"
-              />
-              <label
-                onClick={() =>
-                  designerDispatch({ type: 'SET_AVAILABLE_PUBLIC_VIEW', payload: !designerState.availablePublicView })
-                }
-                style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
-                {resources.messages['availableInPublicView']}
-              </label>
+              <div>
+                <Checkbox
+                  id={`available_in_public_view_checkbox`}
+                  inputId={`available_in_public_view_checkbox`}
+                  isChecked={designerState.availablePublicView}
+                  onChange={e => onChangeAvailableInPublicView(e.checked)}
+                  role="checkbox"
+                />
+                <label
+                  onClick={() => {
+                    designerDispatch({
+                      type: 'SET_AVAILABLE_PUBLIC_VIEW',
+                      payload: !designerState.availablePublicView
+                    });
+                    onChangeAvailableInPublicView(!designerState.availablePublicView);
+                  }}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '11pt',
+                    fontWeight: 'bold',
+                    marginLeft: '6px',
+                    marginRight: '6px'
+                  }}>
+                  {resources.messages['availableInPublicView']}
+                </label>
+              </div>
               <Button
                 className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
                 icon={'table'}
