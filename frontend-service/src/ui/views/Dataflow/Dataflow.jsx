@@ -97,6 +97,7 @@ const Dataflow = withRouter(({ history, match }) => {
     name: '',
     obligations: {},
     restrictFromPublic: false,
+    showPublicInfo: true,
     status: '',
     updatedDatasetSchema: undefined,
     userRoles: []
@@ -448,7 +449,8 @@ const Dataflow = withRouter(({ history, match }) => {
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
-          status: dataflow.status
+          status: dataflow.status,
+          showPublicInfo: dataflow.showPublicInfo
         }
       });
 
