@@ -76,8 +76,13 @@ public class ViewHelper implements DisposableBean {
         String credentials =
             SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
         // no processes running, then we should queue it
-        viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
-            isMaterialized, user, credentials, checkSQL));
+        viewExecutorService.execute(() -> {
+          SecurityContextHolder.clearContext();
+          SecurityContextHolder.getContext().setAuthentication(
+              new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+                  credentials, null));
+          executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL);
+        });
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       case "1":
@@ -118,8 +123,13 @@ public class ViewHelper implements DisposableBean {
       String user = SecurityContextHolder.getContext().getAuthentication().getName();
       String credentials =
           SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
-      viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
-          isMaterialized, user, credentials, checkSQL));
+      viewExecutorService.execute(() -> {
+        SecurityContextHolder.clearContext();
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+                credentials, null));
+        executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL);
+      });
     }
     // update the proesses list in every recordstore instance
     releaseDeleteViewProccesEvent(datasetId);
@@ -142,22 +152,15 @@ public class ViewHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param isMaterialized the is materialized
-   * @param user the user
-   * @param credentials the credentials
    * @param checkSQL the check SQL
    */
   public void executeCreateUpdateMaterializedQueryView(Long datasetId, Boolean isMaterialized,
-      String user, String credentials, Boolean checkSQL) {
-
-    SecurityContextHolder.clearContext();
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-        EeaUserDetails.create(user, new HashSet<>()), credentials, null));
-
+      Boolean checkSQL) {
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
     if (Boolean.TRUE.equals(checkSQL)) {
-      releaseValidateManualQCEvent(datasetId, user, true);
+      releaseValidateManualQCEvent(datasetId, true);
     }
-    releaseFinishViewProcessEvent(datasetId, isMaterialized, user, checkSQL);
+    releaseFinishViewProcessEvent(datasetId, isMaterialized, checkSQL);
   }
 
 
@@ -175,36 +178,34 @@ public class ViewHelper implements DisposableBean {
    * Release validate manual QC event.
    *
    * @param datasetId the dataset id
-   * @param user the user
    * @param checkNoSQL the check no SQL
    */
-  private void releaseValidateManualQCEvent(Long datasetId, String user, boolean checkNoSQL) {
+  private void releaseValidateManualQCEvent(Long datasetId, boolean checkNoSQL) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
     result.put("checkNoSQL", checkNoSQL);
-    result.put(LiteralConstants.USER, user);
+    result.put(LiteralConstants.USER,
+        SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATE_MANUAL_QC_COMMAND, result);
   }
-
 
   /**
    * Release finish view process event.
    *
    * @param datasetId the dataset id
    * @param isMaterialized the is materialized
-   * @param user the user
    * @param checkNoSQL the check no SQL
    */
-  private void releaseFinishViewProcessEvent(Long datasetId, Boolean isMaterialized, String user,
+  private void releaseFinishViewProcessEvent(Long datasetId, Boolean isMaterialized,
       boolean checkNoSQL) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
     result.put("isMaterialized", isMaterialized);
     result.put("checkNoSQL", checkNoSQL);
-    result.put(LiteralConstants.USER, user);
+    result.put(LiteralConstants.USER,
+        SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.FINISH_VIEW_PROCCES_EVENT, result);
   }
-
 
   /**
    * Destroy.
