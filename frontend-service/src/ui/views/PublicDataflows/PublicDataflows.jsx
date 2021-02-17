@@ -49,7 +49,8 @@ export const PublicDataflows = withRouter(({ history, match }) => {
     }
   };
 
-  const onOpenDataflow = dataflowId => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: 77 }));
+  const onOpenDataflow = dataflowId =>
+    history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: 77 }, true));
 
   // if (isLoading) return <Spinner />;
 
