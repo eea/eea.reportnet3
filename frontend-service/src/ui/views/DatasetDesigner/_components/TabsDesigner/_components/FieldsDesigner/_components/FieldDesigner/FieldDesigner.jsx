@@ -54,6 +54,7 @@ export const FieldDesigner = ({
   index,
   initialFieldIndexDragged,
   isCodelistOrLink,
+  isDataflowOpen,
   onCodelistAndLinkShow,
   onFieldDelete,
   onFieldDragAndDrop,
@@ -822,7 +823,8 @@ export const FieldDesigner = ({
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
               fieldDesignerState.fieldTypeValue.fieldType.toUpperCase()
             )) ||
-          (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue))
+          (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)) ||
+          isDataflowOpen
         }
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
@@ -842,7 +844,7 @@ export const FieldDesigner = ({
         className={`${styles.checkRequired} datasetSchema-required-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={Boolean(fieldDesignerState.fieldPKValue)}
+        disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
         label="Default"
@@ -859,6 +861,7 @@ export const FieldDesigner = ({
         className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
+        disabled={isDataflowOpen}
         id={`${fieldId}_check_readOnly`}
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
@@ -879,6 +882,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
+        disabled={isDataflowOpen}
         label={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join(', ')}`
@@ -902,6 +906,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
+        disabled={isDataflowOpen}
         label={
           !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
             ? `${fieldDesignerState.fieldLinkValue.name}`
@@ -922,6 +927,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
+        disabled={isDataflowOpen}
         label={`${resources.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
@@ -957,7 +963,7 @@ export const FieldDesigner = ({
         draggable={true}
         className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        }`}
+        } ${isDataflowOpen ? styles.linkDisabled : ''}`}
         href="#"
         onClick={e => {
           e.preventDefault();
@@ -979,6 +985,7 @@ export const FieldDesigner = ({
         className={`${styles.inputField} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
+        disabled={isDataflowOpen}
         id={fieldName}
         maxLength={60}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
@@ -1003,6 +1010,7 @@ export const FieldDesigner = ({
       <InputTextarea
         autoFocus={false}
         collapsedHeight={33}
+        disabled={isDataflowOpen}
         expandableOnClick={true}
         className={`${styles.inputFieldDescription} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -1032,6 +1040,7 @@ export const FieldDesigner = ({
         className={`${styles.dropdownFieldType} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
+        disabled={isDataflowOpen}
         inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
         name={resources.messages['newFieldTypePlaceHolder']}
@@ -1058,7 +1067,7 @@ export const FieldDesigner = ({
   return (
     <React.Fragment>
       <div
-        draggable={!addField}
+        draggable={isDataflowOpen ? false : !addField}
         className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
         onDragEnd={e => {
           onFieldDragEnd(e);
@@ -1089,7 +1098,9 @@ export const FieldDesigner = ({
             }`}
             disabled={
               !isUndefined(fieldDesignerState.fieldTypeValue) &&
-              config.validations.bannedFieldNames.includes(fieldDesignerState.fieldTypeValue.value.toLowerCase())
+              config.validations.bannedFieldsNames.sqlFields.includes(
+                fieldDesignerState.fieldTypeValue.value.toLowerCase()
+              )
             }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}

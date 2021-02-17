@@ -3,20 +3,21 @@ import React, { useContext } from 'react';
 import { Button } from 'ui/views/_components/Button';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const Footer = ({ hasWritePermissions, onAddClick, onPasteClick }) => {
+const Footer = ({ hasWritePermissions, isDataflowOpen, onAddClick, onPasteClick }) => {
   const resources = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary ${isDataflowOpen ? null : 'p-button-animated-blink'}`}
         icon="add"
-        disabled={!hasWritePermissions}
+        disabled={!hasWritePermissions || isDataflowOpen}
         label={resources.messages['addRecord']}
         onClick={() => onAddClick()}
         style={{ float: 'left' }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary ${isDataflowOpen ? null : 'p-button-animated-blink'}`}
+        disabled={isDataflowOpen}
         icon="clipboard"
         label={resources.messages['pasteRecords']}
         onClick={async () => {

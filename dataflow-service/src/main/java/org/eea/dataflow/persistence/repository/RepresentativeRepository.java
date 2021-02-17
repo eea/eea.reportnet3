@@ -39,4 +39,8 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
   @Query("SELECT r from Representative r WHERE (r.userMail = :email AND r.dataflow.id= :dataflowId)")
   List<Representative> findByDataflowIdAndEmail(@Param("dataflowId") Long dataflowId,
       @Param("email") String email);
+
+
+  boolean existsByDataflow_IdAndDataProvider_IdAndUserMail(Long dataflowId, Long dataProviderId,
+      String userMail);
 }
