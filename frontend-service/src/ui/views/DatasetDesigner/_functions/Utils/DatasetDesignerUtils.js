@@ -1,6 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import cloneDeep from 'lodash/cloneDeep';
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
@@ -47,7 +48,7 @@ const getIndexById = (datasetSchemaId, datasetSchemasArray) => {
 };
 
 const getTabs = ({ datasetSchema, datasetStatistics, editable }) => {
-  const inmDatasetSchema = { ...datasetSchema };
+  const inmDatasetSchema = cloneDeep(datasetSchema);
   inmDatasetSchema.tables.forEach((table, idx) => {
     table.addTab = false;
     table.description = table.description || table.tableSchemaDescription;
