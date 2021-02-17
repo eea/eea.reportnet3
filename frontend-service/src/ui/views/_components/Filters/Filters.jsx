@@ -243,15 +243,17 @@ export const Filters = ({
     });
   };
 
-  const onFilterData = (filter, value) => {
+  const onFilterData = (filter, value, actualFilterBy) => {
     const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
     const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
 
-    console.log('filter, value', filter, value);
-
     const filteredData = ApplyFilterUtils.onApplyFilters({
+      actualFilterBy,
+      checkboxOptions,
+      checkedKeys,
+      data,
       dateOptions,
       dropdownOptions,
       filter,
@@ -259,10 +261,7 @@ export const Filters = ({
       searchedKeys,
       selectedKeys,
       selectOptions,
-      checkedKeys,
-      checkboxOptions,
       state: filterState,
-      data: data,
       value
     });
 
@@ -354,7 +353,7 @@ export const Filters = ({
       const value = filterBy[filter];
 
       if (!isEmpty(value)) {
-        onFilterData(filter, filterBy[filter]);
+        onFilterData(filter, filterBy[filter], filterBy);
       }
     }
   };
