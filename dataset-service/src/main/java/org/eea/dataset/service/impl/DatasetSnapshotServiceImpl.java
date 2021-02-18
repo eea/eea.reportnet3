@@ -112,9 +112,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The Constant FILE_PATTERN_NAME_INTEGRITY. */
   private static final String FILE_PATTERN_NAME_INTEGRITY = "integritySnapshot_%s-DesignDataset_%s";
 
-  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
-  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s.xlsx";
-
   /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;

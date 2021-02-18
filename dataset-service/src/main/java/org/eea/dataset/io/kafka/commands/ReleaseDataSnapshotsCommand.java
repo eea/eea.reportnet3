@@ -9,16 +9,21 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.apache.commons.io.FileUtils;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -54,8 +59,17 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   private DatasetSnapshotService datasetSnapshotService;
 
   @Autowired
+  private DesignDatasetService designDatasetService;
+
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
+
+  /** The dataflow controller zuul. */
+  @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
   /**
@@ -63,6 +77,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
    */
   private static final Logger LOG = LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
 
+
+  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
+  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s.xlsx";
 
   /**
    * Gets the event type.
@@ -109,45 +126,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         e.printStackTrace();
       }
 
-      // try {
-
-      // List<DesignDatasetVO> desingDataset =
-      // designDatasetService.getDesignDataSetIdByDataflowId(dataflow.getId());
-      // // we find the name of the dataset to asing it for the notiFicaion
-      // String datasetName = "";
-      // for (DesignDatasetVO designDatasetVO : desingDataset) {
-      // if (designDatasetVO.getDatasetSchema()
-      // .equalsIgnoreCase(designDataset.getDatasetSchema())) {
-      // datasetName = designDatasetVO.getDataSetName();
-      // }
-      // }
-      //
-      //
-      // byte[] file = datasetService.exportFile(idDataset, "xlsx", null);
-      // String nameFileUnique =
-      // String.format(FILE_PUBLIC_DATASET_PATTERN_NAME, provider.getLabel(), datasetName);
-      // Path path = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflow.getId());
-      // File directory = new File(path.toString());
-      // if (!directory.exists()) {
-      // Files.createDirectories(path);
-      // }
-      // String newFile = path.toString() + "\\" + nameFileUnique;
-      // // FileWriter fileWriter = new FileWriter(newFile, false);
-      // // BufferedWriter bw = new BufferedWriter(fileWriter);
-      // // bw.write(file);
-      // // bw.close();
-      // // Files.write(new File(newFile), file);
-      // FileUtils.writeByteArrayToFile(new File(newFile), file);
-      // designDataset.setPublicFileName(nameFileUnique);
-      // metabaseRepository.save(designDataset);
-      //
-      // } catch (IOException e) {
-      // LOG.info("Error creating public file : dataflowId={}, datasetId={}, providerId={}",
-      // dataflow.getId(), idDataset, provider.getId());
-      // }
-
-
-
       // At this point the process of releasing all the datasets has been finished so we unlock
       // everything involved
       datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
@@ -164,6 +142,13 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   }
 
 
+  /**
+   * Creates the all files.
+   *
+   * @param dataflowVO the dataflow VO
+   * @param dataset the dataset
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   private void createAllFiles(DataFlowVO dataflowVO, DataSetMetabase dataset) throws IOException {
 
     if (dataflowVO.isShowPublicInfo()) {
@@ -175,9 +160,25 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           .orElse(null);
 
       if (null != representative && !representative.getReceiptDownloaded()) {
+
+        DataProviderVO dataProvider =
+            representativeControllerZuul.findDataProviderById(representative.getDataProviderId());
+
         List<DataSetMetabase> datasetMetabaseList =
             dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowVO.getId(),
                 representative.getDataProviderId());
+
+
+        List<DesignDatasetVO> desingDataset =
+            designDatasetService.getDesignDataSetIdByDataflowId(dataflowVO.getId());
+
+        // we find the name of the dataset to asing it for the notiFicaion
+        String datasetDesingName = "";
+        for (DesignDatasetVO designDatasetVO : desingDataset) {
+          if (designDatasetVO.getDatasetSchema().equalsIgnoreCase(dataset.getDatasetSchema())) {
+            datasetDesingName = designDatasetVO.getDataSetName();
+          }
+        }
 
         Path path = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflowVO.getId());
         File directoryDataflow = new File(path.toString());
@@ -185,14 +186,31 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           Files.createDirectories(path);
         }
         Path pathDataProvider = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflowVO.getId()
-            + "\\dataProvider-" + representative.getDataProviderId());
-        File directoryProvider = new File(pathDataProvider.toString());
-        cleanupDirectory(directoryProvider);
+            + "\\dataProvider-" + dataProvider.getLabel());
+        if (directoryDataflow.exists()) {
+          FileUtils.deleteDirectory(new File(pathDataProvider.toString()));
+        }
         Files.createDirectories(pathDataProvider);
 
 
         for (DataSetMetabase datasetToFile : datasetMetabaseList) {
-          if (!datasetToFile.isRestrictFromPublic()) {
+          if (!datasetToFile.isAvailableInPublic()) {
+
+            try {
+              byte[] file = datasetService.exportFile(datasetToFile.getId(), "xlsx", null);
+              String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
+                  dataProvider.getLabel(), datasetDesingName);
+
+              String newFile = pathDataProvider.toString() + "\\" + nameFileUnique;
+
+              FileUtils.writeByteArrayToFile(new File(newFile), file);
+              dataset.setPublicFileName(nameFileUnique);
+              dataSetMetabaseRepository.save(dataset);
+
+            } catch (EEAException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
 
           }
         }
@@ -202,6 +220,11 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   }
 
 
+  /**
+   * Cleanup directory.
+   *
+   * @param dir the dir
+   */
   private void cleanupDirectory(File dir) {
     for (File file : dir.listFiles()) {
       if (file.isDirectory())
