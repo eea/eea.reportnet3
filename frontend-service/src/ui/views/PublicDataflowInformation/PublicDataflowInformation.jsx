@@ -91,7 +91,6 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
           <div className={styles.datasets}>
             <DataTable
               autoLayout={true}
-              // onRowClick={event => getManageUniqueConstraint(event.data)}
               paginator={true}
               paginatorRight={
                 <span>
