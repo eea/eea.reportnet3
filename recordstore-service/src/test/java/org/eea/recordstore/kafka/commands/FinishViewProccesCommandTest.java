@@ -56,7 +56,7 @@ public class FinishViewProccesCommandTest {
   public void testExecute() throws Exception {
     finishViewProccesCommand.execute(eeaEventVO);
     Mockito.verify(viewHelper, Mockito.times(1)).finishProcces(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
 }
