@@ -77,7 +77,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
-    availablePublicView: false,
+    availableInPublic: true,
     areLoadedSchemas: false,
     areUpdatingTables: false,
     dashDialogVisible: false,
@@ -140,7 +140,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     refresh: false,
     replaceData: false,
     schemaTables: [],
-    showPublicInfo: false,
     tabs: [],
     uniqueConstraintsList: [],
     validateDialogVisible: false,
@@ -286,8 +285,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
-        schemaName: metaData.dataset.name,
-        showPublicInfo: metaData.dataflow.showPublicInfo
+        schemaName: metaData.dataset.name
       }
     });
   };
@@ -621,6 +619,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
+        console.log({ dataset });
         const tableSchemaList = [];
         dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
 
@@ -633,6 +632,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
+            availableInPublic: dataset.availableInPublic,
             datasetSchema: dataset,
             datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription,
@@ -1131,34 +1131,32 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             />
 
             <div className={styles.datasetConfigurationButtons}>
-              {designerState.showPublicInfo && (
-                <div>
-                  <Checkbox
-                    id={`available_in_public_view_checkbox`}
-                    inputId={`available_in_public_view_checkbox`}
-                    isChecked={designerState.availablePublicView}
-                    onChange={e => onChangeAvailableInPublicView(e.checked)}
-                    role="checkbox"
-                  />
-                  <label
-                    onClick={() => {
-                      designerDispatch({
-                        type: 'SET_AVAILABLE_PUBLIC_VIEW',
-                        payload: !designerState.availablePublicView
-                      });
-                      onChangeAvailableInPublicView(!designerState.availablePublicView);
-                    }}
-                    style={{
-                      cursor: 'pointer',
-                      fontSize: '11pt',
-                      fontWeight: 'bold',
-                      marginLeft: '6px',
-                      marginRight: '6px'
-                    }}>
-                    {resources.messages['availableInPublicView']}
-                  </label>
-                </div>
-              )}
+              <div>
+                <Checkbox
+                  id={`available_in_public_view_checkbox`}
+                  inputId={`available_in_public_view_checkbox`}
+                  isChecked={designerState.availableInPublic}
+                  onChange={e => onChangeAvailableInPublicView(e.checked)}
+                  role="checkbox"
+                />
+                <label
+                  onClick={() => {
+                    designerDispatch({
+                      type: 'SET_AVAILABLE_PUBLIC_VIEW',
+                      payload: !designerState.availableInPublic
+                    });
+                    onChangeAvailableInPublicView(!designerState.availableInPublic);
+                  }}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '11pt',
+                    fontWeight: 'bold',
+                    marginLeft: '6px',
+                    marginRight: '6px'
+                  }}>
+                  {resources.messages['availableInPublicView']}
+                </label>
+              </div>
               <Button
                 className={`p-button-secondary ${
                   !designerState.isDataflowOpen ? 'p-button-animated-blink' : null

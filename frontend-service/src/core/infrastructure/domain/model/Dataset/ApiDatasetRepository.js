@@ -428,6 +428,7 @@ const schemaById = async datasetId => {
   const rulesDTO = await apiValidation.getAll(datasetSchemaDTO.idDataSetSchema);
 
   const dataset = new Dataset({
+    availableInPublic: datasetSchemaDTO.availableInPublic,
     datasetSchemaDescription: datasetSchemaDTO.description,
     datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
     datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,

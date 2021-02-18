@@ -27,8 +27,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
       dataflowId,
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
-      status: dataflowMetadata.status || '',
-      showPublicInfo: dataflowMetadata.showPublicInfo || false
+      status: dataflowMetadata.status || ''
     };
   }
 
