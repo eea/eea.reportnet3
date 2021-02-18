@@ -10,7 +10,18 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const PublicCard = ({ animation, dataflowId, dueDate, frequency, onCardClick, scenario, subtitle, title }) => {
+export const PublicCard = ({
+  animation,
+  dataflowId,
+  dueDate,
+  frequency,
+  onCardClick,
+  scenario = 'dfgjdfk',
+  subtitle,
+  title,
+  obligation,
+  instrument
+}) => {
   const resources = useContext(ResourcesContext);
 
   const renderRedirectText = (text, url) => (
@@ -34,11 +45,27 @@ export const PublicCard = ({ animation, dataflowId, dueDate, frequency, onCardCl
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>
         </div>
-        <div className={styles.pilotScenarioAmbition}>
-          <p>
-            <strong>Pilot scenario ambition: </strong> {scenario}
-          </p>
-        </div>
+        {scenario && (
+          <div className={styles.pilotScenarioAmbition} onMouseDown={() => window.open('blablab.com')}>
+            <p>
+              <strong>Pilot scenario ambition: </strong> {scenario}
+            </p>
+          </div>
+        )}
+        {obligation && (
+          <div className={styles.pilotScenarioAmbition}>
+            <p>
+              <strong>Obligation: </strong> {obligation}
+            </p>
+          </div>
+        )}
+        {instrument && (
+          <div className={styles.pilotScenarioAmbition}>
+            <p>
+              <strong>instrument: </strong> {instrument}
+            </p>
+          </div>
+        )}
 
         <div className={`${styles.footer}`}>
           <span>
