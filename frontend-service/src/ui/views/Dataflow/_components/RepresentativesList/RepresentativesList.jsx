@@ -31,6 +31,8 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { Button } from 'ui/views/_components/Button/Button';
+import { InputText } from 'ui/views/_components/InputText/InputText';
 
 const RepresentativesList = ({
   dataflowId,
@@ -102,8 +104,55 @@ const RepresentativesList = ({
     }
   }, [formState.representatives]);
 
+  const onAddEmptyLeadReporter = dataProviderId => {
+    const updatedRepresentativesList = formState.representatives.map(representative => {
+      if (representative.dataProviderId === dataProviderId) {
+        representative.leadReporters.unshift({ leadReporterId: null, leadReporter: '' });
+      }
+      return representative;
+    });
+    formDispatcher({
+      type: 'ADD_NEW_LEAD_REPORTER',
+      payload: { dataProviderId, representatives: updatedRepresentativesList }
+    });
+  };
+
+  const renderLeadReporterTemplate = representative => {
+    const { dataProviderId } = representative;
+    // TODO
+    const leadReporters = representative.leadReporters || [];
+
+    console.log('leadReporters', leadReporters);
+
+    return leadReporters.map(leadReporter => {
+      if (leadReporter.id === null) {
+        return (
+          <InputText
+            // onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+            // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
+            value={leadReporter.account}
+          />
+        );
+      }
+      return (
+        <div className={styles.inputWrapper}>
+          <InputText
+            // onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+            // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
+            value={leadReporter.account}
+          />
+          <Button
+            className={`p-button-animated-blink p-button-primary-transparent ${styles.deleteButton}`}
+            icon={'trash'}
+            // onClick={() => handleDialogs('deleteAttachment', true)}
+          />
+        </div>
+      );
+    });
+  };
+
   const providerAccountInputColumnTemplate = representative => {
-    let inputData = representative.providerAccount;
+    let inputData = representative.leadReporters;
 
     let hasError = formState.representativesHaveError.includes(representative.representativeId);
 
@@ -116,7 +165,7 @@ const RepresentativesList = ({
         thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
       );
 
-      thisRepresentative.providerAccount = account;
+      thisRepresentative.leadReporters = account;
 
       let representativesHaveError;
 
@@ -202,6 +251,16 @@ const RepresentativesList = ({
             );
           })}
         </select>
+        {representative.dataProviderId && (
+          <Button
+            // className={`p-button-animated-blink p-button-primary-transparent ${styles.deleteButton}`}
+            label="Add new lead reporter"
+            style={{ display: 'flex' }}
+            icon={'plus'}
+            disabled={representative.dataProviderId === formState.providerWithEmptyInput}
+            // onClick={() => onAddEmptyLeadReporter(representative.dataProviderId)}
+          />
+        )}
       </>
     );
   };
@@ -260,10 +319,7 @@ const RepresentativesList = ({
               style={{ width: '60px' }}
             />
             <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
-            <Column
-              body={providerAccountInputColumnTemplate}
-              header={resources.messages['manageRolesDialogAccountColumn']}
-            />
+            <Column body={renderLeadReporterTemplate} header={resources.messages['manageRolesDialogAccountColumn']} />
           </DataTable>
         </div>
       ) : (
