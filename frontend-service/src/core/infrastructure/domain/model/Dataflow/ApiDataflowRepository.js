@@ -473,6 +473,8 @@ const getPublicDataflowInformation = async dataflowId => {
 
   const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO);
 
+  publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
+
   return publicDataflowData;
 };
 
