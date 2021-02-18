@@ -179,7 +179,7 @@ public class DatasetServiceImpl implements DatasetService {
    * The dataflow controller zull.
    */
   @Autowired
-  private DataFlowControllerZuul dataflowControllerZull;
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * The table repository.
@@ -459,8 +459,19 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteImportData(final Long dataSetId) {
 
+    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(getDataFlowIdById(dataSetId));
     String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(dataSetId);
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+
+    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        if (!Boolean.TRUE.equals(tableSchema.getReadOnly())
+            || !Boolean.TRUE.equals(tableSchema.get)) {
+
+        }
+      }
+    }
+
     // Delete the records from the tables of the dataset that aren't marked as read only
     for (TableSchema tableSchema : schema.getTableSchemas()) {
       if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
@@ -2088,7 +2099,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the dataFlowId from the metabase
     Long dataflowId = getDataFlowIdById(idDataset);
     // get de dataflow
-    return dataflowControllerZull.getMetabaseById(dataflowId);
+    return dataflowControllerZuul.getMetabaseById(dataflowId);
   }
 
   /**
@@ -3192,7 +3203,7 @@ public class DatasetServiceImpl implements DatasetService {
     dataset = designDatasetRepository.findById(datasetId).orElse(null);
     if (null != dataset) {
       if (TypeStatusEnum.DESIGN
-          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       }
     }
@@ -3201,7 +3212,7 @@ public class DatasetServiceImpl implements DatasetService {
     else {
       dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
       if (null != dataset && TypeStatusEnum.DRAFT
-          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
         if (null != tableSchemaId) {
           TableSchema tableSchema = schema.getTableSchemas().stream()

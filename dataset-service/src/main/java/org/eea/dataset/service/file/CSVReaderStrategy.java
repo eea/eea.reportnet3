@@ -141,6 +141,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
     TableVO tableVO = new TableVO();
     final List<TableVO> tables = new ArrayList<>();
     final DataSetVO dataset = new DataSetVO();
+    tableVO.setIdTableSchema(idTableSchema);
+    tableVO.setRecords(new ArrayList<RecordVO>());
+    tables.add(tableVO);
 
     // Get DataSetSchema
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);

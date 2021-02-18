@@ -1178,15 +1178,20 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
     List<List<RecordValue>> generalList = new ArrayList<>();
 
-    // dividing the number of records in different lists
-    int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
-    if (nLists > 1) {
-      for (int i = 0; i < (nLists - 1); i++) {
-        generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
+    if (allRecords.isEmpty()) {
+      generalList.add(new ArrayList<>());
+    } else {
+      // dividing the number of records in different lists
+      int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
+      if (nLists > 1) {
+        for (int i = 0; i < (nLists - 1); i++) {
+          generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
+        }
       }
+      generalList
+          .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
+
     }
-    generalList
-        .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
 
     return generalList;
   }
