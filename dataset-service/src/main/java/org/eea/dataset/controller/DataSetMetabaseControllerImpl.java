@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -72,6 +73,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(Long idDataflow) {
     return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
   }
+
 
   /**
    * Find data set id by dataflow id.
@@ -391,5 +393,20 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       produces = MediaType.APPLICATION_JSON_VALUE)
   public Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId) {
     return datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
+  }
+
+  /**
+   * Find reporting data set public by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/getReportingPublic/dataflow/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(
+      @PathVariable("id") Long dataflowId) {
+    return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
   }
 }

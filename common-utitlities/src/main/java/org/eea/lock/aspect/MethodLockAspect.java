@@ -19,9 +19,10 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
-import org.eea.thread.ThreadPropertiesManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -53,9 +54,9 @@ public class MethodLockAspect {
 
     try {
       Object rtn;
-      Object user = ThreadPropertiesManager.getVariable("user");
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       lockVO = lockService.createLock(new Timestamp(System.currentTimeMillis()),
-          user != null ? (String) user : null, LockType.METHOD, getLockCriteria(joinPoint));
+          auth == null ? null : auth.getName(), LockType.METHOD, getLockCriteria(joinPoint));
 
       if (lockMethod.removeWhenFinish()) {
         try {

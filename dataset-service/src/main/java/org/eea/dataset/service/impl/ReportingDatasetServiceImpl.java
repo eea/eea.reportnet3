@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
+import org.eea.dataset.mapper.ReportingDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -16,6 +17,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,10 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
+  /** The reporting dataset public mapper. */
+  @Autowired
+  private ReportingDatasetPublicMapper reportingDatasetPublicMapper;
+
 
   /**
    * The Constant LOG_ERROR.
@@ -73,6 +79,18 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     getDatasetSchemaNames(datasetsVO);
 
     return datasetsVO;
+  }
+
+
+  /**
+   * Gets the data set public by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data set public by dataflow
+   */
+  @Override
+  public List<ReportingDatasetPublicVO> getDataSetPublicByDataflow(Long dataflowId) {
+    return reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
   }
 
 

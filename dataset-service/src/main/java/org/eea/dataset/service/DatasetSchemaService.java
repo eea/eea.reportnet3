@@ -519,5 +519,5 @@ public interface DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param isExportable the is exportable
    */
-  void updateDatasetSchemaExportable(String datasetSchemaId, boolean exportable);
+  void updateDatasetSchemaExportable(String datasetSchemaId, boolean availableInPublic);
 }
