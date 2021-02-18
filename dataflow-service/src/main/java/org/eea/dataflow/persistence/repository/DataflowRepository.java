@@ -128,6 +128,19 @@ public interface DataflowRepository
   Dataflow findByIdAndShowPublicInfoTrue(Long dataflowId);
 
   /**
+   * Update public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "update dataflow set show_public_info = :showPublicInfo where id = :dataflowId")
+  void updatePublicStatus(@Param("dataflowId") Long dataflowId,
+      @Param("showPublicInfo") boolean showPublicInfo);
+
+  /**
    * The Interface IDatasetStatus.
    */
   public interface IDatasetStatus {
@@ -135,6 +148,7 @@ public interface DataflowRepository
 
     String getStatus();
   }
+
 
 
 }

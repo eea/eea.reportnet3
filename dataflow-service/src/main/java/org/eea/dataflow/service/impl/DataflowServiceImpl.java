@@ -804,4 +804,15 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
   }
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Override
+  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
+    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
+  }
 }

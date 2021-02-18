@@ -38,4 +38,7 @@ public class RepresentativeVO implements Serializable {
   /** The has datasets. */
   private Boolean hasDatasets;
 
+  /** The restrict from public. */
+  private boolean restrictFromPublic;
+
 }

@@ -74,8 +74,8 @@ public class DataSetMetabase {
   private Boolean releasing;
 
   /** The restrict from public. */
-  @Column(name = "RESTRICT_FROM_PUBLIC")
-  private boolean restrictFromPublic;
+  @Column(name = "AVAILABLE_IN_PUBLIC")
+  private boolean availableInPublic;
 
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)

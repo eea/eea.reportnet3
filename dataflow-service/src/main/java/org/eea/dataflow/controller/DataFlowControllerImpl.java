@@ -495,6 +495,19 @@ public class DataFlowControllerImpl implements DataFlowController {
 
 
   /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Override
+  @PutMapping("private/updatePublicStatus")
+  public void updateDataFlowPublicStatus(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("showPublicInfo") boolean showPublicInfo) {
+    dataflowService.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
+  }
+
+  /**
    * Checks if is user data custodian.
    *
    * @return true, if is user data custodian

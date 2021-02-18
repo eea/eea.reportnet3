@@ -180,4 +180,11 @@ public interface DataflowService {
    */
   DataflowPublicVO getPublicDataflowById(Long dataflowId) throws EEAException;
 
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo);
 }
