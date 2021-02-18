@@ -799,6 +799,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'FILE_UPLOAD_BLOCKED_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {

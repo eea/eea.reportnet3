@@ -715,15 +715,18 @@ const publicData = async () => {
         client: null,
         countries: null,
         issues: null,
-        reportFreq: null,
+        reportFreq: 'Yearly',
         reportFreqDetail: null
-      }
+      },
+      status: 'DRAFT',
+      releasable: false
     },
     {
       id: 77,
       reportingDatasets: null,
-      description: 'a',
-      name: 'PAMSS',
+      description:
+        'National climate change adaptation planning and strategies_Tue_Feb 16 2021. A very long description to see how it fits in the public carrrrdddddddddddddddddddddddddddddddddddd d sd fdf sdf sdf s',
+      name: 'National climate change adaptation planning and strategies_Tue_Feb 16 2021',
       deadlineDate: null,
       obligation: {
         obligationId: 693,
@@ -743,9 +746,11 @@ const publicData = async () => {
         client: null,
         countries: null,
         issues: null,
-        reportFreq: null,
+        reportFreq: 'Monthly',
         reportFreqDetail: null
-      }
+      },
+      status: 'DRAFT',
+      releasable: false
     },
     {
       id: 81,
@@ -771,9 +776,71 @@ const publicData = async () => {
         client: null,
         countries: null,
         issues: null,
-        reportFreq: null,
+        reportFreq: 'Monthly',
         reportFreqDetail: null
-      }
+      },
+      status: 'DRAFT',
+      releasable: true
+    },
+    {
+      id: 81,
+      reportingDatasets: null,
+      description: 'taka',
+      name: 'taka',
+      deadlineDate: 1614380000,
+      obligation: {
+        obligationId: 694,
+        oblTitle: '(C) Preliminary information on the assessment regime (Article 7)',
+        description:
+          'Article 7\r\nAssessment regime\r\n1. In accordance with the procedure referred to in Article 5 of this Decision, Member States shall make available the information set out in Part C of Annex II on the assessment regime to be applied in the following calendar year for each pollutant within individual zones and agglomerations in accordance with Article 4 of Directive 2004/107/EC and Articles 5 and 9 of Directive 2008/50/EC.',
+        validSince: 1324076400000,
+        validTo: 253402210800000,
+        comment: null,
+        nextDeadline: 1609455600000,
+        legalInstrument: {
+          sourceId: '650',
+          sourceTitle:
+            '2011/850/EU: Commission Implementing Decision of 12 December 2011 laying down rules for Directives 2004/107/EC and 2008/50/EC of the European Parliament and of the Council as regards the reciprocal exchange of information and reporting on ambient air quality',
+          sourceAlias: 'Air Quality Directive IPR'
+        },
+        client: null,
+        countries: null,
+        issues: null,
+        reportFreq: 'Monthly',
+        reportFreqDetail: null
+      },
+      status: 'DRAFT',
+      releasable: true
+    },
+    {
+      id: 81,
+      reportingDatasets: null,
+      description: 'taka',
+      name: 'taka',
+      deadlineDate: 1614380000,
+      obligation: {
+        obligationId: 694,
+        oblTitle: '(C) Preliminary information on the assessment regime (Article 7)',
+        description:
+          'Article 7\r\nAssessment regime\r\n1. In accordance with the procedure referred to in Article 5 of this Decision, Member States shall make available the information set out in Part C of Annex II on the assessment regime to be applied in the following calendar year for each pollutant within individual zones and agglomerations in accordance with Article 4 of Directive 2004/107/EC and Articles 5 and 9 of Directive 2008/50/EC.',
+        validSince: 1324076400000,
+        validTo: 253402210800000,
+        comment: null,
+        nextDeadline: 1609455600000,
+        legalInstrument: {
+          sourceId: '650',
+          sourceTitle:
+            '2011/850/EU: Commission Implementing Decision of 12 December 2011 laying down rules for Directives 2004/107/EC and 2008/50/EC of the European Parliament and of the Council as regards the reciprocal exchange of information and reporting on ambient air quality',
+          sourceAlias: 'Air Quality Directive IPR'
+        },
+        client: null,
+        countries: null,
+        issues: null,
+        reportFreq: 'Monthly',
+        reportFreqDetail: null
+      },
+      status: 'DRAFT',
+      releasable: true
     }
   ];
 
@@ -785,7 +852,9 @@ const publicData = async () => {
           publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
         // id: publicDataflow.id,
         name: publicDataflow.name,
-        obligation: parseObligationDTO(publicDataflow.obligation)
+        obligation: parseObligationDTO(publicDataflow.obligation),
+        status: publicDataflow.status,
+        isReleasable: publicDataflow.releasable
       })
   );
 
