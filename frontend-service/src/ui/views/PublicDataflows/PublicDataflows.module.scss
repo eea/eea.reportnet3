@@ -1,7 +1,5 @@
-.wrap {
-  // display: flex;
-  .title {
-  }
+.content {
+  margin-top: 6px;
 
   .dataflowsList {
     display: flex;
@@ -9,6 +7,7 @@
     flex-wrap: wrap;
     margin-bottom: 2rem;
     margin: auto;
+    padding-bottom: 4rem;
 
     @media (max-width: 1349px) {
       justify-content: space-between;

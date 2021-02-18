@@ -75,6 +75,14 @@
     .legalInstrumentAndObligation {
       font-size: 1rem;
     }
+    .link {
+      color: var(--hyperlink-color);
+      cursor: pointer;
+    }
+    .tooltip {
+      max-width: 300px;
+      word-break: break-all;
+    }
     .footer {
       display: flex;
       justify-content: space-between;

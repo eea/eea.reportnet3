@@ -1,27 +1,26 @@
 import React, { Fragment, useContext } from 'react';
 import PropTypes from 'prop-types';
 
-import isNil from 'lodash/isNil';
+import uuid from 'uuid';
 
 import styles from './PublicCard.module.scss';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ReactTooltip from 'react-tooltip';
 
 export const PublicCard = ({
   animation,
   dataflowId,
   dueDate,
-  frequency,
-  onCardClick,
-  subtitle,
-  title,
+  instrument,
   obligation,
-  instrument
+  onCardClick,
+  isReleasable,
+  subtitle,
+  title
 }) => {
-  const resources = useContext(ResourcesContext);
+  const idTooltip = uuid.v4();
 
   const renderRedirectText = (text, url) => (
     <a href={url} target="_blank" title={text}>
@@ -37,35 +36,52 @@ export const PublicCard = ({
       onClick={() => onCardClick(dataflowId)}>
       <div className={styles.content}>
         <div className={styles.text}>
-          <h3 className={styles.title} title={title.text}>
-            {renderRedirectText(title.text, title.url)}
+          <h3 className={styles.title} className={styles.link} title={title.text}>
+            {title.text}
+            <FontAwesomeIcon
+              aria-hidden={false}
+              className={`${styles.link} p-breadcrumb-home`}
+              icon={AwesomeIcons('externalLink')}
+            />
           </h3>
-          <h4 className={styles.subtitle} title={subtitle.text}>
+          <h4 className={styles.subtitle} data-tip data-for={idTooltip}>
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>
+          <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+            {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
+          </ReactTooltip>
         </div>
         {obligation && (
-          <div className={styles.legalInstrumentAndObligation} onMouseDown={() => window.open('blablab.com')}>
-            <p>
-              <strong>Obligation: </strong> {obligation}
+          <div className={styles.legalInstrumentAndObligation}>
+            <p onClick={e => e.stopPropagation()}>
+              <strong>Obligation: </strong>
+              {renderRedirectText(
+                obligation.title,
+                `https://rod.eionet.europa.eu/obligations/${obligation.obligationId}`
+              )}
             </p>
           </div>
         )}
         {instrument && (
           <div className={styles.legalInstrumentAndObligation}>
-            <p>
-              <strong>instrument: </strong> {instrument}
+            <p onClick={e => e.stopPropagation()}>
+              <strong>Instrument: </strong>
+              {renderRedirectText(
+                obligation.legalInstruments.alias,
+                `https://rod.eionet.europa.eu/instruments/${obligation.legalInstruments.id}`
+              )}
             </p>
           </div>
         )}
 
         <div className={`${styles.footer}`}>
           <span>
-            {frequency && (
+            {
               <Fragment>
-                <strong>Frequency:</strong> {frequency}
+                <strong>Status: </strong>
+                {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
               </Fragment>
-            )}
+            }
           </span>
           <span>
             <strong>Delivery date:</strong> {dueDate}
