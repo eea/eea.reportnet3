@@ -102,7 +102,12 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
       DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataset.getDataflowId());
 
-
+      try {
+        createAllFiles(dataflowVO, dataset);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
 
       // try {
 
@@ -166,7 +171,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowVO.getId());
 
       RepresentativeVO representative = representativeList.stream()
-          .filter(data -> data.getId() == dataset.getDataProviderId()).findAny().orElse(null);
+          .filter(data -> data.getDataProviderId() == dataset.getDataProviderId()).findAny()
+          .orElse(null);
 
       if (null != representative && !representative.getReceiptDownloaded()) {
         List<DataSetMetabase> datasetMetabaseList =
@@ -174,14 +180,18 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                 representative.getDataProviderId());
 
         Path path = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflowVO.getId());
-        File directory = new File(path.toString());
-        if (!directory.exists()) {
+        File directoryDataflow = new File(path.toString());
+        if (!directoryDataflow.exists()) {
           Files.createDirectories(path);
         }
+        Path pathDataProvider = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflowVO.getId()
+            + "\\dataProvider-" + representative.getDataProviderId());
+        File directoryProvider = new File(pathDataProvider.toString());
+        cleanupDirectory(directoryProvider);
+        Files.createDirectories(pathDataProvider);
+
 
         for (DataSetMetabase datasetToFile : datasetMetabaseList) {
-
-
           if (!datasetToFile.isRestrictFromPublic()) {
 
           }
@@ -191,4 +201,12 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     }
   }
 
+
+  private void cleanupDirectory(File dir) {
+    for (File file : dir.listFiles()) {
+      if (file.isDirectory())
+        cleanupDirectory(file);
+      file.delete();
+    }
+  }
 }
