@@ -398,6 +398,16 @@ export const Dataset = withRouter(({ match, history }) => {
         content: { dataflowId, datasetId, datasetName: datasetSchemaName }
       });
     }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'FILE_UPLOAD_BLOCKED_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {

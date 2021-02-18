@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 
 /**
@@ -31,5 +32,13 @@ public interface ReportingDatasetService {
    * @param reportingVO the reporting VO
    */
   void updateReportingDatasetMetabase(ReportingDatasetVO reportingVO);
+
+  /**
+   * Gets the data set id public by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data set id public by dataflow
+   */
+  List<ReportingDatasetPublicVO> getDataSetPublicByDataflow(Long dataflowId);
 
 }

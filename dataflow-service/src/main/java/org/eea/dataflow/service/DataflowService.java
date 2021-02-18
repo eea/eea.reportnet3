@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.data.domain.Pageable;
@@ -169,5 +170,21 @@ public interface DataflowService {
    *
    * @return the public dataflows
    */
-  List<DataFlowVO> getPublicDataflows();
+  List<DataflowPublicVO> getPublicDataflows();
+
+  /**
+   * Gets the public dataflow by id.
+   *
+   * @return the public dataflow by id
+   * @throws EEAException
+   */
+  DataflowPublicVO getPublicDataflowById(Long dataflowId) throws EEAException;
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo);
 }
