@@ -170,4 +170,13 @@ public interface DataflowService {
    * @return the public dataflows
    */
   List<DataFlowVO> getPublicDataflows();
+
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo);
 }
