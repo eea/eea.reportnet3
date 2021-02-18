@@ -146,11 +146,11 @@ const RepresentativesList = ({
             className={representative.hasDatasets ? styles.disabled : undefined}
             disabled={representative.hasDatasets}
             id={isEmpty(inputData) ? 'emptyInput' : labelId}
-            onBlur={() => {
+            /*  onBlur={() => {
               representative.providerAccount = representative.providerAccount.toLowerCase();
               isValidEmail(representative.providerAccount) &&
                 onAddProvider(formDispatcher, formState, representative, dataflowId);
-            }}
+            }} */
             onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
             onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
             placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
@@ -254,15 +254,15 @@ const RepresentativesList = ({
                 : formState.representatives
             }>
             <Column
-              body={providerAccountInputColumnTemplate}
-              header={resources.messages['manageRolesDialogAccountColumn']}
-            />
-            <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
-            <Column
               body={deleteBtnColumnTemplate}
               className={styles.emptyTableHeader}
               header={resources.messages['deleteRepresentativeButtonTableHeader']}
               style={{ width: '60px' }}
+            />
+            <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
+            <Column
+              body={providerAccountInputColumnTemplate}
+              header={resources.messages['manageRolesDialogAccountColumn']}
             />
           </DataTable>
         </div>

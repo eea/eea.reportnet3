@@ -15,7 +15,7 @@ const allRepresentatives = async dataflowId => {
             id: representativeDTO.id,
             isReceiptDownloaded: representativeDTO.receiptDownloaded,
             isReceiptOutdated: representativeDTO.receiptOutdated,
-            providerAccount: representativeDTO.providerAccounts,
+            leadReporters: representativeDTO.providerAccounts.unshift({ id: 777, account: 'pablo@man.com' }),
             hasDatasets: representativeDTO.hasDatasets
           })
       )
