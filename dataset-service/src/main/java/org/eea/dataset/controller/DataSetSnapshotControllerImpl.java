@@ -470,7 +470,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           required = true) Long dataflowId,
       @LockCriteria(name = "dataProviderId") @PathVariable(value = "dataProviderId",
           required = true) Long dataProviderId,
-      @RequestParam("restrictFromPublic") boolean restrictFromPublic) {
+      @RequestParam(name = "restrictFromPublic", required = true,
+          defaultValue = "false") boolean restrictFromPublic) {
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
