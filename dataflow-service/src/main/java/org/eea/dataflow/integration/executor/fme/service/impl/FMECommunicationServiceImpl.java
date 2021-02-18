@@ -560,7 +560,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       Long datasetId, String userName, boolean notificationRequired) {
 
     EventType eventType = null;
-
+    // Release lock related to Releasing Process
+    releaseLockReleasingProcess(datasetId);
     if (isStatusCompleted) {
       if (notificationRequired) {
         if (isReporting) {
@@ -580,8 +581,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
 
     lockService
         .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
-    // Release lock related to Releasing Process
-    releaseLockReleasingProcess(datasetId);
+
 
     return eventType;
   }
@@ -643,6 +643,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   private EventType importFromOtherSystemNotification(boolean isReporting,
       boolean isStatusCompleted, Long datasetId, String userName) {
     EventType eventType;
+    // Release lock related to Releasing Process
+    releaseLockReleasingProcess(datasetId);
     if (isStatusCompleted) {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
