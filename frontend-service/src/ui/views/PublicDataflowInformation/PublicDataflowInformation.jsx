@@ -5,6 +5,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './PublicDataflowInformation.module.scss';
 
@@ -32,6 +33,13 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
     onLoadDataflowData();
   }, []);
 
+  const exportableFileBodyColumn = rowData => (
+    <div className={styles.downloadIcon}>
+      {!isNil(rowData.exportableFile) && (
+        <FontAwesomeIcon icon={AwesomeIcons(getFileExtension(rowData.exportableFile))} />
+      )}
+    </div>
+  );
   const getHeader = fieldHeader => {
     let header;
     switch (fieldHeader) {
@@ -46,6 +54,9 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
         break;
       case 'isReleased':
         header = resources.messages['isReleased'];
+        break;
+      case 'exportableFile':
+        header = resources.messages['file'];
         break;
       default:
         break;
@@ -78,7 +89,8 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
       { id: 'datasetSchemaName', index: 1 },
       { id: 'name', index: 2 },
       { id: 'isReleased', index: 3 },
-      { id: 'releaseDate', index: 4 }
+      { id: 'releaseDate', index: 4 },
+      { id: 'exportableFile', index: 5 }
     ];
 
     return datasets
@@ -95,11 +107,13 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
           key.includes('datasetSchemaName') ||
           key.includes('name') ||
           key.includes('isReleased') ||
-          key.includes('releaseDate')
+          key.includes('releaseDate') ||
+          key.includes('exportableFile')
       )
       .map(field => {
         let template = null;
         if (field === 'isReleased') template = isReleasedBodyColumn;
+        if (field === 'exportableFile') template = exportableFileBodyColumn;
         return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
       });
 

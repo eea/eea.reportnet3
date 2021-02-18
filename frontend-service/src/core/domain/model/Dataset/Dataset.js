@@ -8,6 +8,7 @@ export class Dataset {
     datasetSchemaId,
     datasetSchemaName,
     errors,
+    exportableFile,
     hasErrors,
     isReleased,
     isReleasing,
@@ -31,6 +32,7 @@ export class Dataset {
     this.datasetSchemaId = datasetSchemaId;
     this.datasetSchemaName = datasetSchemaName;
     this.errors = errors;
+    this.exportableFile = exportableFile;
     this.hasErrors = hasErrors;
     this.isReleased = isReleased;
     this.isReleasing = isReleasing;

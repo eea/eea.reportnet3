@@ -394,28 +394,33 @@ const getPublicDataflowInformation = async dataflowId => {
         isReleased: true,
         dateReleased: 1614380000,
         dataProviderId: 5,
-        nameDatasetSchema: 'schema1'
+        nameDatasetSchema: 'schema1',
+        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Spain',
         isReleased: false,
         dateReleased: 1614380000,
         dataProviderId: 1,
-        nameDatasetSchema: 'schema1'
+        nameDatasetSchema: 'schema1',
+        exportableFile: 'dataset_552-public-date-18-02-2021.xlsx'
       },
       {
         dataSetName: 'France',
         isReleased: true,
         dateReleased: null,
         dataProviderId: 2,
-        nameDatasetSchema: 'schema2'
+        nameDatasetSchema:
+          'schema2 asdfkjasñfk a kfdjadk fjk dkfja sfkjas dfakd asdkf akdfj asdklfj a aksjfd askfj askdjf asdkfj aslkdfj  kfjasdf askdfj asdfjsakdf jaskdjf ñlajdfaskdf',
+        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Germany',
         isReleased: false,
         dateReleased: null,
         dataProviderId: 5,
-        nameDatasetSchema: 'schema2'
+        nameDatasetSchema: 'schema2',
+        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Spain',
@@ -436,14 +441,16 @@ const getPublicDataflowInformation = async dataflowId => {
         isReleased: false,
         dateReleased: null,
         dataProviderId: 5,
-        nameDatasetSchema: 'schema3'
+        nameDatasetSchema: 'schema3',
+        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Spain',
         isReleased: false,
         dateReleased: null,
         dataProviderId: 1,
-        nameDatasetSchema: 'schema3'
+        nameDatasetSchema: 'schema3',
+        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
       }
     ],
     description: 'd',
@@ -587,6 +594,7 @@ const parseDatasetDTO = datasetDTO =>
     datasetId: datasetDTO.id,
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
+    exportableFile: datasetDTO.exportableFile,
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased * 1000).format('YYYY-MM-DD') : '-',
