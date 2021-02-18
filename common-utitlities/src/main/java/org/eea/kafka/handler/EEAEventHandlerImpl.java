@@ -62,6 +62,7 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
         ThreadPropertiesManager.setVariable("user", user);
       }
       if (message.getData().containsKey("token")) {
+        SecurityContextHolder.clearContext();
         SecurityContextHolder.getContext()
             .setAuthentication(new UsernamePasswordAuthenticationToken(
                 EeaUserDetails.create(user, new HashSet<>()),

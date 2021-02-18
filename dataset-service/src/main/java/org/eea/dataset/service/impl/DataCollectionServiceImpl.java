@@ -303,7 +303,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      boolean stopAndNotifySQLErrors, boolean manualCheck) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
+
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+    dataFlowVO.setShowPublicInfo(showPublicInfo);
+    dataflowControllerZuul.updateDataFlow(dataFlowVO);
+
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
   }
 
@@ -570,7 +575,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
-      datasetIdsEmails.put(datasetId, representative.getProviderAccount());
+      for (String email : representative.getProviderAccounts()) {
+        datasetIdsEmails.put(datasetId, email);
+      }
       datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
 
       FKDataCollection newReporting = new FKDataCollection();

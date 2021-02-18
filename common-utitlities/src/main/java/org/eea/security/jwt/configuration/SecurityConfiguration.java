@@ -58,14 +58,6 @@ public abstract class SecurityConfiguration extends WebSecurityConfigurerAdapter
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * Inits the security.
-   */
-//  @PostConstruct
-//  private void initSecurity() {
-//    SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
-//  }
-
 
   /**
    * Configure.
