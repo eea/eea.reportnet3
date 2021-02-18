@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -56,7 +55,7 @@ public class LockServiceImplTest {
     MockitoAnnotations.initMocks(this);
     lockCriteria = new HashMap<>();
     lockCriteria.put("criteria", "value");
-    lockVO = new LockVO(new Timestamp(1L), null, LockType.METHOD, 111972752, lockCriteria);
+    lockVO = new LockVO(new Timestamp(1L), "user", LockType.METHOD, -1877130877, lockCriteria);
   }
 
   /**
@@ -80,7 +79,7 @@ public class LockServiceImplTest {
     Mockito.when(lockMapper.classToEntity(Mockito.any())).thenReturn(new Lock());
     Mockito.when(lockRepository.saveIfAbsent(Mockito.any(), Mockito.any())).thenReturn(false);
     try {
-      lockServiceImpl.createLock(new Timestamp(1L), null, LockType.METHOD, lockCriteria);
+      lockServiceImpl.createLock(new Timestamp(1L), "user", LockType.METHOD, lockCriteria);
     } catch (EEAException e) {
       Assert.assertEquals("Method locked: " + lockVO, e.getMessage());
     }
@@ -101,8 +100,7 @@ public class LockServiceImplTest {
   @Test
   public void removeLockByCriteriaTest() {
     Mockito.when(lockRepository.deleteIfPresent(Mockito.any())).thenReturn(true);
-    Assert.assertTrue(lockServiceImpl
-        .removeLockByCriteria(lockCriteria.values().stream().collect(Collectors.toList())));
+    Assert.assertTrue(lockServiceImpl.removeLockByCriteria(lockCriteria));
   }
 
   /**
