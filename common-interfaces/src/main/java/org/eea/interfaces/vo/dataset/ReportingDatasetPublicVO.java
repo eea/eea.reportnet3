@@ -7,10 +7,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 
-/**
- * The Class ReportingDatasetVO.
- */
 
+/**
+ * The Class ReportingDatasetPublicVO.
+ */
 @Getter
 @Setter
 @ToString
