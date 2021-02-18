@@ -33,6 +33,7 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,6 +59,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
+  /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
 
@@ -77,9 +79,18 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
    */
   private static final Logger LOG = LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR =
+      LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
 
   /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
   private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s.xlsx";
+
+
+  /** The path public file. */
+  @Value("${pathPublicFile}")
+  private String pathPublicFile;
+
 
   /**
    * Gets the event type.
@@ -115,15 +126,14 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     } else {
       DataSetMetabase dataset =
           dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+
       // now when all finish we create the file to save the data to public export
-
       DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataset.getDataflowId());
-
       try {
         createAllFiles(dataflowVO, dataset);
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} message {}",
+            dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage(), e);
       }
 
       // At this point the process of releasing all the datasets has been finished so we unlock
@@ -151,14 +161,22 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
    */
   private void createAllFiles(DataFlowVO dataflowVO, DataSetMetabase dataset) throws IOException {
 
+    // 1 we ceck if the dataflow is avaliable to publish
     if (dataflowVO.isShowPublicInfo()) {
+
+      LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataset.getDataflowId(),
+          dataset.getDataProviderId());
+
+
       List<RepresentativeVO> representativeList =
           representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowVO.getId());
 
+      // we took representative
       RepresentativeVO representative = representativeList.stream()
           .filter(data -> data.getDataProviderId() == dataset.getDataProviderId()).findAny()
           .orElse(null);
 
+      // we check if the representative have permit to do it
       if (null != representative && !representative.getReceiptDownloaded()) {
 
         DataProviderVO dataProvider =
@@ -169,51 +187,29 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                 representative.getDataProviderId());
 
 
-        List<DesignDatasetVO> desingDataset =
-            designDatasetService.getDesignDataSetIdByDataflowId(dataflowVO.getId());
 
-        // we find the name of the dataset to asing it for the notiFicaion
-        String datasetDesingName = "";
-        for (DesignDatasetVO designDatasetVO : desingDataset) {
-          if (designDatasetVO.getDatasetSchema().equalsIgnoreCase(dataset.getDatasetSchema())) {
-            datasetDesingName = designDatasetVO.getDataSetName();
-          }
-        }
-
-        Path path = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflowVO.getId());
-        File directoryDataflow = new File(path.toString());
+        // we create the dataflow folder to save it
+        Path pathDataflow = Paths.get(new StringBuilder(pathPublicFile).append("dataflow-")
+            .append(dataflowVO.getId()).toString());
+        File directoryDataflow = new File(pathDataflow.toString());
         if (!directoryDataflow.exists()) {
-          Files.createDirectories(path);
+          Files.createDirectories(pathDataflow);
+
+          LOG.info("Folder {} created", pathDataflow);
         }
-        Path pathDataProvider = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflowVO.getId()
-            + "\\dataProvider-" + dataProvider.getLabel());
+
+        // we create the dataprovider folder to save it andwe always delete it and put new files
+        Path pathDataProvider = Paths
+            .get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowVO.getId())
+                .append("\\dataProvider-").append(dataProvider.getLabel()).toString());
         if (directoryDataflow.exists()) {
           FileUtils.deleteDirectory(new File(pathDataProvider.toString()));
         }
         Files.createDirectories(pathDataProvider);
+        LOG.info("Folder {} created", pathDataProvider);
 
-
-        for (DataSetMetabase datasetToFile : datasetMetabaseList) {
-          if (!datasetToFile.isAvailableInPublic()) {
-
-            try {
-              byte[] file = datasetService.exportFile(datasetToFile.getId(), "xlsx", null);
-              String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
-                  dataProvider.getLabel(), datasetDesingName);
-
-              String newFile = pathDataProvider.toString() + "\\" + nameFileUnique;
-
-              FileUtils.writeByteArrayToFile(new File(newFile), file);
-              dataset.setPublicFileName(nameFileUnique);
-              dataSetMetabaseRepository.save(dataset);
-
-            } catch (EEAException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-
-          }
-        }
+        creeateAllDatasetFiles(dataset, dataflowVO.getId(), dataProvider, datasetMetabaseList,
+            pathDataProvider);
       }
 
     }
@@ -221,15 +217,58 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
 
   /**
-   * Cleanup directory.
+   * Creeate all dataset files.
    *
-   * @param dir the dir
+   * @param dataset the dataset
+   * @param dataflowId the dataflow id
+   * @param dataProvider the data provider
+   * @param datasetMetabaseList the dataset metabase list
+   * @param pathDataProvider the path data provider
+   * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void cleanupDirectory(File dir) {
-    for (File file : dir.listFiles()) {
-      if (file.isDirectory())
-        cleanupDirectory(file);
-      file.delete();
+  private void creeateAllDatasetFiles(DataSetMetabase dataset, Long dataflowId,
+      DataProviderVO dataProvider, List<DataSetMetabase> datasetMetabaseList, Path pathDataProvider)
+      throws IOException {
+    // now we create all files depends if they are avaliable
+    for (DataSetMetabase datasetToFile : datasetMetabaseList) {
+      if (!datasetToFile.isAvailableInPublic()) {
+
+        // we put the good in the correct field
+        List<DesignDatasetVO> desingDataset =
+            designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
+
+        // we find the name of the dataset to asing it for file
+        String datasetDesingName = "";
+        for (DesignDatasetVO designDatasetVO : desingDataset) {
+          if (designDatasetVO.getDatasetSchema()
+              .equalsIgnoreCase(datasetToFile.getDatasetSchema())) {
+            datasetDesingName = designDatasetVO.getDataSetName();
+          }
+        }
+
+        try {
+          // 1º we create
+          byte[] file = datasetService.exportFile(datasetToFile.getId(), "xlsx", null);
+          String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
+              dataProvider.getLabel(), datasetDesingName);
+
+
+          String newFile = new StringBuilder(pathDataProvider.toString()).append("\\")
+              .append(nameFileUnique).toString();
+
+          FileUtils.writeByteArrayToFile(new File(newFile), file);
+          datasetToFile.setPublicFileName(newFile);
+          dataSetMetabaseRepository.save(datasetToFile);
+
+        } catch (EEAException e) {
+          LOG_ERROR.error(
+              "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
+              dataset.getDataflowId(), dataset.getDataProviderId(), datasetToFile.getId(),
+              e.getMessage(), e);
+        }
+        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}",
+            dataset.getDataflowId(), dataset.getDataProviderId());
+      }
     }
   }
 }
