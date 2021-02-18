@@ -47,10 +47,15 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/snapshot")
 public class DataSetSnapshotControllerImpl implements DatasetSnapshotController {
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataSetSnapshotControllerImpl.class);
+
   /** The dataset metabase service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
-
 
   /** The reporting dataset repository. */
   @Autowired
@@ -59,12 +64,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataflow controller zull. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetSnapshotControllerImpl.class);
 
   /**
    * Gets the by id.
@@ -470,7 +469,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           required = true) Long dataflowId,
       @LockCriteria(name = "dataProviderId") @PathVariable(value = "dataProviderId",
           required = true) Long dataProviderId,
-      @RequestParam("restrictFromPublic") boolean restrictFromPublic) {
+      @RequestParam(name = "restrictFromPublic", required = true,
+          defaultValue = "false") boolean restrictFromPublic) {
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());

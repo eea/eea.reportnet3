@@ -39,7 +39,7 @@ public interface LockService {
    * @param args the args
    * @return the boolean
    */
-  Boolean removeLockByCriteria(List<Object> args);
+  Boolean removeLockByCriteria(Map<String, Object> args);
 
   /**
    * Find by id.
