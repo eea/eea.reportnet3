@@ -315,6 +315,10 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_NOT_RELEASABLE: {@value}. */
   public static final String DATAFLOW_NOT_RELEASABLE = "The dataflow %s is not releasable";
 
+  /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
+  public static final String USER_AND_COUNTRY_EXIST =
+      "Email and country already exist in this dataflow";
+
   /**
    * Instantiates a new EEA error message.
    */

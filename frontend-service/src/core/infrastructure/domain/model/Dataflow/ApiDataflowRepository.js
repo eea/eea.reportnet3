@@ -423,6 +423,7 @@ const parseDataflowDTO = dataflowDTO =>
     reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
+    showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     userRequestStatus: dataflowDTO.userRequestStatus,
     userRole: dataflowDTO.userRole,

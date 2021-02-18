@@ -11,6 +11,7 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_DATASET_DATA':
       return {
         ...state,
+        availableInPublic: payload.availableInPublic,
         dataViewerOptions: {
           ...state.dataViewerOptions,
           selectedRecordErrorId: -1
@@ -129,7 +130,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, datasetSchema: { ...state.datasetSchema, tables: payload.schema } };
 
     case 'SET_AVAILABLE_PUBLIC_VIEW':
-      return { ...state, availablePublicView: payload };
+      return { ...state, availableInPublic: payload };
 
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };
