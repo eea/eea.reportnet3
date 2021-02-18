@@ -210,7 +210,7 @@ public interface DatasetSnapshotController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
       @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
-      @RequestParam("restrictFromPublic") boolean restrictFromPublic);
+      @RequestParam(value = "restrictFromPublic", required = false) boolean restrictFromPublic);
 
 
   /**

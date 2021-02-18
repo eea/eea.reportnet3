@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -13,8 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -33,8 +30,6 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.security.jwt.utils.EeaUserDetails;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -49,7 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
@@ -162,7 +157,8 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    validationExecutorService =
+        new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(maxRunningTasks));
   }
 
   /**
@@ -370,19 +366,8 @@ public class ValidationHelper implements DisposableBean {
       Validator validator, EventType notificationEventType) throws EEAException {
     ValidationTask validationTask = new ValidationTask(eeaEventVO, validator, datasetId,
         this.getKieBase(processId, datasetId), processId, notificationEventType);
-
-    // first every task is always queued up to ensure the order
-
-    if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
-      LOG.info(
-          "Event {} will be queued up as there are no validating threads available at the moment",
-          eeaEventVO);
-    }
-
     this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
-
   }
-
 
   /**
    * Creates the lock with signature.
@@ -766,19 +751,14 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
 
       Long currentTime = System.currentTimeMillis();
-      int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
 
-      SecurityContextHolder.clearContext();
-
-      SecurityContextHolder.getContext()
-          .setAuthentication(new UsernamePasswordAuthenticationToken(
-              EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
-                  new HashSet<>()),
-              validationTask.eeaEventVO.getData().get("token").toString(), null));
-
-      LOG.info(
-          "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
-          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
+      // SecurityContextHolder.clearContext();
+      //
+      // SecurityContextHolder.getContext()
+      // .setAuthentication(new UsernamePasswordAuthenticationToken(
+      // EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
+      // new HashSet<>()),
+      // validationTask.eeaEventVO.getData().get("token").toString(), null));
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);

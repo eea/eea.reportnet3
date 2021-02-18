@@ -2,26 +2,21 @@ package org.eea.recordstore.service.impl;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
-import org.eea.security.jwt.utils.EeaUserDetails;
-import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.stereotype.Component;
+import lombok.AllArgsConstructor;
 
 /**
  * The Class RestoreSnapshotHelper.
@@ -67,7 +62,8 @@ public class SnapshotHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    restorationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    restorationExecutorService =
+        new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(maxRunningTasks));
   }
 
   /**
@@ -101,17 +97,7 @@ public class SnapshotHelper implements DisposableBean {
       throws EEAException {
     RestorationTask restorationTask = new RestorationTask(datasetId, idSnapshot, idPartition,
         datasetType, user, isSchemaSnapshot, deleteData);
-
-    // first every task is always queued up to ensure the order
-
-    if (((ThreadPoolExecutor) restorationExecutorService).getActiveCount() == maxRunningTasks) {
-      LOG.info(
-          "Snapshot {} will be queued up as there are no restoration threads available at the moment",
-          idSnapshot);
-    }
-
     this.restorationExecutorService.submit(new RestorationTasksExecutorThread(restorationTask));
-
   }
 
   /**
@@ -171,8 +157,8 @@ public class SnapshotHelper implements DisposableBean {
      */
     private RestorationTask restorationTask;
 
-    private String user;
-    private String credentials;
+    // private String user;
+    // private String credentials;
 
     /**
      * Instantiates a new restoration tasks executor thread.
@@ -180,9 +166,9 @@ public class SnapshotHelper implements DisposableBean {
      * @param restorationTask the restoration task
      */
     public RestorationTasksExecutorThread(RestorationTask restorationTask) {
-      user = SecurityContextHolder.getContext().getAuthentication().getName();
-      credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials()
-          .toString();
+      // user = SecurityContextHolder.getContext().getAuthentication().getName();
+      // credentials =
+      // SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
       this.restorationTask = restorationTask;
     }
 
@@ -192,20 +178,13 @@ public class SnapshotHelper implements DisposableBean {
     @Override
     public void run() {
       Long currentTime = System.currentTimeMillis();
-      int workingThreads = ((ThreadPoolExecutor) restorationExecutorService).getActiveCount();
-
-      LOG.info(
-          "Executing restoration for snapshot {}. Working restoration threads {}, Available restoration threads {}",
-          restorationTask.idSnapshot, workingThreads, maxRunningTasks - workingThreads);
       try {
-        ThreadPropertiesManager.setVariable("user", restorationTask.user);
-        SecurityContextHolder.clearContext();
-
-        SecurityContextHolder.getContext()
-            .setAuthentication(new UsernamePasswordAuthenticationToken(
-                EeaUserDetails.create(user,
-                    new HashSet<>()),
-                credentials, null));
+        // ThreadPropertiesManager.setVariable("user", restorationTask.user);
+        // SecurityContextHolder.clearContext();
+        //
+        // SecurityContextHolder.getContext().setAuthentication(
+        // new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+        // credentials, null));
         recordStoreService.restoreDataSnapshot(restorationTask.datasetId,
             restorationTask.idSnapshot, restorationTask.idPartition, restorationTask.datasetType,
             restorationTask.isSchemaSnapshot, restorationTask.deleteData);

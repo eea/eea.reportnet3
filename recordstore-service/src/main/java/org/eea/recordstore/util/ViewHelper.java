@@ -2,7 +2,6 @@ package org.eea.recordstore.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -12,14 +11,13 @@ import javax.annotation.PostConstruct;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
-import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +54,8 @@ public class ViewHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    viewExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    viewExecutorService =
+        new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(maxRunningTasks));
     processesList = new ArrayList<>();
   }
 
@@ -72,15 +71,15 @@ public class ViewHelper implements DisposableBean {
     switch (processesList.stream().filter(x -> datasetId.equals(x)).collect(Collectors.counting())
         .toString()) {
       case "0":
-        String user = SecurityContextHolder.getContext().getAuthentication().getName();
-        String credentials =
-            SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
+        // String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        // String credentials =
+        // SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
         // no processes running, then we should queue it
         viewExecutorService.execute(() -> {
-          SecurityContextHolder.clearContext();
-          SecurityContextHolder.getContext().setAuthentication(
-              new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
-                  credentials, null));
+          // SecurityContextHolder.clearContext();
+          // SecurityContextHolder.getContext().setAuthentication(
+          // new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+          // credentials, null));
           executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL);
         });
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
@@ -120,14 +119,14 @@ public class ViewHelper implements DisposableBean {
     // If we hace two dataset view generating process we have to execute it again
     if (2 == processesList.stream().filter(x -> datasetId.equals(x))
         .collect(Collectors.counting())) {
-      String user = SecurityContextHolder.getContext().getAuthentication().getName();
-      String credentials =
-          SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
+      // String user = SecurityContextHolder.getContext().getAuthentication().getName();
+      // String credentials =
+      // SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
       viewExecutorService.execute(() -> {
-        SecurityContextHolder.clearContext();
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
-                credentials, null));
+        // SecurityContextHolder.clearContext();
+        // SecurityContextHolder.getContext().setAuthentication(
+        // new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+        // credentials, null));
         executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL);
       });
     }
