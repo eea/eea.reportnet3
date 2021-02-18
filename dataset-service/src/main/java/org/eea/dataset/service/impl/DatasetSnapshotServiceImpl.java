@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -474,6 +473,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
     Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
 
+
     // Delete data of the same provider
     deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);
 
@@ -484,23 +484,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
-
-    // We create file public
-    if (!designDataset.isRestrictFromPublic() && dataflow.isShowPublicInfo()) {
-      try {
-        byte[] file = datasetService.exportFile(idDataset, "xlsx", null);
-
-        Date myDate = new Date();
-        String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME, provider.getLabel(),
-            designDataset.getDataSetName());
-        designDataset.setPublicFileName(nameFileUnique);
-        metabaseRepository.save(designDataset);
-
-      } catch (IOException e) {
-        LOG.info("Error creating public file : dataflowId={}, datasetId={}, providerId={}",
-            dataflow.getId(), idDataset, provider.getId());
-      }
-    }
   }
 
   /**
