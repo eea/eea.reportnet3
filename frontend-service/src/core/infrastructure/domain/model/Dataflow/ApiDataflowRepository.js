@@ -392,14 +392,14 @@ const getPublicDataflowInformation = async dataflowId => {
       {
         dataSetName: 'Germany',
         isReleased: true,
-        dateReleased: 1612960717918,
+        dateReleased: 1614380000,
         dataProviderId: 5,
         nameDatasetSchema: 'schema1'
       },
       {
         dataSetName: 'Spain',
         isReleased: false,
-        dateReleased: null,
+        dateReleased: 1614380000,
         dataProviderId: 1,
         nameDatasetSchema: 'schema1'
       },
