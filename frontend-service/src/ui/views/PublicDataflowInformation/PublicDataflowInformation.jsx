@@ -65,8 +65,25 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
       </div>
     );
   };
+
+  const getOrderedColumns = datasets => {
+    const datasetsWithPriority = [
+      { id: 'id', index: 0 },
+      { id: 'datasetSchemaName', index: 1 },
+      { id: 'name', index: 2 },
+      { id: 'isReleased', index: 3 },
+      { id: 'releaseDate', index: 4 }
+    ];
+
+    return datasets
+      .map(field => datasetsWithPriority.filter(e => field === e.id))
+      .flat()
+      .sort((a, b) => a.index - b.index)
+      .map(orderedField => orderedField.id);
+  };
+
   const renderColumns = datasets => {
-    const fieldColumns = Object.keys(datasets[0])
+    const fieldColumns = getOrderedColumns(Object.keys(datasets[0]))
       .filter(
         key =>
           key.includes('datasetSchemaName') ||
