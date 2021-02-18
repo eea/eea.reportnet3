@@ -24,6 +24,7 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
 
   const [dataflowData, setDataflowData] = useState({});
 
+  const { datasets } = dataflowData;
 
   useEffect(() => {
     onLoadDataflowData();
@@ -86,18 +87,23 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
     <PublicLayout>
       <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
       <div>
-        {!isEmpty(dataflowData.datasets) ? (
+        {!isEmpty(datasets) ? (
           <div className={styles.datasets}>
             <DataTable
               autoLayout={true}
               // onRowClick={event => getManageUniqueConstraint(event.data)}
               paginator={true}
-              paginatorRight={<span>{`${resources.messages['totalRecords']}  ${dataflowData.datasets.length}`}</span>}
+              paginatorRight={
+                <span>
+                  {`${resources.messages['totalRecords']}  ${datasets.length}`}{' '}
+                  {resources.messages['records'].toLowerCase()}
+                </span>
+              }
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
-              totalRecords={dataflowData.datasets.length}
-              value={dataflowData.datasets}>
-              {renderColumns(dataflowData.datasets)}
+              totalRecords={datasets.length}
+              value={datasets}>
+              {renderColumns(datasets)}
             </DataTable>
           </div>
         ) : (
