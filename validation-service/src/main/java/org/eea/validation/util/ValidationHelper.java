@@ -577,9 +577,9 @@ public class ValidationHelper implements DisposableBean {
       lockService.removeLockByCriteria(executeValidation);
 
       Map<String, Object> forceExecuteValidation = new HashMap<>();
-      executeValidation.put(LiteralConstants.SIGNATURE,
+      forceExecuteValidation.put(LiteralConstants.SIGNATURE,
           LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
-      executeValidation.put(LiteralConstants.DATASETID, datasetId);
+      forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(forceExecuteValidation);
 
       // after last dataset validations have been saved, an event is sent to notify it

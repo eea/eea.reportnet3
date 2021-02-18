@@ -1072,6 +1072,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           List<ReportingDatasetVO> reportingDatasets =
               dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
           for (ReportingDatasetVO dataset : reportingDatasets) {
+            System.out.println("Entro al bucle: datasetId=" + dataset.getId());
             launchUpdateMaterializedQueryView(dataset.getId());
           }
           break;

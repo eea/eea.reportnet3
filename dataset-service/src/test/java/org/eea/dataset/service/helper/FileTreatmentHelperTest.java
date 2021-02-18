@@ -49,8 +49,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,12 +85,6 @@ public class FileTreatmentHelperTest {
   private RulesControllerZuul rulesControllerZuul;
 
   @Mock
-  private Authentication authentication;
-
-  @Mock
-  private SecurityContext securityContext;
-
-  @Mock
   private LockService lockService;
 
   /**
@@ -100,9 +93,9 @@ public class FileTreatmentHelperTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
-    securityContext = Mockito.mock(SecurityContext.class);
-    securityContext.setAuthentication(authentication);
-    SecurityContextHolder.setContext(securityContext);
+    SecurityContextHolder.clearContext();
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     ReflectionTestUtils.setField(fileTreatmentHelper, "importPath",
         this.getClass().getClassLoader().getResource("").getPath());
     ReflectionTestUtils.setField(fileTreatmentHelper, "importExecutorService",
@@ -166,12 +159,8 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
 
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-
-    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
     FileUtils
@@ -254,12 +243,8 @@ public class FileTreatmentHelperTest {
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
 
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-
-    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
@@ -300,12 +285,8 @@ public class FileTreatmentHelperTest {
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-
-    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
     FileUtils
@@ -324,7 +305,9 @@ public class FileTreatmentHelperTest {
     try {
       fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (EEAException e) {
-      // TODO. verify?
+      Assert.assertEquals(
+          "Dataset not reportable: datasetId=1, tableSchemaId=5cf0e9b3b793310e9ceca190",
+          e.getMessage());
       throw e;
     }
   }
@@ -352,14 +335,15 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn(new DataSetSchema());
     MultipartFile file = Mockito.mock(MultipartFile.class);
-    Mockito.when(file.getInputStream()).thenThrow(IOException.class);
+    IOException returningException = new IOException();
+    Mockito.when(file.getInputStream()).thenThrow(returningException);
     Mockito.when(file.getName()).thenReturn("fileName.csv");
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     try {
       fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (EEAException e) {
-      // TODO. Verify?
+      Assert.assertEquals(returningException, e.getCause());
       throw e;
     }
   }
