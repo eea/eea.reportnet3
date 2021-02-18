@@ -3,7 +3,6 @@ package org.eea.dataset.service;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,39 +53,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * The Class DesignDatasetServiceTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DesignDatasetServiceTest {
 
-
-  /**
-   * The design dataset service.
-   */
   @InjectMocks
   private DesignDatasetServiceImpl designDatasetService;
 
-
-  /**
-   * The design dataset repository.
-   */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
-
-  /**
-   * The design dataset mapper.
-   */
   @Mock
   private DesignDatasetMapper designDatasetMapper;
 
-  /**
-   * The file common.
-   */
   @Mock
   private FileCommonUtils fileCommon;
+
+  @Mock
+  private LockService lockService;
 
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
@@ -95,7 +82,6 @@ public class DesignDatasetServiceTest {
 
   @Mock
   private DatasetSchemaService dataschemaService;
-
 
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
@@ -127,11 +113,19 @@ public class DesignDatasetServiceTest {
   @Mock
   private WebFormMapper webformMapper;
 
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     ReflectionTestUtils.setField(designDatasetService, "timeToWaitBeforeContinueCopy", 3000L);
     MockitoAnnotations.initMocks(this);
   }
@@ -161,8 +155,10 @@ public class DesignDatasetServiceTest {
 
   @Test(expected = EEAException.class)
   public void testCopyDesignDatasetsException() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(null);
     try {
-      when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(null);
       designDatasetService.copyDesignDatasets(1L, 2L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -217,7 +213,7 @@ public class DesignDatasetServiceTest {
     when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong())).thenReturn(new ObjectId());
     when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(CompletableFuture.completedFuture(1L));
+            .thenReturn(CompletableFuture.completedFuture(1L));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
         .thenReturn(table);
@@ -245,7 +241,6 @@ public class DesignDatasetServiceTest {
         .thenReturn(Arrays.asList(new DesignDatasetVO()));
     Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong()))
         .thenThrow(EEAException.class);
-    Mockito.doNothing().when(datasetService).releaseLock(Mockito.any());
     try {
       designDatasetService.copyDesignDatasets(1L, 2L);
     } catch (EEAException e) {
