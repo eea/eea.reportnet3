@@ -1,5 +1,10 @@
 package org.eea.dataset.io.kafka.commands;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -154,15 +159,34 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   }
 
 
-  private void createAllFiles(DataFlowVO dataflowVO, DataSetMetabase dataset) {
-
-    List<RepresentativeVO> representativeList =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowVO.getId());
-
-    RepresentativeVO representative = representativeList.stream()
-        .filter(data -> data.getId() == dataset.getDataProviderId()).findAny().orElse(null);
+  private void createAllFiles(DataFlowVO dataflowVO, DataSetMetabase dataset) throws IOException {
 
     if (dataflowVO.isShowPublicInfo()) {
+      List<RepresentativeVO> representativeList =
+          representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowVO.getId());
+
+      RepresentativeVO representative = representativeList.stream()
+          .filter(data -> data.getId() == dataset.getDataProviderId()).findAny().orElse(null);
+
+      if (null != representative && !representative.getReceiptDownloaded()) {
+        List<DataSetMetabase> datasetMetabaseList =
+            dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowVO.getId(),
+                representative.getDataProviderId());
+
+        Path path = Paths.get("C:\\importFilesPublic\\dataflow-" + dataflowVO.getId());
+        File directory = new File(path.toString());
+        if (!directory.exists()) {
+          Files.createDirectories(path);
+        }
+
+        for (DataSetMetabase datasetToFile : datasetMetabaseList) {
+
+
+          if (!datasetToFile.isRestrictFromPublic()) {
+
+          }
+        }
+      }
 
     }
   }
