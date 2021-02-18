@@ -24,22 +24,33 @@ import lombok.AllArgsConstructor;
 @Component
 public class SnapshotHelper implements DisposableBean {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SnapshotHelper.class);
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The max running tasks. */
   @Value("${snapshot.task.parallelism}")
   private int maxRunningTasks;
 
+  /** The record store service. */
   @Autowired
   private RecordStoreService recordStoreService;
 
+  /** The restoration executor service. */
   private ExecutorService restorationExecutorService;
 
+  /**
+   * Instantiates a new snapshot helper.
+   */
   public SnapshotHelper() {
     super();
   }
 
+  /**
+   * Inits the.
+   */
   @PostConstruct
   private void init() {
     restorationExecutorService =
@@ -66,10 +77,8 @@ public class SnapshotHelper implements DisposableBean {
    * @param idSnapshot the id snapshot
    * @param idPartition the id partition
    * @param datasetType the dataset type
-   * @param user the user
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
-   *
    * @throws EEAException the eea exception
    */
   public void processRestoration(Long datasetId, Long idSnapshot, Long idPartition,
@@ -80,32 +89,61 @@ public class SnapshotHelper implements DisposableBean {
     this.restorationExecutorService.submit(new RestorationTasksExecutorThread(restorationTask));
   }
 
+  /**
+   * Instantiates a new restoration task.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param idPartition the id partition
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   */
   @AllArgsConstructor
   private static class RestorationTask {
 
+    /** The dataset id. */
     Long datasetId;
 
+    /** The id snapshot. */
     Long idSnapshot;
 
+    /** The id partition. */
     Long idPartition;
 
+    /** The dataset type. */
     DatasetTypeEnum datasetType;
 
+    /** The is schema snapshot. */
     Boolean isSchemaSnapshot;
 
+    /** The delete data. */
     Boolean deleteData;
   }
 
+  /**
+   * The Class RestorationTasksExecutorThread.
+   */
   private class RestorationTasksExecutorThread implements Runnable {
 
+    /** The Constant MILISECONDS. */
     private static final double MILISECONDS = 1000.0;
 
+    /** The restoration task. */
     private RestorationTask restorationTask;
 
+    /**
+     * Instantiates a new restoration tasks executor thread.
+     *
+     * @param restorationTask the restoration task
+     */
     public RestorationTasksExecutorThread(RestorationTask restorationTask) {
       this.restorationTask = restorationTask;
     }
 
+    /**
+     * Run.
+     */
     @Override
     public void run() {
       Long currentTime = System.currentTimeMillis();

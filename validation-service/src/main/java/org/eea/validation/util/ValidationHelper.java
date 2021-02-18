@@ -222,15 +222,10 @@ public class ValidationHelper implements DisposableBean {
     } else {
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
-      values.put(LiteralConstants.USER,
-          SecurityContextHolder.getContext().getAuthentication().getName());
       values.put("released", released);
-
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
-
     }
   }
-
 
   /**
    * Execute validation process.
@@ -399,7 +394,6 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-
   /**
    * Start process.
    *
@@ -515,7 +509,6 @@ public class ValidationHelper implements DisposableBean {
     value.put("idTable", idTable);
     value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
-
   }
 
   /**
@@ -668,7 +661,6 @@ public class ValidationHelper implements DisposableBean {
     return isProcessStarted;
   }
 
-
   /**
    * Instantiates a new validation task.
    *
@@ -682,31 +674,22 @@ public class ValidationHelper implements DisposableBean {
   @AllArgsConstructor
   private static class ValidationTask {
 
-    /**
-     * The Eea event vo.
-     */
+    /** The eea event VO. */
     EEAEventVO eeaEventVO;
-    /**
-     * The Validator.
-     */
+
+    /** The validator. */
     Validator validator;
-    /**
-     * The Dataset id.
-     */
+
+    /** The dataset id. */
     Long datasetId;
-    /**
-     * The Kie base.
-     */
+
+    /** The kie base. */
     KieBase kieBase;
 
-    /**
-     * The Process id.
-     */
+    /** The process id. */
     String processId;
 
-    /**
-     * The Notification event type.
-     */
+    /** The notification event type. */
     EventType notificationEventType;
   }
 
@@ -715,13 +698,10 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
-    /**
-     * The Constant MILISECONDS.
-     */
+    /** The Constant MILISECONDS. */
     private static final double MILISECONDS = 1000.0;
-    /**
-     * The validation task.
-     */
+
+    /** The validation task. */
     private ValidationTask validationTask;
 
     /**
@@ -733,7 +713,6 @@ public class ValidationHelper implements DisposableBean {
       this.validationTask = validationTask;
     }
 
-
     /**
      * Run.
      */
@@ -742,13 +721,6 @@ public class ValidationHelper implements DisposableBean {
 
       Long currentTime = System.currentTimeMillis();
 
-      // SecurityContextHolder.clearContext();
-      //
-      // SecurityContextHolder.getContext()
-      // .setAuthentication(new UsernamePasswordAuthenticationToken(
-      // EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
-      // new HashSet<>()),
-      // validationTask.eeaEventVO.getData().get("token").toString(), null));
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
@@ -779,7 +751,5 @@ public class ValidationHelper implements DisposableBean {
             validationTask.eeaEventVO, totalTime);
       }
     }
-
-
   }
 }

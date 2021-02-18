@@ -18,7 +18,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -68,20 +67,12 @@ public class ViewHelper implements DisposableBean {
    */
   public void insertViewProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // Check the number of views per dataset in this moment queued
-    switch (processesList.stream().filter(x -> datasetId.equals(x)).collect(Collectors.counting())
+    switch (processesList.stream().filter(datasetId::equals).collect(Collectors.counting())
         .toString()) {
       case "0":
-        // String user = SecurityContextHolder.getContext().getAuthentication().getName();
-        // String credentials =
-        // SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
         // no processes running, then we should queue it
-        viewExecutorService.execute(() -> {
-          // SecurityContextHolder.clearContext();
-          // SecurityContextHolder.getContext().setAuthentication(
-          // new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
-          // credentials, null));
-          executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL);
-        });
+        viewExecutorService.execute(
+            () -> executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL));
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       case "1":
@@ -112,23 +103,13 @@ public class ViewHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param isMaterialized the is materialized
-   * @param user the user
    * @param checkSQL the check SQL
    */
   public void finishProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // If we hace two dataset view generating process we have to execute it again
-    if (2 == processesList.stream().filter(x -> datasetId.equals(x))
-        .collect(Collectors.counting())) {
-      // String user = SecurityContextHolder.getContext().getAuthentication().getName();
-      // String credentials =
-      // SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
-      viewExecutorService.execute(() -> {
-        // SecurityContextHolder.clearContext();
-        // SecurityContextHolder.getContext().setAuthentication(
-        // new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
-        // credentials, null));
-        executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL);
-      });
+    if (2 == processesList.stream().filter(datasetId::equals).collect(Collectors.counting())) {
+      viewExecutorService.execute(
+          () -> executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL));
     }
     // update the proesses list in every recordstore instance
     releaseDeleteViewProccesEvent(datasetId);
@@ -183,8 +164,6 @@ public class ViewHelper implements DisposableBean {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
     result.put("checkNoSQL", checkNoSQL);
-    result.put(LiteralConstants.USER,
-        SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATE_MANUAL_QC_COMMAND, result);
   }
 
@@ -201,8 +180,6 @@ public class ViewHelper implements DisposableBean {
     result.put(LiteralConstants.DATASET_ID, datasetId);
     result.put("isMaterialized", isMaterialized);
     result.put("checkNoSQL", checkNoSQL);
-    result.put(LiteralConstants.USER,
-        SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.FINISH_VIEW_PROCCES_EVENT, result);
   }
 
