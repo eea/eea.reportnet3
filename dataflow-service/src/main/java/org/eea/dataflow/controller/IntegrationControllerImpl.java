@@ -1,7 +1,8 @@
 package org.eea.dataflow.controller;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
@@ -364,8 +365,10 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
           integrationId, datasetId, e.getMessage());
-      lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(), datasetId));
+      Map<String, Object> lockCriteria = new HashMap<>();
+      lockCriteria.put("criteria", LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
+      lockCriteria.put("datasetId", datasetId);
+      lockService.removeLockByCriteria(lockCriteria);
       integrationService.releaseLocks(datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }

@@ -66,6 +66,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,14 +81,14 @@ import org.springframework.stereotype.Service;
 @Service("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
 
-  /** The Constant CHUNK_SIZE. */
-  private static final int CHUNK_SIZE = 10;
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant CHUNK_SIZE. */
+  private static final int CHUNK_SIZE = 10;
 
   /** The Constant NAME_DC: {@value}. */
   private static final String NAME_DC = "Data Collection - %s";
@@ -278,10 +279,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
 
     // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(methodSignature);
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    Map<String, Object> lockCriteria = new HashMap<>();
+    lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
+    lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.removeLockByCriteria(lockCriteria);
 
     // Release the notification
     try {
@@ -451,11 +452,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .disabledRules(disabledRules).build();
       LOG.info("Data Collection creation proccess stopped: there are SQL rules containing errors");
       // remove lock
-      String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(methodSignature);
-      criteria.add(dataflowId);
-      lockService.removeLockByCriteria(criteria);
+      Map<String, Object> createDataCollection = new HashMap<>();
+      createDataCollection.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_DATA_COLLECTION.getValue());
+      createDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(createDataCollection);
       // release notification
       rulesOk = false;
       releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
