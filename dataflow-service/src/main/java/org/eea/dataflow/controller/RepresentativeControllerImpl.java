@@ -9,11 +9,9 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,11 +58,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Autowired
   private RepresentativeService representativeService;
 
-  /** The user management controller zull. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
-
-
   /**
    * Creates the representative.
    *
@@ -82,17 +76,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       @ApiParam(type = "Object",
           value = "Representative Object") @RequestBody RepresentativeVO representativeVO) {
 
-    if (null == representativeVO.getProviderAccount()) {
+    if (CollectionUtils.isEmpty(representativeVO.getProviderAccounts())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
     }
     Pattern p = Pattern.compile(EMAIL_REGEX);
-    Matcher m = p.matcher(representativeVO.getProviderAccount());
-    boolean result = m.matches();
-    if (Boolean.FALSE.equals(result)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+    for (String representative : representativeVO.getProviderAccounts()) {
+      Matcher m = p.matcher(representative);
+      boolean result = m.matches();
+      if (Boolean.FALSE.equals(result)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format(EEAErrorMessage.NOT_EMAIL, representative));
+      }
     }
-
     try {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
@@ -132,7 +127,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
   public List<DataProviderCodeVO> findAllDataProviderTypes() {
@@ -148,7 +143,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
   @ApiOperation(value = "Find Representatives by Dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List")
@@ -178,7 +173,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER')")
   @ApiOperation(value = "Update a Representative", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Email field provider is not an email"),
@@ -189,30 +184,21 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     String message = null;
     HttpStatus status = HttpStatus.OK;
 
-    if (null != representativeVO.getProviderAccount()) {
+    if (null != representativeVO.getProviderAccounts()) {
       Pattern p = Pattern.compile(EMAIL_REGEX);
-      Matcher m = p.matcher(representativeVO.getProviderAccount());
-      boolean result = m.matches();
-      if (Boolean.FALSE.equals(result)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            String.format(EEAErrorMessage.NOT_EMAIL, representativeVO.getProviderAccount()));
+      for (String representative : representativeVO.getProviderAccounts()) {
+        Matcher m = p.matcher(representative);
+        boolean result = m.matches();
+        if (Boolean.FALSE.equals(result)) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              String.format(EEAErrorMessage.NOT_EMAIL, representative));
+        }
       }
     }
 
-    if (representativeVO.getProviderAccount() != null) {
-      List<UserRepresentationVO> users = userManagementControllerZull.getUsers();
-      UserRepresentationVO userRepresentationVO = users.stream()
-          .filter(user -> representativeVO.getProviderAccount().equalsIgnoreCase(user.getEmail()))
-          .findFirst().orElse(null);
-      if (userRepresentationVO == null) {
-        message = EEAErrorMessage.USER_REQUEST_NOTFOUND;
-        status = HttpStatus.NOT_FOUND;
-      }
-    }
     try {
-      message = message == null
-          ? String.valueOf(representativeService.updateDataflowRepresentative(representativeVO))
-          : message;
+      message =
+          String.valueOf(representativeService.updateDataflowRepresentative(representativeVO));
     } catch (EEAException e) {
       if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
         LOG_ERROR.error("Duplicated representative relationship", e.getCause());
@@ -235,7 +221,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{dataflowRepresentativeId}")
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Delete Representative")
   @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public void deleteRepresentative(@ApiParam(value = "Dataflow Representative id",
@@ -292,7 +278,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export file lead reporters")
   public ResponseEntity<byte[]> exportLeadReportersFile(
@@ -317,7 +303,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @GetMapping(value = "/exportTemplateReportersFile/{groupId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export template file countrys avaliable")
@@ -347,7 +333,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Import file lead reporters ")
   @PostMapping("/import/{dataflowId}/group/{groupId}")
   public ResponseEntity<byte[]> importFileCountryTemplate(

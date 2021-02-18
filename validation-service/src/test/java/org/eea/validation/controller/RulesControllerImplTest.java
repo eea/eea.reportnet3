@@ -619,9 +619,9 @@ public class RulesControllerImplTest {
 
   @Test
   public void validateSqlRulesTest() throws EEAException {
-    rulesControllerImpl.validateSqlRules(Mockito.anyLong(), Mockito.anyString());
+    rulesControllerImpl.validateSqlRules(Mockito.anyLong(), Mockito.anyString(), Mockito.any());
     Mockito.verify(sqlRulesService, times(1)).validateSQLRules(Mockito.anyLong(),
-        Mockito.anyString());
+        Mockito.anyString(), Mockito.any());
   }
 
 

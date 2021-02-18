@@ -992,6 +992,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description);
   }
 
+
+
+  /**
+   * Update dataset schema exportable.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param isExportable the is exportable
+   */
+  @Override
+  public void updateDatasetSchemaExportable(String datasetSchemaId, boolean exportable) {
+    schemasRepository.updateDatasetSchemaExportable(datasetSchemaId, exportable);
+  }
+
   /**
    * Gets the table schema name.
    *
@@ -2018,7 +2031,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Release validate manual QC event.
    *
    * @param datasetId the dataset id
-   * @param checkNoSQL the check no SQL
+   * @param user the user
+   * @param checkSQL the check SQL
    */
   @Override
   public void releaseCreateUpdateView(Long datasetId, String user, boolean checkSQL) {
@@ -2037,7 +2051,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param dataflowId the dataflow id
    * @return the byte[]
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public byte[] exportSchemas(Long dataflowId) throws IOException, EEAException {
@@ -2163,7 +2177,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
         recordStoreControllerZuul.createUpdateQueryView(datasetCreated, false);
         rulesControllerZuul.validateSqlRules(datasetCreated,
-            dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()));
+            dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()), false);
       });
 
       // Success notification
@@ -2280,7 +2294,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param mapDatasetIdFKRelations the map dataset id FK relations
-   * @throws EEAException the EEA exception
    */
   private void processToModifyTheFK(Map<String, String> dictionaryOriginTargetObjectId,
       Map<Long, List<FieldSchema>> mapDatasetIdFKRelations) {
@@ -2395,6 +2408,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param uniques the uniques
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @return the map
    */
   private Map<String, String> importUniqueConstraintsCatalogue(List<UniqueConstraintSchema> uniques,
       Map<String, String> dictionaryOriginTargetObjectId) {

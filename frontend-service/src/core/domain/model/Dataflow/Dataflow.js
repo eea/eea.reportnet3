@@ -16,6 +16,7 @@ export class Dataflow {
     reportingDatasetsStatus,
     representatives,
     requestId,
+    showPublicInfo,
     status,
     userRequestStatus,
     userRole,
@@ -38,6 +39,7 @@ export class Dataflow {
     this.representatives = representatives;
     this.requestId = requestId;
     this.status = status;
+    this.showPublicInfo = showPublicInfo;
     this.userRequestStatus = userRequestStatus;
     this.userRole = userRole;
     this.weblinks = weblinks;

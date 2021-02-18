@@ -4,6 +4,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +18,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,10 +41,59 @@ public class SnapshotHelperTest {
   @Mock
   private RecordStoreService recordStoreService;
 
+  @Mock
+  private SecurityContext securityContext;
+
+  @Mock
+  private Authentication authentication;
+
   @Before
   public void initMocks() {
     restorationExecutorService = Executors.newFixedThreadPool(2);
+    SecurityContextHolder.setContext(securityContext);
+    authentication = new Authentication() {
+
+      @Override
+      public String getName() {
+        return null;
+      }
+
+      @Override
+      public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {}
+
+      @Override
+      public boolean isAuthenticated() {
+        return false;
+      }
+
+      @Override
+      public Object getPrincipal() {
+        return null;
+      }
+
+      @Override
+      public Object getDetails() {
+        return null;
+      }
+
+      @Override
+      public Object getCredentials() {
+        List<CredentialRepresentation> credentials = new ArrayList<>();
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType("password");
+        credential.setTemporary(false);
+        credential.setValue("1234");
+        credentials.add(credential);
+        return credentials;
+      }
+
+      @Override
+      public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+      }
+    };
     MockitoAnnotations.initMocks(this);
+    SecurityContextHolder.setContext(securityContext);
   }
 
   @After
@@ -50,6 +107,9 @@ public class SnapshotHelperTest {
     ReflectionTestUtils.setField(snapshotHelper, "restorationExecutorService",
         Executors.newFixedThreadPool(2));
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
     snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
@@ -66,6 +126,10 @@ public class SnapshotHelperTest {
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
     doThrow(new SQLException()).when(recordStoreService).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
+
     snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);

@@ -14,6 +14,9 @@ import lombok.ToString;
 @ToString
 public class UserRepresentationVO {
 
+  /** The id. */
+  private String id;
+
   /** The username. */
   private String username;
 

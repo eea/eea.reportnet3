@@ -1,5 +1,6 @@
 export class Dataset {
   constructor({
+    availableInPublic,
     dataProviderId,
     datasetFeedbackStatus,
     datasetId,
@@ -22,6 +23,7 @@ export class Dataset {
     totalRecords,
     webform
   } = {}) {
+    this.availableInPublic = availableInPublic;
     this.dataProviderId = dataProviderId;
     this.datasetFeedbackStatus = datasetFeedbackStatus;
     this.datasetId = datasetId;

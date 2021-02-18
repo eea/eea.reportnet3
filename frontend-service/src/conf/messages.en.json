@@ -972,6 +972,7 @@
     "moreElements": "There are more elements, use the search to limit results",
     "getReferencedLinkValuesError": "Error while loading the referenced field values",
     "updateReleasableFailedEvent": "Error updating the dataflow release status",
+    "releaseBlockedEvent": "Releasing process is being blocked by another action, please wait",
     "showPublicInfo": "Show public information",
     "availableInPublicView": "Available in public view",
     "restrictFromPublic": "Restrict from public view",

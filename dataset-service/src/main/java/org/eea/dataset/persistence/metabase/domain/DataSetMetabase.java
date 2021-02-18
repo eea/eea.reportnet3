@@ -72,6 +72,10 @@ public class DataSetMetabase {
   @Column(name = "RELEASING")
   private Boolean releasing;
 
+  /** The restrict from public. */
+  @Column(name = "RESTRICT_FROM_PUBLIC")
+  private boolean restrictFromPublic;
+
   /** The partitions. */
   @OneToMany(mappedBy = "idDataSet", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<PartitionDataSetMetabase> partitions;

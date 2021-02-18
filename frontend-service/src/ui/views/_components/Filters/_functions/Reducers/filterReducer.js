@@ -69,6 +69,13 @@ export const filterReducer = (state, { type, payload }) => {
         searched: payload.searched
       };
 
+    case 'UPDATE_FILTER_BY':
+      return {
+        ...state,
+        filterBy: payload.filterBy,
+        previousState: { filtered: state.filtered, filterBy: payload.filterBy }
+      };
+
     case 'ON_CHECKBOX_FILTER':
       return {
         ...state,

@@ -780,7 +780,7 @@ public class DatasetSnapshotServiceTest {
     dataset.setDataProviderId(1L);
     dataset.setDataSetName("datsetName");
     representative.setDataProviderId(1L);
-    representative.setProviderAccount("providerAccount");
+    representative.setProviderAccounts(Arrays.asList("providerAccount"));
     representative.setReceiptDownloaded(true);
     representative.setReceiptOutdated(true);
     datasets.add(dataset);
@@ -1052,7 +1052,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(schema);
 
     datasetSnapshotService.releaseLocksRelatedToRelease(1L, 1L);
-    Mockito.verify(lockService, times(11)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(12)).removeLockByCriteria(Mockito.any());
   }
 
 }
