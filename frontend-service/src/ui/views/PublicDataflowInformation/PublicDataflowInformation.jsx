@@ -11,6 +11,7 @@ import styles from './PublicDataflowInformation.module.scss';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -23,6 +24,7 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
   const { params } = match;
 
   const [dataflowData, setDataflowData] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   const { datasets } = dataflowData;
 
@@ -55,7 +57,11 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
   const onLoadDataflowData = async () => {
     try {
       setDataflowData(await DataflowService.getPublicDataflowInformation(params.dataflowId));
-    } catch (error) {}
+    } catch (error) {
+      console.error('error', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isReleasedTemplate = rowData => {
@@ -103,8 +109,8 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
   return (
     <PublicLayout>
       <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-      <div>
-        {!isEmpty(datasets) ? (
+      {!isLoading ? (
+        !isEmpty(datasets) ? (
           <div className={styles.datasets}>
             <DataTable
               autoLayout={true}
@@ -126,8 +132,10 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
           <div className={styles.datasetsWithoutTable}>
             <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
           </div>
-        )}
-      </div>
+        )
+      ) : (
+        <Spinner style={{ top: 0, left: 0 }} />
+      )}
     </PublicLayout>
   );
 });
