@@ -108,10 +108,10 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
 
   return (
     <PublicLayout>
-      <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-      {!isLoading ? (
-        !isEmpty(datasets) ? (
-          <div className={styles.datasets}>
+      <div className={`${styles.container} rep-container`}>
+        <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+        {!isLoading ? (
+          !isEmpty(datasets) ? (
             <DataTable
               autoLayout={true}
               paginator={true}
@@ -127,15 +127,13 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
               value={datasets}>
               {renderColumns(datasets)}
             </DataTable>
-          </div>
-        ) : (
-          <div className={styles.datasetsWithoutTable}>
+          ) : (
             <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
-          </div>
-        )
-      ) : (
-        <Spinner style={{ top: 0, left: 0 }} />
-      )}
+          )
+        ) : (
+          <Spinner style={{ top: 0, left: 0 }} />
+        )}
+      </div>
     </PublicLayout>
   );
 });
