@@ -40,12 +40,10 @@ public class CreateUpdateViewCommand extends AbstractEEAEventHandlerCommand {
 
     Long datasetId =
         Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
-    String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
     Boolean isMaterialized =
         Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isMaterialized")));
     Boolean checkSQL = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("checkSQL")));
 
-    viewHelper.insertViewProcces(datasetId, isMaterialized, user, checkSQL);
-
+    viewHelper.insertViewProcces(datasetId, isMaterialized, checkSQL);
   }
 }
