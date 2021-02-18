@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import orderBy from 'lodash/orderBy';
 import dayjs from 'dayjs';
 
 import { config } from 'conf';
@@ -390,56 +391,56 @@ const getPublicDataflowInformation = async dataflowId => {
     reportingDatasets: [
       {
         dataSetName: 'Germany',
-        releasing: false,
-        dateReleased: null,
+        isReleased: true,
+        dateReleased: 1612960717918,
         dataProviderId: 5,
         nameDatasetSchema: 'schema1'
       },
       {
         dataSetName: 'Spain',
-        releasing: false,
+        isReleased: false,
         dateReleased: null,
         dataProviderId: 1,
         nameDatasetSchema: 'schema1'
       },
       {
         dataSetName: 'France',
-        releasing: false,
+        isReleased: true,
         dateReleased: null,
         dataProviderId: 2,
         nameDatasetSchema: 'schema2'
       },
       {
         dataSetName: 'Germany',
-        releasing: false,
+        isReleased: false,
         dateReleased: null,
         dataProviderId: 5,
         nameDatasetSchema: 'schema2'
       },
       {
         dataSetName: 'Spain',
-        releasing: false,
+        isReleased: false,
         dateReleased: null,
         dataProviderId: 1,
         nameDatasetSchema: 'schema2'
       },
       {
         dataSetName: 'France',
-        releasing: false,
+        isReleased: false,
         dateReleased: null,
         dataProviderId: 2,
         nameDatasetSchema: 'schema3'
       },
       {
         dataSetName: 'Germany',
-        releasing: false,
+        isReleased: false,
         dateReleased: null,
         dataProviderId: 5,
         nameDatasetSchema: 'schema3'
       },
       {
         dataSetName: 'Spain',
-        releasing: false,
+        isReleased: false,
         dateReleased: null,
         dataProviderId: 1,
         nameDatasetSchema: 'schema3'

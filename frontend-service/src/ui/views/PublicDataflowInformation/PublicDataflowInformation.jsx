@@ -1,21 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import isEmpty from 'lodash/isEmpty';
+
+import styles from './PublicDataflowInformation.module.scss';
+
+import { Column } from 'primereact/column';
+import { DataTable } from 'ui/views/_components/DataTable';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 export const PublicDataflowInformation = withRouter(({ history, match }) => {
+  const resources = useContext(ResourcesContext);
+
   const { params } = match;
 
   const [dataflowData, setDataflowData] = useState({});
 
-  console.log('dataflowData', dataflowData);
 
   useEffect(() => {
     onLoadDataflowData();
   }, []);
+
+  const getHeader = fieldHeader => {
+    let header;
+    switch (fieldHeader) {
+      case 'datasetSchemaName':
+        header = resources.messages['countries'];
+        break;
+      case 'name':
+        header = resources.messages['datasetName'];
+        break;
+      case 'releaseDate':
+        header = resources.messages['releaseDate'];
+        break;
+      case 'isReleased':
+        header = resources.messages['isReleased'];
+        break;
+      default:
+        break;
+    }
+
+    return header;
+  };
 
   const onLoadDataflowData = async () => {
     try {
@@ -23,14 +57,55 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
     } catch (error) {}
   };
 
+  const isReleasedTemplate = rowData => {
+    return (
+      <div className={styles.checkedValueColumn}>
+        {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      </div>
+    );
+  };
+  const renderColumns = datasets => {
+    const fieldColumns = Object.keys(datasets[0])
+      .filter(
+        key =>
+          key.includes('datasetSchemaName') ||
+          key.includes('name') ||
+          key.includes('isReleased') ||
+          key.includes('releaseDate')
+      )
+      .map(field => {
+        let template = null;
+        if (field === 'isReleased') template = isReleasedTemplate;
+        return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
+      });
+
+    return fieldColumns;
+  };
+
   return (
     <PublicLayout>
-      <Title
-        icon={'clone'}
-        iconSize={'4rem'}
-        subtitle={'Here should be a very long description'}
-        title={'Cosas de dataflowss'}
-      />
+      <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+      <div>
+        {!isEmpty(dataflowData.datasets) ? (
+          <div className={styles.datasets}>
+            <DataTable
+              autoLayout={true}
+              // onRowClick={event => getManageUniqueConstraint(event.data)}
+              paginator={true}
+              paginatorRight={<span>{`${resources.messages['totalRecords']}  ${dataflowData.datasets.length}`}</span>}
+              rows={10}
+              rowsPerPageOptions={[5, 10, 15]}
+              totalRecords={dataflowData.datasets.length}
+              value={dataflowData.datasets}>
+              {renderColumns(dataflowData.datasets)}
+            </DataTable>
+          </div>
+        ) : (
+          <div className={styles.datasetsWithoutTable}>
+            <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+          </div>
+        )}
+      </div>
     </PublicLayout>
   );
 });

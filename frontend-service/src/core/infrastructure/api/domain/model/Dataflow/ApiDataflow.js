@@ -120,7 +120,6 @@ export const apiDataflow = {
     return response.data;
   },
   getPublicDataflowInformation: async dataflowId => {
-    console.log('dataflowId', dataflowId);
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.getPublicDataflowInformation, { dataflowId })
     });
