@@ -1,7 +1,8 @@
 package org.eea.dataflow.controller.fme;
 
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.utils.StreamingUtil;
 import org.eea.dataflow.persistence.domain.FMEJob;
@@ -109,26 +110,32 @@ public class FMEControllerImpl implements FMEController {
   @ApiResponse(code = 400, message = "Internal Server Error")
   public void operationFinished(@ApiParam(value = "FME Operation info",
       type = "Object") @RequestBody FMEOperationInfoVO fmeOperationInfoVO) {
+
+    Exception exception = null;
+    HttpStatus httpStatus = null;
+    Map<String, Object> lockCriteria = new HashMap<>();
+    lockCriteria.put("criteria", LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
+    lockCriteria.put("datasetId", fmeOperationInfoVO.getDatasetId());
+
     try {
       FMEJob fmeJob = fmeCommunicationService.authenticateAndAuthorize(
           fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getRn3JobId());
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
           fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
-              fmeOperationInfoVO.getDatasetId()));
-      integrationService.releaseLocks(fmeOperationInfoVO.getDatasetId());
     } catch (EEAForbiddenException e) {
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
-              fmeOperationInfoVO.getDatasetId()));
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      exception = e;
+      httpStatus = HttpStatus.FORBIDDEN;
     } catch (EEAUnauthorizedException e) {
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(),
-              fmeOperationInfoVO.getDatasetId()));
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);
+      exception = e;
+      httpStatus = HttpStatus.UNAUTHORIZED;
+    }
+
+    lockService.removeLockByCriteria(lockCriteria);
+    integrationService.releaseLocks(fmeOperationInfoVO.getDatasetId());
+
+    if (null != exception) {
+      throw new ResponseStatusException(httpStatus, exception.getMessage(), exception);
     }
   }
 

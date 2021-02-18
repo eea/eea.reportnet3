@@ -47,6 +47,12 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASET_ID = "dataset_id";
 
+  /** The Constant DATASET_ID: {@value}. */
+  public static final String DATASETID = "datasetId";
+
+  /** The Constant DATASET_ID: {@value}. */
+  public static final String SIGNATURE = "signature";
+
   /** The Constant PK_HAS_MULTIPLE_VALUES: {@value}. */
   public static final String PK_HAS_MULTIPLE_VALUES = "pkHasMultipleValues";
 
@@ -101,17 +107,16 @@ public final class LiteralConstants {
   /** The Constant READ_ONLY: {@value}. */
   public static final String READ_ONLY = "readOnly";
 
-
-  /** The Constant SNAPSHOT_FILE_ATTACHMENT_SUFFIX. */
+  /** The Constant SNAPSHOT_FILE_ATTACHMENT_SUFFIX: {@value}. */
   public static final String SNAPSHOT_FILE_ATTACHMENT_SUFFIX = "_table_AttachmentValue.snap";
 
-  /** The Constant INTEGRATION_ID. */
+  /** The Constant INTEGRATION_ID: {@value}. */
   public static final String INTEGRATION_ID = "integrationId";
 
-  /** The Constant OPERATION. */
+  /** The Constant OPERATION: {@value}. */
   public static final String OPERATION = "operation";
 
-  /** The Constant USER. */
+  /** The Constant USER: {@value}. */
   public static final String USER = "user";
 
   /** The Constant ID: {@value}. */
@@ -120,6 +125,26 @@ public final class LiteralConstants {
   /** The Constant FIELD_SCHEMAS: {@value}. */
   public static final String FIELD_SCHEMAS = "fieldSchemas";
 
+  /** The Constant DATAFLOWID: {@value}. */
+  public static final String DATAFLOWID = "dataflowId";
+
+  /** The Constant DATAPROVIDERID: {@value}. */
+  public static final String DATAPROVIDERID = "dataProviderId";
+
+  /** The Constant FIELDSCHEMAID: {@value}. */
+  public static final String FIELDSCHEMAID = "fieldSchemaId";
+
+  /** The Constant TABLESCHEMAID: {@value}. */
+  public static final String TABLESCHEMAID = "tableSchemaId";
+
+  /** The Constant RELEASED: {@value}. */
+  public static final String RELEASED = "released";
+
+  /** The Constant DATAFLOWIDORIGIN: {@value}. */
+  public static final String DATAFLOWIDORIGIN = "dataflowIdOrigin";
+
+  /** The Constant DATAFLOWIDDESTINATION: {@value}. */
+  public static final String DATAFLOWIDDESTINATION = "dataflowIdDestination";
 
   /**
    * Instantiates a new literal constants.

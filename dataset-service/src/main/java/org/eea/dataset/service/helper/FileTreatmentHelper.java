@@ -50,6 +50,8 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,90 +74,62 @@ import feign.FeignException;
 @Component
 public class FileTreatmentHelper implements DisposableBean {
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The max running tasks.
-   */
+  /** The import executor service. */
+  private ExecutorService importExecutorService;
+
+  /** The batch size. */
+  private int batchSize = 1000;
+
+  /** The max running tasks. */
   @Value("${dataset.task.parallelism}")
   private int maxRunningTasks;
 
-  /**
-   * The import path.
-   */
+  /** The import path. */
   @Value("${importPath}")
   private String importPath;
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The integration controller.
-   */
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
+
+  /** The integration controller. */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The data set mapper.
-   */
+  /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-
-  /**
-   * The import executor service.
-   */
-  private ExecutorService importExecutorService;
-
-
-  /**
-   * The rules repository.
-   */
+  /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
 
-  /**
-   * The unique constraint repository.
-   */
+  /** The unique constraint repository. */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
 
-  /**
-   * The rules controller zuul.
-   */
+  /** The rules controller zuul. */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
-
-
-  /**
-   * The batch size.
-   */
-  private int batchSize = 1000;
 
   /**
    * Inits the.
@@ -192,7 +166,10 @@ public class FileTreatmentHelper implements DisposableBean {
       boolean replace) throws EEAException {
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
     if (null == schema) {
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
           datasetId, tableSchemaId, file.getName());
       throw new EEAException(
@@ -694,7 +671,6 @@ public class FileTreatmentHelper implements DisposableBean {
     return integrities;
   }
 
-
   /**
    * Release lock.
    *
@@ -702,7 +678,10 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void releaseLock(Long datasetId) {
     try {
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
 
       releaseLockReleasingProcess(datasetId);
@@ -710,7 +689,6 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
     }
   }
-
 
   /**
    * Release lock releasing process.
@@ -721,12 +699,13 @@ public class FileTreatmentHelper implements DisposableBean {
     // Release lock to the releasing process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     if (datasetMetabaseVO.getDataProviderId() != null) {
-      datasetService.releaseLock(LockSignature.RELEASE_SNAPSHOTS.getValue(),
-          datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId());
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      importFileData.put(LiteralConstants.DATAFLOWID, datasetMetabaseVO.getDataflowId());
+      importFileData.put(LiteralConstants.DATAPROVIDERID, datasetMetabaseVO.getDataProviderId());
+      lockService.removeLockByCriteria(importFileData);
     }
-
   }
-
 
   /**
    * File management.
@@ -928,7 +907,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
-        datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
         releaseLockReleasingProcess(datasetId);
       }
 
@@ -945,7 +927,10 @@ public class FileTreatmentHelper implements DisposableBean {
     if (error) {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
           datasetId, file.getName(), integrationVO);
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       releaseLockReleasingProcess(datasetId);
       throw new EEAException("Error executing integration");
     }

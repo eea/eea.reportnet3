@@ -392,13 +392,6 @@ public interface DatasetService {
   Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
 
   /**
-   * Release lock.
-   *
-   * @param criteria the criteria
-   */
-  void releaseLock(Object... criteria);
-
-  /**
    * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
    * status design or reportingDataset in state Draft.
    *

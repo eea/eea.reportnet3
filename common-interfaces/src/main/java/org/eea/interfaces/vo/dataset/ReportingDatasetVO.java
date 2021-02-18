@@ -49,4 +49,7 @@ public class ReportingDatasetVO implements Serializable {
   /** The releasing. */
   private Boolean releasing;
 
+  /** The available in public. */
+  private boolean availableInPublic;
+
 }
