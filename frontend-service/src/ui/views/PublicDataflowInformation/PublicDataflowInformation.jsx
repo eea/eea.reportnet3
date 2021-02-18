@@ -64,7 +64,7 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
     }
   };
 
-  const isReleasedTemplate = rowData => {
+  const isReleasedBodyColumn = rowData => {
     return (
       <div className={styles.checkedValueColumn}>
         {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
@@ -99,7 +99,7 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
       )
       .map(field => {
         let template = null;
-        if (field === 'isReleased') template = isReleasedTemplate;
+        if (field === 'isReleased') template = isReleasedBodyColumn;
         return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
       });
 
