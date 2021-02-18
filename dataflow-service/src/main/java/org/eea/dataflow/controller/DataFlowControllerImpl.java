@@ -12,6 +12,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -466,13 +467,29 @@ public class DataFlowControllerImpl implements DataFlowController {
 
 
   /**
+   * Gets the public dataflow
+   *
+   * @return the public dataflow
+   */
+  @Override
+  @GetMapping("/getPublicDataflow/{dataflowId}")
+  public DataflowPublicVO getPublicDataflow(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    try {
+      return dataflowService.getPublicDataflowById(dataflowId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
    * Gets the public dataflows.
    *
    * @return the public dataflows
    */
   @Override
   @GetMapping("/getPublicDataflows")
-  public List<DataFlowVO> getPublicDataflows() {
+  public List<DataflowPublicVO> getPublicDataflows() {
     return dataflowService.getPublicDataflows();
   }
 

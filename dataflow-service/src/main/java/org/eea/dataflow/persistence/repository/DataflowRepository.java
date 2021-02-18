@@ -112,6 +112,21 @@ public interface DataflowRepository
       value = "select  df.id as id ,ds.status as status from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
   List<IDatasetStatus> getDatasetsStatus(@Param("datasetIds") List<Long> datasetIds);
 
+
+  /**
+   * Find by available true.
+   *
+   * @return the list
+   */
+  List<Dataflow> findByShowPublicInfoTrue();
+
+  /**
+   * Find by id and available true.
+   *
+   * @return the dataflow
+   */
+  Dataflow findByIdAndShowPublicInfoTrue(Long dataflowId);
+
   /**
    * The Interface IDatasetStatus.
    */

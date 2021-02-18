@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -160,5 +161,14 @@ public interface DataFlowController {
    * @return the public dataflows
    */
   @GetMapping("/getPublicDataflows")
-  List<DataFlowVO> getPublicDataflows();
+  List<DataflowPublicVO> getPublicDataflows();
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+
+  @GetMapping("/getPublicDataflow/{dataflowId}")
+  DataflowPublicVO getPublicDataflow(@PathVariable("dataflowId") Long dataflowId);
 }
