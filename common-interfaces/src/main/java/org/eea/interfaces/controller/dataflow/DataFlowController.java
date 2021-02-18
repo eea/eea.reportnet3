@@ -161,4 +161,17 @@ public interface DataFlowController {
    */
   @GetMapping("/getPublicDataflows")
   List<DataFlowVO> getPublicDataflows();
+
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @PutMapping("private/updatePublicStatus")
+  void updateDataFlowPublicStatus(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("showPublicInfo") boolean showPublicInfo);
+
+
 }

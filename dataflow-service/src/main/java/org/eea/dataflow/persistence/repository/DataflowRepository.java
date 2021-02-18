@@ -112,6 +112,20 @@ public interface DataflowRepository
       value = "select  df.id as id ,ds.status as status from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
   List<IDatasetStatus> getDatasetsStatus(@Param("datasetIds") List<Long> datasetIds);
 
+
+  /**
+   * Update public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "update dataflow set show_public_info = :showPublicInfo where id = :dataflowId")
+  void updatePublicStatus(@Param("dataflowId") Long dataflowId,
+      @Param("showPublicInfo") boolean showPublicInfo);
+
   /**
    * The Interface IDatasetStatus.
    */
@@ -120,6 +134,7 @@ public interface DataflowRepository
 
     String getStatus();
   }
+
 
 
 }
