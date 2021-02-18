@@ -16,7 +16,6 @@ export const PublicCard = ({
   dueDate,
   frequency,
   onCardClick,
-  scenario = 'dfgjdfk',
   subtitle,
   title,
   obligation,
@@ -45,22 +44,15 @@ export const PublicCard = ({
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>
         </div>
-        {scenario && (
-          <div className={styles.pilotScenarioAmbition} onMouseDown={() => window.open('blablab.com')}>
-            <p>
-              <strong>Pilot scenario ambition: </strong> {scenario}
-            </p>
-          </div>
-        )}
         {obligation && (
-          <div className={styles.pilotScenarioAmbition}>
+          <div className={styles.legalInstrumentAndObligation} onMouseDown={() => window.open('blablab.com')}>
             <p>
               <strong>Obligation: </strong> {obligation}
             </p>
           </div>
         )}
         {instrument && (
-          <div className={styles.pilotScenarioAmbition}>
+          <div className={styles.legalInstrumentAndObligation}>
             <p>
               <strong>instrument: </strong> {instrument}
             </p>
