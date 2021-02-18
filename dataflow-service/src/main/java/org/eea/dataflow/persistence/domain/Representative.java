@@ -65,6 +65,9 @@ public class Representative {
   @Column(name = "has_datasets")
   private Boolean hasDatasets;
 
+  /** The restrict from public. */
+  @Column(name = "restrict_from_public")
+  private boolean restrictFromPublic;
 
   /**
    * Equals.
