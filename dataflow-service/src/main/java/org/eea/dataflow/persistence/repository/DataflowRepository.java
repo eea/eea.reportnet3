@@ -114,6 +114,20 @@ public interface DataflowRepository
 
 
   /**
+   * Find by available true.
+   *
+   * @return the list
+   */
+  List<Dataflow> findByShowPublicInfoTrue();
+
+  /**
+   * Find by id and available true.
+   *
+   * @return the dataflow
+   */
+  Dataflow findByIdAndShowPublicInfoTrue(Long dataflowId);
+
+  /**
    * Update public status.
    *
    * @param dataflowId the dataflow id
