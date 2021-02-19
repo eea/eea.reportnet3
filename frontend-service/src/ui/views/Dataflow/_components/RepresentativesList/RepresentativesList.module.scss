@@ -5,7 +5,10 @@
   padding-left: 0px;
   list-style: none;
 }
-
+.inputWrapper {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
 .dataProvidersDropdown {
   max-width: 16rem;
 }

@@ -54,7 +54,8 @@ const RepresentativesList = ({
     representatives: [],
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: [],
-    isLoading: false
+    isLoading: false,
+    providerWithEmptyInput: null
   };
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
@@ -106,8 +107,11 @@ const RepresentativesList = ({
 
   const onAddEmptyLeadReporter = dataProviderId => {
     const updatedRepresentativesList = formState.representatives.map(representative => {
-      if (representative.dataProviderId === dataProviderId) {
-        representative.leadReporters.unshift({ leadReporterId: null, leadReporter: '' });
+      if (representative.dataProviderId === dataProviderId && representative.leadReporters) {
+        // TODO
+        representative.leadReporters.unshift({ id: null, account: '' });
+      } else if (representative.dataProviderId === dataProviderId && !representative.leadReporters) {
+        representative.leadReporters = [{ id: null, account: '' }];
       }
       return representative;
     });
@@ -121,17 +125,54 @@ const RepresentativesList = ({
     const { dataProviderId } = representative;
     // TODO
     const leadReporters = representative.leadReporters || [];
+    //------------------------------------------------
+    let inputData = representative.leadReporters;
 
-    console.log('leadReporters', leadReporters);
+    let hasError = formState.representativesHaveError.includes(representative.representativeId);
+
+    const labelId = uuid.v4();
+
+    const onAccountChange = (account, dataProviderId) => {
+      const { representatives } = formState;
+
+      const [thisRepresentative] = representatives.filter(
+        thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
+      );
+      //
+      thisRepresentative.leadReporters = account;
+
+      let representativesHaveError;
+
+      if (isValidEmail(account)) {
+        representativesHaveError = formState.representativesHaveError.filter(
+          representativeId => representativeId !== thisRepresentative.representativeId
+        );
+      } else {
+        representativesHaveError = formState.representativesHaveError;
+        representativesHaveError.unshift(thisRepresentative.representativeId);
+      }
+
+      formDispatcher({
+        type: 'ON_ACCOUNT_CHANGE',
+        payload: {
+          representatives,
+          representativesHaveError: uniq(representativesHaveError)
+        }
+      });
+    };
+
+    //------------------------------------------------
 
     return leadReporters.map(leadReporter => {
       if (leadReporter.id === null) {
         return (
-          <InputText
-            // onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
-            value={leadReporter.account}
-          />
+          <div className={styles.inputWrapper}>
+            <InputText
+              // onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+              // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
+              value={leadReporter.account}
+            />
+          </div>
         );
       }
       return (
@@ -196,8 +237,9 @@ const RepresentativesList = ({
             disabled={representative.hasDatasets}
             id={isEmpty(inputData) ? 'emptyInput' : labelId}
             /*  onBlur={() => {
-              representative.providerAccount = representative.providerAccount.toLowerCase();
-              isValidEmail(representative.providerAccount) &&
+              //TODO pass to array
+              representative.leadReporters = representative.leadReporters[0].toLowerCase();
+              isValidEmail(representative.leadReporters) &&
                 onAddProvider(formDispatcher, formState, representative, dataflowId);
             }} */
             onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
@@ -258,7 +300,7 @@ const RepresentativesList = ({
             style={{ display: 'flex' }}
             icon={'plus'}
             disabled={representative.dataProviderId === formState.providerWithEmptyInput}
-            // onClick={() => onAddEmptyLeadReporter(representative.dataProviderId)}
+            onClick={() => onAddEmptyLeadReporter(representative.dataProviderId)}
           />
         )}
       </>

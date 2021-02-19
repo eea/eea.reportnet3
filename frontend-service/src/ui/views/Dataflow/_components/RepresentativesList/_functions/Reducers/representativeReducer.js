@@ -113,6 +113,13 @@ export const reducer = (state, { type, payload }) => {
         representativeIdToDelete: payload.representativeId
       };
 
+    case 'ADD_NEW_LEAD_REPORTER':
+      return {
+        ...state,
+        providerWithEmptyInput: payload.dataProviderId,
+        representatives: payload.representatives
+      };
+
     default:
       return state;
   }
