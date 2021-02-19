@@ -395,7 +395,7 @@ const getPublicDataflowData = async dataflowId => {
         dateReleased: 1614380000,
         dataProviderId: 5,
         nameDatasetSchema: 'schema1',
-        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
+        publicFileName: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Spain',
@@ -403,7 +403,7 @@ const getPublicDataflowData = async dataflowId => {
         dateReleased: 1614380000,
         dataProviderId: 1,
         nameDatasetSchema: 'schema1',
-        exportableFile: 'dataset_552-public-date-18-02-2021.xlsx'
+        publicFileName: 'dataset_552-public-date-18-02-2021.xlsx'
       },
       {
         dataSetName: 'France',
@@ -412,7 +412,7 @@ const getPublicDataflowData = async dataflowId => {
         dataProviderId: 2,
         nameDatasetSchema:
           'schema2 asdfkjasñfk a kfdjadk fjk dkfja sfkjas dfakd asdkf akdfj asdklfj a aksjfd askfj askdjf asdkfj aslkdfj  kfjasdf askdfj asdfjsakdf jaskdjf ñlajdfaskdf',
-        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
+        publicFileName: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Germany',
@@ -420,7 +420,7 @@ const getPublicDataflowData = async dataflowId => {
         dateReleased: null,
         dataProviderId: 5,
         nameDatasetSchema: 'schema2',
-        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
+        publicFileName: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Spain',
@@ -442,7 +442,7 @@ const getPublicDataflowData = async dataflowId => {
         dateReleased: null,
         dataProviderId: 5,
         nameDatasetSchema: 'schema3',
-        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
+        publicFileName: 'dataset_572-public-date-17-02-2021.xlsx'
       },
       {
         dataSetName: 'Spain',
@@ -450,7 +450,7 @@ const getPublicDataflowData = async dataflowId => {
         dateReleased: null,
         dataProviderId: 1,
         nameDatasetSchema: 'schema3',
-        exportableFile: 'dataset_572-public-date-17-02-2021.xlsx'
+        publicFileName: 'dataset_572-public-date-17-02-2021.xlsx'
       }
     ],
     description: 'd',
@@ -594,9 +594,9 @@ const parseDatasetDTO = datasetDTO =>
     datasetId: datasetDTO.id,
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
-    exportableFile: datasetDTO.exportableFile,
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
+    publicFileName: datasetDTO.publicFileName,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased * 1000).format('YYYY-MM-DD') : '-',
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId

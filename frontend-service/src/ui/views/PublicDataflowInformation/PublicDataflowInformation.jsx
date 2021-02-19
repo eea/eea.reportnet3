@@ -39,12 +39,12 @@ export const PublicDataflowInformation = withRouter(
       onLoadDataflowData();
     }, []);
 
-    const exportableFileBodyColumn = rowData => (
+    const downloadFileBodyColumn = rowData => (
       <div
         className={styles.downloadIcon}
-        onClick={() => onFileDownload(rowData.dataProviderId, rowData.exportableFile)}>
-        {!isNil(rowData.exportableFile) && (
-          <FontAwesomeIcon icon={AwesomeIcons(getFileExtension(rowData.exportableFile))} />
+        onClick={() => onFileDownload(rowData.dataProviderId, rowData.publicFileName)}>
+        {!isNil(rowData.publicFileName) && (
+          <FontAwesomeIcon icon={AwesomeIcons(getFileExtension(rowData.publicFileName))} />
         )}
       </div>
     );
@@ -69,7 +69,7 @@ export const PublicDataflowInformation = withRouter(
         case 'isReleased':
           header = resources.messages['isReleased'];
           break;
-        case 'exportableFile':
+        case 'publicFileName':
           header = resources.messages['file'];
           break;
         default:
@@ -85,7 +85,7 @@ export const PublicDataflowInformation = withRouter(
         { id: 'name', index: 2 },
         { id: 'isReleased', index: 3 },
         { id: 'releaseDate', index: 4 },
-        { id: 'exportableFile', index: 5 }
+        { id: 'publicFileName', index: 5 }
       ];
 
       return datasets
@@ -126,12 +126,12 @@ export const PublicDataflowInformation = withRouter(
             key.includes('name') ||
             key.includes('isReleased') ||
             key.includes('releaseDate') ||
-            key.includes('exportableFile')
+            key.includes('publicFileName')
         )
         .map(field => {
           let template = null;
           if (field === 'isReleased') template = isReleasedBodyColumn;
-          if (field === 'exportableFile') template = exportableFileBodyColumn;
+          if (field === 'publicFileName') template = downloadFileBodyColumn;
           return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
         });
 
@@ -145,7 +145,6 @@ export const PublicDataflowInformation = withRouter(
           {!isLoading ? (
             !isEmpty(datasets) ? (
               <DataTable
-                className={styles.dataflowDataTable}
                 autoLayout={true}
                 paginator={true}
                 paginatorRight={
