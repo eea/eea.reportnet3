@@ -343,7 +343,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           for (ReportingDataset reportingDataset : reportingDatasetList) {
             DataSetMetabase dataset =
                 dataSetMetabaseRepository.findById(reportingDataset.getId()).orElse(null);
-            if (null != dataset) {
+            if (null != dataset
+                && schema.getIdDataSetSchema().toString().equals(dataset.getDatasetSchema())) {
               dataset.setAvailableInPublic(true);
               dataSetMetabaseRepository.save(dataset);
             }
