@@ -38,7 +38,6 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   const onLoadPublicDataflows = async () => {
     try {
       const publicData = await DataflowService.publicData();
-      console.log({ publicData });
       setPublicDataflows(publicData);
     } catch (error) {
       console.error('error', error);

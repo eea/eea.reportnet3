@@ -11,8 +11,6 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
 
   const [dataflowData, setDataflowData] = useState({});
 
-  console.log('dataflowData', dataflowData);
-
   useEffect(() => {
     onLoadDataflowData();
   }, []);
