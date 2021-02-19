@@ -495,7 +495,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       DataProviderVO provider, Long idDataCollection) throws EEAException {
     Long idDataflow = datasetService.getDataFlowIdById(idDataset);
     if (provider != null && idDataCollection != null) {
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
+      TenantResolver
+          .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
       datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
