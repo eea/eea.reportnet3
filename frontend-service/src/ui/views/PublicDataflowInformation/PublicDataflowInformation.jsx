@@ -65,15 +65,6 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
     return header;
   };
 
-  const onLoadDataflowData = async () => {
-    try {
-      setDataflowData(await DataflowService.getPublicDataflowInformation(params.dataflowId));
-    } catch (error) {
-      console.error('error', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const isReleasedBodyColumn = rowData => {
     return (
@@ -141,6 +132,15 @@ export const PublicDataflowInformation = withRouter(({ history, match }) => {
               value={datasets}>
               {renderColumns(datasets)}
             </DataTable>
+    const onLoadDataflowData = async () => {
+      try {
+        setDataflowData(await DataflowService.getPublicDataflowData(dataflowId));
+      } catch (error) {
+        console.error('error', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
           ) : (
             <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
           )

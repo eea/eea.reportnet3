@@ -384,8 +384,8 @@ const getAllSchemas = async dataflowId => {
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
-const getPublicDataflowInformation = async dataflowId => {
-  // const publicDataflowDataDTO = await apiDataflow.getPublicDataflowInformation(dataflowId);
+const getPublicDataflowData = async dataflowId => {
+  // const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
   const publicDataflowDataDTO = {
     id: 70,
     reportingDatasets: [
@@ -908,10 +908,10 @@ export const ApiDataflowRepository = {
   generateApiKey,
   getAllSchemas,
   getApiKey,
+  getPublicDataflowData,
   newEmptyDatasetSchema,
   pending,
   publicData,
-  getPublicDataflowInformation,
   reject,
   reporting,
   schemasValidation,

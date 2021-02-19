@@ -119,9 +119,9 @@ export const apiDataflow = {
 
     return response.data;
   },
-  getPublicDataflowInformation: async dataflowId => {
+  getPublicDataflowData: async dataflowId => {
     const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.getPublicDataflowInformation, { dataflowId })
+      url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId })
     });
 
     return response.data;
