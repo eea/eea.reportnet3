@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DesignDatasetService;
+import org.eea.dataset.service.helper.SchemaHelper;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -67,61 +69,97 @@ import org.springframework.web.server.ResponseStatusException;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetSchemaControllerImplTest {
 
-  /** The data schema controller impl. */
+  /**
+   * The data schema controller impl.
+   */
   @InjectMocks
   private DatasetSchemaControllerImpl dataSchemaControllerImpl;
 
-  /** The expected ex. */
+  /**
+   * The expected ex.
+   */
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Mock
   private DataschemaServiceImpl dataschemaService;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Mock
   private DatasetService datasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The record store controller zuul. */
+  /**
+   * The record store controller zuul.
+   */
   @Mock
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The contributor controller zuul. */
+  /**
+   * The contributor controller zuul.
+   */
   @Mock
   private ContributorControllerZuul contributorControllerZuul;
 
-  /** The integration controller zuul. */
+  /**
+   * The integration controller zuul.
+   */
   @Mock
   private IntegrationControllerZuul integrationControllerZuul;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Mock
   private RulesControllerZuul rulesControllerZuul;
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @Mock
   private DesignDatasetService designDatasetService;
 
-  /** The dataflow controller zuul. */
+  /**
+   * The dataflow controller zuul.
+   */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The dataset schema VO. */
+  /**
+   * The schema helper
+   **/
+  @Mock
+  private SchemaHelper schemaHelper;
+
+  /**
+   * The dataset schema VO.
+   */
   private DataSetSchemaVO datasetSchemaVO;
 
-  /** The security context. */
+  /**
+   * The security context.
+   */
   private SecurityContext securityContext;
 
-  /** The authentication. */
+  /**
+   * The authentication.
+   */
   private Authentication authentication;
 
   /**
@@ -1617,6 +1655,7 @@ public class DatasetSchemaControllerImplTest {
    * Gets the unique constraint test.
    *
    * @return the unique constraint test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -1630,6 +1669,7 @@ public class DatasetSchemaControllerImplTest {
    * Gets the unique constraint error test.
    *
    * @return the unique constraint error test
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
@@ -1705,6 +1745,7 @@ public class DatasetSchemaControllerImplTest {
    * Gets the simple schema error test.
    *
    * @return the simple schema error test
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
@@ -1754,7 +1795,7 @@ public class DatasetSchemaControllerImplTest {
         "application/x-zip-compressed", baos.toByteArray());
 
     dataSchemaControllerImpl.importSchemas(1L, multipartFile);
-    Mockito.verify(dataschemaService, times(1)).importSchemas(Mockito.any(), Mockito.any());
+    Mockito.verify(schemaHelper, times(1)).importSchemas(Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
@@ -1780,7 +1821,6 @@ public class DatasetSchemaControllerImplTest {
       MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
           "application/x-zip-compressed", baos.toByteArray());
 
-
       dataSchemaControllerImpl.importSchemas(1L, multipartFile);
 
     } catch (ResponseStatusException e) {
@@ -1793,7 +1833,6 @@ public class DatasetSchemaControllerImplTest {
   public void testExportSchemas() throws EEAException, IOException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-
 
     dataSchemaControllerImpl.exportSchemas(1L);
     Mockito.verify(dataschemaService, times(1)).exportSchemas(Mockito.any());
