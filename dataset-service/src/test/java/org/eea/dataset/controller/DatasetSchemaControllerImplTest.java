@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DesignDatasetService;
-import org.eea.dataset.service.helper.SchemaHelper;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -141,11 +139,6 @@ public class DatasetSchemaControllerImplTest {
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /**
-   * The schema helper
-   **/
-  @Mock
-  private SchemaHelper schemaHelper;
 
   /**
    * The dataset schema VO.
@@ -1795,7 +1788,7 @@ public class DatasetSchemaControllerImplTest {
         "application/x-zip-compressed", baos.toByteArray());
 
     dataSchemaControllerImpl.importSchemas(1L, multipartFile);
-    Mockito.verify(schemaHelper, times(1)).importSchemas(Mockito.any(), Mockito.any());
+    Mockito.verify(dataschemaService, times(1)).importSchemas(Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)

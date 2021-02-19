@@ -10,7 +10,6 @@ import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DesignDatasetService;
-import org.eea.dataset.service.helper.SchemaHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
@@ -137,11 +136,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
-  /**
-   * The schema helper
-   **/
-  @Autowired
-  private SchemaHelper schemaHelper;
 
   /**
    * Creates the empty dataset schema.
@@ -386,7 +380,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
-          tableSchemaVO.getIdTableSchema(), datasetId))) {
+              tableSchemaVO.getIdTableSchema(), datasetId))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
                 tableSchemaVO.getIdTableSchema(), datasetId),
@@ -929,8 +923,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @param dataflowIdOrigin the dataflow id origin
    * @param dataflowIdDestination the dataflow id destination
    *
-   *     Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's an
-   *     async call. It sends a notification when all the process it's done
+   *        Copy the design datasets of a dataflow (origin) into the current dataflow (target) It's
+   *        an async call. It sends a notification when all the process it's done
    */
   @Override
   @HystrixCommand
@@ -1029,7 +1023,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
-      schemaHelper.importSchemas(dataflowId, file);
+      dataschemaService.importSchemas(dataflowId, file);
     } catch (Exception e) {
       LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);

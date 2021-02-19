@@ -39,7 +39,7 @@ import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.helper.FileTreatmentHelper;
+import org.eea.dataset.service.file.ZipUtils;
 import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
@@ -242,11 +242,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
-  /**
-   * The file treatment helper.
-   */
+
+  /** The zip utils. */
   @Autowired
-  private FileTreatmentHelper fileTreatmentHelper;
+  private ZipUtils zipUtils;
 
 
   /**
@@ -683,7 +682,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // n codelist and multiselect
       if (fieldSchemaVO.getCodelistItems() != null
           && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
-          || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
+              || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
         String[] codelistItems = fieldSchemaVO.getCodelistItems();
         for (int i = 0; i < codelistItems.length; i++) {
           codelistItems[i] = codelistItems[i].trim();
@@ -881,7 +880,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       Document fieldSchema) {
     if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
         && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
-        || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
+            || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
       // we clean blank space in codelist and multiselect
       String[] codelistItems = fieldSchemaVO.getCodelistItems();
       for (int i = 0; i < codelistItems.length; i++) {
@@ -924,7 +923,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       boolean typeModified, Document fieldSchema) {
     if (fieldSchemaVO.getType() != null
         && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
-        .equals(fieldSchemaVO.getType().getValue())) {
+            .equals(fieldSchemaVO.getType().getValue())) {
       typeModified = true;
       if (!(DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
           || DataType.CODELIST.equals(fieldSchemaVO.getType()))
@@ -1187,7 +1186,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           if (tableVO.getRecordSchema() != null
               && tableVO.getRecordSchema().getFieldSchema() != null
               && tableVO.getRecordSchema().getFieldSchema().stream()
-              .anyMatch(field -> field.getId().equals(fieldSchemaVO.getId()))) {
+                  .anyMatch(field -> field.getId().equals(fieldSchemaVO.getId()))) {
             table = tableVO;
             break;
           }
@@ -1991,7 +1990,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if ((DataType.ATTACHMENT.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
           || DataType.ATTACHMENT.equals(fieldSchemaVO.getType()))
           && !fieldSchema.get(LiteralConstants.TYPE_DATA)
-          .equals(fieldSchemaVO.getType().getValue())) {
+              .equals(fieldSchemaVO.getType().getValue())) {
         hasToClean = true;
       }
       // Clean if the type is still ATTACHMENT, but the maxSize or the list of file formats have
@@ -2000,8 +1999,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
           && previousMaxSize != null && previousExtensions != null
           && ((fieldSchemaVO.getMaxSize() != null
-          && (previousMaxSize != fieldSchemaVO.getMaxSize().doubleValue()))
-          || !differentExtensions.isEmpty())) {
+              && (previousMaxSize != fieldSchemaVO.getMaxSize().doubleValue()))
+              || !differentExtensions.isEmpty())) {
         hasToClean = true;
       }
     }
@@ -2146,7 +2145,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       LOG.error("No schemas found to export in the dataflow {}", dataflowId);
       throw new EEAException(String.format("No schemas to export in the dataflow %s", dataflowId));
     }
-    return fileTreatmentHelper.zipSchema(designs, schemas, dataflowId);
+    return zipUtils.zipSchema(designs, schemas, dataflowId);
 
 
   }
@@ -2161,6 +2160,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
+  @Async
   @Override
   public void importSchemas(Long dataflowId, MultipartFile multipartFile)
       throws IOException, EEAException {
@@ -2171,7 +2171,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     try {
       // Unzip the file and keep the classes on an auxiliary bean
-      ImportSchemas importClasses = fileTreatmentHelper.unZipImportSchema(multipartFile);
+      ImportSchemas importClasses = zipUtils.unZipImportSchema(multipartFile);
 
       List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
       // If there are no schemas, error
@@ -2442,14 +2442,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     if (field.getReferencedField().getLinkedConditionalFieldId() != null
         && dictionaryOriginTargetObjectId
-        .containsKey(field.getReferencedField().getLinkedConditionalFieldId().toString())) {
+            .containsKey(field.getReferencedField().getLinkedConditionalFieldId().toString())) {
       field.getReferencedField()
           .setLinkedConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
               .get(field.getReferencedField().getLinkedConditionalFieldId().toString())));
     }
     if (field.getReferencedField().getMasterConditionalFieldId() != null
         && dictionaryOriginTargetObjectId
-        .containsKey(field.getReferencedField().getMasterConditionalFieldId().toString())) {
+            .containsKey(field.getReferencedField().getMasterConditionalFieldId().toString())) {
       field.getReferencedField()
           .setMasterConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
               .get(field.getReferencedField().getMasterConditionalFieldId().toString())));
