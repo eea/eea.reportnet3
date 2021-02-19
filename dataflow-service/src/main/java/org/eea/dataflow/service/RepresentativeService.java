@@ -123,4 +123,16 @@ public interface RepresentativeService {
    */
   byte[] importFile(Long dataflowId, Long groupId, MultipartFile file)
       throws EEAException, IOException;
+
+
+  /**
+   * Update representative visibility restrictions.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  public void updateRepresentativeVisibilityRestrictions(Long dataflowId, Long dataProviderId,
+      boolean restrictFromPublic);
+
 }
