@@ -12,6 +12,7 @@ export const DatasetRepository = {
   deleteTableDesign: () => Promise.reject('[DatasetRepository#deleteTableDesign] must be implemented'),
   downloadExportFile: () => Promise.reject('[DatasetRepository#downloadExportFile] must be implemented'),
   downloadFileData: () => Promise.reject('[DatasetRepository#downloadFileData] must be implemented'),
+  downloadDatasetFileData: () => Promise.reject('[DatasetRepository#downloadDatasetFileData] must be implemented'),
   errorPositionByObjectId: () => Promise.reject('[DatasetRepository#errorPositionByObjectId] must be implemented'),
   errorsById: () => Promise.reject('[DatasetRepository#errorsById] must be implemented'),
   errorStatisticsById: () => Promise.reject('[DatasetRepository#errorStatisticsById] must be implemented'),

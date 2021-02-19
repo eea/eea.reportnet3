@@ -95,6 +95,9 @@ const downloadExportFile = async (datasetId, fileName, providerId) =>
 
 const downloadFileData = async (datasetId, fieldId) => await apiDataset.downloadFileData(datasetId, fieldId);
 
+const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
+  await apiDataset.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+
 const errorsById = async (
   datasetId,
   pageNum,
@@ -698,6 +701,7 @@ export const ApiDatasetRepository = {
   deleteTableDesign,
   downloadExportFile,
   downloadFileData,
+  downloadDatasetFileData,
   errorPositionByObjectId,
   errorsById,
   errorStatisticsById,
