@@ -16,6 +16,13 @@ const apiRepresentative = {
     return response;
   },
 
+  addLeadReporter: async (leadReporterAccount, representativeId) => {
+    return await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.addLeadReporter, { representativeId }),
+      data: { email: leadReporterAccount }
+    });
+  },
+
   allDataProviders: async dataProviderGroupId => {
     const response = await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.allDataProviders, {
@@ -44,20 +51,13 @@ const apiRepresentative = {
     return response;
   },
 
+  deleteLeadReporter: async leadReporterId => {
+    return await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, leadReporterId) });
+  },
+
   getProviderTypes: async () => {
     const response = await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.getProviderTypes, {})
-    });
-    return response;
-  },
-
-  updateProviderAccount: async (representativeId, providerAccount) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.updateProviderAccount, {}),
-      data: {
-        id: representativeId,
-        providerAccounts: [providerAccount]
-      }
     });
     return response;
   },
@@ -68,6 +68,24 @@ const apiRepresentative = {
       data: {
         id: representativeId,
         dataProviderId: dataProviderId
+      }
+    });
+    return response;
+  },
+
+  updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId) => {
+    return await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.updateLeadReporter, {}),
+      data: { email: leadReporterAccount, id: leadReporterId, representativeId }
+    });
+  },
+
+  updateProviderAccount: async (representativeId, providerAccount) => {
+    const response = await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.updateProviderAccount, {}),
+      data: {
+        id: representativeId,
+        providerAccounts: [providerAccount]
       }
     });
     return response;
