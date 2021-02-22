@@ -158,4 +158,39 @@ public class ReportingDatasetServiceTest {
     Mockito.verify(reportingDatasetPublicMapper, times(1)).entityListToClass(Mockito.any());
   }
 
+  @Test
+  public void getDataSetIdByDataflowIdAndDataProviderIdTest() {
+    List<ReportingDatasetVO> datasets = new ArrayList<>();
+    ReportingDatasetVO dataset = new ReportingDatasetVO();
+    DesignDataset designDataset = new DesignDataset();
+    ArrayList<DesignDataset> designs = new ArrayList<>();
+    designDataset.setDatasetSchema("");
+    designs.add(designDataset);
+    dataset.setId(1L);
+    datasets.add(dataset);
+    Snapshot snap = new Snapshot();
+    snap.setId(1L);
+    snap.setDcReleased(false);
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(1L);
+    snap.setReportingDataset(reporting);
+    when(reportingDatasetRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
+        Mockito.any())).thenReturn(new ArrayList<>());
+    when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);
+    when(snapshotRepository.findByReportingDatasetAndRelease(Mockito.any(), Mockito.any()))
+        .thenReturn(Arrays.asList(snap));
+    when(designDatasetRepository.findbyDatasetSchemaList(Mockito.any())).thenReturn(designs);
+    assertEquals("failed assertion", datasets,
+        reportingDatasetService.getDataSetIdByDataflowIdAndDataProviderId(1L, 1L));
+  }
+
+  @Test
+  public void getDataSetIdByDataflowIdNullAndDataProviderIdTest() {
+    when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    when(reportingDatasetRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
+        Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("failed assertion", new ArrayList<>(), reportingDatasetService
+        .getDataSetIdByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.any()));
+  }
+
 }
