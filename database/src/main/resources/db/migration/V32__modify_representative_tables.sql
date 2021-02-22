@@ -7,7 +7,7 @@ CREATE TABLE if not exists public.representative_leadreporter (
 
 -- Permissions
 
-ALTER TABLE public.representative_leadreporter OWNER TO testuser, dataflow, dataset, recordstore, validation;
+ALTER TABLE public.representative_leadreporter OWNER TO testuser;
 GRANT ALL ON TABLE public.representative_leadreporter TO testuser, dataflow, dataset, recordstore, validation;
 
 
