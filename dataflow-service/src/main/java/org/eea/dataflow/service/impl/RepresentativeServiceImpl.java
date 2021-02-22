@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataProviderMapper;
@@ -488,38 +489,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     LeadReporter leadReporter = leadReporterMapper.classToEntity(leadReporterVO);
     leadReporter.setRepresentative(representative);
     LOG.info("Insert new lead reporter relation to representative: {}", representativeId);
-    addLeadReporterPermissions(email, representative);
+    modifyLeadReporterPermissions(email, representative, false);
     return leadReporterRepository.save(leadReporter).getId();
 
-  }
-
-  private void addLeadReporterPermissions(String email, Representative representative) {
-    if (Boolean.TRUE.equals(representative.getHasDatasets())) {
-      List<ResourceAssignationVO> assignments = new ArrayList<>();
-      // get datasetId
-      List<ReportingDatasetVO> datasets =
-          datasetMetabaseController.findReportingDataSetIdByDataflowIdAndProviderId(
-              representative.getDataflow().getId(), representative.getDataProvider().getId());
-      // assign resource to lead reporter
-      for (ReportingDatasetVO dataset : datasets) {
-        assignments.add(
-            createAssignments(dataset.getId(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
-      }
-      // Assign Dataflow-%s-LEAD_REPORTER
-      assignments.add(createAssignments(representative.getDataflow().getId(), email,
-          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
-      userManagementControllerZull.addContributorsToResources(assignments);
-    }
-  }
-
-  private ResourceAssignationVO createAssignments(Long id, String email, ResourceGroupEnum group) {
-
-    ResourceAssignationVO resource = new ResourceAssignationVO();
-    resource.setResourceId(id);
-    resource.setEmail(email);
-    resource.setResourceGroup(group);
-
-    return resource;
   }
 
   @Override
@@ -546,8 +518,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 .filter(reporter -> leadReporterVO.getEmail().equals(reporter.getEmail()))
                 .collect(Collectors.counting()) == 0) {
           leadReporter.setEmail(leadReporterVO.getEmail());
+          modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
         }
-        addLeadReporterPermissions(leadReporterVO.getEmail(), representative);
       }
     }
     representative = new Representative();
@@ -568,12 +540,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   @Transactional
   public void deleteLeadReporter(Long leadReporterId) throws EEAException {
-    if (leadReporterId == null) {
-      throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    Optional<LeadReporter> leadReporter = leadReporterRepository.findById(leadReporterId);
+    if (leadReporter.isPresent()) {
+      modifyLeadReporterPermissions(leadReporter.get().getEmail(),
+          leadReporter.get().getRepresentative(), true);
     }
     LOG.info("Deleting the lead reporter relation");
     leadReporterRepository.deleteById(leadReporterId);
-    // if (hasdatasets) remove permit?
   }
 
 
@@ -591,5 +564,54 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         restrictFromPublic);
   }
 
+  /**
+   * Modify lead reporter permissions.
+   *
+   * @param email the email
+   * @param representative the representative
+   * @param remove the remove
+   */
+  private void modifyLeadReporterPermissions(String email, Representative representative,
+      boolean remove) {
+    if (Boolean.TRUE.equals(representative.getHasDatasets())) {
+      List<ResourceAssignationVO> assignments = new ArrayList<>();
+      // get datasetId
+      List<ReportingDatasetVO> datasets =
+          datasetMetabaseController.findReportingDataSetIdByDataflowIdAndProviderId(
+              representative.getDataflow().getId(), representative.getDataProvider().getId());
+      // assign resource to lead reporter
+      for (ReportingDatasetVO dataset : datasets) {
+        assignments.add(
+            createAssignments(dataset.getId(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
+      }
+      // Assign Dataflow-%s-LEAD_REPORTER
+      assignments.add(createAssignments(representative.getDataflow().getId(), email,
+          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+      if (!remove) {
+        userManagementControllerZull.addContributorsToResources(assignments);
+      } else {
+        userManagementControllerZull.removeContributorsFromResources(assignments);
+      }
+    }
+  }
+
+
+  /**
+   * Creates the assignments.
+   *
+   * @param id the id
+   * @param email the email
+   * @param group the group
+   * @return the resource assignation VO
+   */
+  private ResourceAssignationVO createAssignments(Long id, String email, ResourceGroupEnum group) {
+
+    ResourceAssignationVO resource = new ResourceAssignationVO();
+    resource.setResourceId(id);
+    resource.setEmail(email);
+    resource.setResourceGroup(group);
+
+    return resource;
+  }
 }
 
