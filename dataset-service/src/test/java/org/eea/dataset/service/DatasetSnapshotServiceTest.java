@@ -1025,7 +1025,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(schemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(schema);
     Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
-    datasetSnapshotService.createReleaseSnapshots(1L, 1L);
+    datasetSnapshotService.createReleaseSnapshots(1L, 1L, true);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
         Mockito.anyBoolean());
   }
