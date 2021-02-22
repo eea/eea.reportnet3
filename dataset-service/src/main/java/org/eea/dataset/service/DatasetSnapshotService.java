@@ -81,11 +81,10 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
    * @param datasetType the dataset type
-   * @param user the user
    * @throws EEAException the EEA exception
    */
   void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination, Long idSnapshot,
-      Boolean deleteData, DatasetTypeEnum datasetType, String user) throws EEAException;
+      Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException;
 
   /**
    * Release snapshot.

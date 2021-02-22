@@ -22,6 +22,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
@@ -136,7 +137,8 @@ public class ValidationHelperTest {
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_RECORD);
     eeaEventVO.setData(data);
     processesMap = new ConcurrentHashMap<>();
-    executorService = Executors.newFixedThreadPool(2);
+    executorService =
+        new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2));
     MockitoAnnotations.initMocks(this);
     SecurityContextHolder.setContext(securityContext);
   }
@@ -384,7 +386,7 @@ public class ValidationHelperTest {
   public void processValidationExcedingMaximumParallelism()
       throws EEAException, InterruptedException {
     ReflectionTestUtils.setField(validationHelper, "validationExecutorService",
-        Executors.newFixedThreadPool(2));
+        new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2)));
     ReflectionTestUtils.setField(validationHelper, "maxRunningTasks", 2);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");

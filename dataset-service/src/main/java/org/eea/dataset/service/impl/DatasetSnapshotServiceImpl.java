@@ -400,8 +400,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        DatasetTypeEnum.REPORTING, SecurityContextHolder.getContext().getAuthentication().getName(),
-        false, deleteData);
+        DatasetTypeEnum.REPORTING, false, deleteData);
   }
 
   /**
@@ -412,20 +411,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
    * @param datasetType the dataset type
-   * @param user the user
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
   public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
-      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, String user)
-      throws EEAException {
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, user, false, deleteData);
+        datasetType, false, deleteData);
   }
 
   /**

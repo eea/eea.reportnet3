@@ -3,7 +3,6 @@ package org.eea.validation.util;
 import java.sql.Timestamp;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,7 +29,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.security.jwt.utils.EeaUserDetails;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -45,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
@@ -127,7 +125,8 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    validationExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
   }
 
   /**
@@ -224,15 +223,10 @@ public class ValidationHelper implements DisposableBean {
     } else {
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
-      values.put(LiteralConstants.USER,
-          SecurityContextHolder.getContext().getAuthentication().getName());
       values.put("released", released);
-
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
-
     }
   }
-
 
   /**
    * Execute validation process.
@@ -345,16 +339,15 @@ public class ValidationHelper implements DisposableBean {
 
     // first every task is always queued up to ensure the order
 
-    if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
+    if (((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+        .getDelegateExecutorService()).getActiveCount() == maxRunningTasks) {
       LOG.info(
           "Event {} will be queued up as there are no validating threads available at the moment",
           eeaEventVO);
     }
 
     this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
-
   }
-
 
   /**
    * Creates the lock with signature.
@@ -411,7 +404,6 @@ public class ValidationHelper implements DisposableBean {
       lockService.removeLockByCriteria(releaseSnapshots);
     }
   }
-
 
   /**
    * Start process.
@@ -528,7 +520,6 @@ public class ValidationHelper implements DisposableBean {
     value.put("idTable", idTable);
     value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
-
   }
 
   /**
@@ -590,9 +581,9 @@ public class ValidationHelper implements DisposableBean {
       lockService.removeLockByCriteria(executeValidation);
 
       Map<String, Object> forceExecuteValidation = new HashMap<>();
-      executeValidation.put(LiteralConstants.SIGNATURE,
+      forceExecuteValidation.put(LiteralConstants.SIGNATURE,
           LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
-      executeValidation.put(LiteralConstants.DATASETID, datasetId);
+      forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(forceExecuteValidation);
 
       // after last dataset validations have been saved, an event is sent to notify it
@@ -681,7 +672,6 @@ public class ValidationHelper implements DisposableBean {
     return isProcessStarted;
   }
 
-
   /**
    * Instantiates a new validation task.
    *
@@ -695,31 +685,22 @@ public class ValidationHelper implements DisposableBean {
   @AllArgsConstructor
   private static class ValidationTask {
 
-    /**
-     * The Eea event vo.
-     */
+    /** The eea event VO. */
     EEAEventVO eeaEventVO;
-    /**
-     * The Validator.
-     */
+
+    /** The validator. */
     Validator validator;
-    /**
-     * The Dataset id.
-     */
+
+    /** The dataset id. */
     Long datasetId;
-    /**
-     * The Kie base.
-     */
+
+    /** The kie base. */
     KieBase kieBase;
 
-    /**
-     * The Process id.
-     */
+    /** The process id. */
     String processId;
 
-    /**
-     * The Notification event type.
-     */
+    /** The notification event type. */
     EventType notificationEventType;
   }
 
@@ -728,13 +709,10 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
-    /**
-     * The Constant MILISECONDS.
-     */
+    /** The Constant MILISECONDS. */
     private static final double MILISECONDS = 1000.0;
-    /**
-     * The validation task.
-     */
+
+    /** The validation task. */
     private ValidationTask validationTask;
 
     /**
@@ -746,7 +724,6 @@ public class ValidationHelper implements DisposableBean {
       this.validationTask = validationTask;
     }
 
-
     /**
      * Run.
      */
@@ -754,19 +731,14 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
 
       Long currentTime = System.currentTimeMillis();
-      int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
-
-      SecurityContextHolder.clearContext();
-
-      SecurityContextHolder.getContext()
-          .setAuthentication(new UsernamePasswordAuthenticationToken(
-              EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
-                  new HashSet<>()),
-              validationTask.eeaEventVO.getData().get("token").toString(), null));
+      int workingThreads =
+          ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+              .getDelegateExecutorService()).getActiveCount();
 
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
+
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
@@ -797,7 +769,5 @@ public class ValidationHelper implements DisposableBean {
             validationTask.eeaEventVO, totalTime);
       }
     }
-
-
   }
 }
