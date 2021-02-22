@@ -490,5 +490,20 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return csv.getBytes();
   }
 
+
+  /**
+   * Update representative visibility restrictions.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  @Override
+  public void updateRepresentativeVisibilityRestrictions(Long dataflowId, Long dataProviderId,
+      boolean restrictFromPublic) {
+    representativeRepository.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
+        restrictFromPublic);
+  }
+
 }
 
