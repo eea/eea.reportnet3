@@ -27,9 +27,11 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -106,6 +108,9 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Inits the.
@@ -139,17 +144,27 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
       boolean replace) throws EEAException {
+
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+
     if (null == schema) {
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(importFileData);
       LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
-          datasetId, tableSchemaId, file.getName());
+          datasetId, tableSchemaId, file.getOriginalFilename());
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
+
+    if (schemaContainsFixedRecords(datasetId, schema, tableSchemaId)) {
+      LOG_ERROR.error(
+          "Import blocked because of fixed records: datasetId={}, filName={}, tableSchemaId={}",
+          datasetId, file.getOriginalFilename(), tableSchemaId);
+      throw new EEAException("Import blocked: dataset " + datasetId + " contains fixed records");
+    }
+
     // We add a lock to the Release process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     Map<String, Object> mapCriteria = new HashMap<>();
@@ -162,8 +177,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
     fileManagement(datasetId, tableSchemaId, schema, file, replace);
   }
-
-
 
   /**
    * Release lock.
@@ -656,15 +669,20 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
     List<List<RecordValue>> generalList = new ArrayList<>();
 
-    // dividing the number of records in different lists
-    int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
-    if (nLists > 1) {
-      for (int i = 0; i < (nLists - 1); i++) {
-        generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
+    if (allRecords.isEmpty()) {
+      generalList.add(new ArrayList<>());
+    } else {
+      // dividing the number of records in different lists
+      int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
+      if (nLists > 1) {
+        for (int i = 0; i < (nLists - 1); i++) {
+          generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
+        }
       }
+      generalList
+          .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
+
     }
-    generalList
-        .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
 
     return generalList;
   }
@@ -683,5 +701,39 @@ public class FileTreatmentHelper implements DisposableBean {
           .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
           .forEach(tableValue -> tableValue.setId(oldTableId));
     }
+  }
+
+  /**
+   * Schema contains fixed records.
+   *
+   * @param schema the schema
+   * @param tableSchemaId the table schema id
+   * @return true, if successful
+   */
+  private boolean schemaContainsFixedRecords(Long datasetId, DataSetSchema schema,
+      String tableSchemaId) {
+
+    boolean rtn = false;
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      if (null == tableSchemaId) {
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+            rtn = true;
+            break;
+          }
+        }
+      } else {
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (tableSchemaId.equals(tableSchema.getIdTableSchema().toString())) {
+            rtn = Boolean.TRUE.equals(tableSchema.getFixedNumber());
+            break;
+          }
+        }
+      }
+    }
+
+    return rtn;
   }
 }

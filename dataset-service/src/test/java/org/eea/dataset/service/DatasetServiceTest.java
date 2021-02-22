@@ -552,16 +552,21 @@ public class DatasetServiceTest {
    */
   @Test
   public void testDeleteImportData() throws Exception {
-
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    tableSchema.setReadOnly(true);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(new ObjectId());
-    schema.setTableSchemas(Arrays.asList(table));
-    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     datasetService.deleteImportData(1L);
-    Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
+    Mockito.verify(recordRepository, times(0)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 
   /**
@@ -571,16 +576,19 @@ public class DatasetServiceTest {
    */
   @Test
   public void testDeleteImportDataFixed() throws Exception {
-
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     DataSetSchema schema = new DataSetSchema();
     TableSchema table = new TableSchema();
     RecordSchema record = new RecordSchema();
-    List<FieldSchema> fieldSchemaList = new ArrayList();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
     FieldSchema field = new FieldSchema();
     FieldSchema field2 = new FieldSchema();
     field.setReadOnly(true);
+    field.setIdFieldSchema(new ObjectId());
     fieldSchemaList.add(field);
     fieldSchemaList.add(field2);
     record.setFieldSchema(fieldSchemaList);
@@ -1117,8 +1125,20 @@ public class DatasetServiceTest {
    */
   @Test
   public void testDeleteTableData() throws Exception {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     doNothing().when(recordRepository).deleteRecordWithIdTableSchema(Mockito.any());
-    datasetService.deleteTableBySchema("", 1L);
+    datasetService.deleteTableBySchema("5ce524fad31fc52540abae73", 1L);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 

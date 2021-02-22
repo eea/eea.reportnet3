@@ -26,9 +26,12 @@ import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -84,6 +87,9 @@ public class FileTreatmentHelperTest {
   private RulesControllerZuul rulesControllerZuul;
 
   @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
+
+  @Mock
   private Authentication authentication;
 
   @Mock
@@ -131,9 +137,16 @@ public class FileTreatmentHelperTest {
     DatasetValue datasetValue = new DatasetValue();
     datasetValue.setTableValues(tableValues);
 
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setNameTableSchema("tableSchemaName");
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setTableSchemas(tableSchemas);
 
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
@@ -141,16 +154,17 @@ public class FileTreatmentHelperTest {
     integrationVOs.add(integrationVO);
 
     MultipartFile multipartFile =
-        new MockMultipartFile("file", "file.csv", "text/csv", "".getBytes());
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", "".getBytes());
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(datasetSchema);
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
-    // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-    // .thenReturn(integrationVOs);
-    Mockito.doNothing().when(datasetService).deleteTableBySchema(Mockito.anyString(),
-        Mockito.anyLong());
     Mockito.when(
         datasetService.processFile(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new DataSetVO());
@@ -171,7 +185,7 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -231,6 +245,11 @@ public class FileTreatmentHelperTest {
     MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
         "application/x-zip-compressed", baos.toByteArray());
 
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(datasetSchema);
 
@@ -269,9 +288,20 @@ public class FileTreatmentHelperTest {
   @Test
   public void importFileDataXlsFMETest() throws EEAException, IOException {
 
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setFixedNumber(Boolean.FALSE);
+
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setTableSchemas(tableSchemas);
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
 
     Map<String, String> internalParameters = new HashMap<>();
     internalParameters.put(IntegrationParams.FILE_EXTENSION, "xls");
@@ -288,6 +318,9 @@ public class FileTreatmentHelperTest {
 
     MultipartFile multipartFile =
         new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
+
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(datasetSchema);
@@ -316,7 +349,7 @@ public class FileTreatmentHelperTest {
   @Test(expected = EEAException.class)
   public void importFileDataExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
-    Mockito.when(file.getName()).thenReturn("fileName.csv");
+    Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
     try {
@@ -329,8 +362,23 @@ public class FileTreatmentHelperTest {
 
   @Test(expected = EEAException.class)
   public void importFileDataFolderExceptionTest() throws EEAException {
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setFixedNumber(Boolean.FALSE);
+
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn(new DataSetSchema());
+        .thenReturn(datasetSchema);
     MultipartFile multipartFile =
         new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
     File folder = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
@@ -347,8 +395,23 @@ public class FileTreatmentHelperTest {
 
   @Test(expected = EEAException.class)
   public void importFileDataIOExceptionTest() throws IOException, EEAException {
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setFixedNumber(Boolean.FALSE);
+
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn(new DataSetSchema());
+        .thenReturn(datasetSchema);
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.when(file.getInputStream()).thenThrow(IOException.class);
     Mockito.when(file.getName()).thenReturn("fileName.csv");

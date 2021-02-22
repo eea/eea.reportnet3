@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
+import org.eea.dataset.mapper.ReportingDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
@@ -50,6 +51,10 @@ public class ReportingDatasetServiceTest {
   /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
+
+  /** The reporting dataset public mapper. */
+  @Mock
+  private ReportingDatasetPublicMapper reportingDatasetPublicMapper;
 
   /**
    * Inits the mocks.
@@ -147,5 +152,10 @@ public class ReportingDatasetServiceTest {
     Mockito.verify(reportingDatasetRepository, times(1)).save(Mockito.any());
   }
 
+  @Test
+  public void getDataSetPublicByDataflowTest() {
+    reportingDatasetService.getDataSetPublicByDataflow(1L);
+    Mockito.verify(reportingDatasetPublicMapper, times(1)).entityListToClass(Mockito.any());
+  }
 
 }
