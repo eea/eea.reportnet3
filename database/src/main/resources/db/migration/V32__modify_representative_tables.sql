@@ -20,9 +20,9 @@ create sequence if not exists leadreporter_id_seq INCREMENT BY 1
 GRANT ALL ON sequence public.leadreporter_id_seq TO testuser, dataflow, dataset, recordstore, validation;
 
 
-drop table if exists public."user";
-
 drop table if exists public."representative_user";
+
+drop table if exists public."user";
 
 
 insert into public.representative_leadreporter (id, representative_id, email) (select nextval('leadreporter_id_seq') as id, r.id as representative_id, r.user_mail as email from public.representative r  where r.user_mail is not null) on conflict do nothing;
