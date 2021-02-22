@@ -89,12 +89,6 @@ public class FileTreatmentHelperTest {
   private DataFlowControllerZuul dataflowControllerZuul;
 
   @Mock
-  private Authentication authentication;
-
-  @Mock
-  private SecurityContext securityContext;
-
-  @Mock
   private LockService lockService;
 
   /**
@@ -179,8 +173,6 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-
-    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
