@@ -420,8 +420,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/dataflow/{id}/dataProvider/{dataProviderId}",
+  @GetMapping(value = "/private/dataflow/{id}/dataProvider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndProviderId(
       @PathVariable("id") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId) {
