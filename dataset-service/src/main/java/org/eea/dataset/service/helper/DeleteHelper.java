@@ -11,13 +11,13 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -70,14 +70,14 @@ public class DeleteHelper {
     Map<String, Object> deleteImportTable = new HashMap<>();
     deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
     deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
-    deleteImportTable.put(LiteralConstants.TABLESCHEMAID, datasetId);
+    deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
     lockService.removeLockByCriteria(deleteImportTable);
 
     // after the table has been deleted, an event is sent to notify it
     Map<String, Object> value = new HashMap<>();
-    NotificationVO notificationVO =
-        NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
-            .datasetId(datasetId).tableSchemaId(tableSchemaId).build();
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .tableSchemaId(tableSchemaId).build();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
@@ -104,9 +104,9 @@ public class DeleteHelper {
 
     // after the dataset values have been deleted, an event is sent to notify it
     Map<String, Object> value = new HashMap<>();
-    NotificationVO notificationVO =
-        NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
-            .datasetId(datasetId).build();
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .build();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
