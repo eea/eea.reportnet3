@@ -5,6 +5,7 @@ import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -124,6 +125,32 @@ public interface RepresentativeService {
   byte[] importFile(Long dataflowId, Long groupId, MultipartFile file)
       throws EEAException, IOException;
 
+  /**
+   * Creates the lead reporter.
+   *
+   * @param representativeId the representative id
+   * @param leadReporterVO the lead reporter VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long createLeadReporter(Long representativeId, LeadReporterVO leadReporterVO) throws EEAException;
+
+  /**
+   * Update lead reporter.
+   *
+   * @param leadReporterVO the lead reporter VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long updateLeadReporter(LeadReporterVO leadReporterVO) throws EEAException;
+
+  /**
+   * Delete lead reporter.
+   *
+   * @param leadReporterId the lead reporter id
+   * @throws EEAException the EEA exception
+   */
+  void deleteLeadReporter(Long leadReporterId) throws EEAException;
 
   /**
    * Update representative visibility restrictions.
@@ -132,7 +159,6 @@ public interface RepresentativeService {
    * @param dataProviderId the data provider id
    * @param restrictFromPublic the restrict from public
    */
-  public void updateRepresentativeVisibilityRestrictions(Long dataflowId, Long dataProviderId,
+  void updateRepresentativeVisibilityRestrictions(Long dataflowId, Long dataProviderId,
       boolean restrictFromPublic);
-
 }
