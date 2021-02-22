@@ -1037,7 +1037,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(schema);
 
     datasetSnapshotService.releaseLocksRelatedToRelease(1L, 1L);
-    Mockito.verify(lockService, times(11)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(12)).removeLockByCriteria(Mockito.any());
   }
 
 }

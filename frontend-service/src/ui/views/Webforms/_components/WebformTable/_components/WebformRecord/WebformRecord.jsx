@@ -174,18 +174,6 @@ export const WebformRecord = ({
     }
   };
 
-  const checkRequiredLabelVisibility = el => {
-    if (isNil(isGroup)) {
-      return true;
-    } else {
-      if (isGroup() && el.calculatedWhenGroup) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-  };
-
   const handleDialogs = (dialog, value) => {
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
@@ -435,7 +423,9 @@ export const WebformRecord = ({
         ) : (
           <ul className={styles.errorList}>
             {errorMessages.map(msg => (
-              <li className={styles.errorItem}>{msg}</li>
+              <li key={msg} className={styles.errorItem}>
+                {msg}
+              </li>
             ))}
           </ul>
         )}

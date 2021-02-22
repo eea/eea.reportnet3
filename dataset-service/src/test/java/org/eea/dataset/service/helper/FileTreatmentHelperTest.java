@@ -21,12 +21,14 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -64,6 +66,9 @@ public class FileTreatmentHelperTest {
 
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
 
   @Mock
   private Authentication authentication;
@@ -141,6 +146,11 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
+
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
     FileUtils
@@ -226,6 +236,10 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
@@ -269,6 +283,10 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+
+    Mockito.when(authentication.getCredentials()).thenReturn("credentials");
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
     FileUtils
@@ -300,6 +318,8 @@ public class FileTreatmentHelperTest {
         new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
     File folder = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
     folder.mkdirs();
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     try {
       fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
     } catch (EEAException e) {
@@ -315,6 +335,8 @@ public class FileTreatmentHelperTest {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.when(file.getInputStream()).thenThrow(IOException.class);
     Mockito.when(file.getName()).thenReturn("fileName.csv");
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     try {
       fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (EEAException e) {

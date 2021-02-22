@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -95,6 +96,9 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -1908,6 +1912,26 @@ public class DatasetServiceImpl implements DatasetService {
           attachmentRepository.saveAll(attachments);
         }
       }
+    }
+  }
+
+
+  /**
+   * Creates the lock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @param userName the user name
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
+      String userName) throws EEAException {
+    mapCriteria.put("signature", lockSignature.getValue());
+    LockVO lockVO = lockService.findByCriteria(mapCriteria);
+    if (lockVO == null) {
+      lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
+          mapCriteria);
     }
   }
 

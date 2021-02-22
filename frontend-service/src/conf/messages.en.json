@@ -955,6 +955,9 @@
     "settingsHelp": "User settings help",
     "dataflowPinnedInit": "You have pinned the dataflow",
     "dataflowUnpinnedInit": "You have unpinned the dataflow",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "TypePolicyInstrument": "Types",
+    "UnionPolicyList": "Union policies",
+    "releaseBlockedEvent": "Releasing process is being blocked by another action, please wait"
   }
 }
