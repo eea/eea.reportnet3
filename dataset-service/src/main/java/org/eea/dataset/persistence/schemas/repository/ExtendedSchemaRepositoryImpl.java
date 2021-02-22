@@ -355,10 +355,11 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * @return the update result
    */
   @Override
-  public UpdateResult updateDatasetSchemaExportable(String datasetSchemaId, boolean exportable) {
+  public UpdateResult updateDatasetSchemaExportable(String datasetSchemaId,
+      boolean availableInPublic) {
     return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
         new Document("_id", new ObjectId(datasetSchemaId)),
-        new Document("$set", new Document("exportable", exportable)));
+        new Document("$set", new Document("availableInPublic", availableInPublic)));
   }
 
 

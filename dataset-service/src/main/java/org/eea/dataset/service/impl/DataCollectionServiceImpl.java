@@ -20,12 +20,16 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -201,6 +205,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private EUDatasetRepository euDatasetRepository;
 
+  /** The reporting dataset repository. */
+  @Autowired
+  private ReportingDatasetRepository reportingDatasetRepository;
+
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
+
   /**
    * Gets the dataflow status.
    *
@@ -308,10 +320,41 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
 
-    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-    dataFlowVO.setShowPublicInfo(showPublicInfo);
-    dataflowControllerZuul.updateDataFlow(dataFlowVO);
+    updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
+
   }
+
+  /**
+   * Update reporting datasets visibility.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  private void updateReportingDatasetsVisibility(Long dataflowId, boolean showPublicInfo) {
+
+    dataflowControllerZuul.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
+
+    if (showPublicInfo) {
+      List<ReportingDataset> reportingDatasetList =
+          reportingDatasetRepository.findByDataflowId(dataflowId);
+
+      for (DataSetSchema schema : schemasRepository.findByIdDataFlow(dataflowId)) {
+        if (schema.isAvailableInPublic()) {
+          for (ReportingDataset reportingDataset : reportingDatasetList) {
+            DataSetMetabase dataset =
+                dataSetMetabaseRepository.findById(reportingDataset.getId()).orElse(null);
+            if (null != dataset
+                && schema.getIdDataSetSchema().toString().equals(dataset.getDatasetSchema())) {
+              dataset.setAvailableInPublic(true);
+              dataSetMetabaseRepository.save(dataset);
+            }
+          }
+        }
+      }
+    }
+
+  }
+
 
   /**
    * Manage data collection.
