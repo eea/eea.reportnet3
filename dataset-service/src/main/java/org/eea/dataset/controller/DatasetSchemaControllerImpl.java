@@ -65,77 +65,40 @@ import io.netty.util.internal.StringUtil;
 @RequestMapping("/dataschema")
 public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
-  /**
-   * The Constant LOG.
-   */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSchemaControllerImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The dataset service.
-   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The dataschema service.
-   */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /**
-   * The dataset metabase service.
-   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The dataset snapshot service.
-   */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /**
-   * The record store controller zuul.
-   */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /**
-   * The dataflow controller zuul.
-   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /**
-   * The rules controller zuul.
-   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-  /**
-   * The design dataset service.
-   */
   @Autowired
   private DesignDatasetService designDatasetService;
 
-  /**
-   * The contributor controller zuul.
-   */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
 
-  /**
-   * The integration controller zuul.
-   */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
-
 
   /**
    * Creates the empty dataset schema.
@@ -698,25 +661,30 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
 
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-    }
-
+    String datasetSchemaId;
     try {
-      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (null != datasetSchemaVO.getDescription()) {
-        dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
-            datasetSchemaVO.getDescription());
-      }
-      if (null != datasetSchemaVO.getWebform()) {
-        dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
-      }
-      dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
-          datasetSchemaVO.isAvailableInPublic());
+      datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
     } catch (EEAException e) {
+      LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
           e);
+    }
+
+    dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
+        datasetSchemaVO.isAvailableInPublic());
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid dataflow status");
+    }
+
+    if (null != datasetSchemaVO.getDescription()) {
+      dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
+          datasetSchemaVO.getDescription());
+    }
+
+    if (null != datasetSchemaVO.getWebform()) {
+      dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
     }
   }
 
