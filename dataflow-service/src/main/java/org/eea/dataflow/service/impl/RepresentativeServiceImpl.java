@@ -285,8 +285,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
       List<String> headers = new ArrayList<>();
-      headers.add("Email");
       headers.add("Representing");
+      headers.add("Email");
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 2;
       String[] fieldsToWrite = new String[nHeaders];
@@ -298,8 +298,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         List<String> usersRepresentative = representative.getLeadReporters().stream()
             .map(LeadReporter::getEmail).collect(Collectors.toList());
         usersRepresentative.stream().forEach(users -> {
-          fieldsToWrite[0] = users;
-          fieldsToWrite[1] = representative.getDataProvider().getCode();
+          fieldsToWrite[0] = representative.getDataProvider().getCode();
+          fieldsToWrite[1] = users;
           csvWriter.writeNext(fieldsToWrite);
         });
 
@@ -328,8 +328,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
       List<String> headers = new ArrayList<>();
-      headers.add("Email");
       headers.add("Representing");
+      headers.add("Email");
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 2;
       String[] fieldsToWrite = new String[nHeaders];
@@ -337,7 +337,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       // we find all dataprovider for group id
       List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
       for (DataProvider dataProvider : dataProviderList) {
-        fieldsToWrite[1] = dataProvider.getCode();
+        fieldsToWrite[0] = dataProvider.getCode();
         csvWriter.writeNext(fieldsToWrite);
 
       }
@@ -370,8 +370,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
       List<String> headers = new ArrayList<>();
-      headers.add("Email");
       headers.add("Representing");
+      headers.add("Email");
       headers.add("Imported");
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 3;
@@ -392,8 +392,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
       for (String representativeData : everyLines) {
         String[] dataLine = representativeData.split("[|]");
-        String email = dataLine[0].replaceAll("\"", "");
-        String contryCode = dataLine[1].replaceAll("\"", "");
+        String contryCode = dataLine[0].replaceAll("\"", "");
+        String email = dataLine[1].replaceAll("\"", "");
         UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
         if (!countryCodeList.contains(contryCode) && null == user) {
           fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
@@ -443,8 +443,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           }
 
         }
-        fieldsToWrite[0] = email;
-        fieldsToWrite[1] = contryCode;
+        fieldsToWrite[0] = contryCode;
+        fieldsToWrite[1] = email;
         csvWriter.writeNext(fieldsToWrite);
       }
       if (!Collections.isEmpty(representativeList)) {
