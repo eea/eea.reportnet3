@@ -481,7 +481,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
     if (null != dataflow && dataflow.isReleasable()) {
       try {
-        datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId);
+        datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
+            restrictFromPublic);
       } catch (EEAException e) {
         LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,

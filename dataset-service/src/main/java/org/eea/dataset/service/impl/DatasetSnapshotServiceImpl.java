@@ -1002,13 +1002,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void createReleaseSnapshots(Long dataflowId, Long dataProviderId) throws EEAException {
+  public void createReleaseSnapshots(Long dataflowId, Long dataProviderId,
+      boolean restrictFromPublic) throws EEAException {
     LOG.info("Releasing datasets process begins. DataflowId: {} DataProviderId: {}", dataflowId,
         dataProviderId);
     // First dataset involved in the process
     ReportingDataset dataset = reportingDatasetRepository
         .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(dataflowId, dataProviderId);
-
     // List of the datasets involved
     List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
@@ -1019,6 +1019,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
     // Lock all the operations related to the datasets involved
     addLocksRelatedToRelease(datasetsFilters, representatives, dataflowId);
+
+    // Update representative visibility
+    representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
+        dataProviderId, restrictFromPublic);
 
     validationControllerZuul.validateDataSetData(dataset.getId(), true);
 
