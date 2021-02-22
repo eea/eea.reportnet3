@@ -3277,20 +3277,20 @@ public class DatasetServiceImpl implements DatasetService {
         try {
           // 1º we create
           byte[] file = exportFile(datasetToFile.getId(), "xlsx", null);
-          String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
-              dataProvider.getLabel(), datasetDesingName);
-
           // we save the file in its files
-          String newFile = new StringBuilder(pathDataProvider.toString()).append("\\")
-              .append(nameFileUnique).append(".xlsx").toString();
-          FileUtils.writeByteArrayToFile(new File(newFile), file);
+          if (null != file) {
+            String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
+                dataProvider.getLabel(), datasetDesingName);
+            String newFile = new StringBuilder(pathDataProvider.toString()).append("\\")
+                .append(nameFileUnique).append(".xlsx").toString();
+            FileUtils.writeByteArrayToFile(new File(newFile), file);
 
-          // we save the file in metabase with the name without the route
-          newFile = new StringBuilder("dataflow-").append(dataflowId).append("\\dataProvider-")
-              .append(dataProvider.getId()).append("\\").append(nameFileUnique).toString();
-          datasetToFile.setPublicFileName(nameFileUnique);
-          dataSetMetabaseRepository.save(datasetToFile);
-
+            // we save the file in metabase with the name without the route
+            newFile = new StringBuilder("dataflow-").append(dataflowId).append("\\dataProvider-")
+                .append(dataProvider.getId()).append("\\").append(nameFileUnique).toString();
+            datasetToFile.setPublicFileName(nameFileUnique);
+            dataSetMetabaseRepository.save(datasetToFile);
+          }
         } catch (EEAException e) {
           LOG_ERROR.error(
               "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
