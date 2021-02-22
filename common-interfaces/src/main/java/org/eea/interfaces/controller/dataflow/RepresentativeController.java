@@ -137,6 +137,22 @@ public interface RepresentativeController {
       @PathVariable(value = "dataflowId") Long dataflowId,
       @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
 
+      
+  /**
+   * Update representative visibility restrictions.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  @PostMapping("/private/updateRepresentativeVisibilityRestrictions")
+  void updateRepresentativeVisibilityRestrictions(
+      @RequestParam(value = "dataflowId", required = true) Long dataflowId,
+      @RequestParam(value = "dataProviderId", required = true) Long dataProviderId,
+      @RequestParam(value = "restrictFromPublic", required = true,
+          defaultValue = "false") boolean restrictFromPublic);
+
+
 
   /**
    * Creates the lead reporter.

@@ -95,6 +95,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.kafka.domain.EventType;
@@ -118,217 +119,144 @@ import org.springframework.transaction.annotation.Propagation;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-  /**
-   * The Constant ROOT: {@value}.
-   */
-  private static final String USER = "root";
-
-  /**
-   * The Constant HEADER_NAME.
-   */
-  private static final String HEADER_NAME = "headerName";
-
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The field max length.
-   */
+  /** The Constant USER: {@value}. */
+  private static final String USER = "root";
+
+  /** The Constant HEADER_NAME: {@value}. */
+  private static final String HEADER_NAME = "headerName";
+
+  /** The Constant DATASET_ID: {@value}. */
+  private static final String DATASET_ID = "dataset_%s";
+
+  /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
 
-  /**
-   * The dataset repository.
-   */
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /**
-   * The data set metabase repository.
-   */
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /**
-   * The partition data set metabase repository.
-   */
+  /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /**
-   * The design dataset repository.
-   */
+  /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /**
-   * The reporting dataset repository.
-   */
+  /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The dataflow controller zull.
-   */
+  /** The dataflow controller zull. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
 
-  /**
-   * The table repository.
-   */
+  /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
 
-  /**
-   * The record repository.
-   */
+  /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
-  /**
-   * The record validation repository.
-   */
+  /** The record validation repository. */
   @Autowired
   private RecordValidationRepository recordValidationRepository;
 
-  /**
-   * The field repository.
-   */
+  /** The field repository. */
   @Autowired
   private FieldRepository fieldRepository;
 
-  /**
-   * The field validation repository.
-   */
+  /** The field validation repository. */
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
 
-  /**
-   * The statistics repository.
-   */
+  /** The statistics repository. */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /**
-   * The data set mapper.
-   */
+  /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /**
-   * The record mapper.
-   */
+  /** The record mapper. */
   @Autowired
   private RecordMapper recordMapper;
 
-  /**
-   * The file parser factory.
-   */
+  /** The file parser factory. */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
-  /**
-   * The file export factory.
-   */
+  /** The file export factory. */
   @Autowired
   private IFileExportFactory fileExportFactory;
 
-  /**
-   * The record no validation mapper.
-   */
+  /** The record no validation mapper. */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /**
-   * The field validation mapper.
-   */
+  /** The field validation mapper. */
   @Autowired
   private FieldValidationMapper fieldValidationMapper;
 
-  /**
-   * The record validation mapper.
-   */
+  /** The record validation mapper. */
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The representative controller zuul.
-   */
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /**
-   * The field no validation mapper.
-   */
+  /** The field no validation mapper. */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
-  /**
-   * The integration controller.
-   */
+  /** The integration controller. */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-
-  /**
-   * The paM service.
-   */
+  /** The pa M service. */
   @Autowired
   private PaMService paMService;
-  /**
-   * The attachment repository.
-   */
+
+  /** The attachment repository. */
   @Autowired
   private AttachmentRepository attachmentRepository;
 
-  /**
-   * The data collection repository.
-   */
+  /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /**
-   * The pk catalogue repository.
-   */
+  /** The pk catalogue repository. */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
-
-
-  /**
-   * The Constant DATASET_ID.
-   */
-  private static final String DATASET_ID = "dataset_%s";
 
   /**
    * Process file.
@@ -824,7 +752,7 @@ public class DatasetServiceImpl implements DatasetService {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
-        .getCode()
+            .getCode()
         : null;
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
@@ -969,9 +897,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException {
-    DataSetMetabase datasetMetabase =
-        dataSetMetabaseRepository.findById(datasetId)
-            .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId)
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
     String datasetSchemaId = datasetMetabase.getDatasetSchema();
     IntegrationVO integrationVO =
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
@@ -1597,16 +1524,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Release lock.
-   *
-   * @param criteria the criteria
-   */
-  @Override
-  public void releaseLock(Object... criteria) {
-    lockService.removeLockByCriteria(Arrays.asList(criteria));
-  }
-
-  /**
    * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
    * status design or reportingDataset in state Draft.
    *
@@ -1923,8 +1840,11 @@ public class DatasetServiceImpl implements DatasetService {
   public void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
       String userName) throws EEAException {
     mapCriteria.put("signature", lockSignature.getValue());
-    lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
-        mapCriteria);
+    LockVO lockVO = lockService.findByCriteria(mapCriteria);
+    if (lockVO == null) {
+      lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
+          mapCriteria);
+    }
   }
 
 
@@ -1966,7 +1886,7 @@ public class DatasetServiceImpl implements DatasetService {
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-          .size() > 0) {
+              .size() > 0) {
 
         processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
             dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
@@ -2864,7 +2784,7 @@ public class DatasetServiceImpl implements DatasetService {
       // new schema
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-          .size() > 0) {
+              .size() > 0) {
         LOG.info(
             "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
             fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
@@ -3216,6 +3136,13 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Gets the table schema.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
+   * @return the table schema
+   */
   private TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId) {
 
     DataSetSchema datasetSchema =

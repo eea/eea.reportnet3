@@ -34,6 +34,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,6 @@ public class DataSetControllerImpl implements DatasetController {
   private FileTreatmentHelper fileTreatmentHelper;
 
   /** The lock service. */
-  @Deprecated
   @Autowired
   private LockService lockService;
 
@@ -202,7 +202,11 @@ public class DataSetControllerImpl implements DatasetController {
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace);
     } catch (EEAException e) {
       LOG_ERROR.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
-          tableSchemaId, file.getName());
+          tableSchemaId, file.getOriginalFilename());
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
     }
   }
@@ -505,11 +509,15 @@ public class DataSetControllerImpl implements DatasetController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
+    Map<String, Object> deleteImportTable = new HashMap<>();
+    deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
+    deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+    deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(
             datasetService.getTableReadOnly(datasetId, tableSchemaId, EntityTypeEnum.TABLE))) {
-      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
-          datasetId);
+      lockService.removeLockByCriteria(deleteImportTable);
       LOG_ERROR.error(
           "Error deleting the table values from the datasetId {}. The table is read only",
           datasetId);
@@ -518,8 +526,7 @@ public class DataSetControllerImpl implements DatasetController {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId, tableSchemaId,
             EntityTypeEnum.TABLE))) {
-      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
-          datasetId);
+      lockService.removeLockByCriteria(deleteImportTable);
       LOG_ERROR.error(
           "Error deleting the table values from the datasetId {}. The table has a fixed number of records",
           datasetId);
@@ -534,8 +541,7 @@ public class DataSetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting the table values from the datasetId {}. Message: {}",
           datasetId, e.getMessage());
-      datasetService.releaseLock(tableSchemaId, LockSignature.DELETE_IMPORT_TABLE.getValue(),
-          datasetId);
+      lockService.removeLockByCriteria(deleteImportTable);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }

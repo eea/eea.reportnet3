@@ -47,7 +47,6 @@ public class DataSetMetabaseVO implements Serializable {
    */
   private String datasetSchema;
 
-
   /**
    * The data provider id.
    */
@@ -60,5 +59,10 @@ public class DataSetMetabaseVO implements Serializable {
 
   /** The status. */
   private DatasetStatusEnum status;
+
+  /** The available in public. */
+  private boolean availableInPublic;
+
+
 
 }

@@ -353,6 +353,22 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
+   * Update representative visibility restrictions.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  @PostMapping("/private/updateRepresentativeVisibilityRestrictions")
+  public void updateRepresentativeVisibilityRestrictions(
+      @RequestParam(value = "dataflowId", required = true) Long dataflowId,
+      @RequestParam(value = "dataProviderId", required = true) Long dataProviderId,
+      @RequestParam(value = "restrictFromPublic", required = true,
+          defaultValue = "false") boolean restrictFromPublic) {
+
+  }
+  
+  /**
    * Creates the lead reporter.
    *
    * @param representativeId the representative id

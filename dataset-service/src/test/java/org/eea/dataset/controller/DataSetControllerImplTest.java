@@ -33,6 +33,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,74 +58,42 @@ import org.springframework.web.server.ResponseStatusException;
 @RunWith(MockitoJUnitRunner.class)
 public class DataSetControllerImplTest {
 
-  /**
-   * The data set controller impl.
-   */
   @InjectMocks
   private DataSetControllerImpl dataSetControllerImpl;
 
-  /**
-   * The dataset service.
-   */
   @Mock
   private DatasetServiceImpl datasetService;
 
-  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The design dataset service.
-   */
+  @Mock
+  private LockService lockService;
+
   @Mock
   private DesignDatasetServiceImpl designDatasetService;
 
-  /** The dataset schema service. */
   @Mock
   private DatasetSchemaService datasetSchemaService;
 
-  /**
-   * The records.
-   */
-  private List<RecordVO> records;
-
-  /**
-   * The record ids.
-   */
-  private String recordId;
-
-  /**
-   * The update record helper.
-   */
   @Mock
   private UpdateRecordHelper updateRecordHelper;
 
-  /**
-   * The file treatment helper.
-   */
   @Mock
   private FileTreatmentHelper fileTreatmentHelper;
 
-  /**
-   * The security context.
-   */
-  private SecurityContext securityContext;
-
-  /**
-   * The authentication.
-   */
-  private Authentication authentication;
-
-  /** The file mock. */
-  private MockMultipartFile fileMock;
-
-
-  /**
-   * The delete helper.
-   */
   @Mock
   private DeleteHelper deleteHelper;
 
+  private List<RecordVO> records;
+
+  private String recordId;
+
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
+  private MockMultipartFile fileMock;
 
   /**
    * Inits the mocks.
@@ -1138,7 +1107,7 @@ public class DataSetControllerImplTest {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean());
-    Mockito.when(file.getName()).thenReturn("fileName.csv");
+    Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     try {
       dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (ResponseStatusException e) {

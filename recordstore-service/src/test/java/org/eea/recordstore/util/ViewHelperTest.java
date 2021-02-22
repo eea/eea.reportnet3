@@ -1,9 +1,11 @@
 package org.eea.recordstore.util;
 
 import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,6 +14,7 @@ import org.eea.exception.EEAException;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,6 +25,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -30,22 +35,32 @@ import org.springframework.test.util.ReflectionTestUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class ViewHelperTest {
 
-  /** The view helper. */
+  /**
+   * The view helper.
+   */
   @InjectMocks
   private ViewHelper viewHelper;
 
-  /** The view executor service. */
+  /**
+   * The view executor service.
+   */
   private ExecutorService viewExecutorService;
 
-  /** The processes map. */
+  /**
+   * The processes map.
+   */
   private List<Long> processesList;
 
-  /** The record store service. */
+  /**
+   * The record store service.
+   */
   @Mock
   private RecordStoreService recordStoreService;
 
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -84,7 +99,7 @@ public class ViewHelperTest {
     ReflectionTestUtils.setField(viewHelper, "maxRunningTasks", 2);
     processesList.add(1L);
     ReflectionTestUtils.setField(viewHelper, "processesList", processesList);
-    viewHelper.insertViewProcces(1L, true, "user", true);
+    viewHelper.insertViewProcces(1L, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseDatasetKafkaEvent(Mockito.any(),
@@ -109,7 +124,11 @@ public class ViewHelperTest {
     ReflectionTestUtils.setField(viewHelper, "maxRunningTasks", 2);
     processesList.add(0L);
     ReflectionTestUtils.setField(viewHelper, "processesList", processesList);
-    viewHelper.insertViewProcces(1L, true, "user", true);
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UsernamePasswordAuthenticationToken(
+            EeaUserDetails.create("user", new HashSet<>()),
+            "token", null));
+    viewHelper.insertViewProcces(1L, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseDatasetKafkaEvent(Mockito.any(),
@@ -150,7 +169,12 @@ public class ViewHelperTest {
     processesList.add(1L);
     processesList.add(1L);
     ReflectionTestUtils.setField(viewHelper, "processesList", processesList);
-    viewHelper.finishProcces(1L, true, "user", true);
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UsernamePasswordAuthenticationToken(
+            EeaUserDetails.create("user", new HashSet<>()),
+            "token", null));
+
+    viewHelper.finishProcces(1L, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseDatasetKafkaEvent(Mockito.any(),

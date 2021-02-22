@@ -20,12 +20,16 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -63,6 +67,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,14 +82,14 @@ import org.springframework.stereotype.Service;
 @Service("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
 
-  /** The Constant CHUNK_SIZE. */
-  private static final int CHUNK_SIZE = 10;
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant CHUNK_SIZE. */
+  private static final int CHUNK_SIZE = 10;
 
   /** The Constant NAME_DC: {@value}. */
   private static final String NAME_DC = "Data Collection - %s";
@@ -201,6 +206,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private EUDatasetRepository euDatasetRepository;
 
+  /** The reporting dataset repository. */
+  @Autowired
+  private ReportingDatasetRepository reportingDatasetRepository;
+
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
+
   /**
    * Gets the dataflow status.
    *
@@ -267,10 +280,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
 
     // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(methodSignature);
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    Map<String, Object> lockCriteria = new HashMap<>();
+    lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
+    lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.removeLockByCriteria(lockCriteria);
 
     // Release the notification
     try {
@@ -306,12 +319,43 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
 
-    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-    dataFlowVO.setAvailable(showPublicInfo);
-    dataflowControllerZuul.updateDataFlow(dataFlowVO);
-
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
+
+    updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
+
   }
+
+  /**
+   * Update reporting datasets visibility.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  private void updateReportingDatasetsVisibility(Long dataflowId, boolean showPublicInfo) {
+
+    dataflowControllerZuul.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
+
+    if (showPublicInfo) {
+      List<ReportingDataset> reportingDatasetList =
+          reportingDatasetRepository.findByDataflowId(dataflowId);
+
+      for (DataSetSchema schema : schemasRepository.findByIdDataFlow(dataflowId)) {
+        if (schema.isAvailableInPublic()) {
+          for (ReportingDataset reportingDataset : reportingDatasetList) {
+            DataSetMetabase dataset =
+                dataSetMetabaseRepository.findById(reportingDataset.getId()).orElse(null);
+            if (null != dataset
+                && schema.getIdDataSetSchema().toString().equals(dataset.getDatasetSchema())) {
+              dataset.setAvailableInPublic(true);
+              dataSetMetabaseRepository.save(dataset);
+            }
+          }
+        }
+      }
+    }
+
+  }
+
 
   /**
    * Manage data collection.
@@ -410,11 +454,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .disabledRules(disabledRules).build();
       LOG.info("Data Collection creation proccess stopped: there are SQL rules containing errors");
       // remove lock
-      String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(methodSignature);
-      criteria.add(dataflowId);
-      lockService.removeLockByCriteria(criteria);
+      Map<String, Object> createDataCollection = new HashMap<>();
+      createDataCollection.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_DATA_COLLECTION.getValue());
+      createDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(createDataCollection);
       // release notification
       rulesOk = false;
       releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);

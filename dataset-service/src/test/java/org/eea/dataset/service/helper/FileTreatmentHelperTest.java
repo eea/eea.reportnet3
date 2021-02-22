@@ -1,7 +1,6 @@
 package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -20,13 +19,11 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
-import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
@@ -39,6 +36,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,6 +89,12 @@ public class FileTreatmentHelperTest {
   @Mock
   private SecurityContext securityContext;
 
+  @Mock
+  private LockService lockService;
+
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -172,7 +176,6 @@ public class FileTreatmentHelperTest {
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
-    Mockito.verify(datasetService, times(1)).releaseLock(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -261,7 +264,6 @@ public class FileTreatmentHelperTest {
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
-    Mockito.verify(datasetService, times(1)).releaseLock(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -320,7 +322,7 @@ public class FileTreatmentHelperTest {
     try {
       fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (EEAException e) {
-      Mockito.verify(datasetService, times(1)).releaseLock(Mockito.anyString(), Mockito.anyLong());
+      // TODO. verify?
       throw e;
     }
   }
@@ -355,91 +357,19 @@ public class FileTreatmentHelperTest {
     try {
       fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (EEAException e) {
-      Mockito.verify(datasetService, times(1)).releaseLock(Mockito.anyString(), Mockito.anyLong());
+      // TODO. Verify?
       throw e;
     }
   }
 
 
-  @Test
-  public void zipSchemaTest() {
-    List<DataSetSchema> schemas = new ArrayList<>();
-    DataSetSchema schema = new DataSetSchema();
-    schema.setIdDataFlow(1L);
-    schema.setIdDataSetSchema(new ObjectId());
-    schemas.add(schema);
-    List<DesignDataset> designs = new ArrayList<>();
-    DesignDataset design = new DesignDataset();
-    design.setDataSetName("test");
-    design.setId(1L);
-    design.setDatasetSchema(new ObjectId().toString());
-    designs.add(design);
-
-    Map<String, String> internalParameters = new HashMap<>();
-    internalParameters.put(IntegrationParams.FILE_EXTENSION, "xls");
-    IntegrationVO integrationVO = new IntegrationVO();
-    integrationVO.setInternalParameters(internalParameters);
-    integrationVO.setOperation(IntegrationOperationTypeEnum.IMPORT);
-    List<IntegrationVO> integrationVOs = new ArrayList<>();
-    integrationVOs.add(integrationVO);
-
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any()))
-        .thenReturn(new RulesSchema());
-    Mockito.when(uniqueConstraintRepository.findByDatasetSchemaId(Mockito.any()))
-        .thenReturn(new ArrayList<>());
-    Mockito.when(rulesControllerZuul.getIntegrityRulesByDatasetSchemaId(Mockito.any()))
-        .thenReturn(new ArrayList<>());
-    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-        .thenReturn(integrationVOs);
-
-    fileTreatmentHelper.zipSchema(designs, schemas, 1L);
-    Mockito.verify(integrationController, times(1)).findAllIntegrationsByCriteria(Mockito.any());
-  }
-
-
-  /**
-   * @throws IOException
-   * @throws EEAException
-   */
-  @Test
-  public void unzipSchemaTest() throws EEAException, IOException {
-
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-    ZipOutputStream zip = new ZipOutputStream(baos);
-    ZipEntry entry1 = new ZipEntry("Table.schema");
-    ZipEntry entry2 = new ZipEntry("Table.qcrules");
-    ZipEntry entry3 = new ZipEntry("Table.unique");
-    ZipEntry entry4 = new ZipEntry("Table.names");
-    ZipEntry entry5 = new ZipEntry("Table.extintegrations");
-    ZipEntry entry6 = new ZipEntry("Table.integrity");
-    ZipEntry entry7 = new ZipEntry("Table.ids");
-
-    zip.putNextEntry(entry1);
-    zip.putNextEntry(entry2);
-    zip.putNextEntry(entry3);
-    zip.putNextEntry(entry4);
-    zip.putNextEntry(entry5);
-    zip.putNextEntry(entry6);
-    zip.putNextEntry(entry7);
-
-    zip.close();
-    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
-        "application/x-zip-compressed", baos.toByteArray());
-
-    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
-        .thenReturn("schema").thenReturn("qcrules").thenReturn("unique").thenReturn("names")
-        .thenReturn("extintegrations").thenReturn("integrity").thenReturn("ids");
-    Assert.assertNotNull(fileTreatmentHelper.unZipImportSchema(multipartFile));
-  }
 }
 
 
 class CurrentThreadExecutor extends AbstractExecutorService {
 
   @Override
-  public void shutdown() {
-  }
+  public void shutdown() {}
 
   @Override
   public List<Runnable> shutdownNow() {

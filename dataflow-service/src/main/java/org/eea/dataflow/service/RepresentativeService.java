@@ -151,4 +151,14 @@ public interface RepresentativeService {
    * @throws EEAException the EEA exception
    */
   void deleteLeadReporter(Long leadReporterId) throws EEAException;
+  
+    /**
+   * Update representative visibility restrictions.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  public void updateRepresentativeVisibilityRestrictions(Long dataflowId, Long dataProviderId,
+      boolean restrictFromPublic);
 }

@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -325,11 +324,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
       // Release the lock manually
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.CREATE_SNAPSHOT.getValue());
-      criteria.add(idDataset);
-      criteria.add(createSnapshotVO.getReleased());
-      lockService.removeLockByCriteria(criteria);
+      Map<String, Object> createSnapshot = new HashMap<>();
+      createSnapshot.put(LiteralConstants.SIGNATURE, LockSignature.CREATE_SNAPSHOT.getValue());
+      createSnapshot.put(LiteralConstants.DATASETID, idDataset);
+      createSnapshot.put(LiteralConstants.RELEASED, createSnapshotVO.getReleased());
+      lockService.removeLockByCriteria(createSnapshot);
     }
     // release snapshot when the user press create+release
   }
@@ -496,7 +495,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       DataProviderVO provider, Long idDataCollection) throws EEAException {
     Long idDataflow = datasetService.getDataFlowIdById(idDataset);
     if (provider != null && idDataCollection != null) {
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
+      TenantResolver
+          .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
       datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
@@ -542,19 +542,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
     }
-  }
-
-  /**
-   * Removes the lock.
-   *
-   * @param idLock the id lock
-   * @param lock the lock
-   */
-  private void removeLock(Long idLock, LockSignature lock) {
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(lock.getValue());
-    criteria.add(idLock);
-    lockService.removeLockByCriteria(criteria);
   }
 
   /**
@@ -652,10 +639,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       LOG_ERROR.error("Error creating snapshot for dataset schema {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
       // Release the lock manually
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
-      criteria.add(idDataset);
-      lockService.removeLockByCriteria(criteria);
+      Map<String, Object> createSchemaSnapshot = new HashMap<>();
+      createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+      createSchemaSnapshot.put(LiteralConstants.DATASETID, idDataset);
+      lockService.removeLockByCriteria(createSchemaSnapshot);
     }
   }
 
@@ -747,8 +735,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           idSnapshot, e);
       releaseEvent(EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset,
           "Error restoring the schema snapshot");
+
       // Release the lock manually
-      removeLock(idDataset, LockSignature.RESTORE_SCHEMA_SNAPSHOT);
+      Map<String, Object> restoreSchemaSnapshot = new HashMap<>();
+      restoreSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+          LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
+      restoreSchemaSnapshot.put(LiteralConstants.DATASETID, idDataset);
+      lockService.removeLockByCriteria(restoreSchemaSnapshot);
     }
   }
 
@@ -887,10 +880,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param dataflowId the dataflow id
    */
   private void removeLockRelatedToCopyDataToEUDataset(Long dataflowId) {
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    Map<String, Object> populateEuDataset = new HashMap<>();
+    populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
+    populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.removeLockByCriteria(populateEuDataset);
   }
 
   /**
@@ -1009,13 +1002,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void createReleaseSnapshots(Long dataflowId, Long dataProviderId) throws EEAException {
+  public void createReleaseSnapshots(Long dataflowId, Long dataProviderId,
+      boolean restrictFromPublic) throws EEAException {
     LOG.info("Releasing datasets process begins. DataflowId: {} DataProviderId: {}", dataflowId,
         dataProviderId);
     // First dataset involved in the process
     ReportingDataset dataset = reportingDatasetRepository
         .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(dataflowId, dataProviderId);
-
     // List of the datasets involved
     List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
@@ -1026,6 +1019,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
     // Lock all the operations related to the datasets involved
     addLocksRelatedToRelease(datasetsFilters, representatives, dataflowId);
+
+    // Update representative visibility
+    representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
+        dataProviderId, restrictFromPublic);
 
     validationControllerZuul.validateDataSetData(dataset.getId(), true);
 
@@ -1047,57 +1044,76 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
         .collect(Collectors.toList());
 
-
     // We have to lock all the dataset operations (insert, delete, update...)
     for (Long datasetId : datasets) {
-      // Insert
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.INSERT_RECORDS.getValue(), datasetId));
-      // Delete
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.DELETE_RECORDS.getValue(), datasetId));
-      // Update field
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_FIELD.getValue(), datasetId));
-      // Update records
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.UPDATE_RECORDS.getValue(), datasetId));
-      // Delete dataset
-      lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.DELETE_DATASET_VALUES.getValue(), datasetId));
-      // Import
-      lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
-      // Import Etl
-      lockService
-          .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_ETL.getValue(), datasetId));
-      // Multiple table insert records (PAMS)
-      lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.INSERT_RECORDS_MULTITABLE.getValue(), datasetId));
+
+      Map<String, Object> insertRecords = new HashMap<>();
+      insertRecords.put(LiteralConstants.SIGNATURE, LockSignature.INSERT_RECORDS.getValue());
+      insertRecords.put(LiteralConstants.DATASETID, datasetId);
+
+      Map<String, Object> deleteRecords = new HashMap<>();
+      deleteRecords.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_RECORDS.getValue());
+      deleteRecords.put(LiteralConstants.DATASETID, datasetId);
+
+      Map<String, Object> updateField = new HashMap<>();
+      updateField.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_FIELD.getValue());
+      updateField.put(LiteralConstants.DATASETID, datasetId);
+
+      Map<String, Object> updateRecords = new HashMap<>();
+      updateRecords.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_RECORDS.getValue());
+      updateRecords.put(LiteralConstants.DATASETID, datasetId);
+
+      Map<String, Object> deleteDatasetValues = new HashMap<>();
+      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+          LockSignature.DELETE_DATASET_VALUES.getValue());
+      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+
+      Map<String, Object> insertRecordsMultitable = new HashMap<>();
+      insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
+          LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
+      insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
+
+      lockService.removeLockByCriteria(insertRecords);
+      lockService.removeLockByCriteria(deleteRecords);
+      lockService.removeLockByCriteria(updateField);
+      lockService.removeLockByCriteria(updateRecords);
+      lockService.removeLockByCriteria(deleteDatasetValues);
+      lockService.removeLockByCriteria(importFileData);
+      lockService.removeLockByCriteria(insertRecordsMultitable);
+
       // Delete tables and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {
-
-        lockService.removeLockByCriteria(Arrays.asList(LockSignature.DELETE_IMPORT_TABLE.getValue(),
-            datasetId, table.getIdTableSchema()));
-
-        lockService.removeLockByCriteria(
-            Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
+        Map<String, Object> deleteImportTable = new HashMap<>();
+        deleteImportTable.put(LiteralConstants.SIGNATURE,
+            LockSignature.DELETE_IMPORT_TABLE.getValue());
+        deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+        deleteImportTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
+        lockService.removeLockByCriteria(deleteImportTable);
       }
+
       // Set the 'releasing' property to false in the dataset metabase
       ReportingDatasetVO reportingVO = new ReportingDatasetVO();
       reportingVO.setId(datasetId);
       reportingVO.setReleasing(false);
       reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
-
     }
-    // Unlock the copy from DC to EU
-    lockService.removeLockByCriteria(
-        Arrays.asList(LockSignature.POPULATE_EU_DATASET.getValue(), dataflowId));
 
-    // Finally, unlock the release operation itself
-    lockService.removeLockByCriteria(
-        Arrays.asList(LockSignature.RELEASE_SNAPSHOTS.getValue(), dataflowId, dataProviderId));
+    Map<String, Object> populateEuDataset = new HashMap<>();
+    populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
+    populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
+
+    Map<String, Object> releaseSnapshots = new HashMap<>();
+    releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+    releaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
+    releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, dataProviderId);
+
+    lockService.removeLockByCriteria(populateEuDataset);
+    lockService.removeLockByCriteria(releaseSnapshots);
   }
 
 
@@ -1140,8 +1156,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       // Import
       createLockWithSignature(LockSignature.IMPORT_FILE_DATA, mapCriteria, userName);
-      // ETL Import
-      createLockWithSignature(LockSignature.IMPORT_ETL, mapCriteria, userName);
 
       // Set the 'releasing' property to true in the dataset metabase
       ReportingDatasetVO reportingVO = new ReportingDatasetVO();
