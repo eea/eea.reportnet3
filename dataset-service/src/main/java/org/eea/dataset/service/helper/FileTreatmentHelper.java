@@ -37,10 +37,12 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -132,6 +134,10 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
   /**
    * Inits the.
    */
@@ -164,17 +170,27 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
       boolean replace) throws EEAException {
+
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+
     if (null == schema) {
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(importFileData);
       LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
-          datasetId, tableSchemaId, file.getName());
+          datasetId, tableSchemaId, file.getOriginalFilename());
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
+
+    if (schemaContainsFixedRecords(datasetId, schema, tableSchemaId)) {
+      LOG_ERROR.error(
+          "Import blocked because of fixed records: datasetId={}, filName={}, tableSchemaId={}",
+          datasetId, file.getOriginalFilename(), tableSchemaId);
+      throw new EEAException("Import blocked: dataset " + datasetId + " contains fixed records");
+    }
+
     // We add a lock to the Release process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     Map<String, Object> mapCriteria = new HashMap<>();
@@ -187,7 +203,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
     fileManagement(datasetId, tableSchemaId, schema, file, replace);
   }
-
 
   /**
    * Un zip import schema.
@@ -570,7 +585,6 @@ public class FileTreatmentHelper implements DisposableBean {
     return uniques;
   }
 
-
   /**
    * Unzipping dataset names classes.
    *
@@ -595,7 +609,6 @@ public class FileTreatmentHelper implements DisposableBean {
     return schemaNames;
   }
 
-
   /**
    * Unzipping dataset ids classes.
    *
@@ -619,7 +632,6 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     return schemaIds;
   }
-
 
   /**
    * Unzipping ext integrations classes.
@@ -1194,5 +1206,39 @@ public class FileTreatmentHelper implements DisposableBean {
           .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
           .forEach(tableValue -> tableValue.setId(oldTableId));
     }
+  }
+
+  /**
+   * Schema contains fixed records.
+   *
+   * @param schema the schema
+   * @param tableSchemaId the table schema id
+   * @return true, if successful
+   */
+  private boolean schemaContainsFixedRecords(Long datasetId, DataSetSchema schema,
+      String tableSchemaId) {
+
+    boolean rtn = false;
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      if (null == tableSchemaId) {
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+            rtn = true;
+            break;
+          }
+        }
+      } else {
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (tableSchemaId.equals(tableSchema.getIdTableSchema().toString())) {
+            rtn = Boolean.TRUE.equals(tableSchema.getFixedNumber());
+            break;
+          }
+        }
+      }
+    }
+
+    return rtn;
   }
 }

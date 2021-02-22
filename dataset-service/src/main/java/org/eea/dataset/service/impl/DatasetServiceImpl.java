@@ -367,65 +367,75 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Delete table by schema.
    *
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
    */
   @Override
   @Transactional
-  public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
-    recordRepository.deleteRecordWithIdTableSchema(idTableSchema);
-    LOG.info("Executed delete table with id {}, from dataset {}", idTableSchema, datasetId);
+  public void deleteTableBySchema(final String tableSchemaId, final Long datasetId) {
+    deleteRecords(datasetId, tableSchemaId);
   }
 
-  /**
-   * Delete import data.
-   *
-   * @param dataSetId the data set id
-   */
-  @Override
-  @Transactional
-  public void deleteImportData(final Long dataSetId) {
+  private void deleteRecords(Long datasetId, String tableSchemaId) {
 
-    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(getDataFlowIdById(dataSetId));
-    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(dataSetId);
-    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+    boolean singleTable = null != tableSchemaId;
+    Long dataflowId = getDataFlowIdById(datasetId);
+    TypeStatusEnum dataflowStatus = dataflowControllerZuul.getMetabaseById(dataflowId).getStatus();
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
+        new ObjectId(datasetMetabaseService.findDatasetSchemaIdById(datasetId)));
 
-    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
-      for (TableSchema tableSchema : schema.getTableSchemas()) {
-        if (!Boolean.TRUE.equals(tableSchema.getReadOnly())
-            || !Boolean.TRUE.equals(tableSchema.get)) {
-
-        }
-      }
-    }
-
-    // Delete the records from the tables of the dataset that aren't marked as read only
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-      if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
-          && (tableSchema.getFixedNumber() == null || !tableSchema.getFixedNumber())) {
-        recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
-        // if we have fixed number records we delete the non readonly fields
-      } else if (tableSchema.getFixedNumber()) {
-        List<String> fieldSchemasToDelete = new ArrayList();
-        for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
-          if (null != fieldSchema.getReadOnly() && !fieldSchema.getReadOnly()) {
-            fieldSchemasToDelete.add(fieldSchema.getIdFieldSchema().toString());
-          }
-        }
-        List<FieldValue> fieldValue =
-            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToDelete);
-        fieldValue.stream().forEach(fieldVal -> fieldVal.setValue(""));
-        fieldRepository.saveAll(fieldValue);
+
+      String loopTableSchemaId = tableSchema.getIdTableSchema().toString();
+
+      if (singleTable && !tableSchemaId.equals(loopTableSchemaId)) {
+        continue;
+      }
+
+      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
+        recordRepository.deleteRecordWithIdTableSchema(loopTableSchemaId);
+        LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId,
+            loopTableSchemaId);
+      } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
+        LOG.info("Skipped deleteRecords: datasetId={}, tableSchemaId={}, tableSchema.readOnly={}",
+            datasetId, loopTableSchemaId, tableSchema.getReadOnly());
+      } else if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        List<String> fieldSchemasToClear = tableSchema.getRecordSchema().getFieldSchema().stream()
+            .filter(fieldSchema -> Boolean.FALSE.equals(fieldSchema.getReadOnly()))
+            .map(fieldSchema -> fieldSchema.getIdFieldSchema().toString())
+            .collect(Collectors.toList());
+        List<FieldValue> fieldValuesToClear =
+            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToClear);
+        fieldValuesToClear.stream().forEach(fieldVal -> fieldVal.setValue(""));
+        fieldRepository.saveAll(fieldValuesToClear);
+        LOG.info("Overwritting fieldValues to blank: datasetId={}, tableSchemaId={}", datasetId,
+            loopTableSchemaId);
+      }
+
+      if (singleTable) {
+        return;
       }
     }
+
     try {
-      this.saveStatistics(dataSetId);
+      saveStatistics(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error saving statistics after deleting all the dataset values. Error message: {}",
           e.getMessage(), e);
     }
-    LOG.info("All data value deleted from dataSetId {}", dataSetId);
+  }
+
+
+  /**
+   * Delete import data.
+   *
+   * @param datasetId the data set id
+   */
+  @Override
+  @Transactional
+  public void deleteImportData(final Long datasetId) {
+    deleteRecords(datasetId, null);
   }
 
   /**
