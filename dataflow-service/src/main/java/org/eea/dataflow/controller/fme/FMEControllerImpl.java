@@ -14,6 +14,7 @@ import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -114,8 +115,9 @@ public class FMEControllerImpl implements FMEController {
     Exception exception = null;
     HttpStatus httpStatus = null;
     Map<String, Object> lockCriteria = new HashMap<>();
-    lockCriteria.put("criteria", LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
-    lockCriteria.put("datasetId", fmeOperationInfoVO.getDatasetId());
+    lockCriteria.put(LiteralConstants.SIGNATURE,
+        LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
+    lockCriteria.put(LiteralConstants.DATASETID, fmeOperationInfoVO.getDatasetId());
 
     try {
       FMEJob fmeJob = fmeCommunicationService.authenticateAndAuthorize(

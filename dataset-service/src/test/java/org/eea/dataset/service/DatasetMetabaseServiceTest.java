@@ -38,6 +38,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
@@ -139,6 +140,9 @@ public class DatasetMetabaseServiceTest {
   /** The data set metabase. */
   private DataSetMetabase dataSetMetabase;
 
+  /** The lead reporters VO. */
+  private List<LeadReporterVO> leadReportersVO;
+
   /**
    * Inits the mocks.
    */
@@ -150,6 +154,8 @@ public class DatasetMetabaseServiceTest {
     foreignRelations = new ForeignRelations();
     foreignRelations.setId(1L);
     foreignRelations.setIdDatasetDestination(dataSetMetabase);
+    leadReportersVO = new ArrayList<>();
+    leadReportersVO.add(new LeadReporterVO());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -187,7 +193,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(reportingDatasetRepository.save(Mockito.any())).thenReturn(reporting);
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
-    representative.setProviderAccounts(Arrays.asList("test@reportnet.net"));
+    representative.setLeadReporters(leadReportersVO);
     datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "",
         "5d0c822ae1ccd34cfcd97e20", 1L, null, Arrays.asList(representative), 0);
 
@@ -208,7 +214,7 @@ public class DatasetMetabaseServiceTest {
             .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(1L).build());
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
-    representative.setProviderAccounts(Arrays.asList("test@reportnet.net"));
+    representative.setLeadReporters(leadReportersVO);
     try {
       datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "datasetName",
           (new ObjectId()).toString(), 1L, null, new ArrayList<>(), 0);
@@ -393,7 +399,7 @@ public class DatasetMetabaseServiceTest {
   public void createGroupAndAddUserTest() {
 
     RepresentativeVO representative = new RepresentativeVO();
-    representative.setProviderAccounts(Arrays.asList("test@reportnet.net"));
+    representative.setLeadReporters(leadReportersVO);
     representative.setDataProviderId(1L);
     Map<Long, String> mapTest = new HashMap<>();
     mapTest.put(1L, "test@reportnet.net");

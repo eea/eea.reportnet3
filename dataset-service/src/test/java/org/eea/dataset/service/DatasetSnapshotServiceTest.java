@@ -57,6 +57,7 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -232,6 +233,9 @@ public class DatasetSnapshotServiceTest {
    */
   private Authentication authentication;
 
+  /** The lead reporters VO. */
+  private List<LeadReporterVO> leadReportersVO;
+
   /**
    * Inits the mocks.
    */
@@ -257,6 +261,8 @@ public class DatasetSnapshotServiceTest {
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
 
+    leadReportersVO = new ArrayList<>();
+    leadReportersVO.add(new LeadReporterVO());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -777,7 +783,7 @@ public class DatasetSnapshotServiceTest {
     dataset.setDataProviderId(1L);
     dataset.setDataSetName("datsetName");
     representative.setDataProviderId(1L);
-    representative.setProviderAccounts(Arrays.asList("providerAccount"));
+    representative.setLeadReporters(leadReportersVO);
     representative.setReceiptDownloaded(true);
     representative.setReceiptOutdated(true);
     datasets.add(dataset);
