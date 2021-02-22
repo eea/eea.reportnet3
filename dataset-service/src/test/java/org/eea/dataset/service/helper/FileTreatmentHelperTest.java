@@ -349,7 +349,7 @@ public class FileTreatmentHelperTest {
   @Test(expected = EEAException.class)
   public void importFileDataExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
-    Mockito.when(file.getName()).thenReturn("fileName.csv");
+    Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
     try {

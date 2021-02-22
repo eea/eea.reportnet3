@@ -107,6 +107,11 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
   /**
    * Inits the.
    */
