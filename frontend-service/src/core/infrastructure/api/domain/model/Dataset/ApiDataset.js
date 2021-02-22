@@ -78,7 +78,6 @@ export const apiDataset = {
     const response = await HTTPRequester.delete({
       url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
     });
-    console.log(response);
     return response;
   },
   deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
