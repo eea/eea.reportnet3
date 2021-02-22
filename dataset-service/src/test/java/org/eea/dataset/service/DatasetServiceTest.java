@@ -2950,7 +2950,7 @@ public class DatasetServiceTest {
     List<DesignDataset> desingDataset = new ArrayList();
     DesignDataset designDataset = new DesignDataset();
     designDataset.setDatasetSchema("603362319d49f04fce13b68f");
-    designDataset.setDataSetName("PACO");
+    designDataset.setDataSetName("test");
     desingDataset.add(designDataset);
     Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(desingDataset);
@@ -2969,7 +2969,25 @@ public class DatasetServiceTest {
             .thenReturn(expectedResult);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
         Mockito.anyLong())).thenReturn(datasetMetabaseList);
-    datasetService.savePublicFiles(1L, dataSetMetabase);
+    datasetService.savePublicFiles(1L, 1L);
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
+
+
+  /**
+   * Export public file throws.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void exportPublicFileThrows() throws IOException, EEAException {
+    try {
+      datasetService.exportPublicFile(1L, 1L, "test");
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.FILE_NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
 }

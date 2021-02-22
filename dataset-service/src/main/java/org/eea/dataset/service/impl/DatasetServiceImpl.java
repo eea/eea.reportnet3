@@ -3177,18 +3177,17 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public void savePublicFiles(Long dataflowId, DataSetMetabase dataSetMetabase) throws IOException {
+  public void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException {
 
     LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
-        dataSetMetabase.getDataProviderId());
+        dataSetDataProvider);
 
     List<RepresentativeVO> representativeList =
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
 
     // we took representative
     RepresentativeVO representative = representativeList.stream()
-        .filter(data -> data.getDataProviderId() == dataSetMetabase.getDataProviderId()).findAny()
-        .orElse(null);
+        .filter(data -> data.getDataProviderId() == dataSetDataProvider).findAny().orElse(null);
 
     // we check if the representative have permit to do it
     if (null != representative && !representative.isRestrictFromPublic()) {
@@ -3213,8 +3212,7 @@ public class DatasetServiceImpl implements DatasetService {
       Files.createDirectories(pathDataProvider);
       LOG.info("Folder {} created", pathDataProvider);
 
-      creeateAllDatasetFiles(dataSetMetabase, dataflowId, pathDataProvider,
-          representative.getDataProviderId());
+      creeateAllDatasetFiles(dataflowId, pathDataProvider, representative.getDataProviderId());
     }
 
   }
@@ -3231,21 +3229,17 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
+  public File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
       throws IOException, EEAException {
-
     // we compound the route
     String location = new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
         .append("\\dataProvider-").append(dataProviderId).append("\\").append(fileName)
         .append(".xlsx").toString();
-
-    byte[] dataBytes = null;
     File file = new File(location);
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
-    dataBytes = FileUtils.readFileToByteArray(file);
-    return dataBytes;
+    return file;
   }
 
   /**
@@ -3257,8 +3251,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataProviderId the data provider id
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void creeateAllDatasetFiles(DataSetMetabase dataset, Long dataflowId,
-      Path pathDataProvider, Long dataProviderId) throws IOException {
+  private void creeateAllDatasetFiles(Long dataflowId, Path pathDataProvider, Long dataProviderId)
+      throws IOException {
 
     DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
 
@@ -3300,11 +3294,11 @@ public class DatasetServiceImpl implements DatasetService {
         } catch (EEAException e) {
           LOG_ERROR.error(
               "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
-              dataset.getDataflowId(), dataset.getDataProviderId(), datasetToFile.getId(),
-              e.getMessage(), e);
+              dataflowId, datasetToFile.getDataProviderId(), datasetToFile.getId(), e.getMessage(),
+              e);
         }
-        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}",
-            dataset.getDataflowId(), dataset.getDataProviderId());
+        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}", dataflowId,
+            datasetToFile.getDataProviderId());
       }
     }
   }

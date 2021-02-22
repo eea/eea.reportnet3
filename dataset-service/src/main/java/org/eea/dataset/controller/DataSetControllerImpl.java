@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -39,10 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -889,19 +890,22 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping(value = "/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public HttpEntity<ByteArrayResource> exportPublicFile(@PathVariable("dataflowId") Long dataflowId,
+  public ResponseEntity<InputStreamResource> exportPublicFile(
+      @PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderI,
       @RequestParam(value = "fileName", required = true) String fileName) {
 
     try {
-      byte[] excelContent = datasetService.exportPublicFile(dataflowId, dataProviderI, fileName);
+      File excelContent = datasetService.exportPublicFile(dataflowId, dataProviderI, fileName);
+      InputStreamResource resource = new InputStreamResource(new FileInputStream(excelContent));
       HttpHeaders header = new HttpHeaders();
       header.setContentType(new MediaType("application", "force-download"));
       header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
-      return new HttpEntity<>(new ByteArrayResource(excelContent), header);
+      return ResponseEntity.ok().headers(header).contentLength(excelContent.length())
+          .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
   }
 
