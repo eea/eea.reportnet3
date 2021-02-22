@@ -65,38 +65,50 @@ import io.netty.util.internal.StringUtil;
 @RequestMapping("/dataschema")
 public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSchemaControllerImpl.class);
 
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
+  /** The dataschema service. */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
+  /** The record store controller zuul. */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The rules controller zuul. */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
+  /** The design dataset service. */
   @Autowired
   private DesignDatasetService designDatasetService;
 
+  /** The contributor controller zuul. */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
 
+  /** The integration controller zuul. */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
