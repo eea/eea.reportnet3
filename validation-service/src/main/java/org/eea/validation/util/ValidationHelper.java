@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -28,6 +29,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -42,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
@@ -124,8 +125,8 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    validationExecutorService =
-        new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(maxRunningTasks));
+    validationExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
   }
 
   /**
@@ -335,6 +336,16 @@ public class ValidationHelper implements DisposableBean {
       Validator validator, EventType notificationEventType) throws EEAException {
     ValidationTask validationTask = new ValidationTask(eeaEventVO, validator, datasetId,
         this.getKieBase(processId, datasetId), processId, notificationEventType);
+
+    // first every task is always queued up to ensure the order
+
+    if (((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+        .getDelegateExecutorService()).getActiveCount() == maxRunningTasks) {
+      LOG.info(
+          "Event {} will be queued up as there are no validating threads available at the moment",
+          eeaEventVO);
+    }
+
     this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
   }
 
@@ -720,6 +731,13 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
 
       Long currentTime = System.currentTimeMillis();
+      int workingThreads =
+          ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+              .getDelegateExecutorService()).getActiveCount();
+
+      LOG.info(
+          "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
+          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,

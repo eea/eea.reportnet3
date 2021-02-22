@@ -11,13 +11,13 @@ import javax.annotation.PostConstruct;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -53,8 +53,8 @@ public class ViewHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    viewExecutorService =
-        new DelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(maxRunningTasks));
+    viewExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
     processesList = new ArrayList<>();
   }
 
