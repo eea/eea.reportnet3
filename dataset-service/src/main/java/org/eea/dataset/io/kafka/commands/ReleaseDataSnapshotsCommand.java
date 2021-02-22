@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
@@ -13,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -37,10 +36,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
-
-  /** The data set metabase repository. */
-  @Autowired
-  private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   /** The dataset snapshot service. */
   @Autowired
@@ -95,14 +90,14 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       createSnapshotVO.setDescription("Release " + formateador.format(ahora));
       datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null);
     } else {
-      DataSetMetabase dataset =
-          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+      DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+
 
       // now when all finish we create the file to save the data to public export
       DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataset.getDataflowId());
       if (dataflowVO.isShowPublicInfo()) {
         try {
-          datasetService.savePublicFiles(dataflowVO.getId(), dataset);
+          datasetService.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
         } catch (IOException e) {
           LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} message {}",
               dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage(), e);

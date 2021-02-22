@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
@@ -572,10 +572,10 @@ public interface DatasetService {
    * Save public file.
    *
    * @param dataflowId the dataflow id
-   * @param dataSetMetabase the data set metabase
+   * @param dataSetDataProvider the data set data provider
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void savePublicFiles(Long dataflowId, DataSetMetabase dataSetMetabase) throws IOException;
+  void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException;
 
 
   /**
@@ -588,6 +588,6 @@ public interface DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  byte[] exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
+  File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
       throws IOException, EEAException;
 }

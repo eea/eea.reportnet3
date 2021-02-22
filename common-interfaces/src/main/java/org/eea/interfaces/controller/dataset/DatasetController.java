@@ -12,8 +12,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -381,7 +380,7 @@ public interface DatasetController {
    */
   @GetMapping(value = "/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  HttpEntity<ByteArrayResource> exportPublicFile(@PathVariable("dataflowId") Long dataflowId,
+  ResponseEntity<InputStreamResource> exportPublicFile(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId,
       @RequestParam(value = "fileName", required = true) String fileName);
 
