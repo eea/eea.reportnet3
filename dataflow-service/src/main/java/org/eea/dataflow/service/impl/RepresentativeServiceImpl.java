@@ -99,21 +99,12 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO)
       throws EEAException {
 
-    // String email = representativeVO.getProviderAccounts().get(0);
     Long dataProviderId = representativeVO.getDataProviderId();
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
     if (dataflow == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    // UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
-    // if (user == null) {
-    // throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    // }
-    // if (null != representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(dataflowId,
-    // representativeVO.getDataProviderId(), email)) {
-    // throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
-    // }
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
     Representative representative = representativeMapper.classToEntity(representativeVO);
@@ -124,8 +115,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setHasDatasets(false);
     representative.setId(0L);
     representative.setLeadReporters(new ArrayList<>());
-    // representative.getLeadReporters().stream().findFirst()
-    // .ifPresent(reporter -> reporter.setEmail(email));
 
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();
@@ -461,19 +450,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               representative.setReceiptOutdated(false);
               representative.setHasDatasets(false);
               representative.setId(0L);
+              LeadReporter leadReporter = new LeadReporter();
+              leadReporter.setRepresentative(representative);
+              leadReporter.setEmail(email);
+              representative.setLeadReporters(Arrays.asList(leadReporter));
+            } else {
+              List<LeadReporter> leadReporters = representative.getLeadReporters();
+              LeadReporter leadReporter = new LeadReporter();
+              leadReporter.setRepresentative(representative);
+              leadReporter.setEmail(email);
+              leadReporters.add(leadReporter);
+              representative.setLeadReporters(leadReporters);
             }
-            // if (!Collections.isEmpty(representative.getLeadReporters())) {
-            // representative.getLeadReporters().stream().findFirst()
-            // .ifPresent(reporter -> reporter.setEmail(email));
-            // } else {
-            // List<LeadReporter> reporters = new ArrayList<>();
-            // LeadReporter userNew = new LeadReporter();
-            // userNew.setEmail(user.getEmail());
-            // reporters.add(userNew);
-            // representative.setLeadReporters(reporters);
-            // representative.getLeadReporters().stream().findFirst()
-            // .ifPresent(reporter -> reporter.setEmail(user.getEmail()));
-            // }
             representativeList.add(representative);
             fieldsToWrite[2] = "OK imported";
           } else {
