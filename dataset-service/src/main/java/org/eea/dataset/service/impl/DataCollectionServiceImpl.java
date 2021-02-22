@@ -41,6 +41,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
@@ -575,7 +576,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
-      for (String email : representative.getProviderAccounts()) {
+      for (String email : representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
+          .collect(Collectors.toList())) {
         datasetIdsEmails.put(datasetId, email);
       }
       datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());

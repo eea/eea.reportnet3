@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -136,4 +137,32 @@ public interface RepresentativeController {
       @PathVariable(value = "dataflowId") Long dataflowId,
       @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
 
+
+  /**
+   * Creates the lead reporter.
+   *
+   * @param representativeId the representative id
+   * @param leadReporterVO the lead reporter VO
+   * @return the long
+   */
+  @PostMapping("/leadReporter/{representativeId}")
+  Long createLeadReporter(@PathVariable("representativeId") final Long representativeId,
+      @RequestBody LeadReporterVO leadReporterVO);
+
+  /**
+   * Update lead reporter.
+   *
+   * @param leadReporterVO the lead reporter VO
+   * @return the response entity
+   */
+  @PutMapping(value = "/leadReporter/update", produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO);
+
+  /**
+   * Delete lead reporter.
+   *
+   * @param leadReporterId the lead reporter id
+   */
+  @DeleteMapping(value = "/leadReporter/{leadReporterId}")
+  void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId);
 }
