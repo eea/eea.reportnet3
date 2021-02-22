@@ -1273,8 +1273,6 @@ public class DatasetSchemaControllerImplTest {
   public void updateDatasetSchemaDescriptionTest3() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
     try {
       dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
