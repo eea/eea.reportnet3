@@ -409,4 +409,23 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       @PathVariable("id") Long dataflowId) {
     return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
   }
+
+
+  /**
+   * Find reporting data set id by dataflow id and provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/dataflow/{id}/dataProvider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndProviderId(
+      @PathVariable("id") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId) {
+    return reportingDatasetService.getDataSetIdByDataflowIdAndDataProviderId(dataflowId,
+        dataProviderId);
+  }
 }
