@@ -1,14 +1,17 @@
 package org.eea.dataset.io.kafka.commands;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -27,7 +30,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand {
 
-
   /** The dataset metabase controller. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
@@ -44,6 +46,11 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
+
+  /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
@@ -52,6 +59,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
    */
   private static final Logger LOG = LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR =
+      LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
 
   /**
    * Gets the event type.
@@ -87,6 +97,18 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     } else {
       DataSetMetabase dataset =
           dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+
+      // now when all finish we create the file to save the data to public export
+      DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataset.getDataflowId());
+      if (dataflowVO.isShowPublicInfo()) {
+        try {
+          datasetService.savePublicFiles(dataflowVO.getId(), dataset);
+        } catch (IOException e) {
+          LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} message {}",
+              dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage(), e);
+        }
+      }
+
       // At this point the process of releasing all the datasets has been finished so we unlock
       // everything involved
       datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
@@ -96,13 +118,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           dataset.getDataflowId(), dataset.getDataProviderId());
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
           NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .dataflowId(dataset.getDataflowId())
-              .dataflowName(
-                  dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getName())
+              .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
               .providerId(dataset.getDataProviderId()).build());
     }
 
   }
-
-
 }

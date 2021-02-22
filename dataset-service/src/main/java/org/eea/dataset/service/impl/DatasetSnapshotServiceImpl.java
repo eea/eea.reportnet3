@@ -456,8 +456,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Mark the released dataset with the status
     String datasetSchema = "";
     if (designDataset != null) {
-      datasetSchema = designDataset.getDatasetSchema();
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
+      datasetSchema = designDataset.getDatasetSchema();
       designDataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
           : DatasetStatusEnum.RELEASED);
       metabaseRepository.save(designDataset);
@@ -465,6 +465,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Optional<DataCollection> dataCollection =
         dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
     Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
+
 
     // Delete data of the same provider
     deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);

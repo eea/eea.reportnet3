@@ -1,7 +1,11 @@
 package org.eea.dataset.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -72,6 +77,7 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -134,9 +140,15 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Constant DATASET_ID: {@value}. */
   private static final String DATASET_ID = "dataset_%s";
 
+  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
+  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
+
+  /** The path public file. */
+  @Value("${pathPublicFile}")
+  private String pathPublicFile;
 
   /** The dataset repository. */
   @Autowired
@@ -3158,6 +3170,147 @@ public class DatasetServiceImpl implements DatasetService {
 
 
   /**
+   * Save public files.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataSetMetabase the data set metabase
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public void savePublicFiles(Long dataflowId, DataSetMetabase dataSetMetabase) throws IOException {
+
+    LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
+        dataSetMetabase.getDataProviderId());
+
+    List<RepresentativeVO> representativeList =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+
+    // we took representative
+    RepresentativeVO representative = representativeList.stream()
+        .filter(data -> data.getDataProviderId() == dataSetMetabase.getDataProviderId()).findAny()
+        .orElse(null);
+
+    // we check if the representative have permit to do it
+    if (null != representative && !representative.isRestrictFromPublic()) {
+
+      // we create the dataflow folder to save it
+      Path pathDataflow = Paths
+          .get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId).toString());
+      File directoryDataflow = new File(pathDataflow.toString());
+      if (!directoryDataflow.exists()) {
+        Files.createDirectories(pathDataflow);
+
+        LOG.info("Folder {} created", pathDataflow);
+      }
+
+      // we create the dataprovider folder to save it andwe always delete it and put new files
+      Path pathDataProvider =
+          Paths.get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
+              .append("\\dataProvider-").append(representative.getDataProviderId()).toString());
+      if (directoryDataflow.exists()) {
+        FileUtils.deleteDirectory(new File(pathDataProvider.toString()));
+      }
+      Files.createDirectories(pathDataProvider);
+      LOG.info("Folder {} created", pathDataProvider);
+
+      creeateAllDatasetFiles(dataSetMetabase, dataflowId, pathDataProvider,
+          representative.getDataProviderId());
+    }
+
+  }
+
+
+  /**
+   * Export public file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param fileName the file name
+   * @return the byte[]
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public byte[] exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
+      throws IOException, EEAException {
+
+    // we compound the route
+    String location = new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
+        .append("\\dataProvider-").append(dataProviderId).append("\\").append(fileName)
+        .append(".xlsx").toString();
+
+    byte[] dataBytes = null;
+    File file = new File(location);
+    if (!file.exists()) {
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    dataBytes = FileUtils.readFileToByteArray(file);
+    return dataBytes;
+  }
+
+  /**
+   * Creeate all dataset files.
+   *
+   * @param dataset the dataset
+   * @param dataflowId the dataflow id
+   * @param pathDataProvider the path data provider
+   * @param dataProviderId the data provider id
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void creeateAllDatasetFiles(DataSetMetabase dataset, Long dataflowId,
+      Path pathDataProvider, Long dataProviderId) throws IOException {
+
+    DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
+
+    List<DataSetMetabase> datasetMetabaseList =
+        dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+
+    // now we create all files depends if they are avaliable
+    for (DataSetMetabase datasetToFile : datasetMetabaseList) {
+      if (datasetToFile.isAvailableInPublic()) {
+
+        // we put the good in the correct field
+        List<DesignDataset> desingDataset = designDatasetRepository.findByDataflowId(dataflowId);
+        // we find the name of the dataset to asing it for file
+        String datasetDesingName = "";
+        for (DesignDataset designDatasetVO : desingDataset) {
+          if (designDatasetVO.getDatasetSchema()
+              .equalsIgnoreCase(datasetToFile.getDatasetSchema())) {
+            datasetDesingName = designDatasetVO.getDataSetName();
+          }
+        }
+
+        try {
+          // 1º we create
+          byte[] file = exportFile(datasetToFile.getId(), "xlsx", null);
+          String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
+              dataProvider.getLabel(), datasetDesingName);
+
+          // we save the file in its files
+          String newFile = new StringBuilder(pathDataProvider.toString()).append("\\")
+              .append(nameFileUnique).append(".xlsx").toString();
+          FileUtils.writeByteArrayToFile(new File(newFile), file);
+
+          // we save the file in metabase with the name without the route
+          newFile = new StringBuilder("dataflow-").append(dataflowId).append("\\dataProvider-")
+              .append(dataProvider.getId()).append("\\").append(nameFileUnique).toString();
+          datasetToFile.setPublicFileName(nameFileUnique);
+          dataSetMetabaseRepository.save(datasetToFile);
+
+        } catch (EEAException e) {
+          LOG_ERROR.error(
+              "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
+              dataset.getDataflowId(), dataset.getDataProviderId(), datasetToFile.getId(),
+              e.getMessage(), e);
+        }
+        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}",
+            dataset.getDataflowId(), dataset.getDataProviderId());
+      }
+    }
+  }
+
+
+  /**
    * Gets the table schema.
    *
    * @param tableSchemaId the table schema id
@@ -3179,4 +3332,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     return tableSchema;
   }
+
+
+
 }
