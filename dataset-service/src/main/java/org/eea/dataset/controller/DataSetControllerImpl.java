@@ -39,8 +39,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -877,6 +879,34 @@ public class DataSetControllerImpl implements DatasetController {
 
 
   /**
+   * Export public file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderI the data provider I
+   * @param fileName the file name
+   * @return the http entity
+   */
+  @Override
+  @GetMapping(value = "/exportPublicFile/dataflow({dataflowId}/dataProvider{dataProviderId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public HttpEntity<ByteArrayResource> exportPublicFile(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderI,
+      @RequestParam(value = "fileName", required = true) String fileName) {
+
+    try {
+      byte[] excelContent = datasetService.exportPublicFile(dataflowId, dataProviderI, fileName);
+      HttpHeaders header = new HttpHeaders();
+      header.setContentType(new MediaType("application", "force-download"));
+      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+      return new HttpEntity<>(new ByteArrayResource(excelContent), header);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  /**
    * Validate attachment.
    *
    * @param datasetId the dataset id
@@ -915,6 +945,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
+
 
 
 }
