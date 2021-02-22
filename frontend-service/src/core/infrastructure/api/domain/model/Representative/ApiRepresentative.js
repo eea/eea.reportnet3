@@ -3,14 +3,14 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const apiRepresentative = {
-  add: async (dataflowId, providerAccount, dataProviderId) => {
+  add: async (dataflowId, dataProviderGroupId, dataProviderId) => {
     const response = await HTTPRequester.post({
       url: getUrl(RepresentativeConfig.add, {
         dataflowId
       }),
       data: {
         dataProviderId,
-        providerAccounts: [providerAccount]
+        dataProviderGroupId
       }
     });
     return response;

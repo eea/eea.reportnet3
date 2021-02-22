@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 import { Representative } from 'core/domain/model/Representative/Representative';
 
 export const reducer = (state, { type, payload }) => {
-  const emptyRepresentative = new Representative({ dataProviderId: '', providerAccount: '' });
+  const emptyRepresentative = new Representative({ dataProviderId: '', leadReporters: [] });
 
   switch (type) {
     case 'REFRESH':
@@ -64,6 +64,15 @@ export const reducer = (state, { type, payload }) => {
         payload.response.representatives.push(emptyRepresentative);
       }
 
+      // add empty leadReporter to all representative that have country
+      payload.response.representatives.forEach(representative => {
+        if (representative.dataProviderId) {
+          representative.leadReporters.push({ id: 'empty', account: '' });
+          return representative;
+        }
+        return representative;
+      });
+
       const getSelectedProviderGroup = () => {
         let selectedGroup = null;
         if (isNil(state.selectedDataProviderGroup)) {
@@ -78,7 +87,8 @@ export const reducer = (state, { type, payload }) => {
         representatives: payload.response.representatives,
         initialRepresentatives: payload.representativesByCopy,
         selectedDataProviderGroup: getSelectedProviderGroup(),
-        representativeHaveError: []
+        representativeHaveError: [],
+        leadReporters: payload.parsedLeadReporters
       };
 
     case 'ON_ACCOUNT_CHANGE':
@@ -118,6 +128,30 @@ export const reducer = (state, { type, payload }) => {
         ...state,
         providerWithEmptyInput: payload.dataProviderId,
         representatives: payload.representatives
+      };
+
+    case 'ON_CHANGE_LEAD_REPORTER':
+      return {
+        ...state,
+        leadReporters: {
+          ...state.leadReporters,
+          [payload.dataProviderId]: {
+            ...state.leadReporters[payload.dataProviderId],
+            [payload.leadReporterId]: payload.inputValue
+          }
+        }
+      };
+
+    case 'CREATE_ERROR':
+      return {
+        ...state,
+        leadReportersErrors: {
+          ...state.leadReportersErrors,
+          [payload.dataProviderId]: {
+            ...state.leadReportersErrors[payload.dataProviderId],
+            [payload.leadReporterId]: payload.hasErrors
+          }
+        }
       };
 
     default:

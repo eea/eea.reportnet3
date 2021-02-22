@@ -34,6 +34,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Button } from 'ui/views/_components/Button/Button';
 import { InputText } from 'ui/views/_components/InputText/InputText';
 
+import { RepresentativeService } from 'core/services/Representative';
+
 const RepresentativesList = ({
   dataflowId,
   isActiveManageRolesDialog,
@@ -47,21 +49,27 @@ const RepresentativesList = ({
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     initialRepresentatives: [],
+    isLoading: false,
     isVisibleConfirmDeleteDialog: false,
+    leadReporters: {},
+    leadReportersErrors: {},
+    providerWithEmptyInput: null,
     refresher: false,
-    representativesHaveError: [],
     representativeIdToDelete: '',
     representatives: [],
+    representativesHaveError: [],
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: [],
-    isLoading: false,
-    providerWithEmptyInput: null
+    unusedDataProvidersOptions: []
   };
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
   }, [formState.refresher]);
+
+  useEffect(() => {
+    console.log('formState.leadReporters', formState.leadReporters);
+  }, [formState.leadReporters]);
 
   useEffect(() => {
     if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
@@ -105,85 +113,99 @@ const RepresentativesList = ({
     }
   }, [formState.representatives]);
 
-  const onAddEmptyLeadReporter = dataProviderId => {
-    const updatedRepresentativesList = formState.representatives.map(representative => {
-      if (representative.dataProviderId === dataProviderId && representative.leadReporters) {
-        // TODO
-        representative.leadReporters.unshift({ id: null, account: '' });
-      } else if (representative.dataProviderId === dataProviderId && !representative.leadReporters) {
-        representative.leadReporters = [{ id: null, account: '' }];
+  const onChangeLeadReporter = async (dataProviderId, leadReporterId, inputValue) => {
+    formDispatcher({ type: 'ON_CHANGE_LEAD_REPORTER', payload: { dataProviderId, leadReporterId, inputValue } });
+  };
+
+  const onSubmitLeadReporter = async (dataProviderId, leadReporterId, inputValue) => {
+    if (isValidEmail(inputValue)) {
+      try {
+        await RepresentativeService.updateProviderAccount(
+          parseInt(leadReporterId),
+          parseInt(dataProviderId),
+          inputValue
+        );
+      } catch (error) {
+        console.log('error', error);
+        formDispatcher({ type: 'CREATE_ERROR', payload: { hasErrors: true, leadReporterId, dataProviderId } });
       }
-      return representative;
-    });
-    formDispatcher({
-      type: 'ADD_NEW_LEAD_REPORTER',
-      payload: { dataProviderId, representatives: updatedRepresentativesList }
-    });
+    }
+    formDispatcher({ type: 'CREATE_ERROR', payload: { hasErrors: true, leadReporterId, dataProviderId } });
   };
 
   const renderLeadReporterTemplate = representative => {
     const { dataProviderId } = representative;
-    // TODO
-    const leadReporters = representative.leadReporters || [];
+
+    if (isNil(representative.leadReporters)) return [];
     //------------------------------------------------
-    let inputData = representative.leadReporters;
+    // let inputData = representative.leadReporters;
 
-    let hasError = formState.representativesHaveError.includes(representative.representativeId);
+    // let hasError = formState.representativesHaveError.includes(representative.representativeId);
 
-    const labelId = uuid.v4();
+    // const labelId = uuid.v4();
 
-    const onAccountChange = (account, dataProviderId) => {
-      const { representatives } = formState;
+    // const onAccountChange = (account, dataProviderId) => {
+    //   const { representatives } = formState;
 
-      const [thisRepresentative] = representatives.filter(
-        thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
-      );
-      //
-      thisRepresentative.leadReporters = account;
+    //   const [thisRepresentative] = representatives.filter(
+    //     thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
+    //   );
+    //   //
+    //   thisRepresentative.leadReporters = account;
 
-      let representativesHaveError;
+    //   let representativesHaveError;
 
-      if (isValidEmail(account)) {
-        representativesHaveError = formState.representativesHaveError.filter(
-          representativeId => representativeId !== thisRepresentative.representativeId
-        );
-      } else {
-        representativesHaveError = formState.representativesHaveError;
-        representativesHaveError.unshift(thisRepresentative.representativeId);
-      }
+    //   if (isValidEmail(account)) {
+    //     representativesHaveError = formState.representativesHaveError.filter(
+    //       representativeId => representativeId !== thisRepresentative.representativeId
+    //     );
+    //   } else {
+    //     representativesHaveError = formState.representativesHaveError;
+    //     representativesHaveError.unshift(thisRepresentative.representativeId);
+    //   }
 
-      formDispatcher({
-        type: 'ON_ACCOUNT_CHANGE',
-        payload: {
-          representatives,
-          representativesHaveError: uniq(representativesHaveError)
-        }
-      });
-    };
+    //   formDispatcher({
+    //     type: 'ON_ACCOUNT_CHANGE',
+    //     payload: {
+    //       representatives,
+    //       representativesHaveError: uniq(representativesHaveError)
+    //     }
+    //   });
+    // };
 
     //------------------------------------------------
 
-    return leadReporters.map(leadReporter => {
-      if (leadReporter.id === null) {
+    return representative.leadReporters.map(leadReporter => {
+      const reporters = formState.leadReporters[dataProviderId];
+
+      const errors = formState.leadReportersErrors[dataProviderId];
+
+      console.log('reporters', reporters);
+
+      if (leadReporter.id === 'empty') {
+        console.log('leadReporter', leadReporter);
         return (
           <div className={styles.inputWrapper}>
             <InputText
-              // onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+              placeholder={`New lead reporter`}
+              onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
               // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
-              value={leadReporter.account}
+              // value={reporters[leadReporter.id].account}
             />
           </div>
         );
       }
+
       return (
         <div className={styles.inputWrapper}>
           <InputText
-            // onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
-            value={leadReporter.account}
+            className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
+            onBlur={event => onSubmitLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+            onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+            value={reporters[leadReporter.id].account}
           />
           <Button
-            className={`p-button-animated-blink p-button-primary-transparent ${styles.deleteButton}`}
+            className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton}`}
             icon={'trash'}
             // onClick={() => handleDialogs('deleteAttachment', true)}
           />
@@ -192,68 +214,68 @@ const RepresentativesList = ({
     });
   };
 
-  const providerAccountInputColumnTemplate = representative => {
-    let inputData = representative.leadReporters;
+  // const providerAccountInputColumnTemplate = representative => {
+  //   let inputData = representative.leadReporters;
 
-    let hasError = formState.representativesHaveError.includes(representative.representativeId);
+  //   let hasError = formState.representativesHaveError.includes(representative.representativeId);
 
-    const labelId = uuid.v4();
+  //   const labelId = uuid.v4();
 
-    const onAccountChange = (account, dataProviderId) => {
-      const { representatives } = formState;
+  //   const onAccountChange = (account, dataProviderId) => {
+  //     const { representatives } = formState;
 
-      const [thisRepresentative] = representatives.filter(
-        thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
-      );
+  //     const [thisRepresentative] = representatives.filter(
+  //       thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
+  //     );
 
-      thisRepresentative.leadReporters = account;
+  //     thisRepresentative.leadReporters = account;
 
-      let representativesHaveError;
+  //     let representativesHaveError;
 
-      if (isValidEmail(account)) {
-        representativesHaveError = formState.representativesHaveError.filter(
-          representativeId => representativeId !== thisRepresentative.representativeId
-        );
-      } else {
-        representativesHaveError = formState.representativesHaveError;
-        representativesHaveError.unshift(thisRepresentative.representativeId);
-      }
+  //     if (isValidEmail(account)) {
+  //       representativesHaveError = formState.representativesHaveError.filter(
+  //         representativeId => representativeId !== thisRepresentative.representativeId
+  //       );
+  //     } else {
+  //       representativesHaveError = formState.representativesHaveError;
+  //       representativesHaveError.unshift(thisRepresentative.representativeId);
+  //     }
 
-      formDispatcher({
-        type: 'ON_ACCOUNT_CHANGE',
-        payload: {
-          representatives,
-          representativesHaveError: uniq(representativesHaveError)
-        }
-      });
-    };
+  //     formDispatcher({
+  //       type: 'ON_ACCOUNT_CHANGE',
+  //       payload: {
+  //         representatives,
+  //         representativesHaveError: uniq(representativesHaveError)
+  //       }
+  //     });
+  //   };
 
-    return (
-      <>
-        <div className={`formField ${hasError ? 'error' : undefined}`} style={{ marginBottom: '0rem' }}>
-          <input
-            autoFocus={isNil(representative.representativeId)}
-            className={representative.hasDatasets ? styles.disabled : undefined}
-            disabled={representative.hasDatasets}
-            id={isEmpty(inputData) ? 'emptyInput' : labelId}
-            /*  onBlur={() => {
-              //TODO pass to array
-              representative.leadReporters = representative.leadReporters[0].toLowerCase();
-              isValidEmail(representative.leadReporters) &&
-                onAddProvider(formDispatcher, formState, representative, dataflowId);
-            }} */
-            onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
-            onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-            placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-            value={inputData}
-          />
-          <label htmlFor={isEmpty(inputData) ? 'emptyInput' : labelId} className="srOnly">
-            {resources.messages['manageRolesDialogInputPlaceholder']}
-          </label>
-        </div>
-      </>
-    );
-  };
+  //   return (
+  //     <>
+  //       <div className={`formField ${hasError ? 'error' : undefined}`} style={{ marginBottom: '0rem' }}>
+  //         <input
+  //           autoFocus={isNil(representative.representativeId)}
+  //           className={representative.hasDatasets ? styles.disabled : undefined}
+  //           disabled={representative.hasDatasets}
+  //           id={isEmpty(inputData) ? 'emptyInput' : labelId}
+  //           /*  onBlur={() => {
+  //             //TODO pass to array
+  //             representative.leadReporters = representative.leadReporters[0].toLowerCase();
+  //             isValidEmail(representative.leadReporters) &&
+  //               onAddProvider(formDispatcher, formState, representative, dataflowId);
+  //           }} */
+  //           onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
+  //           onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
+  //           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+  //           value={inputData}
+  //         />
+  //         <label htmlFor={isEmpty(inputData) ? 'emptyInput' : labelId} className="srOnly">
+  //           {resources.messages['manageRolesDialogInputPlaceholder']}
+  //         </label>
+  //       </div>
+  //     </>
+  //   );
+  // };
 
   const dropdownColumnTemplate = representative => {
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
@@ -293,16 +315,6 @@ const RepresentativesList = ({
             );
           })}
         </select>
-        {representative.dataProviderId && (
-          <Button
-            // className={`p-button-animated-blink p-button-primary-transparent ${styles.deleteButton}`}
-            label="Add new lead reporter"
-            style={{ display: 'flex' }}
-            icon={'plus'}
-            disabled={representative.dataProviderId === formState.providerWithEmptyInput}
-            onClick={() => onAddEmptyLeadReporter(representative.dataProviderId)}
-          />
-        )}
       </>
     );
   };

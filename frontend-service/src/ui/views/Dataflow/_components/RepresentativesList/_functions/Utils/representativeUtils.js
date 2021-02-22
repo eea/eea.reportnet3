@@ -25,8 +25,8 @@ export const autofocusOnEmptyInput = formState => {
 const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
   const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
   if (
-    !isEmpty(newRepresentative[0].providerAccount) &&
-    isValidEmail(newRepresentative[0].providerAccount) &&
+    // !isEmpty(newRepresentative[0].providerAccount) &&
+    // isValidEmail(newRepresentative[0].providerAccount) &&
     !isEmpty(newRepresentative[0].dataProviderId)
   ) {
     formDispatcher({
@@ -36,7 +36,7 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
     try {
       await RepresentativeService.add(
         dataflowId,
-        newRepresentative[0].providerAccount,
+        formState.selectedDataProviderGroup.dataProviderGroupId,
         parseInt(newRepresentative[0].dataProviderId)
       );
 
@@ -86,15 +86,42 @@ export const getAllDataProviders = async (selectedDataProviderGroup, representat
   }
 };
 
+const parseInsideLeadReporters = (leadReporters = []) => {
+  const reporters = {};
+  for (let index = 0; index < leadReporters.length; index++) {
+    const leadReporter = leadReporters[index];
+
+    reporters[leadReporter.id] = leadReporter;
+    reporters['empty'] = '';
+  }
+  return reporters;
+};
+
+const parseLeadReporters = (representatives = []) => {
+  const filteredRepresentatives = representatives.filter(re => !isNil(re.dataProviderId));
+
+  const dataProvidersLeadReporters = {};
+
+  filteredRepresentatives.forEach(representative => {
+    if (isNil(representative.leadReporters)) return {};
+
+    dataProvidersLeadReporters[representative.dataProviderId] = parseInsideLeadReporters(representative.leadReporters);
+  });
+
+  return dataProvidersLeadReporters;
+};
+
 const getAllRepresentatives = async (dataflowId, formDispatcher) => {
   try {
-    const responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+    let responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+
+    const parsedLeadReporters = parseLeadReporters(responseAllRepresentatives.representatives);
 
     const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
 
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: { response: responseAllRepresentatives, representativesByCopy }
+      payload: { response: responseAllRepresentatives, representativesByCopy, parsedLeadReporters }
     });
   } catch (error) {
     console.error('error on RepresentativeService.allRepresentatives', error);
@@ -134,6 +161,7 @@ export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, 
       type: 'SET_IS_LOADING',
       payload: { isLoading: true }
     });
+
     try {
       await RepresentativeService.updateDataProviderId(
         parseInt(representative.representativeId),

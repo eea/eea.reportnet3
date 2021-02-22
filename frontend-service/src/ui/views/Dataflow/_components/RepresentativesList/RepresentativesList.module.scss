@@ -13,9 +13,9 @@
   max-width: 16rem;
 }
 
-.btnDelete {
+.deleteButton {
   border: 1px solid var(--c-custom-gray) !important;
-  box-shadow: 0em var(--blue-100) !important;
+  box-shadow: 0 0 0 0em var(--blue-120) !important;
   color: var(--errors) !important;
   margin-left: 3px !important;
 
@@ -72,4 +72,8 @@
       width: 100px;
     }
   }
+}
+
+.hasErrors {
+  border: 2px solid var(--errors) !important;
 }
