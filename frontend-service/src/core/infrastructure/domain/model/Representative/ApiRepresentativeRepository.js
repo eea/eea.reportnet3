@@ -22,6 +22,7 @@ const allDataProviders = async dataProviderGroup => {
 
 const allRepresentatives = async dataflowId => {
   const representativesDTO = await apiRepresentative.allRepresentatives(dataflowId);
+
   const representativesList = !isEmpty(representativesDTO.data)
     ? representativesDTO.data.map(
         representativeDTO =>
@@ -31,11 +32,7 @@ const allRepresentatives = async dataflowId => {
             id: representativeDTO.id,
             isReceiptDownloaded: representativeDTO.receiptDownloaded,
             isReceiptOutdated: representativeDTO.receiptOutdated,
-            // leadReporters: representativeDTO.providerAccounts.unshift({ id: 777, account: 'pablo@man.com' }),
-            leadReporters: [
-              { account: representativeDTO.providerAccounts[0], id: 50 },
-              { id: 777, account: 'pablo@man.com' }
-            ],
+            leadReporters: representativeDTO.leadReporters,
             hasDatasets: representativeDTO.hasDatasets
           })
       )
