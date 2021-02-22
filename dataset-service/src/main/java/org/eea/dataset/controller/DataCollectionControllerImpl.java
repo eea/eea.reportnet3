@@ -96,6 +96,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
       @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+      @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
       @RequestBody @LockCriteria(name = "dataflowId",
           path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
@@ -120,7 +121,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     // This method will release the lock
     dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-        manualCheck);
+        manualCheck, showPublicInfo);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 

@@ -561,7 +561,11 @@
         {
           "key": "DELETE_RECORD_BY_ID_BLOCKED_ERROR"
         },
-        { "key": "ADD_RECORDS_BLOCKED_ERROR" }
+        { "key": "ADD_RECORDS_BLOCKED_ERROR" },
+        {
+          "key": "RELEASE_BLOCKED_EVENT"
+        }
+
       ]
     },
     {

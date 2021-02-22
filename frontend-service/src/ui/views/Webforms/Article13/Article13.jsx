@@ -90,10 +90,10 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
 
   const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const generatePamId = () => {
-    if (isEmpty(pamsRecords)) return 1;
+  const generatePamId = pamsTableRecords => {
+    if (isEmpty(pamsTableRecords)) return 1;
 
-    const recordIds = parsePamsRecords(pamsRecords)
+    const recordIds = parsePamsRecords(pamsTableRecords)
       .map(record => parseInt(record.Id) || parseInt(record.id))
       .filter(id => !Number.isNaN(id));
 
@@ -104,6 +104,22 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     article13Dispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
   };
 
+  const getPamsTableRecords = async tableSchemaId => {
+    if (!isNil(tableSchemaId[0])) {
+      const pamsTable = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
+        'CORRECT',
+        'INFO',
+        'WARNING',
+        'ERROR',
+        'BLOCKER'
+      ]);
+
+      return onParseWebformRecords(pamsTable.records, article13State.data[0], {}, pamsTable.totalRecords) || [];
+    }
+
+    return [];
+  };
+
   const onAddPamsRecord = async type => {
     if (type === 'single') {
       setIsAddingSingleRecord(true);
@@ -111,12 +127,14 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       setIsAddingGroupRecord(true);
     }
     const filteredTables = datasetSchema.tables.filter(table => table.tableSchemaNotEmpty);
+    const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
 
     try {
+      const pamsTableRecords = await getPamsTableRecords(tableSchemaId);
       const response = await WebformService.addPamsRecords(
         datasetId,
         filteredTables,
-        generatePamId(),
+        generatePamId(pamsTableRecords),
         capitalize(type)
       );
       if (response.status >= 200 && response.status <= 299) {

@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.PartitionInfo;
 import org.eea.kafka.domain.EEAEventVO;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class KafkaSender {
 
   public void sendMessage(final EEAEventVO event) {
 
-    kafkaTemplate.executeInTransaction(operations -> {     
+    kafkaTemplate.executeInTransaction(operations -> {
       event.getData().put("user", SecurityContextHolder.getContext().getAuthentication().getName());
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));

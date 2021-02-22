@@ -398,6 +398,16 @@ export const Dataset = withRouter(({ match, history }) => {
         content: { dataflowId, datasetId, datasetName: datasetSchemaName }
       });
     }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'FILE_UPLOAD_BLOCKED_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -525,7 +535,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   useCheckNotifications(
-    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
     onLoadDataflow
   );
 

@@ -240,10 +240,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   * @param showNotification the show notification
    */
   @Async
   @Override
-  public void validateSQLRules(Long datasetId, String datasetSchemaId) {
+  public void validateSQLRules(Long datasetId, String datasetSchemaId, Boolean showNotification) {
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
@@ -276,14 +277,18 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           .datasetId(datasetId).dataflowId(dataflowId).invalidRules(rulesUnchecked)
           .disabledRules(rulesDisabled).build();
       LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
+      if (showNotification == null || showNotification) {
+        releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
+      }
     } else {
 
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
           .datasetId(datasetId).dataflowId(dataflowId).build();
       LOG.info("SQL rules contains 0 errors");
-      releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
+      if (showNotification == null || showNotification) {
+        releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
+      }
     }
   }
 
