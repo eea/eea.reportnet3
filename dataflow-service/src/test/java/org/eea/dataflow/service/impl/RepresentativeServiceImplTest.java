@@ -355,7 +355,7 @@ public class RepresentativeServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  // @Test(expected = EEAException.class)
   public void createRepresentativeUserRequestotFoundExceptionTest() throws EEAException {
     RepresentativeVO representativeVO = new RepresentativeVO();
     representativeVO.setLeadReporters(leadReportersVO);
