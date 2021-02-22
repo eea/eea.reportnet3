@@ -16,6 +16,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -366,8 +367,9 @@ public class IntegrationControllerImpl implements IntegrationController {
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
           integrationId, datasetId, e.getMessage());
       Map<String, Object> lockCriteria = new HashMap<>();
-      lockCriteria.put("criteria", LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
-      lockCriteria.put("datasetId", datasetId);
+      lockCriteria.put(LiteralConstants.SIGNATURE,
+          LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
+      lockCriteria.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(lockCriteria);
       integrationService.releaseLocks(datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

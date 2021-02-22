@@ -38,4 +38,12 @@ public interface ReportingDatasetRepository extends CrudRepository<ReportingData
   ReportingDataset findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(Long dataflowId,
       Long dataProviderId);
 
+  /**
+   * Find by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  List<ReportingDataset> findByDataflowIdAndDataProviderId(Long dataflowId, Long dataProviderId);
+
 }

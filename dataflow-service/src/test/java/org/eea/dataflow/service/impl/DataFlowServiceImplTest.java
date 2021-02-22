@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
@@ -38,6 +40,7 @@ import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -148,6 +151,10 @@ public class DataFlowServiceImplTest {
   /** The eu dataset controller zuul. */
   @Mock
   private EUDatasetControllerZuul euDatasetControllerZuul;
+
+  /** The dataflow public mapper. */
+  @Mock
+  private DataflowPublicMapper dataflowPublicMapper;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -896,4 +903,55 @@ public class DataFlowServiceImplTest {
       throw e;
     }
   }
+
+  /**
+   * Gets the public dataflows test.
+   *
+   * @return the public dataflows test
+   */
+  @Test
+  public void getPublicDataflowsTest() {
+    DataflowPublicVO dataflow = new DataflowPublicVO();
+    dataflow.setId(1L);
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflow.setObligation(obligation);
+    Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
+        .thenReturn(Arrays.asList(dataflow));
+    assertNotNull(dataflowServiceImpl.getPublicDataflows());
+  }
+
+  /**
+   * Gets the public dataflow by id test.
+   *
+   * @return the public dataflow by id test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getPublicDataflowByIdTest() throws EEAException {
+    DataflowPublicVO dataflow = new DataflowPublicVO();
+    dataflow.setId(1L);
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflow.setObligation(obligation);
+    Mockito.when(dataflowPublicMapper.entityToClass(Mockito.any())).thenReturn(dataflow);
+    assertNotNull(dataflowServiceImpl.getPublicDataflowById(1L));
+  }
+
+  /**
+   * Gets the public dataflow by id exception test.
+   *
+   * @return the public dataflow by id exception test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getPublicDataflowByIdExceptionTest() throws EEAException {
+    try {
+      dataflowServiceImpl.getPublicDataflowById(1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getLocalizedMessage());
+      throw e;
+    }
+  }
+
 }

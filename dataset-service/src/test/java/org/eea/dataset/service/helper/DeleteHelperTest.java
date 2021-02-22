@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteHelperTest {
@@ -37,6 +39,9 @@ public class DeleteHelperTest {
    */
   @Before
   public void initMocks() {
+    SecurityContextHolder.clearContext();
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
   }
@@ -54,11 +59,9 @@ public class DeleteHelperTest {
         Mockito.any(), Mockito.any());
   }
 
-
   @Test
   public void executeDeleteDatasetProcessTest()
       throws EEAException, IOException, InterruptedException {
-
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
         Mockito.any());
