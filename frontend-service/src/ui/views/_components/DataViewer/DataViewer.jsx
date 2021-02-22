@@ -631,20 +631,26 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'DELETE_RECORD_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName,
-            tableName
-          }
-        });
+        if (error.response.status === 423) {
+          notificationContext.add({
+            type: 'DELETE_RECORD_BY_ID_BLOCKED_ERROR'
+          });
+        } else {
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+          notificationContext.add({
+            type: 'DELETE_RECORD_BY_ID_ERROR',
+            content: {
+              dataflowId,
+              datasetId,
+              dataflowName,
+              datasetName,
+              tableName
+            }
+          });
+        }
       } finally {
         setDeleteDialogVisible(false);
       }
