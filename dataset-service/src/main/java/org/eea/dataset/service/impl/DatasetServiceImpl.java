@@ -3215,10 +3215,11 @@ public class DatasetServiceImpl implements DatasetService {
 
     // we compound the route
     String location = new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
-        .append("\\dataProvider-").append(dataProviderId).toString();
+        .append("\\dataProvider-").append(dataProviderId).append("\\").append(fileName)
+        .append(".xlsx").toString();
 
     byte[] dataBytes = null;
-    File file = new File(new StringBuilder(pathPublicFile).append(location).toString());
+    File file = new File(location);
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
@@ -3266,13 +3267,13 @@ public class DatasetServiceImpl implements DatasetService {
 
           // we save the file in its files
           String newFile = new StringBuilder(pathDataProvider.toString()).append("\\")
-              .append(nameFileUnique).toString();
+              .append(nameFileUnique).append(".xlsx").toString();
           FileUtils.writeByteArrayToFile(new File(newFile), file);
 
           // we save the file in metabase with the name without the route
           newFile = new StringBuilder("dataflow-").append(dataflowId).append("\\dataProvider-")
               .append(dataProvider.getId()).append("\\").append(nameFileUnique).toString();
-          datasetToFile.setPublicFileName(newFile);
+          datasetToFile.setPublicFileName(nameFileUnique);
           dataSetMetabaseRepository.save(datasetToFile);
 
         } catch (EEAException e) {

@@ -887,7 +887,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the http entity
    */
   @Override
-  @GetMapping(value = "/exportPublicFile/dataflow({dataflowId}/dataProvider{dataProviderId}",
+  @GetMapping(value = "/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public HttpEntity<ByteArrayResource> exportPublicFile(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderI,

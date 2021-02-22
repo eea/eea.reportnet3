@@ -457,9 +457,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataSetMetabase designDataset = metabaseRepository.findById(idDataset).orElse(null);
 
     // Mark the released dataset with the status
-    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
     String datasetSchema = "";
     if (designDataset != null) {
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
       datasetSchema = designDataset.getDatasetSchema();
       designDataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
           : DatasetStatusEnum.RELEASED);

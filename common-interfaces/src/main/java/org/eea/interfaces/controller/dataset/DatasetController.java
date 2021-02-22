@@ -379,7 +379,7 @@ public interface DatasetController {
    * @param fileName the file name
    * @return the response entity
    */
-  @GetMapping(value = "/exportPublicFile/dataflow({dataflowId}/dataProvider{dataProviderId}",
+  @GetMapping(value = "/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   HttpEntity<ByteArrayResource> exportPublicFile(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId,
