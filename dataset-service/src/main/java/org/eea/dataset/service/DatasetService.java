@@ -57,9 +57,9 @@ public interface DatasetService {
   /**
    * Delete import data.
    *
-   * @param dataSetId the data set id
+   * @param datasetId the data set id
    */
-  void deleteImportData(@DatasetId Long dataSetId);
+  void deleteImportData(@DatasetId Long datasetId);
 
   /**
    * Gets the table values by id.
@@ -154,10 +154,10 @@ public interface DatasetService {
   /**
    * Delete table by schema.
    *
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
    */
-  void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
+  void deleteTableBySchema(String tableSchemaId, @DatasetId Long datasetId);
 
   /**
    * Export file.
