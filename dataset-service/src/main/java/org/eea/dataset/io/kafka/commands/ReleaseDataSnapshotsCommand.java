@@ -94,7 +94,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
 
       // now when all finish we create the file to save the data to public export
-      DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataset.getDataflowId());
+      DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
       if (dataflowVO.isShowPublicInfo()) {
         try {
           datasetService.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
