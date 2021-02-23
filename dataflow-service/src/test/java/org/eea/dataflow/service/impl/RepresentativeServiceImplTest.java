@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import org.eea.dataflow.mapper.DataProviderMapper;
@@ -16,6 +18,7 @@ import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -24,6 +27,8 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,55 +36,48 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
-/** The Class RepresentativeServiceImplTest. */
 public class RepresentativeServiceImplTest {
 
-  /** The representative service impl. */
   @InjectMocks
   private RepresentativeServiceImpl representativeServiceImpl;
 
-  /** The dataflow repository. */
   @Mock
   private DataflowRepository dataflowRepository;
 
-  /** The user management controller zull. */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
 
-  /** The representative repository. */
   @Mock
   private RepresentativeRepository representativeRepository;
 
-  /** The representative mapper. */
   @Mock
   private RepresentativeMapper representativeMapper;
 
-  /** The data provider repository. */
   @Mock
   private DataProviderRepository dataProviderRepository;
 
-  /** The data provider mapper. */
+  @Mock
+  private LeadReporterRepository leadReporterRepository;
+
   @Mock
   private DataProviderMapper dataProviderMapper;
 
-  /** The representative. */
   private Representative representative;
 
-  /** The representative VO. */
   private RepresentativeVO representativeVO;
 
-  /** The array id. */
   private List<Representative> arrayId;
 
-  /** The emails. */
   private List<LeadReporterVO> leadReportersVO;
 
   private LeadReporter leadReporter;
 
   private List<LeadReporter> leadReporters;
 
-  /** Inits the mocks. */
   @Before
   public void initMocks() {
     Dataflow dataflow = new Dataflow();
@@ -425,7 +423,7 @@ public class RepresentativeServiceImplTest {
 
   @Test
   public void exportTemplateReportersFile() throws EEAException, IOException {
-    List<DataProvider> dataProviderList = new ArrayList();
+    List<DataProvider> dataProviderList = new ArrayList<>();
     DataProvider dataProvider = new DataProvider();
     dataProviderList.add(dataProvider);
     Mockito.when(dataProviderRepository.findAllByGroupId(1L)).thenReturn(dataProviderList);
@@ -434,5 +432,23 @@ public class RepresentativeServiceImplTest {
         representativeServiceImpl.exportTemplateReportersFile(1L));
   }
 
+  @Test
+  public void authorizeByRepresentativeIdTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    Representative representative = new Representative();
+    representative.setDataflow(dataflow);
+    Optional<Representative> optionalRepresentative = Optional.of(representative);
 
+    UserDetails userDetails = EeaUserDetails.create("user",
+        new HashSet<>(Arrays.asList(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(1L))));
+    SecurityContextHolder.clearContext();
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+        userDetails, "password", userDetails.getAuthorities()));
+
+    Mockito.when(representativeRepository.findById(Mockito.anyLong()))
+        .thenReturn(optionalRepresentative);
+
+    Assert.assertTrue(representativeServiceImpl.authorizeByRepresentativeId(1L));
+  }
 }

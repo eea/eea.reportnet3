@@ -500,15 +500,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   @Transactional
   public Long updateLeadReporter(LeadReporterVO leadReporterVO) throws EEAException {
-    if (leadReporterVO == null) {
-      throw new EEAException(EEAErrorMessage.USER_NOTFOUND);
-    }
+
     // load old reporter
-    LeadReporter leadReporter =
-        leadReporterRepository.findById(leadReporterVO.getId()).orElse(null);
-    if (leadReporter == null) {
-      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
-    }
+    LeadReporter leadReporter = leadReporterRepository.findById(leadReporterVO.getId())
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND));
     Representative representative;
     if (leadReporterVO.getEmail() != null) {
       UserRepresentationVO newUser =
@@ -594,7 +589,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     return isAuthorized;
   }
-  
+
   /**
    * Modify lead reporter permissions.
    *
