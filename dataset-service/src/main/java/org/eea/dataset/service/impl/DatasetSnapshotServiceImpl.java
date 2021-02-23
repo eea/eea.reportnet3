@@ -400,8 +400,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        DatasetTypeEnum.REPORTING, SecurityContextHolder.getContext().getAuthentication().getName(),
-        false, deleteData);
+        DatasetTypeEnum.REPORTING, false, deleteData);
   }
 
   /**
@@ -412,20 +411,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
    * @param datasetType the dataset type
-   * @param user the user
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
   public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
-      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, String user)
-      throws EEAException {
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, user, false, deleteData);
+        datasetType, false, deleteData);
   }
 
   /**
@@ -459,8 +456,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Mark the released dataset with the status
     String datasetSchema = "";
     if (designDataset != null) {
-      datasetSchema = designDataset.getDatasetSchema();
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
+      datasetSchema = designDataset.getDatasetSchema();
       designDataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
           : DatasetStatusEnum.RELEASED);
       metabaseRepository.save(designDataset);
@@ -468,6 +465,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Optional<DataCollection> dataCollection =
         dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
     Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
+
 
     // Delete data of the same provider
     deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);

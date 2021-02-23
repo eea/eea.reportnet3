@@ -11,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,24 +71,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PostMapping("/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @ApiOperation(value = "Create one Representative", response = Long.class)
-  @ApiResponse(code = 400, message = "Email field provider is not an email")
   public Long createRepresentative(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Object",
           value = "Representative Object") @RequestBody RepresentativeVO representativeVO) {
 
-    if (CollectionUtils.isEmpty(representativeVO.getProviderAccounts())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
-    }
-    Pattern p = Pattern.compile(EMAIL_REGEX);
-    for (String representative : representativeVO.getProviderAccounts()) {
-      Matcher m = p.matcher(representative);
-      boolean result = m.matches();
-      if (Boolean.FALSE.equals(result)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            String.format(EEAErrorMessage.NOT_EMAIL, representative));
-      }
-    }
     try {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
@@ -176,7 +164,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER')")
   @ApiOperation(value = "Update a Representative", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
-  @ApiResponses(value = {@ApiResponse(code = 400, message = "Email field provider is not an email"),
+  @ApiResponses(value = {/*
+                          * @ApiResponse(code = 400, message =
+                          * "Email field provider is not an email"),
+                          */
       @ApiResponse(code = 404, message = "1-Representative not found \n 2-User request not found "),
       @ApiResponse(code = 409, message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED)})
   public ResponseEntity updateRepresentative(@ApiParam(value = "RepresentativeVO Object",
@@ -184,17 +175,17 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     String message = null;
     HttpStatus status = HttpStatus.OK;
 
-    if (null != representativeVO.getProviderAccounts()) {
-      Pattern p = Pattern.compile(EMAIL_REGEX);
-      for (String representative : representativeVO.getProviderAccounts()) {
-        Matcher m = p.matcher(representative);
-        boolean result = m.matches();
-        if (Boolean.FALSE.equals(result)) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              String.format(EEAErrorMessage.NOT_EMAIL, representative));
-        }
-      }
-    }
+    // if (null != representativeVO.getProviderAccounts()) {
+    // Pattern p = Pattern.compile(EMAIL_REGEX);
+    // for (String representative : representativeVO.getProviderAccounts()) {
+    // Matcher m = p.matcher(representative);
+    // boolean result = m.matches();
+    // if (Boolean.FALSE.equals(result)) {
+    // throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+    // String.format(EEAErrorMessage.NOT_EMAIL, representative));
+    // }
+    // }
+    // }
 
     try {
       message =
@@ -325,7 +316,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   /**
    * Import file country template.With that controller we can download a country template to import
    * data with the countrys with this group id
-   * 
+   *
    * @param dataflowId the dataflow id
    * @param groupId the group id
    * @param file the file
@@ -369,6 +360,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @param dataProviderId the data provider id
    * @param restrictFromPublic the restrict from public
    */
+  @Override
   @PostMapping("/private/updateRepresentativeVisibilityRestrictions")
   public void updateRepresentativeVisibilityRestrictions(
       @RequestParam(value = "dataflowId", required = true) Long dataflowId,
@@ -379,4 +371,107 @@ public class RepresentativeControllerImpl implements RepresentativeController {
         restrictFromPublic);
   }
 
+  /**
+   * Creates the lead reporter.
+   *
+   * @param representativeId the representative id
+   * @param leadReporterVO the lead reporter VO
+   * @return the created lead reporter id
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("/leadReporter/{representativeId}")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @ApiOperation(value = "Create one Lead reporter", response = Long.class)
+  public Long createLeadReporter(
+      @ApiParam(value = "Representative id",
+          example = "0") @PathVariable("representativeId") Long representativeId,
+      @ApiParam(type = "Object",
+          value = "Lead reporter Object") @RequestBody LeadReporterVO leadReporterVO) {
+
+    if (null == leadReporterVO || null == leadReporterVO.getEmail()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
+    }
+    Pattern p = Pattern.compile(EMAIL_REGEX);
+    Matcher m = p.matcher(leadReporterVO.getEmail());
+    boolean result = m.matches();
+    if (Boolean.FALSE.equals(result)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          String.format(EEAErrorMessage.NOT_EMAIL, leadReporterVO.getEmail()));
+    }
+    try {
+      return representativeService.createLeadReporter(representativeId, leadReporterVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating new lead reporter: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  /**
+   * Update lead reporter.
+   *
+   * @param leadReporterVO the lead reporter VO
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/leadReporter/update", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER')")
+  @ApiOperation(value = "Update a lead reporter", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = ResponseEntity.class)
+  @ApiResponses(value = {@ApiResponse(code = 400, message = "Email field provider is not an email"),
+
+      @ApiResponse(code = 404, message = "1-Lead reporter not found"),
+      @ApiResponse(code = 409, message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED)})
+  public ResponseEntity updateLeadReporter(@ApiParam(value = "LeadReporterVO Object",
+      type = "Object") @RequestBody LeadReporterVO leadReporterVO) {
+    String message = null;
+    HttpStatus status = HttpStatus.OK;
+
+    if (null != leadReporterVO.getEmail()) {
+      Pattern p = Pattern.compile(EMAIL_REGEX);
+      Matcher m = p.matcher(leadReporterVO.getEmail());
+      boolean result = m.matches();
+      if (Boolean.FALSE.equals(result)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            String.format(EEAErrorMessage.NOT_EMAIL, leadReporterVO.getEmail()));
+      }
+    }
+    try {
+      message = String.valueOf(representativeService.updateLeadReporter(leadReporterVO));
+    } catch (EEAException e) {
+      if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
+        LOG_ERROR.error("Duplicated lead reporter relationship", e.getCause());
+        message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED;
+        status = HttpStatus.CONFLICT;
+      } else {
+        LOG_ERROR.error("Bad Request", e.getCause());
+        message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND;
+        status = HttpStatus.BAD_REQUEST;
+      }
+    }
+    return new ResponseEntity<>(message, status);
+  }
+
+  /**
+   * Delete lead reporter.
+   *
+   * @param leadReporterId the lead reporter id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/leadReporter/{leadReporterId}")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @ApiOperation(value = "Delete lead reporter")
+  @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
+  public void deleteLeadReporter(@ApiParam(value = "Lead reporter id",
+      example = "0") @PathVariable("leadReporterId") Long leadReporterId) {
+
+    try {
+      representativeService.deleteLeadReporter(leadReporterId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
+    }
+  }
 }

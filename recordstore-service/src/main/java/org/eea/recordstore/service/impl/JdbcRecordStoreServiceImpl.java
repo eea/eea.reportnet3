@@ -1063,14 +1063,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
     LOG.info(" Update Materialized Views");
 
-    DatasetTypeEnum type = dataSetMetabaseControllerZuul.getType(datasetId);
+    DataSetMetabaseVO datasetMetabaseVO =
+        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
-
     try {
-      switch (type) {
+      switch (datasetMetabaseVO.getDatasetTypeEnum()) {
         case REPORTING:
           List<ReportingDatasetVO> reportingDatasets =
-              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
+              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(
+                  dataflowId, datasetMetabaseVO.getDataProviderId());
+
           for (ReportingDatasetVO dataset : reportingDatasets) {
             launchUpdateMaterializedQueryView(dataset.getId());
           }

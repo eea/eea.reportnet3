@@ -351,7 +351,7 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    * Update dataset schema exportable.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param isExportable the is exportable
+   * @param availableInPublic the available in public
    * @return the update result
    */
   @Override
@@ -456,5 +456,29 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
     return null != document ? (Document) document : null;
 
+  }
+
+  /**
+   * Find available in public by id data set schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return true, if successful
+   */
+  @Override
+  public boolean findAvailableInPublicByIdDataSetSchema(ObjectId idDatasetSchema) {
+
+    boolean avaliable = false;
+
+    Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
+        .find(new Document("_id", idDatasetSchema))
+        .projection(new Document("availableInPublic", true)).first();
+
+    if (null != document) {
+      document = ((Document) document).get("availableInPublic");
+      if (null != document && !"".equalsIgnoreCase(document.toString())) {
+        avaliable = Boolean.parseBoolean(document.toString());
+      }
+    }
+    return avaliable;
   }
 }

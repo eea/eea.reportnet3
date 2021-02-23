@@ -4,21 +4,20 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DataProviderMapper;
+import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
 import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
-import org.eea.dataflow.persistence.domain.User;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -26,6 +25,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.slf4j.Logger;
@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
 import io.jsonwebtoken.lang.Collections;
@@ -62,9 +61,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private DataProviderMapper dataProviderMapper;
 
+  /** The lead reporter mapper. */
+  @Autowired
+  private LeadReporterMapper leadReporterMapper;
+
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
+
+  /** The lead reporter repository. */
+  @Autowired
+  private LeadReporterRepository leadReporterRepository;
 
   /**
    * The delimiter.
@@ -92,20 +99,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO)
       throws EEAException {
 
-    String email = representativeVO.getProviderAccounts().get(0);
     Long dataProviderId = representativeVO.getDataProviderId();
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
     if (dataflow == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
-    if (user == null) {
-      throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    }
-    if (null != representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(dataflowId,
-        representativeVO.getDataProviderId(), email)) {
-      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
     }
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
@@ -116,8 +114,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
     representative.setId(0L);
-    representative.getReporters().stream().findFirst()
-        .ifPresent(reporter -> reporter.setUserMail(email));
+    representative.setLeadReporters(new ArrayList<>());
 
     LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();
@@ -159,20 +156,20 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
     // update changes on first level
-    if (representativeVO.getProviderAccounts() != null) {
-      Set<User> usersToInsert = new HashSet<>();
-      for (String email : representativeVO.getProviderAccounts()) {
-        Optional<User> user = representative.getReporters().stream()
-            .filter(reporter -> reporter.getUserMail().equals(email)).findAny();
-        if (user.isPresent()) {
-          usersToInsert.add(user.get());
-        } else {
-          UserRepresentationVO newUser = userManagementControllerZull.getUserByEmail(email);
-          usersToInsert.add(new User(newUser.getEmail(), null));
-        }
-      }
-      representative.setReporters(usersToInsert);
-    }
+    // if (representativeVO.getProviderAccounts() != null) {
+    // List<LeadReporter> usersToInsert = new ArrayList<>();
+    // for (String email : representativeVO.getProviderAccounts()) {
+    // Optional<LeadReporter> user = representative.getLeadReporters().stream()
+    // .filter(reporter -> reporter.getEmail().equals(email)).findAny();
+    // if (user.isPresent()) {
+    // usersToInsert.add(user.get());
+    // } else {
+    // UserRepresentationVO newUser = userManagementControllerZull.getUserByEmail(email);
+    // usersToInsert.add(new LeadReporter(null, newUser.getEmail(), null));
+    // }
+    // }
+    // representative.setLeadReporters(usersToInsert);
+    // }
     if (representativeVO.getDataProviderId() != null) {
       DataProvider dataProvider = new DataProvider();
       dataProvider.setId(representativeVO.getDataProviderId());
@@ -245,14 +242,14 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  private boolean existsUserMail(Long dataProviderId, List<String> userMail, Long dataflowId)
-      throws EEAException {
-    if (dataProviderId == null || CollectionUtils.isEmpty(userMail)) {
-      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
-    }
-    return representativeRepository.findByDataProviderIdAndDataflowId(dataProviderId, dataflowId)
-        .isPresent();
-  }
+  // private boolean existsUserMail(Long dataProviderId, List<String> userMail, Long dataflowId)
+  // throws EEAException {
+  // if (dataProviderId == null || CollectionUtils.isEmpty(userMail)) {
+  // throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+  // }
+  // return representativeRepository.findByDataProviderIdAndDataflowId(dataProviderId, dataflowId)
+  // .isPresent();
+  // }
 
 
   /**
@@ -324,8 +321,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       List<Representative> representativeList =
           representativeRepository.findAllByDataflow_Id(dataflowId);
       for (Representative representative : representativeList) {
-        List<String> usersRepresentative = representative.getReporters().stream()
-            .map(User::getUserMail).collect(Collectors.toList());
+        List<String> usersRepresentative = representative.getLeadReporters().stream()
+            .map(LeadReporter::getEmail).collect(Collectors.toList());
         usersRepresentative.stream().forEach(users -> {
           fieldsToWrite[0] = users;
           fieldsToWrite[1] = representative.getDataProvider().getCode();
@@ -453,18 +450,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               representative.setReceiptOutdated(false);
               representative.setHasDatasets(false);
               representative.setId(0L);
-            }
-            if (!Collections.isEmpty(representative.getReporters())) {
-              representative.getReporters().stream().findFirst()
-                  .ifPresent(reporter -> reporter.setUserMail(email));
+              LeadReporter leadReporter = new LeadReporter();
+              leadReporter.setRepresentative(representative);
+              leadReporter.setEmail(email);
+              representative.setLeadReporters(Arrays.asList(leadReporter));
             } else {
-              Set<User> reporters = new HashSet<>();
-              User userNew = new User();
-              userNew.setUserMail(user.getEmail());
-              reporters.add(userNew);
-              representative.setReporters(reporters);
-              representative.getReporters().stream().findFirst()
-                  .ifPresent(reporter -> reporter.setUserMail(user.getEmail()));
+              List<LeadReporter> leadReporters = representative.getLeadReporters();
+              LeadReporter leadReporter = new LeadReporter();
+              leadReporter.setRepresentative(representative);
+              leadReporter.setEmail(email);
+              leadReporters.add(leadReporter);
+              representative.setLeadReporters(leadReporters);
             }
             representativeList.add(representative);
             fieldsToWrite[2] = "OK imported";
@@ -480,14 +476,102 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       if (!Collections.isEmpty(representativeList)) {
         representativeRepository.saveAll(representativeList);
       }
-    } catch (
-
-    IOException e) {
+    } catch (IOException e) {
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
     return csv.getBytes();
+  }
+
+  /**
+   * Creates the lead reporter.
+   *
+   * @param representativeId the representative id
+   * @param leadReporterVO the lead reporter VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public Long createLeadReporter(Long representativeId, LeadReporterVO leadReporterVO)
+      throws EEAException {
+
+    String email = leadReporterVO.getEmail();
+    Representative representative =
+        representativeRepository.findById(representativeId).orElse(null);
+
+    if (representative == null) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    }
+    UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
+    if (user == null) {
+      throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    }
+    if (representative.getLeadReporters().stream()
+        .anyMatch(reporter -> email.equals(reporter.getEmail()))) {
+      throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
+    }
+    LeadReporter leadReporter = leadReporterMapper.classToEntity(leadReporterVO);
+    leadReporter.setRepresentative(representative);
+    LOG.info("Insert new lead reporter relation to representative: {}", representativeId);
+    // if (hasdatasets) add permit?
+    return leadReporterRepository.save(leadReporter).getId();
+
+  }
+
+  @Override
+  @Transactional
+  public Long updateLeadReporter(LeadReporterVO leadReporterVO) throws EEAException {
+    if (leadReporterVO == null) {
+      throw new EEAException(EEAErrorMessage.USER_NOTFOUND);
+    }
+    // load old reporter
+    LeadReporter leadReporter =
+        leadReporterRepository.findById(leadReporterVO.getId()).orElse(null);
+    if (leadReporter == null) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    }
+    Representative representative;
+    if (leadReporterVO.getEmail() != null) {
+      UserRepresentationVO newUser =
+          userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail());
+      if (newUser != null) {
+        representative =
+            representativeRepository.findById(leadReporterVO.getRepresentativeId()).orElse(null);
+        if (null != representative && null != representative.getLeadReporters()
+            && representative.getLeadReporters().stream()
+                .filter(reporter -> leadReporterVO.getEmail().equals(reporter.getEmail()))
+                .collect(Collectors.counting()) == 0) {
+          leadReporter.setEmail(leadReporterVO.getEmail());
+        }
+      }
+    }
+    representative = new Representative();
+    if (leadReporterVO.getRepresentativeId() != null) {
+      representative.setId(leadReporterVO.getRepresentativeId());
+      leadReporter.setRepresentative(representative);
+    }
+    // save changes
+    // if (hasdatasets) add permit?
+    return leadReporterRepository.save(leadReporter).getId();
+  }
+
+  /**
+   * Delete lead reporter.
+   *
+   * @param leadReporterId the lead reporter id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteLeadReporter(Long leadReporterId) throws EEAException {
+    if (leadReporterId == null) {
+      throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
+    }
+    LOG.info("Deleting the lead reporter relation");
+    leadReporterRepository.deleteById(leadReporterId);
+    // if (hasdatasets) remove permit?
   }
 
 

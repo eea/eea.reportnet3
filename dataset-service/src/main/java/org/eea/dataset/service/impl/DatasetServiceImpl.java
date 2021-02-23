@@ -1,7 +1,11 @@
 package org.eea.dataset.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -72,6 +77,7 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -134,9 +140,15 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Constant DATASET_ID: {@value}. */
   private static final String DATASET_ID = "dataset_%s";
 
+  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
+  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
+
+  /** The path public file. */
+  @Value("${pathPublicFile}")
+  private String pathPublicFile;
 
   /** The dataset repository. */
   @Autowired
@@ -160,7 +172,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The dataflow controller zull. */
   @Autowired
-  private DataFlowControllerZuul dataflowControllerZull;
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /** The table repository. */
   @Autowired
@@ -367,54 +379,75 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Delete table by schema.
    *
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
    */
   @Override
   @Transactional
-  public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
-    recordRepository.deleteRecordWithIdTableSchema(idTableSchema);
-    LOG.info("Executed delete table with id {}, from dataset {}", idTableSchema, datasetId);
+  public void deleteTableBySchema(final String tableSchemaId, final Long datasetId) {
+    deleteRecords(datasetId, tableSchemaId);
   }
 
-  /**
-   * Delete import data.
-   *
-   * @param dataSetId the data set id
-   */
-  @Override
-  @Transactional
-  public void deleteImportData(final Long dataSetId) {
+  private void deleteRecords(Long datasetId, String tableSchemaId) {
 
-    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(dataSetId);
-    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
-    // Delete the records from the tables of the dataset that aren't marked as read only
+    boolean singleTable = null != tableSchemaId;
+    Long dataflowId = getDataFlowIdById(datasetId);
+    TypeStatusEnum dataflowStatus = dataflowControllerZuul.getMetabaseById(dataflowId).getStatus();
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
+        new ObjectId(datasetMetabaseService.findDatasetSchemaIdById(datasetId)));
+
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-      if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
-          && (tableSchema.getFixedNumber() == null || !tableSchema.getFixedNumber())) {
-        recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
-        // if we have fixed number records we delete the non readonly fields
-      } else if (tableSchema.getFixedNumber()) {
-        List<String> fieldSchemasToDelete = new ArrayList();
-        for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
-          if (null != fieldSchema.getReadOnly() && !fieldSchema.getReadOnly()) {
-            fieldSchemasToDelete.add(fieldSchema.getIdFieldSchema().toString());
-          }
-        }
-        List<FieldValue> fieldValue =
-            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToDelete);
-        fieldValue.stream().forEach(fieldVal -> fieldVal.setValue(""));
-        fieldRepository.saveAll(fieldValue);
+
+      String loopTableSchemaId = tableSchema.getIdTableSchema().toString();
+
+      if (singleTable && !tableSchemaId.equals(loopTableSchemaId)) {
+        continue;
+      }
+
+      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
+        recordRepository.deleteRecordWithIdTableSchema(loopTableSchemaId);
+        LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId,
+            loopTableSchemaId);
+      } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
+        LOG.info("Skipped deleteRecords: datasetId={}, tableSchemaId={}, tableSchema.readOnly={}",
+            datasetId, loopTableSchemaId, tableSchema.getReadOnly());
+      } else if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        List<String> fieldSchemasToClear = tableSchema.getRecordSchema().getFieldSchema().stream()
+            .filter(fieldSchema -> Boolean.FALSE.equals(fieldSchema.getReadOnly()))
+            .map(fieldSchema -> fieldSchema.getIdFieldSchema().toString())
+            .collect(Collectors.toList());
+        List<FieldValue> fieldValuesToClear =
+            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToClear);
+        fieldValuesToClear.stream().forEach(fieldVal -> fieldVal.setValue(""));
+        fieldRepository.saveAll(fieldValuesToClear);
+        LOG.info("Overwritting fieldValues to blank: datasetId={}, tableSchemaId={}", datasetId,
+            loopTableSchemaId);
+      }
+
+      if (singleTable) {
+        return;
       }
     }
+
     try {
-      this.saveStatistics(dataSetId);
+      saveStatistics(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error saving statistics after deleting all the dataset values. Error message: {}",
           e.getMessage(), e);
     }
-    LOG.info("All data value deleted from dataSetId {}", dataSetId);
+  }
+
+
+  /**
+   * Delete import data.
+   *
+   * @param datasetId the data set id
+   */
+  @Override
+  @Transactional
+  public void deleteImportData(final Long datasetId) {
+    deleteRecords(datasetId, null);
   }
 
   /**
@@ -2005,7 +2038,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the dataFlowId from the metabase
     Long dataflowId = getDataFlowIdById(idDataset);
     // get de dataflow
-    return dataflowControllerZull.getMetabaseById(dataflowId);
+    return dataflowControllerZuul.getMetabaseById(dataflowId);
   }
 
   /**
@@ -3109,7 +3142,7 @@ public class DatasetServiceImpl implements DatasetService {
     dataset = designDatasetRepository.findById(datasetId).orElse(null);
     if (null != dataset) {
       if (TypeStatusEnum.DESIGN
-          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       }
     }
@@ -3118,7 +3151,7 @@ public class DatasetServiceImpl implements DatasetService {
     else {
       dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
       if (null != dataset && TypeStatusEnum.DRAFT
-          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
         if (null != tableSchemaId) {
           TableSchema tableSchema = schema.getTableSchemas().stream()
@@ -3133,6 +3166,142 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     return schema;
+  }
+
+
+  /**
+   * Save public files.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataSetMetabase the data set metabase
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException {
+
+    LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
+        dataSetDataProvider);
+
+    List<RepresentativeVO> representativeList =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+
+    // we took representative
+    RepresentativeVO representative = representativeList.stream()
+        .filter(data -> data.getDataProviderId() == dataSetDataProvider).findAny().orElse(null);
+
+    // we check if the representative have permit to do it
+    if (null != representative && !representative.isRestrictFromPublic()) {
+
+      // we create the dataflow folder to save it
+      Path pathDataflow = Paths
+          .get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId).toString());
+      File directoryDataflow = new File(pathDataflow.toString());
+      if (!directoryDataflow.exists()) {
+        Files.createDirectories(pathDataflow);
+
+        LOG.info("Folder {} created", pathDataflow);
+      }
+
+      // we create the dataprovider folder to save it andwe always delete it and put new files
+      Path pathDataProvider =
+          Paths.get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
+              .append("\\dataProvider-").append(representative.getDataProviderId()).toString());
+      if (directoryDataflow.exists()) {
+        FileUtils.deleteDirectory(new File(pathDataProvider.toString()));
+      }
+      Files.createDirectories(pathDataProvider);
+      LOG.info("Folder {} created", pathDataProvider);
+
+      creeateAllDatasetFiles(dataflowId, pathDataProvider, representative.getDataProviderId());
+    }
+
+  }
+
+
+  /**
+   * Export public file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param fileName the file name
+   * @return the byte[]
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
+      throws IOException, EEAException {
+    // we compound the route
+    String location = new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
+        .append("\\dataProvider-").append(dataProviderId).append("\\").append(fileName)
+        .append(".xlsx").toString();
+    File file = new File(location);
+    if (!file.exists()) {
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
+  /**
+   * Creeate all dataset files.
+   *
+   * @param dataset the dataset
+   * @param dataflowId the dataflow id
+   * @param pathDataProvider the path data provider
+   * @param dataProviderId the data provider id
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void creeateAllDatasetFiles(Long dataflowId, Path pathDataProvider, Long dataProviderId)
+      throws IOException {
+
+    DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
+
+    List<DataSetMetabase> datasetMetabaseList =
+        dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+
+    // now we create all files depends if they are avaliable
+    for (DataSetMetabase datasetToFile : datasetMetabaseList) {
+      if (schemasRepository
+          .findAvailableInPublicByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()))) {
+
+        // we put the good in the correct field
+        List<DesignDataset> desingDataset = designDatasetRepository.findByDataflowId(dataflowId);
+        // we find the name of the dataset to asing it for file
+        String datasetDesingName = "";
+        for (DesignDataset designDatasetVO : desingDataset) {
+          if (designDatasetVO.getDatasetSchema()
+              .equalsIgnoreCase(datasetToFile.getDatasetSchema())) {
+            datasetDesingName = designDatasetVO.getDataSetName();
+          }
+        }
+
+        try {
+          // 1º we create
+          byte[] file = exportFile(datasetToFile.getId(), "xlsx", null);
+          // we save the file in its files
+          if (null != file) {
+            String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
+                dataProvider.getLabel(), datasetDesingName);
+            String newFile = new StringBuilder(pathDataProvider.toString()).append("\\")
+                .append(nameFileUnique).append(".xlsx").toString();
+            FileUtils.writeByteArrayToFile(new File(newFile), file);
+
+            // we save the file in metabase with the name without the route
+            newFile = new StringBuilder("dataflow-").append(dataflowId).append("\\dataProvider-")
+                .append(dataProvider.getId()).append("\\").append(nameFileUnique).toString();
+            datasetToFile.setPublicFileName(nameFileUnique);
+            dataSetMetabaseRepository.save(datasetToFile);
+          }
+        } catch (EEAException e) {
+          LOG_ERROR.error(
+              "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
+              dataflowId, datasetToFile.getDataProviderId(), datasetToFile.getId(), e.getMessage(),
+              e);
+        }
+        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}", dataflowId,
+            datasetToFile.getDataProviderId());
+      }
+    }
   }
 
 
@@ -3158,4 +3327,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     return tableSchema;
   }
+
+
+
 }

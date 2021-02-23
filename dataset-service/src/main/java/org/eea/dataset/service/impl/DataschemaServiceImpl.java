@@ -265,7 +265,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public ObjectId createEmptyDataSetSchema(Long dataflowId) throws EEAException {
 
-    if (dataFlowControllerZuul.findById(dataflowId) == null) {
+    if (dataFlowControllerZuul.getMetabaseById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
     DataSetSchema dataSetSchema = new DataSetSchema();
@@ -446,7 +446,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
-        (String) ThreadPropertiesManager.getVariable("user"), true, true);
+        true, true);
   }
 
   /**

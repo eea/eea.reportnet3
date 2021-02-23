@@ -56,7 +56,8 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description, webform);
+    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description, webform,
+        availableInPublic);
   }
 
   /**
@@ -77,7 +78,8 @@ public class DataSetSchema {
     return Objects.equals(idDataFlow, other.idDataFlow)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas)
-        && Objects.equals(description, other.description) && Objects.equals(webform, other.webform);
+        && Objects.equals(description, other.description) && Objects.equals(webform, other.webform)
+        && Objects.equals(availableInPublic, other.availableInPublic);
 
   }
 
