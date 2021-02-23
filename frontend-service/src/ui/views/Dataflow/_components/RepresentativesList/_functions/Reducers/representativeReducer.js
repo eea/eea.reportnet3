@@ -78,10 +78,6 @@ export const reducer = (state, { type, payload }) => {
         selectedDataProviderGroup: getSelectedProviderGroup()
       };
 
-    //TODO AUTO FOCUS
-    case 'ADD_NEW_LEAD_REPORTER':
-      return { ...state, providerWithEmptyInput: payload.dataProviderId, representatives: payload.representatives };
-
     case 'ON_PROVIDER_CHANGE':
       return { ...state, representatives: payload.representatives };
 

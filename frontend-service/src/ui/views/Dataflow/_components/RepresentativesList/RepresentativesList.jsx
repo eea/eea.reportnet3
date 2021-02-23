@@ -48,7 +48,6 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     isVisibleDialog: { deleteLeadReporter: false, deleteRepresentative: false },
     leadReporters: {},
     leadReportersErrors: {},
-    providerWithEmptyInput: null,
     refresher: false,
     representativeIdToDelete: '',
     representatives: [],
