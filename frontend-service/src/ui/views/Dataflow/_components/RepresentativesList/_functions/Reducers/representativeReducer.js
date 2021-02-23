@@ -8,11 +8,7 @@ export const reducer = (state, { type, payload }) => {
 
   switch (type) {
     case 'REFRESH':
-      return {
-        ...state,
-        refresher: !state.refresher,
-        leadReportersErrors: {}
-      };
+      return { ...state, refresher: !state.refresher, leadReportersErrors: {} };
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
       const unusedDataProvidersOptions = state.allPossibleDataProviders.filter(dataProviderOption => {
@@ -49,11 +45,7 @@ export const reducer = (state, { type, payload }) => {
       return { ...state, representativesHaveError: payload.representativesHaveError };
 
     case 'HIDE_CONFIRM_DIALOG':
-      return {
-        ...state,
-        isVisibleConfirmDeleteDialog: false,
-        representativeIdToDelete: ''
-      };
+      return { ...state, isVisibleConfirmDeleteDialog: false, representativeIdToDelete: '' };
 
     case 'INITIAL_LOAD':
       const group = state.dataProvidersTypesList.filter(
@@ -98,37 +90,20 @@ export const reducer = (state, { type, payload }) => {
         representativesHaveError: payload.representativesHaveError
       };
 
+    case 'ADD_NEW_LEAD_REPORTER':
+      return { ...state, providerWithEmptyInput: payload.dataProviderId, representatives: payload.representatives };
+
     case 'ON_PROVIDER_CHANGE':
-      return {
-        ...state,
-        representatives: payload.representatives
-      };
+      return { ...state, representatives: payload.representatives };
 
     case 'SELECT_PROVIDERS_TYPE':
-      return {
-        ...state,
-        selectedDataProviderGroup: payload
-      };
+      return { ...state, selectedDataProviderGroup: payload };
 
     case 'SET_IS_LOADING':
-      return {
-        ...state,
-        isLoading: payload.isLoading
-      };
+      return { ...state, isLoading: payload.isLoading };
 
     case 'SHOW_CONFIRM_DIALOG':
-      return {
-        ...state,
-        isVisibleConfirmDeleteDialog: true,
-        representativeIdToDelete: payload.representativeId
-      };
-
-    case 'ADD_NEW_LEAD_REPORTER':
-      return {
-        ...state,
-        providerWithEmptyInput: payload.dataProviderId,
-        representatives: payload.representatives
-      };
+      return { ...state, isVisibleConfirmDeleteDialog: true, representativeIdToDelete: payload.representativeId };
 
     case 'ON_CHANGE_LEAD_REPORTER':
       return {

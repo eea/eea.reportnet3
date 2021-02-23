@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -74,10 +74,6 @@ const RepresentativesList = ({
   }, [formState.refresher]);
 
   useEffect(() => {
-    console.log('formState.leadReporters', formState.leadReporters);
-  }, [formState.leadReporters]);
-
-  useEffect(() => {
     if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
       formDispatcher({ type: 'REFRESH' });
     }
@@ -131,6 +127,10 @@ const RepresentativesList = ({
     formDispatcher({ type: 'CLEAN_UP_ERRORS', payload: { dataProviderId, hasErrors: false, leadReporterId } });
   };
 
+  const onCreateError = (dataProviderId, hasErrors, leadReporterId) => {
+    formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors, leadReporterId } });
+  };
+
   const onDeleteLeadReporter = async () => {
     try {
       const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
@@ -144,13 +144,17 @@ const RepresentativesList = ({
     }
   };
 
-  const checkIsSameAccount = (accountCurrent, accountPrevious) => {
-    return accountCurrent === accountPrevious;
+  const onKeyDown = (event, representativeId, dataProviderId, leadReporter) => {
+    if (TextUtils.areEquals(event.key, 'Enter')) {
+      onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
+    }
   };
 
   const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporter) => {
     const { addLeadReporter, updateLeadReporter } = RepresentativeService;
-    if (!checkIsSameAccount(inputValue, leadReporter.account)) {
+    const hasErrors = true;
+
+    if (!TextUtils.areEquals(inputValue, leadReporter.account)) {
       if (isValidEmail(inputValue)) {
         try {
           const response = TextUtils.areEquals(leadReporter.id, 'empty')
@@ -162,16 +166,10 @@ const RepresentativesList = ({
           }
         } catch (error) {
           console.log('error', error);
-          formDispatcher({
-            type: 'CREATE_ERROR',
-            payload: { dataProviderId, hasErrors: true, leadReporterId: leadReporter.id }
-          });
+          onCreateError(dataProviderId, hasErrors, leadReporter.id);
         }
       } else {
-        formDispatcher({
-          type: 'CREATE_ERROR',
-          payload: { dataProviderId, hasErrors: true, leadReporterId: leadReporter.id }
-        });
+        onCreateError(dataProviderId, hasErrors, leadReporter.id);
       }
     }
   };
@@ -185,46 +183,35 @@ const RepresentativesList = ({
       const reporters = formState.leadReporters[dataProviderId];
       const errors = formState.leadReportersErrors[dataProviderId];
 
-      if (leadReporter.id === 'empty') {
-        return (
-          <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
-            <InputText
-              id={`${leadReporter.id}-${representativeId}`}
-              className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
-              onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
-              placeholder={`New lead reporter`}
-              onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-              onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
-              value={reporters[leadReporter.id]}
-            />
-          </div>
-        );
-      }
-
       return (
         <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
           <InputText
-            id={`${leadReporter.id}-${representativeId}`}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
-            onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
+            id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            value={reporters[leadReporter.id]?.account}
+            onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
+            onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
+            placeholder={`New lead reporter`}
+            value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton}`}
-            icon={'trash'}
-            onClick={() => {
-              handleDialogs('deleteLeadReporter', true);
-              formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: leadReporter.id } });
-            }}
-          />
+
+          {!TextUtils.areEquals(leadReporter.id, 'empty') && (
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton}`}
+              icon={'trash'}
+              onClick={() => {
+                handleDialogs('deleteLeadReporter', true);
+                formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: leadReporter.id } });
+              }}
+            />
+          )}
         </div>
       );
     });
   };
 
-  const dropdownColumnTemplate = representative => {
+  const renderDropdownColumnTemplate = representative => {
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
       option => option.dataProviderId === representative.dataProviderId
     );
@@ -319,7 +306,10 @@ const RepresentativesList = ({
               header={resources.messages['deleteRepresentativeButtonTableHeader']}
               style={{ width: '60px' }}
             />
-            <Column body={dropdownColumnTemplate} header={resources.messages['manageRolesDialogDataProviderColumn']} />
+            <Column
+              body={renderDropdownColumnTemplate}
+              header={resources.messages['manageRolesDialogDataProviderColumn']}
+            />
             <Column body={renderLeadReporterTemplate} header={resources.messages['manageRolesDialogAccountColumn']} />
           </DataTable>
         </div>
