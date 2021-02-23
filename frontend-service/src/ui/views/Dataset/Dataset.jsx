@@ -379,10 +379,16 @@ export const Dataset = withRouter(({ match, history }) => {
         content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        });
+      }
     }
   };
 
@@ -418,7 +424,7 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetId,
         replaceData
       );
-      if (dataImported) {
+      if (dataImported.status >= 200 && dataImported.status <= 299) {
         setIsDataLoaded(true);
       }
       const {
@@ -429,14 +435,20 @@ export const Dataset = withRouter(({ match, history }) => {
         type: 'DATASET_IMPORT_INIT',
         content: { dataflowId, datasetId, dataflowName, datasetName }
       });
-    } catch {
-      notificationContext.add({
-        type: 'EXTERNAL_IMPORT_REPORING_FROM_OTHER_SYSTEM_ERROR',
-        content: {
-          dataflowName: dataflowName,
-          datasetName: datasetName
-        }
-      });
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT'
+        });
+      } else {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
+          content: {
+            dataflowName: dataflowName,
+            datasetName: datasetName
+          }
+        });
+      }
     }
   };
   useEffect(() => {

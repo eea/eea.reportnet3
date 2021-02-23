@@ -12,7 +12,7 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
-        },  
+        },
         {
           "key": "UPDATE_RELEASABLE_FAILED_EVENT",
           "navigateTo": {
@@ -550,10 +550,23 @@
           "key": "EXPORT_DATASET_SCHEMA_FAILED_EVENT"
         },
         {
-          "key": "GET_REFERENCED_LINK_VALUES_ERROR"          
+          "key": "GET_REFERENCED_LINK_VALUES_ERROR"
         },
         {
+          "key": "DELETE_RECORD_BY_ID_BLOCKED_ERROR"
+        },
+        {
+          "key": "EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT"
+        },
+        {
+          "key": "DELETE_RECORD_BY_ID_BLOCKED_ERROR"
+        },
+        { "key": "ADD_RECORDS_BLOCKED_ERROR" },
+        {
           "key": "RELEASE_BLOCKED_EVENT"
+        },
+        {
+          "key": "VALIDATE_DATA_BLOCKED_ERROR"
         }
       ]
     },
