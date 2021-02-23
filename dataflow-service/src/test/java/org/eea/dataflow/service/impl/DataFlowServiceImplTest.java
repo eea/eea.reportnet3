@@ -954,4 +954,11 @@ public class DataFlowServiceImplTest {
     }
   }
 
+  @Test
+  public void updateDataFlowPublicStatus() {
+    dataflowServiceImpl.updateDataFlowPublicStatus(1L, false);
+    Mockito.verify(dataflowRepository, times(1)).updatePublicStatus(Mockito.any(),
+        Mockito.anyBoolean());
+  }
+
 }
