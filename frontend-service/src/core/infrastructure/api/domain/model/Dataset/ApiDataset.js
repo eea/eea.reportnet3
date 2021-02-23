@@ -173,7 +173,7 @@ export const apiDataset = {
     const response = await HTTPRequester.download({
       url: getUrl(DatasetConfig.downloadDatasetFileData, {
         dataflowId,
-        providerId: dataProviderId,
+        dataProviderId,
         fileName
       })
     });

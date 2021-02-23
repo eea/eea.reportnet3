@@ -13,7 +13,7 @@
   "deleteRecord": "/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}",
   "deleteRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}",
   "deleteTableDesign": "/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}",
-  "downloadDatasetFileData": "/dataflow/{:dataflowId}/dataset/providerId={:providerId}/field/{:fieldName}/attachment",
+  "downloadDatasetFileData": "/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProviderId/{:dataProviderId}?fileName={:fileName}",
   "downloadExportFile": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}",
   "downloadExportFileNoProviderId": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}",
   "downloadFileData": "/dataset/{:datasetId}/field/{:fieldId}/attachment",
