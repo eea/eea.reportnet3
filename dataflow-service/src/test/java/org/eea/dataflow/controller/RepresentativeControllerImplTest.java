@@ -393,4 +393,81 @@ public class RepresentativeControllerImplTest {
       assertEquals(null, e.getReason());
     }
   }
+
+  @Test
+  public void updateLeadReporterTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("sample@email.com");
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    Mockito.when(representativeService.updateLeadReporter(Mockito.any())).thenReturn(1L);
+    Assert.assertEquals(1L,
+        representativeControllerImpl.updateLeadReporter(leadReporterVO).longValue());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterNotFoundTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("sample@email.com");
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    Mockito.when(representativeService.updateLeadReporter(Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterInvalidEmailTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("@email.com");
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterEmptyEmailTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterUnauthorizedTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(false);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
 }

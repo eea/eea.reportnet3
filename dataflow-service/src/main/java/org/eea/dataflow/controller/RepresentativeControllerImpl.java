@@ -419,8 +419,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO) {
 
     // Authorization
-    if (!representativeService.authorizeByRepresentativeId(leadReporterVO.getId())) {
-      LOG_ERROR.error("LeadReporter not allowed: leadReporterVO={}", leadReporterVO.getId());
+    if (!representativeService.authorizeByRepresentativeId(leadReporterVO.getRepresentativeId())) {
+      LOG_ERROR.error("LeadReporter not allowed: leadReporterVO={}",
+          leadReporterVO.getRepresentativeId());
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
