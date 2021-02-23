@@ -33,10 +33,13 @@ import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.security.jwt.expression.EeaSecurityExpressionRoot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
@@ -565,6 +568,34 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
+   * Authorize by representative id.
+   *
+   * @param representativeId the representative id
+   * @return true, if successful
+   */
+  @Override
+  public boolean authorizeByRepresentativeId(Long representativeId) {
+
+    boolean isAuthorized = false;
+
+    if (null != representativeId) {
+      Representative representative =
+          representativeRepository.findById(representativeId).orElse(null);
+      if (null != representative) {
+        Dataflow dataflow = representative.getDataflow();
+        if (null != dataflow) {
+          EeaSecurityExpressionRoot eeaSecurityExpressionRoot = new EeaSecurityExpressionRoot(
+              SecurityContextHolder.getContext().getAuthentication(), userManagementControllerZull);
+          isAuthorized = eeaSecurityExpressionRoot.secondLevelAuthorize(representativeId,
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN);
+        }
+      }
+    }
+
+    return isAuthorized;
+  }
+  
+  /**
    * Modify lead reporter permissions.
    *
    * @param email the email
@@ -614,4 +645,3 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return resource;
   }
 }
-

@@ -414,43 +414,30 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/leadReporter/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER')")
-  @ApiOperation(value = "Update a lead reporter", produces = MediaType.APPLICATION_JSON_VALUE,
-      response = ResponseEntity.class)
-  @ApiResponses(value = {@ApiResponse(code = 400, message = "Email field provider is not an email"),
+  @PutMapping("/leadReporter/update")
+  @PreAuthorize("isAuthenticated()")
+  public Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO) {
 
-      @ApiResponse(code = 404, message = "1-Lead reporter not found"),
-      @ApiResponse(code = 409, message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED)})
-  public ResponseEntity updateLeadReporter(@ApiParam(value = "LeadReporterVO Object",
-      type = "Object") @RequestBody LeadReporterVO leadReporterVO) {
-    String message = null;
-    HttpStatus status = HttpStatus.OK;
+    // Authorization
+    if (!representativeService.authorizeByRepresentativeId(leadReporterVO.getId())) {
+      LOG_ERROR.error("LeadReporter not allowed: leadReporterVO={}", leadReporterVO.getId());
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
 
-    if (null != leadReporterVO.getEmail()) {
-      Pattern p = Pattern.compile(EMAIL_REGEX);
-      Matcher m = p.matcher(leadReporterVO.getEmail());
-      boolean result = m.matches();
-      if (Boolean.FALSE.equals(result)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            String.format(EEAErrorMessage.NOT_EMAIL, leadReporterVO.getEmail()));
-      }
+    // Validate email
+    if (null == leadReporterVO.getEmail() || !leadReporterVO.getEmail().matches(EMAIL_REGEX)) {
+      LOG_ERROR.error("Error updating lead reporter: invalid email. leadReporterVO={}",
+          leadReporterVO);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email");
     }
 
     try {
-      message = String.valueOf(representativeService.updateLeadReporter(leadReporterVO));
+      return representativeService.updateLeadReporter(leadReporterVO);
     } catch (EEAException e) {
-      if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
-        LOG_ERROR.error("Duplicated lead reporter relationship", e.getCause());
-        message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED;
-        status = HttpStatus.CONFLICT;
-      } else {
-        LOG_ERROR.error("Bad Request", e.getCause());
-        message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND;
-        status = HttpStatus.BAD_REQUEST;
-      }
+      LOG_ERROR.error("Error updating lead reporter: duplicated representative. leadReporterVO={}",
+          leadReporterVO);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Representative not found");
     }
-    return new ResponseEntity<>(message, status);
   }
 
   /**
@@ -460,13 +447,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/leadReporter/{leadReporterId}")
+  @DeleteMapping("/leadReporter/{leadReporterId}")
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
-  @ApiOperation(value = "Delete lead reporter")
-  @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
-  public void deleteLeadReporter(@ApiParam(value = "Lead reporter id",
-      example = "0") @PathVariable("leadReporterId") Long leadReporterId) {
-
+  public void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId) {
     try {
       representativeService.deleteLeadReporter(leadReporterId);
     } catch (EEAException e) {

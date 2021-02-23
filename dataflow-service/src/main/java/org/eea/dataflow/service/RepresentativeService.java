@@ -161,4 +161,12 @@ public interface RepresentativeService {
    */
   void updateRepresentativeVisibilityRestrictions(Long dataflowId, Long dataProviderId,
       boolean restrictFromPublic);
+
+  /**
+   * Authorize by representative id.
+   *
+   * @param representativeId the representative id
+   * @return true, if successful
+   */
+  boolean authorizeByRepresentativeId(Long representativeId);
 }
