@@ -52,7 +52,4 @@ public class ReportingDatasetVO implements Serializable {
   /** The public file name. */
   private String publicFileName;
 
-  /** The available in public. */
-  private boolean availableInPublic;
-
 }

@@ -375,7 +375,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       @RequestParam(value = "dataProviderId", required = true) Long dataProviderId,
       @RequestParam(value = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic) {
-
+    representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
+        restrictFromPublic);
   }
 
 }

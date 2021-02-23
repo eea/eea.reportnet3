@@ -23,7 +23,6 @@ import lombok.ToString;
 @Document(collection = "DataSetSchema")
 public class DataSetSchema {
 
-
   /** The id. */
   @Id
   @Field(value = "_id")
