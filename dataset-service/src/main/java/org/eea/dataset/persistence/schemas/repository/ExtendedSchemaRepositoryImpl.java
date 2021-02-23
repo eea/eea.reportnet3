@@ -475,7 +475,9 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
     if (null != document) {
       document = ((Document) document).get("availableInPublic");
-      avaliable = Boolean.parseBoolean(document.toString());
+      if (null != document && !"".equalsIgnoreCase(document.toString())) {
+        avaliable = Boolean.parseBoolean(document.toString());
+      }
     }
     return avaliable;
   }
