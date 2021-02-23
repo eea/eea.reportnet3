@@ -154,6 +154,12 @@ export const reducer = (state, { type, payload }) => {
         }
       };
 
+    case 'HANDLE_DIALOGS':
+      return { ...state, isVisibleDialog: { ...state.isVisibleDialog, [payload.dialog]: payload.isVisible } };
+
+    case 'LEAD_REPORTER_DELETE_ID':
+      return { ...state, deleteLeadReporterId: payload.id };
+
     default:
       return state;
   }

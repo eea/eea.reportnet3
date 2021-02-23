@@ -50,9 +50,11 @@ const RepresentativesList = ({
     allPossibleDataProviders: [],
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
+    deleteLeadReporterId: null,
     initialRepresentatives: [],
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
+    isVisibleDialog: { deleteLeadReporter: false, deleteRepresentative: false },
     leadReporters: {},
     leadReportersErrors: {},
     providerWithEmptyInput: null,
@@ -63,7 +65,10 @@ const RepresentativesList = ({
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: []
   };
+
   const [formState, formDispatcher] = useReducer(reducer, initialState);
+
+  const { isVisibleDialog } = formState;
 
   useEffect(() => {
     getInitialData(formDispatcher, dataflowId, formState);
@@ -115,8 +120,26 @@ const RepresentativesList = ({
     }
   }, [formState.representatives]);
 
+  const handleDialogs = (dialog, isVisible) => {
+    formDispatcher({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
+  };
+
   const onChangeLeadReporter = async (dataProviderId, leadReporterId, inputValue) => {
     formDispatcher({ type: 'ON_CHANGE_LEAD_REPORTER', payload: { dataProviderId, leadReporterId, inputValue } });
+  };
+
+  const onDeleteLeadReporter = async () => {
+    try {
+      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
+      console.log('response', response);
+
+      if (response.status >= 200 && response.status <= 299) {
+        handleDialogs('deleteLeadReporter', false);
+        formDispatcher({ type: 'REFRESH' });
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporterId) => {
@@ -127,8 +150,6 @@ const RepresentativesList = ({
         const response = TextUtils.areEquals(leadReporterId, 'empty')
           ? await addLeadReporter(inputValue, representativeId)
           : await updateLeadReporter(inputValue, leadReporterId, representativeId);
-
-        console.log('response', response);
 
         if (response.status >= 200 && response.status <= 299) {
           formDispatcher({ type: 'REFRESH' });
@@ -217,7 +238,10 @@ const RepresentativesList = ({
           <Button
             className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton}`}
             icon={'trash'}
-            // onClick={() => handleDialogs('deleteAttachment', true)}
+            onClick={() => {
+              handleDialogs('deleteLeadReporter', true);
+              formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: leadReporter.id } });
+            }}
           />
         </div>
       );
@@ -400,6 +424,22 @@ const RepresentativesList = ({
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}>
           {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
+        </ConfirmDialog>
+      )}
+
+      {isVisibleDialog.deleteLeadReporter && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={'DELETE LEAD REPORTER'}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onDeleteLeadReporter()}
+          onHide={() => {
+            handleDialogs('deleteLeadReporter', false);
+            formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: null } });
+          }}
+          visible={isVisibleDialog.deleteLeadReporter}>
+          DELETE LEAD REPORTER
         </ConfirmDialog>
       )}
     </div>

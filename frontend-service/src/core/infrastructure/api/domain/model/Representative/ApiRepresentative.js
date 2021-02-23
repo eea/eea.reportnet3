@@ -52,7 +52,7 @@ const apiRepresentative = {
   },
 
   deleteLeadReporter: async leadReporterId => {
-    return await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, leadReporterId) });
+    return await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId }) });
   },
 
   getProviderTypes: async () => {
