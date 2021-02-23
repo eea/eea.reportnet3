@@ -399,7 +399,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           leadReporterVO);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email");
     }
-
     try {
       return representativeService.updateLeadReporter(leadReporterVO);
     } catch (EEAException e) {

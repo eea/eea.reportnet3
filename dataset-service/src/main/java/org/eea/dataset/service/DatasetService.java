@@ -590,4 +590,15 @@ public interface DatasetService {
    */
   File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
       throws IOException, EEAException;
+
+
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  boolean checkAnySchemaAvailableInPublic(Long dataflowId);
+
+
 }

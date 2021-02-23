@@ -42,7 +42,6 @@ public class DataFlowVO implements Serializable {
   /** The data collections. */
   private List<DataCollectionVO> dataCollections;
 
-
   /** The eu datasets. */
   private List<EUDatasetVO> euDatasets;
 
@@ -93,6 +92,9 @@ public class DataFlowVO implements Serializable {
 
   /** The show public info. */
   private boolean showPublicInfo;
+
+  /** The any schema available in public. */
+  private boolean anySchemaAvailableInPublic;
 
   /**
    * Equals.
