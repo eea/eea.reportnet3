@@ -2961,6 +2961,10 @@ public class DatasetServiceTest {
     datasetMetabaseList.add(dataSetMetabaseEnd);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
         Mockito.anyLong())).thenReturn(datasetMetabaseList);
+    Mockito.when(schemasRepository.findAvailableInPublicByIdDataSetSchema(Mockito.any()))
+        .thenReturn(true);
+    DataSetSchema dataSetSchema = new DataSetSchema();
+    dataSetSchema.setAvailableInPublic(true);
     byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(

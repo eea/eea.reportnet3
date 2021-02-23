@@ -518,6 +518,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
         if (isCreation) {
           // 6. Create DataCollection in metabase
+
           Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
           dataCollectionIds.add(dataCollectionId);
           datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());

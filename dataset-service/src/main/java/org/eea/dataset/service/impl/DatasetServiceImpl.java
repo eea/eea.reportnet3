@@ -3261,7 +3261,8 @@ public class DatasetServiceImpl implements DatasetService {
 
     // now we create all files depends if they are avaliable
     for (DataSetMetabase datasetToFile : datasetMetabaseList) {
-      if (datasetToFile.isAvailableInPublic()) {
+      if (schemasRepository
+          .findAvailableInPublicByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()))) {
 
         // we put the good in the correct field
         List<DesignDataset> desingDataset = designDatasetRepository.findByDataflowId(dataflowId);
