@@ -598,7 +598,7 @@ const parseDatasetDTO = datasetDTO =>
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
     publicFileName: datasetDTO.publicFileName,
-    releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased * 1000).format('YYYY-MM-DD') : '-',
+    releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD') : '-',
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });
