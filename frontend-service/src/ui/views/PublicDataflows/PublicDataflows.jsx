@@ -14,6 +14,9 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const PublicDataflows = withRouter(({ history, match }) => {
@@ -22,6 +25,8 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   const [contentStyles, setContentStyles] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [publicDataflows, setPublicDataflows] = useState([]);
+
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS, history });
 
   useEffect(() => {
     onLoadPublicDataflows();
@@ -56,7 +61,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container`}>
-          <h3 className={styles.title}>Public dataflows:</h3>
+          <h1 className={styles.title}>Public dataflows</h1>
           <div className={styles.dataflowsList}>
             {!isLoading ? (
               publicDataflows.map(dataflow => (

@@ -8,6 +8,12 @@
   display: block;
   width: calc(100% / 3.12);
   height: auto;
+  &:first-of-type {
+    margin-left: 0;
+  }
+  &:nth-of-type(3n + 1) {
+    margin-left: 0;
+  }
   &::after {
     content: '';
     background-image: url('/assets/img/logo.png') !important;

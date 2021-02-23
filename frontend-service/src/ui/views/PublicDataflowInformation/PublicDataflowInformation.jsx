@@ -21,6 +21,10 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
+
 export const PublicDataflowInformation = withRouter(
   ({
     history,
@@ -34,6 +38,8 @@ export const PublicDataflowInformation = withRouter(
     const [isLoading, setIsLoading] = useState(true);
 
     const { datasets } = dataflowData;
+
+    useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
     useEffect(() => {
       onLoadDataflowData();

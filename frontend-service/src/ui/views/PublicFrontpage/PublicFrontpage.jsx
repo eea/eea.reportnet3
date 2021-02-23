@@ -16,12 +16,17 @@ import logo from 'assets/images/logo.png';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { PublicCard } from '../_components/PublicCard/PublicCard';
 
 export const PublicFrontpage = ({ history }) => {
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
+
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
   useEffect(() => {
     if (!themeContext.headerCollapse) {

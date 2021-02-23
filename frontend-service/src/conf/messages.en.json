@@ -979,6 +979,8 @@
     "releaseDate": "Release date",
     "deleteRecordByIdBlockedError": "Failure in the delete process. Please wait until the end of the previous operation",
     "externalImportReportingFromOtherSystemBlockedFailedEvent": "Failed importing data. Please wait until the end of the previous operation",
-    "addRecordsBlockedError": "There has been an error adding a record. Please wait until the end of the previous operation"
+    "addRecordsBlockedError": "There has been an error adding a record. Please wait until the end of the previous operation",
+    "publicDataflowsBreadcrumbs": "Public dataflows",
+    "publicDataflowBreadcrumbs": "Dataflow"
   }
 }
