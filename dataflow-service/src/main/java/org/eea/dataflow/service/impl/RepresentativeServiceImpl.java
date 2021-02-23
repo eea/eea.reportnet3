@@ -497,6 +497,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   }
 
+  /**
+   * Update lead reporter.
+   *
+   * @param leadReporterVO the lead reporter VO
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public Long updateLeadReporter(LeadReporterVO leadReporterVO) throws EEAException {
@@ -504,26 +511,31 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     // load old reporter
     LeadReporter leadReporter = leadReporterRepository.findById(leadReporterVO.getId())
         .orElseThrow(() -> new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND));
-    Representative representative;
-    if (leadReporterVO.getEmail() != null) {
-      UserRepresentationVO newUser =
-          userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail());
-      if (newUser != null) {
-        representative =
-            representativeRepository.findById(leadReporterVO.getRepresentativeId()).orElse(null);
-        if (null != representative && null != representative.getLeadReporters()
-            && representative.getLeadReporters().stream()
-                .filter(reporter -> leadReporterVO.getEmail().equals(reporter.getEmail()))
-                .collect(Collectors.counting()) == 0) {
-          leadReporter.setEmail(leadReporterVO.getEmail());
-          modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
-        }
-      }
-    }
-    representative = new Representative();
     if (leadReporterVO.getRepresentativeId() != null) {
-      representative.setId(leadReporterVO.getRepresentativeId());
-      leadReporter.setRepresentative(representative);
+      Representative representative =
+          representativeRepository.findById(leadReporterVO.getRepresentativeId()).orElse(null);
+      if (representative == null) {
+        throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+      }
+      if (!leadReporterVO.getRepresentativeId().equals(leadReporter.getRepresentative().getId())) {
+        throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+      }
+      if (leadReporterVO.getEmail() != null) {
+        UserRepresentationVO newUser =
+            userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail());
+        if (newUser == null) {
+          throw new EEAException(EEAErrorMessage.USER_NOTFOUND);
+        }
+        if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
+            .filter(reporter -> leadReporterVO.getEmail().equals(reporter.getEmail()))
+            .collect(Collectors.counting()) == 0) {
+          modifyLeadReporterPermissions(leadReporter.getEmail(), representative, true);
+          modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
+          leadReporter.setEmail(leadReporterVO.getEmail());
+        }
+        leadReporter.setRepresentative(representative);
+      }
+
     }
     // save changes
     return leadReporterRepository.save(leadReporter).getId();
@@ -581,7 +593,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         if (null != dataflow) {
           EeaSecurityExpressionRoot eeaSecurityExpressionRoot = new EeaSecurityExpressionRoot(
               SecurityContextHolder.getContext().getAuthentication(), userManagementControllerZull);
-          isAuthorized = eeaSecurityExpressionRoot.secondLevelAuthorize(representativeId,
+          isAuthorized = eeaSecurityExpressionRoot.secondLevelAuthorize(dataflow.getId(),
               ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN);
         }
       }
