@@ -20,14 +20,12 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
@@ -335,25 +333,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     dataflowControllerZuul.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
 
-    if (showPublicInfo) {
-      List<ReportingDataset> reportingDatasetList =
-          reportingDatasetRepository.findByDataflowId(dataflowId);
-
-      for (DataSetSchema schema : schemasRepository.findByIdDataFlow(dataflowId)) {
-        if (schema.isAvailableInPublic()) {
-          for (ReportingDataset reportingDataset : reportingDatasetList) {
-            DataSetMetabase dataset =
-                dataSetMetabaseRepository.findById(reportingDataset.getId()).orElse(null);
-            if (null != dataset
-                && schema.getIdDataSetSchema().toString().equals(dataset.getDatasetSchema())) {
-              dataset.setAvailableInPublic(true);
-              dataSetMetabaseRepository.save(dataset);
-            }
-          }
-        }
-      }
-    }
-
   }
 
 
@@ -518,7 +497,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
         if (isCreation) {
           // 6. Create DataCollection in metabase
-
           Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
           dataCollectionIds.add(dataCollectionId);
           datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());

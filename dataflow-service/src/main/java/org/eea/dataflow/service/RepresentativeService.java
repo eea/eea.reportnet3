@@ -35,9 +35,8 @@ public interface RepresentativeService {
    *
    * @param representativeVO the representative VO
    * @return the long
-   * @throws EEAException the EEA exception
    */
-  Long updateDataflowRepresentative(RepresentativeVO representativeVO) throws EEAException;
+  Long updateDataflowRepresentative(RepresentativeVO representativeVO);
 
   /**
    * Gets the all data provider types.
@@ -161,4 +160,12 @@ public interface RepresentativeService {
    */
   void updateRepresentativeVisibilityRestrictions(Long dataflowId, Long dataProviderId,
       boolean restrictFromPublic);
+
+  /**
+   * Authorize by representative id.
+   *
+   * @param representativeId the representative id
+   * @return true, if successful
+   */
+  boolean authorizeByRepresentativeId(Long representativeId);
 }
