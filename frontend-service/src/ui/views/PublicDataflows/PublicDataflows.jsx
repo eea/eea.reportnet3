@@ -38,7 +38,6 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   const onLoadPublicDataflows = async () => {
     try {
       const publicData = await DataflowService.publicData();
-      console.log({ publicData });
       setPublicDataflows(publicData);
     } catch (error) {
       console.error('error', error);
@@ -48,7 +47,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   };
 
   const onOpenDataflow = dataflowId => {
-    return history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true));
+    return history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: 77 }, true));
   };
 
   // if (isLoading) return <Spinner />;

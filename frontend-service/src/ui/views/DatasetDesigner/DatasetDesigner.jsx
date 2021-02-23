@@ -77,7 +77,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
-    availableInPublic: true,
+    availableInPublic: false,
     areLoadedSchemas: false,
     areUpdatingTables: false,
     dashDialogVisible: false,
@@ -279,7 +279,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const callSetMetaData = async () => {
     const metaData = await getMetadata({ datasetId, dataflowId });
-    console.log({ metaData });
     designerDispatch({
       type: 'GET_METADATA',
       payload: {
@@ -618,8 +617,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
-        const dataset = await DatasetService.schemaById(datasetId);
-        console.log({ dataset });
+        const dataset = await DatasetService.schemaById(datasetId);        
         const tableSchemaList = [];
         dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
 
@@ -828,10 +826,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         content: { dataflowId, datasetId, dataflowName, datasetName }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
-        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT'
+        });
+      } else {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
+          content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
+        });
+      }
     }
   };
 

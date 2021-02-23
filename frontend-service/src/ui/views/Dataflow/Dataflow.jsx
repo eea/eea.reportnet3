@@ -253,6 +253,9 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadSchemasValidations();
   }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
 
+  const checkAvailableInPublic = data =>
+    data.datasets.some(reportingDataset => reportingDataset.availableInPublic === true);
+
   const checkRestrictFromPublic = (
     <div style={{ float: 'left' }}>
       <Checkbox
@@ -448,6 +451,7 @@ const Dataflow = withRouter(({ history, match }) => {
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
+          restrictFromPublic: checkAvailableInPublic(dataflow),
           status: dataflow.status
         }
       });
@@ -680,7 +684,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
-            footerAddon={checkRestrictFromPublic}
+            footerAddon={dataflowState.restrictFromPublic && checkRestrictFromPublic}
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
