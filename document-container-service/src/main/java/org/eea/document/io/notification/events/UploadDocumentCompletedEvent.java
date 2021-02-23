@@ -44,7 +44,7 @@ public class UploadDocumentCompletedEvent implements NotificableEventHandler {
     notification.put("dataflowId", notificationVO.getDataflowId());
     notification.put("dataflowName",
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.findById(notificationVO.getDataflowId()).getName());
+            : dataflowControllerZuul.getMetabaseById(notificationVO.getDataflowId()).getName());
     notification.put("fileName", notificationVO.getFileName());
     return notification;
   }
