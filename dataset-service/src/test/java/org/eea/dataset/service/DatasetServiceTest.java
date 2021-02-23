@@ -2956,7 +2956,6 @@ public class DatasetServiceTest {
         .thenReturn(desingDataset);
     List<DataSetMetabase> datasetMetabaseList = new ArrayList();
     DataSetMetabase dataSetMetabaseEnd = new DataSetMetabase();
-    dataSetMetabaseEnd.setAvailableInPublic(true);
     dataSetMetabaseEnd.setDatasetSchema("603362319d49f04fce13b68f");
     datasetMetabaseList.add(dataSetMetabaseEnd);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),

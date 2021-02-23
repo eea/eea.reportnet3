@@ -436,7 +436,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
             String.format(EEAErrorMessage.NOT_EMAIL, leadReporterVO.getEmail()));
       }
     }
-
     try {
       message = String.valueOf(representativeService.updateLeadReporter(leadReporterVO));
     } catch (EEAException e) {

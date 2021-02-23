@@ -20,14 +20,12 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
@@ -318,44 +316,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
-
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
-
-    updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
-
   }
-
-  /**
-   * Update reporting datasets visibility.
-   *
-   * @param dataflowId the dataflow id
-   * @param showPublicInfo the show public info
-   */
-  private void updateReportingDatasetsVisibility(Long dataflowId, boolean showPublicInfo) {
-
-    dataflowControllerZuul.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
-
-    if (showPublicInfo) {
-      List<ReportingDataset> reportingDatasetList =
-          reportingDatasetRepository.findByDataflowId(dataflowId);
-
-      for (DataSetSchema schema : schemasRepository.findByIdDataFlow(dataflowId)) {
-        if (schema.isAvailableInPublic()) {
-          for (ReportingDataset reportingDataset : reportingDatasetList) {
-            DataSetMetabase dataset =
-                dataSetMetabaseRepository.findById(reportingDataset.getId()).orElse(null);
-            if (null != dataset
-                && schema.getIdDataSetSchema().toString().equals(dataset.getDatasetSchema())) {
-              dataset.setAvailableInPublic(true);
-              dataSetMetabaseRepository.save(dataset);
-            }
-          }
-        }
-      }
-    }
-
-  }
-
 
   /**
    * Manage data collection.

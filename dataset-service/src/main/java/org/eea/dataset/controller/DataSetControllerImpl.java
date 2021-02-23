@@ -948,6 +948,17 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  @Override
+  @GetMapping("/private/checkAnySchemaAvailableInPublic")
+  public boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId) {
+    return datasetService.checkAnySchemaAvailableInPublic(dataflowId);
+  }
 
 
 }

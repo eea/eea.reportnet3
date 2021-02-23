@@ -384,4 +384,14 @@ public interface DatasetController {
       @PathVariable("dataProviderId") Long dataProviderId,
       @RequestParam(value = "fileName", required = true) String fileName);
 
+
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  @GetMapping("/private/checkAnySchemaAvailableInPublic")
+  boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId);
+
 }
