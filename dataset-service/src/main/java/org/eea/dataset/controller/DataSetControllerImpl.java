@@ -1,5 +1,7 @@
 package org.eea.dataset.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -39,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -632,10 +635,8 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateField")
-  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateField(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @RequestBody FieldVO field,
+  public void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field,
       @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),
@@ -877,6 +878,37 @@ public class DataSetControllerImpl implements DatasetController {
 
 
   /**
+   * Export public file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderI the data provider I
+   * @param fileName the file name
+   * @return the http entity
+   */
+  @Override
+  @GetMapping(value = "/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<InputStreamResource> exportPublicFile(
+      @PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderI,
+      @RequestParam(value = "fileName", required = true) String fileName) {
+
+    try {
+      File excelContent = datasetService.exportPublicFile(dataflowId, dataProviderI, fileName);
+      InputStreamResource resource = new InputStreamResource(new FileInputStream(excelContent));
+      HttpHeaders header = new HttpHeaders();
+      header.setContentType(new MediaType("application", "force-download"));
+      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+      return ResponseEntity.ok().headers(header).contentLength(excelContent.length())
+          .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+
+  /**
    * Validate attachment.
    *
    * @param datasetId the dataset id
@@ -915,6 +947,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     return result;
   }
+
 
 
 }

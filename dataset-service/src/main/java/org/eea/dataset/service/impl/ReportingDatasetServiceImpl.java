@@ -195,6 +195,32 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
 
 
   /**
+   * Gets the data set id by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the data set id by dataflow id and data provider id
+   */
+  @Override
+  public List<ReportingDatasetVO> getDataSetIdByDataflowIdAndDataProviderId(Long dataflowId,
+      Long dataProviderId) {
+
+    List<ReportingDataset> datasets =
+        reportingDatasetRepository.findByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+
+    List<ReportingDatasetVO> datasetsVO = reportingDatasetMapper.entityListToClass(datasets);
+
+    // Check if dataset is released
+    isReleased(datasetsVO);
+
+    getDatasetSchemaNames(datasetsVO);
+
+    return datasetsVO;
+  }
+
+
+
+  /**
    * Gets the null properties.
    *
    * @param object the object

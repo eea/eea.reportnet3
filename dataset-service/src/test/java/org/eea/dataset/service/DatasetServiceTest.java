@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
@@ -73,6 +74,7 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -114,6 +116,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The Class DatasetServiceTest.
@@ -121,161 +124,220 @@ import org.springframework.mock.web.MockMultipartFile;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetServiceTest {
 
+  /** The dataset service. */
   @InjectMocks
   private DatasetServiceImpl datasetService;
 
+  /** The context. */
   @Mock
   private FileParseContextImpl context;
 
+  /** The file parser factory. */
   @Mock
   private FileParserFactory fileParserFactory;
 
+  /** The data set mapper. */
   @Mock
   private DataSetMapper dataSetMapper;
 
+  /** The table value mapper. */
   @Mock
   private TableValueMapper tableValueMapper;
 
+  /** The partition data set metabase repository. */
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The data set metabase repository. */
   @Mock
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The data collection repository. */
   @Mock
   private DataCollectionRepository dataCollectionRepository;
 
+  /** The reporting dataset repository. */
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
 
+  /** The dataset repository. */
   @Mock
   private DatasetRepository datasetRepository;
 
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
+  /** The kafka sender. */
   @Mock
   private KafkaSender kafkaSender;
 
+  /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
 
+  /** The record mapper. */
   @Mock
   private RecordMapper recordMapper;
 
+  /** The record no validation mapper. */
   @Mock
   private RecordNoValidationMapper recordNoValidationMapper;
 
+  /** The pageable. */
   @Mock
   private Pageable pageable;
 
+  /** The field repository. */
   @Mock
   private FieldRepository fieldRepository;
 
+  /** The table no record mapper. */
   @Mock
   private TableNoRecordMapper tableNoRecordMapper;
 
+  /** The field validation repository. */
   @Mock
   private FieldValidationRepository fieldValidationRepository;
 
+  /** The record validation repository. */
   @Mock
   private RecordValidationRepository recordValidationRepository;
 
+  /** The table validation repository. */
   @Mock
   private TableValidationRepository tableValidationRepository;
 
+  /** The table validation mapper. */
   @Mock
   private TableValidationMapper tableValidationMapper;
 
+  /** The field validation mapper. */
   @Mock
   private FieldValidationMapper fieldValidationMapper;
 
+  /** The record validation mapper. */
   @Mock
   private RecordValidationMapper recordValidationMapper;
 
+  /** The validation repository. */
   @Mock
   private ValidationRepository validationRepository;
 
+  /** The dataset validation repository. */
   @Mock
   private DatasetValidationRepository datasetValidationRepository;
 
+  /** The file export factory. */
   @Mock
   private IFileExportFactory fileExportFactory;
 
+  /** The context export. */
   @Mock
   private IFileExportContext contextExport;
 
+  /** The file common. */
   @Mock
   private FileCommonUtils fileCommon;
 
+  /** The statistics repository. */
   @Mock
   private StatisticsRepository statisticsRepository;
 
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The representative controller zuul. */
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The field no validation mapper. */
   @Mock
   private FieldNoValidationMapper fieldNoValidationMapper;
 
+  /** The lock service. */
   @Mock
   private LockService lockService;
 
+  /** The dataflow controller zull. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZull;
 
+  /** The integration controller. */
   @Mock
   private IntegrationControllerZuul integrationController;
 
+  /** The update record helper. */
   @Mock
   private UpdateRecordHelper updateRecordHelper;
 
+  /** The attachment repository. */
   @Mock
   private AttachmentRepository attachmentRepository;
 
+  /** The pa M service. */
   @Mock
   private PaMService paMService;
 
+  /** The pk catalogue repository. */
   @Mock
   private PkCatalogueRepository pkCatalogueRepository;
 
+  /** The field value. */
   private FieldValue fieldValue;
 
+  /** The record value. */
   private RecordValue recordValue;
 
+  /** The record values. */
   private ArrayList<RecordValue> recordValues;
 
+  /** The table value. */
   private TableValue tableValue;
 
+  /** The table values. */
   private ArrayList<TableValue> tableValues;
 
+  /** The dataset value. */
   private DatasetValue datasetValue;
 
+  /** The data set VO. */
   private DataSetVO dataSetVO;
 
+  /** The table V os. */
   private ArrayList<TableVO> tableVOs;
 
+  /** The table VO. */
   private TableVO tableVO;
 
+  /** The field list. */
   private List<FieldValue> fieldList;
 
+  /** The sorted list. */
   private List<FieldValue> sortedList;
 
+  /** The field. */
   private FieldValue field;
 
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
+    ReflectionTestUtils.setField(datasetService, "pathPublicFile", "dato");
     fieldValue = new FieldValue();
     recordValues = new ArrayList<>();
     recordValue = new RecordValue();
@@ -490,16 +552,21 @@ public class DatasetServiceTest {
    */
   @Test
   public void testDeleteImportData() throws Exception {
-
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    tableSchema.setReadOnly(true);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema table = new TableSchema();
-    table.setIdTableSchema(new ObjectId());
-    schema.setTableSchemas(Arrays.asList(table));
-    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     datasetService.deleteImportData(1L);
-    Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
+    Mockito.verify(recordRepository, times(0)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 
   /**
@@ -509,16 +576,19 @@ public class DatasetServiceTest {
    */
   @Test
   public void testDeleteImportDataFixed() throws Exception {
-
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     DataSetSchema schema = new DataSetSchema();
     TableSchema table = new TableSchema();
     RecordSchema record = new RecordSchema();
-    List<FieldSchema> fieldSchemaList = new ArrayList();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
     FieldSchema field = new FieldSchema();
     FieldSchema field2 = new FieldSchema();
     field.setReadOnly(true);
+    field.setIdFieldSchema(new ObjectId());
     fieldSchemaList.add(field);
     fieldSchemaList.add(field2);
     record.setFieldSchema(fieldSchemaList);
@@ -1055,8 +1125,20 @@ public class DatasetServiceTest {
    */
   @Test
   public void testDeleteTableData() throws Exception {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     doNothing().when(recordRepository).deleteRecordWithIdTableSchema(Mockito.any());
-    datasetService.deleteTableBySchema("", 1L);
+    datasetService.deleteTableBySchema("5ce524fad31fc52540abae73", 1L);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 
@@ -2836,4 +2918,75 @@ public class DatasetServiceTest {
     datasetService.insertRecords(1L, recordVOs, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.anyIterable());
   }
+
+
+
+  /**
+   * Save public files.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void savePublicFiles() throws IOException, InvalidFileException, EEAException {
+    DataSetMetabase dataSetMetabase = new DataSetMetabase();
+    dataSetMetabase.setDataflowId(1L);
+    dataSetMetabase.setDataProviderId(1L);
+    dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
+    List<RepresentativeVO> representativeList = new ArrayList();
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setDataProviderId(1L);
+    representativeVO.setRestrictFromPublic(false);
+    representativeList.add(representativeVO);
+    DataProviderVO dataProvider = new DataProviderVO();
+    dataProvider.setLabel("SPAIN");
+    dataProvider.setId(1l);
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representativeList);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(dataProvider);
+
+    List<DesignDataset> desingDataset = new ArrayList();
+    DesignDataset designDataset = new DesignDataset();
+    designDataset.setDatasetSchema("603362319d49f04fce13b68f");
+    designDataset.setDataSetName("test");
+    desingDataset.add(designDataset);
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(desingDataset);
+    List<DataSetMetabase> datasetMetabaseList = new ArrayList();
+    DataSetMetabase dataSetMetabaseEnd = new DataSetMetabase();
+    dataSetMetabaseEnd.setAvailableInPublic(true);
+    dataSetMetabaseEnd.setDatasetSchema("603362319d49f04fce13b68f");
+    datasetMetabaseList.add(dataSetMetabaseEnd);
+    Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
+        Mockito.anyLong())).thenReturn(datasetMetabaseList);
+    byte[] expectedResult = null;
+    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
+    when(
+        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            .thenReturn(expectedResult);
+    Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
+        Mockito.anyLong())).thenReturn(datasetMetabaseList);
+    datasetService.savePublicFiles(1L, 1L);
+    Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
+  }
+
+
+  /**
+   * Export public file throws.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void exportPublicFileThrows() throws IOException, EEAException {
+    try {
+      datasetService.exportPublicFile(1L, 1L, "test");
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.FILE_NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
 }

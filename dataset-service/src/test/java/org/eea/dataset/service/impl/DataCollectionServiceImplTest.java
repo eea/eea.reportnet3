@@ -29,6 +29,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -128,11 +129,16 @@ public class DataCollectionServiceImplTest {
   @Mock
   private DesignDatasetRepository designDatasetRepository;
 
+  /** The lead reporters VO. */
+  private List<LeadReporterVO> leadReportersVO;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    leadReportersVO = new ArrayList<>();
+    leadReportersVO.add(new LeadReporterVO());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -249,7 +255,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
+    representative.setLeadReporters(leadReportersVO);
     representative.setHasDatasets(false);
     designs.add(design);
     representatives.add(representative);
@@ -298,7 +304,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
+    representative.setLeadReporters(leadReportersVO);
     representative.setDataProviderId(1L);
     representative.setHasDatasets(false);
     dataProvider.setId(1L);
@@ -391,7 +397,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
+    representative.setLeadReporters(leadReportersVO);
     representative.setHasDatasets(false);
     designs.add(design);
     representatives.add(representative);
@@ -423,7 +429,7 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     representative.setId(1L);
-    representative.setProviderAccounts(Arrays.asList("providerAccount_"));
+    representative.setLeadReporters(leadReportersVO);
     representative.setHasDatasets(false);
     designs.add(design);
     representatives.add(representative);
