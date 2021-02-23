@@ -144,24 +144,35 @@ const RepresentativesList = ({
     }
   };
 
-  const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporterId) => {
+  const checkIsSameAccount = (accountCurrent, accountPrevious) => {
+    return accountCurrent === accountPrevious;
+  };
+
+  const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporter) => {
     const { addLeadReporter, updateLeadReporter } = RepresentativeService;
+    if (!checkIsSameAccount(inputValue, leadReporter.account)) {
+      if (isValidEmail(inputValue)) {
+        try {
+          const response = TextUtils.areEquals(leadReporter.id, 'empty')
+            ? await addLeadReporter(inputValue, representativeId)
+            : await updateLeadReporter(inputValue, leadReporter.id, representativeId);
 
-    if (isValidEmail(inputValue)) {
-      try {
-        const response = TextUtils.areEquals(leadReporterId, 'empty')
-          ? await addLeadReporter(inputValue, representativeId)
-          : await updateLeadReporter(inputValue, leadReporterId, representativeId);
-
-        if (response.status >= 200 && response.status <= 299) {
-          formDispatcher({ type: 'REFRESH' });
+          if (response.status >= 200 && response.status <= 299) {
+            formDispatcher({ type: 'REFRESH' });
+          }
+        } catch (error) {
+          console.log('error', error);
+          formDispatcher({
+            type: 'CREATE_ERROR',
+            payload: { dataProviderId, hasErrors: true, leadReporterId: leadReporter.id }
+          });
         }
-      } catch (error) {
-        console.log('error', error);
-        formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
+      } else {
+        formDispatcher({
+          type: 'CREATE_ERROR',
+          payload: { dataProviderId, hasErrors: true, leadReporterId: leadReporter.id }
+        });
       }
-    } else {
-      formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
     }
   };
 
@@ -183,9 +194,7 @@ const RepresentativesList = ({
               onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
               placeholder={`New lead reporter`}
               onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-              onBlur={event =>
-                onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
-              }
+              onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
               value={reporters[leadReporter.id]}
             />
           </div>
@@ -198,9 +207,7 @@ const RepresentativesList = ({
             id={`${leadReporter.id}-${representativeId}`}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
-            onBlur={event =>
-              onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
-            }
+            onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
             value={reporters[leadReporter.id]?.account}
           />

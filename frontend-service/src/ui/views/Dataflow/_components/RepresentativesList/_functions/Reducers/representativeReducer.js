@@ -11,7 +11,7 @@ export const reducer = (state, { type, payload }) => {
       return {
         ...state,
         refresher: !state.refresher,
-        representativesHaveError: []
+        leadReportersErrors: {}
       };
 
     case 'CREATE_UNUSED_OPTIONS_LIST':
