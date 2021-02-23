@@ -160,8 +160,9 @@ const RepresentativesList = ({
         console.log('error', error);
         formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
       }
+    } else {
+      formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
     }
-    formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
   };
 
   const renderLeadReporterTemplate = representative => {
