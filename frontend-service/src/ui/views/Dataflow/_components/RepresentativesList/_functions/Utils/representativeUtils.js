@@ -216,13 +216,9 @@ export const onKeyDown = (event, formDispatcher, formState, representative, data
 };
 
 export const isValidEmail = email => {
-  if (isNil(email)) {
-    return true;
-  }
-
   const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-  return email.match(expression);
+  return expression.test(email);
 };
 
 const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {

@@ -122,22 +122,23 @@ const RepresentativesList = ({
   const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporterId) => {
     const { addLeadReporter, updateLeadReporter } = RepresentativeService;
 
-    if (!isValidEmail(inputValue) || isNil(isValidEmail(inputValue))) {
-      formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
+    if (isValidEmail(inputValue)) {
+      try {
+        const response = TextUtils.areEquals(leadReporterId, 'empty')
+          ? await addLeadReporter(inputValue, representativeId)
+          : await updateLeadReporter(inputValue, leadReporterId, representativeId);
+
+        console.log('response', response);
+
+        if (response.status >= 200 && response.status <= 299) {
+          formDispatcher({ type: 'REFRESH' });
+        }
+      } catch (error) {
+        console.log('error', error);
+        formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
+      }
     }
-
-    try {
-      const response = TextUtils.areEquals(leadReporterId, 'empty')
-        ? await addLeadReporter(inputValue, representativeId)
-        : await updateLeadReporter(inputValue, leadReporterId, representativeId);
-
-      console.log('response', response);
-
-      if (response.status >= 200 && response.status <= 299) formDispatcher({ type: 'REFRESH' });
-    } catch (error) {
-      console.log('error', error);
-      formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
-    }
+    formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
   };
 
   const renderLeadReporterTemplate = representative => {
