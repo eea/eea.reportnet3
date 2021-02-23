@@ -826,10 +826,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         content: { dataflowId, datasetId, dataflowName, datasetName }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
-        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT'
+        });
+      } else {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
+          content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
+        });
+      }
     }
   };
 
