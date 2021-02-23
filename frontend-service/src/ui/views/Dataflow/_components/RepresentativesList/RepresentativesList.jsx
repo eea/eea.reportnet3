@@ -189,8 +189,9 @@ const RepresentativesList = ({
 
       if (leadReporter.id === 'empty') {
         return (
-          <div className={styles.inputWrapper}>
+          <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
             <InputText
+              id={`${leadReporter.id}-${representativeId}`}
               placeholder={`New lead reporter`}
               onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
               onBlur={event =>
@@ -203,8 +204,9 @@ const RepresentativesList = ({
       }
 
       return (
-        <div className={styles.inputWrapper}>
+        <div className={styles.inputWrapper} key={leadReporter.id}>
           <InputText
+            id={`${leadReporter.id}`}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             onBlur={event =>
               onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
