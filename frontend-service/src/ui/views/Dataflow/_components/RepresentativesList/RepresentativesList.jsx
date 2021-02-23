@@ -218,7 +218,7 @@ const RepresentativesList = ({
               onBlur={event =>
                 onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
               }
-              // value={reporters[leadReporter.id].account}
+              value={reporters[leadReporter.id]}
             />
           </div>
         );
