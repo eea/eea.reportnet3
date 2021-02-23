@@ -65,15 +65,14 @@ public interface RepresentativeController {
   List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId);
 
-
   /**
    * Update representative.
    *
    * @param dataflowRepresentativeVO the dataflow representative VO
    * @return the response entity
    */
-  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
+  @PutMapping("/update")
+  Long updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 
   /**
    * Delete representative.
@@ -137,7 +136,7 @@ public interface RepresentativeController {
       @PathVariable(value = "dataflowId") Long dataflowId,
       @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
 
-      
+
   /**
    * Update representative visibility restrictions.
    *
@@ -161,7 +160,7 @@ public interface RepresentativeController {
    * @param leadReporterVO the lead reporter VO
    * @return the long
    */
-  @PostMapping("/leadReporter/{representativeId}")
+  @PostMapping("/{representativeId}/leadReporter/")
   Long createLeadReporter(@PathVariable("representativeId") final Long representativeId,
       @RequestBody LeadReporterVO leadReporterVO);
 
@@ -171,14 +170,14 @@ public interface RepresentativeController {
    * @param leadReporterVO the lead reporter VO
    * @return the response entity
    */
-  @PutMapping(value = "/leadReporter/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO);
+  @PutMapping("/leadReporter/update")
+  Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO);
 
   /**
    * Delete lead reporter.
    *
    * @param leadReporterId the lead reporter id
    */
-  @DeleteMapping(value = "/leadReporter/{leadReporterId}")
+  @DeleteMapping("/leadReporter/{leadReporterId}")
   void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId);
 }
