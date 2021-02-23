@@ -379,10 +379,16 @@ export const Dataset = withRouter(({ match, history }) => {
         content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        });
+      }
     }
   };
 

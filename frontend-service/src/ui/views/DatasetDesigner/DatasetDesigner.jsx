@@ -502,16 +502,22 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: {
-          countryName: 'DESIGN',
-          dataflowId,
-          dataflowName: designerState.dataflowName,
-          datasetId,
-          datasetName: designerState.datasetSchemaName
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          content: {
+            countryName: 'DESIGN',
+            dataflowId,
+            dataflowName: designerState.dataflowName,
+            datasetId,
+            datasetName: designerState.datasetSchemaName
+          }
+        });
+      }
     }
   };
 

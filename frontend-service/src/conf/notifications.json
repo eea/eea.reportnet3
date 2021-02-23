@@ -564,8 +564,10 @@
         { "key": "ADD_RECORDS_BLOCKED_ERROR" },
         {
           "key": "RELEASE_BLOCKED_EVENT"
+        },
+        {
+          "key": "VALIDATE_DATA_BLOCKED_ERROR"
         }
-
       ]
     },
     {
