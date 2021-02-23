@@ -531,6 +531,7 @@ const useBigButtonList = ({
   return [
     ...manageReportersBigButton,
     ...helpBigButton,
+    ...designDatasetModels,
     ...feedbackBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
@@ -538,7 +539,6 @@ const useBigButtonList = ({
     ...copyDataCollectionToEuDatasetBigButton,
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
-    ...designDatasetModels,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,
