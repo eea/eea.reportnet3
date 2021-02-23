@@ -163,6 +163,10 @@
   }
 }
 
+.checkboxDisabled {
+  cursor: default !important;
+}
+
 @keyframes fadeInOpacity {
   0% {
     opacity: 0.2;
