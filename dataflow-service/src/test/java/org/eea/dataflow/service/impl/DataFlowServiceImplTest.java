@@ -32,6 +32,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -155,6 +156,10 @@ public class DataFlowServiceImplTest {
   /** The dataflow public mapper. */
   @Mock
   private DataflowPublicMapper dataflowPublicMapper;
+
+  /** The data set controller zuul. */
+  @Mock
+  private DataSetControllerZuul dataSetControllerZuul;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
