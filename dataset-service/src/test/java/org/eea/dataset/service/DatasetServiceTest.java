@@ -2961,8 +2961,7 @@ public class DatasetServiceTest {
     datasetMetabaseList.add(dataSetMetabaseEnd);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
         Mockito.anyLong())).thenReturn(datasetMetabaseList);
-
-    byte[] expectedResult = "".getBytes();
+    byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
