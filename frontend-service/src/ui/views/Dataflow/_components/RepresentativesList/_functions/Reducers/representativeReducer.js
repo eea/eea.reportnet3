@@ -41,9 +41,6 @@ export const reducer = (state, { type, payload }) => {
     case 'GET_PROVIDERS_TYPES_LIST':
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
-    case 'MANAGE_ERRORS':
-      return { ...state, representativesHaveError: payload.representativesHaveError };
-
     case 'HIDE_CONFIRM_DIALOG':
       return { ...state, isVisibleConfirmDeleteDialog: false, representativeIdToDelete: '' };
 
@@ -76,20 +73,12 @@ export const reducer = (state, { type, payload }) => {
       };
       return {
         ...state,
+        leadReporters: payload.parsedLeadReporters,
         representatives: payload.response.representatives,
-        initialRepresentatives: payload.representativesByCopy,
-        selectedDataProviderGroup: getSelectedProviderGroup(),
-        representativeHaveError: [],
-        leadReporters: payload.parsedLeadReporters
+        selectedDataProviderGroup: getSelectedProviderGroup()
       };
 
-    case 'ON_ACCOUNT_CHANGE':
-      return {
-        ...state,
-        representatives: payload.representatives,
-        representativesHaveError: payload.representativesHaveError
-      };
-
+    //TODO AUTO FOCUS
     case 'ADD_NEW_LEAD_REPORTER':
       return { ...state, providerWithEmptyInput: payload.dataProviderId, representatives: payload.representatives };
 

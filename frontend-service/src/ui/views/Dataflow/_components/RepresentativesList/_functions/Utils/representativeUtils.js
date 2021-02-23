@@ -1,34 +1,11 @@
-import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
 
 import { RepresentativeService } from 'core/services/Representative';
 
-export const autofocusOnEmptyInput = formState => {
-  if (!isEmpty(formState.representatives)) {
-    if (
-      isNil(formState.representatives[formState.representatives.length - 1].representativeId) &&
-      !isNil(document.getElementById('emptyInput'))
-    ) {
-      const activeElement = document.activeElement;
-
-      if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT') {
-        return;
-      } else {
-        document.getElementById('emptyInput').focus();
-      }
-    }
-  }
-};
-
 const addRepresentative = async (formDispatcher, representatives, dataflowId, formState) => {
   const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
-  if (
-    // !isEmpty(newRepresentative[0].providerAccount) &&
-    // isValidEmail(newRepresentative[0].providerAccount) &&
-    !isEmpty(newRepresentative[0].dataProviderId)
-  ) {
+  if (!isEmpty(newRepresentative[0].dataProviderId)) {
     formDispatcher({
       type: 'SET_IS_LOADING',
       payload: { isLoading: true }
@@ -45,14 +22,7 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
       });
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
-      if (error.response.status === 400 || error.response.status === 404) {
-        let { representativesHaveError } = formState;
-        representativesHaveError.unshift(representatives[representatives.length - 1].representativeId);
-        formDispatcher({
-          type: 'MANAGE_ERRORS',
-          payload: { representativesHaveError: uniq(representativesHaveError) }
-        });
-      }
+      //TODO Add notification if representative add fails?
     } finally {
       formDispatcher({
         type: 'SET_IS_LOADING',
@@ -116,11 +86,10 @@ const getAllRepresentatives = async (dataflowId, formDispatcher) => {
     let responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
     const parsedLeadReporters = parseLeadReporters(responseAllRepresentatives.representatives);
-    const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
 
     formDispatcher({
       type: 'INITIAL_LOAD',
-      payload: { response: responseAllRepresentatives, representativesByCopy, parsedLeadReporters }
+      payload: { response: responseAllRepresentatives, parsedLeadReporters }
     });
   } catch (error) {
     console.error('error on RepresentativeService.allRepresentatives', error);
@@ -148,10 +117,8 @@ export const getInitialData = async (formDispatcher, dataflowId, formState) => {
   }
 };
 
-export const onAddProvider = (formDispatcher, formState, representative, dataflowId) => {
-  isNil(representative.representativeId)
-    ? addRepresentative(formDispatcher, formState.representatives, dataflowId, formState)
-    : updateRepresentative(formDispatcher, formState, representative);
+export const onAddRepresentative = (formDispatcher, formState, dataflowId) => {
+  addRepresentative(formDispatcher, formState.representatives, dataflowId, formState);
 };
 
 export const onDataProviderIdChange = async (formDispatcher, newDataProviderId, representative, formState) => {
@@ -209,73 +176,8 @@ export const onDeleteConfirm = async (formDispatcher, formState) => {
   }
 };
 
-export const onKeyDown = (event, formDispatcher, formState, representative, dataflowId) => {
-  if (event.key === 'Enter') {
-    onAddProvider(formDispatcher, formState, representative, dataflowId);
-  }
-};
-
 export const isValidEmail = email => {
   const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   return expression.test(email);
-};
-
-const updateRepresentative = async (formDispatcher, formState, updatedRepresentative) => {
-  let isChangedAccount = false;
-  const { initialRepresentatives } = formState;
-
-  for (let initialRepresentative of initialRepresentatives) {
-    if (
-      initialRepresentative.representativeId === updatedRepresentative.representativeId &&
-      initialRepresentative.providerAccount !== updatedRepresentative.providerAccount
-    ) {
-      isChangedAccount = true;
-    } else if (
-      initialRepresentative.representativeId === updatedRepresentative.representativeId &&
-      initialRepresentative.providerAccount === updatedRepresentative.providerAccount
-    ) {
-      const filteredInputsWithErrors = formState.representativesHaveError.filter(
-        representativeId => representativeId !== updatedRepresentative.representativeId
-      );
-
-      formDispatcher({
-        type: 'MANAGE_ERRORS',
-        payload: { representativesHaveError: filteredInputsWithErrors }
-      });
-    }
-  }
-
-  if (isChangedAccount && isValidEmail(updatedRepresentative.providerAccount)) {
-    formDispatcher({
-      type: 'SET_IS_LOADING',
-      payload: { isLoading: true }
-    });
-    try {
-      await RepresentativeService.updateProviderAccount(
-        parseInt(updatedRepresentative.representativeId),
-        updatedRepresentative.providerAccount
-      );
-      formDispatcher({
-        type: 'REFRESH'
-      });
-    } catch (error) {
-      console.error('error on RepresentativeService.updateProviderAccount', error);
-
-      if (error.response.status >= 400 || error.response.status <= 404) {
-        let { representativesHaveError } = formState;
-        representativesHaveError.unshift(updatedRepresentative.representativeId);
-
-        formDispatcher({
-          type: 'MANAGE_ERRORS',
-          payload: { representativesHaveError: uniq(representativesHaveError) }
-        });
-      }
-    } finally {
-      formDispatcher({
-        type: 'SET_IS_LOADING',
-        payload: { isLoading: false }
-      });
-    }
-  }
 };

@@ -25,24 +25,17 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
 import {
-  autofocusOnEmptyInput,
   createUnusedOptionsList,
   getAllDataProviders,
   getInitialData,
   isValidEmail,
-  onAddProvider,
+  onAddRepresentative,
   onDataProviderIdChange,
-  onDeleteConfirm,
-  onKeyDown
+  onDeleteConfirm
 } from './_functions/Utils/representativeUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-const RepresentativesList = ({
-  dataflowId,
-  isActiveManageRolesDialog,
-  setFormHasRepresentatives,
-  setHasRepresentativesWithoutDatasets
-}) => {
+const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepresentativesWithoutDatasets }) => {
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -50,7 +43,6 @@ const RepresentativesList = ({
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
-    initialRepresentatives: [],
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
     isVisibleDialog: { deleteLeadReporter: false, deleteRepresentative: false },
@@ -60,7 +52,6 @@ const RepresentativesList = ({
     refresher: false,
     representativeIdToDelete: '',
     representatives: [],
-    representativesHaveError: [],
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: []
   };
@@ -74,12 +65,6 @@ const RepresentativesList = ({
   }, [formState.refresher]);
 
   useEffect(() => {
-    if (isActiveManageRolesDialog === false && !isEmpty(formState.representativesHaveError)) {
-      formDispatcher({ type: 'REFRESH' });
-    }
-  }, [isActiveManageRolesDialog]);
-
-  useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     }
@@ -88,10 +73,6 @@ const RepresentativesList = ({
   useEffect(() => {
     createUnusedOptionsList(formDispatcher);
   }, [formState.allPossibleDataProviders]);
-
-  useEffect(() => {
-    autofocusOnEmptyInput(formState);
-  }, [formState.representativesHaveError]);
 
   useEffect(() => {
     if (!isEmpty(formState.representatives)) {
@@ -175,18 +156,20 @@ const RepresentativesList = ({
   };
 
   const renderLeadReporterTemplate = representative => {
-    const { dataProviderId, representativeId } = representative;
+    const { dataProviderId, hasDatasets, representativeId } = representative;
 
     if (isNil(representative.leadReporters)) return [];
 
     return representative.leadReporters.map(leadReporter => {
       const reporters = formState.leadReporters[dataProviderId];
       const errors = formState.leadReportersErrors[dataProviderId];
+      const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
 
       return (
         <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
           <InputText
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
+            disabled={hasDatasets && !isNewLeadReporter}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
@@ -196,7 +179,7 @@ const RepresentativesList = ({
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
-          {!TextUtils.areEquals(leadReporter.id, 'empty') && (
+          {!isNewLeadReporter && (
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton}`}
               icon={'trash'}
@@ -230,16 +213,19 @@ const RepresentativesList = ({
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
         <select
+          autoFocus
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
           disabled={representative.hasDatasets}
           id={labelId}
-          onBlur={() => onAddProvider(formDispatcher, formState, representative, dataflowId)}
-          onChange={event => {
-            onDataProviderIdChange(formDispatcher, event.target.value, representative, formState);
+          onBlur={() => onAddRepresentative(formDispatcher, formState, dataflowId)}
+          onChange={event => onDataProviderIdChange(formDispatcher, event.target.value, representative, formState)}
+          onKeyDown={event => {
+            if (TextUtils.areEquals(event.key, 'Enter')) {
+              onAddRepresentative(formDispatcher, formState, dataflowId);
+            }
           }}
-          onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
           value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map(provider => {
             return (
@@ -309,6 +295,7 @@ const RepresentativesList = ({
             <Column
               body={renderDropdownColumnTemplate}
               header={resources.messages['manageRolesDialogDataProviderColumn']}
+              style={{ width: '16rem' }}
             />
             <Column body={renderLeadReporterTemplate} header={resources.messages['manageRolesDialogAccountColumn']} />
           </DataTable>
