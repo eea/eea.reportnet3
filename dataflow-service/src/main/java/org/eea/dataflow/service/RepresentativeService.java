@@ -35,9 +35,8 @@ public interface RepresentativeService {
    *
    * @param representativeVO the representative VO
    * @return the long
-   * @throws EEAException the EEA exception
    */
-  Long updateDataflowRepresentative(RepresentativeVO representativeVO) throws EEAException;
+  Long updateDataflowRepresentative(RepresentativeVO representativeVO);
 
   /**
    * Gets the all data provider types.
