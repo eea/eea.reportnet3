@@ -13,6 +13,9 @@
 .addEditRecordDialog {
   width: 35vw !important;
 }
+.fieldDisabled {
+  cursor: default;
+}
 .chips {
   display: flex !important;
   justify-content: center;
