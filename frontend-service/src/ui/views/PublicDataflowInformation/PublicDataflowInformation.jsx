@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -141,29 +141,31 @@ export const PublicDataflowInformation = withRouter(
     return (
       <PublicLayout>
         <div className={`${styles.container} rep-container`}>
-          <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
           {!isLoading ? (
             !isEmpty(datasets) ? (
-              <DataTable
-                autoLayout={true}
-                paginator={true}
-                paginatorRight={
-                  <span>
-                    {`${resources.messages['totalRecords']}  ${datasets.length}`}{' '}
-                    {resources.messages['records'].toLowerCase()}
-                  </span>
-                }
-                rows={10}
-                rowsPerPageOptions={[5, 10, 15]}
-                totalRecords={datasets.length}
-                value={datasets}>
-                {renderColumns(datasets)}
-              </DataTable>
+              <Fragment>
+                <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+                <DataTable
+                  autoLayout={true}
+                  paginator={true}
+                  paginatorRight={
+                    <span>
+                      {`${resources.messages['totalRecords']}  ${datasets.length}`}{' '}
+                      {resources.messages['records'].toLowerCase()}
+                    </span>
+                  }
+                  rows={10}
+                  rowsPerPageOptions={[5, 10, 15]}
+                  totalRecords={datasets.length}
+                  value={datasets}>
+                  {renderColumns(datasets)}
+                </DataTable>
+              </Fragment>
             ) : (
               <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
             )
           ) : (
-            <Spinner style={{ top: 0, left: 0 }} />
+            <Spinner style={{ top: 0 }} />
           )}
         </div>
       </PublicLayout>
