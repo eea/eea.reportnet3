@@ -391,7 +391,7 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @return true, if successful
    */
-  @GetMapping(value = "/private/checkAnySchemaAvailableInPublic")
+  @GetMapping("/private/checkAnySchemaAvailableInPublic")
   boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId);
 
 }
