@@ -160,6 +160,18 @@ export const reducer = (state, { type, payload }) => {
     case 'LEAD_REPORTER_DELETE_ID':
       return { ...state, deleteLeadReporterId: payload.id };
 
+    case 'CLEAN_UP_ERRORS':
+      return {
+        ...state,
+        leadReportersErrors: {
+          ...state.leadReportersErrors,
+          [payload.dataProviderId]: {
+            ...state.leadReportersErrors[payload.dataProviderId],
+            [payload.leadReporterId]: payload.hasErrors
+          }
+        }
+      };
+
     default:
       return state;
   }

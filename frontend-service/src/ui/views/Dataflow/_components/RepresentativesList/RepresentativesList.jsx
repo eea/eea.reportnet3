@@ -5,7 +5,6 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
-import uniq from 'lodash/uniq';
 import uuid from 'uuid';
 
 import styles from './RepresentativesList.module.scss';
@@ -128,10 +127,13 @@ const RepresentativesList = ({
     formDispatcher({ type: 'ON_CHANGE_LEAD_REPORTER', payload: { dataProviderId, leadReporterId, inputValue } });
   };
 
+  const onCleanErrors = (dataProviderId, leadReporterId) => {
+    formDispatcher({ type: 'CLEAN_UP_ERRORS', payload: { dataProviderId, hasErrors: false, leadReporterId } });
+  };
+
   const onDeleteLeadReporter = async () => {
     try {
       const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
-      console.log('response', response);
 
       if (response.status >= 200 && response.status <= 299) {
         handleDialogs('deleteLeadReporter', false);
@@ -166,43 +168,6 @@ const RepresentativesList = ({
     const { dataProviderId, representativeId } = representative;
 
     if (isNil(representative.leadReporters)) return [];
-    //------------------------------------------------
-    // let inputData = representative.leadReporters;
-
-    // let hasError = formState.representativesHaveError.includes(representative.representativeId);
-
-    // const labelId = uuid.v4();
-
-    // const onAccountChange = (account, dataProviderId) => {
-    //   const { representatives } = formState;
-
-    //   const [thisRepresentative] = representatives.filter(
-    //     thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
-    //   );
-    //   //
-    //   thisRepresentative.leadReporters = account;
-
-    //   let representativesHaveError;
-
-    //   if (isValidEmail(account)) {
-    //     representativesHaveError = formState.representativesHaveError.filter(
-    //       representativeId => representativeId !== thisRepresentative.representativeId
-    //     );
-    //   } else {
-    //     representativesHaveError = formState.representativesHaveError;
-    //     representativesHaveError.unshift(thisRepresentative.representativeId);
-    //   }
-
-    //   formDispatcher({
-    //     type: 'ON_ACCOUNT_CHANGE',
-    //     payload: {
-    //       representatives,
-    //       representativesHaveError: uniq(representativesHaveError)
-    //     }
-    //   });
-    // };
-
-    //------------------------------------------------
 
     return representative.leadReporters.map(leadReporter => {
       const reporters = formState.leadReporters[dataProviderId];
@@ -213,6 +178,8 @@ const RepresentativesList = ({
           <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
             <InputText
               id={`${leadReporter.id}-${representativeId}`}
+              className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
+              onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
               placeholder={`New lead reporter`}
               onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
               onBlur={event =>
@@ -225,10 +192,11 @@ const RepresentativesList = ({
       }
 
       return (
-        <div className={styles.inputWrapper} key={leadReporter.id}>
+        <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
           <InputText
-            id={`${leadReporter.id}`}
+            id={`${leadReporter.id}-${representativeId}`}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
+            onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
             onBlur={event =>
               onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
             }
@@ -247,69 +215,6 @@ const RepresentativesList = ({
       );
     });
   };
-
-  // const providerAccountInputColumnTemplate = representative => {
-  //   let inputData = representative.leadReporters;
-
-  //   let hasError = formState.representativesHaveError.includes(representative.representativeId);
-
-  //   const labelId = uuid.v4();
-
-  //   const onAccountChange = (account, dataProviderId) => {
-  //     const { representatives } = formState;
-
-  //     const [thisRepresentative] = representatives.filter(
-  //       thisRepresentative => thisRepresentative.dataProviderId === dataProviderId
-  //     );
-
-  //     thisRepresentative.leadReporters = account;
-
-  //     let representativesHaveError;
-
-  //     if (isValidEmail(account)) {
-  //       representativesHaveError = formState.representativesHaveError.filter(
-  //         representativeId => representativeId !== thisRepresentative.representativeId
-  //       );
-  //     } else {
-  //       representativesHaveError = formState.representativesHaveError;
-  //       representativesHaveError.unshift(thisRepresentative.representativeId);
-  //     }
-
-  //     formDispatcher({
-  //       type: 'ON_ACCOUNT_CHANGE',
-  //       payload: {
-  //         representatives,
-  //         representativesHaveError: uniq(representativesHaveError)
-  //       }
-  //     });
-  //   };
-
-  //   return (
-  //     <>
-  //       <div className={`formField ${hasError ? 'error' : undefined}`} style={{ marginBottom: '0rem' }}>
-  //         <input
-  //           autoFocus={isNil(representative.representativeId)}
-  //           className={representative.hasDatasets ? styles.disabled : undefined}
-  //           disabled={representative.hasDatasets}
-  //           id={isEmpty(inputData) ? 'emptyInput' : labelId}
-  //           /*  onBlur={() => {
-  //             //TODO pass to array
-  //             representative.leadReporters = representative.leadReporters[0].toLowerCase();
-  //             isValidEmail(representative.leadReporters) &&
-  //               onAddProvider(formDispatcher, formState, representative, dataflowId);
-  //           }} */
-  //           onChange={event => onAccountChange(event.target.value, representative.dataProviderId)}
-  //           onKeyDown={event => onKeyDown(event, formDispatcher, formState, representative, dataflowId)}
-  //           placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
-  //           value={inputData}
-  //         />
-  //         <label htmlFor={isEmpty(inputData) ? 'emptyInput' : labelId} className="srOnly">
-  //           {resources.messages['manageRolesDialogInputPlaceholder']}
-  //         </label>
-  //       </div>
-  //     </>
-  //   );
-  // };
 
   const dropdownColumnTemplate = representative => {
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
