@@ -975,6 +975,7 @@
     "releaseBlockedEvent": "Releasing process is being blocked by another action, please wait",
     "deleteRecordByIdBlockedError": "Failure in the delete process. Please wait until the end of the previous operation",
     "externalImportReportingFromOtherSystemBlockedFailedEvent": "Failed importing data. Please wait until the end of the previous operation",
-    "addRecordsBlockedError": "There has been an error adding a record. Please wait until the end of the previous operation"
+    "addRecordsBlockedError": "There has been an error adding a record. Please wait until the end of the previous operation",
+    "validateDataBlockedError": "Failure in the validate process. Please wait until the end of the previous operation"
   }
 }
