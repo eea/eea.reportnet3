@@ -6,22 +6,9 @@ import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
 import uniq from 'lodash/uniq';
-
 import uuid from 'uuid';
-import styles from './RepresentativesList.module.scss';
 
-import { reducer } from './_functions/Reducers/representativeReducer.js';
-import {
-  autofocusOnEmptyInput,
-  createUnusedOptionsList,
-  getAllDataProviders,
-  getInitialData,
-  onAddProvider,
-  onDataProviderIdChange,
-  onDeleteConfirm,
-  onKeyDown,
-  isValidEmail
-} from './_functions/Utils/representativeUtils';
+import styles from './RepresentativesList.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
@@ -30,11 +17,26 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { RepresentativeService } from 'core/services/Representative';
+
 import { Button } from 'ui/views/_components/Button/Button';
 import { InputText } from 'ui/views/_components/InputText/InputText';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { RepresentativeService } from 'core/services/Representative';
+import { reducer } from './_functions/Reducers/representativeReducer.js';
+
+import {
+  autofocusOnEmptyInput,
+  createUnusedOptionsList,
+  getAllDataProviders,
+  getInitialData,
+  isValidEmail,
+  onAddProvider,
+  onDataProviderIdChange,
+  onDeleteConfirm,
+  onKeyDown
+} from './_functions/Utils/representativeUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 const RepresentativesList = ({
   dataflowId,
@@ -117,33 +119,25 @@ const RepresentativesList = ({
     formDispatcher({ type: 'ON_CHANGE_LEAD_REPORTER', payload: { dataProviderId, leadReporterId, inputValue } });
   };
 
-  const onCreateLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporterId) => {
-    if (isValidEmail(inputValue)) {
-      try {
-        const response = await RepresentativeService.addLeadReporter(inputValue, representativeId);
-        if (response.status >= 200 && response.status <= 299) formDispatcher({ type: 'REFRESH' });
-      } catch (error) {
-        console.log('error', error);
-        formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
-      }
-    }
-    formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
-  };
+  const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporterId) => {
+    const { addLeadReporter, updateLeadReporter } = RepresentativeService;
 
-  const onSubmitLeadReporter = async (dataProviderId, leadReporterId, inputValue) => {
-    if (isValidEmail(inputValue)) {
-      try {
-        await RepresentativeService.updateProviderAccount(
-          parseInt(leadReporterId),
-          parseInt(dataProviderId),
-          inputValue
-        );
-      } catch (error) {
-        console.log('error', error);
-        formDispatcher({ type: 'CREATE_ERROR', payload: { hasErrors: true, leadReporterId, dataProviderId } });
-      }
+    if (!isValidEmail(inputValue) || isNil(isValidEmail(inputValue))) {
+      formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
     }
-    formDispatcher({ type: 'CREATE_ERROR', payload: { hasErrors: true, leadReporterId, dataProviderId } });
+
+    try {
+      const response = TextUtils.areEquals(leadReporterId, 'empty')
+        ? await addLeadReporter(inputValue, representativeId)
+        : await updateLeadReporter(inputValue, leadReporterId, representativeId);
+
+      console.log('response', response);
+
+      if (response.status >= 200 && response.status <= 299) formDispatcher({ type: 'REFRESH' });
+    } catch (error) {
+      console.log('error', error);
+      formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
+    }
   };
 
   const renderLeadReporterTemplate = representative => {
@@ -199,9 +193,8 @@ const RepresentativesList = ({
               placeholder={`New lead reporter`}
               onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
               onBlur={event =>
-                onCreateLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
+                onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
               }
-              // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
               // value={reporters[leadReporter.id].account}
             />
           </div>
@@ -212,7 +205,9 @@ const RepresentativesList = ({
         <div className={styles.inputWrapper}>
           <InputText
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
-            onBlur={event => onSubmitLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+            onBlur={event =>
+              onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
+            }
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
             value={reporters[leadReporter.id]?.account}
           />
