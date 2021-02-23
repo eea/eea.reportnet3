@@ -154,7 +154,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     }
   };
 
-  const renderLeadReporterTemplate = representative => {
+  const renderLeadReporterColumnTemplate = representative => {
     const { dataProviderId, hasDatasets, representativeId } = representative;
 
     if (isNil(representative.leadReporters)) return [];
@@ -174,7 +174,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
             onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
             onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
-            placeholder={`New lead reporter`}
+            placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
@@ -238,7 +238,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     );
   };
 
-  const deleteBtnColumnTemplate = representative => {
+  const renderDeleteBtnColumnTemplate = representative => {
     return isNil(representative.representativeId) || representative.hasDatasets ? (
       <></>
     ) : (
@@ -286,7 +286,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
                 : formState.representatives
             }>
             <Column
-              body={deleteBtnColumnTemplate}
+              body={renderDeleteBtnColumnTemplate}
               className={styles.emptyTableHeader}
               header={resources.messages['deleteRepresentativeButtonTableHeader']}
               style={{ width: '60px' }}
@@ -296,7 +296,10 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
               header={resources.messages['manageRolesDialogDataProviderColumn']}
               style={{ width: '16rem' }}
             />
-            <Column body={renderLeadReporterTemplate} header={resources.messages['manageRolesDialogAccountColumn']} />
+            <Column
+              body={renderLeadReporterColumnTemplate}
+              header={resources.messages['manageRolesDialogAccountColumn']}
+            />
           </DataTable>
         </div>
       ) : (

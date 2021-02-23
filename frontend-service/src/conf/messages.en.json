@@ -524,7 +524,7 @@
     "manageRolesDialogDropdownLabel": "Representative of",
     "manageRolesDialogDropdownPlaceholder": "Select one...",
     "manageRolesDialogHeader": "Lead reporters",
-    "manageRolesDialogInputPlaceholder": "Lead reporter e-mail...",
+    "manageRolesDialogInputPlaceholder": "New lead reporter e-mail...",
     "manageRolesDialogNoRepresentativesMessage": "Please select provider group",
     "manageRolesDialogTitle": "Manage lead reporters",
     "manageRolesEditorDialogInputPlaceholder": "Editor account...",
