@@ -126,36 +126,6 @@ public class RepresentativeServiceImplTest {
   }
 
   /**
-   * Update dataflow representative exception 1 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateDataflowRepresentativeException1Test() throws EEAException {
-    try {
-      representativeServiceImpl.updateDataflowRepresentative(null);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
-    }
-  }
-
-  /**
-   * Update dataflow representative exception 2 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateDataflowRepresentativeException2Test() throws EEAException {
-    when(representativeRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    try {
-      representativeServiceImpl.updateDataflowRepresentative(representativeVO);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.REPRESENTATIVE_NOT_FOUND,
-          e.getMessage());
-    }
-  }
-
-  /**
    * Update dataflow representative success test.
    *
    * @throws EEAException the EEA exception
@@ -190,38 +160,6 @@ public class RepresentativeServiceImplTest {
         .thenReturn(new UserRepresentationVO());
     assertEquals("error in the message", (Long) 1L,
         representativeServiceImpl.updateDataflowRepresentative(representativeVO));
-  }
-
-  /**
-   * Update dataflow representative exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateDataflowRepresentativeException3Test() throws EEAException {
-    representative.setLeadReporters(leadReporters);
-    representativeVO.setDataProviderId(null);
-    representativeVO.setReceiptDownloaded(false);
-    representativeVO.setReceiptOutdated(false);
-    DataProvider dataProvider = new DataProvider();
-    dataProvider.setId(1L);
-    representative.setDataProvider(dataProvider);
-    representative.setReceiptDownloaded(false);
-    representative.setReceiptOutdated(false);
-    representative.setLeadReporters(leadReporters);
-    when(representativeRepository.findById(Mockito.any())).thenReturn(Optional.of(representative));
-    when(representativeRepository.findByDataProviderIdAndDataflowId(Mockito.any(), Mockito.any()))
-        .thenReturn(Optional.of(arrayId));
-    when(representativeRepository.save(Mockito.any())).thenReturn(representative);
-    Mockito.when(representativeMapper.classToEntity(Mockito.any())).thenReturn(representative);
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
-        .thenReturn(new UserRepresentationVO());
-    try {
-      representativeServiceImpl.updateDataflowRepresentative(representativeVO);
-    } catch (EEAException e) {
-      assertEquals("error in the message", EEAErrorMessage.REPRESENTATIVE_DUPLICATED,
-          e.getMessage());
-    }
   }
 
   /**
