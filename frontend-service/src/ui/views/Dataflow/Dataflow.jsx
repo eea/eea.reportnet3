@@ -62,6 +62,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
+    anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
     dataProviderId: [],
@@ -443,12 +444,12 @@ const Dataflow = withRouter(({ history, match }) => {
       dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
+          anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
-          restrictFromPublic: dataflow.anySchemaAvailableInPublic,
           status: dataflow.status
         }
       });
@@ -681,7 +682,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
-            footerAddon={dataflowState.restrictFromPublic && checkRestrictFromPublic}
+            footerAddon={dataflowState.anySchemaAvailableInPublic && checkRestrictFromPublic}
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
