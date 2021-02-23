@@ -3329,5 +3329,32 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  @Override
+  public boolean checkAnySchemaAvailableInPublic(Long dataflowId) {
+
+    List<DataSetMetabase> dataSetMetabaseList =
+        dataSetMetabaseRepository.findByDataflowIdAndProviderIdNotNull(dataflowId);
+
+    boolean anySchemaAvailableInPublic = false;
+
+    for (DataSetMetabase dataset : dataSetMetabaseList) {
+      anySchemaAvailableInPublic = schemasRepository
+          .findAvailableInPublicByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+
+      if (anySchemaAvailableInPublic == Boolean.TRUE) {
+        break;
+      }
+    }
+
+    return anySchemaAvailableInPublic;
+  }
+
+
 
 }

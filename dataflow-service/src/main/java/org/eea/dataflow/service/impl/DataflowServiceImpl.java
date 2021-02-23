@@ -27,6 +27,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -135,6 +136,11 @@ public class DataflowServiceImpl implements DataflowService {
   /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
+
+  /** The dataset controller zuul. */
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
+
 
   /**
    * Gets the by id.
@@ -776,6 +782,11 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVO.getDocuments()
           .sort(Comparator.comparing(DocumentVO::getDescription, String.CASE_INSENSITIVE_ORDER));
     }
+
+    // Calculate anySchemaAvailableInPublic
+    dataflowVO.setAnySchemaAvailableInPublic(
+        dataSetControllerZuul.checkAnySchemaAvailableInPublic(dataflowVO.getId()));
+
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
