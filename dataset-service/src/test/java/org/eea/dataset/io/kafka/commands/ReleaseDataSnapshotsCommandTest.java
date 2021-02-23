@@ -94,7 +94,7 @@ public class ReleaseDataSnapshotsCommandTest {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setName("dataflowName");
     dataflowVO.setShowPublicInfo(false);
-    Mockito.when(dataflowControllerZuul.findById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     releaseDataSnapshotsCommand.execute(eeaEventVO);
     Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
 

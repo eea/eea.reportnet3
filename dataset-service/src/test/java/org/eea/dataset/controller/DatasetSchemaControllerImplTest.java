@@ -1236,7 +1236,7 @@ public class DatasetSchemaControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void updateDatasetSchemaForbiddenTest() {
+  public void updateDatasetSchemaBadRequestTest() {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
@@ -1244,7 +1244,7 @@ public class DatasetSchemaControllerImplTest {
     try {
       dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
     } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
     }
   }
