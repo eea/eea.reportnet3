@@ -3347,7 +3347,7 @@ public class DatasetServiceImpl implements DatasetService {
       anySchemaAvailableInPublic = schemasRepository
           .findAvailableInPublicByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
 
-      if (anySchemaAvailableInPublic == Boolean.TRUE) {
+      if (anySchemaAvailableInPublic) {
         break;
       }
     }
