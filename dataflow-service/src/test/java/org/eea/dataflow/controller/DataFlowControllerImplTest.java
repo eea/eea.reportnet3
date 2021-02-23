@@ -717,4 +717,11 @@ public class DataFlowControllerImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void updateDataFlowPublicStatusTest() throws EEAException {
+    dataFlowControllerImpl.updateDataFlowPublicStatus(1L, true);
+    Mockito.verify(dataflowService, times(1)).updateDataFlowPublicStatus(Mockito.any(),
+        Mockito.anyBoolean());
+  }
 }
