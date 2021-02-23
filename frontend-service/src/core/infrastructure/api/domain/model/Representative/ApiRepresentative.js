@@ -17,7 +17,7 @@ const apiRepresentative = {
   },
 
   addLeadReporter: async (leadReporterAccount, representativeId) => {
-    return await HTTPRequester.update({
+    return await HTTPRequester.post({
       url: getUrl(RepresentativeConfig.addLeadReporter, { representativeId }),
       data: { email: leadReporterAccount }
     });

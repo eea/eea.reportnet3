@@ -29,14 +29,15 @@ const allRepresentatives = async dataflowId => {
           new Representative({
             dataProviderGroupId: representativeDTO.dataProviderGroupId,
             dataProviderId: representativeDTO.dataProviderId,
+            hasDatasets: representativeDTO.hasDatasets,
             id: representativeDTO.id,
             isReceiptDownloaded: representativeDTO.receiptDownloaded,
             isReceiptOutdated: representativeDTO.receiptOutdated,
-            leadReporters: representativeDTO.leadReporters,
-            hasDatasets: representativeDTO.hasDatasets
+            leadReporters: parseLeadReporters(representativeDTO.leadReporters)
           })
       )
     : [];
+
   const dataToConsume = {
     group: !isEmpty(representativesDTO.data)
       ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
@@ -45,6 +46,13 @@ const allRepresentatives = async dataflowId => {
   };
   return dataToConsume;
 };
+
+const parseLeadReporters = (leadReporters = []) =>
+  leadReporters.map(leadReporter => ({
+    account: leadReporter.email,
+    id: leadReporter.id,
+    representativeId: leadReporter.representativeId
+  }));
 
 const deleteById = async representativeId => await apiRepresentative.deleteById(representativeId);
 

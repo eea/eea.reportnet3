@@ -116,7 +116,6 @@ const getAllRepresentatives = async (dataflowId, formDispatcher) => {
     let responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
 
     const parsedLeadReporters = parseLeadReporters(responseAllRepresentatives.representatives);
-
     const representativesByCopy = cloneDeep(responseAllRepresentatives.representatives);
 
     formDispatcher({

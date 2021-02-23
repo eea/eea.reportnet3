@@ -117,6 +117,19 @@ const RepresentativesList = ({
     formDispatcher({ type: 'ON_CHANGE_LEAD_REPORTER', payload: { dataProviderId, leadReporterId, inputValue } });
   };
 
+  const onCreateLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporterId) => {
+    if (isValidEmail(inputValue)) {
+      try {
+        const response = await RepresentativeService.addLeadReporter(inputValue, representativeId);
+        if (response.status >= 200 && response.status <= 299) formDispatcher({ type: 'REFRESH' });
+      } catch (error) {
+        console.log('error', error);
+        formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
+      }
+    }
+    formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors: true, leadReporterId } });
+  };
+
   const onSubmitLeadReporter = async (dataProviderId, leadReporterId, inputValue) => {
     if (isValidEmail(inputValue)) {
       try {
@@ -134,7 +147,7 @@ const RepresentativesList = ({
   };
 
   const renderLeadReporterTemplate = representative => {
-    const { dataProviderId } = representative;
+    const { dataProviderId, representativeId } = representative;
 
     if (isNil(representative.leadReporters)) return [];
     //------------------------------------------------
@@ -177,18 +190,17 @@ const RepresentativesList = ({
 
     return representative.leadReporters.map(leadReporter => {
       const reporters = formState.leadReporters[dataProviderId];
-
       const errors = formState.leadReportersErrors[dataProviderId];
 
-      console.log('reporters', reporters);
-
       if (leadReporter.id === 'empty') {
-        console.log('leadReporter', leadReporter);
         return (
           <div className={styles.inputWrapper}>
             <InputText
               placeholder={`New lead reporter`}
               onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
+              onBlur={event =>
+                onCreateLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter.id)
+              }
               // onBlur={event => onSubmitLeadReporter(dataProviderId, event.target.value)}
               // value={reporters[leadReporter.id].account}
             />
@@ -202,7 +214,7 @@ const RepresentativesList = ({
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             onBlur={event => onSubmitLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            value={reporters[leadReporter.id].account}
+            value={reporters[leadReporter.id]?.account}
           />
           <Button
             className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton}`}
