@@ -417,7 +417,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void createEmptyDataSetSchemaTest() throws EEAException {
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
     doNothing().when(rulesControllerZuul).createEmptyRulesSchema(Mockito.any(), Mockito.any());
     Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
@@ -430,7 +431,7 @@ public class DatasetSchemaServiceTest {
    */
   @Test(expected = EEAException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(null);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(null);
     dataSchemaServiceImpl.createEmptyDataSetSchema(1L);
   }
 
@@ -2140,7 +2141,8 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any(),
         Mockito.anyBoolean());
 
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
 
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(dataSchemaMapper.entityToClass(Mockito.any(DataSetSchema.class)))

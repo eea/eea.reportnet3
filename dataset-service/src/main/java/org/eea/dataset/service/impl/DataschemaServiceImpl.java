@@ -265,7 +265,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public ObjectId createEmptyDataSetSchema(Long dataflowId) throws EEAException {
 
-    if (dataFlowControllerZuul.findById(dataflowId) == null) {
+    if (dataFlowControllerZuul.getMetabaseById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
     DataSetSchema dataSetSchema = new DataSetSchema();
