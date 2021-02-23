@@ -159,48 +159,17 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER')")
-  @ApiOperation(value = "Update a Representative", produces = MediaType.APPLICATION_JSON_VALUE,
-      response = ResponseEntity.class)
-  @ApiResponses(value = {/*
-                          * @ApiResponse(code = 400, message =
-                          * "Email field provider is not an email"),
-                          */
-      @ApiResponse(code = 404, message = "1-Representative not found \n 2-User request not found "),
-      @ApiResponse(code = 409, message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED)})
-  public ResponseEntity updateRepresentative(@ApiParam(value = "RepresentativeVO Object",
-      type = "Object") @RequestBody RepresentativeVO representativeVO) {
-    String message = null;
-    HttpStatus status = HttpStatus.OK;
+  @PutMapping("/update")
+  @PreAuthorize("isAuthenticated()")
+  public Long updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
 
-    // if (null != representativeVO.getProviderAccounts()) {
-    // Pattern p = Pattern.compile(EMAIL_REGEX);
-    // for (String representative : representativeVO.getProviderAccounts()) {
-    // Matcher m = p.matcher(representative);
-    // boolean result = m.matches();
-    // if (Boolean.FALSE.equals(result)) {
-    // throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-    // String.format(EEAErrorMessage.NOT_EMAIL, representative));
-    // }
-    // }
-    // }
-
-    try {
-      message =
-          String.valueOf(representativeService.updateDataflowRepresentative(representativeVO));
-    } catch (EEAException e) {
-      if (EEAErrorMessage.REPRESENTATIVE_DUPLICATED.equals(e.getMessage())) {
-        LOG_ERROR.error("Duplicated representative relationship", e.getCause());
-        message = EEAErrorMessage.REPRESENTATIVE_DUPLICATED;
-        status = HttpStatus.CONFLICT;
-      } else {
-        LOG_ERROR.error("Bad Request", e.getCause());
-        message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND;
-        status = HttpStatus.BAD_REQUEST;
-      }
+    // Authorization
+    if (!representativeService.authorizeByRepresentativeId(representativeVO.getId())) {
+      LOG_ERROR.error("Representative not allowed: representativeVO={}", representativeVO);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
-    return new ResponseEntity<>(message, status);
+
+    return representativeService.updateDataflowRepresentative(representativeVO);
   }
 
   /**
@@ -420,8 +389,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
 
     // Authorization
     if (!representativeService.authorizeByRepresentativeId(leadReporterVO.getRepresentativeId())) {
-      LOG_ERROR.error("LeadReporter not allowed: leadReporterVO={}",
-          leadReporterVO.getRepresentativeId());
+      LOG_ERROR.error("LeadReporter not allowed: leadReporterVO={}", leadReporterVO);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 

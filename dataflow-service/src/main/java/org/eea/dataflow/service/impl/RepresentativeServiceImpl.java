@@ -152,20 +152,15 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    *
    * @param representativeVO the representative VO
    * @return the long
-   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public Long updateDataflowRepresentative(RepresentativeVO representativeVO) throws EEAException {
-    if (representativeVO == null) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
+  public Long updateDataflowRepresentative(RepresentativeVO representativeVO) {
+
     // load old relationship
     Representative representative =
-        representativeRepository.findById(representativeVO.getId()).orElse(null);
-    if (representative == null) {
-      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
-    }
+        representativeRepository.findById(representativeVO.getId()).orElse(new Representative());
+
     if (representativeVO.getDataProviderId() != null) {
       DataProvider dataProvider = new DataProvider();
       dataProvider.setId(representativeVO.getDataProviderId());
@@ -537,6 +532,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
 
     }
+
     // save changes
     return leadReporterRepository.save(leadReporter).getId();
   }
