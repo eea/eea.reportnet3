@@ -307,20 +307,20 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          header={resources.messages['manageRolesDialogConfirmDeleteProviderHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConfirm(formDispatcher, formState)}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}>
-          {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
+          {resources.messages['manageRolesDialogConfirmDeleteProviderQuestion']}
         </ConfirmDialog>
       )}
 
       {isVisibleDialog.deleteLeadReporter && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={'DELETE LEAD REPORTER'}
+          header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteLeadReporter()}
@@ -329,7 +329,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
             formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: null } });
           }}
           visible={isVisibleDialog.deleteLeadReporter}>
-          DELETE LEAD REPORTER
+          {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
         </ConfirmDialog>
       )}
     </div>

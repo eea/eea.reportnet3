@@ -976,6 +976,8 @@
     "deleteRecordByIdBlockedError": "Failure in the delete process. Please wait until the end of the previous operation",
     "externalImportReportingFromOtherSystemBlockedFailedEvent": "Failed importing data. Please wait until the end of the previous operation",
     "addRecordsBlockedError": "There has been an error adding a record. Please wait until the end of the previous operation",
-    "validateDataBlockedError": "Failure in the validate process. Please wait until the end of the previous operation"
+    "validateDataBlockedError": "Failure in the validate process. Please wait until the end of the previous operation",
+    "manageRolesDialogConfirmDeleteProviderHeader": "Delete data provider",
+    "manageRolesDialogConfirmDeleteProviderQuestion": "Do you really want to delete this data provider?"
   }
 }
