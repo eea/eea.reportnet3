@@ -22,7 +22,6 @@ const addRepresentative = async (formDispatcher, representatives, dataflowId, fo
       });
     } catch (error) {
       console.error('error on RepresentativeService.add', error);
-      //TODO Add notification if representative add fails?
     } finally {
       formDispatcher({
         type: 'SET_IS_LOADING',
