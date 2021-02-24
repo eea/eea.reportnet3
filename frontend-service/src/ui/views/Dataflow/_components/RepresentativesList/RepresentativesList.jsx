@@ -25,7 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
-import { isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
+import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepresentativesWithoutDatasets }) => {
@@ -260,7 +260,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     const hasErrors = true;
 
     if (!TextUtils.areEquals(inputValue, leadReporter.account)) {
-      if (isValidEmail(inputValue)) {
+      if (isValidEmail(inputValue) && !isDuplicatedLeadReporter(inputValue, dataProviderId, formState.leadReporters)) {
         try {
           const response = TextUtils.areEquals(leadReporter.id, 'empty')
             ? await addLeadReporter(inputValue, representativeId)
