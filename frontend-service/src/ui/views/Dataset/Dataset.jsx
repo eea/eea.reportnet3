@@ -1001,6 +1001,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <Webforms
           dataflowId={dataflowId}
           datasetId={datasetId}
+          isReleasing={dataset.isReleasing}
           isReporting
           state={{
             datasetSchema: { tables: datasetSchemaAllTables },
