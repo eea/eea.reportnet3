@@ -3,9 +3,6 @@ package org.eea.dataset.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3199,28 +3196,24 @@ public class DatasetServiceImpl implements DatasetService {
 
     if (null != representative) {
       // we create the dataflow folder to save it
-      Path pathDataflow = Paths
-          .get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId).toString());
-      File directoryDataflow = new File(pathDataflow.toString());
-      if (!directoryDataflow.exists()) {
-        Files.createDirectories(pathDataflow);
 
-        LOG.info("Folder {} created", pathDataflow);
-      }
-
+      File directoryDataflow = new File(pathPublicFile, "dataflow-" + dataflowId);
+      File directoryDataProvider =
+          new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
       // we create the dataprovider folder to save it andwe always delete it and put new files
-      Path pathDataProvider =
-          Paths.get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
-              .append("\\dataProvider-").append(representative.getDataProviderId()).toString());
-      if (directoryDataflow.exists()) {
-        FileUtils.deleteDirectory(new File(pathDataProvider.toString()));
-      }
-      if (!representative.isRestrictFromPublic()) {
+      FileUtils.deleteDirectory(directoryDataProvider);
 
-        Files.createDirectories(pathDataProvider);
-        LOG.info("Folder {} created", pathDataProvider);
+      if (!representative.isRestrictFromPublic()) {
         // we check if the representative have permit to do it
-        creeateAllDatasetFiles(dataflowId, pathDataProvider, representative.getDataProviderId());
+        createAllDatasetFiles(dataflowId, representative.getDataProviderId());
+      } else {
+        // we delete all file names in the table dataset
+        List<DataSetMetabase> datasetMetabaseList = dataSetMetabaseRepository
+            .findByDataflowIdAndDataProviderId(dataflowId, representative.getDataProviderId());
+        datasetMetabaseList.stream().forEach(datasetFileName -> {
+          datasetFileName.setPublicFileName(null);
+        });
+        dataSetMetabaseRepository.saveAll(datasetMetabaseList);
       }
     }
   }
@@ -3257,8 +3250,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataProviderId the data provider id
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void creeateAllDatasetFiles(Long dataflowId, Path pathDataProvider, Long dataProviderId)
-      throws IOException {
+  private void createAllDatasetFiles(Long dataflowId, Long dataProviderId) throws IOException {
 
     DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
 
@@ -3288,13 +3280,14 @@ public class DatasetServiceImpl implements DatasetService {
           if (null != file) {
             String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
                 dataProvider.getLabel(), datasetDesingName);
-            String newFile = new StringBuilder(pathDataProvider.toString()).append("\\")
-                .append(nameFileUnique).append(".xlsx").toString();
-            FileUtils.writeByteArrayToFile(new File(newFile), file);
+
+            FileUtils
+                .writeByteArrayToFile(
+                    new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+                        "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".xlsx"),
+                    file);
 
             // we save the file in metabase with the name without the route
-            newFile = new StringBuilder("dataflow-").append(dataflowId).append("\\dataProvider-")
-                .append(dataProvider.getId()).append("\\").append(nameFileUnique).toString();
             datasetToFile.setPublicFileName(nameFileUnique);
             dataSetMetabaseRepository.save(datasetToFile);
           }
@@ -3306,6 +3299,9 @@ public class DatasetServiceImpl implements DatasetService {
         }
         LOG.info("Start files created in DataflowId: {} with DataProviderId: {}", dataflowId,
             datasetToFile.getDataProviderId());
+      } else {
+        datasetToFile.setPublicFileName(null);
+        dataSetMetabaseRepository.save(datasetToFile);
       }
     }
   }
