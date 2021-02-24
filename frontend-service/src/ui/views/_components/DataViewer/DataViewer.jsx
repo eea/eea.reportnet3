@@ -61,7 +61,6 @@ const DataViewer = withRouter(
     hasCountryCode,
     hasWritePermissions,
     isDataflowOpen,
-    isDatasetDeleted = false,
     isExportable,
     isFilterable,
     isGroupedValidationDeleted,
@@ -111,7 +110,6 @@ const DataViewer = withRouter(
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [isTableDeleted, setIsTableDeleted] = useState(false);
     const [isValidationShown, setIsValidationShown] = useState(false);
     const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
       'CORRECT',
@@ -139,7 +137,6 @@ const DataViewer = withRouter(
       firstPageRecord: 0,
       geometryType: '',
       initialRecordValue: undefined,
-      isAllDataDeleted: isDatasetDeleted,
       isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
@@ -312,16 +309,7 @@ const DataViewer = withRouter(
       if (records.isMapOpen) {
         datatableRef.current.closeEditingCell();
       }
-      // else {
-      //   dispatchRecords({ type: 'RESET_DRAW_ELEMENTS' });
-      // }
     }, [records.isMapOpen]);
-
-    useEffect(() => {
-      if (isDatasetDeleted) {
-        dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
-      }
-    }, [isDatasetDeleted]);
 
     useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
@@ -586,26 +574,34 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteTable = async () => {
       try {
+        notificationContext.add({
+          type: 'DELETE_TABLE_DATA_INIT'
+        });
         await DatasetService.deleteTableDataById(datasetId, tableId);
         setFetchedData([]);
-        setIsTableDeleted(true);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
       } catch (error) {
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName,
-            tableName
-          }
-        });
+        if (error.response.status === 423) {
+          notificationContext.add({
+            type: 'GENERIC_BLOCKED_ERROR'
+          });
+        } else {
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+          notificationContext.add({
+            type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
+            content: {
+              dataflowId,
+              datasetId,
+              dataflowName,
+              datasetName,
+              tableName
+            }
+          });
+        }
       } finally {
         setDeleteDialogVisible(false);
       }
@@ -631,20 +627,26 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'DELETE_RECORD_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName,
-            tableName
-          }
-        });
+        if (error.response.status === 423) {
+          notificationContext.add({
+            type: 'GENERIC_BLOCKED_ERROR'
+          });
+        } else {
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+          notificationContext.add({
+            type: 'DELETE_RECORD_BY_ID_ERROR',
+            content: {
+              dataflowId,
+              datasetId,
+              dataflowName,
+              datasetName,
+              tableName
+            }
+          });
+        }
       } finally {
         setDeleteDialogVisible(false);
       }
@@ -706,7 +708,7 @@ const DataViewer = withRouter(
             }
           } catch (error) {
             if (error.response.status === 423) {
-              notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+              notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
             } else {
               const {
                 dataflow: { name: dataflowName },
@@ -766,11 +768,10 @@ const DataViewer = withRouter(
         } else {
           onRefresh();
           setIsPasting(false);
-          setIsTableDeleted(false);
         }
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
           const {
             dataflow: { name: dataflowName },
@@ -825,11 +826,10 @@ const DataViewer = withRouter(
         try {
           setIsSaving(true);
           await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
-          setIsTableDeleted(false);
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
           } else {
             const {
               dataflow: { name: dataflowName },
@@ -854,7 +854,7 @@ const DataViewer = withRouter(
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'EDIT_ADD_DATA_RELEASING_ERROR' });
+            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
           } else {
             const {
               dataflow: { name: dataflowName },
@@ -912,7 +912,6 @@ const DataViewer = withRouter(
           datasetName
         }
       });
-      setIsTableDeleted(false);
     };
 
     const addRowDialogFooter = (
@@ -1108,9 +1107,9 @@ const DataViewer = withRouter(
         : resources.messages['maxSizeNotDefined']
     }`;
 
-    const onImportTableError = async ({ xhr, files }) => {
+    const onImportTableError = async ({ xhr }) => {
       if (xhr.status === 423) {
-        notificationContext.add({ type: 'FILE_UPLOAD_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       }
     };
 
@@ -1129,7 +1128,6 @@ const DataViewer = withRouter(
           isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
           isLoading={isLoading}
-          isTableDeleted={isTableDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}

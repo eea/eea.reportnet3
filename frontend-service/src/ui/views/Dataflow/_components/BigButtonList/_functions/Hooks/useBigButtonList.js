@@ -314,7 +314,11 @@ const useBigButtonList = ({
             }
           }
         ],
-        onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.dataProviderId }, true),
+        onWheel: getUrl(
+          routes.DATAFLOW_REPRESENTATIVE,
+          { dataflowId, representativeId: representative.dataProviderId },
+          true
+        ),
         visibility: true
       };
     });
@@ -530,6 +534,7 @@ const useBigButtonList = ({
   return [
     ...manageReportersBigButton,
     ...helpBigButton,
+    ...designDatasetModels,
     ...feedbackBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
@@ -537,7 +542,6 @@ const useBigButtonList = ({
     ...copyDataCollectionToEuDatasetBigButton,
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
-    ...designDatasetModels,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,

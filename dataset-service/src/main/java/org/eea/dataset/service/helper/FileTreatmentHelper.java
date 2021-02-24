@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +33,7 @@ import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.exception.EEAException;
@@ -40,6 +42,7 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
@@ -48,6 +51,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +59,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -69,55 +74,89 @@ import feign.FeignException;
 @Component
 public class FileTreatmentHelper implements DisposableBean {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The max running tasks. */
+  /**
+   * The max running tasks.
+   */
   @Value("${dataset.task.parallelism}")
   private int maxRunningTasks;
 
-  /** The import path. */
+  /**
+   * The import path.
+   */
   @Value("${importPath}")
   private String importPath;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The integration controller. */
+  /**
+   * The integration controller.
+   */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The data set mapper. */
+  /**
+   * The data set mapper.
+   */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /** The import executor service. */
+
+  /**
+   * The dataset metabase service.
+   */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+
+  /**
+   * The import executor service.
+   */
   private ExecutorService importExecutorService;
 
 
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   @Autowired
   private RulesRepository rulesRepository;
 
-  /** The unique constraint repository. */
+  /**
+   * The unique constraint repository.
+   */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
 
-  /** The batch size. */
+  /**
+   * The batch size.
+   */
   private int batchSize = 1000;
 
   /**
@@ -147,6 +186,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   *
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
@@ -159,16 +199,27 @@ public class FileTreatmentHelper implements DisposableBean {
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
+    // We add a lock to the Release process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
+    mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
     fileManagement(datasetId, tableSchemaId, schema, file, replace);
   }
-
 
 
   /**
    * Un zip import schema.
    *
    * @param multipartFile the multipart file
+   *
    * @return the import schemas
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -244,6 +295,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param designs the designs
    * @param schemas the schemas
    * @param dataflowId the dataflow id
+   *
    * @return the byte[]
    */
   public byte[] zipSchema(List<DesignDataset> designs, List<DataSetSchema> schemas,
@@ -319,6 +371,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param zos the zos
    * @param fileName the file name
    * @param stream the stream
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void zippingClasses(ZipOutputStream zos, String fileName, InputStream stream)
@@ -473,6 +526,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param zip the zip
    * @param schemas the schemas
+   *
    * @return the list
    */
   private List<DataSetSchema> unzippingSchemaClasses(ZipInputStream zip,
@@ -494,12 +548,12 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
 
-
   /**
    * Unzipping qc classes.
    *
    * @param zip the zip
    * @param qcrulesBytes the qcrules bytes
+   *
    * @return the list
    */
   private List<byte[]> unzippingQcClasses(ZipInputStream zip, List<byte[]> qcrulesBytes) {
@@ -520,6 +574,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param zip the zip
    * @param uniques the uniques
+   *
    * @return the list
    */
   private List<UniqueConstraintSchema> unzippingUniqueClasses(ZipInputStream zip,
@@ -545,6 +600,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param zip the zip
    * @param schemaNames the schema names
+   *
    * @return the map
    */
   private Map<String, String> unzippingDatasetNamesClasses(ZipInputStream zip,
@@ -569,6 +625,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param zip the zip
    * @param schemaIds the schema ids
+   *
    * @return the map
    */
   private Map<String, Long> unzippingDatasetIdsClasses(ZipInputStream zip,
@@ -593,6 +650,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param zip the zip
    * @param extIntegrations the ext integrations
+   *
    * @return the list
    */
   private List<IntegrationVO> unzippingExtIntegrationsClasses(ZipInputStream zip,
@@ -618,6 +676,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param zip the zip
    * @param integrities the integrities
+   *
    * @return the list
    */
   private List<IntegrityVO> unzippingIntegrityQcClasses(ZipInputStream zip,
@@ -637,7 +696,6 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
 
-
   /**
    * Release lock.
    *
@@ -647,10 +705,29 @@ public class FileTreatmentHelper implements DisposableBean {
     try {
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
       FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+
+      releaseLockReleasingProcess(datasetId);
     } catch (IOException e) {
       LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
     }
   }
+
+
+  /**
+   * Release lock releasing process.
+   *
+   * @param datasetId the dataset id
+   */
+  private void releaseLockReleasingProcess(Long datasetId) {
+    // Release lock to the releasing process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      datasetService.releaseLock(LockSignature.RELEASE_SNAPSHOTS.getValue(),
+          datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId());
+    }
+
+  }
+
 
   /**
    * File management.
@@ -660,6 +737,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param multipartFile the multipart file
    * @param delete the delete
+   *
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
@@ -749,7 +827,9 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param folder the folder
    * @param saveLocationPath the save location path
    * @param zip the zip
+   *
    * @return the list
+   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -795,6 +875,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param files the files
    * @param originalFileName the original file name
    * @param integrationVO the integration VO
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
@@ -803,11 +884,19 @@ public class FileTreatmentHelper implements DisposableBean {
       List<File> files, String originalFileName, IntegrationVO integrationVO)
       throws IOException, EEAException {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    String credentials =
+        SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
-      importExecutorService.submit(
-          () -> rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user));
+      importExecutorService.submit(() -> {
+        SecurityContextHolder.clearContext();
+
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
+                credentials, null));
+        rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user);
+      });
     }
   }
 
@@ -817,6 +906,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param file the file
    * @param integrationVO the integration VO
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
@@ -840,6 +930,7 @@ public class FileTreatmentHelper implements DisposableBean {
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
         datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+        releaseLockReleasingProcess(datasetId);
       }
 
       if ((Integer) integrationController
@@ -856,6 +947,7 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
           datasetId, file.getName(), integrationVO);
       datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      releaseLockReleasingProcess(datasetId);
       throw new EEAException("Error executing integration");
     }
   }
@@ -935,7 +1027,9 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param schema the schema
    * @param fileName the file name
+   *
    * @return the table schema id from file name
+   *
    * @throws EEAException the EEA exception
    */
   private String getTableSchemaIdFromFileName(DataSetSchema schema, String fileName)
@@ -996,6 +1090,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * Integration VO copy constructor.
    *
    * @param integrationVO the integration VO
+   *
    * @return the integration VO
    */
   private IntegrationVO integrationVOCopyConstructor(IntegrationVO integrationVO) {
@@ -1026,6 +1121,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetSchema the dataset schema
    * @param mimeType the mime type
+   *
    * @return the integration VO
    */
   private IntegrationVO getIntegrationVO(DataSetSchema datasetSchema, String mimeType) {
@@ -1076,6 +1172,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * Gets the list of records.
    *
    * @param allRecords the all records
+   *
    * @return the list of records
    */
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {

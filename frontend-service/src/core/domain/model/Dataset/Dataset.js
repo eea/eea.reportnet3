@@ -1,5 +1,6 @@
 export class Dataset {
   constructor({
+    availableInPublic,
     dataProviderId,
     datasetFeedbackStatus,
     datasetId,
@@ -13,6 +14,8 @@ export class Dataset {
     isValid = false,
     levelErrorTypes,
     name,
+    publicFileName,
+    releaseDate,
     tables,
     tableStatisticPercentages,
     tableStatisticValues,
@@ -21,6 +24,7 @@ export class Dataset {
     totalRecords,
     webform
   } = {}) {
+    this.availableInPublic = availableInPublic;
     this.dataProviderId = dataProviderId;
     this.datasetFeedbackStatus = datasetFeedbackStatus;
     this.datasetId = datasetId;
@@ -34,6 +38,8 @@ export class Dataset {
     this.isValid = isValid;
     this.levelErrorTypes = levelErrorTypes;
     this.name = name;
+    this.publicFileName = publicFileName;
+    this.releaseDate = releaseDate;
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;

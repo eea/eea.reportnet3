@@ -14,9 +14,11 @@
   "getApiKey": "/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}",
   "getApiKeyCustodian": "/user/getApiKey?dataflowId={:dataflowId}",
   "getDataflows": "/dataflow/getDataflows",
+  "getPublicDataflowData": "/dataflow/getPublicDataflow/{:dataflowId}",
   "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
   "importSchema": "/dataschema/import?dataflowId={:dataflowId}",
   "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
   "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
-  "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}"
+  "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
+  "publicData": "/dataflow/getPublicDataflows"
 }

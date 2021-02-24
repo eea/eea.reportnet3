@@ -66,6 +66,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
+    anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
     dataProviderId: [],
@@ -103,6 +104,7 @@ const Dataflow = withRouter(({ history, match }) => {
     name: '',
     obligations: {},
     representativesImport: false,
+    restrictFromPublic: false,
     status: '',
     updatedDatasetSchema: undefined,
     userRoles: []
@@ -258,6 +260,25 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
     onLoadSchemasValidations();
   }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
+
+  const checkRestrictFromPublic = (
+    <div style={{ float: 'left' }}>
+      <Checkbox
+        id={`restrict_from_public_checkbox`}
+        inputId={`restrict_from_public_checkbox`}
+        isChecked={dataflowState.restrictFromPublic}
+        onChange={e => dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: e.checked })}
+        role="checkbox"
+      />
+      <label
+        onClick={e =>
+          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
+        }
+        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        {resources.messages['restrictFromPublic']}
+      </label>
+    </div>
+  );
 
   const getLeftSidebarButtonsVisibility = () => {
     const { userRoles } = dataflowState;
@@ -466,6 +487,7 @@ const Dataflow = withRouter(({ history, match }) => {
       dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
+          anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
           isReleasable: dataflow.isReleasable,
@@ -554,7 +576,9 @@ const Dataflow = withRouter(({ history, match }) => {
   const setIsReleasingDatasetsProviderId = isReleasingDatasetValue => {
     const [notification] = notificationContext.all.filter(
       notification =>
-        notification.key === 'RELEASE_FAILED_EVENT' || notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
+        notification.key === 'RELEASE_FAILED_EVENT' ||
+        notification.key === 'RELEASE_BLOCKED_EVENT' ||
+        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
     );
 
     dataflowState.data.datasets.forEach(dataset => {
@@ -567,7 +591,7 @@ const Dataflow = withRouter(({ history, match }) => {
   useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   useCheckNotifications(
-    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
     setIsReleasingDatasetsProviderId,
     false
   );
@@ -617,13 +641,17 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
-      await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
+      await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
         .forEach(dataset => (dataset.isReleasing = true));
     } catch (error) {
-      notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' });
+      } else {
+        notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
+      }
     } finally {
       manageDialogs('isReleaseDialogVisible', false);
     }
@@ -639,7 +667,7 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
-  
+
   const getImportExtensions = ['.csv'].join(', ').toLowerCase();
 
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
@@ -725,6 +753,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
+            footerAddon={dataflowState.anySchemaAvailableInPublic && checkRestrictFromPublic}
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
@@ -745,10 +774,9 @@ const Dataflow = withRouter(({ history, match }) => {
             <div className={styles.dialog}>
               <RepresentativesList
                 dataflowId={dataflowId}
-                dataflowRepresentatives={dataflowState.data.representatives}
                 representativesImport={dataflowState.representativesImport}
-                isActiveManageRolesDialog={dataflowState.isManageRolesDialogVisible}
                 setDataProviderSelected={setDataProviderSelected}
+                setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setFormHasRepresentatives={setFormHasRepresentatives}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setRepresentativeImport={isImport =>

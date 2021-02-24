@@ -1,2 +1,2 @@
-export const ReleaseDataflow = ({ snapshotRepository }) => async (dataflowId, dataProviderId) =>
-  snapshotRepository.releaseDataflow(dataflowId, dataProviderId);
+export const ReleaseDataflow = ({ snapshotRepository }) => async (dataflowId, dataProviderId, restrictFromPublic) =>
+  snapshotRepository.releaseDataflow(dataflowId, dataProviderId, restrictFromPublic);

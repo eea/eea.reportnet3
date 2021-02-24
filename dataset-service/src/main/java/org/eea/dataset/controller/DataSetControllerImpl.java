@@ -202,7 +202,7 @@ public class DataSetControllerImpl implements DatasetController {
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace);
     } catch (EEAException e) {
       LOG_ERROR.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
-          tableSchemaId, file.getName());
+          tableSchemaId, file.getOriginalFilename());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
     }
   }
@@ -712,10 +712,8 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PostMapping("/{datasetId}/etlImport")
-  @LockMethod
   @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void etlImportDataset(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
+  public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId) {
 

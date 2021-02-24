@@ -72,11 +72,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
       isNil(datasetId)
         ? (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
         : (response = await HistoricReleaseService.allHistoricReleases(datasetId));
-      // Array.isArray(datasetId)
-      //   ? datasetId.length === 1
-      //     ? (response = await HistoricReleaseService.allHistoricReleases(datasetId[0]))
-      //     : (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
-      //   : (response = await HistoricReleaseService.allHistoricReleases(datasetId));
+
       response.sort((a, b) => b.releasedDate - a.releasedDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',

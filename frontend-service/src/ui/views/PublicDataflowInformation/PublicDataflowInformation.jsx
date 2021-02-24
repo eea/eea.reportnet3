@@ -1,0 +1,194 @@
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { withRouter } from 'react-router-dom';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
+import styles from './PublicDataflowInformation.module.scss';
+
+import { Column } from 'primereact/column';
+import { DataTable } from 'ui/views/_components/DataTable';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
+import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
+import { Spinner } from 'ui/views/_components/Spinner';
+import { Title } from 'ui/views/_components/Title';
+
+import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
+
+export const PublicDataflowInformation = withRouter(
+  ({
+    history,
+    match: {
+      params: { dataflowId }
+    }
+  }) => {
+    const resources = useContext(ResourcesContext);
+
+    const [dataflowData, setDataflowData] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+
+    const notificationContext = useContext(NotificationContext);
+
+    const { datasets } = dataflowData;
+
+    useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
+
+    useEffect(() => {
+      onLoadDataflowData();
+    }, []);
+
+    const downloadFileBodyColumn = rowData => (
+      <div
+        className={styles.downloadIcon}
+        onClick={() => onFileDownload(rowData.dataProviderId, rowData.publicFileName)}>
+        {!isNil(rowData.publicFileName) && (
+          <FontAwesomeIcon icon={AwesomeIcons(getFileExtension(rowData.publicFileName))} />
+        )}
+      </div>
+    );
+
+    const getFileExtension = file => {
+      const splittedFile = file.split('.');
+      return splittedFile[splittedFile.length - 1];
+    };
+
+    const getHeader = fieldHeader => {
+      let header;
+      switch (fieldHeader) {
+        case 'datasetSchemaName':
+          header = resources.messages['countries'];
+          break;
+        case 'name':
+          header = resources.messages['datasetName'];
+          break;
+        case 'releaseDate':
+          header = resources.messages['releaseDate'];
+          break;
+        case 'isReleased':
+          header = resources.messages['isReleased'];
+          break;
+        case 'publicFileName':
+          header = resources.messages['file'];
+          break;
+        default:
+          break;
+      }
+      return header;
+    };
+
+    const getOrderedColumns = datasets => {
+      const datasetsWithPriority = [
+        { id: 'id', index: 0 },
+        { id: 'datasetSchemaName', index: 1 },
+        { id: 'name', index: 2 },
+        { id: 'isReleased', index: 3 },
+        { id: 'releaseDate', index: 4 },
+        { id: 'publicFileName', index: 5 }
+      ];
+
+      return datasets
+        .map(field => datasetsWithPriority.filter(e => field === e.id))
+        .flat()
+        .sort((a, b) => a.index - b.index)
+        .map(orderedField => orderedField.id);
+    };
+
+    const isReleasedBodyColumn = rowData => (
+      <div className={styles.checkedValueColumn}>
+        {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      </div>
+    );
+
+    const onFileDownload = async (dataProviderId, fileName) => {
+      try {
+        const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+
+        DownloadFile(fileContent, `${fileName}.xlsx`);
+      } catch (error) {
+        if (error.response.status === 404) {
+          notificationContext.add({
+            type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
+          });
+        } else {
+          notificationContext.add({
+            type: 'DOWNLOAD_DATASET_FILE_ERROR'
+          });
+        }
+      }
+    };
+
+    const onLoadDataflowData = async () => {
+      try {
+        setDataflowData(await DataflowService.getPublicDataflowData(dataflowId));
+      } catch (error) {
+        console.error('error', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const renderColumns = datasets => {
+      const fieldColumns = getOrderedColumns(Object.keys(datasets[0]))
+        .filter(
+          key =>
+            key.includes('datasetSchemaName') ||
+            key.includes('name') ||
+            key.includes('isReleased') ||
+            key.includes('releaseDate') ||
+            key.includes('publicFileName')
+        )
+        .map(field => {
+          let template = null;
+          if (field === 'isReleased') template = isReleasedBodyColumn;
+          if (field === 'publicFileName') template = downloadFileBodyColumn;
+          return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
+        });
+
+      return fieldColumns;
+    };
+
+    return (
+      <PublicLayout>
+        <div className={`${styles.container} rep-container`}>
+          {!isLoading ? (
+            !isEmpty(datasets) ? (
+              <Fragment>
+                <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+                <DataTable
+                  autoLayout={true}
+                  paginator={true}
+                  paginatorRight={
+                    <span>
+                      {`${resources.messages['totalRecords']}  ${datasets.length}`}{' '}
+                      {resources.messages['records'].toLowerCase()}
+                    </span>
+                  }
+                  rows={10}
+                  rowsPerPageOptions={[5, 10, 15]}
+                  totalRecords={datasets.length}
+                  value={datasets}>
+                  {renderColumns(datasets)}
+                </DataTable>
+              </Fragment>
+            ) : (
+              <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+            )
+          ) : (
+            <Spinner style={{ top: 0 }} />
+          )}
+        </div>
+      </PublicLayout>
+    );
+  }
+);

@@ -816,7 +816,7 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldPKValue}
         className={`${styles.checkPK} datasetSchema-pk-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        }`}
+        } ${isDataflowOpen && styles.checkboxDisabled}`}
         disabled={
           (!isNil(fieldDesignerState.fieldTypeValue) &&
             !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
@@ -843,7 +843,7 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldRequiredValue}
         className={`${styles.checkRequired} datasetSchema-required-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        }`}
+        } ${isDataflowOpen && styles.checkboxDisabled}`}
         disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
@@ -860,7 +860,7 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldReadOnlyValue}
         className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        }`}
+        } ${isDataflowOpen && styles.checkboxDisabled}`}
         disabled={isDataflowOpen}
         id={`${fieldId}_check_readOnly`}
         inputId={`${fieldId}_check_readOnly`}

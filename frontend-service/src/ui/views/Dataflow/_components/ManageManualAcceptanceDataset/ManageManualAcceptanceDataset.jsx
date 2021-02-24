@@ -121,7 +121,6 @@ export const ManageManualAcceptanceDataset = ({
         visible={isManageManualAcceptanceDatasetDialogVisible}>
         {children}
       </Dialog>
-      }
     </Fragment>
   );
 

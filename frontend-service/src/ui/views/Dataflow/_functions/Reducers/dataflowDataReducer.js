@@ -87,6 +87,8 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_EXPORTING':
       return { ...state, isExporting: payload };
 
+    case 'SET_RESTRICT_FROM_PUBLIC':
+      return { ...state, restrictFromPublic: payload };
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
 
