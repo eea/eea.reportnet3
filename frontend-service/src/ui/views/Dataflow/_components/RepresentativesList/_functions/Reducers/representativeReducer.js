@@ -132,6 +132,9 @@ export const reducer = (state, { type, payload }) => {
         }
       };
 
+    case 'SET_IS_DELETING':
+      return { ...state, isDeleting: payload.isDeleting };
+
     default:
       return state;
   }

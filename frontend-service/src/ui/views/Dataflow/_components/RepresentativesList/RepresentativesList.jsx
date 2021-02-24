@@ -10,32 +10,26 @@ import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { RepresentativeService } from 'core/services/Representative';
 
-import { Button } from 'ui/views/_components/Button/Button';
-import { InputText } from 'ui/views/_components/InputText/InputText';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
-import {
-  createUnusedOptionsList,
-  getAllDataProviders,
-  getInitialData,
-  isValidEmail,
-  onAddRepresentative,
-  onDataProviderIdChange,
-  onDeleteConfirm
-} from './_functions/Utils/representativeUtils';
+import { isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepresentativesWithoutDatasets }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const initialState = {
@@ -43,6 +37,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
+    isDeleting: false,
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
     isVisibleDialog: { deleteLeadReporter: false, deleteRepresentative: false },
@@ -60,7 +55,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
   const { isVisibleDialog } = formState;
 
   useEffect(() => {
-    getInitialData(formDispatcher, dataflowId, formState);
+    getInitialData();
   }, [formState.refresher]);
 
   useEffect(() => {
@@ -70,7 +65,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
   }, [formState.selectedDataProviderGroup]);
 
   useEffect(() => {
-    createUnusedOptionsList(formDispatcher);
+    createUnusedOptionsList();
   }, [formState.allPossibleDataProviders]);
 
   useEffect(() => {
@@ -95,8 +90,87 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     }
   }, [formState.representatives]);
 
+  const createUnusedOptionsList = () => formDispatcher({ type: 'CREATE_UNUSED_OPTIONS_LIST' });
+
+  const getAllDataProviders = async () => {
+    const { representatives, selectedDataProviderGroup } = formState;
+    try {
+      const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
+
+      const providersNoSelect = [...responseAllDataProviders];
+      if (representatives.length <= responseAllDataProviders.length) {
+        responseAllDataProviders.unshift({ dataProviderId: '', label: ' Select...' });
+      }
+
+      formDispatcher({
+        type: 'GET_DATA_PROVIDERS_LIST_BY_GROUP_ID',
+        payload: { responseAllDataProviders, providersNoSelect }
+      });
+    } catch (error) {
+      console.error('error on RepresentativeService.allDataProviders', error);
+    }
+  };
+
+  const getInitialData = async () => {
+    await getProviderTypes();
+    await getAllRepresentatives();
+
+    if (!isEmpty(formState.representatives)) {
+      await getAllDataProviders();
+      createUnusedOptionsList();
+    }
+  };
+
+  const getAllRepresentatives = async () => {
+    try {
+      let responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
+
+      const parsedLeadReporters = parseLeadReporters(responseAllRepresentatives.representatives);
+
+      formDispatcher({
+        type: 'INITIAL_LOAD',
+        payload: { response: responseAllRepresentatives, parsedLeadReporters }
+      });
+    } catch (error) {
+      console.error('error on RepresentativeService.allRepresentatives', error);
+      notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' });
+    }
+  };
+
+  const getProviderTypes = async () => {
+    try {
+      const providerTypes = await RepresentativeService.getProviderTypes();
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes } });
+    } catch (error) {
+      console.error('error on  RepresentativeService.getProviderTypes', error);
+    }
+  };
+
   const handleDialogs = (dialog, isVisible) => {
     formDispatcher({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
+  };
+
+  const onAddRepresentative = async () => {
+    const { representatives } = formState;
+
+    const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
+    if (!isEmpty(newRepresentative[0].dataProviderId)) {
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
+      try {
+        await RepresentativeService.add(
+          dataflowId,
+          formState.selectedDataProviderGroup.dataProviderGroupId,
+          parseInt(newRepresentative[0].dataProviderId)
+        );
+
+        formDispatcher({ type: 'REFRESH' });
+      } catch (error) {
+        console.error('error on RepresentativeService.add', error);
+        notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' });
+      } finally {
+        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
+      }
+    }
   };
 
   const onChangeLeadReporter = async (dataProviderId, leadReporterId, inputValue) => {
@@ -111,16 +185,67 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors, leadReporterId } });
   };
 
+  const onDataProviderIdChange = async (newDataProviderId, representative) => {
+    if (!isNil(representative.representativeId)) {
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
+
+      try {
+        await RepresentativeService.updateDataProviderId(
+          parseInt(representative.representativeId),
+          parseInt(newDataProviderId)
+        );
+        formDispatcher({ type: 'REFRESH' });
+      } catch (error) {
+        console.error('error on RepresentativeService.updateDataProviderId', error);
+        notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' });
+      } finally {
+        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
+      }
+    } else {
+      const { representatives } = formState;
+
+      const [thisRepresentative] = representatives.filter(
+        thisRepresentative => thisRepresentative.representativeId === representative.representativeId
+      );
+      thisRepresentative.dataProviderId = newDataProviderId;
+
+      formDispatcher({ type: 'ON_PROVIDER_CHANGE', payload: { representatives } });
+    }
+  };
+
+  const onDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await RepresentativeService.deleteById(formState.representativeIdToDelete);
+
+      const updatedList = formState.representatives.filter(
+        representative => representative.representativeId !== formState.representativeIdToDelete
+      );
+
+      formDispatcher({ type: 'DELETE_REPRESENTATIVE', payload: { updatedList } });
+    } catch (error) {
+      console.error('error on RepresentativeService.deleteById: ', error);
+      notificationContext.add({ type: 'DELETE_REPRESENTATIVE_ERROR' });
+    } finally {
+      formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' });
+      setIsDeleting(false);
+    }
+  };
+
   const onDeleteLeadReporter = async () => {
+    setIsDeleting(true);
     try {
       const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
 
       if (response.status >= 200 && response.status <= 299) {
-        handleDialogs('deleteLeadReporter', false);
         formDispatcher({ type: 'REFRESH' });
       }
     } catch (error) {
-      console.log('error', error);
+      console.error('error on RepresentativeService.deleteLeadReporter', error);
+      notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
+    } finally {
+      handleDialogs('deleteLeadReporter', false);
+      setIsDeleting(false);
     }
   };
 
@@ -145,7 +270,8 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
             formDispatcher({ type: 'REFRESH' });
           }
         } catch (error) {
-          console.log('error', error);
+          console.error('error on RepresentativeService.addLeadReporter', error);
+
           onCreateError(dataProviderId, hasErrors, leadReporter.id);
         }
       } else {
@@ -154,8 +280,10 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     }
   };
 
+  const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
+
   const renderLeadReporterColumnTemplate = representative => {
-    const { dataProviderId, hasDatasets, representativeId } = representative;
+    const { dataProviderId, representativeId } = representative;
 
     if (isNil(representative.leadReporters)) return [];
 
@@ -217,11 +345,11 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
           }
           disabled={representative.hasDatasets}
           id={labelId}
-          onBlur={() => onAddRepresentative(formDispatcher, formState, dataflowId)}
-          onChange={event => onDataProviderIdChange(formDispatcher, event.target.value, representative, formState)}
+          onBlur={() => onAddRepresentative()}
+          onChange={event => onDataProviderIdChange(event.target.value, representative)}
           onKeyDown={event => {
             if (TextUtils.areEquals(event.key, 'Enter')) {
-              onAddRepresentative(formDispatcher, formState, dataflowId);
+              onAddRepresentative();
             }
           }}
           value={representative.dataProviderId}>
@@ -308,10 +436,12 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={formState.isDeleting}
           header={resources.messages['manageRolesDialogConfirmDeleteProviderHeader']}
+          iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onDeleteConfirm(formDispatcher, formState)}
+          onConfirm={() => onDeleteConfirm()}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}>
           {resources.messages['manageRolesDialogConfirmDeleteProviderQuestion']}
@@ -321,7 +451,9 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       {isVisibleDialog.deleteLeadReporter && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={formState.isDeleting}
           header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteLeadReporter()}
