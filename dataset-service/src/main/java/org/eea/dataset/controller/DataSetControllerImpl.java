@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -882,26 +881,23 @@ public class DataSetControllerImpl implements DatasetController {
    * Export public file.
    *
    * @param dataflowId the dataflow id
-   * @param dataProviderI the data provider I
+   * @param dataProviderId the data provider I
    * @param fileName the file name
    * @return the http entity
    */
   @Override
-  @GetMapping(value = "/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<InputStreamResource> exportPublicFile(
-      @PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderI,
-      @RequestParam(value = "fileName", required = true) String fileName) {
+  @GetMapping("/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  public ResponseEntity<InputStreamResource> exportPublicFile(@PathVariable Long dataflowId,
+      @PathVariable Long dataProviderId, @RequestParam String fileName) {
 
     try {
-      File excelContent = datasetService.exportPublicFile(dataflowId, dataProviderI, fileName);
+      File excelContent = datasetService.exportPublicFile(dataflowId, dataProviderId, fileName);
       InputStreamResource resource = new InputStreamResource(new FileInputStream(excelContent));
       HttpHeaders header = new HttpHeaders();
       header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
       return ResponseEntity.ok().headers(header).contentLength(excelContent.length())
           .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-    } catch (IOException | EEAException | UndeclaredThrowableException e) {
+    } catch (IOException | EEAException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

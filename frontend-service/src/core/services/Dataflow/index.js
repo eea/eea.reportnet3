@@ -13,8 +13,10 @@ import { GetApiKey } from './GetApiKey';
 import { GenerateApiKey } from './GenerateApiKey';
 import { GetCompleted } from './GetCompleted';
 import { GetDatasetStatisticStatus } from './GetDatasetStatisticStatus';
+import { GetPublicDataflowData } from './GetPublicDataflowData';
 import { GetDetails } from './GetDetails';
 import { GetPending } from './GetPending';
+import { GetPublicData } from './GetPublicData';
 import { GetReleasedDashboards } from './GetReleasedDashboards';
 import { GetReporting } from './GetReporting';
 import { Reject } from './Reject';
@@ -36,9 +38,11 @@ export const DataflowService = {
   downloadById: Download({ dataflowRepository }),
   getAllSchemas: GetAllSchemas({ dataflowRepository }),
   getApiKey: GetApiKey({ dataflowRepository }),
+  getPublicDataflowData: GetPublicDataflowData({ dataflowRepository }),
   generateApiKey: GenerateApiKey({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
   pending: GetPending({ dataflowRepository }),
+  publicData: GetPublicData({ dataflowRepository }),
   reject: Reject({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
   schemasValidation: ValidateSchemas({ dataflowRepository }),

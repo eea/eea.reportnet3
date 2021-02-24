@@ -62,6 +62,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
+    anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
     dataProviderId: [],
@@ -96,6 +97,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isSnapshotDialogVisible: false,
     name: '',
     obligations: {},
+    restrictFromPublic: false,
     status: '',
     updatedDatasetSchema: undefined,
     userRoles: []
@@ -251,6 +253,25 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
     onLoadSchemasValidations();
   }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
+
+  const checkRestrictFromPublic = (
+    <div style={{ float: 'left' }}>
+      <Checkbox
+        id={`restrict_from_public_checkbox`}
+        inputId={`restrict_from_public_checkbox`}
+        isChecked={dataflowState.restrictFromPublic}
+        onChange={e => dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: e.checked })}
+        role="checkbox"
+      />
+      <label
+        onClick={e =>
+          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
+        }
+        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        {resources.messages['restrictFromPublic']}
+      </label>
+    </div>
+  );
 
   const getLeftSidebarButtonsVisibility = () => {
     const { userRoles } = dataflowState;
@@ -423,6 +444,7 @@ const Dataflow = withRouter(({ history, match }) => {
       dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
+          anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
           isReleasable: dataflow.isReleasable,
@@ -554,7 +576,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
-      await SnapshotService.releaseDataflow(dataflowId, dataProviderId);
+      await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
@@ -660,6 +682,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
+            footerAddon={dataflowState.anySchemaAvailableInPublic && checkRestrictFromPublic}
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
@@ -679,9 +702,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
-                dataflowRepresentatives={dataflowState.data.representatives}
                 dataflowId={dataflowId}
-                isActiveManageRolesDialog={dataflowState.isManageRolesDialogVisible}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setFormHasRepresentatives={setFormHasRepresentatives}
               />

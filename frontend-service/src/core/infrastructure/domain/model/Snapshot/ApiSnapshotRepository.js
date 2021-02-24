@@ -57,8 +57,8 @@ const restoreByIdReporter = async (dataflowId, datasetId, snapshotId) => {
   return await apiSnapshot.restoreByIdReporter(dataflowId, datasetId, snapshotId);
 };
 
-const releaseDataflow = async (dataflowId, dataProviderId) => {
-  return await apiSnapshot.releaseDataflow(dataflowId, dataProviderId);
+const releaseDataflow = async (dataflowId, dataProviderId, restrictFromPublic) => {
+  return await apiSnapshot.releaseDataflow(dataflowId, dataProviderId, restrictFromPublic);
 };
 export const ApiSnapshotRepository = {
   allDesigner,

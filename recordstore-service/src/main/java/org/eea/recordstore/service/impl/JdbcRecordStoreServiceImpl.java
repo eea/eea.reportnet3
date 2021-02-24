@@ -256,6 +256,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Map<String, Object> lockCriteria = new HashMap<>();
       lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
       lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(lockCriteria);
 
       // command to assign national coordinators and end the dataCollectionProcess.
       Map<String, Object> result = new HashMap<>();
@@ -1065,7 +1066,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     DataSetMetabaseVO datasetMetabaseVO =
         dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
+    Long dataflowId = datasetMetabaseVO.getDataflowId();
     try {
       switch (datasetMetabaseVO.getDatasetTypeEnum()) {
         case REPORTING:
