@@ -59,7 +59,7 @@
     "clearFilter": "Clear filter",
     "clearFilters": "Clear filters",
     "cloneDatasetSchemasInit": "Cloning dataset schemas from <strong>{:sourceDataflowName}</strong> to <strong>{:targetDataflowName}</strong>.",
-    "cloneNewSchemaError": "Failed clonning the schemas",
+    "cloneNewSchemaError": "Failed cloning the schemas",
     "cloneSchemasFromDataflow": "Clone all schemas from dataflow",
     "cloneSelectedDataflow": "Clone selected dataflow",
     "close": "Close",
@@ -980,6 +980,11 @@
     "deleteDatasetDataInit": "Dataset data deleting...",
     "restoreDatasetSnapshotInitInfo": "Restoring copy...",
     "deleteTableDataInit": "Table data deleting...",
-    "genericBlockedError": "This operation is blocked because there is already another process running"
+    "genericBlockedError": "This operation is blocked because there is already another process running",
+    "deleteLeadReporterError": "Error deleting lead reporter",
+    "deleteRepresentativeError": "Error deleting representative",
+    "addDataProviderError": "There has been an error adding the representative",
+    "updateDataProviderError": "There has been an error updating the representative",
+    "getRepresentativesError": "There has been an error loading the representatives"
   }
 }
