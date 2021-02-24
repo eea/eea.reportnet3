@@ -37,6 +37,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
+    isDeleting: false,
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
     isVisibleDialog: { deleteLeadReporter: false, deleteRepresentative: false },
@@ -184,23 +185,6 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors, leadReporterId } });
   };
 
-  const onDeleteConfirm = async () => {
-    try {
-      await RepresentativeService.deleteById(formState.representativeIdToDelete);
-
-      const updatedList = formState.representatives.filter(
-        representative => representative.representativeId !== formState.representativeIdToDelete
-      );
-
-      formDispatcher({ type: 'DELETE_REPRESENTATIVE', payload: { updatedList } });
-    } catch (error) {
-      console.error('error on RepresentativeService.deleteById: ', error);
-      notificationContext.add({ type: 'DELETE_REPRESENTATIVE_ERROR' });
-    } finally {
-      formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' });
-    }
-  };
-
   const onDataProviderIdChange = async (newDataProviderId, representative) => {
     if (!isNil(representative.representativeId)) {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
@@ -229,7 +213,27 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     }
   };
 
+  const onDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await RepresentativeService.deleteById(formState.representativeIdToDelete);
+
+      const updatedList = formState.representatives.filter(
+        representative => representative.representativeId !== formState.representativeIdToDelete
+      );
+
+      formDispatcher({ type: 'DELETE_REPRESENTATIVE', payload: { updatedList } });
+    } catch (error) {
+      console.error('error on RepresentativeService.deleteById: ', error);
+      notificationContext.add({ type: 'DELETE_REPRESENTATIVE_ERROR' });
+    } finally {
+      formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' });
+      setIsDeleting(false);
+    }
+  };
+
   const onDeleteLeadReporter = async () => {
+    setIsDeleting(true);
     try {
       const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
 
@@ -241,6 +245,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
     } finally {
       handleDialogs('deleteLeadReporter', false);
+      setIsDeleting(false);
     }
   };
 
@@ -274,6 +279,8 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       }
     }
   };
+
+  const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
 
   const renderLeadReporterColumnTemplate = representative => {
     const { dataProviderId, representativeId } = representative;
@@ -429,7 +436,9 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={formState.isDeleting}
           header={resources.messages['manageRolesDialogConfirmDeleteProviderHeader']}
+          iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConfirm()}
@@ -442,7 +451,9 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       {isVisibleDialog.deleteLeadReporter && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={formState.isDeleting}
           header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteLeadReporter()}
