@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -897,13 +898,12 @@ public class DataSetControllerImpl implements DatasetController {
       File excelContent = datasetService.exportPublicFile(dataflowId, dataProviderI, fileName);
       InputStreamResource resource = new InputStreamResource(new FileInputStream(excelContent));
       HttpHeaders header = new HttpHeaders();
-      header.setContentType(new MediaType("application", "force-download"));
       header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
       return ResponseEntity.ok().headers(header).contentLength(excelContent.length())
           .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-    } catch (IOException | EEAException e) {
+    } catch (IOException | EEAException | UndeclaredThrowableException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 

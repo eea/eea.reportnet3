@@ -1258,17 +1258,14 @@ public class DataSetControllerImplTest {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void exportPublicFileThrows() throws EEAException, IOException {
     Mockito.doThrow(EEAException.class).when(datasetService).exportPublicFile(Mockito.anyLong(),
         Mockito.any(), Mockito.anyString());
-    // Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
-    try {
-      dataSetControllerImpl.exportPublicFile(Mockito.anyLong(), Mockito.any(), Mockito.anyString());
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
-      throw e;
-    }
+    ResponseEntity<?> value = dataSetControllerImpl.exportPublicFile(Mockito.anyLong(),
+        Mockito.any(), Mockito.anyString());
+    assertEquals(null, value.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
 
   }
 
