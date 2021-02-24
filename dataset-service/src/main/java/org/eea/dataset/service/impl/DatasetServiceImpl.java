@@ -3192,10 +3192,10 @@ public class DatasetServiceImpl implements DatasetService {
     List<RepresentativeVO> representativeList =
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
 
-    // we took representative
-    RepresentativeVO representative = representativeList.stream()
-        .filter(data -> data.getDataProviderId().equals(dataSetDataProvider)).findAny()
-        .orElse(null);
+    // we find representative
+    RepresentativeVO representative = representativeList.stream().filter(
+        representativeData -> representativeData.getDataProviderId().equals(dataSetDataProvider))
+        .findAny().orElse(null);
 
     if (null != representative) {
       // we create the dataflow folder to save it
@@ -3241,7 +3241,7 @@ public class DatasetServiceImpl implements DatasetService {
       throws IOException, EEAException {
     // we compound the route and create the file
     File file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-        "\\dataProvider-" + dataProviderId.toString()), fileName + ".xlsx");
+        "dataProvider-" + dataProviderId.toString()), fileName + ".xlsx");
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
