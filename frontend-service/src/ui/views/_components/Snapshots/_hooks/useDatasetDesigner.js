@@ -38,7 +38,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -61,7 +61,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -99,11 +99,14 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
 
   const onRestoreSnapshot = async () => {
     try {
+      notificationContext.add({
+        type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO'
+      });
       await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({

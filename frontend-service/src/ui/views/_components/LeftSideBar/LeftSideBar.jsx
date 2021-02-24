@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';

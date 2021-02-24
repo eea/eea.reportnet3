@@ -262,7 +262,7 @@ export const FieldsDesigner = ({
       console.error('Error during field delete');
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'FIELD_DELETE_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       }
     } finally {
