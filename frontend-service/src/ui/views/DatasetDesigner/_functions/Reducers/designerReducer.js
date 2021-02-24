@@ -12,10 +12,6 @@ export const designerReducer = (state, { type, payload }) => {
       return {
         ...state,
         availableInPublic: payload.availableInPublic,
-        dataViewerOptions: {
-          ...state.dataViewerOptions,
-          selectedRecordErrorId: -1
-        },
         datasetDescription: payload.description,
         datasetSchema: payload.datasetSchema,
         datasetSchemaAllTables: payload.tables,
