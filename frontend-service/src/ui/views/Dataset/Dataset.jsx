@@ -348,6 +348,9 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onConfirmDelete = async () => {
     try {
+      notificationContext.add({
+        type: 'DELETE_DATASET_DATA_INIT'
+      });
       setDeleteDialogVisible(false);
       const dataDeleted = await DatasetService.deleteDataById(datasetId);
       if (dataDeleted) {

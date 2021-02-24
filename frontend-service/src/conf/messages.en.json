@@ -978,6 +978,8 @@
     "addRecordsBlockedError": "There has been an error adding a record. Please wait until the end of the previous operation",
     "validateDataBlockedError": "Failure in the validate process. Please wait until the end of the previous operation",
     "manageRolesDialogConfirmDeleteProviderHeader": "Delete data provider",
-    "manageRolesDialogConfirmDeleteProviderQuestion": "Do you really want to delete this data provider?"
+    "manageRolesDialogConfirmDeleteProviderQuestion": "Do you really want to delete this data provider?",
+    "deleteDatasetDataInit": "Dataset data deleting...",
+    "restoreDatasetSnapshotInitInfo": "Restoring copy..."
   }
 }
