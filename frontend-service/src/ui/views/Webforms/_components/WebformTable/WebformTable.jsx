@@ -135,7 +135,7 @@ export const WebformTable = ({
         console.error('error', error);
         if (error.response.status === 423) {
           notificationContext.add({
-            type: 'ADD_RECORDS_BLOCKED_ERROR'
+            type: 'GENERIC_BLOCKED_ERROR'
           });
         } else {
           const {

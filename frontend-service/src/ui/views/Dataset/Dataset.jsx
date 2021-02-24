@@ -357,19 +357,25 @@ export const Dataset = withRouter(({ match, history }) => {
         setIsDataDeleted(true);
       }
     } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            dataflowName,
+            datasetName
+          }
+        });
+      }
     }
   };
 
@@ -384,7 +390,7 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'VALIDATE_DATA_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -409,7 +415,7 @@ export const Dataset = withRouter(({ match, history }) => {
     }
     if (xhr.status === 423) {
       notificationContext.add({
-        type: 'FILE_UPLOAD_BLOCKED_ERROR',
+        type: 'GENERIC_BLOCKED_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -441,7 +447,7 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({

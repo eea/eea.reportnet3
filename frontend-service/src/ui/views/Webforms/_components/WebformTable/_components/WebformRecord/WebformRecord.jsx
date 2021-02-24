@@ -91,7 +91,7 @@ export const WebformRecord = ({
       console.error('error', error);
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'DELETE_RECORD_BY_ID_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         const {
