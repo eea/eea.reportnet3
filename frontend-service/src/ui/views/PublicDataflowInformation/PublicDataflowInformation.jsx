@@ -111,7 +111,7 @@ export const PublicDataflowInformation = withRouter(
       const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
       // const fileContent = {};
 
-      DownloadFile(fileContent, fileName);
+      DownloadFile(fileContent, `${fileName}.xlsx`);
     };
 
     const onLoadDataflowData = async () => {

@@ -418,6 +418,7 @@ const parseDataflowDTOs = dataflowDTOs => {
 
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
+    anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),

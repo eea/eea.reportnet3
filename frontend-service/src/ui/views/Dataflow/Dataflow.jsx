@@ -62,6 +62,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
+    anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
     dataProviderId: [],
@@ -253,9 +254,6 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadSchemasValidations();
   }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
 
-  const checkAvailableInPublic = data =>
-    data.datasets.some(reportingDataset => reportingDataset.availableInPublic === true);
-
   const checkRestrictFromPublic = (
     <div style={{ float: 'left' }}>
       <Checkbox
@@ -446,12 +444,12 @@ const Dataflow = withRouter(({ history, match }) => {
       dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
+          anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
-          restrictFromPublic: checkAvailableInPublic(dataflow),
           status: dataflow.status
         }
       });
@@ -578,7 +576,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
-      await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
+      await SnapshotService.releaseDataflow(
+        dataflowId,
+        dataProviderId,
+        dataflowState.anySchemaAvailableInPublic ? dataflowState.restrictFromPublic : true
+      );
 
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
@@ -684,7 +686,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
-            footerAddon={dataflowState.restrictFromPublic && checkRestrictFromPublic}
+            footerAddon={dataflowState.anySchemaAvailableInPublic && checkRestrictFromPublic}
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
