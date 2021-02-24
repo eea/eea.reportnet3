@@ -211,9 +211,15 @@ export const BigButtonList = ({
     setDatasetId(datasetId);
   };
 
-  const getDataHistoricReleases = (datasetId, value, providerId) => {
+  const getDataHistoricReleases = (datasetId, headerTitle) => {
     setDatasetId(datasetId);
-    setHistoricReleasesDialogHeader(value);
+    setHistoricReleasesDialogHeader(headerTitle);
+    setProviderId(null);
+  };
+
+  const getDataHistoricReleasesByRepresentatives = (headerTitle, providerId) => {
+    setDatasetId(null);
+    setHistoricReleasesDialogHeader(headerTitle);
     setProviderId(providerId);
   };
 
@@ -522,39 +528,35 @@ export const BigButtonList = ({
     ));
   };
 
-  const bigButtonList = uniqBy(
-    useBigButtonList({
-      dataflowId,
-      dataflowState,
-      dataProviderId,
-      getDatasetData,
-      getDataHistoricReleases,
-      getDeleteSchemaIndex,
-      handleExportEuDataset,
-      handleRedirect,
-      isActiveButton,
-      isCloningDataflow,
-      isImportingDataflow,
-      isLeadReporterOfCountry,
-      onCloneDataflow,
-      onImportSchema,
-      onLoadEuDatasetIntegration,
-      onLoadReceiptData,
-      onSaveName,
-      onShowCopyDataCollectionToEuDatasetModal,
-      onShowDataCollectionModal,
-      onShowExportEuDatasetModal,
-      onShowManualTechnicalAcceptanceDialog,
-      onShowHistoricReleases,
-      onShowManageReportersDialog,
-      onShowNewSchemaDialog,
-      onOpenReleaseConfirmDialog,
-      onShowUpdateDataCollectionModal,
-      setErrorDialogData,
-      updatedDatasetSchema
-    }),
-    'caption'
-  )
+  const bigButtonList = useBigButtonList({
+    dataflowId,
+    dataflowState,
+    dataProviderId,
+    getDataHistoricReleases,
+    getDataHistoricReleasesByRepresentatives,
+    getDatasetData,
+    getDeleteSchemaIndex,
+    handleExportEuDataset,
+    handleRedirect,
+    isActiveButton,
+    isCloningDataflow,
+    isLeadReporterOfCountry,
+    onCloneDataflow,
+    onLoadEuDatasetIntegration,
+    onLoadReceiptData,
+    onOpenReleaseConfirmDialog,
+    onSaveName,
+    onShowCopyDataCollectionToEuDatasetModal,
+    onShowDataCollectionModal,
+    onShowExportEuDatasetModal,
+    onShowHistoricReleases,
+    onShowManageReportersDialog,
+    onShowManualTechnicalAcceptanceDialog,
+    onShowNewSchemaDialog,
+    onShowUpdateDataCollectionModal,
+    setErrorDialogData,
+    updatedDatasetSchema
+  })
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
 
