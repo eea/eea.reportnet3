@@ -576,11 +576,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
-      await SnapshotService.releaseDataflow(
-        dataflowId,
-        dataProviderId,
-        dataflowState.anySchemaAvailableInPublic ? dataflowState.restrictFromPublic : true
-      );
+      await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
