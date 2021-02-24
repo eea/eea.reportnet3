@@ -1235,20 +1235,6 @@ public class DatasetSchemaControllerImplTest {
         Mockito.any());
   }
 
-  @Test(expected = ResponseStatusException.class)
-  public void updateDatasetSchemaBadRequestTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    try {
-      dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      throw e;
-    }
-  }
-
   @Test
   public void updateDatasetSchemaWebformTest1() throws EEAException {
     WebformVO webform = new WebformVO();

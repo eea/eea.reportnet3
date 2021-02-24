@@ -673,30 +673,26 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
 
-    String datasetSchemaId;
     try {
-      datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+
+      dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
+          datasetSchemaVO.isAvailableInPublic());
+
+      if (TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+          .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+        if (null != datasetSchemaVO.getDescription()) {
+          dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
+              datasetSchemaVO.getDescription());
+        }
+        if (null != datasetSchemaVO.getWebform()) {
+          dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
+        }
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
           e);
-    }
-
-    dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
-        datasetSchemaVO.isAvailableInPublic());
-
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid dataflow status");
-    }
-
-    if (null != datasetSchemaVO.getDescription()) {
-      dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
-          datasetSchemaVO.getDescription());
-    }
-
-    if (null != datasetSchemaVO.getWebform()) {
-      dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
     }
   }
 

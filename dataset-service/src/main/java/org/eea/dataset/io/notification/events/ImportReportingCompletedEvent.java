@@ -11,6 +11,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,6 +25,7 @@ public class ImportReportingCompletedEvent implements NotificableEventHandler {
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  @Lazy
   @Autowired
   private DatasetSchemaService dataschemaService;
 
