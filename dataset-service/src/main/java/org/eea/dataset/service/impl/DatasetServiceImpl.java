@@ -388,6 +388,13 @@ public class DatasetServiceImpl implements DatasetService {
     deleteRecords(datasetId, tableSchemaId);
   }
 
+
+  /**
+   * Delete records.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   */
   private void deleteRecords(Long datasetId, String tableSchemaId) {
 
     boolean singleTable = null != tableSchemaId;
@@ -405,9 +412,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
       if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
-        recordRepository.deleteRecordWithIdTableSchema(loopTableSchemaId);
-        LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId,
-            loopTableSchemaId);
+        deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
       } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         LOG.info("Skipped deleteRecords: datasetId={}, tableSchemaId={}, tableSchema.readOnly={}",
             datasetId, loopTableSchemaId, tableSchema.getReadOnly());
@@ -422,6 +427,8 @@ public class DatasetServiceImpl implements DatasetService {
         fieldRepository.saveAll(fieldValuesToClear);
         LOG.info("Overwritting fieldValues to blank: datasetId={}, tableSchemaId={}", datasetId,
             loopTableSchemaId);
+      } else {
+        deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
       }
 
       if (singleTable) {
@@ -3353,6 +3360,18 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     return anySchemaAvailableInPublic;
+  }
+
+
+  /**
+   * Delete records from id table schema.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   */
+  private void deleteRecordsFromIdTableSchema(Long datasetId, String tableSchemaId) {
+    recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
+    LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
   }
 
 
