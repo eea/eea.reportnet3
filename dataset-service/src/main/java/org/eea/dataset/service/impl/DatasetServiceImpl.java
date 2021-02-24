@@ -3194,7 +3194,8 @@ public class DatasetServiceImpl implements DatasetService {
 
     // we took representative
     RepresentativeVO representative = representativeList.stream()
-        .filter(data -> data.getDataProviderId() == dataSetDataProvider).findAny().orElse(null);
+        .filter(data -> data.getDataProviderId().equals(dataSetDataProvider)).findAny()
+        .orElse(null);
 
     // we check if the representative have permit to do it
     if (null != representative && !representative.isRestrictFromPublic()) {
