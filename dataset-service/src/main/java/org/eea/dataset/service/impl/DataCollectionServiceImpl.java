@@ -316,8 +316,25 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
+
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
+
+    updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
+
   }
+
+  /**
+   * Update reporting datasets visibility.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  private void updateReportingDatasetsVisibility(Long dataflowId, boolean showPublicInfo) {
+
+    dataflowControllerZuul.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
+
+  }
+
 
   /**
    * Manage data collection.
@@ -480,7 +497,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
         if (isCreation) {
           // 6. Create DataCollection in metabase
-
           Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
           dataCollectionIds.add(dataCollectionId);
           datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
