@@ -1123,7 +1123,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
     List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-    String updateQuery = "refresh materialized view dataset_";
+    String updateQuery = "refresh materialized view concurrently dataset_";
 
     for (String view : viewList) {
       executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
