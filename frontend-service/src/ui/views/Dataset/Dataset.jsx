@@ -93,7 +93,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
-  const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
@@ -159,7 +158,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     onLoadDatasetSchema();
-  }, [isDataDeleted]);
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -352,10 +351,7 @@ export const Dataset = withRouter(({ match, history }) => {
         type: 'DELETE_DATASET_DATA_INIT'
       });
       setDeleteDialogVisible(false);
-      const dataDeleted = await DatasetService.deleteDataById(datasetId);
-      if (dataDeleted) {
-        setIsDataDeleted(true);
-      }
+      await DatasetService.deleteDataById(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
@@ -983,7 +979,6 @@ export const Dataset = withRouter(({ match, history }) => {
         <TabsSchema
           isReportingWebform={isReportingWebform}
           hasWritePermissions={hasWritePermissions}
-          isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isValidationSelected={dataViewerOptions.isValidationSelected}
