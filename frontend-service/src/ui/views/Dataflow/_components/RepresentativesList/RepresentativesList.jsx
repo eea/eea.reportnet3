@@ -295,6 +295,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       return (
         <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
           <InputText
+            autoFocus
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
@@ -331,7 +332,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       ['asc']
     );
 
-    const labelId = uuid.v4();
+    const labelId = `${representative.representativeId}-${representative.dataProviderId}`;
 
     return (
       <>
@@ -339,7 +340,6 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
         <select
-          autoFocus
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
@@ -353,9 +353,12 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
             }
           }}
           value={representative.dataProviderId}>
-          {remainingOptionsAndSelectedOption.map(provider => {
+          {remainingOptionsAndSelectedOption.map((provider, i) => {
             return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={provider.dataProviderId}>
+              <option
+                key={`${provider.dataProviderId}${provider.label}${i}`}
+                className="p-dropdown-item"
+                value={provider.dataProviderId}>
                 {provider.label}
               </option>
             );
