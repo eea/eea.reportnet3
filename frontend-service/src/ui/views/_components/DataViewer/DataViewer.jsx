@@ -586,6 +586,9 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteTable = async () => {
       try {
+        notificationContext.add({
+          type: 'DELETE_DATASET_DATA_INIT'
+        });
         await DatasetService.deleteTableDataById(datasetId, tableId);
         setFetchedData([]);
         setIsTableDeleted(true);
