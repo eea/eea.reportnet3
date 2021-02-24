@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 
 import styles from './EuHeader.module.scss';
 
@@ -14,14 +14,14 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [searchInput, setSearchInput] = useState('');
+  // const [searchInput, setSearchInput] = useState('');
   const [openGloban, setOpenGloban] = useState(false);
 
-  const onSearch = () => {
-    window.document.location.href = `https://ec.europa.eu/search/?query_source=TCORNER&QueryText=${encodeURI(
-      searchInput
-    )}&op=Search&swlang=en&form_build_id=form-8X47OfGhYybVDfQbtJNCrERR9n519jEiL2dVIl2S2Ps&form_id=nexteuropa_europa_search_search_form`;
-  };
+  // const onSearch = () => {
+  //   window.document.location.href = `https://ec.europa.eu/search/?query_source=TCORNER&QueryText=${encodeURI(
+  //     searchInput
+  //   )}&op=Search&swlang=en&form_build_id=form-8X47OfGhYybVDfQbtJNCrERR9n519jEiL2dVIl2S2Ps&form_id=nexteuropa_europa_search_search_form`;
+  // };
 
   return (
     <Fragment>

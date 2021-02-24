@@ -2,15 +2,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
-import isUndefined from 'lodash/isUndefined';
-
-import colors from 'conf/colors.json';
 
 import './DataTable.css';
 
-import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Paginator } from './_components/Paginator';
-// import { Paginator } from 'primereact/paginator';
 import { ScrollableView } from './_components/ScrollableView';
 import { TableBody } from './_components/TableBody';
 import { TableFooter } from './_components/TableFooter';

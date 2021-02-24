@@ -77,6 +77,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
+    availableInPublic: false,
     areLoadedSchemas: false,
     areUpdatingTables: false,
     dashDialogVisible: false,
@@ -280,7 +281,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const metaData = await getMetadata({ datasetId, dataflowId });
     designerDispatch({
       type: 'GET_METADATA',
-      payload: { metaData, dataflowName: metaData.dataflow.name, schemaName: metaData.dataset.name }
+      payload: {
+        metaData,
+        dataflowName: metaData.dataflow.name,
+        schemaName: metaData.dataset.name
+      }
     });
   };
 
@@ -439,6 +444,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       onUpdateDescription(description);
     }
   };
+
+  const onChangeAvailableInPublicView = async checked => {
+    try {
+      designerDispatch({ type: 'SET_AVAILABLE_PUBLIC_VIEW', payload: checked });
+      await DatasetService.updateDatasetSchemaDesign(datasetId, { availableInPublic: checked });
+    } catch (error) {
+      console.error('Error during datasetSchema Available in public view update: ', error);
+    }
+  };
+
   const onChangeIsValidationSelected = options =>
     designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: options });
 
@@ -504,7 +519,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'VALIDATE_DATA_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -621,6 +636,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
+            availableInPublic: dataset.availableInPublic,
             datasetSchema: dataset,
             datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription,
@@ -789,7 +805,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
     if (xhr.status === 423) {
       notificationContext.add({
-        type: 'FILE_UPLOAD_BLOCKED_ERROR',
+        type: 'GENERIC_BLOCKED_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -818,7 +834,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -1133,7 +1149,34 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
               value={designerState.datasetDescription || ''}
             />
+
             <div className={styles.datasetConfigurationButtons}>
+              <div>
+                <Checkbox
+                  id={`available_in_public_view_checkbox`}
+                  inputId={`available_in_public_view_checkbox`}
+                  isChecked={designerState.availableInPublic}
+                  onChange={e => onChangeAvailableInPublicView(e.checked)}
+                  role="checkbox"
+                />
+                <label
+                  onClick={() => {
+                    designerDispatch({
+                      type: 'SET_AVAILABLE_PUBLIC_VIEW',
+                      payload: !designerState.availableInPublic
+                    });
+                    onChangeAvailableInPublicView(!designerState.availableInPublic);
+                  }}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '11pt',
+                    fontWeight: 'bold',
+                    marginLeft: '6px',
+                    marginRight: '6px'
+                  }}>
+                  {resources.messages['availableInPublicView']}
+                </label>
+              </div>
               <Button
                 className={`p-button-secondary ${
                   !designerState.isDataflowOpen ? 'p-button-animated-blink' : null

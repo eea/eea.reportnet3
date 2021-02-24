@@ -93,7 +93,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
-  const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
@@ -159,7 +158,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     onLoadDatasetSchema();
-  }, [isDataDeleted]);
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -348,25 +347,31 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onConfirmDelete = async () => {
     try {
-      setDeleteDialogVisible(false);
-      const dataDeleted = await DatasetService.deleteDataById(datasetId);
-      if (dataDeleted) {
-        setIsDataDeleted(true);
-      }
-    } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        type: 'DELETE_DATASET_DATA_INIT'
       });
+      setDeleteDialogVisible(false);
+      await DatasetService.deleteDataById(datasetId);
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            dataflowName,
+            datasetName
+          }
+        });
+      }
     }
   };
 
@@ -381,7 +386,7 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'VALIDATE_DATA_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -406,7 +411,7 @@ export const Dataset = withRouter(({ match, history }) => {
     }
     if (xhr.status === 423) {
       notificationContext.add({
-        type: 'FILE_UPLOAD_BLOCKED_ERROR',
+        type: 'GENERIC_BLOCKED_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -438,7 +443,7 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -974,7 +979,6 @@ export const Dataset = withRouter(({ match, history }) => {
         <TabsSchema
           isReportingWebform={isReportingWebform}
           hasWritePermissions={hasWritePermissions}
-          isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isValidationSelected={dataViewerOptions.isValidationSelected}
@@ -997,6 +1001,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <Webforms
           dataflowId={dataflowId}
           datasetId={datasetId}
+          isReleasing={dataset.isReleasing}
           isReporting
           state={{
             datasetSchema: { tables: datasetSchemaAllTables },

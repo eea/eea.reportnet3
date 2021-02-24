@@ -1,5 +1,6 @@
 export class Dataflow {
   constructor({
+    anySchemaAvailableInPublic,
     creationDate,
     dataCollections,
     datasets,
@@ -16,11 +17,13 @@ export class Dataflow {
     reportingDatasetsStatus,
     representatives,
     requestId,
+    showPublicInfo,
     status,
     userRequestStatus,
     userRole,
     weblinks
   } = {}) {
+    this.anySchemaAvailableInPublic = anySchemaAvailableInPublic;
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.datasets = datasets;
@@ -38,6 +41,7 @@ export class Dataflow {
     this.representatives = representatives;
     this.requestId = requestId;
     this.status = status;
+    this.showPublicInfo = showPublicInfo;
     this.userRequestStatus = userRequestStatus;
     this.userRole = userRole;
     this.weblinks = weblinks;

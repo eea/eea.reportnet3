@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { isEmpty } from 'lodash';
 
@@ -92,7 +92,7 @@ export const ReleasedDatasetsDashboard = dataflowId => {
     scales: {
       xAxes: [
         {
-          stacked: true,         
+          stacked: true,
           gridLines: { display: false }
           // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
           // ticks: {

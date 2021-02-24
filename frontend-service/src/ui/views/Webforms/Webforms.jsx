@@ -4,10 +4,18 @@ import { Article13 } from './Article13';
 import { Article15 } from './Article15';
 import { NationalSystems } from './NationalSystems';
 
-export const Webforms = ({ dataflowId, datasetId, isReporting = false, state, webformType }) => {
+export const Webforms = ({ dataflowId, datasetId, isReleasing, isReporting = false, state, webformType }) => {
   switch (webformType) {
     case 'MMR-ART13':
-      return <Article13 dataflowId={dataflowId} datasetId={datasetId} state={state} isReporting={isReporting} />;
+      return (
+        <Article13
+          dataflowId={dataflowId}
+          datasetId={datasetId}
+          state={state}
+          isReporting={isReporting}
+          isReleasing={isReleasing}
+        />
+      );
 
     case 'MMR-ART15':
       return <Article15 dataflowId={dataflowId} datasetId={datasetId} state={state} isReporting={isReporting} />;

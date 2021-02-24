@@ -112,6 +112,20 @@ export const apiDataflow = {
 
     return response.data;
   },
+  publicData: async () => {
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.publicData)
+    });
+
+    return response.data;
+  },
+  getPublicDataflowData: async dataflowId => {
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId })
+    });
+
+    return response.data;
+  },
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
     const response = await HTTPRequester.post({
       url: getUrl(DataflowConfig.newEmptyDatasetSchema, {

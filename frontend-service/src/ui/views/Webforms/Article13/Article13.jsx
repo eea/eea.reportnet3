@@ -27,7 +27,7 @@ import { Article13Utils } from './_functions/Utils/Article13Utils';
 import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
-export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
+export const Article13 = ({ dataflowId, datasetId, isReleasing, isReporting, state }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;
   const { datasetSchema, datasetStatistics } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
@@ -144,7 +144,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
       console.error('error', error);
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'ADD_RECORDS_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         const {
@@ -175,7 +175,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'ADD_RECORDS_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         const {
@@ -352,7 +352,7 @@ export const Article13 = ({ dataflowId, datasetId, isReporting, state }) => {
             <div className={styles.addButtonWrapper}>
               <Button
                 className={styles.addButton}
-                disabled={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
+                disabled={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord || isReleasing}
                 icon={
                   list === 'single'
                     ? article13State.isAddingSingleRecord

@@ -42,7 +42,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaId: null,
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
-    isDataDeleted: false,
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
@@ -60,7 +59,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     dataflowName,
     datasetName,
     dataViewerOptions,
-    isDataDeleted,
     isGroupedValidationSelected,
     isValidationSelected,
     levelErrorTypes,
@@ -77,7 +75,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   useEffect(() => {
     onLoadDatasetSchema();
-  }, [euDatasetState.isDataUpdated, isDataDeleted]);
+  }, [euDatasetState.isDataUpdated]);
 
   useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, metaData });
 
@@ -214,7 +212,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     <TabsSchema
       hasWritePermissions={false}
       showWriteButtons={false}
-      isDatasetDeleted={isDataDeleted}
       isExportable={false}
       isFilterable={false}
       hasCountryCode={true}

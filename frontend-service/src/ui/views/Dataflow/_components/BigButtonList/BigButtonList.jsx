@@ -3,7 +3,6 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 import remove from 'lodash/remove';
-import uniqBy from 'lodash/uniqBy';
 
 import { DataflowConfig } from 'conf/domain/model/Dataflow';
 
@@ -110,6 +109,7 @@ export const BigButtonList = ({
   });
 
   const [providerId, setProviderId] = useState(null);
+  const [showPublicInfo, setShowPublicInfo] = useState(true);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
@@ -154,6 +154,23 @@ export const BigButtonList = ({
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
 
+  const checkShowPublicInfo = (
+    <div style={{ float: 'left' }}>
+      <Checkbox
+        id={`show_public_info_checkbox`}
+        inputId={`show_public_info_checkbox`}
+        isChecked={showPublicInfo}
+        onChange={e => setShowPublicInfo(e.checked)}
+        role="checkbox"
+      />
+      <label
+        onClick={() => setShowPublicInfo(!showPublicInfo)}
+        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        {resources.messages['showPublicInfo']}
+      </label>
+    </div>
+  );
+
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
 
@@ -168,6 +185,8 @@ export const BigButtonList = ({
     } catch (error) {
       console.error(error);
       if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
       }
     }
@@ -192,9 +211,15 @@ export const BigButtonList = ({
     setDatasetId(datasetId);
   };
 
-  const getDataHistoricReleases = (datasetId, value, providerId) => {
+  const getDataHistoricReleases = (datasetId, headerTitle) => {
     setDatasetId(datasetId);
-    setHistoricReleasesDialogHeader(value);
+    setHistoricReleasesDialogHeader(headerTitle);
+    setProviderId(null);
+  };
+
+  const getDataHistoricReleasesByRepresentatives = (headerTitle, providerId) => {
+    setDatasetId(null);
+    setHistoricReleasesDialogHeader(headerTitle);
     setProviderId(providerId);
   };
 
@@ -238,7 +263,13 @@ export const BigButtonList = ({
     setIsActiveButton(false);
 
     try {
-      return await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, true);
+      return await DataCollectionService.create(
+        dataflowId,
+        getDate(),
+        isManualTechnicalAcceptance,
+        true,
+        showPublicInfo
+      );
     } catch (error) {
       console.error(error);
       const {
@@ -257,8 +288,10 @@ export const BigButtonList = ({
     setIsImportSchemaVisible(true);
   };
 
-  const onImportSchemaError = async ({ xhr, files }) => {
+  const onImportSchemaError = async ({ xhr }) => {
     if (xhr.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+    } else {
       notificationContext.add({ type: 'IMPORT_DATASET_SCHEMA_FAILED_EVENT' });
     }
   };
@@ -497,39 +530,36 @@ export const BigButtonList = ({
     ));
   };
 
-  const bigButtonList = uniqBy(
-    useBigButtonList({
-      dataflowId,
-      dataflowState,
-      dataProviderId,
-      getDatasetData,
-      getDataHistoricReleases,
-      getDeleteSchemaIndex,
-      handleExportEuDataset,
-      handleRedirect,
-      isActiveButton,
-      isCloningDataflow,
-      isImportingDataflow,
-      isLeadReporterOfCountry,
-      onCloneDataflow,
-      onImportSchema,
-      onLoadEuDatasetIntegration,
-      onLoadReceiptData,
-      onSaveName,
-      onShowCopyDataCollectionToEuDatasetModal,
-      onShowDataCollectionModal,
-      onShowExportEuDatasetModal,
-      onShowManualTechnicalAcceptanceDialog,
-      onShowHistoricReleases,
-      onShowManageReportersDialog,
-      onShowNewSchemaDialog,
-      onOpenReleaseConfirmDialog,
-      onShowUpdateDataCollectionModal,
-      setErrorDialogData,
-      updatedDatasetSchema
-    }),
-    'caption'
-  )
+  const bigButtonList = useBigButtonList({
+    dataflowId,
+    dataflowState,
+    dataProviderId,
+    getDataHistoricReleases,
+    getDataHistoricReleasesByRepresentatives,
+    getDatasetData,
+    getDeleteSchemaIndex,
+    handleExportEuDataset,
+    handleRedirect,
+    isActiveButton,
+    isCloningDataflow,
+    isLeadReporterOfCountry,
+    onCloneDataflow,
+    onImportSchema,
+    onLoadEuDatasetIntegration,
+    onLoadReceiptData,
+    onOpenReleaseConfirmDialog,
+    onSaveName,
+    onShowCopyDataCollectionToEuDatasetModal,
+    onShowDataCollectionModal,
+    onShowExportEuDatasetModal,
+    onShowHistoricReleases,
+    onShowManageReportersDialog,
+    onShowManualTechnicalAcceptanceDialog,
+    onShowNewSchemaDialog,
+    onShowUpdateDataCollectionModal,
+    setErrorDialogData,
+    updatedDatasetSchema
+  })
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
 
@@ -666,6 +696,7 @@ export const BigButtonList = ({
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
           header={resources.messages['createDataCollection']}
+          footerAddon={checkShowPublicInfo}
           labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['create']}
           onConfirm={() => setIsConfirmCollectionDialog(true)}
