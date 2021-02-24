@@ -1,5 +1,4 @@
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
