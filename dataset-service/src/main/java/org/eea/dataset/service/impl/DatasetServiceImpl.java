@@ -3239,12 +3239,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
       throws IOException, EEAException {
-    // we compound the route
-    String location = new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
-        .append("\\dataProvider-").append(dataProviderId).append("\\").append(fileName)
-        .append(".xlsx").toString();
-
-    File file = new File(location);
+    // we compound the route and create the file
+    File file =
+        new File(new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+            "\\dataProvider-" + dataProviderId.toString()), "\\"), fileName + ".xlsx");
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
