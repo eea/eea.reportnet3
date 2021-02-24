@@ -544,6 +544,21 @@
         },
         {
           "key": "GENERIC_BLOCKED_ERROR"
+        },
+        {
+          "key": "DELETE_REPRESENTATIVE_ERROR"
+        },
+        {
+          "key": "DELETE_LEAD_REPORTER_ERROR"        
+        },
+        {
+          "key": "ADD_DATA_PROVIDER_ERROR"
+        },
+        {
+          "key": "UPDATE_DATA_PROVIDER_ERROR"
+        },
+        {
+          "key": "GET_REPRESENTATIVES_ERROR"
         }
       ]
     },

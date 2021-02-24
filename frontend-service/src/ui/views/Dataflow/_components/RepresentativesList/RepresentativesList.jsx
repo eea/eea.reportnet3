@@ -64,7 +64,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
   }, [formState.selectedDataProviderGroup]);
 
   useEffect(() => {
-    createUnusedOptionsList(formDispatcher);
+    createUnusedOptionsList();
   }, [formState.allPossibleDataProviders]);
 
   useEffect(() => {
@@ -89,15 +89,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     }
   }, [formState.representatives]);
 
-  const handleDialogs = (dialog, isVisible) => {
-    formDispatcher({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
-  };
-
-  const createUnusedOptionsList = formDispatcher => {
-    formDispatcher({
-      type: 'CREATE_UNUSED_OPTIONS_LIST'
-    });
-  };
+  const createUnusedOptionsList = () => formDispatcher({ type: 'CREATE_UNUSED_OPTIONS_LIST' });
 
   const getAllDataProviders = async () => {
     const { representatives, selectedDataProviderGroup } = formState;
@@ -121,9 +113,10 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
   const getInitialData = async () => {
     await getProviderTypes();
     await getAllRepresentatives();
+
     if (!isEmpty(formState.representatives)) {
       await getAllDataProviders();
-      createUnusedOptionsList(formDispatcher);
+      createUnusedOptionsList();
     }
   };
 
@@ -139,21 +132,21 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       });
     } catch (error) {
       console.error('error on RepresentativeService.allRepresentatives', error);
-      //TODO
+      notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' });
     }
   };
 
   const getProviderTypes = async () => {
     try {
       const providerTypes = await RepresentativeService.getProviderTypes();
-      formDispatcher({
-        type: 'GET_PROVIDERS_TYPES_LIST',
-        payload: { providerTypes }
-      });
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes } });
     } catch (error) {
       console.error('error on  RepresentativeService.getProviderTypes', error);
-      //TODO
     }
+  };
+
+  const handleDialogs = (dialog, isVisible) => {
+    formDispatcher({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
   };
 
   const onAddRepresentative = async () => {
@@ -161,10 +154,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
 
     const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
     if (!isEmpty(newRepresentative[0].dataProviderId)) {
-      formDispatcher({
-        type: 'SET_IS_LOADING',
-        payload: { isLoading: true }
-      });
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
       try {
         await RepresentativeService.add(
           dataflowId,
@@ -172,17 +162,12 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
           parseInt(newRepresentative[0].dataProviderId)
         );
 
-        formDispatcher({
-          type: 'REFRESH'
-        });
+        formDispatcher({ type: 'REFRESH' });
       } catch (error) {
         console.error('error on RepresentativeService.add', error);
-        //TODO
+        notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' });
       } finally {
-        formDispatcher({
-          type: 'SET_IS_LOADING',
-          payload: { isLoading: false }
-        });
+        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     }
   };
@@ -207,38 +192,30 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
         representative => representative.representativeId !== formState.representativeIdToDelete
       );
 
-      formDispatcher({
-        type: 'DELETE_REPRESENTATIVE',
-        payload: { updatedList }
-      });
+      formDispatcher({ type: 'DELETE_REPRESENTATIVE', payload: { updatedList } });
     } catch (error) {
       console.error('error on RepresentativeService.deleteById: ', error);
-      //TODO => notificationContext.add({ type: 'DATAFLOW_DELETE_REPRESENTATIVE_ERROR', content: { dataflowId } });
+      notificationContext.add({ type: 'DELETE_REPRESENTATIVE_ERROR' });
+    } finally {
+      formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' });
     }
   };
 
   const onDataProviderIdChange = async (newDataProviderId, representative) => {
     if (!isNil(representative.representativeId)) {
-      formDispatcher({
-        type: 'SET_IS_LOADING',
-        payload: { isLoading: true }
-      });
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
 
       try {
         await RepresentativeService.updateDataProviderId(
           parseInt(representative.representativeId),
           parseInt(newDataProviderId)
         );
-        formDispatcher({
-          type: 'REFRESH'
-        });
+        formDispatcher({ type: 'REFRESH' });
       } catch (error) {
         console.error('error on RepresentativeService.updateDataProviderId', error);
+        notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' });
       } finally {
-        formDispatcher({
-          type: 'SET_IS_LOADING',
-          payload: { isLoading: false }
-        });
+        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     } else {
       const { representatives } = formState;
@@ -248,10 +225,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       );
       thisRepresentative.dataProviderId = newDataProviderId;
 
-      formDispatcher({
-        type: 'ON_PROVIDER_CHANGE',
-        payload: { representatives }
-      });
+      formDispatcher({ type: 'ON_PROVIDER_CHANGE', payload: { representatives } });
     }
   };
 
@@ -260,12 +234,13 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
 
       if (response.status >= 200 && response.status <= 299) {
-        handleDialogs('deleteLeadReporter', false);
         formDispatcher({ type: 'REFRESH' });
       }
     } catch (error) {
       console.error('error on RepresentativeService.deleteLeadReporter', error);
-      //TODO
+      notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
+    } finally {
+      handleDialogs('deleteLeadReporter', false);
     }
   };
 
@@ -291,7 +266,6 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
           }
         } catch (error) {
           console.error('error on RepresentativeService.addLeadReporter', error);
-          //TODO
 
           onCreateError(dataProviderId, hasErrors, leadReporter.id);
         }
