@@ -378,11 +378,9 @@ public interface DatasetController {
    * @param fileName the file name
    * @return the response entity
    */
-  @GetMapping(value = "/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity<InputStreamResource> exportPublicFile(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId,
-      @RequestParam(value = "fileName", required = true) String fileName);
+  @GetMapping("/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  ResponseEntity<InputStreamResource> exportPublicFile(@PathVariable Long dataflowId,
+      @PathVariable Long dataProviderId, @RequestParam String fileName);
 
 
   /**
