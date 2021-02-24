@@ -1127,7 +1127,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     for (String view : viewList) {
       executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
     }
-    LOG.info("These views: {} have been deleted.", viewList);
+    LOG.info("These views: {} have been refreshed.", viewList);
   }
 
 
