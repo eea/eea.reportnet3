@@ -295,7 +295,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
       return (
         <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
           <InputText
-            autoFocus
+            autoFocus={isNewLeadReporter}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
