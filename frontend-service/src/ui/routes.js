@@ -5,7 +5,7 @@ export const routes = {
   DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
   DATAFLOW_FEEDBACK_CUSTODIAN: '/dataflow/:dataflowId/feedback',
   DATAFLOW_FEEDBACK: '/dataflow/:dataflowId/feedback/:representativeId',
-  DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/representativeId/:representativeId',
+  DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/provider/:representativeId',
   DATAFLOW: '/dataflow/:dataflowId',
   DATAFLOWS_ERROR: '/dataflows/error/:errorType',
   DATAFLOWS: '/dataflows',
@@ -18,6 +18,5 @@ export const routes = {
   PRIVACY_STATEMENT: '/privacyPolicy',
   PUBLIC_DATAFLOW_INFORMATION: '/publicDataflow/:dataflowId',
   PUBLIC_DATAFLOWS: '/publicDataflows',
-  REPRESENTATIVE: '/dataflow/:dataflowId/representative/:representative',
   SETTINGS: '/settings'
 };
