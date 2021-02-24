@@ -288,8 +288,10 @@ export const BigButtonList = ({
     setIsImportSchemaVisible(true);
   };
 
-  const onImportSchemaError = async ({ xhr, files }) => {
+  const onImportSchemaError = async ({ xhr }) => {
     if (xhr.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+    } else {
       notificationContext.add({ type: 'IMPORT_DATASET_SCHEMA_FAILED_EVENT' });
     }
   };
