@@ -62,7 +62,6 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
-import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
@@ -1011,19 +1010,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
         .collect(Collectors.toList());
-    // List of the representatives
-    List<RepresentativeVO> representatives =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
-            .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
+
     // Lock all the operations related to the datasets involved
-    addLocksRelatedToRelease(datasetsFilters, representatives, dataflowId);
+    addLocksRelatedToRelease(datasetsFilters, dataflowId);
 
     // Update representative visibility
     representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
         dataProviderId, restrictFromPublic);
 
     validationControllerZuul.validateDataSetData(dataset.getId(), true);
-
   }
 
 
@@ -1114,7 +1109,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     lockService.removeLockByCriteria(releaseSnapshots);
   }
 
-
   /**
    * Adds the locks related to release.
    *
@@ -1123,68 +1117,69 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void addLocksRelatedToRelease(List<Long> datasets, List<RepresentativeVO> representatives,
-      Long dataflowId) throws EEAException {
-    // We have to lock all the dataset operations (insert, delete, update...)
-    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-    for (Long datasetId : datasets) {
-      Map<String, Object> mapCriteria = new HashMap<>();
-      mapCriteria.put("datasetId", datasetId);
-      // Insert
-      createLockWithSignature(LockSignature.INSERT_RECORDS, mapCriteria, userName);
-      // Delete
-      createLockWithSignature(LockSignature.DELETE_RECORDS, mapCriteria, userName);
-      // Update field
-      createLockWithSignature(LockSignature.UPDATE_FIELD, mapCriteria, userName);
-      // Update record
-      createLockWithSignature(LockSignature.UPDATE_RECORDS, mapCriteria, userName);
-      // Delete dataset
-      createLockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteria, userName);
-      // Multiple table insert records (PAMS)
-      createLockWithSignature(LockSignature.INSERT_RECORDS_MULTITABLE, mapCriteria, userName);
+  private void addLocksRelatedToRelease(List<Long> datasets, Long dataflowId) throws EEAException {
 
-      // Delete table and import tables
+    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+    for (Long datasetId : datasets) {
+
+      Map<String, Object> insertRecords = new HashMap<>();
+      insertRecords.put(LiteralConstants.SIGNATURE, LockSignature.INSERT_RECORDS.getValue());
+      insertRecords.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, insertRecords);
+
+      Map<String, Object> deleteRecords = new HashMap<>();
+      deleteRecords.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_RECORDS.getValue());
+      deleteRecords.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, deleteRecords);
+
+      Map<String, Object> updateField = new HashMap<>();
+      updateField.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_FIELD.getValue());
+      updateField.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, updateField);
+
+      Map<String, Object> updateRecords = new HashMap<>();
+      updateRecords.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_RECORDS.getValue());
+      updateRecords.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, updateRecords);
+
+      Map<String, Object> deleteDatasetValues = new HashMap<>();
+      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+          LockSignature.DELETE_DATASET_VALUES.getValue());
+      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, deleteDatasetValues);
+
+      Map<String, Object> insertRecordsMultitable = new HashMap<>();
+      insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
+          LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
+      insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, insertRecordsMultitable);
+
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, importFileData);
+
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {
-        Map<String, Object> mapCriteriaTables = new HashMap<>();
-        mapCriteriaTables.put("datasetId", datasetId);
-        mapCriteriaTables.put("tableSchemaId", table.getIdTableSchema());
-
-        createLockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaTables, userName);
+        Map<String, Object> deleteImportTable = new HashMap<>();
+        deleteImportTable.put(LiteralConstants.SIGNATURE,
+            LockSignature.DELETE_IMPORT_TABLE.getValue());
+        deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+        deleteImportTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
+        lockService.createLock(timestamp, userName, LockType.METHOD, deleteImportTable);
       }
-      // Import
-      createLockWithSignature(LockSignature.IMPORT_FILE_DATA, mapCriteria, userName);
 
-      // Set the 'releasing' property to true in the dataset metabase
       ReportingDatasetVO reportingVO = new ReportingDatasetVO();
       reportingVO.setId(datasetId);
       reportingVO.setReleasing(true);
       reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
-
     }
-    // Lock the operation to copy from the DC to the EU
-    Map<String, Object> mapCriteriaCopyToEu = new HashMap<>();
-    mapCriteriaCopyToEu.put("dataflowId", dataflowId);
-    createLockWithSignature(LockSignature.POPULATE_EU_DATASET, mapCriteriaCopyToEu, userName);
 
+    Map<String, Object> populateEuDataset = new HashMap<>();
+    populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
+    populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.createLock(timestamp, userName, LockType.METHOD, populateEuDataset);
   }
-
-  /**
-   * Creates the lock with signature.
-   *
-   * @param lockSignature the lock signature
-   * @param mapCriteria the map criteria
-   * @param userName the user name
-   * @throws EEAException the EEA exception
-   */
-  private void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
-      String userName) throws EEAException {
-    mapCriteria.put("signature", lockSignature.getValue());
-    LockVO lockVO = lockService.findByCriteria(mapCriteria);
-    if (lockVO == null) {
-      lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
-          mapCriteria);
-    }
-  }
-
 }
