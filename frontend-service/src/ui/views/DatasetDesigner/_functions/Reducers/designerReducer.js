@@ -23,6 +23,7 @@ export const designerReducer = (state, { type, payload }) => {
         datasetStatistics: payload.datasetStatistics,
         dataViewerOptions: {
           ...state.dataViewerOptions,
+          selectedRecordErrorId: -1,
           tableSchemaId:
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')

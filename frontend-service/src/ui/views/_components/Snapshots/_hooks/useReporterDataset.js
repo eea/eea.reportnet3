@@ -40,7 +40,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -60,7 +60,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -96,11 +96,14 @@ const useReporterDataset = (datasetId, dataflowId) => {
 
   const onRestoreSnapshot = async () => {
     try {
+      notificationContext.add({
+        type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO'
+      });
       await SnapshotService.restoreByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'SNAPSHOT_ACTION_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({

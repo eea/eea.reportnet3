@@ -59,7 +59,7 @@
     "clearFilter": "Clear filter",
     "clearFilters": "Clear filters",
     "cloneDatasetSchemasInit": "Cloning dataset schemas from <strong>{:sourceDataflowName}</strong> to <strong>{:targetDataflowName}</strong>.",
-    "cloneNewSchemaError": "Error. The cloning process is already running.",
+    "cloneNewSchemaError": "Failed clonning the schemas",
     "cloneSchemasFromDataflow": "Clone all schemas from dataflow",
     "cloneSelectedDataflow": "Clone selected dataflow",
     "close": "Close",
@@ -319,7 +319,6 @@
     "duplicatedUniqueConstraint": "The unique constraint already exists",
     "duplicateSchemaError": "The schema name already exists, Please choose another one.",
     "edit": "Edit",
-    "editAddDataReleasingError": "Error. The process is already running.",
     "editDocument": "Edit document",
     "editExternalIntegration": "Edit external integration",
     "editFieldConstraint": "Edit Field Constraint",
@@ -412,7 +411,6 @@
     "fieldComparisonLabel": "Field comparison",
     "fieldConstraintTableFieldNoOptions": "No tables yet",
     "fieldData": "Field name",
-    "fieldDeleteBlockedError": "Failure in the delete process. Please wait until the end of the previous operation",
     "fieldIsNotCreated": "The field {:fieldName} is not created in the design, please check it",
     "fieldRecords": "Field records: ",
     "fieldRelationsLabel": "Field relations",
@@ -423,7 +421,6 @@
     "fileExtension": "File extension",
     "fileExtensionsSelection": "No valid file extensions selected",
     "fileTitle": "File title",
-    "fileUploadBlockedError": "Failed in the upload process. Please wait until the end of the previous import",
     "filter": "Filter",
     "filterByDataset": "Filter by dataset",
     "filterByTable": "Filter by table",
@@ -766,7 +763,6 @@
     "showValidations": "Show validations",
     "sidebarApiKeyBtn": "API-key",
     "single": "Single",
-    "snapshotActionBlockedError": "Failure in the Manage copy's process. Please wait until the end of the previous operation",
     "snapshotAllDesignerError": "Copy listing error at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshotCreationError": "Copy creation error at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "snapshotDeleteError": "Copy delete error at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
@@ -981,6 +977,10 @@
     "externalImportReportingFromOtherSystemBlockedFailedEvent": "Failed importing data. Please wait until the end of the previous operation",
     "addRecordsBlockedError": "There has been an error adding a record. Please wait until the end of the previous operation",
     "publicDataflowsBreadcrumbs": "Public dataflows",
-    "publicDataflowBreadcrumbs": "Dataflow"
+    "publicDataflowBreadcrumbs": "Dataflow",
+    "deleteDatasetDataInit": "Dataset data deleting...",
+    "restoreDatasetSnapshotInitInfo": "Restoring copy...",
+    "deleteTableDataInit": "Table data deleting...",
+    "genericBlockedError": "This operation is blocked because there is already another process running"
   }
 }

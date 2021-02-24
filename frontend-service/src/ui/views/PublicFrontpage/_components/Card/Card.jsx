@@ -14,7 +14,7 @@ export const Card = card => {
       <div className={styles.content}>
         <div className={styles.text}>
           <h3 className={styles.title} title={card.dataflow}>
-            <a href={card.dataFlowUrl} target="_blank" title={card.dataflow}>
+            <a href={card.dataFlowUrl} target="_blank" rel="noopener noreferrer" title={card.dataflow}>
               <span>
                 {card.dataflow}{' '}
                 <FontAwesomeIcon
@@ -27,7 +27,7 @@ export const Card = card => {
           </h3>
           <h4 className={styles.subtitle} title={card.legalInstrument}>
             {card.legalInstrumentUrl ? (
-              <a href={card.legalInstrumentUrl} target="_blank">
+              <a href={card.legalInstrumentUrl} target="_blank" rel="noopener noreferrer">
                 <span>
                   {card.legalInstrument}{' '}
                   <FontAwesomeIcon

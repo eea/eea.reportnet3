@@ -11,7 +11,6 @@ import { FilterList } from './_components/FilterList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { filterReducer } from './_functions/filterReducer';
 
@@ -20,7 +19,6 @@ import { ErrorUtils } from 'ui/views/_functions/Utils';
 
 export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName, isVisible }) => {
   const resources = useContext(ResourcesContext);
-  const themeContext = useContext(ThemeContext);
   const initialFiltersState = {
     data: {},
     originalData: {},
@@ -155,7 +153,7 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
     scales: {
       xAxes: [
         {
-          stacked: true,        
+          stacked: true,
           gridLines: { display: false }
         }
       ],
