@@ -78,17 +78,6 @@ const apiRepresentative = {
       url: getUrl(RepresentativeConfig.updateLeadReporter, {}),
       data: { email: leadReporterAccount, id: leadReporterId, representativeId }
     });
-  },
-
-  updateProviderAccount: async (representativeId, providerAccount) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.updateProviderAccount, {}),
-      data: {
-        id: representativeId,
-        providerAccounts: [providerAccount]
-      }
-    });
-    return response;
   }
 };
 

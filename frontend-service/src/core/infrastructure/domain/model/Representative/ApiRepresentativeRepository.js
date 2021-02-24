@@ -69,9 +69,6 @@ const updateDataProviderId = async (representativeId, dataProviderId) =>
 const updateLeadReporter = async (leadReporterAccount, leadReporterId, representativeId) =>
   await apiRepresentative.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId);
 
-const updateProviderAccount = async (representativeId, providerAccount) =>
-  await apiRepresentative.updateProviderAccount(representativeId, providerAccount);
-
 export const ApiRepresentativeRepository = {
   add,
   addLeadReporter,
@@ -81,6 +78,5 @@ export const ApiRepresentativeRepository = {
   deleteLeadReporter,
   getProviderTypes,
   updateDataProviderId,
-  updateLeadReporter,
-  updateProviderAccount
+  updateLeadReporter
 };
