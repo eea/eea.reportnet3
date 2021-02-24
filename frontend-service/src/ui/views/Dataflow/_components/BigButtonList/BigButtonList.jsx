@@ -167,6 +167,8 @@ export const BigButtonList = ({
     } catch (error) {
       console.error(error);
       if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
       }
     }

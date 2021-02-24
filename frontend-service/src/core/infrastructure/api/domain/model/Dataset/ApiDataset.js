@@ -2,8 +2,6 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-import isNil from 'lodash/isNil';
-
 export const apiDataset = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
     try {
@@ -46,18 +44,13 @@ export const apiDataset = {
     }
   },
   deleteDataById: async datasetId => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteImportData, {
-          datasetId: datasetId
-        })
-      });
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteImportData, {
+        datasetId: datasetId
+      })
+    });
 
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset data: ${error}`);
-      return false;
-    }
+    return response;
   },
   deleteFileData: async (datasetId, fieldId) => {
     try {
@@ -98,19 +91,14 @@ export const apiDataset = {
     return response.status;
   },
   deleteTableDataById: async (datasetId, tableId) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteImportTable, {
-          datasetId: datasetId,
-          tableId: tableId
-        })
-      });
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteImportTable, {
+        datasetId: datasetId,
+        tableId: tableId
+      })
+    });
 
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset table data: ${error}`);
-      return false;
-    }
+    return response;
   },
 
   deleteTableDesign: async (datasetId, tableSchemaId) => {

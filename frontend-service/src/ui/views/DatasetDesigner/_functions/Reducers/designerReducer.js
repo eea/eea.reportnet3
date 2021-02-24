@@ -11,10 +11,6 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_DATASET_DATA':
       return {
         ...state,
-        dataViewerOptions: {
-          ...state.dataViewerOptions,
-          selectedRecordErrorId: -1
-        },
         datasetDescription: payload.description,
         datasetSchema: payload.datasetSchema,
         datasetSchemaAllTables: payload.tables,
@@ -22,6 +18,7 @@ export const designerReducer = (state, { type, payload }) => {
         datasetStatistics: payload.datasetStatistics,
         dataViewerOptions: {
           ...state.dataViewerOptions,
+          selectedRecordErrorId: -1,
           tableSchemaId:
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')

@@ -4,7 +4,7 @@ export const parseTables = rawTables => {
   const tablesOptions = [];
   const tables = [];
   for (const table of rawTables) {
-    const { tableSchemaName, tableSchemaId, records } = table;
+    const { tableSchemaName, tableSchemaId } = table;
     tablesOptions.push({
       label: table.tableSchemaName,
       value: table.tableSchemaId
