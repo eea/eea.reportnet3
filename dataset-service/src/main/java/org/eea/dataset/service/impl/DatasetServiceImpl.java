@@ -3192,13 +3192,12 @@ public class DatasetServiceImpl implements DatasetService {
     List<RepresentativeVO> representativeList =
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
 
-    // we took representative
-    RepresentativeVO representative = representativeList.stream()
-        .filter(data -> data.getDataProviderId() == dataSetDataProvider).findAny().orElse(null);
+    // we find representative
+    RepresentativeVO representative = representativeList.stream().filter(
+        representativeData -> representativeData.getDataProviderId().equals(dataSetDataProvider))
+        .findAny().orElse(null);
 
-    // we check if the representative have permit to do it
-    if (null != representative && !representative.isRestrictFromPublic()) {
-
+    if (null != representative) {
       // we create the dataflow folder to save it
       Path pathDataflow = Paths
           .get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId).toString());
@@ -3216,12 +3215,14 @@ public class DatasetServiceImpl implements DatasetService {
       if (directoryDataflow.exists()) {
         FileUtils.deleteDirectory(new File(pathDataProvider.toString()));
       }
-      Files.createDirectories(pathDataProvider);
-      LOG.info("Folder {} created", pathDataProvider);
+      if (!representative.isRestrictFromPublic()) {
 
-      creeateAllDatasetFiles(dataflowId, pathDataProvider, representative.getDataProviderId());
+        Files.createDirectories(pathDataProvider);
+        LOG.info("Folder {} created", pathDataProvider);
+        // we check if the representative have permit to do it
+        creeateAllDatasetFiles(dataflowId, pathDataProvider, representative.getDataProviderId());
+      }
     }
-
   }
 
 
@@ -3238,11 +3239,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
       throws IOException, EEAException {
-    // we compound the route
-    String location = new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
-        .append("\\dataProvider-").append(dataProviderId).append("\\").append(fileName)
-        .append(".xlsx").toString();
-    File file = new File(location);
+    // we compound the route and create the file
+    File file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+        "dataProvider-" + dataProviderId.toString()), fileName + ".xlsx");
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
