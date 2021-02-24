@@ -3240,9 +3240,8 @@ public class DatasetServiceImpl implements DatasetService {
   public File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
       throws IOException, EEAException {
     // we compound the route and create the file
-    File file =
-        new File(new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-            "\\dataProvider-" + dataProviderId.toString()), "\\"), fileName + ".xlsx");
+    File file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+        "\\dataProvider-" + dataProviderId.toString()), fileName + ".xlsx");
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
