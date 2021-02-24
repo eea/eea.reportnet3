@@ -504,7 +504,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'VALIDATE_DATA_BLOCKED_ERROR'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({
@@ -789,7 +789,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
     if (xhr.status === 423) {
       notificationContext.add({
-        type: 'FILE_UPLOAD_BLOCKED_ERROR',
+        type: 'GENERIC_BLOCKED_ERROR',
         content: {
           dataflowId,
           datasetId,
@@ -818,7 +818,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
-          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_BLOCKED_FAILED_EVENT'
+          type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
         notificationContext.add({

@@ -52,7 +52,7 @@ export const PublicFrontpage = () => {
                       </p>
                       <p>
                         Reportnet 2.0 can be accessed here: &nbsp;
-                        <a href="http://cdr.eionet.europa.eu/" target="_blank">
+                        <a href="http://cdr.eionet.europa.eu/" target="_blank" rel="noopener noreferrer">
                           http://cdr.eionet.europa.eu/
                         </a>
                       </p>
@@ -91,28 +91,32 @@ export const PublicFrontpage = () => {
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3.0`}
-                          target="_blank">
+                          target="_blank"
+                          rel="noopener noreferrer">
                           Login
                         </a>
                       </li>
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3.0`}
-                          target="_blank">
+                          target="_blank"
+                          rel="noopener noreferrer">
                           Reporter
                         </a>
                       </li>
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3.0`}
-                          target="_blank">
+                          target="_blank"
+                          rel="noopener noreferrer">
                           Requester
                         </a>
                       </li>
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
-                          target="_blank">
+                          target="_blank"
+                          rel="noopener noreferrer">
                           Webforms
                         </a>
                       </li>
@@ -144,12 +148,20 @@ export const PublicFrontpage = () => {
                 <h3>External portals</h3>
               </div>
               <div className={styles.portalList}>
-                <a className={styles.portalBox} href="http://cdr.eionet.europa.eu/" target="_blank">
+                <a
+                  className={styles.portalBox}
+                  href="http://cdr.eionet.europa.eu/"
+                  target="_blank"
+                  rel="noopener noreferrer">
                   <img height="50px" src={logo} alt="Reportnet 2.0 Portal" />
                   <h4>Reportnet 2</h4>
                   <p>Reportnet is Eionet’s infrastructure for supporting and improving data and information flows.</p>
                 </a>
-                <a className={styles.portalBox} href="https://rod.eionet.europa.eu/" target="_blank">
+                <a
+                  className={styles.portalBox}
+                  href="https://rod.eionet.europa.eu/"
+                  target="_blank"
+                  rel="noopener noreferrer">
                   <img height="50px" src={logo} alt="ROD 3 Portal" />
                   <h4>ROD 3</h4>
                   <p>EEA's reporting obligations database</p>

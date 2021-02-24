@@ -123,8 +123,6 @@ export const AwesomeIcons = icon => {
       return faSortAlphaDown;
     case 'alphabeticOrderUp':
       return faSortAlphaUpAlt;
-    case 'angleUp':
-      return faAngleDoubleUp;
     case 'angleSingleUp':
       return faAngleUp;
     case 'angleDoubleLeft':

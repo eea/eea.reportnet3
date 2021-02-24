@@ -35,7 +35,6 @@ const ActionsToolbar = ({
   isFilterable = true,
   isFilterValidationsActive,
   isLoading,
-  isTableDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
   levelErrorTypesWithCorrects,
@@ -229,11 +228,11 @@ const ActionsToolbar = ({
         {(hasWritePermissions || showWriteButtons) && (
           <Button
             className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
-              !hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted || isDataflowOpen
+              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen
                 ? null
                 : 'p-button-animated-blink'
             }`}
-            disabled={!hasWritePermissions || isUndefined(records.totalRecords) || isTableDeleted || isDataflowOpen}
+            disabled={!hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen}
             icon={'trash'}
             label={resources.messages['deleteTable']}
             onClick={() => onSetVisible(setDeleteDialogVisible, true)}
