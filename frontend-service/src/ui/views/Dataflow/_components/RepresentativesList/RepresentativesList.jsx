@@ -168,7 +168,6 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
         <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
           <InputText
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
-            disabled={hasDatasets && !isNewLeadReporter}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
