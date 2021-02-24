@@ -13,6 +13,8 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.lock.annotation.LockCriteria;
+import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -349,11 +351,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PostMapping("/{representativeId}/leadReporter")
+  @LockMethod(removeWhenFinish = false)
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Create one Lead reporter", response = Long.class)
   public Long createLeadReporter(
-      @ApiParam(value = "Representative id",
-          example = "0") @PathVariable("representativeId") Long representativeId,
+      @ApiParam(value = "Representative id", example = "0") @LockCriteria(
+          name = "representativeId") @PathVariable("representativeId") Long representativeId,
       @ApiParam(type = "Object",
           value = "Lead reporter Object") @RequestBody LeadReporterVO leadReporterVO) {
 
