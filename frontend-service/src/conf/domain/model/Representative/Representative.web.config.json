@@ -1,6 +1,6 @@
 {
   "add": "/representative/{:dataflowId}",
-  "addLeadReporter": "/representative/{:representativeId}/leadReporter/",
+  "addLeadReporter": "/representative/{:representativeId}/leadReporter",
   "allDataProviders": "/representative/dataProvider/{:dataProviderGroupId}",
   "allRepresentatives": "/representative/dataflow/{:dataflowId}",
   "deleteById": "/representative/{:representativeId}",
