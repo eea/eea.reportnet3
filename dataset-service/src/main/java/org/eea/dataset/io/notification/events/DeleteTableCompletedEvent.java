@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -19,10 +18,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DeleteTableCompletedEvent implements NotificableEventHandler {
-
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
 
   /** The dataset metabase service. */
   @Autowired
@@ -55,9 +50,10 @@ public class DeleteTableCompletedEvent implements NotificableEventHandler {
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long datasetId = notificationVO.getDatasetId();
-    Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
-        : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
     DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
+        : datasetVO.getDataflowId();
+
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
         : datasetVO.getDataSetName();
     String dataflowName =
