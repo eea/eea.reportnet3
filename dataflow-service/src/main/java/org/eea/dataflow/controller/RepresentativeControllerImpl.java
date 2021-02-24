@@ -425,4 +425,19 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
     }
   }
+
+  /**
+   * Update internal representative.
+   *
+   * @param representativeVO the representative VO
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/update")
+  @PreAuthorize("isAuthenticated()")
+  public Long updateInternalRepresentative(@RequestBody RepresentativeVO representativeVO) {
+
+    return representativeService.updateDataflowRepresentative(representativeVO);
+  }
 }
