@@ -3,7 +3,6 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 import remove from 'lodash/remove';
-import uniqBy from 'lodash/uniqBy';
 
 import { DataflowConfig } from 'conf/domain/model/Dataflow';
 
