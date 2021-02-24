@@ -801,7 +801,8 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(userManagementControllerZull.getUserByUserId(Mockito.any()))
         .thenReturn(userRepresentationVO);
     datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
-    Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
+    Mockito.verify(representativeControllerZuul, times(1))
+        .updateInternalRepresentative(Mockito.any());
   }
 
   /**

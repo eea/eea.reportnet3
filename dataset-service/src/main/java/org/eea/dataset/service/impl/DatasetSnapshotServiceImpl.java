@@ -509,7 +509,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           // We only update the representative if the receipt is not outdated
           if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
             representative.setReceiptOutdated(true);
-            representativeControllerZuul.updateRepresentative(representative);
+            representativeControllerZuul.updateInternalRepresentative(representative);
             LOG.info(
                 "Receipt marked as outdated: dataflowId={}, datasetId={}, providerId={}, representativeId={}",
                 idDataflow, idDataset, provider.getId(), representative.getId());
@@ -864,7 +864,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         // update provider. Button downloaded = true && outdated = false
         representative.setReceiptDownloaded(true);
         representative.setReceiptOutdated(false);
-        representativeControllerZuul.updateRepresentative(representative);
+        representativeControllerZuul.updateInternalRepresentative(representative);
         LOG.info("Receipt from the representative {} marked as downloaded", representative.getId());
       }
     }
