@@ -679,9 +679,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
-                dataflowRepresentatives={dataflowState.data.representatives}
                 dataflowId={dataflowId}
-                isActiveManageRolesDialog={dataflowState.isManageRolesDialogVisible}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setFormHasRepresentatives={setFormHasRepresentatives}
               />
