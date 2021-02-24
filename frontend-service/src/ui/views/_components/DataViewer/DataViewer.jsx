@@ -61,7 +61,6 @@ const DataViewer = withRouter(
     hasCountryCode,
     hasWritePermissions,
     isDataflowOpen,
-    isDatasetDeleted = false,
     isExportable,
     isFilterable,
     isGroupedValidationDeleted,
@@ -138,7 +137,6 @@ const DataViewer = withRouter(
       firstPageRecord: 0,
       geometryType: '',
       initialRecordValue: undefined,
-      isAllDataDeleted: isDatasetDeleted,
       isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
@@ -311,16 +309,7 @@ const DataViewer = withRouter(
       if (records.isMapOpen) {
         datatableRef.current.closeEditingCell();
       }
-      // else {
-      //   dispatchRecords({ type: 'RESET_DRAW_ELEMENTS' });
-      // }
     }, [records.isMapOpen]);
-
-    useEffect(() => {
-      if (isDatasetDeleted) {
-        dispatchRecords({ type: 'IS_ALL_DATA_DELETED', payload: true });
-      }
-    }, [isDatasetDeleted]);
 
     useEffect(() => {
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: false });
