@@ -3197,9 +3197,7 @@ public class DatasetServiceImpl implements DatasetService {
         .filter(data -> data.getDataProviderId().equals(dataSetDataProvider)).findAny()
         .orElse(null);
 
-    // we check if the representative have permit to do it
-    if (null != representative && !representative.isRestrictFromPublic()) {
-
+    if (null != representative) {
       // we create the dataflow folder to save it
       Path pathDataflow = Paths
           .get(new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId).toString());
@@ -3217,12 +3215,14 @@ public class DatasetServiceImpl implements DatasetService {
       if (directoryDataflow.exists()) {
         FileUtils.deleteDirectory(new File(pathDataProvider.toString()));
       }
-      Files.createDirectories(pathDataProvider);
-      LOG.info("Folder {} created", pathDataProvider);
+      if (!representative.isRestrictFromPublic()) {
 
-      creeateAllDatasetFiles(dataflowId, pathDataProvider, representative.getDataProviderId());
+        Files.createDirectories(pathDataProvider);
+        LOG.info("Folder {} created", pathDataProvider);
+        // we check if the representative have permit to do it
+        creeateAllDatasetFiles(dataflowId, pathDataProvider, representative.getDataProviderId());
+      }
     }
-
   }
 
 
@@ -3243,6 +3243,7 @@ public class DatasetServiceImpl implements DatasetService {
     String location = new StringBuilder(pathPublicFile).append("dataflow-").append(dataflowId)
         .append("\\dataProvider-").append(dataProviderId).append("\\").append(fileName)
         .append(".xlsx").toString();
+
     File file = new File(location);
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
