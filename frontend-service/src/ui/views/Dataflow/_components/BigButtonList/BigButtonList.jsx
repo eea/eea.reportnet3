@@ -3,7 +3,6 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 import remove from 'lodash/remove';
-import uniqBy from 'lodash/uniqBy';
 
 import { DataflowConfig } from 'conf/domain/model/Dataflow';
 
@@ -12,6 +11,7 @@ import styles from './BigButtonList.module.scss';
 import { BigButton } from '../BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
@@ -109,6 +109,7 @@ export const BigButtonList = ({
   });
 
   const [providerId, setProviderId] = useState(null);
+  const [showPublicInfo, setShowPublicInfo] = useState(true);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
@@ -152,6 +153,23 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
+
+  const checkShowPublicInfo = (
+    <div style={{ float: 'left' }}>
+      <Checkbox
+        id={`show_public_info_checkbox`}
+        inputId={`show_public_info_checkbox`}
+        isChecked={showPublicInfo}
+        onChange={e => setShowPublicInfo(e.checked)}
+        role="checkbox"
+      />
+      <label
+        onClick={() => setShowPublicInfo(!showPublicInfo)}
+        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        {resources.messages['showPublicInfo']}
+      </label>
+    </div>
+  );
 
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
@@ -245,7 +263,13 @@ export const BigButtonList = ({
     setIsActiveButton(false);
 
     try {
-      return await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, true);
+      return await DataCollectionService.create(
+        dataflowId,
+        getDate(),
+        isManualTechnicalAcceptance,
+        true,
+        showPublicInfo
+      );
     } catch (error) {
       console.error(error);
       const {
@@ -669,6 +693,7 @@ export const BigButtonList = ({
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
           header={resources.messages['createDataCollection']}
+          footerAddon={checkShowPublicInfo}
           labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['create']}
           onConfirm={() => setIsConfirmCollectionDialog(true)}

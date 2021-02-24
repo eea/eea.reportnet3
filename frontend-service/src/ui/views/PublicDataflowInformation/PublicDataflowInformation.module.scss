@@ -1,0 +1,23 @@
+.container {
+  padding-bottom: 4rem;
+}
+
+.checkedValueColumn {
+  text-align: center;
+}
+
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--documenticon-color);
+  text-align: center;
+}
+
+.noDatasets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+}

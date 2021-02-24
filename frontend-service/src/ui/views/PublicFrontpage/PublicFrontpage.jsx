@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 
+import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { config } from 'conf';
+import { routes } from 'ui/routes';
 
 import styles from './PublicFrontpage.module.scss';
 
@@ -14,9 +16,17 @@ import logo from 'assets/images/logo.png';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
-export const PublicFrontpage = () => {
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { PublicCard } from '../_components/PublicCard/PublicCard';
+
+export const PublicFrontpage = ({ history }) => {
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
+
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
   useEffect(() => {
     if (!themeContext.headerCollapse) {
@@ -25,6 +35,8 @@ export const PublicFrontpage = () => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
+
+  const handleRedirect = target => history.push(target);
 
   return (
     <PublicLayout>
@@ -129,17 +141,43 @@ export const PublicFrontpage = () => {
         </div>
         <div className={`rep-container`}>
           <div className={`${styles.pageContent} rep-row`}>
+            <div className={styles.showPublicDataflows}>
+              <Button
+                icon="eye"
+                label="View public dataflows"
+                onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}></Button>
+            </div>
+          </div>
+          <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.currentDataflows}>
               <h3>Dataflows in scope of Reportnet 3.0:</h3>
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.dataflows.map(dataflow => (
-                  <Card {...dataflow} />
+                  <PublicCard
+                    key={dataflow.key}
+                    card={dataflow}
+                    dataflowId={dataflow.id}
+                    dueDate={dataflow.targetDate}
+                    frequency={dataflow.reportingFrequency}
+                    pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
+                    subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
+                    title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
+                  />
                 ))}
               </div>
               <h3>EEA Voluntary Dataflows:</h3>
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.voluntaryDataflows.map(dataflow => (
-                  <Card {...dataflow} />
+                  <PublicCard
+                    key={dataflow.key}
+                    card={dataflow}
+                    dataflowId={dataflow.id}
+                    dueDate={dataflow.targetDate}
+                    frequency={dataflow.reportingFrequency}
+                    pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
+                    subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
+                    title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
+                  />
                 ))}
               </div>
             </div>

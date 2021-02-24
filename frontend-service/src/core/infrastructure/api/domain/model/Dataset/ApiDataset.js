@@ -151,6 +151,17 @@ export const apiDataset = {
       return false;
     }
   },
+  downloadDatasetFileData: async (dataflowId, dataProviderId, fileName) => {
+    const response = await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadDatasetFileData, {
+        dataflowId,
+        dataProviderId,
+        fileName
+      })
+    });
+
+    return response.data;
+  },
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.validationViewer, {
