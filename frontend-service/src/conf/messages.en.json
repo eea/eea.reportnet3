@@ -985,6 +985,8 @@
     "deleteRepresentativeError": "Error deleting representative",
     "addDataProviderError": "There has been an error adding the representative",
     "updateDataProviderError": "There has been an error updating the representative",
-    "getRepresentativesError": "There has been an error loading the representatives"
+    "getRepresentativesError": "There has been an error loading the representatives",
+    "downloadDatasetFileNotFoundEvent": "File not found",
+    "downloadDatasetFileError": "Error downloading file"
   }
 }
