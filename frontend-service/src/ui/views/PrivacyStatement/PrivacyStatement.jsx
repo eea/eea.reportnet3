@@ -120,7 +120,10 @@ const PrivacyStatement = withRouter(() => {
               <p>
                 Reportnet 3.0 requires you to login via your ‘EU Login’. ‘EU Login’ requires certain personal data such
                 as the name, surname and e-mail address of the registrant. For further information, please refer to the{' '}
-                <a href="https://webgate.ec.europa.eu/cas/privacyStatementPopup.html" target="_blank">
+                <a
+                  href="https://webgate.ec.europa.eu/cas/privacyStatementPopup.html"
+                  target="_blank"
+                  rel="noopener noreferrer">
                   privacy statement of ‘EU Login’
                 </a>
                 .
@@ -160,12 +163,12 @@ const PrivacyStatement = withRouter(() => {
                 We process personal data (transactional data) such as anonymized IP-address, browser version and other
                 device information that is necessary to securely deliver web pages to your internet client. This
                 transactional data is also processed by personnel at EEA and at CERT-EU (
-                <a href="https://cert.europa.eu/" target="_blank">
+                <a href="https://cert.europa.eu/" target="_blank" rel="noopener noreferrer">
                   https://cert.europa.eu/
                 </a>
                 ) which provides security services for EEA. This transactional data is also available to our Internet
                 Service Provider and our cloud provider Amazon in EU (
-                <a href="https://aws.amazon.com/es/privacy/" target="_blank">
+                <a href="https://aws.amazon.com/es/privacy/" target="_blank" rel="noopener noreferrer">
                   see their privacy statement
                 </a>
                 ).
@@ -253,7 +256,7 @@ const PrivacyStatement = withRouter(() => {
               </p>
               <p>
                 You are entitled to have recourse at any time to the European Data Protection Supervisor (
-                <a href="https://edps.europa.eu" target="_blank">
+                <a href="https://edps.europa.eu" target="_blank" rel="noopener noreferrer">
                   https://edps.europa.eu
                 </a>
                 ; <a href="mailto:edps@edps.europa.eu">edps@edps.europa.eu</a>) if you consider that your rights under

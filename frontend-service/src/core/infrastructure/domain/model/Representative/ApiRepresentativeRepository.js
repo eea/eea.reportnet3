@@ -1,5 +1,6 @@
 import { apiRepresentative } from 'core/infrastructure/api/domain/model/Representative';
 import { Representative } from 'core/domain/model/Representative/Representative';
+import { LeadReporter } from 'core/domain/model/LeadReporter/LeadReporter';
 import isEmpty from 'lodash/isEmpty';
 import sortBy from 'lodash/sortBy';
 
@@ -48,11 +49,14 @@ const allRepresentatives = async dataflowId => {
 };
 
 const parseLeadReporters = (leadReporters = []) =>
-  leadReporters.map(leadReporter => ({
-    account: leadReporter.email,
-    id: leadReporter.id,
-    representativeId: leadReporter.representativeId
-  }));
+  leadReporters.map(
+    leadReporter =>
+      new LeadReporter({
+        account: leadReporter.email,
+        id: leadReporter.id,
+        representativeId: leadReporter.representativeId
+      })
+  );
 
 const deleteById = async representativeId => await apiRepresentative.deleteById(representativeId);
 
