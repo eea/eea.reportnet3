@@ -160,7 +160,7 @@ public interface RepresentativeController {
    * @param leadReporterVO the lead reporter VO
    * @return the long
    */
-  @PostMapping("/{representativeId}/leadReporter/")
+  @PostMapping("/{representativeId}/leadReporter")
   Long createLeadReporter(@PathVariable("representativeId") final Long representativeId,
       @RequestBody LeadReporterVO leadReporterVO);
 

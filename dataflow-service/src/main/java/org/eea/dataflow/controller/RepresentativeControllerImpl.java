@@ -348,7 +348,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{representativeId}/leadReporter/")
+  @PostMapping("/{representativeId}/leadReporter")
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   @ApiOperation(value = "Create one Lead reporter", response = Long.class)
   public Long createLeadReporter(
