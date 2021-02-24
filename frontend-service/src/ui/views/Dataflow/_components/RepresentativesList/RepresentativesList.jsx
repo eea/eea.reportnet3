@@ -10,12 +10,12 @@ import uuid from 'uuid';
 import styles from './RepresentativesList.module.scss';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
-import { Button } from 'ui/views/_components/Button/Button';
+import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { InputText } from 'ui/views/_components/InputText/InputText';
+import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { RepresentativeService } from 'core/services/Representative';
