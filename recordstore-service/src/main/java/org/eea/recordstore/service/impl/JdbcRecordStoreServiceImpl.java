@@ -1066,7 +1066,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     DataSetMetabaseVO datasetMetabaseVO =
         dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
+    Long dataflowId = datasetMetabaseVO.getDataflowId();
     try {
       switch (datasetMetabaseVO.getDatasetTypeEnum()) {
         case REPORTING:
