@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
@@ -23,10 +24,12 @@ import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
@@ -69,6 +72,9 @@ public class RepresentativeServiceImplTest {
 
   @Mock
   private DataProviderMapper dataProviderMapper;
+
+  @Mock
+  private DatasetMetabaseController datasetMetabaseController;
 
   private Representative representative;
 
@@ -478,4 +484,120 @@ public class RepresentativeServiceImplTest {
       throw e;
     }
   }
+
+  @Test
+  public void updateLeadReporterTest() throws EEAException {
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setLeadReporters(leadReporters);
+    representative.setHasDatasets(true);
+    representative.setDataflow(new Dataflow());
+    representative.setDataProvider(new DataProvider());
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setLeadReporters(leadReportersVO);
+    representativeVO.setDataProviderId(1L);
+    leadReporterVO.setRepresentativeId(1L);
+    ReportingDatasetVO dataset = new ReportingDatasetVO();
+    dataset.setId(1L);
+    List<ReportingDatasetVO> datasets = new ArrayList<>();
+    datasets.add(dataset);
+    Mockito.when(leadReporterRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(leadReporter));
+    Mockito.when(representativeRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(representative));
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
+
+    Mockito
+        .when(datasetMetabaseController
+            .findReportingDataSetIdByDataflowIdAndProviderId(Mockito.any(), Mockito.any()))
+        .thenReturn(datasets);
+    Mockito.when(leadReporterMapper.classToEntity(Mockito.any())).thenReturn(leadReporter);
+    Mockito.when(leadReporterRepository.save(Mockito.any())).thenReturn(leadReporter);
+
+    Assert.assertEquals(1L,
+        representativeServiceImpl.updateLeadReporter(leadReporterVO).longValue());
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void updateLeadReporterRepresentativeNotFoundExceptionTest() throws EEAException {
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setLeadReporters(leadReporters);
+    representative.setHasDatasets(true);
+    representative.setDataflow(new Dataflow());
+    representative.setDataProvider(new DataProvider());
+    leadReporterVO.setRepresentativeId(1L);
+
+    Mockito.when(leadReporterRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    try {
+      representativeServiceImpl.updateLeadReporter(leadReporterVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateLeadReporterRepresentativeDuplicatedExceptionTest() throws EEAException {
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setLeadReporters(leadReporters);
+    representative.setHasDatasets(true);
+    representative.setDataflow(new Dataflow());
+    representative.setDataProvider(new DataProvider());
+    leadReporterVO.setRepresentativeId(1L);
+
+    Mockito.when(leadReporterRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(leadReporter));
+    Mockito.when(representativeRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    try {
+      representativeServiceImpl.updateLeadReporter(leadReporterVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateLeadReporterUserNotFoundExceptionTest() throws EEAException {
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setLeadReporters(leadReporters);
+    representative.setHasDatasets(true);
+    representative.setDataflow(new Dataflow());
+    representative.setDataProvider(new DataProvider());
+    leadReporterVO.setRepresentativeId(1L);
+
+    Mockito.when(leadReporterRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(leadReporter));
+    Mockito.when(representativeRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(representative));
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
+    try {
+      representativeServiceImpl.updateLeadReporter(leadReporterVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void deleteLeadReporterTest() throws EEAException {
+    Mockito.when(leadReporterRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(leadReporter));
+    doNothing().when(leadReporterRepository).deleteById(Mockito.any());
+
+    representativeServiceImpl.deleteLeadReporter(1L);
+    Mockito.verify(leadReporterRepository, times(1)).deleteById(Mockito.any());
+  }
+
+  @Test
+  public void updateRepresentativeVisibilityRestrictionsTest() {
+    representativeServiceImpl.updateRepresentativeVisibilityRestrictions(1L, 1L, true);
+    Mockito.verify(representativeRepository, times(1)).updateRepresentativeVisibilityRestrictions(
+        Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean());
+  }
+
 }
