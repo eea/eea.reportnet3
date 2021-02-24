@@ -559,6 +559,12 @@
         },
         {
           "key": "GET_REPRESENTATIVES_ERROR"
+        },
+        {
+          "key": "DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT"
+        },
+        {
+          "key": "DOWNLOAD_DATASET_FILE_ERROR"
         }
       ]
     },

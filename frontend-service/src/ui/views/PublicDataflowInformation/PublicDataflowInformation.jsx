@@ -19,6 +19,7 @@ import { Title } from 'ui/views/_components/Title';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
@@ -36,6 +37,8 @@ export const PublicDataflowInformation = withRouter(
 
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+
+    const notificationContext = useContext(NotificationContext);
 
     const { datasets } = dataflowData;
 
@@ -108,10 +111,21 @@ export const PublicDataflowInformation = withRouter(
     );
 
     const onFileDownload = async (dataProviderId, fileName) => {
-      const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
-      // const fileContent = {};
+      try {
+        const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
 
-      DownloadFile(fileContent, `${fileName}.xlsx`);
+        DownloadFile(fileContent, `${fileName}.xlsx`);
+      } catch (error) {
+        if (error.response.status === 404) {
+          notificationContext.add({
+            type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
+          });
+        } else {
+          notificationContext.add({
+            type: 'DOWNLOAD_DATASET_FILE_ERROR'
+          });
+        }
+      }
     };
 
     const onLoadDataflowData = async () => {

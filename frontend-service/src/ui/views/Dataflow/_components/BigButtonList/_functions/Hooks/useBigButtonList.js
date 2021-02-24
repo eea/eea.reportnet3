@@ -314,7 +314,11 @@ const useBigButtonList = ({
             }
           }
         ],
-        onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.dataProviderId }, true),
+        onWheel: getUrl(
+          routes.DATAFLOW_REPRESENTATIVE,
+          { dataflowId, representativeId: representative.dataProviderId },
+          true
+        ),
         visibility: true
       };
     });

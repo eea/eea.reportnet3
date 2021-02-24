@@ -544,6 +544,7 @@ export const BigButtonList = ({
     isCloningDataflow,
     isLeadReporterOfCountry,
     onCloneDataflow,
+    onImportSchema,
     onLoadEuDatasetIntegration,
     onLoadReceiptData,
     onOpenReleaseConfirmDialog,

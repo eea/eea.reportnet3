@@ -34,7 +34,8 @@ const useBigButtonList = ({
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isReleased =
-      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
+      !isNil(dataflowState.data.datasets) &&
+      dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
 
     return {
       feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
