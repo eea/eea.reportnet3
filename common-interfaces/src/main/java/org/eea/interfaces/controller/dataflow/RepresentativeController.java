@@ -180,4 +180,13 @@ public interface RepresentativeController {
    */
   @DeleteMapping("/leadReporter/{leadReporterId}")
   void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId);
+
+  /**
+   * Update internal representative.
+   *
+   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @return the response entity
+   */
+  @PutMapping("/private/update")
+  Long updateInternalRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 }
