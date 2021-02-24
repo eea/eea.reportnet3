@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import orderBy from 'lodash/orderBy';
 import dayjs from 'dayjs';
 
 import { config } from 'conf';
@@ -383,6 +384,16 @@ const getAllSchemas = async dataflowId => {
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
+const getPublicDataflowData = async dataflowId => {
+  const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
+
+  const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO);
+
+  publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
+
+  return publicDataflowData;
+};
+
 const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.generateApiKey(dataflowId, dataProviderId, isCustodian);
 
@@ -407,6 +418,7 @@ const parseDataflowDTOs = dataflowDTOs => {
 
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
+    anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
@@ -423,6 +435,7 @@ const parseDataflowDTO = dataflowDTO =>
     reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
+    showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     userRequestStatus: dataflowDTO.userRequestStatus,
     userRole: dataflowDTO.userRole,
@@ -487,11 +500,14 @@ const parseDatasetListDTO = datasetsDTO => {
 
 const parseDatasetDTO = datasetDTO =>
   new Dataset({
+    availableInPublic: datasetDTO.availableInPublic,
     datasetId: datasetDTO.id,
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
+    publicFileName: datasetDTO.publicFileName,
+    releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased * 1000).format('YYYY-MM-DD') : '-',
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });
@@ -564,13 +580,20 @@ const parseRepresentativeDTO = representativeDTO => {
   return new Representative({
     dataProviderGroupId: representativeDTO.dataProviderGroupId,
     dataProviderId: representativeDTO.dataProviderId,
+    hasDatasets: representativeDTO.hasDatasets,
     id: representativeDTO.id,
     isReceiptDownloaded: representativeDTO.receiptDownloaded,
     isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.providerAccount,
-    hasDatasets: representativeDTO.hasDatasets
+    leadReporters: parseLeadReporters(representativeDTO.leadReporters)
   });
 };
+
+const parseLeadReporters = (leadReporters = []) =>
+  leadReporters.map(leadReporter => ({
+    account: leadReporter.email,
+    id: leadReporter.id,
+    representativeId: leadReporter.representativeId
+  }));
 
 const parseWebLinkListDTO = webLinksDTO => {
   if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
@@ -588,6 +611,26 @@ const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
+};
+
+const publicData = async () => {
+  const publicDataflows = await apiDataflow.publicData();
+
+  const publicDataflowsDTO = publicDataflows.map(
+    publicDataflow =>
+      new Dataflow({
+        description: publicDataflow.description,
+        expirationDate:
+          publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
+        id: publicDataflow.id,
+        name: publicDataflow.name,
+        obligation: parseObligationDTO(publicDataflow.obligation),
+        status: publicDataflow.status,
+        isReleasable: publicDataflow.releasable
+      })
+  );
+
+  return publicDataflowsDTO;
 };
 
 const reject = async dataflowId => {
@@ -629,8 +672,10 @@ export const ApiDataflowRepository = {
   generateApiKey,
   getAllSchemas,
   getApiKey,
+  getPublicDataflowData,
   newEmptyDatasetSchema,
   pending,
+  publicData,
   reject,
   reporting,
   schemasValidation,

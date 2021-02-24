@@ -1,14 +1,14 @@
 export const routes = {
   ACCESS_POINT: '/',
   CODELISTS: '/codelists',
-  DATAFLOW_FEEDBACK: '/dataflow/:dataflowId/feedback/:representativeId',
-  DATAFLOW_FEEDBACK_CUSTODIAN: '/dataflow/:dataflowId/feedback',
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
+  DATAFLOW_FEEDBACK_CUSTODIAN: '/dataflow/:dataflowId/feedback',
+  DATAFLOW_FEEDBACK: '/dataflow/:dataflowId/feedback/:representativeId',
   DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/representativeId/:representativeId',
   DATAFLOW: '/dataflow/:dataflowId',
-  DATAFLOWS: '/dataflows',
   DATAFLOWS_ERROR: '/dataflows/error/:errorType',
+  DATAFLOWS: '/dataflows',
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
   DOCUMENTS: '/dataflow/:dataflowId/documents',
@@ -16,6 +16,8 @@ export const routes = {
   EULOGIN: '/eulogin',
   LOGIN: '/login',
   PRIVACY_STATEMENT: '/privacyPolicy',
+  PUBLIC_DATAFLOW_INFORMATION: '/publicDataflow/:dataflowId',
+  PUBLIC_DATAFLOWS: '/publicDataflows',
   REPRESENTATIVE: '/dataflow/:dataflowId/representative/:representative',
   SETTINGS: '/settings'
 };

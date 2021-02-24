@@ -29,6 +29,17 @@
       font-weight: bold;
     }
   }
+  &.isPublic {
+    ul {
+      li {
+        a {
+          span {
+            color: white;
+          }
+        }
+      }
+    }
+  }
 }
 // .p-breadcrumb {
 //   background-color: var(--blue-120);
