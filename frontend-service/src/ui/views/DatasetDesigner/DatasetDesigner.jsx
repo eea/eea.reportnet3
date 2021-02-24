@@ -623,7 +623,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
-        const dataset = await DatasetService.schemaById(datasetId);        
+        const dataset = await DatasetService.schemaById(datasetId);
         const tableSchemaList = [];
         dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
 

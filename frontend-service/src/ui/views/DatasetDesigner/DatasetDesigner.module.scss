@@ -68,6 +68,9 @@
   .datasetConfigurationButtons {
     display: flex;
     align-items: center;
+    > div {
+      margin-right: 1rem;
+    }
     button:last-child {
       margin-top: 5px;
     }
