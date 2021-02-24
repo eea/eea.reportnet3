@@ -394,7 +394,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
 
       List<Long> dataCollectionIds = new ArrayList<>();
-      Map<Long, String> datasetIdsEmails = new HashMap<>();
+      Map<Long, List<String>> datasetIdsEmails = new HashMap<>();
       Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
       Map<Long, String> datasetIdsAndSchemaIdsFromDC = new HashMap<>();
       Map<Long, String> datasetIdsAndSchemaIdsFromEU = new HashMap<>();
@@ -469,7 +469,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private void processDataCollectionAndRoles(Long dataflowId, Date dueDate, boolean isCreation,
       boolean manualCheck, String time, List<DesignDatasetVO> designs,
       List<RepresentativeVO> representatives, Map<Long, String> map, List<Long> dataCollectionIds,
-      Map<Long, String> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
+      Map<Long, List<String>> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
       Map<Long, String> datasetIdsAndSchemaIdsFromDC,
       Map<Long, String> datasetIdsAndSchemaIdsFromEU, List<Long> euDatasetIds,
       Connection connection, Statement statement) throws SQLException {
@@ -591,7 +591,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void createReportingDatasetInMetabase(Long dataflowId, String time,
       List<RepresentativeVO> representatives, Map<Long, String> map,
-      Map<Long, String> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
+      Map<Long, List<String>> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
       Statement statement, List<FKDataCollection> newReportingDatasetsRegistry,
       List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
       List<IntegrityVO> integritieVOs) throws SQLException {
@@ -599,9 +599,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
-      for (String email : representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
-          .collect(Collectors.toList())) {
-        datasetIdsEmails.put(datasetId, email);
+      List<String> emails = representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
+          .collect(Collectors.toList());
+      if (emails.isEmpty()) {
+        datasetIdsEmails.put(datasetId, null);
+      } else {
+        datasetIdsEmails.put(datasetId, emails);
       }
       datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
 
@@ -842,8 +845,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
-      List<Long> euDatasetIds, Long dataflowId) throws EEAException {
+  private void createPermissions(Map<Long, List<String>> datasetIdsEmails,
+      List<Long> dataCollectionIds, List<Long> euDatasetIds, Long dataflowId) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> assignments = new ArrayList<>();
@@ -919,8 +922,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param assignments the assignments
    */
   private void createGroupsAndAssings(Long dataflowId, List<Long> dataCollectionIds,
-      List<Long> euDatasetIds, Map<Long, String> datasetIdsEmails, List<ResourceInfoVO> groups,
-      List<ResourceAssignationVO> assignments) {
+      List<Long> euDatasetIds, Map<Long, List<String>> datasetIdsEmails,
+      List<ResourceInfoVO> groups, List<ResourceAssignationVO> assignments) {
 
     List<UserRepresentationVO> stewards =
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
@@ -973,7 +976,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
     }
 
-    for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
+    for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
 
       // Create Dataset-%s-DATA_STEWARD
       groups.add(
@@ -999,13 +1002,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             ResourceGroupEnum.DATASET_CUSTODIAN));
       }
 
-      // Assign Dataset-%s-LEAD_REPORTER
-      assignments.add(createAssignments(entry.getKey(), entry.getValue(),
-          ResourceGroupEnum.DATASET_LEAD_REPORTER));
+      if (null != entry.getValue()) {
+        for (String email : entry.getValue()) {
+          // Assign Dataset-%s-LEAD_REPORTER
+          assignments.add(
+              createAssignments(entry.getKey(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
 
-      // Assign Dataflow-%s-LEAD_REPORTER
-      assignments.add(createAssignments(dataflowId, entry.getValue(),
-          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+          // Assign Dataflow-%s-LEAD_REPORTER
+          assignments
+              .add(createAssignments(dataflowId, email, ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+        }
+      }
     }
   }
 
