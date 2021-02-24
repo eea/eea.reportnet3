@@ -290,7 +290,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
         <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
           {loadTitle()}
-          {<BreadCrumb isPublic />}
+          {<BreadCrumb isPublic={isPublic} />}
           {!isPublic && loadUser()}
           {isPublic && loadLogin()}
           {!isPublic && userContext.userProps.showLogoutConfirmation && confirmvisible && (
