@@ -436,6 +436,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 leadReporter.setRepresentative(representative);
                 leadReporter.setEmail(email);
                 representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
+                representativeList.add(representative);
               } else {
                 List<LeadReporter> leadReporters = representative.getLeadReporters();
                 LeadReporter leadReporter = new LeadReporter();
@@ -443,8 +444,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 leadReporter.setEmail(email);
                 leadReporters.add(leadReporter);
                 representative.setLeadReporters(leadReporters);
+                if (!representativeList.contains(representative)) {
+                  representativeList.add(representative);
+                }
               }
-              representativeList.add(representative);
               fieldsToWrite[2] = "OK imported";
             } else {
               fieldsToWrite[2] = "KO imported already exist in reportnet";
