@@ -7,6 +7,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import styles from './PublicDataflowInformation.module.scss';
 
 import { Column } from 'primereact/column';
@@ -21,6 +23,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
@@ -34,7 +37,9 @@ export const PublicDataflowInformation = withRouter(
     }
   }) => {
     const resources = useContext(ResourcesContext);
+    const themeContext = useContext(ThemeContext);
 
+    const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
 
@@ -47,6 +52,14 @@ export const PublicDataflowInformation = withRouter(
     useEffect(() => {
       onLoadDataflowData();
     }, []);
+
+    useEffect(() => {
+      if (!themeContext.headerCollapse) {
+        setContentStyles({ marginTop: `${config.theme.cookieConsentHeight + 6}px` });
+      } else {
+        setContentStyles({});
+      }
+    }, [themeContext.headerCollapse]);
 
     const downloadFileBodyColumn = rowData => (
       <div
@@ -160,7 +173,7 @@ export const PublicDataflowInformation = withRouter(
 
     return (
       <PublicLayout>
-        <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`}>
+        <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`} style={contentStyles}>
           {!isLoading ? (
             !isEmpty(datasets) ? (
               <Fragment>
