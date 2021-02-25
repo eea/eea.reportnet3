@@ -9,5 +9,5 @@
   "loadSnapshotsListReporter": "/snapshot/dataset/{:datasetId}/listSnapshots",
   "restoreSnapshotReporter": "/snapshot/{:snapshotId}/dataset/{:datasetId}/restore",
 
-  "releaseDataflow": "/snapshot/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release"
+  "releaseDataflow": "/snapshot/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release?restrictFromPublic={:restrictFromPublic}"
 }
