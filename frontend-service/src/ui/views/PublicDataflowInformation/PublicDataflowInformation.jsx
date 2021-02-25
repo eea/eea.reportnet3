@@ -160,7 +160,7 @@ export const PublicDataflowInformation = withRouter(
 
     return (
       <PublicLayout>
-        <div className={`${styles.container} rep-container`}>
+        <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`}>
           {!isLoading ? (
             !isEmpty(datasets) ? (
               <Fragment>
@@ -185,7 +185,7 @@ export const PublicDataflowInformation = withRouter(
               <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
             )
           ) : (
-            <Spinner style={{ top: 0 }} />
+            <Spinner style={{ top: 0, left: 0 }} />
           )}
         </div>
       </PublicLayout>
