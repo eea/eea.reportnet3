@@ -55,23 +55,13 @@ const apiRepresentative = {
     return await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId }) });
   },
 
-  getProviderTypes: async () => {
-    const response = await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.getProviderTypes, {})
-    });
-
-    return response.data;
-  },
-  
   downloadById: async dataflowId => {
     const response = await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentatives, { dataflowId })
-
     });
 
     return response.data;
   },
-
 
   downloadTemplateById: async dataProviderGroupId => {
     const response = await HTTPRequester.download({
