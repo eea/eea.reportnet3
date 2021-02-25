@@ -409,44 +409,49 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         } else if (null == user) {
           fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
+          DataProvider dataProvider = dataProviderList.stream()
+              .filter(dataProv -> contryCode.equalsIgnoreCase(dataProv.getCode())).findFirst()
+              .orElse(null);
+          if (null != dataProvider) {
+            if (null == representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(
+                dataflowId, dataProvider.getId(), email)) {
 
-          Long dataProviderId = dataProviderList.stream()
-              .filter(dataProvider -> contryCode.equalsIgnoreCase(dataProvider.getCode()))
-              .findFirst().get().getId();
+              Representative representative = representativeList.stream()
+                  .filter(rep -> dataProvider.getId().equals(rep.getDataProvider().getId()))
+                  .findFirst().orElse(representativeRepository
+                      .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProvider.getId()));
 
-          if (null == representativeRepository
-              .findOneByDataflowIdAndDataProviderIdUserMail(dataflowId, dataProviderId, email)) {
-
-            Representative representative = representativeRepository
-                .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProviderId);
-
-            // if exist we dont create representative
-            if (null == representative) {
-              DataProvider dataProvider = new DataProvider();
-              representative = new Representative();
-              dataProvider.setId(dataProviderId);
-              representative.setDataflow(dataflow);
-              representative.setDataProvider(dataProvider);
-              representative.setReceiptDownloaded(false);
-              representative.setReceiptOutdated(false);
-              representative.setHasDatasets(false);
-              representative.setId(0L);
-              LeadReporter leadReporter = new LeadReporter();
-              leadReporter.setRepresentative(representative);
-              leadReporter.setEmail(email);
-              representative.setLeadReporters(Arrays.asList(leadReporter));
+              // if exist we dont create representative
+              if (null == representative) {
+                DataProvider dataProviderNew = new DataProvider();
+                representative = new Representative();
+                dataProviderNew.setId(dataProvider.getId());
+                representative.setDataflow(dataflow);
+                representative.setDataProvider(dataProviderNew);
+                representative.setReceiptDownloaded(false);
+                representative.setReceiptOutdated(false);
+                representative.setHasDatasets(false);
+                representative.setId(0L);
+                LeadReporter leadReporter = new LeadReporter();
+                leadReporter.setRepresentative(representative);
+                leadReporter.setEmail(email);
+                representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
+                representativeList.add(representative);
+              } else {
+                List<LeadReporter> leadReporters = representative.getLeadReporters();
+                LeadReporter leadReporter = new LeadReporter();
+                leadReporter.setRepresentative(representative);
+                leadReporter.setEmail(email);
+                leadReporters.add(leadReporter);
+                representative.setLeadReporters(leadReporters);
+                if (!representativeList.contains(representative)) {
+                  representativeList.add(representative);
+                }
+              }
+              fieldsToWrite[2] = "OK imported";
             } else {
-              List<LeadReporter> leadReporters = representative.getLeadReporters();
-              LeadReporter leadReporter = new LeadReporter();
-              leadReporter.setRepresentative(representative);
-              leadReporter.setEmail(email);
-              leadReporters.add(leadReporter);
-              representative.setLeadReporters(leadReporters);
+              fieldsToWrite[2] = "KO imported already exist in reportnet";
             }
-            representativeList.add(representative);
-            fieldsToWrite[2] = "OK imported";
-          } else {
-            fieldsToWrite[2] = "KO imported already exist in reportnet";
           }
 
         }
