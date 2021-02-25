@@ -1,5 +1,13 @@
 .container {
+  flex: 1 auto;
+  height: 100%;
   padding-bottom: 4rem;
+  &.isLoading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 .checkedValueColumn {

@@ -60,7 +60,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   return (
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
-        <div className={`rep-container`}>
+        <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>Public dataflows</h1>
           <div className={styles.dataflowsList}>
             {!isLoading ? (
