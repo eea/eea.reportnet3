@@ -361,7 +361,6 @@ const RepresentativesList = ({
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
         <select
-          autoFocus
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
