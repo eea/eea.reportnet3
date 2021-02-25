@@ -30,9 +30,6 @@ public enum LockSignature {
   /** DataSetSnapshotControllerImpl.createReleaseSnapshots(..) */
   RELEASE_SNAPSHOTS("DataSetSnapshotControllerImpl.createReleaseSnapshots(..)"),
 
-  /** DataSetSnapshotControllerImpl.releaseSnapshot(..) */
-  RELEASE_SNAPSHOT("DataSetSnapshotControllerImpl.releaseSnapshot(..)"),
-
   /** DataCollectionControllerImpl.createEmptyDataCollection(..) */
   CREATE_DATA_COLLECTION("DataCollectionControllerImpl.createEmptyDataCollection(..)"),
 
@@ -54,31 +51,26 @@ public enum LockSignature {
   /** IntegrationControllerImpl.executeEUDatasetExport(..) */
   EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)"),
 
-  /** The delete records. */
+  /** DataSetControllerImpl.deleteRecord(..) */
   DELETE_RECORDS("DataSetControllerImpl.deleteRecord(..)"),
 
-  /** The insert records. */
+  /** DataSetControllerImpl.insertRecords(..) */
   INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)"),
 
-  /** The insert records multitable. */
+  /** DataSetControllerImpl.insertRecordsMultiTable(..) */
   INSERT_RECORDS_MULTITABLE("DataSetControllerImpl.insertRecordsMultiTable(..)"),
 
-  /** The update records. */
+  /** DataSetControllerImpl.updateRecords(..) */
   UPDATE_RECORDS("DataSetControllerImpl.updateRecords(..)"),
 
-  /** The update field. */
+  /** DataSetControllerImpl.updateField(..) */
   UPDATE_FIELD("DataSetControllerImpl.updateField(..)"),
 
-  /** The import etl. */
-  IMPORT_ETL("DataSetControllerImpl.etlImportDataset(..)"),
-
-  /** The delete field schema. */
+  /** DatasetSchemaControllerImpl.deleteFieldSchema(..) */
   DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)"),
 
-  /** The execute external integration. */
+  /** IntegrationControllerImpl.executeExternalIntegration(..) */
   EXECUTE_EXTERNAL_INTEGRATION("IntegrationControllerImpl.executeExternalIntegration(..)");
-
-
 
   /** The value. */
   private final String value;

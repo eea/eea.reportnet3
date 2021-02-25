@@ -2,7 +2,9 @@ package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.eea.dataflow.persistence.domain.Representative;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +18,7 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @Query("SELECT distinct r from Representative r JOIN FETCH r.reporters rep WHERE r.dataflow.id= :dataflowId")
+  @Query("SELECT distinct r from Representative r left JOIN FETCH r.leadReporters rep WHERE r.dataflow.id= :dataflowId")
   List<Representative> findAllByDataflow_Id(@Param("dataflowId") Long dataflowId);
 
   /**
@@ -26,7 +28,7 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param dataflowId the dataflow id
    * @return true, if successful
    */
-  @Query("SELECT distinct r from Representative r JOIN FETCH r.reporters WHERE r.dataProvider.id = :dataProviderId AND r.dataflow.id= :dataflowId")
+  @Query("SELECT distinct r from Representative r left JOIN FETCH r.leadReporters WHERE r.dataProvider.id = :dataProviderId AND r.dataflow.id= :dataflowId")
   Optional<List<Representative>> findByDataProviderIdAndDataflowId(
       @Param("dataProviderId") Long dataProviderId, @Param("dataflowId") Long dataflowId);
 
@@ -37,7 +39,7 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param email the email
    * @return the list
    */
-  @Query("SELECT distinct r from Representative r JOIN FETCH r.reporters rep WHERE rep.userMail= :email AND r.dataflow.id= :dataflowId")
+  @Query("SELECT distinct r from Representative r left JOIN FETCH r.leadReporters rep WHERE rep.email= :email AND r.dataflow.id= :dataflowId")
   List<Representative> findByDataflowIdAndEmail(@Param("dataflowId") Long dataflowId,
       @Param("email") String email);
 
@@ -49,7 +51,6 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param dataProviderId the data provider id
    * @return the representative
    */
-  @Query
   Representative findOneByDataflow_IdAndDataProvider_Id(Long dataflowId, Long dataProviderId);
 
   /**
@@ -60,7 +61,17 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    * @param userMail the user mail
    * @return true, if successful
    */
-  @Query("SELECT distinct r from Representative r JOIN FETCH r.reporters rep WHERE rep.userMail= :userMail AND  r.dataProvider.id= :dataProviderId AND r.dataflow.id= :dataflowId")
+  @Query("SELECT distinct r from Representative r left JOIN FETCH r.leadReporters rep WHERE rep.email= :email AND  r.dataProvider.id= :dataProviderId AND r.dataflow.id= :dataflowId")
   Representative findOneByDataflowIdAndDataProviderIdUserMail(@Param("dataflowId") Long dataflowId,
-      @Param("dataProviderId") Long dataProviderId, @Param("userMail") String userMail);
+      @Param("dataProviderId") Long dataProviderId, @Param("email") String email);
+
+
+
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "update representative set restrict_from_public = :restrictFromPublic where dataflow_id = :dataflowId and data_provider_id = :dataProviderId ")
+  void updateRepresentativeVisibilityRestrictions(@Param("dataflowId") Long dataflowId,
+      @Param("dataProviderId") Long dataProviderId,
+      @Param("restrictFromPublic") boolean restrictFromPublic);
 }

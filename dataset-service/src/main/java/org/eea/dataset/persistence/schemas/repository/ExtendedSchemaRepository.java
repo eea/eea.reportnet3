@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.schemas.repository;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -130,7 +131,7 @@ public interface ExtendedSchemaRepository {
    * Update dataset schema exportable.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param isExportable the is exportable
+   * @param exportable the exportable
    * @return the update result
    */
   UpdateResult updateDatasetSchemaExportable(String datasetSchemaId, boolean exportable);
@@ -169,4 +170,12 @@ public interface ExtendedSchemaRepository {
    * @return the document
    */
   Document findRecordSchemaByRecordSchemaId(String datasetSchemaId, String recordSchemaId);
+
+  /**
+   * Find available in public by id data set schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return true, if successful
+   */
+  boolean findAvailableInPublicByIdDataSetSchema(ObjectId idDatasetSchema);
 }

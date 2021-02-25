@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.utils.LiteralConstants;
 
 
 /**
@@ -55,9 +56,14 @@ public class ProxyMultitenantService<T> implements InvocationHandler {
       }
     }
     if (StringUtils.isNotBlank(datasetId)) {
-      TenantResolver.setTenantName("dataset_" + datasetId);
+      TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     }
-    
-    return method.invoke(proxiedService, args);
+
+    try {
+      return method.invoke(proxiedService, args);
+    } catch (Throwable e) {
+      // We throw the underlying cause occurred during the method invocation
+      throw e.getCause();
+    }
   }
 }

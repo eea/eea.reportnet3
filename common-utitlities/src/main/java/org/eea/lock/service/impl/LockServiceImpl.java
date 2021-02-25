@@ -4,12 +4,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -68,9 +70,8 @@ public class LockServiceImpl implements LockService {
   public LockVO createLock(Timestamp createDate, String createdBy, LockType lockType,
       Map<String, Object> lockCriteria) throws EEAException {
 
-    LockVO lockVO = new LockVO(createDate, createdBy, lockType,
-        generateHashCode(lockCriteria.values().stream().collect(Collectors.toList())),
-        lockCriteria);
+    LockVO lockVO =
+        new LockVO(createDate, createdBy, lockType, generateHashCode(lockCriteria), lockCriteria);
 
     if (lockRepository.saveIfAbsent(lockVO.getId(), lockMapper.classToEntity(lockVO))) {
       LOG.info("Lock added: {}", lockVO.getId());
@@ -105,7 +106,7 @@ public class LockServiceImpl implements LockService {
    * @return the boolean
    */
   @Override
-  public Boolean removeLockByCriteria(List<Object> args) {
+  public Boolean removeLockByCriteria(Map<String, Object> args) {
     return removeLock(generateHashCode(args));
   }
 
@@ -142,17 +143,12 @@ public class LockServiceImpl implements LockService {
    * @param args the args
    * @return the integer
    */
-  private Integer generateHashCode(List<Object> args) {
-    args.sort((o1, o2) -> {
-      if (o1.hashCode() > o2.hashCode()) {
-        return 1;
-      } else if (o1.hashCode() == o2.hashCode()) {
-        return 0;
-      } else {
-        return -1;
-      }
-    });
-    return args.hashCode();
+  private Integer generateHashCode(Map<String, Object> criteria) {
+    SortedSet<String> treeSet = new TreeSet<>();
+    for (Entry<String, Object> entry : criteria.entrySet()) {
+      treeSet.add(entry.getKey() + "-" + entry.getValue());
+    }
+    return treeSet.hashCode();
   }
 
   /**
@@ -163,7 +159,7 @@ public class LockServiceImpl implements LockService {
    */
   @Override
   public LockVO findByCriteria(Map<String, Object> lockCriteria) {
-    return findById(generateHashCode(lockCriteria.values().stream().collect(Collectors.toList())));
+    return findById(generateHashCode(lockCriteria));
   }
 
   /**

@@ -502,12 +502,12 @@ const FieldValidation = ({ datasetId, tabs }) => {
           )}
 
           <Button
-            id={`${componentName}__cancel`}
-            className="p-button-secondary p-button-text-icon-left p-button-animated-blink"
-            type="button"
-            label={resourcesContext.messages.cancel}
+            className="p-button-secondary p-button-text-icon-left p-button-animated-blink button-right-aligned"
             icon="cancel"
+            id={`${componentName}__cancel`}
+            label={resourcesContext.messages.cancel}
             onClick={() => onHide()}
+            type="button"
           />
         </div>
       </div>

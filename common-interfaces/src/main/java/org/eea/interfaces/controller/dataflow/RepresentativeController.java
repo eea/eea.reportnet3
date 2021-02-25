@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -64,15 +65,14 @@ public interface RepresentativeController {
   List<RepresentativeVO> findRepresentativesByIdDataFlow(
       @PathVariable("dataflowId") Long dataflowId);
 
-
   /**
    * Update representative.
    *
    * @param dataflowRepresentativeVO the dataflow representative VO
    * @return the response entity
    */
-  @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
+  @PutMapping("/update")
+  Long updateRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 
   /**
    * Delete representative.
@@ -136,4 +136,57 @@ public interface RepresentativeController {
       @PathVariable(value = "dataflowId") Long dataflowId,
       @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
 
+
+  /**
+   * Update representative visibility restrictions.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  @PostMapping("/private/updateRepresentativeVisibilityRestrictions")
+  void updateRepresentativeVisibilityRestrictions(
+      @RequestParam(value = "dataflowId", required = true) Long dataflowId,
+      @RequestParam(value = "dataProviderId", required = true) Long dataProviderId,
+      @RequestParam(value = "restrictFromPublic", required = true,
+          defaultValue = "false") boolean restrictFromPublic);
+
+
+
+  /**
+   * Creates the lead reporter.
+   *
+   * @param representativeId the representative id
+   * @param leadReporterVO the lead reporter VO
+   * @return the long
+   */
+  @PostMapping("/{representativeId}/leadReporter")
+  Long createLeadReporter(@PathVariable("representativeId") final Long representativeId,
+      @RequestBody LeadReporterVO leadReporterVO);
+
+  /**
+   * Update lead reporter.
+   *
+   * @param leadReporterVO the lead reporter VO
+   * @return the response entity
+   */
+  @PutMapping("/leadReporter/update")
+  Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO);
+
+  /**
+   * Delete lead reporter.
+   *
+   * @param leadReporterId the lead reporter id
+   */
+  @DeleteMapping("/leadReporter/{leadReporterId}")
+  void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId);
+
+  /**
+   * Update internal representative.
+   *
+   * @param dataflowRepresentativeVO the dataflow representative VO
+   * @return the response entity
+   */
+  @PutMapping("/private/update")
+  Long updateInternalRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
 }

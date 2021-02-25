@@ -1,18 +1,16 @@
 package org.eea.dataflow.persistence.domain;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -48,10 +46,8 @@ public class Representative {
   private DataProvider dataProvider;
 
   /** The lead reporters. */
-  @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
-  @JoinTable(name = "representative_user", joinColumns = @JoinColumn(name = "representative_id"),
-      inverseJoinColumns = @JoinColumn(name = "user_mail"))
-  private Set<User> reporters;
+  @OneToMany(mappedBy = "representative", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<LeadReporter> leadReporters;
 
   /** The receipt downloaded. */
   @Column(name = "receipt_downloaded")
@@ -65,6 +61,9 @@ public class Representative {
   @Column(name = "has_datasets")
   private Boolean hasDatasets;
 
+  /** The restrict from public. */
+  @Column(name = "restrict_from_public")
+  private boolean restrictFromPublic;
 
   /**
    * Equals.

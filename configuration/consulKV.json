@@ -1363,6 +1363,10 @@
     "key": "config/dataset/importPath",
     "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
   },
+    {
+    "key": "config/dataset/pathPublicFile",
+    "value": "JHtEQVRBU0VUX1BVQkxJQ19GSUxFX1BBVEg6QzpcaW1wb3J0RmlsZXNQdWJsaWNcfQ=="
+  },
   {
     "key": "config/apiGateway/zuul.routes.pam.path",
     "value": "L3BhbS8qKg=="

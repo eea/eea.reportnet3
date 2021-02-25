@@ -227,8 +227,6 @@ public interface DatasetMetabaseService {
    */
   List<Long> getUserProviderIdsByDataflowId(Long dataflowId);
 
-
-
   /**
    * Last dataset validation for releasing by id.
    *

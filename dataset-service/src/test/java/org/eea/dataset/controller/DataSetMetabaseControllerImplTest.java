@@ -272,4 +272,17 @@ public class DataSetMetabaseControllerImplTest {
     }
   }
 
+  @Test
+  public void findReportingDataSetPublicByDataflowIdTest() throws EEAException {
+    dataSetMetabaseControllerImpl.findReportingDataSetPublicByDataflowId(1L);
+    Mockito.verify(reportingDatasetService, times(1)).getDataSetPublicByDataflow(Mockito.any());
+  }
+
+  @Test
+  public void findReportingDataSetIdByDataflowIdAndProviderIdTest() {
+    dataSetMetabaseControllerImpl.findReportingDataSetIdByDataflowIdAndProviderId(1L, 1L);
+    Mockito.verify(reportingDatasetService, times(1))
+        .getDataSetIdByDataflowIdAndDataProviderId(Mockito.any(), Mockito.any());
+  }
+
 }

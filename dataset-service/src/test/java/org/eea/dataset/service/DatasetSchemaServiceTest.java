@@ -40,6 +40,7 @@ import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
+import org.eea.dataset.service.file.ZipUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.dataset.service.model.ImportSchemas;
@@ -255,6 +256,9 @@ public class DatasetSchemaServiceTest {
   @Mock
   private IntegrationControllerZuul integrationControllerZuul;
 
+  @Mock
+  private ZipUtils zipUtils;
+
   /** The security context. */
   private SecurityContext securityContext;
 
@@ -413,7 +417,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void createEmptyDataSetSchemaTest() throws EEAException {
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
     doNothing().when(rulesControllerZuul).createEmptyRulesSchema(Mockito.any(), Mockito.any());
     Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
@@ -426,7 +431,7 @@ public class DatasetSchemaServiceTest {
    */
   @Test(expected = EEAException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(null);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(null);
     dataSchemaServiceImpl.createEmptyDataSetSchema(1L);
   }
 
@@ -458,7 +463,7 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
     doNothing().when(recordStoreControllerZuul).restoreSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
     dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
     verify(schemasRepository, times(1)).save(Mockito.any());
@@ -2136,7 +2141,8 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any(),
         Mockito.anyBoolean());
 
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
 
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(dataSchemaMapper.entityToClass(Mockito.any(DataSetSchema.class)))
@@ -2165,7 +2171,7 @@ public class DatasetSchemaServiceTest {
     importSchema.setSchemaIds(schemaDatatasetId);
     importSchema.setSchemaNames(schemaNames);
     importSchema.setUniques(Arrays.asList(new UniqueConstraintSchema()));
-    Mockito.when(fileTreatmentHelper.unZipImportSchema(Mockito.any())).thenReturn(importSchema);
+    Mockito.when(zipUtils.unZipImportSchema(Mockito.any())).thenReturn(importSchema);
 
     DataSetMetabase datasetMetabase = new DataSetMetabase();
     datasetMetabase.setDatasetSchema("5ce524fad31fc52540abae73");
@@ -2198,7 +2204,7 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testImportSchemasEmpty() throws EEAException, IOException {
 
-    when(fileTreatmentHelper.unZipImportSchema(Mockito.any())).thenReturn(new ImportSchemas());
+    when(zipUtils.unZipImportSchema(Mockito.any())).thenReturn(new ImportSchemas());
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ZipOutputStream zip = new ZipOutputStream(baos);
     ZipEntry entry1 = new ZipEntry("Table.schema");
@@ -2226,8 +2232,7 @@ public class DatasetSchemaServiceTest {
       MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
           "application/x-zip-compressed", baos.toByteArray());
 
-      Mockito.when(fileTreatmentHelper.unZipImportSchema(Mockito.any()))
-          .thenThrow(new EEAException("error"));
+      Mockito.when(zipUtils.unZipImportSchema(Mockito.any())).thenThrow(new EEAException("error"));
 
       dataSchemaServiceImpl.importSchemas(1L, multipartFile);
     } catch (Exception e) {

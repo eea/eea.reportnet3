@@ -889,7 +889,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         tooltipOptions={{ position: 'top' }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onHideValidationsDialog()}
@@ -899,7 +899,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderDashboardFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
@@ -915,7 +915,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => onImportOtherSystems()}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => cleanImportOtherSystemsDialog()}
@@ -925,7 +925,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderValidationsFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => manageDialogs('isValidationViewerVisible', false)}
@@ -1046,7 +1046,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['cancel']}
         onClick={() => {
@@ -1068,7 +1068,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         />
       </div>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onCloseUniqueListModal()}

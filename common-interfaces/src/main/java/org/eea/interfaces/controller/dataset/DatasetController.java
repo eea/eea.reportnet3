@@ -12,6 +12,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -367,4 +368,28 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace);
+
+
+  /**
+   * Export file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param fileName the file name
+   * @return the response entity
+   */
+  @GetMapping("/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  ResponseEntity<InputStreamResource> exportPublicFile(@PathVariable Long dataflowId,
+      @PathVariable Long dataProviderId, @RequestParam String fileName);
+
+
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  @GetMapping("/private/checkAnySchemaAvailableInPublic")
+  boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId);
+
 }
