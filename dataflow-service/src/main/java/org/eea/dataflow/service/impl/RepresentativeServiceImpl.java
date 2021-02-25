@@ -420,7 +420,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                   .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProvider.getId());
 
               // if exist we dont create representative
-              if (null == representative || null == representative.getId()) {
+              if (null == representative) {
                 DataProvider dataProviderNew = new DataProvider();
                 representative = new Representative();
                 dataProviderNew.setId(dataProvider.getId());
