@@ -5,7 +5,10 @@
   "allRepresentatives": "/representative/dataflow/{:dataflowId}",
   "deleteById": "/representative/{:representativeId}",
   "deleteLeadReporter": "/representative/leadReporter/{:leadReporterId}",
+  "exportRepresentatives": "/representative/export/{:dataflowId}",
+  "exportRepresentativesTemplate": "/representative/exportTemplateReportersFile/{:dataProviderGroupId}",
   "getProviderTypes": "/representative/dataProvider/types",
+  "importLeadReporters": "/representative/import/{:dataflowId}/group/{:dataProviderGroupId}",
   "updateDataProviderId": "/representative/update",
   "updateLeadReporter": "/representative/leadReporter/update"
 }

@@ -233,7 +233,7 @@ const DocumentFileUpload = ({
                 type={isSubmitting ? '' : 'submit'}
               />
               <Button
-                className={`${styles.cancelButton} p-button-secondary`}
+                className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
                 icon="cancel"
                 label={resources.messages['cancel']}
                 onClick={() => setIsUploadDialogVisible(false)}

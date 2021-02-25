@@ -92,7 +92,7 @@ export const BigButtonListRepresentative = ({
   const renderDialogFooter = (
     <Fragment>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onCloseHistoricReleasesDialogVisible(false)}

@@ -3,12 +3,20 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
+    case 'SET_DATA_PROVIDER_SELECTED':
+      return {
+        ...state,
+        dataProviderSelected: payload
+      };
+
     case 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS':
       return { ...state, hasRepresentativesWithoutDatasets: payload.hasRepresentativesWithoutDatasets };
 
     case 'SET_FORM_HAS_REPRESENTATIVES':
       return { ...state, formHasRepresentatives: payload.formHasRepresentatives };
 
+    case 'SET_REPRESENTATIVES_IMPORT':
+      return { ...state, representativesImport: payload };
     case 'LOAD_PERMISSIONS':
       return {
         ...state,

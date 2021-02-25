@@ -74,7 +74,7 @@ const ApiKeyDialog = ({
         onClick={() => onGenerateApiKey()}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onCloseDialog()}

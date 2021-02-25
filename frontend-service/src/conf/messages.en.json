@@ -987,6 +987,13 @@
     "updateDataProviderError": "There has been an error updating the representative",
     "getRepresentativesError": "There has been an error loading the representatives",
     "downloadDatasetFileNotFoundEvent": "File not found",
-    "downloadDatasetFileError": "Error downloading file"
+    "downloadDatasetFileError": "Error downloading file",
+    "importLeadReporters": "Import lead reporters",
+    "exportLeadReporters": "Export lead reporters",
+    "dataflowLoadingLeadReportersInit": "Importing lead reporters to <strong>{:dataflowName}</strong>",
+    "exportDataflowLeadReportersFailedEvent": "Error exporting lead reporters",
+    "exportDataflowLeadReportersTemplateFailedEvent": "Error exporting lead reporters template",
+    "exportLeadReportersTemplate": "Export template",
+    "importDataflowLeadReportersFailedEvent": "Error importing lead reporters from file"
   }
 }
