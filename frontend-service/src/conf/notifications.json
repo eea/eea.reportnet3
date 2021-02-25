@@ -571,6 +571,9 @@
         },
         {
           "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT"
+        },
+        {
+          "key": "IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
         }
       ]
     },

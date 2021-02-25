@@ -26,7 +26,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
 import {
-isDuplicatedLeadReporter,
+  isDuplicatedLeadReporter,
   isValidEmail,
   onExportLeadReportersTemplate,
   parseLeadReporters

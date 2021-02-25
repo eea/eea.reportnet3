@@ -993,6 +993,7 @@
     "dataflowLoadingLeadReportersInit": "Importing lead reporters to <strong>{:dataflowName}</strong>",
     "exportDataflowLeadReportersFailedEvent": "Error exporting lead reporters",
     "exportDataflowLeadReportersTemplateFailedEvent": "Error exporting lead reporters template",
-    "exportLeadReportersTemplate": "Export template"
+    "exportLeadReportersTemplate": "Export template",
+    "importDataflowLeadReportersFailedEvent": "Error importing lead reporters from file"
   }
 }

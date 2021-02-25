@@ -563,13 +563,9 @@ const Dataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error(`Error while downloading the file: ${error}`);
-      // notificationContext.add({
-      //   type: 'DATAFLOW_LOADING_LEAD_REPORTERS_INIT',
-      //   content: {
-      //     datasetLoadingMessage: resources.messages['dataflowLoadingLeadReportersInit'],
-      //     dataflowName: TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)
-      //   }
-      // });
+      notificationContext.add({
+        type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT'
+      });
     }
   };
 
@@ -883,7 +879,6 @@ const Dataflow = withRouter(({ history, match }) => {
             multiple={false}
             name="file"
             onUpload={onUploadLeadReporters}
-            // replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importLeadReporters, {
               dataflowId,
               dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
