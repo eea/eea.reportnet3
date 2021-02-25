@@ -2267,6 +2267,7 @@ body .p-growl .p-growl-item-container {
 body .p-growl-item-container a {
   color: var(--c-corporate-blue);
   text-decoration: none;
+  word-break: break-all;
 }
 body .p-growl-item-container a:hover {
   color: var(--c-corporate-blue-lighter);
