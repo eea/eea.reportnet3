@@ -161,6 +161,9 @@ public final class EEAErrorMessage {
   /** The Constant CSV_FILE_ERROR: {@value}. */
   public static final String CSV_FILE_ERROR = "File format invalid, use csv file ";
 
+  /** The Constant DATA_FILE_ERROR: {@value}. */
+  public static final String DATA_FILE_ERROR = "File format invalid, use valid format file ";
+
   /** The Constant REPRESENTATIVE_DUPLICATED: {@value}. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
 

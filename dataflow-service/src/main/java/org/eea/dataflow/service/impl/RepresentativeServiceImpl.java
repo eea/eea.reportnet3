@@ -401,6 +401,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         String[] dataLine = representativeData.split("[|]");
         String contryCode = dataLine[0].replaceAll("\"", "");
         String email = dataLine[1].replaceAll("\"", "");
+        email = email.replaceAll("\r", "");
         UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
         if (!countryCodeList.contains(contryCode) && null == user) {
           fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
@@ -439,11 +440,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 representativeList.add(representative);
               } else {
                 List<LeadReporter> leadReporters = representative.getLeadReporters();
-                LeadReporter leadReporter = new LeadReporter();
-                leadReporter.setRepresentative(representative);
-                leadReporter.setEmail(email);
-                leadReporters.add(leadReporter);
-                representative.setLeadReporters(leadReporters);
+                if (leadReporters.stream().noneMatch(rep -> email.equals(rep.getEmail()))) {
+                  LeadReporter leadReporter = new LeadReporter();
+                  leadReporter.setRepresentative(representative);
+                  leadReporter.setEmail(email);
+                  leadReporters.add(leadReporter);
+                  representative.setLeadReporters(leadReporters);
+                }
                 if (!representativeList.contains(representative)) {
                   representativeList.add(representative);
                 }
@@ -464,6 +467,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     } catch (IOException e) {
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+    } catch (IndexOutOfBoundsException e) {
+      LOG_ERROR.error(EEAErrorMessage.DATA_FILE_ERROR, e);
+      throw new EEAException(EEAErrorMessage.DATA_FILE_ERROR);
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
