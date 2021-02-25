@@ -116,10 +116,21 @@ const Dataflow = withRouter(({ history, match }) => {
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
 
   const isInsideACountry = !isNil(representativeId) || uniqDataProviders.length === 1;
-  const country = isInsideACountry ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName')) : '';
   const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
     config.permissions.LEAD_REPORTER
   ]);
+
+  const country =
+    uniqDataProviders.length === 1
+      ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
+      : isNil(representativeId)
+      ? null
+      : uniq(
+          map(
+            dataflowState.data?.datasets?.filter(d => d.dataProviderId == representativeId),
+            'datasetSchemaName'
+          )
+        );
 
   const isLeadReporterOfCountry =
     isLeadReporter &&
@@ -719,9 +730,7 @@ const Dataflow = withRouter(({ history, match }) => {
         <Title
           icon="clone"
           iconSize="4rem"
-          subtitle={
-            isInsideACountry ? `${resources.messages['dataflow']} - ${country}` : resources.messages['dataflow']
-          }
+          subtitle={!isNil(country) ? `${resources.messages['dataflow']} - ${country}` : resources.messages['dataflow']}
           title={dataflowState.name}
         />
 
@@ -762,7 +771,12 @@ const Dataflow = withRouter(({ history, match }) => {
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             onConfirm={() => onConfirmRelease()}
-            onHide={() => manageDialogs('isReleaseDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isReleaseDialogVisible', false);
+              if (dataflowState.restrictFromPublic) {
+                dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+              }
+            }}
             visible={dataflowState.isReleaseDialogVisible}>
             {resources.messages['confirmReleaseQuestion']}
           </ConfirmDialog>
