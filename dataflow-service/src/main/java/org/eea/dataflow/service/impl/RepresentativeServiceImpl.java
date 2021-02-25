@@ -435,7 +435,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 LeadReporter leadReporter = new LeadReporter();
                 leadReporter.setRepresentative(representative);
                 leadReporter.setEmail(email);
-                representative.setLeadReporters(Arrays.asList(leadReporter));
+                representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
               } else {
                 List<LeadReporter> leadReporters = representative.getLeadReporters();
                 LeadReporter leadReporter = new LeadReporter();
