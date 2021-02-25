@@ -25,10 +25,22 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
-import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
+import {
+  isDuplicatedLeadReporter,
+  isValidEmail,
+  onExportLeadReportersTemplate,
+  parseLeadReporters
+} from './_functions/Utils/representativeUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepresentativesWithoutDatasets }) => {
+const RepresentativesList = ({
+  dataflowId,
+  representativesImport = false,
+  setDataProviderSelected,
+  setFormHasRepresentatives,
+  setRepresentativeImport,
+  setHasRepresentativesWithoutDatasets
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -46,6 +58,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     refresher: false,
     representativeIdToDelete: '',
     representatives: [],
+    representativesHaveError: [],
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: []
   };
@@ -55,6 +68,13 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
   const { isVisibleDialog } = formState;
 
   useEffect(() => {
+    if (representativesImport) {
+      getInitialData(formDispatcher, dataflowId, formState);
+      setRepresentativeImport(false);
+    }
+  }, [representativesImport]);
+
+  useEffect(() => {
     getInitialData();
   }, [formState.refresher]);
 
@@ -62,6 +82,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     if (!isNull(formState.selectedDataProviderGroup)) {
       getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     }
+    setDataProviderSelected(formState.selectedDataProviderGroup);
   }, [formState.selectedDataProviderGroup]);
 
   useEffect(() => {
@@ -340,6 +361,7 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
         <select
+          autoFocus
           className={
             representative.hasDatasets ? `${styles.disabled} ${styles.selectDataProvider}` : styles.selectDataProvider
           }
@@ -389,7 +411,6 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
     <div className={styles.container}>
       <div className={styles.selectWrapper}>
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
-
         <div>
           <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
@@ -402,6 +423,24 @@ const RepresentativesList = ({ dataflowId, setFormHasRepresentatives, setHasRepr
             placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
             className={styles.dataProvidersDropdown}
             value={formState.selectedDataProviderGroup}
+          />
+          <Button
+            className={`${styles.exportTemplate} p-button-secondary ${
+              !isEmpty(formState.selectedDataProviderGroup) ? 'p-button-animated-blink' : ''
+            }`}
+            disabled={isEmpty(formState.selectedDataProviderGroup)}
+            icon={'export'}
+            label={resources.messages['exportLeadReportersTemplate']}
+            onClick={() => {
+              try {
+                onExportLeadReportersTemplate(formState.selectedDataProviderGroup);
+              } catch (error) {
+                console.error(error);
+                notificationContext.add({
+                  type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
+                });
+              }
+            }}
           />
         </div>
       </div>

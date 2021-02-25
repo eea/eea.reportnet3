@@ -23,13 +23,18 @@
     box-shadow: none;
   }
 }
+.exportTemplate {
+  margin-left: 1rem !important;
+}
+
 .selectWrapper {
   display: flex;
   justify-items: center;
+  align-items: center;
   align-self: center;
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.6rem;
 }
 
 .addDataProviderButtonWrapper :global .formField {

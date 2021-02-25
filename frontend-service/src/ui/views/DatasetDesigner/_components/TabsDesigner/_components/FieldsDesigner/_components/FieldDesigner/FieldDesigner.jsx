@@ -797,7 +797,7 @@ export const FieldDesigner = ({
   const qcDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        className="p-button-secondary-transparent p-button-animated-blink"
+        className="p-button-secondary-transparent p-button-animated-blink button-right-aligned"
         icon="cancel"
         label={resources.messages['close']}
         onClick={() => dispatchFieldDesigner({ type: 'TOGGLE_QC_MANAGER_VISIBLE', payload: false })}

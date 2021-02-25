@@ -16,6 +16,7 @@ import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
 import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { routes } from 'ui/routes';
 import DataflowConf from 'conf/dataflow.config.json';
+import { RepresentativeConfig } from 'conf/domain/model/Representative';
 
 import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
@@ -23,6 +24,7 @@ import { BigButtonListRepresentative } from './_components/BigButtonListRepresen
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
@@ -36,6 +38,7 @@ import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
+import { RepresentativeService } from 'core/services/Representative';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -50,6 +53,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -66,6 +70,7 @@ const Dataflow = withRouter(({ history, match }) => {
     currentUrl: '',
     data: {},
     dataProviderId: [],
+    dataProviderSelected: {},
     deleteInput: '',
     description: '',
     designDatasetSchemas: [],
@@ -84,6 +89,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isExportEuDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
+    isImportLeadReportersVisible: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
     isPageLoading: true,
@@ -97,6 +103,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isSnapshotDialogVisible: false,
     name: '',
     obligations: {},
+    representativesImport: false,
     restrictFromPublic: false,
     status: '',
     updatedDatasetSchema: undefined,
@@ -307,18 +314,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const manageRoleDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
-    />
-  );
-
   const manageRightsDialogFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => manageDialogs('isShareRightsDialogVisible', false)}
@@ -331,8 +329,7 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
 
-  const onConfirmDeleteDataflow = event =>
-    dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
+  const setDataProviderSelected = value => dataflowDispatch({ type: 'SET_DATA_PROVIDER_SELECTED', payload: value });
 
   const setFormHasRepresentatives = value =>
     dataflowDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
@@ -397,6 +394,52 @@ const Dataflow = withRouter(({ history, match }) => {
     });
     onLoadReportingDataflow();
   };
+
+  const onConfirmDeleteDataflow = event =>
+    dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
+
+  const onExportLeadReporters = async () => {
+    try {
+      const response = await RepresentativeService.downloadById(dataflowId);
+      if (!isNil(response)) {
+        DownloadFile(
+          response,
+          `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Lead_Reporters.csv`
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT'
+      });
+    }
+  };
+
+  const manageRoleDialogFooter = (
+    <>
+      <Button
+        className={`${styles.manageLeadReportersButton} p-button-secondary ${
+          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
+        }`}
+        disabled={isEmpty(dataflowState.dataProviderSelected)}
+        icon={'import'}
+        label={resources.messages['importLeadReporters']}
+        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
+      />
+      <Button
+        className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
+        icon={'export'}
+        label={resources.messages['exportLeadReporters']}
+        onClick={onExportLeadReporters}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
+      />
+    </>
+  );
 
   const getCurrentDatasetId = () => {
     if (isEmpty(dataflowState.data)) return null;
@@ -508,6 +551,24 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onUploadLeadReporters = event => {
+    manageDialogs('isImportLeadReportersVisible', false);
+    try {
+      if (!isNil(event.xhr) && !isNil(event.xhr.response)) {
+        DownloadFile(
+          event.xhr.response,
+          `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Results.csv`
+        );
+        dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: true });
+      }
+    } catch (error) {
+      console.error(`Error while downloading the file: ${error}`);
+      notificationContext.add({
+        type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT'
+      });
+    }
+  };
+
   const setIsReleasingDatasetsProviderId = isReleasingDatasetValue => {
     const [notification] = notificationContext.all.filter(
       notification =>
@@ -602,6 +663,12 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
+
+  const getImportExtensions = ['.csv'].join(', ').toLowerCase();
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
+    getImportExtensions.split(', ')
+  ).join(', ')}`;
 
   const onConfirmUpdateIsReleaseable = async () => {
     manageDialogs('isReleaseableDialogVisible', false);
@@ -703,8 +770,14 @@ const Dataflow = withRouter(({ history, match }) => {
             <div className={styles.dialog}>
               <RepresentativesList
                 dataflowId={dataflowId}
+                representativesImport={dataflowState.representativesImport}
+                setDataProviderSelected={setDataProviderSelected}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setFormHasRepresentatives={setFormHasRepresentatives}
+                setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
+                setRepresentativeImport={isImport =>
+                  dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: isImport })
+                }
               />
             </div>
           </Dialog>
@@ -789,6 +862,28 @@ const Dataflow = withRouter(({ history, match }) => {
               </a>
             </label>
           </ConfirmDialog>
+        )}
+
+        {dataflowState.isImportLeadReportersVisible && (
+          <CustomFileUpload
+            dialogHeader={`${resources.messages['importLeadReporters']}`}
+            dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}
+            dialogVisible={dataflowState.isImportLeadReportersVisible}
+            isDialog={true}
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']}
+            fileLimit={1}
+            infoTooltip={infoExtensionsTooltip}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            mode="advanced"
+            multiple={false}
+            name="file"
+            onUpload={onUploadLeadReporters}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importLeadReporters, {
+              dataflowId,
+              dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
+            })}`}
+          />
         )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />

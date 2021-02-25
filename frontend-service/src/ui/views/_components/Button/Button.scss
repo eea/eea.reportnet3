@@ -61,6 +61,10 @@ body .p-button.p-button-rounded {
   border-radius: 3px;
 }
 
+body .p-button.p-button-right-aligned {
+  margin-right: 0 !important;
+}
+
 body .p-button.p-button-secondary,
 body .p-buttonset.p-button-secondary > .p-button {
   color: var(--button-secondary-color);

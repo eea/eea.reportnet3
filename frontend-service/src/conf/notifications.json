@@ -565,6 +565,15 @@
         },
         {
           "key": "DOWNLOAD_DATASET_FILE_ERROR"
+        },
+        {
+          "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
+        },
+        {
+          "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT"
+        },
+        {
+          "key": "IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
         }
       ]
     },
@@ -837,6 +846,9 @@
         },
         {
           "key": "RESTORE_DATASET_SNAPSHOT_INIT_INFO"
+        },
+        {
+          "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT"
         }
       ]
     }
