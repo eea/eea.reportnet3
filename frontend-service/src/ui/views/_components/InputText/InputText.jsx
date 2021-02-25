@@ -167,7 +167,8 @@ export class InputText extends Component {
               style={{
                 color: 'var(--errors)',
                 position: 'relative',
-                right: '40px'
+                right: '40px',
+                opacity: `${this.props.disabled ? 0.3 : 1}`
               }}
             />
           </div>

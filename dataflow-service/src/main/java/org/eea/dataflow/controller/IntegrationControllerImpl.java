@@ -1,7 +1,8 @@
 package org.eea.dataflow.controller;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
@@ -15,6 +16,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +77,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find all Integrations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
@@ -99,7 +101,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * @return the integration VO
    */
   @Override
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER')")
   @GetMapping("/findExportEUDatasetIntegration")
   @ApiOperation(value = "Find EU Dataset Export Integration by its Schema Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class)
@@ -115,7 +117,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Create Integration")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -137,7 +139,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @DeleteMapping(value = "/{integrationId}/dataflow/{dataflowId}")
   @ApiOperation(value = "Delete Integration by its Integration Id")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -162,7 +164,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#integration.internalParameters['dataflowId'],'DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update Integration")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -185,7 +187,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER') OR secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
@@ -240,7 +242,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('DATA_CUSTODIAN') OR hasRole('DATA_STEWARD')  OR (checkApiKey(#dataflowId,0L))")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR (checkApiKey(#dataflowId,0L))")
   @LockMethod
   @PostMapping(value = "/executeEUDatasetExport")
   @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
@@ -364,11 +366,36 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
           integrationId, datasetId, e.getMessage());
-      lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(), datasetId));
+      Map<String, Object> lockCriteria = new HashMap<>();
+      lockCriteria.put(LiteralConstants.SIGNATURE,
+          LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
+      lockCriteria.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(lockCriteria);
       integrationService.releaseLocks(datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
+  }
+
+
+  /**
+   * Creates the integrations.
+   *
+   * @param integrations the integrations
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PostMapping("/private/createIntegrations")
+  @ApiOperation(value = "Create Integrations")
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void createIntegrations(@ApiParam(type = "Object",
+      value = "List<IntegrationVO> Object") @RequestBody List<IntegrationVO> integrations) {
+    try {
+      integrationService.createIntegrations(integrations);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating integrations. Message: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 }

@@ -4,7 +4,6 @@ import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
-import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
 import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/reporter';
@@ -194,10 +193,14 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     }
   };
 
+  const sortByProperty = propertyName => (a, b) => a[propertyName].localeCompare(b[propertyName]);
+
   const onLoadDocuments = async () => {
     try {
       let loadedDocuments = await DocumentService.all(`${dataflowId}`);
-      loadedDocuments = sortBy(loadedDocuments, ['Document', 'id']);
+
+      loadedDocuments = loadedDocuments.sort(sortByProperty('description'));
+
       setDocuments(loadedDocuments);
     } catch (error) {
       notificationContext.add({
@@ -215,7 +218,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const onLoadWebLinks = async () => {
     try {
       let loadedWebLinks = await WebLinkService.all(dataflowId);
-      loadedWebLinks = sortBy(loadedWebLinks, ['WebLink', 'id']);
+      loadedWebLinks = loadedWebLinks.sort(sortByProperty('description'));
       setWebLinks(loadedWebLinks);
     } catch (error) {
       notificationContext.add({
@@ -263,7 +266,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           <TabPanel headerClassName="dataflowHelp-weblinks-help-step" header={resources.messages['webLinks']}>
             <WebLinks
               dataflowId={dataflowId}
-              isCustodian={isCustodian}
               isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWeblinks={setSortFieldWeblinks}

@@ -3,12 +3,20 @@
   top: var(--header-height);
   height: auto;
   min-height: calc(100vh - var(--header-height));
-  .pageContent {
+  .mainContent {
     display: flex;
-    margin: 2rem 0 4rem 0;
+    flex-direction: column;
+    .pageContent {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex: auto;
+      margin: 2rem 0 4rem 0;
 
-    @media (max-width: 414px) {
-      margin: 1rem 0 2rem 0;
+      @media (max-width: 414px) {
+        margin: 1rem 0 2rem 0;
+      }
     }
   }
 }

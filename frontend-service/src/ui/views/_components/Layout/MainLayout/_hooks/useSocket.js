@@ -26,7 +26,7 @@ const useSocket = () => {
       // stompClient.debug = str => {
       //   if (str !== '>>> PING' && str !== '<<< PONG' && str !== 'Received data') console.log('socket', str);
       // };
-
+      // stompClient.reconnect_delay = 5000;
       stompClient.connect({ token }, frame => {
         stompClient.subscribe('/user/queue/notifications', notification => {
           const { type, content } = JSON.parse(notification.body);

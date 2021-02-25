@@ -44,6 +44,7 @@ public class FinishViewProccesCommand extends AbstractEEAEventHandlerCommand {
     Boolean checkSQL = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("checkSQL")));
 
     viewHelper.finishProcces(datasetId, isMaterialized, checkSQL);
+
   }
 
 }

@@ -23,7 +23,6 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 export const WebLinks = ({
   dataflowId,
-  isCustodian,
   isToolbarVisible,
   onLoadWebLinks,
   setSortFieldWeblinks,
@@ -370,7 +369,7 @@ export const WebLinks = ({
                       icon={getButtonIcon(isSubmitting)}
                     />
                     <Button
-                      className={`${styles.cancelButton} p-button-secondary`}
+                      className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
                       label={resources.messages['cancel']}
                       icon="cancel"
                       onClick={() => onHideAddEditDialog()}

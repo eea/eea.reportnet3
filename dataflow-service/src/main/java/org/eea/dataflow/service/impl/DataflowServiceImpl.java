@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -8,8 +9,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
@@ -24,6 +27,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -32,6 +36,7 @@ import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -45,6 +50,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,9 +129,18 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
 
+  /** The dataflow public mapper. */
+  @Autowired
+  private DataflowPublicMapper dataflowPublicMapper;
+
   /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
+
+  /** The dataset controller zuul. */
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
+
 
   /**
    * Gets the by id.
@@ -203,7 +218,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Sets the reporting dataset status.
    *
-   * @param map the map
+   * @param datasetsStatusList the datasets status list
    * @param dataflowVO the dataflow VO
    */
   private void setReportingDatasetStatus(List<DataflowStatusDataset> datasetsStatusList,
@@ -434,6 +449,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowSave.get().setName(dataflowVO.getName());
         dataflowSave.get().setDescription(dataflowVO.getDescription());
         dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
+        dataflowSave.get().setReleasable(dataflowVO.isReleasable());
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
@@ -556,6 +572,55 @@ public class DataflowServiceImpl implements DataflowService {
       LOG.info("The dataflow {} has been saved.", dataflow.get().getName());
     } else {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+  }
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  @Override
+  public List<DataflowPublicVO> getPublicDataflows() {
+    List<DataflowPublicVO> dataflowPublicList =
+        dataflowPublicMapper.entityListToClass(dataflowRepository.findByShowPublicInfoTrue());
+    dataflowPublicList.stream().forEach(dataflow -> {
+      findObligationPublicDataflow(dataflow);
+    });
+    return dataflowPublicList;
+  }
+
+  /**
+   * Gets the public dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the public dataflow by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DataflowPublicVO getPublicDataflowById(Long dataflowId) throws EEAException {
+    DataflowPublicVO dataflowPublicVO = dataflowPublicMapper
+        .entityToClass(dataflowRepository.findByIdAndShowPublicInfoTrue(dataflowId));
+    if (null == dataflowPublicVO) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    dataflowPublicVO.setReportingDatasets(
+        datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
+
+    findObligationPublicDataflow(dataflowPublicVO);
+    return dataflowPublicVO;
+  }
+
+  /**
+   * Find obligation public dataflow.
+   *
+   * @param dataflowPublicVO the dataflow public VO
+   */
+  private void findObligationPublicDataflow(DataflowPublicVO dataflowPublicVO) {
+    if (dataflowPublicVO.getObligation() != null
+        && dataflowPublicVO.getObligation().getObligationId() != null) {
+      dataflowPublicVO.setObligation(obligationController
+          .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
     }
   }
 
@@ -708,6 +773,20 @@ public class DataflowServiceImpl implements DataflowService {
 
     getObligation(dataflowVO);
 
+    // we sort the weblinks and documents
+    if (!CollectionUtils.isEmpty(dataflowVO.getWeblinks())) {
+      dataflowVO.getWeblinks()
+          .sort(Comparator.comparing(WeblinkVO::getDescription, String.CASE_INSENSITIVE_ORDER));
+    }
+    if (!CollectionUtils.isEmpty(dataflowVO.getDocuments())) {
+      dataflowVO.getDocuments()
+          .sort(Comparator.comparing(DocumentVO::getDescription, String.CASE_INSENSITIVE_ORDER));
+    }
+
+    // Calculate anySchemaAvailableInPublic
+    dataflowVO.setAnySchemaAvailableInPublic(
+        dataSetControllerZuul.checkAnySchemaAvailableInPublic(dataflowVO.getId()));
+
     LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
@@ -734,5 +813,16 @@ public class DataflowServiceImpl implements DataflowService {
         dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
       }
     }
+  }
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Override
+  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
+    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
   }
 }

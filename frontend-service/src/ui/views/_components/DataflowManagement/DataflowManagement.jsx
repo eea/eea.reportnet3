@@ -53,7 +53,8 @@ export const DataflowManagement = ({
     obligationPrevState:
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
-        : { id: null, title: '' }
+        : { id: null, title: '' },
+    isReleasable: state.isReleasable
   };
 
   const [dataflowManagementState, dataflowManagementDispatch] = useReducer(
@@ -119,7 +120,7 @@ export const DataflowManagement = ({
   const renderCancelButton = action => (
     <Button
       icon="cancel"
-      className="p-button-secondary"
+      className="p-button-secondary button-right-aligned"
       label={resources.messages['cancel']}
       onClick={() => action()}
     />

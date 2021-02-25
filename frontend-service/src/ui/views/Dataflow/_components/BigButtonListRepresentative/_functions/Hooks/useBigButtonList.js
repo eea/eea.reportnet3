@@ -34,7 +34,8 @@ const useBigButtonList = ({
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isReleased =
-      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
+      !isNil(dataflowState.data.datasets) &&
+      dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
 
     return {
       feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
@@ -111,16 +112,7 @@ const useBigButtonList = ({
         infoStatus: dataset.isReleased,
         infoStatusIcon: dataset.isReleased,
         handleRedirect: () => {
-          handleRedirect(
-            getUrl(
-              routes.DATASET,
-              {
-                dataflowId: dataflowState.id,
-                datasetId: dataset.datasetId
-              },
-              true
-            )
-          );
+          handleRedirect(getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true));
         },
         helpClassName: 'dataflow-dataset-container-help-step',
         model: [
@@ -128,26 +120,16 @@ const useBigButtonList = ({
             label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset', true);
-              getDataHistoricReleases(datasetId, datasetName, dataProviderId);
+              getDataHistoricReleases(datasetId, datasetName);
             }
           }
         ],
-        onWheel: getUrl(
-          routes.DATASET,
-          {
-            dataflowId: dataflowState.id,
-            datasetId: dataset.datasetId
-          },
-          true
-        ),
+        onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
         visibility: true
       };
     });
 
   const onBuildReceiptButton = () => {
-    const { datasets } = dataflowState.data;
-    const releasedStates = isNil(datasets) ? [] : datasets.map(dataset => dataset.isReleased);
-
     return [
       {
         buttonClass: 'schemaDataset',
@@ -180,9 +162,11 @@ const useBigButtonList = ({
         buttonIcon: getIsReleasing() ? 'spinner' : 'released',
         buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
+        enabled: dataflowState.isReleasable,
+        handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];

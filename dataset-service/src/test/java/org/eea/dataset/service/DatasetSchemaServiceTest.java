@@ -5,12 +5,17 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
@@ -35,18 +40,24 @@ import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
+import org.eea.dataset.service.file.ZipUtils;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
+import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.dataset.validate.commands.ValidationSchemaIntegrityCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -58,7 +69,9 @@ import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
@@ -73,9 +86,12 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 import com.mongodb.client.result.UpdateResult;
 
 /**
@@ -231,6 +247,18 @@ public class DatasetSchemaServiceTest {
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  @Mock
+  private FileTreatmentHelper fileTreatmentHelper;
+
+  @Mock
+  private ContributorControllerZuul contributorControllerZuul;
+
+  @Mock
+  private IntegrationControllerZuul integrationControllerZuul;
+
+  @Mock
+  private ZipUtils zipUtils;
+
   /** The security context. */
   private SecurityContext securityContext;
 
@@ -250,6 +278,9 @@ public class DatasetSchemaServiceTest {
     SecurityContextHolder.setContext(securityContext);
 
     ThreadPropertiesManager.setVariable("user", "user");
+
+    ReflectionTestUtils.setField(dataSchemaServiceImpl, "timeToWaitBeforeContinueCopy", 3000L);
+
     MockitoAnnotations.initMocks(this);
     validationCommands.add(command);
   }
@@ -386,7 +417,8 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void createEmptyDataSetSchemaTest() throws EEAException {
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(new DataFlowVO());
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
     Mockito.when(schemasRepository.save(Mockito.any())).thenReturn(null);
     doNothing().when(rulesControllerZuul).createEmptyRulesSchema(Mockito.any(), Mockito.any());
     Assert.assertNotNull(dataSchemaServiceImpl.createEmptyDataSetSchema(1L));
@@ -399,7 +431,7 @@ public class DatasetSchemaServiceTest {
    */
   @Test(expected = EEAException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
-    Mockito.when(dataFlowControllerZuul.findById(Mockito.any())).thenReturn(null);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(null);
     dataSchemaServiceImpl.createEmptyDataSetSchema(1L);
   }
 
@@ -431,7 +463,7 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
     doNothing().when(recordStoreControllerZuul).restoreSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
     dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
     verify(schemasRepository, times(1)).save(Mockito.any());
@@ -461,6 +493,40 @@ public class DatasetSchemaServiceTest {
 
     String response = dataSchemaServiceImpl.createFieldSchema("5eb4269d06390651aced7c93", field);
     Assert.assertNotEquals("", response);
+  }
+
+  @Test(expected = EEAException.class)
+  public void createFieldSchemaNameExistTest() throws EEAException {
+    ReferencedFieldSchemaVO referencedField = new ReferencedFieldSchemaVO();
+    referencedField.setIdDatasetSchema("5eb4269d06390651aced7c93");
+    referencedField.setIdPk("5eb4269d06390651aced7c93");
+
+    String[] codelistItems = new String[] {"item1", "item2", "item3"};
+
+    FieldSchemaVO field = new FieldSchemaVO();
+    field.setReferencedField(referencedField);
+    field.setCodelistItems(codelistItems);
+    field.setType(DataType.CODELIST);
+    field.setId("1");
+    field.setName("");
+
+    Document document = new Document();
+    Document documentField = new Document();
+    List<Document> documentsField = new ArrayList<>();
+    documentsField.add(documentField);
+    document.put("fieldSchemas", documentsField);
+    documentField.put("headerName", "");
+    documentField.put("_id", "");
+
+    Mockito.when(schemasRepository.findRecordSchemaByRecordSchemaId(Mockito.any(), Mockito.any()))
+        .thenReturn(document);
+    try {
+      dataSchemaServiceImpl.createFieldSchema("5eb4269d06390651aced7c93", field);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, field.getName(),
+          field.getIdRecord(), "5eb4269d06390651aced7c93"), e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -831,6 +897,40 @@ public class DatasetSchemaServiceTest {
         .thenReturn(new TableSchema());
     dataSchemaServiceImpl.createTableSchema(new ObjectId().toString(), tableSchemaVO, 1L);
     Mockito.verify(schemasRepository, times(1)).insertTableSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateFieldSchemaNameExistTest() throws EEAException {
+    ReferencedFieldSchemaVO referencedField = new ReferencedFieldSchemaVO();
+    referencedField.setIdDatasetSchema("5eb4269d06390651aced7c93");
+    referencedField.setIdPk("5eb4269d06390651aced7c93");
+
+    String[] codelistItems = new String[] {"item1", "item2", "item3"};
+
+    FieldSchemaVO field = new FieldSchemaVO();
+    field.setReferencedField(referencedField);
+    field.setCodelistItems(codelistItems);
+    field.setType(DataType.CODELIST);
+    field.setId("1");
+    field.setName("");
+
+    Document document = new Document();
+    Document documentField = new Document();
+    List<Document> documentsField = new ArrayList<>();
+    documentsField.add(documentField);
+    document.put("fieldSchemas", documentsField);
+    documentField.put("headerName", "");
+    documentField.put("_id", "");
+
+    Mockito.when(schemasRepository.findRecordSchemaByRecordSchemaId(Mockito.any(), Mockito.any()))
+        .thenReturn(document);
+    try {
+      dataSchemaServiceImpl.updateFieldSchema("5eb4269d06390651aced7c93", field);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, field.getName(),
+          field.getIdRecord(), "5eb4269d06390651aced7c93"), e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -1928,11 +2028,245 @@ public class DatasetSchemaServiceTest {
   }
 
   @Test
+  public void checkDeleteAttachmentsFirstHasToCleanTest() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5eb4269d06390651aced7c93");
+    fieldSchemaVO.setType(DataType.ATTACHMENT);
+    fieldSchemaVO.setValidExtensions(new String[0]);
+    Document doc = new Document();
+    doc.put("typeData", "ATTACHMENT1");
+    doc.put("validExtensions", new ArrayList<>());
+    when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(doc);
+    dataSchemaServiceImpl.checkClearAttachments(1L, "5eb4269d06390651aced7c93", fieldSchemaVO);
+    Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void checkDeleteAttachmentsSecondHasToCleanTest() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setId("5eb4269d06390651aced7c93");
+    fieldSchemaVO.setType(DataType.ATTACHMENT);
+    fieldSchemaVO.setValidExtensions(new String[0]);
+    fieldSchemaVO.setMaxSize(1f);
+    Document doc = new Document();
+    doc.put("typeData", "ATTACHMENT");
+    doc.put("validExtensions", new ArrayList<>());
+    doc.put("maxSize", 0.0);
+    when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(doc);
+    dataSchemaServiceImpl.checkClearAttachments(1L, "5eb4269d06390651aced7c93", fieldSchemaVO);
+    Mockito.verify(schemasRepository, times(1)).findFieldSchema(Mockito.any(), Mockito.any());
+  }
+
+  @Test
   public void updateWebform() {
     when(webFormMapper.classToEntity(Mockito.any())).thenReturn(new Webform());
     dataSchemaServiceImpl.updateWebform(Mockito.anyString(), new WebformVO());
     Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaWebForm(Mockito.any(),
         Mockito.any());
+  }
+
+
+  @Test
+  public void testImportSchemas() throws EEAException, IOException {
+
+    DesignDatasetVO dataset = new DesignDatasetVO();
+    dataset.setId(1L);
+    dataset.setDatasetSchema("5ce524fad31fc52540abae73");
+    dataset.setDataSetName("test");
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    schemaVO.setIdDataSetSchema("5ce524fad31fc52540abae73");
+    schemaVO.setNameDatasetSchema("test");
+    TableSchemaVO tableVO = new TableSchemaVO();
+    RecordSchemaVO recordVO = new RecordSchemaVO();
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setPkReferenced(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(true);
+    fieldSchemaVO.setType(DataType.LINK);
+    fieldSchemaVO.setIdRecord("5ce524fad31fc52540abae73");
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    referenced.setLabelId("5ce524fad31fc52540abae73");
+    referenced.setLinkedConditionalFieldId("5ce524fad31fc52540abae73");
+    referenced.setMasterConditionalFieldId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    recordVO.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    recordVO.setIdRecordSchema("5ce524fad31fc52540abae73");
+    tableVO.setRecordSchema(recordVO);
+    tableVO.setIdTableSchema("5ce524fad31fc52540abae73");
+    tableVO.setNameTableSchema("table1");
+    schemaVO.setTableSchemas(Arrays.asList(tableVO));
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    RecordSchema record = new RecordSchema();
+    FieldSchema field = new FieldSchema();
+    ReferencedFieldSchema referenced2 = new ReferencedFieldSchema();
+    referenced2.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced2.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced2.setLabelId(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced2.setLinkedConditionalFieldId(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced2.setMasterConditionalFieldId(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    field.setReferencedField(referenced2);
+    field.setType(DataType.LINK);
+    record.setFieldSchema(Arrays.asList(field));
+    record.setIdRecordSchema(new ObjectId());
+    table.setRecordSchema(record);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(table);
+    schema.setTableSchemas(tableSchemas);
+    schema.setIdDataFlow(1L);
+    schema.setIdDataSetSchema(new ObjectId());
+
+    DataSetSchema schema2 = new DataSetSchema();
+    schema2.setIdDataFlow(1L);
+    schema2.setIdDataSetSchema(new ObjectId());
+    schema2.setTableSchemas(new ArrayList<>());
+
+    DataSetSchemaVO schema2VO = new DataSetSchemaVO();
+    schema2VO.setIdDataSetSchema(new ObjectId().toString());
+    schema2VO.setTableSchemas(new ArrayList<>());
+
+
+    when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(CompletableFuture.completedFuture(1L));
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema2);
+
+
+    Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any(),
+        Mockito.anyBoolean());
+
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenReturn(new DataFlowVO());
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
+    Mockito.when(dataSchemaMapper.entityToClass(Mockito.any(DataSetSchema.class)))
+        .thenReturn(schemaVO);
+
+
+    Map<String, Long> schemaDatatasetId = new HashMap<>();
+    Map<String, String> schemaNames = new HashMap<>();
+    List<byte[]> qcRulesBytes = new ArrayList<>();
+
+    UniqueConstraintVO uniqueVO = new UniqueConstraintVO();
+    uniqueVO.setDataflowId("1");
+    uniqueVO.setDatasetSchemaId("5ce524fad31fc52540abae73");
+    uniqueVO.setUniqueId("5ce524fad31fc52540abae73");
+    uniqueVO.setTableSchemaId("5ce524fad31fc52540abae73");
+    uniqueVO.setFieldSchemaIds(Arrays.asList("5ce524fad31fc52540abae73"));
+    Mockito.when(uniqueConstraintMapper.entityListToClass(Mockito.any()))
+        .thenReturn(Arrays.asList(uniqueVO));
+
+
+    ImportSchemas importSchema = new ImportSchemas();
+    importSchema.setSchemas(Arrays.asList(schema));
+    importSchema.setExternalIntegrations(Arrays.asList(new IntegrationVO()));
+    importSchema.setIntegrities(Arrays.asList(new IntegrityVO()));
+    importSchema.setQcRulesBytes(qcRulesBytes);
+    importSchema.setSchemaIds(schemaDatatasetId);
+    importSchema.setSchemaNames(schemaNames);
+    importSchema.setUniques(Arrays.asList(new UniqueConstraintSchema()));
+    Mockito.when(zipUtils.unZipImportSchema(Mockito.any())).thenReturn(importSchema);
+
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setDatasetSchema("5ce524fad31fc52540abae73");
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(datasetMetabase));
+
+    Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any(FieldSchema.class)))
+        .thenReturn(fieldSchemaVO);
+
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(null);
+
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+    dataSchemaServiceImpl.importSchemas(1L, multipartFile);
+    Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+
+  @Test
+  public void testImportSchemasEmpty() throws EEAException, IOException {
+
+    when(zipUtils.unZipImportSchema(Mockito.any())).thenReturn(new ImportSchemas());
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+    dataSchemaServiceImpl.importSchemas(1L, multipartFile);
+    Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
+  }
+
+  @Test
+  public void testImportSchemasException() throws EEAException, IOException {
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ZipOutputStream zip = new ZipOutputStream(baos);
+      ZipEntry entry1 = new ZipEntry("Table.schema");
+      ZipEntry entry2 = new ZipEntry("Table.qcrules");
+      zip.putNextEntry(entry1);
+      zip.putNextEntry(entry2);
+      zip.close();
+      MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+          "application/x-zip-compressed", baos.toByteArray());
+
+      Mockito.when(zipUtils.unZipImportSchema(Mockito.any())).thenThrow(new EEAException("error"));
+
+      dataSchemaServiceImpl.importSchemas(1L, multipartFile);
+    } catch (Exception e) {
+      assertEquals("error", e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testExportSchemas() throws IOException, EEAException {
+
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(schemasRepository.findByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(new DataSetSchema()));
+
+    dataSchemaServiceImpl.exportSchemas(1L);
+    Mockito.verify(schemasRepository, times(1)).findByIdDataFlow(Mockito.anyLong());
+  }
+
+  @Test(expected = EEAException.class)
+  public void testExportSchemasException() throws IOException, EEAException {
+
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(schemasRepository.findByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+
+    try {
+      dataSchemaServiceImpl.exportSchemas(1L);
+    } catch (EEAException e) {
+      assertEquals(String.format("No schemas to export in the dataflow %s", 1L), e.getMessage());
+      throw e;
+    }
   }
 
 }

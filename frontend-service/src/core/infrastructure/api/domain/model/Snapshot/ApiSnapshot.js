@@ -91,9 +91,9 @@ export const apiSnapshot = {
     return response.data;
   },
 
-  releaseDataflow: async (dataflowId, dataProviderId) => {
+  releaseDataflow: async (dataflowId, dataProviderId, restrictFromPublic) => {
     const response = await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId })
+      url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId, restrictFromPublic })
     });
     return response.data;
   }

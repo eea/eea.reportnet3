@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -59,7 +61,6 @@ import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -73,6 +74,7 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -120,221 +122,150 @@ import org.springframework.transaction.annotation.Propagation;
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
-  /**
-   * The Constant ROOT: {@value}.
-   */
-  private static final String USER = "root";
-
-  /** The Constant HEADER_NAME. */
-  private static final String HEADER_NAME = "headerName";
-
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The field max length.
-   */
+  /** The Constant USER: {@value}. */
+  private static final String USER = "root";
+
+  /** The Constant HEADER_NAME: {@value}. */
+  private static final String HEADER_NAME = "headerName";
+
+  /** The Constant DATASET_ID: {@value}. */
+  private static final String DATASET_ID = "dataset_%s";
+
+  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
+  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
+  /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
 
-  /**
-   * The dataset repository.
-   */
+  /** The path public file. */
+  @Value("${pathPublicFile}")
+  private String pathPublicFile;
+
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
-  /**
-   * The data set metabase repository.
-   */
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /**
-   * The partition data set metabase repository.
-   */
+  /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /**
-   * The design dataset repository.
-   */
+  /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /**
-   * The reporting dataset repository.
-   */
+  /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /**
-   * The dataflow controller zull.
-   */
+  /** The dataflow controller zull. */
   @Autowired
-  private DataFlowControllerZuul dataflowControllerZull;
+  private DataFlowControllerZuul dataflowControllerZuul;
 
-  /**
-   * The table repository.
-   */
+  /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
 
-  /**
-   * The record repository.
-   */
+  /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
 
-  /**
-   * The record validation repository.
-   */
+  /** The record validation repository. */
   @Autowired
   private RecordValidationRepository recordValidationRepository;
 
-  /**
-   * The field repository.
-   */
+  /** The field repository. */
   @Autowired
   private FieldRepository fieldRepository;
 
-  /**
-   * The field validation repository.
-   */
+  /** The field validation repository. */
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
 
-  /**
-   * The statistics repository.
-   */
+  /** The statistics repository. */
   @Autowired
   private StatisticsRepository statisticsRepository;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /**
-   * The data set mapper.
-   */
+  /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
 
-  /**
-   * The record mapper.
-   */
+  /** The record mapper. */
   @Autowired
   private RecordMapper recordMapper;
 
-  /**
-   * The file parser factory.
-   */
+  /** The file parser factory. */
   @Autowired
   private IFileParserFactory fileParserFactory;
 
-  /**
-   * The file export factory.
-   */
+  /** The file export factory. */
   @Autowired
   private IFileExportFactory fileExportFactory;
 
-  /**
-   * The record no validation mapper.
-   */
+  /** The record no validation mapper. */
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
-  /**
-   * The field validation mapper.
-   */
+  /** The field validation mapper. */
   @Autowired
   private FieldValidationMapper fieldValidationMapper;
 
-  /**
-   * The record validation mapper.
-   */
+  /** The record validation mapper. */
   @Autowired
   private RecordValidationMapper recordValidationMapper;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The representative controller zuul.
-   */
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /**
-   * The field no validation mapper.
-   */
+  /** The field no validation mapper. */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
-  /**
-   * The integration controller.
-   */
+  /** The integration controller. */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /**
-   * The dataset schema service.
-   */
-  @Autowired
-  private DatasetSchemaService datasetSchemaService;
-
-  /**
-   * The paM service.
-   */
+  /** The pa M service. */
   @Autowired
   private PaMService paMService;
-  /**
-   * The attachment repository.
-   */
+
+  /** The attachment repository. */
   @Autowired
   private AttachmentRepository attachmentRepository;
 
-  /**
-   * The data collection repository.
-   */
+  /** The data collection repository. */
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /**
-   * The pk catalogue repository.
-   */
+  /** The pk catalogue repository. */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
-
-
-
-  /**
-   * The Constant DATASET_ID.
-   */
-  private static final String DATASET_ID = "dataset_%s";
 
   /**
    * Process file.
@@ -445,54 +376,82 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Delete table by schema.
    *
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
    */
   @Override
   @Transactional
-  public void deleteTableBySchema(final String idTableSchema, final Long datasetId) {
-    recordRepository.deleteRecordWithIdTableSchema(idTableSchema);
-    LOG.info("Executed delete table with id {}, from dataset {}", idTableSchema, datasetId);
+  public void deleteTableBySchema(final String tableSchemaId, final Long datasetId) {
+    deleteRecords(datasetId, tableSchemaId);
   }
 
-  /**
-   * Delete import data.
-   *
-   * @param dataSetId the data set id
-   */
-  @Override
-  @Transactional
-  public void deleteImportData(final Long dataSetId) {
 
-    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(dataSetId);
-    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
-    // Delete the records from the tables of the dataset that aren't marked as read only
+  /**
+   * Delete records.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   */
+  private void deleteRecords(Long datasetId, String tableSchemaId) {
+
+    boolean singleTable = null != tableSchemaId;
+    Long dataflowId = getDataFlowIdById(datasetId);
+    TypeStatusEnum dataflowStatus = dataflowControllerZuul.getMetabaseById(dataflowId).getStatus();
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
+        new ObjectId(datasetMetabaseService.findDatasetSchemaIdById(datasetId)));
+
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-      if ((tableSchema.getReadOnly() == null || !tableSchema.getReadOnly())
-          && (tableSchema.getFixedNumber() == null || !tableSchema.getFixedNumber())) {
-        recordRepository.deleteRecordWithIdTableSchema(tableSchema.getIdTableSchema().toString());
-        // if we have fixed number records we delete the non readonly fields
-      } else if (tableSchema.getFixedNumber()) {
-        List<String> fieldSchemasToDelete = new ArrayList();
-        for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
-          if (null != fieldSchema.getReadOnly() && !fieldSchema.getReadOnly()) {
-            fieldSchemasToDelete.add(fieldSchema.getIdFieldSchema().toString());
-          }
-        }
-        List<FieldValue> fieldValue =
-            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToDelete);
-        fieldValue.stream().forEach(fieldVal -> fieldVal.setValue(""));
-        fieldRepository.saveAll(fieldValue);
+
+      String loopTableSchemaId = tableSchema.getIdTableSchema().toString();
+
+      if (singleTable && !tableSchemaId.equals(loopTableSchemaId)) {
+        continue;
+      }
+
+      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
+        deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
+      } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
+        LOG.info("Skipped deleteRecords: datasetId={}, tableSchemaId={}, tableSchema.readOnly={}",
+            datasetId, loopTableSchemaId, tableSchema.getReadOnly());
+      } else if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        List<String> fieldSchemasToClear = tableSchema.getRecordSchema().getFieldSchema().stream()
+            .filter(fieldSchema -> Boolean.FALSE.equals(fieldSchema.getReadOnly()))
+            .map(fieldSchema -> fieldSchema.getIdFieldSchema().toString())
+            .collect(Collectors.toList());
+        List<FieldValue> fieldValuesToClear =
+            fieldRepository.findAllByIdFieldSchemaIn(fieldSchemasToClear);
+        fieldValuesToClear.stream().forEach(fieldVal -> fieldVal.setValue(""));
+        fieldRepository.saveAll(fieldValuesToClear);
+        LOG.info("Overwritting fieldValues to blank: datasetId={}, tableSchemaId={}", datasetId,
+            loopTableSchemaId);
+      } else {
+        deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
+      }
+
+      if (singleTable) {
+        return;
       }
     }
+
     try {
-      this.saveStatistics(dataSetId);
+      saveStatistics(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error saving statistics after deleting all the dataset values. Error message: {}",
           e.getMessage(), e);
     }
-    LOG.info("All data value deleted from dataSetId {}", dataSetId);
+  }
+
+
+  /**
+   * Delete import data.
+   *
+   * @param datasetId the data set id
+   */
+  @Override
+  @Transactional
+  public void deleteImportData(final Long datasetId) {
+    deleteRecords(datasetId, null);
   }
 
   /**
@@ -821,8 +780,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    TableSchema tableSchema =
-        datasetSchemaService.getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
+    TableSchema tableSchema = getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
 
     if (null == tableSchema) {
       throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
@@ -976,7 +934,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException {
-    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId)
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+    String datasetSchemaId = datasetMetabase.getDatasetSchema();
     IntegrationVO integrationVO =
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
     integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
@@ -1601,16 +1561,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Release lock.
-   *
-   * @param criteria the criteria
-   */
-  @Override
-  public void releaseLock(Object... criteria) {
-    lockService.removeLockByCriteria(Arrays.asList(criteria));
-  }
-
-  /**
    * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
    * status design or reportingDataset in state Draft.
    *
@@ -1670,7 +1620,7 @@ public class DatasetServiceImpl implements DatasetService {
         List<TableSchema> listOfTablesFiltered = getTableFromSchema(originDesign);
         // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
-          LOG.info("There is data to copy. Copy data from datasetId {} to datasetId {}",
+          LOG.info("There are data to copy. Copy data from datasetId {} to datasetId {}",
               originDataset, targetDataset);
           List<RecordValue> recordDesignValuesList = new ArrayList<>();
           List<AttachmentValue> attachments = new ArrayList<>();
@@ -1987,6 +1937,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
+
   /**
    * Process record page.
    *
@@ -2091,7 +2042,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Get the dataFlowId from the metabase
     Long dataflowId = getDataFlowIdById(idDataset);
     // get de dataflow
-    return dataflowControllerZull.getMetabaseById(dataflowId);
+    return dataflowControllerZuul.getMetabaseById(dataflowId);
   }
 
   /**
@@ -2236,6 +2187,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table VO
    */
   private TableVO calculatedErrorsAndRecordsToSee(final Long datasetId, final String idTableSchema,
@@ -2272,6 +2224,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   *
    * @return the table VO
    */
   private TableVO fieldsMap(final Long datasetId, final String idTableSchema, Pageable pageable,
@@ -2869,7 +2822,11 @@ public class DatasetServiceImpl implements DatasetService {
       while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
               .size() > 0) {
-
+        LOG.info(
+            "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
+            fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
+            numberOfFieldsInRecord, desingTable.getNameTableSchema(),
+            desingTable.getIdTableSchema(), originDataset, targetDataset);
         // For this, the best is getting fields in big completed sets and assign them to the records
         // to avoid excessive queries to bd
 
@@ -2939,7 +2896,8 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-
+    // Force last database pointer position
+    recordRepository.findLastRecord();
     return recordValues;
   }
 
@@ -3188,7 +3146,7 @@ public class DatasetServiceImpl implements DatasetService {
     dataset = designDatasetRepository.findById(datasetId).orElse(null);
     if (null != dataset) {
       if (TypeStatusEnum.DESIGN
-          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       }
     }
@@ -3197,7 +3155,7 @@ public class DatasetServiceImpl implements DatasetService {
     else {
       dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
       if (null != dataset && TypeStatusEnum.DRAFT
-          .equals(dataflowControllerZull.getMetabaseById(dataset.getDataflowId()).getStatus())) {
+          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
         if (null != tableSchemaId) {
           TableSchema tableSchema = schema.getTableSchemas().stream()
@@ -3213,6 +3171,204 @@ public class DatasetServiceImpl implements DatasetService {
 
     return schema;
   }
+
+
+  /**
+   * Save public files.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataSetMetabase the data set metabase
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException {
+
+    LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
+        dataSetDataProvider);
+
+    List<RepresentativeVO> representativeList =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+
+    // we find representative
+    RepresentativeVO representative = representativeList.stream().filter(
+        representativeData -> representativeData.getDataProviderId().equals(dataSetDataProvider))
+        .findAny().orElse(null);
+
+    if (null != representative) {
+      // we create the dataflow folder to save it
+
+      File directoryDataflow = new File(pathPublicFile, "dataflow-" + dataflowId);
+      File directoryDataProvider =
+          new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
+      // we create the dataprovider folder to save it andwe always delete it and put new files
+      FileUtils.deleteDirectory(directoryDataProvider);
+
+      if (!representative.isRestrictFromPublic()) {
+        // we check if the representative have permit to do it
+        createAllDatasetFiles(dataflowId, representative.getDataProviderId());
+      } else {
+        // we delete all file names in the table dataset
+        List<DataSetMetabase> datasetMetabaseList = dataSetMetabaseRepository
+            .findByDataflowIdAndDataProviderId(dataflowId, representative.getDataProviderId());
+        datasetMetabaseList.stream().forEach(datasetFileName -> {
+          datasetFileName.setPublicFileName(null);
+        });
+        dataSetMetabaseRepository.saveAll(datasetMetabaseList);
+      }
+    }
+  }
+
+
+  /**
+   * Export public file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param fileName the file name
+   * @return the byte[]
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
+      throws IOException, EEAException {
+    // we compound the route and create the file
+    File file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+        "dataProvider-" + dataProviderId.toString()), fileName + ".xlsx");
+    if (!file.exists()) {
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
+  /**
+   * Creeate all dataset files.
+   *
+   * @param dataset the dataset
+   * @param dataflowId the dataflow id
+   * @param pathDataProvider the path data provider
+   * @param dataProviderId the data provider id
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void createAllDatasetFiles(Long dataflowId, Long dataProviderId) throws IOException {
+
+    DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
+
+    List<DataSetMetabase> datasetMetabaseList =
+        dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+
+    // now we create all files depends if they are avaliable
+    for (DataSetMetabase datasetToFile : datasetMetabaseList) {
+      if (schemasRepository
+          .findAvailableInPublicByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()))) {
+
+        // we put the good in the correct field
+        List<DesignDataset> desingDataset = designDatasetRepository.findByDataflowId(dataflowId);
+        // we find the name of the dataset to asing it for file
+        String datasetDesingName = "";
+        for (DesignDataset designDatasetVO : desingDataset) {
+          if (designDatasetVO.getDatasetSchema()
+              .equalsIgnoreCase(datasetToFile.getDatasetSchema())) {
+            datasetDesingName = designDatasetVO.getDataSetName();
+          }
+        }
+
+        try {
+          // 1º we create
+          byte[] file = exportFile(datasetToFile.getId(), "xlsx", null);
+          // we save the file in its files
+          if (null != file) {
+            String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
+                dataProvider.getLabel(), datasetDesingName);
+
+            FileUtils
+                .writeByteArrayToFile(
+                    new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+                        "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".xlsx"),
+                    file);
+
+            // we save the file in metabase with the name without the route
+            datasetToFile.setPublicFileName(nameFileUnique);
+            dataSetMetabaseRepository.save(datasetToFile);
+          }
+        } catch (EEAException e) {
+          LOG_ERROR.error(
+              "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
+              dataflowId, datasetToFile.getDataProviderId(), datasetToFile.getId(), e.getMessage(),
+              e);
+        }
+        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}", dataflowId,
+            datasetToFile.getDataProviderId());
+      } else {
+        datasetToFile.setPublicFileName(null);
+        dataSetMetabaseRepository.save(datasetToFile);
+      }
+    }
+  }
+
+
+  /**
+   * Gets the table schema.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
+   * @return the table schema
+   */
+  private TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId) {
+
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    TableSchema tableSchema = null;
+
+    if (null != datasetSchema && null != datasetSchema.getTableSchemas()
+        && ObjectId.isValid(tableSchemaId)) {
+      ObjectId oid = new ObjectId(tableSchemaId);
+      tableSchema = datasetSchema.getTableSchemas().stream()
+          .filter(ts -> oid.equals(ts.getIdTableSchema())).findFirst().orElse(null);
+    }
+
+    return tableSchema;
+  }
+
+
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  @Override
+  public boolean checkAnySchemaAvailableInPublic(Long dataflowId) {
+
+    List<DataSetMetabase> dataSetMetabaseList =
+        dataSetMetabaseRepository.findByDataflowIdAndProviderIdNotNull(dataflowId);
+
+    boolean anySchemaAvailableInPublic = false;
+
+    for (DataSetMetabase dataset : dataSetMetabaseList) {
+      anySchemaAvailableInPublic = schemasRepository
+          .findAvailableInPublicByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+
+      if (anySchemaAvailableInPublic) {
+        break;
+      }
+    }
+
+    return anySchemaAvailableInPublic;
+  }
+
+
+  /**
+   * Delete records from id table schema.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   */
+  private void deleteRecordsFromIdTableSchema(Long datasetId, String tableSchemaId) {
+    recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
+    LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
+  }
+
 
 
 }

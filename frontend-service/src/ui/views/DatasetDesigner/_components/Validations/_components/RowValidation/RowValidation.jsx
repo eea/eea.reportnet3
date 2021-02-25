@@ -712,7 +712,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           )}
 
           <Button
-            className="p-button-secondary p-button-text-icon-left p-button-animated-blink"
+            className="p-button-secondary p-button-text-icon-left p-button-animated-blink button-right-aligned"
             icon="cancel"
             id={`${componentName}__cancel`}
             label={resourcesContext.messages.cancel}

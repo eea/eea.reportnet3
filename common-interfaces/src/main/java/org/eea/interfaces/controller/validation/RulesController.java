@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -304,10 +305,13 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   * @param showNotification the show notification
    */
   @PostMapping("/validateSqlRules")
   public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("datasetSchemaId") String datasetSchemaId);
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "showNotification", required = false,
+          defaultValue = "true") Boolean showNotification);
 
 
 
@@ -364,5 +368,15 @@ public interface RulesController {
    */
   @PostMapping("/private/insertIntegrities")
   void insertIntegritySchema(@RequestBody List<IntegrityVO> integritiesVO);
+
+
+  /**
+   * Import rules schema.
+   *
+   * @param importRules the import rules
+   * @return the map
+   */
+  @PostMapping("/private/importRulesSchema")
+  Map<String, String> importRulesSchema(@RequestBody ImportSchemaVO importRules);
 
 }

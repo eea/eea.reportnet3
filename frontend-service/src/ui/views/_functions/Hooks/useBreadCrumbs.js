@@ -103,6 +103,27 @@ export const useBreadCrumbs = ({
     };
   };
 
+  const getPublicDataflowCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
+      href: getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true),
+      label: resources.messages['publicDataflowBreadcrumbs']
+    };
+  };
+  const getPublicDataflowsCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.PUBLIC_DATAFLOWS, {}, true)),
+      href: getUrl(routes.PUBLIC_DATAFLOWS, {}, true),
+      label: resources.messages['publicDataflowsBreadcrumbs']
+    };
+  };
+  const getPublicHomeCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.ACCESS_POINT, {}, true)),
+      href: getUrl(routes.ACCESS_POINT, {}, true),
+      label: resources.messages['homeBreadcrumb']
+    };
+  };
   const getSettingsCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.SETTINGS)),
@@ -169,6 +190,18 @@ export const useBreadCrumbs = ({
 
     if (currentPage === CurrentPage.USER_SETTINGS) {
       breadCrumbContext.add([getHomeCrumb(), getSettingsCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.PUBLIC_DATAFLOW) {
+      breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb(), getPublicDataflowCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.PUBLIC_DATAFLOWS) {
+      breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb()]);
+    }
+
+    if (currentPage == CurrentPage.PUBLIC_INDEX) {
+      breadCrumbContext.add([]);
     }
   };
 

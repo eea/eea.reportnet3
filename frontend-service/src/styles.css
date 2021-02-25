@@ -435,6 +435,9 @@ body .p-multiselect-panel .p-multiselect-items .p-multiselect-item label {
   display: inline-block;
   vertical-align: middle;
 }
+body .p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-disabled) label {
+  cursor: pointer;
+}
 body .p-editor-container .p-editor-toolbar {
   border: 1px solid #c8c8c8;
   background-color: #f4f4f4;
@@ -2264,6 +2267,7 @@ body .p-growl .p-growl-item-container {
 body .p-growl-item-container a {
   color: var(--c-corporate-blue);
   text-decoration: none;
+  word-break: break-all;
 }
 body .p-growl-item-container a:hover {
   color: var(--c-corporate-blue-lighter);

@@ -10,7 +10,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
 import { isUndefined, isEmpty } from 'lodash';
 
-export const BreadCrumb = ({ className, id, style }) => {
+export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const onItemClick = (event, item) => {
     if (item.disabled) {
@@ -77,7 +77,10 @@ export const BreadCrumb = ({ className, id, style }) => {
   };
 
   return (
-    <div id={id} className={`${styles.container} ${className ? className : ''}`} style={style}>
+    <div
+      id={id}
+      className={`${styles.container} ${isPublic ? styles.isPublic : ''} ${className ? className : ''}`}
+      style={style}>
       <ul>{onLoadModel()}</ul>
     </div>
   );

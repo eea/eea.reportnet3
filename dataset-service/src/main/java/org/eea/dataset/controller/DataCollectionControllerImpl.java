@@ -1,8 +1,9 @@
 package org.eea.dataset.controller;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
@@ -13,6 +14,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,27 +40,19 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RequestMapping("/datacollection")
 public class DataCollectionControllerImpl implements DataCollectionController {
 
-  /**
-   * The data collection service.
-   */
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The data collection service. */
   @Autowired
   private DataCollectionService dataCollectionService;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
-
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Undo data collection creation.
@@ -85,17 +79,19 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    *
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param showPublicInfo the show public info
    * @param dataCollectionVO the dataflow collection vo
    */
   @Override
   @HystrixCommand
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   public void createEmptyDataCollection(
       @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
       @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+      @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
       @RequestBody @LockCriteria(name = "dataflowId",
           path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
@@ -105,10 +101,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     // Continue if the dataflow exists and is DESIGN
     if (date == null || dataflowId == null || !TypeStatusEnum.DESIGN.equals(status)) {
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.CREATE_DATA_COLLECTION.getValue());
-      criteria.add(dataflowId);
-      lockService.removeLockByCriteria(criteria);
+      Map<String, Object> createDataCollection = new HashMap<>();
+      createDataCollection.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_DATA_COLLECTION.getValue());
+      createDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(createDataCollection);
       LOG_ERROR.error("Error creating DataCollection: Dataflow {} is not DESIGN", dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.NOT_DESIGN_DATAFLOW);
@@ -120,7 +117,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     // This method will release the lock
     dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-        manualCheck);
+        manualCheck, showPublicInfo);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 
@@ -133,17 +130,19 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PutMapping("/update/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public void updateDataCollection(
       @PathVariable("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
 
     TypeStatusEnum status = dataCollectionService.getDataflowStatus(dataflowId);
 
     if (!TypeStatusEnum.DRAFT.equals(status)) {
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(LockSignature.UPDATE_DATA_COLLECTION.getValue());
-      criteria.add(dataflowId);
-      lockService.removeLockByCriteria(criteria);
+
+      Map<String, Object> updateDataCollection = new HashMap<>();
+      updateDataCollection.put(LiteralConstants.SIGNATURE,
+          LockSignature.UPDATE_DATA_COLLECTION.getValue());
+      updateDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(updateDataCollection);
       LOG_ERROR.error("Error updating DataCollection: Dataflow {} is not DRAFT", dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NOT_DRAFT_DATAFLOW);
     }

@@ -20,6 +20,12 @@ const getCheckboxState = (checkboxes, property) => {
   return checkboxes;
 };
 
+const getFilteredSelectedOptions = (filteredData, property, selectedOptions) => {
+  const filterOptionsByProperty = filteredData.map(filterOption => filterOption[property].toUpperCase());
+
+  return selectedOptions.filter(labelOption => filterOptionsByProperty.includes(labelOption));
+};
+
 const getFilterInitialState = (
   data,
   input = [],
@@ -141,5 +147,6 @@ export const FiltersUtils = {
   getLabelInitialState,
   getOptionTypes,
   getValidationsOptionTypes,
-  getSelectedKeys
+  getSelectedKeys,
+  getFilteredSelectedOptions
 };

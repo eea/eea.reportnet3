@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -27,9 +26,11 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -39,7 +40,8 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.security.jwt.utils.EeaUserDetails;
+import org.eea.lock.service.LockService;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +49,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import feign.FeignException;
 
@@ -59,73 +61,62 @@ import feign.FeignException;
 @Component
 public class FileTreatmentHelper implements DisposableBean {
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The max running tasks.
-   */
+  /** The import executor service. */
+  private ExecutorService importExecutorService;
+
+  /** The batch size. */
+  private int batchSize = 1000;
+
+  /** The max running tasks. */
   @Value("${dataset.task.parallelism}")
   private int maxRunningTasks;
 
-  /**
-   * The import path.
-   */
+  /** The import path. */
   @Value("${importPath}")
   private String importPath;
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The integration controller.
-   */
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
+
+  /** The integration controller. */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The data set mapper.
-   */
+  /** The data set mapper. */
   @Autowired
   private DataSetMapper dataSetMapper;
-
 
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-
-  /** The import executor service. */
-  private ExecutorService importExecutorService;
-
-  /**
-   * The batch size.
-   */
-  private int batchSize = 1000;
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Inits the.
    */
   @PostConstruct
   private void init() {
-    importExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    importExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
   }
 
   /**
@@ -152,14 +143,27 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
       boolean replace) throws EEAException {
+
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+
     if (null == schema) {
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
-          datasetId, tableSchemaId, file.getName());
+          datasetId, tableSchemaId, file.getOriginalFilename());
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
     }
+
+    if (schemaContainsFixedRecords(datasetId, schema, tableSchemaId)) {
+      LOG_ERROR.error(
+          "Import blocked because of fixed records: datasetId={}, filName={}, tableSchemaId={}",
+          datasetId, file.getOriginalFilename(), tableSchemaId);
+      throw new EEAException("Import blocked: dataset " + datasetId + " contains fixed records");
+    }
+
     // We add a lock to the Release process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     Map<String, Object> mapCriteria = new HashMap<>();
@@ -180,7 +184,10 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void releaseLock(Long datasetId) {
     try {
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
 
       releaseLockReleasingProcess(datasetId);
@@ -188,7 +195,6 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
     }
   }
-
 
   /**
    * Release lock releasing process.
@@ -199,12 +205,13 @@ public class FileTreatmentHelper implements DisposableBean {
     // Release lock to the releasing process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     if (datasetMetabaseVO.getDataProviderId() != null) {
-      datasetService.releaseLock(LockSignature.RELEASE_SNAPSHOTS.getValue(),
-          datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId());
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      importFileData.put(LiteralConstants.DATAFLOWID, datasetMetabaseVO.getDataflowId());
+      importFileData.put(LiteralConstants.DATAPROVIDERID, datasetMetabaseVO.getDataProviderId());
+      lockService.removeLockByCriteria(importFileData);
     }
-
   }
-
 
   /**
    * File management.
@@ -360,20 +367,11 @@ public class FileTreatmentHelper implements DisposableBean {
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       List<File> files, String originalFileName, IntegrationVO integrationVO)
       throws IOException, EEAException {
-    String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    String credentials =
-        SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
-      importExecutorService.submit(() -> {
-        SecurityContextHolder.clearContext();
-
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(EeaUserDetails.create(user, new HashSet<>()),
-                credentials, null));
-        rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, user);
-      });
+      importExecutorService
+          .submit(() -> rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName));
     }
   }
 
@@ -406,7 +404,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
-        datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
         releaseLockReleasingProcess(datasetId);
       }
 
@@ -423,7 +424,10 @@ public class FileTreatmentHelper implements DisposableBean {
     if (error) {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
           datasetId, file.getName(), integrationVO);
-      datasetService.releaseLock(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId);
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       releaseLockReleasingProcess(datasetId);
       throw new EEAException("Error executing integration");
     }
@@ -437,21 +441,21 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param files the files
    * @param originalFileName the original file name
-   * @param user the user
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      List<File> files, String originalFileName, String user) {
+      List<File> files, String originalFileName) {
 
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
     String error = null;
+    boolean guessTableName = null == tableSchemaId;
 
     for (File file : files) {
       String fileName = file.getName();
 
       try (InputStream inputStream = new FileInputStream(file)) {
 
-        if (files.size() > 1) {
+        if (guessTableName) {
           tableSchemaId = getTableSchemaIdFromFileName(schema, fileName);
         }
 
@@ -461,7 +465,7 @@ public class FileTreatmentHelper implements DisposableBean {
             datasetService.processFile(datasetId, fileName, inputStream, tableSchemaId);
         datasetVO.setId(datasetId);
         DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-        if (dataset == null) {
+        if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
           throw new EEAException("Error processing file " + fileName);
         }
 
@@ -491,9 +495,9 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     if (files.size() == 1) {
-      finishImportProcess(datasetId, tableSchemaId, originalFileName, user, error);
+      finishImportProcess(datasetId, tableSchemaId, originalFileName, error);
     } else {
-      finishImportProcess(datasetId, null, originalFileName, user, error);
+      finishImportProcess(datasetId, null, originalFileName, error);
     }
 
   }
@@ -527,21 +531,21 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param originalFileName the original file name
-   * @param user the user
    * @param error the error
    */
   private void finishImportProcess(Long datasetId, String tableSchemaId, String originalFileName,
-      String user, String error) {
+      String error) {
     try {
 
       releaseLock(datasetId);
 
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
-      value.put(LiteralConstants.USER, user);
 
-      NotificationVO notificationVO = NotificationVO.builder().user(user).datasetId(datasetId)
-          .tableSchemaId(tableSchemaId).fileName(originalFileName).error(error).build();
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(originalFileName).error(error)
+          .build();
 
       EventType eventType;
 
@@ -654,15 +658,20 @@ public class FileTreatmentHelper implements DisposableBean {
   private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
     List<List<RecordValue>> generalList = new ArrayList<>();
 
-    // dividing the number of records in different lists
-    int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
-    if (nLists > 1) {
-      for (int i = 0; i < (nLists - 1); i++) {
-        generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
+    if (allRecords.isEmpty()) {
+      generalList.add(new ArrayList<>());
+    } else {
+      // dividing the number of records in different lists
+      int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
+      if (nLists > 1) {
+        for (int i = 0; i < (nLists - 1); i++) {
+          generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
+        }
       }
+      generalList
+          .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
+
     }
-    generalList
-        .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
 
     return generalList;
   }
@@ -681,5 +690,39 @@ public class FileTreatmentHelper implements DisposableBean {
           .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
           .forEach(tableValue -> tableValue.setId(oldTableId));
     }
+  }
+
+  /**
+   * Schema contains fixed records.
+   *
+   * @param schema the schema
+   * @param tableSchemaId the table schema id
+   * @return true, if successful
+   */
+  private boolean schemaContainsFixedRecords(Long datasetId, DataSetSchema schema,
+      String tableSchemaId) {
+
+    boolean rtn = false;
+
+    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      if (null == tableSchemaId) {
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+            rtn = true;
+            break;
+          }
+        }
+      } else {
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          if (tableSchemaId.equals(tableSchema.getIdTableSchema().toString())) {
+            rtn = Boolean.TRUE.equals(tableSchema.getFixedNumber());
+            break;
+          }
+        }
+      }
+    }
+
+    return rtn;
   }
 }

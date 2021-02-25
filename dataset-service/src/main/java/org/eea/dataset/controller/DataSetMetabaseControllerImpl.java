@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -72,6 +73,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(Long idDataflow) {
     return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
   }
+
 
   /**
    * Find data set id by dataflow id.
@@ -141,7 +143,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @PutMapping(value = "/updateDatasetName")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName) {
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
@@ -157,7 +159,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @PutMapping(value = "/updateDatasetStatus")
-  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD')")
   public void updateDatasetStatus(@RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
     try {
       datasetMetabaseService.updateDatasetStatus(datasetStatusMessageVO);
@@ -217,7 +219,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/globalStatistics/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('DATA_CUSTODIAN')  OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @PathVariable("dataschemaId") String dataschemaId) {
 
@@ -391,5 +393,38 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       produces = MediaType.APPLICATION_JSON_VALUE)
   public Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId) {
     return datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
+  }
+
+  /**
+   * Find reporting data set public by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/getReportingPublic/dataflow/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(
+      @PathVariable("id") Long dataflowId) {
+    return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
+  }
+
+
+  /**
+   * Find reporting data set id by dataflow id and provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/dataflow/{id}/dataProvider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndProviderId(
+      @PathVariable("id") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId) {
+    return reportingDatasetService.getDataSetIdByDataflowIdAndDataProviderId(dataflowId,
+        dataProviderId);
   }
 }

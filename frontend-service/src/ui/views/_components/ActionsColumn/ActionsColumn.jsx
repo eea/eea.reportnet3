@@ -22,7 +22,9 @@ const ActionsColumn = ({
     <div className={styles.actionTemplate}>
       {!isNil(onEditClick) && !hideEdition && (
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+            disabledButtons ? null : 'p-button-animated-blink'
+          }`}
           disabled={
             (rowDeletingId === rowDataId && isDeletingDocument) ||
             (rowUpdatingId === rowDataId && isUpdating) ||
@@ -35,7 +37,9 @@ const ActionsColumn = ({
       )}
       {!isNil(onDeleteClick) && !hideDeletion && (
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} ${
+            disabledButtons ? null : 'p-button-animated-blink'
+          }`}
           disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
           icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
           onClick={() => onDeleteClick()}

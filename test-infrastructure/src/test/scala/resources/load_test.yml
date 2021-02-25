@@ -1,85 +1,106 @@
 gatling_config:
   scenarios:
-    #    - requestName: createDataset
-    #      endpoint: /recordstore/dataset/create/${datasetName}/poc
-    #      usersNumber: 100
-    #      numberExecutions: 1
-    #      useFeeder: true
-    #      method: post
-    #      puaseTime: 1
-    #      timeOut: 2000
-    #headers:
-    #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
-    #requestBody: '{"title":"example"}'
-    #    - requestName: restoreSnapshot
-    #      endpoint: /recordstore/dataset/${datasetId}/snapshot/restore/poc?idSnapshot=1622&partitionId=${partitionId}&typeDataset=REPORTING&user=jose.luis.provider&isSchemaSnapshot=false&deleteData=true
-    #      usersNumber: 10
-    #      numberExecutions: 1
-    #      useFeeder: true
-    #      method: post
-    #      puaseTime: 1
-    #      timeOut: 1000
-    #    - requestName: createSnapshot
-    #      endpoint: /snapshot/dataset/${datasetId}/create
-    #      usersNumber: 40
-    #      numberExecutions: 5
-    #      useFeeder: true
-    #      method: post
-    #      puaseTime: 5
-    #      timeOut: 3500
-    #      requestBody: '{"description":"test","released":false}'
-    #      headers:
-    #        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
-    - requestName: queryDataset
-      endpoint: /dataset/TableValueDataset/${datasetId}?idTableSchema=${tableschema}&pageNum=0&pageSize=10&levelError=CORRECT,INFO,WARNING,ERROR,BLOCKER
-      usersNumber: 40
-      numberExecutions: 10
+    - requestName: createGroups
+      endpoint: /auth/admin/realms/Reportnet/groups
+      usersNumber: 119
+      numberExecutions: 1
       useFeeder: true
-      method: get
-      puaseTime: 5
-      timeOut: 35000
+      method: post
+      puaseTime: 2
+      timeOut: 2000
+      requestBody: '{"name":"${name}"}'
       headers:
-        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
-    - requestName: listSnapshot
-      endpoint: /snapshot/dataset/${datasetId}/listSnapshots
-      usersNumber: 40
-      numberExecutions: 10
-      useFeeder: true
-      method: get
-      puaseTime: 5
-      timeOut: 35000
-      headers:
-        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
-    - requestName: getDatasetSchema
-      endpoint: /dataschema/datasetId/${datasetId}
-      usersNumber: 40
-      numberExecutions: 10
-      useFeeder: true
-      method: get
-      puaseTime: 5
-      timeOut: 35000
-      headers:
-        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
-    - requestName: rod
-      endpoint: /${url}/${extraPath}
-      usersNumber: 40
-      numberExecutions: 10
-      useFeeder: true
-      method: get
-      puaseTime: 5
-      timeOut: 35000
-      headers:
-        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
-    - requestName: getDataflow
-      endpoint: /dataflow/${dataflowId}
-      usersNumber: 40
-      numberExecutions: 10
-      useFeeder: true
-      method: get
-      puaseTime: 5
-      timeOut: 35000
-      headers:
-        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
+        Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJDZ3o5akY5TjVHTFNmOXhGaWpZdGgzOTIwZzdrVEppejlhRk5uOXdBa1h3In0.eyJqdGkiOiIwYmM5MGZiMC05YjI5LTRlOTItOTUyOS02NDY3MDQ0NmExMjgiLCJleHAiOjE2MTM4OTEyNTgsIm5iZiI6MCwiaWF0IjoxNjEzODkxMTk4LCJpc3MiOiJodHRwOi8va3ZtLXJuM3Byb2QtMDEucGRtei5lZWE6MzEwNTUvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiNzA0MDZiYjUtZGMxZi00MWMwLWFkZmUtYmE1YzA5OGI4N2UwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2VjdXJpdHktYWRtaW4tY29uc29sZSIsIm5vbmNlIjoiMmNkOTdhODctYjI5ZS00ZTJhLTg2MTctYTZkZjQ5OGNmNzM2IiwiYXV0aF90aW1lIjoxNjEzODg5NTAwLCJzZXNzaW9uX3N0YXRlIjoiZDJjYzI2ODYtMDQ5NS00Njk4LTkyNmYtMDFmYWMzYzE2ZGM4IiwiYWNyIjoiMCIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJSZXBvcnRuZXQgSGVscGRlc2sgU2VydmljZSIsInByZWZlcnJlZF91c2VybmFtZSI6ImFkbWluIiwiZ2l2ZW5fbmFtZSI6IlJlcG9ydG5ldCBIZWxwZGVzayIsImZhbWlseV9uYW1lIjoiU2VydmljZSIsImVtYWlsIjoiaGVscGRlc2tAcmVwb3J0bmV0LmV1cm9wYS5ldSJ9.DFLEuB9TtavByWKmRZFzfu10x4IqtmhclQRP8MD1KyCejeiYfQyxSYivx7tO_lkayXf12I6q3Urghyg2mimvN81O39ftjvGWRH6T8Pmyu3il5qjGlRKTUp-E7s1XjxaS_i6Is8xU-9_ZpUxPkrB0EHA0m9IhugKxpb-uM9E8trfsw62qgUk3EiLl1ox52JfLAQnO-ETag8XNO88gyrJXfyPvvq41qma0Pt1TwHuMr2vzRvUvO62g9LX7Fgi32tTrJAiNA-UGJGmX4b5c5q71hKZ22tnswi4h8qfj1GsKvW7syj7LIMgPucgIlcVQ0PqHpNn-PudWK8aOHj43xaJ42w
+      #    - requestName: cloneDataflowWithData
+      #      endpoint: /dataschema/copy?sourceDataflow=188&targetDataflow=${targetDataflow}
+      #      usersNumber: 10
+      #      numberExecutions: 1
+      #      useFeeder: true
+      #      method: post
+      #      puaseTime: 1
+      #      timeOut: 2000
+      #      headers:
+      #        Authorization: Bearer 6db565e5-6931-4660-87d6-db03da393a1e
+      #    - requestName: createDataset
+      #      endpoint: /recordstore/dataset/create/${datasetName}/poc
+      #      usersNumber: 100
+      #      numberExecutions: 1
+      #      useFeeder: true
+      #      method: post
+      #      puaseTime: 1
+      #      timeOut: 2000
+      #headers:
+      #Authorization: Basic Y2FzX3NlcnZpY2U6NTFlYTg2OWFmNjM4NDNjYTkwNjQ0YTY5ZDM0Yjg1Nzk=
+      #requestBody: '{"title":"example"}'
+      #    - requestName: restoreSnapshot
+      #      endpoint: /recordstore/dataset/${datasetId}/snapshot/restore/poc?idSnapshot=1622&partitionId=${partitionId}&typeDataset=REPORTING&user=jose.luis.provider&isSchemaSnapshot=false&deleteData=true
+      #      usersNumber: 10
+      #      numberExecutions: 1
+      #      useFeeder: true
+      #      method: post
+      #      puaseTime: 1
+      #      timeOut: 1000
+      #    - requestName: createSnapshot
+      #      endpoint: /snapshot/dataset/${datasetId}/create
+      #      usersNumber: 40
+      #      numberExecutions: 5
+      #      useFeeder: true
+      #      method: post
+      #      puaseTime: 5
+      #      timeOut: 3500
+      #      requestBody: '{"description":"test","released":false}'
+      #      headers:
+      #        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
+#    - requestName: queryDataset
+#      endpoint: /dataset/TableValueDataset/${datasetId}?idTableSchema=${tableschema}&pageNum=0&pageSize=10&levelError=CORRECT,INFO,WARNING,ERROR,BLOCKER
+#      usersNumber: 40
+#      numberExecutions: 10
+#      useFeeder: true
+#      method: get
+#      puaseTime: 5
+#      timeOut: 35000
+#      headers:
+#        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
+#    - requestName: listSnapshot
+#      endpoint: /snapshot/dataset/${datasetId}/listSnapshots
+#      usersNumber: 40
+#      numberExecutions: 10
+#      useFeeder: true
+#      method: get
+#      puaseTime: 5
+#      timeOut: 35000
+#      headers:
+#        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
+#    - requestName: getDatasetSchema
+#      endpoint: /dataschema/datasetId/${datasetId}
+#      usersNumber: 40
+#      numberExecutions: 10
+#      useFeeder: true
+#      method: get
+#      puaseTime: 5
+#      timeOut: 35000
+#      headers:
+#        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
+#    - requestName: rod
+#      endpoint: /${url}/${extraPath}
+#      usersNumber: 40
+#      numberExecutions: 10
+#      useFeeder: true
+#      method: get
+#      puaseTime: 5
+#      timeOut: 35000
+#      headers:
+#        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
+#    - requestName: getDataflow
+#      endpoint: /dataflow/${dataflowId}
+#      usersNumber: 40
+#      numberExecutions: 10
+#      useFeeder: true
+#      method: get
+#      puaseTime: 5
+#      timeOut: 35000
+#      headers:
+#        Authorization: Bearer e5329ae5-5c63-4116-bdcb-4c9800584b5a
 #    - requestName: deleteDataset
 #      endpoint: /dataset/${datasetId}/deleteImportData
 #      usersNumber: 40
