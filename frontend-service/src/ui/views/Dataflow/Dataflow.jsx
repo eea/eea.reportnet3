@@ -773,7 +773,9 @@ const Dataflow = withRouter(({ history, match }) => {
             onConfirm={() => onConfirmRelease()}
             onHide={() => {
               manageDialogs('isReleaseDialogVisible', false);
-              dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+              if (dataflowState.restrictFromPublic) {
+                dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+              }
             }}
             visible={dataflowState.isReleaseDialogVisible}>
             {resources.messages['confirmReleaseQuestion']}
