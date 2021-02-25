@@ -105,14 +105,6 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
-   * Delete import data.
-   *
-   * @param datasetId the dataset id
-   */
-  @DeleteMapping("{id}/deleteImportData")
-  void deleteImportData(@PathVariable("id") Long datasetId);
-
-  /**
    * Gets the position from any object id.
    *
    * @param id the id
@@ -176,14 +168,30 @@ public interface DatasetController {
       @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK);
 
   /**
+   * Delete import data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @DeleteMapping("/{datasetId}/deleteImportData")
+  void deleteImportData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
    * Delete import table.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
-  @DeleteMapping("{datasetId}/deleteImportTable/{tableSchemaId}")
+  @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
   void deleteImportTable(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("tableSchemaId") String tableSchemaId);
+      @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
    * Export file.
