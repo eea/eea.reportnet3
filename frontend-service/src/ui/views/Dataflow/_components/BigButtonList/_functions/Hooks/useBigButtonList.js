@@ -255,17 +255,14 @@ const useBigButtonList = ({
       };
     });
 
-    const dataProviderIds = allDatasets.map(dataset => dataset.dataProviderId);
-    const isUniqRepresentative = uniq(dataProviderIds).length === dataProviderIds.length;
+    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
       return allDatasets.map(dataset => {
-        const datasetName = dataset.name;
-        const datasetId = dataset.datasetId;
         return {
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
-          caption: datasetName,
+          caption: dataset.datasetName,
           helpClassName: 'dataflow-dataset-help-step',
           handleRedirect: () => {
             handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
@@ -273,13 +270,12 @@ const useBigButtonList = ({
           infoStatus: dataset.isReleased,
           infoStatusIcon: true,
           layout: 'defaultBigButton',
-          // model: [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
           model: [
             {
               label: resources.messages['historicReleases'],
               command: () => {
                 onShowHistoricReleases('reportingDataset');
-                getDataHistoricReleases(datasetId, datasetName);
+                getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
               }
             }
           ],
@@ -289,18 +285,14 @@ const useBigButtonList = ({
       });
     }
 
-    return uniqBy(allDatasets, 'dataProviderId').map(representative => {
+    return uniqBy(allDatasets, 'dataProviderId').map(dataset => {
       return {
         buttonClass: 'dataset',
         buttonIcon: 'representative',
-        caption: representative.name,
+        caption: dataset.name,
         handleRedirect: () => {
           handleRedirect(
-            getUrl(
-              routes.DATAFLOW_REPRESENTATIVE,
-              { dataflowId, representativeId: representative.dataProviderId },
-              true
-            )
+            getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true)
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
@@ -310,15 +302,11 @@ const useBigButtonList = ({
             label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset');
-              getDataHistoricReleasesByRepresentatives(representative.name, representative.dataProviderId);
+              getDataHistoricReleasesByRepresentatives(dataset.name, dataset.dataProviderId);
             }
           }
         ],
-        onWheel: getUrl(
-          routes.DATAFLOW_REPRESENTATIVE,
-          { dataflowId, representativeId: representative.dataProviderId },
-          true
-        ),
+        onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
         visibility: true
       };
     });
