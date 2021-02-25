@@ -1,6 +1,7 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /** The Class RepresentativeControllerImplTest. */
@@ -429,5 +431,127 @@ public class RepresentativeControllerImplTest {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
     }
+  }
+
+  @Test
+  public void importFileCountryTemplateTest() {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    assertNotNull(representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void importFileCountryTemplateFileExtensionTest() {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal", "csv", "content".getBytes());
+    try {
+      representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.FILE_EXTENSION, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void importFileCountryTemplateCSVExceptionTest() {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal.xlsx", "xlsx", "content".getBytes());
+    try {
+      representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.CSV_FILE_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void importFileCountryTemplateExceptionTest() throws EEAException, IOException {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    when(representativeService.importFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateRepresentativeVisibilityRestrictionsTest() {
+    representativeControllerImpl.updateRepresentativeVisibilityRestrictions(1L, 1L, true);
+    Mockito.verify(representativeService, times(1)).updateRepresentativeVisibilityRestrictions(
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+  }
+
+  @Test
+  public void createLeadReporterTest() {
+    LeadReporterVO leadReporter = new LeadReporterVO();
+    leadReporter.setEmail("test@test.com");
+    assertEquals(0L, representativeControllerImpl.createLeadReporter(1L, leadReporter).longValue());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createLeadReporterNullTest() {
+    try {
+      representativeControllerImpl.createLeadReporter(null, null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createLeadReporterEmailExceptionTest() {
+    LeadReporterVO leadReporter = new LeadReporterVO();
+    leadReporter.setEmail("");
+    try {
+      representativeControllerImpl.createLeadReporter(null, leadReporter);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, ""), e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createLeadReporterExceptionTest() throws EEAException {
+    LeadReporterVO leadReporter = new LeadReporterVO();
+    leadReporter.setEmail("test@test.com");
+    Mockito.when(representativeService.createLeadReporter(Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.createLeadReporter(1L, leadReporter);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void deleteLeadReporterTest() throws EEAException {
+    representativeControllerImpl.deleteLeadReporter(0L);
+    Mockito.verify(representativeService, times(1)).deleteLeadReporter(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteLeadReporterExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(representativeService).deleteLeadReporter(Mockito.any());
+    try {
+      representativeControllerImpl.deleteLeadReporter(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateInternalRepresentativeTest() {
+    assertEquals(0L, representativeControllerImpl
+        .updateInternalRepresentative(new RepresentativeVO()).longValue());
   }
 }

@@ -49,6 +49,7 @@ import io.jsonwebtoken.lang.Collections;
 @Service("dataflowRepresentativeService")
 public class RepresentativeServiceImpl implements RepresentativeService {
 
+
   /** The representative repository. */
   @Autowired
   private RepresentativeRepository representativeRepository;
@@ -81,6 +82,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private LeadReporterRepository leadReporterRepository;
 
+  /** The dataset metabase controller. */
   @Autowired
   private DatasetMetabaseController datasetMetabaseController;
 
@@ -96,6 +98,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+
+  /** The Constant EMAIL: {@value}. */
+  private static final String EMAIL = "Email";
+
+  /** The Constant REPRESENTING: {@value}. */
+  private static final String REPRESENTING = "Representing";
 
   /**
    * Creates the representative.
@@ -283,8 +292,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
       List<String> headers = new ArrayList<>();
-      headers.add("Representing");
-      headers.add("Email");
+      headers.add(REPRESENTING);
+      headers.add(EMAIL);
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 2;
       String[] fieldsToWrite = new String[nHeaders];
@@ -326,8 +335,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
       List<String> headers = new ArrayList<>();
-      headers.add("Representing");
-      headers.add("Email");
+      headers.add(REPRESENTING);
+      headers.add(EMAIL);
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 2;
       String[] fieldsToWrite = new String[nHeaders];
@@ -368,8 +377,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
       List<String> headers = new ArrayList<>();
-      headers.add("Representing");
-      headers.add("Email");
+      headers.add(REPRESENTING);
+      headers.add(EMAIL);
       headers.add("Imported");
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 3;
