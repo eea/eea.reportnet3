@@ -849,6 +849,9 @@
         },
         {
           "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT"
+        },
+        {
+          "key": "DELETE_TABLE_DATA_INIT"
         }
       ]
     }
