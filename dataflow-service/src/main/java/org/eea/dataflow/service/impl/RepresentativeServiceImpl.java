@@ -464,6 +464,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     } catch (IOException e) {
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+    } catch (IndexOutOfBoundsException e) {
+      LOG_ERROR.error(EEAErrorMessage.DATA_FILE_ERROR, e);
+      throw new EEAException(EEAErrorMessage.DATA_FILE_ERROR);
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
