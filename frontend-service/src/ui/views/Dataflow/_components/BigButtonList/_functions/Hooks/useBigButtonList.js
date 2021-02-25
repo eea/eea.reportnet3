@@ -255,7 +255,7 @@ const useBigButtonList = ({
       };
     });
 
-    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
+    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.dataProviderId)).length === 1;
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
       return allDatasets.map(dataset => {
