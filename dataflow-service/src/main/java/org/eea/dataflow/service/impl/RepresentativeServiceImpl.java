@@ -439,11 +439,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 representativeList.add(representative);
               } else {
                 List<LeadReporter> leadReporters = representative.getLeadReporters();
-                LeadReporter leadReporter = new LeadReporter();
-                leadReporter.setRepresentative(representative);
-                leadReporter.setEmail(email);
-                leadReporters.add(leadReporter);
-                representative.setLeadReporters(leadReporters);
+                if (leadReporters.stream().noneMatch(rep -> email.equals(rep.getEmail()))) {
+                  LeadReporter leadReporter = new LeadReporter();
+                  leadReporter.setRepresentative(representative);
+                  leadReporter.setEmail(email);
+                  leadReporters.add(leadReporter);
+                  representative.setLeadReporters(leadReporters);
+                }
                 if (!representativeList.contains(representative)) {
                   representativeList.add(representative);
                 }
