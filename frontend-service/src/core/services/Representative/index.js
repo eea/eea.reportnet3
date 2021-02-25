@@ -20,9 +20,9 @@ export const RepresentativeService = {
   allRepresentatives: AllRepresentatives({ representativeRepository }),
   deleteById: Delete({ representativeRepository }),
   deleteLeadReporter: DeleteLeadReporter({ representativeRepository }),
- downloadById: Download({ representativeRepository }),
+  downloadById: Download({ representativeRepository }),
   downloadTemplateById: DownloadTemplate({ representativeRepository }),
- getProviderTypes: GetProviderTypes({ representativeRepository }),
+  getProviderTypes: GetProviderTypes({ representativeRepository }),
   update: Update({ representativeRepository }),
   updateDataProviderId: UpdateDataProviderId({ representativeRepository }),
   updateLeadReporter: UpdateLeadReporter({ representativeRepository })

@@ -26,6 +26,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
 import {
+isDuplicatedLeadReporter,
   isValidEmail,
   onExportLeadReportersTemplate,
   parseLeadReporters
@@ -280,7 +281,7 @@ const RepresentativesList = ({
     const hasErrors = true;
 
     if (!TextUtils.areEquals(inputValue, leadReporter.account)) {
-      if (isValidEmail(inputValue)) {
+      if (isValidEmail(inputValue) && !isDuplicatedLeadReporter(inputValue, dataProviderId, formState.leadReporters)) {
         try {
           const response = TextUtils.areEquals(leadReporter.id, 'empty')
             ? await addLeadReporter(inputValue, representativeId)
@@ -315,6 +316,7 @@ const RepresentativesList = ({
       return (
         <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
           <InputText
+            autoFocus={isNewLeadReporter}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
@@ -351,7 +353,7 @@ const RepresentativesList = ({
       ['asc']
     );
 
-    const labelId = uuid.v4();
+    const labelId = `${representative.representativeId}-${representative.dataProviderId}`;
 
     return (
       <>
@@ -373,9 +375,12 @@ const RepresentativesList = ({
             }
           }}
           value={representative.dataProviderId}>
-          {remainingOptionsAndSelectedOption.map(provider => {
+          {remainingOptionsAndSelectedOption.map((provider, i) => {
             return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={provider.dataProviderId}>
+              <option
+                key={`${provider.dataProviderId}${provider.label}${i}`}
+                className="p-dropdown-item"
+                value={provider.dataProviderId}>
                 {provider.label}
               </option>
             );

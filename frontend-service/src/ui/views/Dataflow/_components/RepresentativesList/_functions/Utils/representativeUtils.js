@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -33,6 +34,16 @@ export const parseLeadReporters = (representatives = []) => {
   });
 
   return dataProvidersLeadReporters;
+};
+
+export const isDuplicatedLeadReporter = (inputValue, dataProviderId, leadReporters) => {
+  if (isEmpty(leadReporters)) return false;
+
+  const existingLeadReporters = Object.values(leadReporters[dataProviderId])
+    .map(reporter => reporter.account)
+    .filter(reporter => !isNil(reporter));
+
+  return existingLeadReporters.includes(inputValue);
 };
 
 export const isValidEmail = email => {
