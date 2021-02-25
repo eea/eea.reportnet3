@@ -120,6 +120,18 @@ const Dataflow = withRouter(({ history, match }) => {
     config.permissions.LEAD_REPORTER
   ]);
 
+  const country =
+    uniqDataProviders.length === 1
+      ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
+      : isNil(representativeId)
+      ? null
+      : uniq(
+          map(
+            dataflowState.data?.datasets?.filter(d => d.dataProviderId == representativeId),
+            'datasetSchemaName'
+          )
+        );
+
   const isLeadReporterOfCountry =
     isLeadReporter &&
     isInsideACountry &&
@@ -715,7 +727,12 @@ const Dataflow = withRouter(({ history, match }) => {
   return layout(
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
-        <Title icon="clone" iconSize="4rem" subtitle={resources.messages['dataflow']} title={dataflowState.name} />
+        <Title
+          icon="clone"
+          iconSize="4rem"
+          subtitle={!isNil(country) ? `${resources.messages['dataflow']} - ${country}` : resources.messages['dataflow']}
+          title={dataflowState.name}
+        />
 
         {isNil(representativeId) ? (
           <BigButtonList
@@ -754,7 +771,12 @@ const Dataflow = withRouter(({ history, match }) => {
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             onConfirm={() => onConfirmRelease()}
-            onHide={() => manageDialogs('isReleaseDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isReleaseDialogVisible', false);
+              if (dataflowState.restrictFromPublic) {
+                dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+              }
+            }}
             visible={dataflowState.isReleaseDialogVisible}>
             {resources.messages['confirmReleaseQuestion']}
           </ConfirmDialog>
