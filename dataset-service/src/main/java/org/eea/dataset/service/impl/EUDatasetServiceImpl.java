@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +23,7 @@ import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +31,20 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-
 /**
  * The Class EUDatasetServiceImpl.
  */
 @Service
 public class EUDatasetServiceImpl implements EUDatasetService {
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(EUDatasetServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant SIGNATURE: {@value}. */
+  private static final String SIGNATURE = "signature";
 
   /** The eu dataset repository. */
   @Autowired
@@ -67,22 +74,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-
-  /** The Constant SIGNATURE: {@value}. */
-  private static final String SIGNATURE = "signature";
-
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(EUDatasetServiceImpl.class);
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
-
   /**
    * Gets the EU dataset by dataflow id.
    *
@@ -94,8 +85,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     List<EUDataset> euDatasets = euDatasetRepository.findByDataflowId(idDataflow);
     return euDatasetMapper.entityListToClass(euDatasets);
   }
-
-
 
   /**
    * Populate EU dataset with data collection.
@@ -200,27 +189,28 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     List<ReportingDatasetVO> reportings =
         reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
     // Release lock to the copy data to EU
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(LockSignature.POPULATE_EU_DATASET.getValue());
-    criteria.add(dataflowId);
-    result = lockService.removeLockByCriteria(criteria);
+    Map<String, Object> populateEuDataset = new HashMap<>();
+    populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
+    populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.removeLockByCriteria(populateEuDataset);
 
     // Release lock to the export EU
-    List<Object> criteriaExport = new ArrayList<>();
-    criteriaExport.add(LockSignature.EXPORT_EU_DATASET.getValue());
-    criteriaExport.add(dataflowId);
-    lockService.removeLockByCriteria(criteriaExport);
+    Map<String, Object> exportEuDataset = new HashMap<>();
+    exportEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.EXPORT_EU_DATASET.getValue());
+    exportEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
+    result = lockService.removeLockByCriteria(exportEuDataset);
 
     List<Long> providersId = reportings.stream().map(ReportingDatasetVO::getDataProviderId)
         .distinct().collect(Collectors.toList());
     providersId.stream().distinct().collect(Collectors.toList());
+
     for (Long providerId : providersId) {
       // Release locks to avoid a provider can release a snapshot
-      List<Object> criteriaReporting = new ArrayList<>();
-      criteriaReporting.add(LockSignature.RELEASE_SNAPSHOTS.getValue());
-      criteriaReporting.add(dataflowId);
-      criteriaReporting.add(providerId);
-      lockService.removeLockByCriteria(criteriaReporting);
+      Map<String, Object> releaseSnapshots = new HashMap<>();
+      releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      releaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
+      releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, providerId);
+      lockService.removeLockByCriteria(releaseSnapshots);
     }
     return result;
   }

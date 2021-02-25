@@ -1,11 +1,8 @@
 package org.eea.validation.util;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,7 +11,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -33,8 +29,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.security.jwt.utils.EeaUserDetails;
-import org.eea.thread.ThreadPropertiesManager;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -49,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import lombok.AllArgsConstructor;
@@ -60,91 +54,60 @@ import lombok.AllArgsConstructor;
 @Component
 public class ValidationHelper implements DisposableBean {
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationHelper.class);
-  /**
-   * The Constant LOG_ERROR.
-   */
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The processes map. */
+  private Map<String, ValidationProcessVO> processesMap;
+
+  /** The validation executor service. */
+  private ExecutorService validationExecutorService;
+
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
-  /**
-   * The validation service.
-   */
+  /** The validation service. */
   @Autowired
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
 
-  /**
-   * The field batch size.
-   */
+  /** The field batch size. */
   @Value("${validation.fieldBatchSize}")
   private int fieldBatchSize;
 
-  /**
-   * The record batch size.
-   */
+  /** The record batch size. */
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
-  /**
-   * The task released tax.
-   */
+  /** The task released tax. */
   @Value("${validation.tasks.release.tax}")
   private int taskReleasedTax;
 
-  /**
-   * The initial tax.
-   */
+  /** The initial tax. */
   @Value("${validation.tasks.initial.tax}")
   private int initialTax;
 
-  /**
-   * The max running tasks.
-   */
+  /** The max running tasks. */
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
-  /**
-   * The table repository.
-   */
+  /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
 
-  /**
-   * the kafka admin utils.
-   */
+  /** The kafka admin utils. */
   @Autowired
   private KafkaAdminUtils kafkaAdminUtils;
 
-  /**
-   * The processes map.
-   */
-  private Map<String, ValidationProcessVO> processesMap;
-
-
-  /**
-   * The validation executor service.
-   */
-  private ExecutorService validationExecutorService;
-
-
-  /**
-   * The dataset metabase controller zuul.
-   */
+  /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
@@ -162,7 +125,8 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    validationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    validationExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
   }
 
   /**
@@ -225,6 +189,7 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param processId the process id
    * @param isCoordinator the is coordinator
+   * @param released the released
    */
   public void initializeProcess(String processId, boolean isCoordinator, boolean released) {
     ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
@@ -242,8 +207,7 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the uu id
    * @param released the released
    * @param updateViews the update views
-   *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Async
   @LockMethod(removeWhenFinish = true, isController = false)
@@ -259,16 +223,18 @@ public class ValidationHelper implements DisposableBean {
     } else {
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
-      values.put(LiteralConstants.USER,
-          SecurityContextHolder.getContext().getAuthentication().getName());
       values.put("released", released);
-
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
-
     }
   }
 
-
+  /**
+   * Execute validation process.
+   *
+   * @param datasetId the dataset id
+   * @param processId the process id
+   * @param released the released
+   */
   public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
     // Initialize process as coordinator
     initializeProcess(processId, true, released);
@@ -373,16 +339,15 @@ public class ValidationHelper implements DisposableBean {
 
     // first every task is always queued up to ensure the order
 
-    if (((ThreadPoolExecutor) validationExecutorService).getActiveCount() == maxRunningTasks) {
+    if (((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+        .getDelegateExecutorService()).getActiveCount() == maxRunningTasks) {
       LOG.info(
           "Event {} will be queued up as there are no validating threads available at the moment",
           eeaEventVO);
     }
 
     this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
-
   }
-
 
   /**
    * Creates the lock with signature.
@@ -432,11 +397,13 @@ public class ValidationHelper implements DisposableBean {
     DataSetMetabaseVO datasetMetabaseVO =
         datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     if (datasetMetabaseVO.getDataProviderId() != null) {
-      lockService.removeLockByCriteria(Arrays.asList(LockSignature.RELEASE_SNAPSHOTS.getValue(),
-          datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId()));
+      Map<String, Object> releaseSnapshots = new HashMap<>();
+      releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      releaseSnapshots.put(LiteralConstants.DATAFLOWID, datasetMetabaseVO.getDataflowId());
+      releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, datasetMetabaseVO.getDataProviderId());
+      lockService.removeLockByCriteria(releaseSnapshots);
     }
   }
-
 
   /**
    * Start process.
@@ -553,7 +520,6 @@ public class ValidationHelper implements DisposableBean {
     value.put("idTable", idTable);
     value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
-
   }
 
   /**
@@ -608,14 +574,17 @@ public class ValidationHelper implements DisposableBean {
     // remember pendingOks > pendingValidations.size()
     if (processesMap.get(processId).getPendingOks() == 0) {
       // Release the lock manually
-      List<Object> criteria1 = new ArrayList<>();
-      List<Object> criteria2 = new ArrayList<>();
-      criteria1.add(LockSignature.EXECUTE_VALIDATION.getValue());
-      criteria1.add(datasetId);
-      criteria2.add(LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
-      criteria2.add(datasetId);
-      lockService.removeLockByCriteria(criteria1);
-      lockService.removeLockByCriteria(criteria2);
+      Map<String, Object> executeValidation = new HashMap<>();
+      executeValidation.put(LiteralConstants.SIGNATURE,
+          LockSignature.EXECUTE_VALIDATION.getValue());
+      executeValidation.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(executeValidation);
+
+      Map<String, Object> forceExecuteValidation = new HashMap<>();
+      forceExecuteValidation.put(LiteralConstants.SIGNATURE,
+          LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+      forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(forceExecuteValidation);
 
       // after last dataset validations have been saved, an event is sent to notify it
       String notificationUser = processesMap.get(processId).getRequestingUser();
@@ -642,7 +611,7 @@ public class ValidationHelper implements DisposableBean {
         Long nextDatasetId =
             datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
         if (null != nextDatasetId) {
-          this.executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, true);
+          this.executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, false);
         } else {
           kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
         }
@@ -703,35 +672,35 @@ public class ValidationHelper implements DisposableBean {
     return isProcessStarted;
   }
 
-
+  /**
+   * Instantiates a new validation task.
+   *
+   * @param eeaEventVO the eea event VO
+   * @param validator the validator
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @param processId the process id
+   * @param notificationEventType the notification event type
+   */
   @AllArgsConstructor
   private static class ValidationTask {
 
-    /**
-     * The Eea event vo.
-     */
+    /** The eea event VO. */
     EEAEventVO eeaEventVO;
-    /**
-     * The Validator.
-     */
+
+    /** The validator. */
     Validator validator;
-    /**
-     * The Dataset id.
-     */
+
+    /** The dataset id. */
     Long datasetId;
-    /**
-     * The Kie base.
-     */
+
+    /** The kie base. */
     KieBase kieBase;
 
-    /**
-     * The Process id.
-     */
+    /** The process id. */
     String processId;
 
-    /**
-     * The Notification event type.
-     */
+    /** The notification event type. */
     EventType notificationEventType;
   }
 
@@ -740,13 +709,10 @@ public class ValidationHelper implements DisposableBean {
    */
   private class ValidationTasksExecutorThread implements Runnable {
 
-    /**
-     * The Constant MILISECONDS.
-     */
+    /** The Constant MILISECONDS. */
     private static final double MILISECONDS = 1000.0;
-    /**
-     * The validation task.
-     */
+
+    /** The validation task. */
     private ValidationTask validationTask;
 
     /**
@@ -758,7 +724,6 @@ public class ValidationHelper implements DisposableBean {
       this.validationTask = validationTask;
     }
 
-
     /**
      * Run.
      */
@@ -766,19 +731,14 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
 
       Long currentTime = System.currentTimeMillis();
-      int workingThreads = ((ThreadPoolExecutor) validationExecutorService).getActiveCount();
-
-      SecurityContextHolder.clearContext();
-
-      SecurityContextHolder.getContext()
-          .setAuthentication(new UsernamePasswordAuthenticationToken(
-              EeaUserDetails.create(validationTask.eeaEventVO.getData().get("user").toString(),
-                  new HashSet<>()),
-              validationTask.eeaEventVO.getData().get("token").toString(), null));
+      int workingThreads =
+          ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+              .getDelegateExecutorService()).getActiveCount();
 
       LOG.info(
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
+
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
@@ -809,7 +769,5 @@ public class ValidationHelper implements DisposableBean {
             validationTask.eeaEventVO, totalTime);
       }
     }
-
-
   }
 }

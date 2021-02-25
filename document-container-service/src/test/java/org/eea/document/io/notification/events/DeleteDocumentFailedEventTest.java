@@ -43,7 +43,7 @@ public class DeleteDocumentFailedEventTest {
 
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
     Assert.assertEquals(4,
         deleteDocumentFailedEvent

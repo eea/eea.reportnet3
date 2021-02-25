@@ -25,7 +25,9 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -41,6 +43,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
@@ -62,6 +65,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,14 +80,14 @@ import org.springframework.stereotype.Service;
 @Service("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
 
-  /** The Constant CHUNK_SIZE. */
-  private static final int CHUNK_SIZE = 10;
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant CHUNK_SIZE. */
+  private static final int CHUNK_SIZE = 10;
 
   /** The Constant NAME_DC: {@value}. */
   private static final String NAME_DC = "Data Collection - %s";
@@ -200,6 +204,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private EUDatasetRepository euDatasetRepository;
 
+  /** The reporting dataset repository. */
+  @Autowired
+  private ReportingDatasetRepository reportingDatasetRepository;
+
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
+
   /**
    * Gets the dataflow status.
    *
@@ -266,10 +278,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
 
     // Release the lock
-    List<Object> criteria = new ArrayList<>();
-    criteria.add(methodSignature);
-    criteria.add(dataflowId);
-    lockService.removeLockByCriteria(criteria);
+    Map<String, Object> lockCriteria = new HashMap<>();
+    lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
+    lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.removeLockByCriteria(lockCriteria);
 
     // Release the notification
     try {
@@ -305,12 +317,24 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
 
-    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-    dataFlowVO.setShowPublicInfo(showPublicInfo);
-    dataflowControllerZuul.updateDataFlow(dataFlowVO);
-
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
+
+    updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
+
   }
+
+  /**
+   * Update reporting datasets visibility.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  private void updateReportingDatasetsVisibility(Long dataflowId, boolean showPublicInfo) {
+
+    dataflowControllerZuul.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
+
+  }
+
 
   /**
    * Manage data collection.
@@ -370,7 +394,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
 
       List<Long> dataCollectionIds = new ArrayList<>();
-      Map<Long, String> datasetIdsEmails = new HashMap<>();
+      Map<Long, List<String>> datasetIdsEmails = new HashMap<>();
       Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
       Map<Long, String> datasetIdsAndSchemaIdsFromDC = new HashMap<>();
       Map<Long, String> datasetIdsAndSchemaIdsFromEU = new HashMap<>();
@@ -409,11 +433,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .disabledRules(disabledRules).build();
       LOG.info("Data Collection creation proccess stopped: there are SQL rules containing errors");
       // remove lock
-      String methodSignature = LockSignature.CREATE_DATA_COLLECTION.getValue();
-      List<Object> criteria = new ArrayList<>();
-      criteria.add(methodSignature);
-      criteria.add(dataflowId);
-      lockService.removeLockByCriteria(criteria);
+      Map<String, Object> createDataCollection = new HashMap<>();
+      createDataCollection.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_DATA_COLLECTION.getValue());
+      createDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(createDataCollection);
       // release notification
       rulesOk = false;
       releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
@@ -445,7 +469,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private void processDataCollectionAndRoles(Long dataflowId, Date dueDate, boolean isCreation,
       boolean manualCheck, String time, List<DesignDatasetVO> designs,
       List<RepresentativeVO> representatives, Map<Long, String> map, List<Long> dataCollectionIds,
-      Map<Long, String> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
+      Map<Long, List<String>> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
       Map<Long, String> datasetIdsAndSchemaIdsFromDC,
       Map<Long, String> datasetIdsAndSchemaIdsFromEU, List<Long> euDatasetIds,
       Connection connection, Statement statement) throws SQLException {
@@ -567,7 +591,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void createReportingDatasetInMetabase(Long dataflowId, String time,
       List<RepresentativeVO> representatives, Map<Long, String> map,
-      Map<Long, String> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
+      Map<Long, List<String>> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
       Statement statement, List<FKDataCollection> newReportingDatasetsRegistry,
       List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
       List<IntegrityVO> integritieVOs) throws SQLException {
@@ -575,8 +599,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
           map.get(representative.getDataProviderId()));
-      for (String email : representative.getProviderAccounts()) {
-        datasetIdsEmails.put(datasetId, email);
+      List<String> emails = representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
+          .collect(Collectors.toList());
+      if (emails.isEmpty()) {
+        datasetIdsEmails.put(datasetId, null);
+      } else {
+        datasetIdsEmails.put(datasetId, emails);
       }
       datasetIdsAndSchemaIds.put(datasetId, design.getDatasetSchema());
 
@@ -817,8 +845,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void createPermissions(Map<Long, String> datasetIdsEmails, List<Long> dataCollectionIds,
-      List<Long> euDatasetIds, Long dataflowId) throws EEAException {
+  private void createPermissions(Map<Long, List<String>> datasetIdsEmails,
+      List<Long> dataCollectionIds, List<Long> euDatasetIds, Long dataflowId) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> assignments = new ArrayList<>();
@@ -894,8 +922,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param assignments the assignments
    */
   private void createGroupsAndAssings(Long dataflowId, List<Long> dataCollectionIds,
-      List<Long> euDatasetIds, Map<Long, String> datasetIdsEmails, List<ResourceInfoVO> groups,
-      List<ResourceAssignationVO> assignments) {
+      List<Long> euDatasetIds, Map<Long, List<String>> datasetIdsEmails,
+      List<ResourceInfoVO> groups, List<ResourceAssignationVO> assignments) {
 
     List<UserRepresentationVO> stewards =
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
@@ -948,7 +976,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
     }
 
-    for (Map.Entry<Long, String> entry : datasetIdsEmails.entrySet()) {
+    for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
 
       // Create Dataset-%s-DATA_STEWARD
       groups.add(
@@ -974,13 +1002,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             ResourceGroupEnum.DATASET_CUSTODIAN));
       }
 
-      // Assign Dataset-%s-LEAD_REPORTER
-      assignments.add(createAssignments(entry.getKey(), entry.getValue(),
-          ResourceGroupEnum.DATASET_LEAD_REPORTER));
+      if (null != entry.getValue()) {
+        for (String email : entry.getValue()) {
+          // Assign Dataset-%s-LEAD_REPORTER
+          assignments.add(
+              createAssignments(entry.getKey(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
 
-      // Assign Dataflow-%s-LEAD_REPORTER
-      assignments.add(createAssignments(dataflowId, entry.getValue(),
-          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+          // Assign Dataflow-%s-LEAD_REPORTER
+          assignments
+              .add(createAssignments(dataflowId, email, ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+        }
+      }
     }
   }
 

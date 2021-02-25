@@ -673,23 +673,24 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
 
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-    }
-
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
-      if (null != datasetSchemaVO.getDescription()) {
-        dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
-            datasetSchemaVO.getDescription());
-      }
-      if (null != datasetSchemaVO.getWebform()) {
-        dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
-      }
+
       dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
           datasetSchemaVO.isAvailableInPublic());
+
+      if (TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
+          .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+        if (null != datasetSchemaVO.getDescription()) {
+          dataschemaService.updateDatasetSchemaDescription(datasetSchemaId,
+              datasetSchemaVO.getDescription());
+        }
+        if (null != datasetSchemaVO.getWebform()) {
+          dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
+        }
+      }
     } catch (EEAException e) {
+      LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
           e);
     }
@@ -953,6 +954,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * Export schemas.
    *
    * @param dataflowId the dataflow id
+   *
    * @return the response entity
    */
   @Override

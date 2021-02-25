@@ -1,7 +1,8 @@
 package org.eea.dataflow.controller;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
@@ -15,6 +16,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -364,8 +366,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
           integrationId, datasetId, e.getMessage());
-      lockService.removeLockByCriteria(
-          Arrays.asList(LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue(), datasetId));
+      Map<String, Object> lockCriteria = new HashMap<>();
+      lockCriteria.put(LiteralConstants.SIGNATURE,
+          LockSignature.EXECUTE_EXTERNAL_INTEGRATION.getValue());
+      lockCriteria.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(lockCriteria);
       integrationService.releaseLocks(datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }

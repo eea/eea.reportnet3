@@ -57,6 +57,7 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -232,6 +233,9 @@ public class DatasetSnapshotServiceTest {
    */
   private Authentication authentication;
 
+  /** The lead reporters VO. */
+  private List<LeadReporterVO> leadReportersVO;
+
   /**
    * Inits the mocks.
    */
@@ -257,6 +261,8 @@ public class DatasetSnapshotServiceTest {
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
 
+    leadReportersVO = new ArrayList<>();
+    leadReportersVO.add(new LeadReporterVO());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -386,10 +392,9 @@ public class DatasetSnapshotServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET,
-        "user");
+    datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET);
     Mockito.verify(recordStoreControllerZuul, times(1)).restoreSnapshotData(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -399,8 +404,6 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void testRestoreSnapshots() throws Exception {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     datasetSnapshotService.restoreSnapshot(1L, 1L, true);
@@ -780,7 +783,7 @@ public class DatasetSnapshotServiceTest {
     dataset.setDataProviderId(1L);
     dataset.setDataSetName("datsetName");
     representative.setDataProviderId(1L);
-    representative.setProviderAccounts(Arrays.asList("providerAccount"));
+    representative.setLeadReporters(leadReportersVO);
     representative.setReceiptDownloaded(true);
     representative.setReceiptOutdated(true);
     datasets.add(dataset);
@@ -798,7 +801,8 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(userManagementControllerZull.getUserByUserId(Mockito.any()))
         .thenReturn(userRepresentationVO);
     datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
-    Mockito.verify(representativeControllerZuul, times(1)).updateRepresentative(Mockito.any());
+    Mockito.verify(representativeControllerZuul, times(1))
+        .updateInternalRepresentative(Mockito.any());
   }
 
   /**
@@ -1028,7 +1032,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(schemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(schema);
     Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
-    datasetSnapshotService.createReleaseSnapshots(1L, 1L);
+    datasetSnapshotService.createReleaseSnapshots(1L, 1L, true);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
         Mockito.anyBoolean());
   }
@@ -1052,7 +1056,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(schema);
 
     datasetSnapshotService.releaseLocksRelatedToRelease(1L, 1L);
-    Mockito.verify(lockService, times(12)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(10)).removeLockByCriteria(Mockito.any());
   }
 
 }
