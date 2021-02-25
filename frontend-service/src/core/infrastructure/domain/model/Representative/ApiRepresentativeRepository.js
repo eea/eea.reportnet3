@@ -62,6 +62,14 @@ const deleteById = async representativeId => await apiRepresentative.deleteById(
 
 const deleteLeadReporter = async leadReporterId => await apiRepresentative.deleteLeadReporter(leadReporterId);
 
+const downloadById = async dataflowId => {
+  return await apiRepresentative.downloadById(dataflowId);
+};
+
+const downloadTemplateById = async dataProviderGroupId => {
+  return await apiRepresentative.downloadTemplateById(dataProviderGroupId);
+};
+
 const getProviderTypes = async () => {
   const dataProviderTypesDTO = await apiRepresentative.getProviderTypes();
   return dataProviderTypesDTO.data;
@@ -80,6 +88,8 @@ export const ApiRepresentativeRepository = {
   allRepresentatives,
   deleteById,
   deleteLeadReporter,
+  downloadById,
+  downloadTemplateById,
   getProviderTypes,
   updateDataProviderId,
   updateLeadReporter

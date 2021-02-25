@@ -937,7 +937,7 @@ const DataViewer = withRouter(
           onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
-          className="p-button-secondary"
+          className="p-button-secondary button-right-aligned"
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
@@ -970,7 +970,7 @@ const DataViewer = withRouter(
           }}
         />
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-secondary p-button-animated-blink p-button-right-aligned"
           icon={'cancel'}
           label={resources.messages['cancel']}
           onClick={onCancelRowEdit}
@@ -993,7 +993,7 @@ const DataViewer = withRouter(
         />
         {areEquals(records.geometryType, 'POINT') && (
           <Button
-            className="p-button-secondary"
+            className="p-button-secondary button-right-aligned"
             icon="cancel"
             label={resources.messages['cancel']}
             onClick={() => {

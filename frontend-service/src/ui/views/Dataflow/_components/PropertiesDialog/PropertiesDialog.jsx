@@ -36,7 +36,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
 
   const dialogFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink button-right-aligned"
       icon="cancel"
       label={resources.messages['close']}
       onClick={() => manageDialogs('isPropertiesDialogVisible', false)}

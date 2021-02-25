@@ -573,7 +573,7 @@ const DataFormFieldEditor = ({
         onClick={() => onSavePoint(map.newPoint, map.newPointCRS)}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => {
