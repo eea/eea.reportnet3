@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
@@ -400,14 +401,19 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       for (String representativeData : everyLines) {
         String[] dataLine = representativeData.split("[|]");
         String contryCode = dataLine[0].replaceAll("\"", "");
-        String email = dataLine[1].replaceAll("\"", "");
-        email = email.replaceAll("\r", "");
-        UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
+        String email = "";
+        UserRepresentationVO user = null;
+        if (dataLine.length == 2 && null != dataLine[1]) {
+          email = dataLine[1].replaceAll("\"", "").replaceAll("\r", "");
+          if (StringUtils.isNotBlank(email)) {
+            user = userManagementControllerZull.getUserByEmail(email);
+          }
+        }
         if (!countryCodeList.contains(contryCode) && null == user) {
           fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
         } else if (!countryCodeList.contains(contryCode)) {
           fieldsToWrite[2] = "KO imported country doesn't exist";
-        } else if (null == user) {
+        } else if (null == user && StringUtils.isNotBlank(email)) {
           fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
           DataProvider dataProvider = dataProviderList.stream()
@@ -433,19 +439,26 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 representative.setReceiptOutdated(false);
                 representative.setHasDatasets(false);
                 representative.setId(0L);
-                LeadReporter leadReporter = new LeadReporter();
-                leadReporter.setRepresentative(representative);
-                leadReporter.setEmail(email);
-                representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
-                representativeList.add(representative);
-              } else {
-                List<LeadReporter> leadReporters = representative.getLeadReporters();
-                if (leadReporters.stream().noneMatch(rep -> email.equals(rep.getEmail()))) {
+                if (StringUtils.isNotBlank(email)) {
                   LeadReporter leadReporter = new LeadReporter();
                   leadReporter.setRepresentative(representative);
                   leadReporter.setEmail(email);
-                  leadReporters.add(leadReporter);
-                  representative.setLeadReporters(leadReporters);
+                  representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
+                } else {
+                  representative.setLeadReporters(new ArrayList<>());
+                }
+                representativeList.add(representative);
+              } else {
+                List<LeadReporter> leadReporters = representative.getLeadReporters();
+                if (StringUtils.isNotBlank(email)) {
+                  final String innerEmail = email;
+                  if (leadReporters.stream().noneMatch(rep -> innerEmail.equals(rep.getEmail()))) {
+                    LeadReporter leadReporter = new LeadReporter();
+                    leadReporter.setRepresentative(representative);
+                    leadReporter.setEmail(innerEmail);
+                    leadReporters.add(leadReporter);
+                    representative.setLeadReporters(leadReporters);
+                  }
                 }
                 if (!representativeList.contains(representative)) {
                   representativeList.add(representative);
