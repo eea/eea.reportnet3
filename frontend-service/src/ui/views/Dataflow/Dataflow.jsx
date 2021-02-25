@@ -762,7 +762,10 @@ const Dataflow = withRouter(({ history, match }) => {
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             onConfirm={() => onConfirmRelease()}
-            onHide={() => manageDialogs('isReleaseDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isReleaseDialogVisible', false);
+              dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+            }}
             visible={dataflowState.isReleaseDialogVisible}>
             {resources.messages['confirmReleaseQuestion']}
           </ConfirmDialog>
