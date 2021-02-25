@@ -116,6 +116,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
 
   const isInsideACountry = !isNil(representativeId) || uniqDataProviders.length === 1;
+  const country = isInsideACountry ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName')) : '';
   const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
     config.permissions.LEAD_REPORTER
   ]);
@@ -715,7 +716,14 @@ const Dataflow = withRouter(({ history, match }) => {
   return layout(
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
-        <Title icon="clone" iconSize="4rem" subtitle={resources.messages['dataflow']} title={dataflowState.name} />
+        <Title
+          icon="clone"
+          iconSize="4rem"
+          subtitle={
+            isInsideACountry ? `${resources.messages['dataflow']} - ${country}` : resources.messages['dataflow']
+          }
+          title={dataflowState.name}
+        />
 
         {isNil(representativeId) ? (
           <BigButtonList
