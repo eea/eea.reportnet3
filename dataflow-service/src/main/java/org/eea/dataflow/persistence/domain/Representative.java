@@ -1,6 +1,8 @@
 package org.eea.dataflow.persistence.domain;
 
+import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -42,13 +45,9 @@ public class Representative {
   @JoinColumn(name = "data_provider_id")
   private DataProvider dataProvider;
 
-  /** The user id. */
-  @Column(name = "user_id")
-  private String userId;
-
-  /** The user mail. */
-  @Column(name = "user_mail")
-  private String userMail;
+  /** The lead reporters. */
+  @OneToMany(mappedBy = "representative", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<LeadReporter> leadReporters;
 
   /** The receipt downloaded. */
   @Column(name = "receipt_downloaded")
@@ -62,6 +61,9 @@ public class Representative {
   @Column(name = "has_datasets")
   private Boolean hasDatasets;
 
+  /** The restrict from public. */
+  @Column(name = "restrict_from_public")
+  private boolean restrictFromPublic;
 
   /**
    * Equals.
@@ -89,6 +91,6 @@ public class Representative {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, userMail, dataflow, dataProvider);
+    return Objects.hash(id, dataflow, dataProvider);
   }
 }

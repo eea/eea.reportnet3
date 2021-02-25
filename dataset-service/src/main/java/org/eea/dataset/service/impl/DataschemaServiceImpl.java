@@ -1,12 +1,15 @@
 package org.eea.dataset.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.json.JsonWriterSettings;
@@ -36,18 +39,24 @@ import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.file.ZipUtils;
+import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.dataset.validate.commands.ValidationSchemaCommand;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
@@ -57,9 +66,11 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
@@ -67,8 +78,11 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,94 +94,163 @@ import com.mongodb.client.result.UpdateResult;
 @Service("dataschemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * The time to wait before continue copy.
+   */
+  @Value("${wait.continue.copy.ms}")
+  private Long timeToWaitBeforeContinueCopy;
 
-  /** The schemas repository. */
+  /**
+   * The schemas repository.
+   */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /** The resource management controller zull. */
+  /**
+   * The resource management controller zull.
+   */
   @Autowired
   private ResourceManagementControllerZull resourceManagementControllerZull;
 
-  /** The data flow controller zuul. */
+  /**
+   * The data flow controller zuul.
+   */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
 
-  /** The data schema mapper. */
+  /**
+   * The data schema mapper.
+   */
   @Autowired
   private DataSchemaMapper dataSchemaMapper;
 
-  /** The no rules data schema mapper. */
+  /**
+   * The no rules data schema mapper.
+   */
   @Autowired
   private NoRulesDataSchemaMapper noRulesDataSchemaMapper;
 
-  /** The field schema no rules mapper. */
+  /**
+   * The field schema no rules mapper.
+   */
   @Autowired
   private FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
-  /** The table schema mapper. */
+  /**
+   * The table schema mapper.
+   */
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
-  /** The record store controller zuul. */
+  /**
+   * The record store controller zuul.
+   */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-  /** The design dataset repository. */
+  /**
+   * The design dataset repository.
+   */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-  /** The validation commands. */
+  /**
+   * The validation commands.
+   */
   @Autowired
   private List<ValidationSchemaCommand> validationCommands;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Autowired
   private DatasetService datasetService;
 
-  /** The pk catalogue repository. */
+  /**
+   * The pk catalogue repository.
+   */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
-  /** The data set metabase repository. */
+  /**
+   * The data set metabase repository.
+   */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The unique constraint repository. */
+  /**
+   * The unique constraint repository.
+   */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
 
-  /** The unique constraint mapper. */
+  /**
+   * The unique constraint mapper.
+   */
   @Autowired
   private UniqueConstraintMapper uniqueConstraintMapper;
 
-  /** The simple data schema mapper. */
+  /**
+   * The simple data schema mapper.
+   */
   @Autowired
   private SimpleDataSchemaMapper simpleDataSchemaMapper;
 
-  /** The web form mapper. */
+  /**
+   * The web form mapper.
+   */
   @Autowired
   private WebFormMapper webFormMapper;
 
-  /** The kafka sender utils. */
+  /**
+   * The kafka sender utils.
+   */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The Constant FIELDSCHEMAS: {@value}. */
+  /**
+   * The contributor controller zuul.
+   */
+  @Autowired
+  private ContributorControllerZuul contributorControllerZuul;
+
+  /**
+   * The integration controller zuul.
+   */
+  @Autowired
+  private IntegrationControllerZuul integrationControllerZuul;
+
+
+  /** The zip utils. */
+  @Autowired
+  private ZipUtils zipUtils;
+
+
+  /**
+   * The Constant FIELDSCHEMAS: {@value}.
+   */
   private static final String FIELDSCHEMAS = "fieldSchemas";
 
   /**
@@ -182,7 +265,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public ObjectId createEmptyDataSetSchema(Long dataflowId) throws EEAException {
 
-    if (dataFlowControllerZuul.findById(dataflowId) == null) {
+    if (dataFlowControllerZuul.getMetabaseById(dataflowId) == null) {
       throw new EEAException("DataFlow with id " + dataflowId + " not found");
     }
     DataSetSchema dataSetSchema = new DataSetSchema();
@@ -326,6 +409,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param tableSchemaId the table schema id
    * @param datasetSchemaId the dataset schema id
+   *
    * @return the table schema
    */
   @Override
@@ -362,7 +446,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
-        (String) ThreadPropertiesManager.getVariable("user"), true, true);
+        true, true);
   }
 
   /**
@@ -421,6 +505,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -456,6 +541,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param tableSchemaVO the table schema VO
    * @param datasetSchemaId the dataset schema id
    * @param tableSchema the table schema
+   *
    * @throws EEAException the EEA exception
    */
   private void tableShemaAddAtributes(Long datasetId, TableSchemaVO tableSchemaVO,
@@ -496,6 +582,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -582,7 +669,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     try {
       fieldSchemaVO.setId(new ObjectId().toString());
-
 
       if (fieldSchemaVO.getReferencedField() != null) {
         // We need to update the fieldSchema is referenced, the property isPKreferenced to true
@@ -683,7 +769,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    * @param typeModified the type modified
    * @param fieldSchema the field schema
+   *
    * @return true, if successful
+   *
    * @throws EEAException the EEA exception
    */
   private boolean modifySchemaInUpdate(FieldSchemaVO fieldSchemaVO, boolean typeModified,
@@ -735,6 +823,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Fill referenced document.
    *
    * @param referencedField the referenced field
+   *
    * @return the document
    */
   private Document fillReferencedDocument(ReferencedFieldSchemaVO referencedField) {
@@ -784,6 +873,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    * @param typeModified the type modified
    * @param fieldSchema the field schema
+   *
    * @return true, if successful
    */
   private boolean modifiedCodelist(FieldSchemaVO fieldSchemaVO, boolean typeModified,
@@ -826,6 +916,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    * @param typeModified the type modified
    * @param fieldSchema the field schema
+   *
    * @return true, if successful
    */
   private boolean modifyIsTrueAndCodeListConstants(FieldSchemaVO fieldSchemaVO,
@@ -849,6 +940,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
    * @param fieldSchema the field schema
+   *
    * @throws EEAException the EEA exception
    */
   private void updateUniqueConstraints(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
@@ -869,6 +961,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update previous data in catalog.
    *
    * @param fieldSchema the field schema
+   *
    * @throws EEAException the EEA exception
    */
   private void updatePreviousDataInCatalog(Document fieldSchema) throws EEAException {
@@ -903,7 +996,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaId the field schema id
    * @param datasetId the dataset id
+   *
    * @return true, if 1 and only 1 fieldSchema has been removed
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -920,7 +1015,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
         .getModifiedCount() == 1;
   }
-
 
 
   /**
@@ -957,6 +1051,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void updateDatasetSchemaDescription(String datasetSchemaId, String description) {
     schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description);
+  }
+
+
+  /**
+   * Update dataset schema exportable.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param isExportable the is exportable
+   */
+  @Override
+  public void updateDatasetSchemaExportable(String datasetSchemaId, boolean availableInPublic) {
+    schemasRepository.updateDatasetSchemaExportable(datasetSchemaId, availableInPublic);
   }
 
   /**
@@ -1102,6 +1208,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param fieldSchemaVO the field schema VO
    * @param allow the allow
    * @param table the table
+   *
    * @return the boolean
    */
   private Boolean fieldsPkFor(FieldSchemaVO fieldSchemaVO, Boolean allow, TableSchemaVO table) {
@@ -1119,6 +1226,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param fieldSchemaVO the field schema VO
    * @param allow the allow
+   *
    * @return the boolean
    */
   private Boolean checkPkReferenced(FieldSchemaVO fieldSchemaVO, Boolean allow) {
@@ -1165,6 +1273,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Checks if is schema allowed for deletion.
    *
    * @param idDatasetSchema the id dataset schema
+   *
    * @return the boolean
    */
   @Override
@@ -1190,6 +1299,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param idDatasetSchema the id dataset schema
    * @param allow the allow
    * @param field the field
+   *
    * @return the boolean
    */
   private Boolean fieldAllowedForDeletion(String idDatasetSchema, Boolean allow,
@@ -1419,6 +1529,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update catalogue deleting.
    *
    * @param field the field
+   *
    * @throws EEAException the EEA exception
    */
   private void updateCatalogueDeleting(FieldSchema field) throws EEAException {
@@ -1523,6 +1634,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param idDataset the id dataset
    * @param field the field
+   *
    * @throws EEAException the EEA exception
    */
   private void pkCatalogueMethod(Long idDataset, FieldSchema field) throws EEAException {
@@ -1552,6 +1664,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param referencedIdDatasetSchema the referenced id dataset schema
    * @param referencedIdPk the referenced id pk
    * @param referenced the referenced
+   *
    * @throws EEAException the EEA exception
    */
   private void updateIsPkReferencedInFieldSchema(String referencedIdDatasetSchema,
@@ -1584,6 +1697,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete unique constraint.
    *
    * @param uniqueId the unique id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1599,6 +1713,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete uniques constraint from table.
    *
    * @param tableSchemaId the table schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1615,6 +1730,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param schemaId the schema id
    * @param fieldSchemaId the field schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1633,6 +1749,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param schemaId the schema id
    * @param fieldSchemaId the field schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1651,6 +1768,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete uniques constraint from dataset.
    *
    * @param datasetSchemaId the dataset schema id
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1682,6 +1800,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Gets the unique constraints.
    *
    * @param schemaId the schema id
+   *
    * @return the unique constraints
    */
   @Override
@@ -1696,7 +1815,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Gets the unique constraint.
    *
    * @param uniqueId the unique id
+   *
    * @return the unique constraint
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1790,7 +1911,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Gets the simple schema.
    *
    * @param datasetId the dataset id
+   *
    * @return the simple schema
+   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1843,6 +1966,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return the boolean
    */
   @Override
@@ -1957,6 +2081,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
+   *
    * @return true, if successful
    */
   private boolean checkIfFieldNameAlreadyExist(String datasetSchemaId,
@@ -1985,7 +2110,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Release validate manual QC event.
    *
    * @param datasetId the dataset id
-   * @param checkNoSQL the check no SQL
+   * @param user the user
+   * @param checkSQL the check SQL
    */
   @Override
   public void releaseCreateUpdateView(Long datasetId, String user, boolean checkSQL) {
@@ -1996,4 +2122,427 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     result.put(LiteralConstants.USER, user);
     kafkaSenderUtils.releaseKafkaEvent(EventType.CREATE_UPDATE_VIEW_EVENT, result);
   }
+
+
+  /**
+   * Export schemas.
+   *
+   * @param dataflowId the dataflow id
+   *
+   * @return the byte[]
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public byte[] exportSchemas(Long dataflowId) throws IOException, EEAException {
+
+    List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
+    List<DataSetSchema> schemas = schemasRepository.findByIdDataFlow(dataflowId);
+
+    if (CollectionUtils.isEmpty(schemas)) {
+      // Error. There aren't schemas to export in the dataflow
+      LOG.error("No schemas found to export in the dataflow {}", dataflowId);
+      throw new EEAException(String.format("No schemas to export in the dataflow %s", dataflowId));
+    }
+    return zipUtils.zipSchema(designs, schemas, dataflowId);
+
+
+  }
+
+
+  /**
+   * Import schemas.
+   *
+   * @param dataflowId the dataflow id
+   * @param multipartFile the multipart file
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Async
+  @Override
+  public void importSchemas(Long dataflowId, MultipartFile multipartFile)
+      throws IOException, EEAException {
+
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    Map<Long, DataSetSchema> mapDatasetsDestinyAndSchemasOrigin = new HashMap<>();
+    Map<Long, List<FieldSchema>> mapDatasetIdFKRelations = new HashMap<>();
+
+    try {
+      // Unzip the file and keep the classes on an auxiliary bean
+      ImportSchemas importClasses = zipUtils.unZipImportSchema(multipartFile);
+
+      List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
+      // If there are no schemas, error
+      if (CollectionUtils.isEmpty(importClasses.getSchemas())) {
+        LOG_ERROR.error("No schemas from the zip file to import in the dataflowId {}", dataflowId);
+        throw new EEAException(
+            "No schemas from the zip file to import in the dataflowId " + dataflowId);
+      }
+      for (DataSetSchema schema : importClasses.getSchemas()) {
+        // Create the empty new dataset schema
+        String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
+        DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
+        dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
+            newIdDatasetSchema);
+
+        final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
+        targetDatasetSchema.getTableSchemas().forEach(table -> {
+          for (TableSchema tableSchema : schema.getTableSchemas()) {
+            if (table.getNameTableSchema().equals(tableSchema.getNameTableSchema())) {
+              dictionaryOriginTargetTableObjectId.put(tableSchema.getIdTableSchema().toString(),
+                  table.getIdTableSchema());
+              dictionaryOriginTargetTableObjectId.put(
+                  tableSchema.getRecordSchema().getIdRecordSchema().toString(),
+                  table.getRecordSchema().getIdRecordSchema());
+            }
+          }
+        });
+        dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
+
+        // Create the schema in the metabase
+        Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
+            nameToImportedSchema(schema.getIdDataSetSchema().toString(),
+                importClasses.getSchemaNames(), designs),
+            newIdDatasetSchema, dataflowId, null, null, 0);
+
+        LOG.info("New dataset created in the import process with id {}", datasetId.get());
+        mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schema);
+        String newDataset = "dataset_" + datasetId.get().toString();
+        String oldDataset =
+            "dataset_" + importClasses.getSchemaIds().get(schema.getIdDataSetSchema().toString());
+        dictionaryOriginTargetObjectId.put(oldDataset, newDataset);
+
+        // Time to wait before continuing the process. If the process goes too fast, it won't find
+        // the
+        // dataset schema created and the process will fail. By default 4000ms
+        Thread.sleep(timeToWaitBeforeContinueCopy);
+      }
+
+      // After creating the datasets schemas on the DB, fill them and create the permissions
+      for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
+          .entrySet()) {
+        contributorControllerZuul.createAssociatedPermissions(dataflowId,
+            itemNewDatasetAndSchema.getKey());
+        fillAndUpdateDesignDatasetImported(itemNewDatasetAndSchema.getValue(),
+            dictionaryOriginTargetObjectId
+                .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()),
+            dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
+            mapDatasetIdFKRelations);
+      }
+
+      // Modify the FK, if the schemas copied have fields of type Link, to update the
+      // relations to
+      // the correct ones
+      processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
+
+      // Import the unique catalogue (in case there are Links in the schemas involved)
+      importUniqueConstraintsCatalogue(importClasses.getUniques(), dictionaryOriginTargetObjectId);
+
+      // Use an auxiliary class to store all the information needed by the validation micro service
+      // to import the rules
+      ImportSchemaVO importRules = new ImportSchemaVO();
+      importRules.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
+      importRules.setIntegritiesVO(importClasses.getIntegrities());
+      importRules.setQcRulesBytes(importClasses.getQcRulesBytes());
+      rulesControllerZuul.importRulesSchema(importRules);
+
+      // Import the external integrations
+      createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
+          dictionaryOriginTargetObjectId);
+
+      // Create the views necessary to the validation in the new datasets created
+      // Also, launch a SQL QC Validation
+      mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
+        recordStoreControllerZuul.createUpdateQueryView(datasetCreated, false);
+        rulesControllerZuul.validateSqlRules(datasetCreated,
+            dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()), false);
+      });
+
+      // Success notification
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataflowId).build());
+
+    } catch (Exception e) {
+      LOG_ERROR.error("An error in the import process happened. Message: {}", e.getMessage(), e);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+              .dataflowId(dataflowId).error("Error importing the schemas").build());
+    }
+  }
+
+
+  /**
+   * Fill and update design dataset imported.
+   *
+   * @param schemaOrigin the schema origin
+   * @param newIdDatasetSchema the new id dataset schema
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param datasetId the dataset id
+   * @param mapDatasetIdFKRelations the map dataset id FK relations
+   *
+   * @return the map
+   *
+   * @throws EEAException the EEA exception
+   */
+  private Map<String, String> fillAndUpdateDesignDatasetImported(DataSetSchema schemaOrigin,
+      String newIdDatasetSchema, Map<String, String> dictionaryOriginTargetObjectId, Long datasetId,
+      Map<Long, List<FieldSchema>> mapDatasetIdFKRelations) throws EEAException {
+
+    // We've got the new schema created during the import process. Now using the dictionary we'll
+    // replace the objectIds of the schema, because at this moment the new schema has the origin
+    // values, so we'll change it to new ObjectIds and finally we'll update it
+    DataSetSchema schema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
+    schema.setDescription(schemaOrigin.getDescription());
+    schema.setWebform(schemaOrigin.getWebform());
+    // table level
+    for (TableSchema table : schemaOrigin.getTableSchemas()) {
+      ObjectId newTableId = new ObjectId();
+      dictionaryOriginTargetObjectId.put(table.getIdTableSchema().toString(),
+          newTableId.toString());
+
+      table.setIdTableSchema(newTableId);
+      // record level
+      RecordSchema record = new RecordSchema();
+      ObjectId newRecordId = new ObjectId();
+      record.setIdRecordSchema(newRecordId);
+      if (table.getRecordSchema() != null && table.getRecordSchema().getFieldSchema() != null) {
+        dictionaryOriginTargetObjectId.put(table.getRecordSchema().getIdRecordSchema().toString(),
+            newRecordId.toString());
+        record.setFieldSchema(new ArrayList<>());
+        record.setIdTableSchema(newTableId);
+        // field level
+        for (FieldSchema fieldOrigin : table.getRecordSchema().getFieldSchema()) {
+          ObjectId newFieldId = new ObjectId();
+          dictionaryOriginTargetObjectId.put(fieldOrigin.getIdFieldSchema().toString(),
+              newFieldId.toString());
+          FieldSchema field = fieldOrigin;
+          field.setIdFieldSchema(newFieldId);
+          field.setIdRecord(newRecordId);
+          // check if the field has referencedField, but the type is no LINK, set the referenced
+          // part as null
+          if (!DataType.LINK.equals(field.getType()) && null != field.getReferencedField()) {
+            field.setReferencedField(null);
+          }
+          record.getFieldSchema().add(field);
+
+          // if the type is Link we store to later modify the schema id's with the proper fk
+          // relations after all the process it's done
+          mapLinkResult(datasetId, mapDatasetIdFKRelations, fieldOrigin, field);
+        }
+        table.setRecordSchema(record);
+      }
+      schema.getTableSchemas().add(table);
+
+      // propagate new table into the datasets schema
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+      datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
+    }
+    // save the schema with the new values
+    schemasRepository.updateSchemaDocument(schema);
+
+    return dictionaryOriginTargetObjectId;
+  }
+
+
+  /**
+   * Map link result.
+   *
+   * @param datasetId the dataset id
+   * @param mapDatasetIdFKRelations the map dataset id FK relations
+   * @param fieldOrigin the field origin
+   * @param fieldCreated the field created
+   */
+  private void mapLinkResult(Long datasetId, Map<Long, List<FieldSchema>> mapDatasetIdFKRelations,
+      FieldSchema fieldOrigin, FieldSchema fieldCreated) {
+    if (DataType.LINK.equals(fieldCreated.getType())) {
+      List<FieldSchema> listFK = new ArrayList<>();
+      if (mapDatasetIdFKRelations.containsKey(datasetId)) {
+        listFK = mapDatasetIdFKRelations.get(datasetId);
+      }
+      listFK.add(fieldOrigin);
+      mapDatasetIdFKRelations.put(datasetId, listFK);
+    }
+  }
+
+
+  /**
+   * Process to modify the FK.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param mapDatasetIdFKRelations the map dataset id FK relations
+   */
+  private void processToModifyTheFK(Map<String, String> dictionaryOriginTargetObjectId,
+      Map<Long, List<FieldSchema>> mapDatasetIdFKRelations) {
+    // With the help of the dictionary and the map of involved datasetIds and it's FieldSchema
+    // objects, we replace the objects with the correct ones and finally we make an
+    // updateFieldSchema
+    mapDatasetIdFKRelations.forEach((datasetId, listFields) -> {
+      for (FieldSchema field : listFields) {
+        if (dictionaryOriginTargetObjectId.containsKey(field.getIdFieldSchema().toString())) {
+          ObjectId newField =
+              new ObjectId(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema().toString()));
+          dictionaryOriginTargetObjectId.put(field.getIdFieldSchema().toString(),
+              newField.toString());
+          field.setIdFieldSchema(newField);
+        }
+        if (dictionaryOriginTargetObjectId.containsKey(field.getIdRecord().toString())) {
+          field.setIdRecord(
+              new ObjectId(dictionaryOriginTargetObjectId.get(field.getIdRecord().toString())));
+        }
+        if (field.getReferencedField() != null && DataType.LINK.equals(field.getType())) {
+          referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
+        }
+        // with the field updated with the objectIds of the imported dataset, we modify the field to
+        // update all the stuff
+        // related to the PK/FK
+        try {
+          String datasetSchemaId = getDatasetSchemaId(datasetId);
+          updateForeignRelation(datasetId, fieldSchemaNoRulesMapper.entityToClass(field),
+              datasetSchemaId);
+          DataType type =
+              updateFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.entityToClass(field));
+          propagateRulesAfterUpdateSchema(datasetSchemaId,
+              fieldSchemaNoRulesMapper.entityToClass(field), type, datasetId);
+          addToPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
+        } catch (EEAException e) {
+          LOG.error("Error importing the schema on the datasetId {} when there are links: {}",
+              datasetId, e.getMessage(), e);
+        }
+      }
+    });
+  }
+
+
+  /**
+   * Reference field dictionary.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param field the field
+   */
+  private void referenceFieldDictionary(Map<String, String> dictionaryOriginTargetObjectId,
+      FieldSchema field) {
+    if (dictionaryOriginTargetObjectId
+        .containsKey(field.getReferencedField().getIdDatasetSchema().toString())) {
+      field.getReferencedField().setIdDatasetSchema(new ObjectId(dictionaryOriginTargetObjectId
+          .get(field.getReferencedField().getIdDatasetSchema().toString())));
+    }
+    if (dictionaryOriginTargetObjectId
+        .containsKey(field.getReferencedField().getIdPk().toString())) {
+      field.getReferencedField().setIdPk(new ObjectId(
+          dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdPk().toString())));
+    }
+    if (field.getReferencedField().getLabelId() != null && dictionaryOriginTargetObjectId
+        .containsKey(field.getReferencedField().getLabelId().toString())) {
+      field.getReferencedField().setLabelId(new ObjectId(
+          dictionaryOriginTargetObjectId.get(field.getReferencedField().getLabelId().toString())));
+    }
+    if (field.getReferencedField().getLinkedConditionalFieldId() != null
+        && dictionaryOriginTargetObjectId
+            .containsKey(field.getReferencedField().getLinkedConditionalFieldId().toString())) {
+      field.getReferencedField()
+          .setLinkedConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
+              .get(field.getReferencedField().getLinkedConditionalFieldId().toString())));
+    }
+    if (field.getReferencedField().getMasterConditionalFieldId() != null
+        && dictionaryOriginTargetObjectId
+            .containsKey(field.getReferencedField().getMasterConditionalFieldId().toString())) {
+      field.getReferencedField()
+          .setMasterConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
+              .get(field.getReferencedField().getMasterConditionalFieldId().toString())));
+    }
+  }
+
+
+  /**
+   * Creates the external integrations.
+   *
+   * @param extIntegrations the ext integrations
+   * @param dataflowId the dataflow id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   */
+  private void createExternalIntegrations(List<IntegrationVO> extIntegrations, Long dataflowId,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+
+    // Create the structure of the external integrations on the import schema process and send them
+    // all to the integrationController to be created
+    List<IntegrationVO> integrations = new ArrayList<>();
+    for (IntegrationVO integration : extIntegrations) {
+      integration.getInternalParameters().put(IntegrationParams.DATASET_SCHEMA_ID,
+          dictionaryOriginTargetObjectId
+              .get(integration.getInternalParameters().get("datasetSchemaId")));
+      integration.getInternalParameters().put("dataflowId", String.valueOf(dataflowId));
+      integration.setId(null);
+      integrations.add(integration);
+
+    }
+    integrationControllerZuul.createIntegrations(integrations);
+  }
+
+
+  /**
+   * Import unique constraints catalogue.
+   *
+   * @param uniques the uniques
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   *
+   * @return the map
+   */
+  private Map<String, String> importUniqueConstraintsCatalogue(List<UniqueConstraintSchema> uniques,
+      Map<String, String> dictionaryOriginTargetObjectId) {
+
+    List<UniqueConstraintVO> uniquesVo = uniqueConstraintMapper.entityListToClass(uniques);
+    for (UniqueConstraintVO uniqueConstraintVO : uniquesVo) {
+      String newUniqueId = new ObjectId().toString();
+      dictionaryOriginTargetObjectId.put(uniqueConstraintVO.getUniqueId(), newUniqueId);
+      uniqueConstraintVO.setUniqueId(newUniqueId);
+      uniqueConstraintVO.setDatasetSchemaId(
+          dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getDatasetSchemaId()));
+      uniqueConstraintVO.setTableSchemaId(
+          dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getTableSchemaId()));
+      for (int i = 0; i < uniqueConstraintVO.getFieldSchemaIds().size(); i++) {
+        uniqueConstraintVO.getFieldSchemaIds().set(i,
+            dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
+      }
+      LOG.info("A unique constraint is going to be created during the import process. UniqueId {}",
+          uniqueConstraintVO.getUniqueId());
+      uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
+    }
+    return dictionaryOriginTargetObjectId;
+  }
+
+
+  /**
+   * Name to imported schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param schemaNames the schema names
+   * @param designs the designs
+   *
+   * @return the string
+   */
+  private String nameToImportedSchema(String datasetSchemaId, Map<String, String> schemaNames,
+      List<DesignDataset> designs) {
+    // The name of the dataset copied will be IMPORTED_whatever. If it exists, it will be
+    // IMPORTED_whatever (1) and so
+    String name = schemaNames.get(datasetSchemaId);
+    String result = "IMPORTED_" + name;
+    int index = 1;
+    for (int i = 0; i < designs.size(); i++) {
+      if (designs.get(i).getDataSetName().equals(result)) {
+        if (result.contains("(" + (index - 1) + ")")) {
+          result = result.replace("(" + (index - 1) + ")", "(" + index + ")");
+        } else {
+          result = result + " (" + index + ")";
+        }
+        i = 0;
+        index++;
+      }
+    }
+    return result;
+  }
+
 }

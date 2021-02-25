@@ -25,7 +25,7 @@ public class FileParserFactory implements IFileParserFactory {
   /**
    * The delimiter.
    */
-  @Value("${dataset.loadDataDelimiter}")
+  @Value("${loadDataDelimiter}")
   private char delimiter;
 
   /**
@@ -67,9 +67,8 @@ public class FileParserFactory implements IFileParserFactory {
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-        context = new FileParseContextImpl(
-            new CSVReaderStrategy(delimiter, fileCommon, datasetId, fieldMaxLength,
-                provider.getCode()));
+        context = new FileParseContextImpl(new CSVReaderStrategy(delimiter, fileCommon, datasetId,
+            fieldMaxLength, provider.getCode()));
         break;
       case "xml":
         // Fill it with the xml strategy

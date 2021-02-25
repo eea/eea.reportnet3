@@ -98,7 +98,7 @@ export const ManageManualAcceptanceDataset = ({
         />
       </span>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => manageDialogs(false)}
@@ -121,7 +121,6 @@ export const ManageManualAcceptanceDataset = ({
         visible={isManageManualAcceptanceDatasetDialogVisible}>
         {children}
       </Dialog>
-      }
     </Fragment>
   );
 

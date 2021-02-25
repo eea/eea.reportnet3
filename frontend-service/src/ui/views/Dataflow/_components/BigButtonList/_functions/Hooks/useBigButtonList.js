@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -18,14 +19,17 @@ const useBigButtonList = ({
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
+  getDataHistoricReleasesByRepresentatives,
   getDatasetData,
   getDeleteSchemaIndex,
   handleExportEuDataset,
   handleRedirect,
   isActiveButton,
   isCloningDataflow,
+  isImportingDataflow,
   isLeadReporterOfCountry,
   onCloneDataflow,
+  onImportSchema,
   onLoadEuDatasetIntegration,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -81,16 +85,17 @@ const useBigButtonList = ({
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
+      designDatasetsOpen: isLeadDesigner && isDraftStatus,
       feedback:
         (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: isLeadDesigner && isDraftStatus,
       manageReporters: isLeadDesigner,
+      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry,
-      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance
+      release: isLeadReporterOfCountry
     };
   };
 
@@ -145,21 +150,30 @@ const useBigButtonList = ({
     },
     {
       label: resources.messages['cloneSchemasFromDataflow'],
-      icon: 'add',
+      icon: 'clone',
       command: () => onCloneDataflow()
+    },
+    {
+      label: resources.messages['importSchema'],
+      icon: 'import',
+      command: () => onImportSchema()
     }
   ];
 
   const newSchemaBigButton = [
     {
       buttonClass: 'newItem',
-      buttonIcon: isCloningDataflow ? 'spinner' : 'plus',
-      buttonIconClass: isCloningDataflow ? 'spinner' : 'newItemCross',
+      buttonIcon: isCloningDataflow || isImportingDataflow ? 'spinner' : 'plus',
+      buttonIconClass: isCloningDataflow || isImportingDataflow ? 'spinner' : 'newItemCross',
       caption: resources.messages['newSchema'],
-      handleRedirect: !isCloningDataflow ? () => onShowNewSchemaDialog() : () => {},
+      handleRedirect: !isCloningDataflow && !isImportingDataflow ? () => onShowNewSchemaDialog() : () => {},
       helpClassName: 'dataflow-new-schema-help-step',
-      layout: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? 'menuBigButton' : 'defaultBigButton',
-      model: buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow ? newSchemaModel : [],
+      layout:
+        buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow
+          ? 'menuBigButton'
+          : 'defaultBigButton',
+      model:
+        buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow ? newSchemaModel : [],
       visibility: buttonsVisibility.newSchema
     }
   ];
@@ -173,14 +187,15 @@ const useBigButtonList = ({
         caption: newDatasetSchema.datasetSchemaName,
         dataflowStatus: dataflowState.status,
         datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-        enabled: buttonsVisibility.designDatasetsActions,
-        handleRedirect: buttonsVisibility.designDatasetsActions
-          ? () => {
-              handleRedirect(
-                getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
-              );
-            }
-          : () => {},
+        enabled: buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen,
+        handleRedirect:
+          buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen
+            ? () => {
+                handleRedirect(
+                  getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+                );
+              }
+            : () => {},
 
         helpClassName: 'dataflow-schema-help-step',
         index: newDatasetSchema.index,
@@ -223,34 +238,31 @@ const useBigButtonList = ({
         onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
         placeholder: resources.messages['datasetSchemaNamePlaceholder'],
         setErrorDialogData: setErrorDialogData,
-        tooltip: !buttonsVisibility.designDatasetsActions ? resources.messages['accessDenied'] : '',
-        visibility: buttonsVisibility.designDatasets
+        tooltip:
+          !buttonsVisibility.designDatasetsActions && !buttonsVisibility.designDatasetsOpen
+            ? resources.messages['accessDenied']
+            : '',
+        visibility: buttonsVisibility.designDatasets || buttonsVisibility.designDatasetsOpen
       }));
 
-  const buildGroupByRepresentativeModels = dataflowData => {
-    const { datasets } = dataflowData;
+  const buildGroupByRepresentativeModels = (datasets = []) => {
+    const allDatasets = datasets.map(dataset => {
+      return {
+        datasetId: dataset.datasetId,
+        datasetName: dataset.name,
+        dataProviderId: dataset.dataProviderId,
+        name: dataset.datasetSchemaName
+      };
+    });
 
-    const allDatasets = isNil(datasets)
-      ? []
-      : datasets.map(dataset => {
-          return {
-            name: dataset.datasetSchemaName,
-            id: dataset.dataProviderId,
-            datasetId: dataset.datasetId,
-            datasetName: dataset.name
-          };
-        });
+    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.dataProviderId)).length === 1;
 
-    const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.id)).length === 1;
-
-    if (isUniqRepresentative && !buttonsVisibility.groupByRepresentative) {
-      return datasets.map(dataset => {
-        const datasetName = dataset.name;
-        const datasetId = dataset.datasetId;
+    if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
+      return allDatasets.map(dataset => {
         return {
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
-          caption: datasetName,
+          caption: dataset.datasetName,
           helpClassName: 'dataflow-dataset-help-step',
           handleRedirect: () => {
             handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
@@ -258,13 +270,12 @@ const useBigButtonList = ({
           infoStatus: dataset.isReleased,
           infoStatusIcon: true,
           layout: 'defaultBigButton',
-          // model: [{ label: resources.messages['properties'], icon: 'info', disabled: true }],
           model: [
             {
               label: resources.messages['historicReleases'],
               command: () => {
                 onShowHistoricReleases('reportingDataset');
-                getDataHistoricReleases(datasetId, datasetName);
+                getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
               }
             }
           ],
@@ -274,18 +285,14 @@ const useBigButtonList = ({
       });
     }
 
-    const datasetsIdsArray = [];
-
-    return allDatasets.map(representative => {
-      datasetsIdsArray.push(representative.datasetId);
-
+    return uniqBy(allDatasets, 'dataProviderId').map(dataset => {
       return {
         buttonClass: 'dataset',
         buttonIcon: 'representative',
-        caption: representative.name,
+        caption: dataset.name,
         handleRedirect: () => {
           handleRedirect(
-            getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true)
+            getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true)
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
@@ -295,17 +302,17 @@ const useBigButtonList = ({
             label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset');
-              getDataHistoricReleases(datasetsIdsArray, representative.name, representative.id);
+              getDataHistoricReleasesByRepresentatives(dataset.name, dataset.dataProviderId);
             }
           }
         ],
-        onWheel: getUrl(routes.REPRESENTATIVE, { dataflowId, representativeId: representative.id }, true),
+        onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
         visibility: true
       };
     });
   };
 
-  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState.data);
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets);
 
   const checkDisabledDataCollectionButton = () =>
     isEmpty(dataflowState.data.dataCollections) &&
@@ -440,9 +447,11 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resources.messages['releaseDataCollection'],
-        handleRedirect: !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
+        enabled: dataflowState.isReleasable,
+        handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];
@@ -513,6 +522,7 @@ const useBigButtonList = ({
   return [
     ...manageReportersBigButton,
     ...helpBigButton,
+    ...designDatasetModels,
     ...feedbackBigButton,
     ...dashboardBigButton,
     ...dataCollectionModels,
@@ -520,7 +530,6 @@ const useBigButtonList = ({
     ...copyDataCollectionToEuDatasetBigButton,
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
-    ...designDatasetModels,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,

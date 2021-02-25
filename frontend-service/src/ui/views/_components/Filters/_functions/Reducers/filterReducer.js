@@ -43,14 +43,22 @@ export const filterReducer = (state, { type, payload }) => {
       };
 
     case 'INITIAL_STATE':
+      const getFilterBy = () => {
+        if (state?.previousState?.filtered) {
+          return { ...state.previousState.filterBy, ...state.filterBy };
+        }
+        return payload.initialFilterBy;
+      };
+
       return {
         ...state,
+        checkboxes: payload.initialCheckboxes,
         data: payload.initialData,
-        filterBy: payload.initialFilterBy,
+        filterBy: getFilterBy(),
         filteredData: payload.initialFilteredData,
         labelAnimations: payload.initialLabelAnimations,
         orderBy: payload.initialOrderBy,
-        checkboxes: payload.initialCheckboxes
+        previousState: { filtered: state.filtered, filterBy: state.filterBy }
       };
 
     case 'ON_SEARCH_DATA':
@@ -59,6 +67,13 @@ export const filterReducer = (state, { type, payload }) => {
         filteredData: payload.searchedValues,
         searchBy: payload.value,
         searched: payload.searched
+      };
+
+    case 'UPDATE_FILTER_BY':
+      return {
+        ...state,
+        filterBy: payload.filterBy,
+        previousState: { filtered: state.filtered, filterBy: payload.filterBy }
       };
 
     case 'ON_CHECKBOX_FILTER':

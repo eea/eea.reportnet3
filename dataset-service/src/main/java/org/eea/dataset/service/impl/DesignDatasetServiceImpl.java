@@ -39,15 +39,17 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 
 /**
  * The Class DesignDatasetServiceImpl.
@@ -55,125 +57,85 @@ import org.springframework.stereotype.Service;
 @Service("designDatasetService")
 public class DesignDatasetServiceImpl implements DesignDatasetService {
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The design dataset repository.
-   */
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DesignDatasetServiceImpl.class);
+
+  /** The time to wait before continue copy. */
+  @Value("${wait.continue.copy.ms}")
+  private Long timeToWaitBeforeContinueCopy;
+
+  /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 
-
-  /**
-   * The design dataset mapper.
-   */
+  /** The design dataset mapper. */
   @Autowired
   private DesignDatasetMapper designDatasetMapper;
 
-
-  /**
-   * The dataschema service.
-   */
+  /** The dataschema service. */
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /**
-   * The dataset metabase service.
-   */
+  /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The schemas repository.
-   */
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
-  /**
-   * The table schema mapper.
-   */
+  /** The table schema mapper. */
   @Autowired
   private TableSchemaMapper tableSchemaMapper;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The field schema no rules mapper.
-   */
+  /** The field schema no rules mapper. */
   @Autowired
   FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
-  /**
-   * The dataschema controller.
-   */
+  /** The dataschema controller. */
   @Autowired
   private DatasetSchemaController dataschemaController;
 
-  /**
-   * The rules controller zuul.
-   */
+  /** The rules controller zuul. */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
 
-
-  /**
-   * The integration controller zuul.
-   */
+  /** The integration controller zuul. */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
-  /**
-   * The contributor controller zuul.
-   */
+  /** The contributor controller zuul. */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
 
-  /**
-   * The webform mapper.
-   */
+  /** The webform mapper. */
   @Autowired
   private WebFormMapper webformMapper;
 
-  /**
-   * The record store controller zuul.
-   */
+  /** The record store controller zuul. */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
-
-  /**
-   * The time to wait before continue copy.
-   */
-  @Value("${wait.continue.copy.ms}")
-  private Long timeToWaitBeforeContinueCopy;
-
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
-   * The Constant LOG.
-   */
-  private static final Logger LOG = LoggerFactory.getLogger(DesignDatasetServiceImpl.class);
-
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
   /**
    * Gets the design data set id by dataflow id.
    *
    * @param idFlow the id flow
-   *
    * @return the design data set id by dataflow id
    */
   @Override
@@ -191,9 +153,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    *
    * @throws EEAException the EEA exception
    *
-   *     We've got the list of design datasets from the dataflow to copy and the dataflow
-   *     destination. The idea is create a new design dataset copied from the original and change
-   *     the schema's objectId (dataset, table, record and field level)
+   *         We've got the list of design datasets from the dataflow to copy and the dataflow
+   *         destination. The idea is create a new design dataset copied from the original and
+   *         change the schema's objectId (dataset, table, record and field level)
    */
   @Async
   @Override
@@ -229,10 +191,18 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     if (designs == null || designs.isEmpty()) {
       // Error. There aren't designs to copy in the dataflow
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_NOT_FOUND_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          null,
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(idDataflowDestination).error("No design datasets found to copy").build());
-      datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
-          idDataflowDestination);
+
+      Map<String, Object> copyDatasetSchema = new HashMap<>();
+      copyDatasetSchema.put(LiteralConstants.SIGNATURE,
+          LockSignature.COPY_DATASET_SCHEMA.getValue());
+      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDORIGIN, idDataflowOrigin);
+      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
+      lockService.removeLockByCriteria(copyDatasetSchema);
+
       throw new EEAException(String.format(EEAErrorMessage.NO_DESIGNS_TO_COPY, idDataflowOrigin));
     }
     try {
@@ -265,8 +235,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
         // Create the schema into the metabase
         Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
-            nameToClone(schemaVO.getNameDatasetSchema(), idDataflowDestination),
-            newIdDatasetSchema, idDataflowDestination, null, null, 0);
+            nameToClone(schemaVO.getNameDatasetSchema(), idDataflowDestination), newIdDatasetSchema,
+            idDataflowDestination, null, null, 0);
         // Fill the new schema dataset with the data of the original schema dataset
         LOG.info("Design dataset created in the copy process with id {}", datasetId.get());
         dictionaryOriginTargetDatasetsId.put(design.getId(), datasetId.get());
@@ -321,30 +291,33 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
       // Release the notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
-          null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(idDataflowDestination).build());
 
       // Release the lock
-      datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
-          idDataflowDestination);
+      Map<String, Object> copyDatasetSchema = new HashMap<>();
+      copyDatasetSchema.put(LiteralConstants.SIGNATURE,
+          LockSignature.COPY_DATASET_SCHEMA.getValue());
+      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDORIGIN, idDataflowOrigin);
+      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
+      lockService.removeLockByCriteria(copyDatasetSchema);
 
     } catch (Exception e) {
       LOG_ERROR.error("Error during the copy. Message: {}", e.getMessage(), e);
       // Release the error notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_EVENT,
-          null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
               .dataflowId(idDataflowDestination).error("Error copying the schemas").build());
-      datasetService.releaseLock(LockSignature.COPY_DATASET_SCHEMA.getValue(), idDataflowOrigin,
-          idDataflowDestination);
-      throw new EEAException(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS,
-          idDataflowOrigin, idDataflowDestination), e);
+      Map<String, Object> copyDatasetSchema = new HashMap<>();
+      copyDatasetSchema.put(LiteralConstants.SIGNATURE,
+          LockSignature.COPY_DATASET_SCHEMA.getValue());
+      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDORIGIN, idDataflowOrigin);
+      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
+      lockService.removeLockByCriteria(copyDatasetSchema);
+      throw new EEAException(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS, idDataflowOrigin,
+          idDataflowDestination), e);
     }
-
-
   }
-
 
   /**
    * Fill and update design dataset copied.
@@ -370,6 +343,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(webformMapper.classToEntity(schemaOrigin.getWebform()));
+    schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
     // table level
     for (TableSchemaVO tableVO : schemaOrigin.getTableSchemas()) {
       ObjectId newTableId = new ObjectId();

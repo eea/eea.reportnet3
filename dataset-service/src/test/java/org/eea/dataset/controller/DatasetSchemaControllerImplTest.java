@@ -7,10 +7,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -50,9 +54,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -61,61 +67,92 @@ import org.springframework.web.server.ResponseStatusException;
 @RunWith(MockitoJUnitRunner.class)
 public class DatasetSchemaControllerImplTest {
 
-  /** The data schema controller impl. */
+  /**
+   * The data schema controller impl.
+   */
   @InjectMocks
   private DatasetSchemaControllerImpl dataSchemaControllerImpl;
 
-  /** The expected ex. */
+  /**
+   * The expected ex.
+   */
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
-  /** The dataschema service. */
+  /**
+   * The dataschema service.
+   */
   @Mock
   private DataschemaServiceImpl dataschemaService;
 
-  /** The dataset service. */
+  /**
+   * The dataset service.
+   */
   @Mock
   private DatasetService datasetService;
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /** The record store controller zuul. */
+  /**
+   * The record store controller zuul.
+   */
   @Mock
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
-  /** The dataset snapshot service. */
+  /**
+   * The dataset snapshot service.
+   */
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The contributor controller zuul. */
+  /**
+   * The contributor controller zuul.
+   */
   @Mock
   private ContributorControllerZuul contributorControllerZuul;
 
-  /** The integration controller zuul. */
+  /**
+   * The integration controller zuul.
+   */
   @Mock
   private IntegrationControllerZuul integrationControllerZuul;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Mock
   private RulesControllerZuul rulesControllerZuul;
 
-  /** The design dataset service. */
+  /**
+   * The design dataset service.
+   */
   @Mock
   private DesignDatasetService designDatasetService;
 
-  /** The dataflow controller zuul. */
+  /**
+   * The dataflow controller zuul.
+   */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The dataset schema VO. */
+
+  /**
+   * The dataset schema VO.
+   */
   private DataSetSchemaVO datasetSchemaVO;
 
-  /** The security context. */
+  /**
+   * The security context.
+   */
   private SecurityContext securityContext;
 
-  /** The authentication. */
+  /**
+   * The authentication.
+   */
   private Authentication authentication;
 
   /**
@@ -283,6 +320,19 @@ public class DatasetSchemaControllerImplTest {
     assertEquals("error, not equals", schema, schema2);
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataSetSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    try {
+      dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Creates the empty data set schema test.
    *
@@ -290,6 +340,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void createEmptyDataSetSchemaTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.any()))
         .thenReturn(new ObjectId());
     Mockito
@@ -305,6 +358,9 @@ public class DatasetSchemaControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetSchemaRepeatTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetMetabaseService.countDatasetNameByDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
     try {
@@ -324,6 +380,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetSchemaException() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any());
@@ -458,6 +517,20 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void updateTableSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Update table schema test.
    *
@@ -468,6 +541,10 @@ public class DatasetSchemaControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     dataSchemaControllerImpl.updateTableSchema(1L, new TableSchemaVO());
     Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
@@ -481,7 +558,10 @@ public class DatasetSchemaControllerImplTest {
   public void updateTableSchemaTestException() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     doThrow(EEAException.class).when(dataschemaService).updateTableSchema(Mockito.any(),
         Mockito.any());
     try {
@@ -499,6 +579,10 @@ public class DatasetSchemaControllerImplTest {
   public void updateTableSchemaTestException2() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     EEAException exception =
         new EEAException(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, "", 1L));
     doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
@@ -518,6 +602,10 @@ public class DatasetSchemaControllerImplTest {
   public void updateTableSchemaTestException3() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     EEAException exception =
         new EEAException(String.format(EEAErrorMessage.TABLE_NOT_FOUND, "", 1L));
     doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
@@ -532,6 +620,20 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void deleteTableSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.deleteTableSchema(1L, "");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Delete table schema test 1.
    *
@@ -539,6 +641,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void deleteTableSchemaTest1() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any(),
         Mockito.any());
     Mockito.doNothing().when(datasetService).deleteTableValue(Mockito.any(), Mockito.any());
@@ -554,6 +660,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void deleteTableSchemaTest2() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.doThrow(EEAException.class).when(dataschemaService).deleteTableSchema(Mockito.any(),
         Mockito.any(), Mockito.any());
     try {
@@ -564,6 +674,20 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void orderTableSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.orderTableSchema(1L, new OrderVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Order table schema test 1.
    *
@@ -571,6 +695,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void orderTableSchemaTest1() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.orderTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -585,12 +713,30 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void orderTableSchemaTest2() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.orderTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(false);
     expectedEx.expect(ResponseStatusException.class);
     expectedEx.expectMessage(EEAErrorMessage.SCHEMA_NOT_FOUND);
     dataSchemaControllerImpl.orderTableSchema(1L, new OrderVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createFieldSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -600,6 +746,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void createFieldSchemaTest1() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
@@ -620,6 +770,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void createFieldSchemaTest2() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.createFieldSchema(Mockito.any(), Mockito.any())).thenReturn("");
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
@@ -639,6 +793,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void createFieldSchemaTest3() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
@@ -658,11 +816,29 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test()
   public void createFieldSchemaTest4() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     try {
       dataSchemaControllerImpl.createFieldSchema(1L, new FieldSchemaVO());
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.FIELD_NAME_NULL, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateFieldSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.updateFieldSchema(1L, new FieldSchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
     }
   }
 
@@ -673,6 +849,11 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest1() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
@@ -696,6 +877,11 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest2() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
@@ -721,6 +907,11 @@ public class DatasetSchemaControllerImplTest {
   @Test
   public void updateFieldSchemaTest3() throws EEAException {
 
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
@@ -744,6 +935,11 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest4() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
@@ -769,6 +965,11 @@ public class DatasetSchemaControllerImplTest {
   @Test
   public void updateFieldSchemaTest5() throws EEAException {
 
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
@@ -792,6 +993,12 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateFieldSchemaTest6() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("datacustodian");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
@@ -802,6 +1009,20 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void deleteFieldSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.deleteFieldSchema(1L, "");
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Delete field schema test 1.
    *
@@ -809,6 +1030,12 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void deleteFieldSchemaTest1() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
@@ -827,6 +1054,12 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest2() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(false);
@@ -846,6 +1079,12 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteFieldSchemaTest3() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.deleteFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
@@ -858,6 +1097,20 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void orderFieldSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.orderFieldSchema(1L, new OrderVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Order field schema test 1.
    *
@@ -865,6 +1118,12 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void orderFieldSchemaTest1() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.orderFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -879,12 +1138,32 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void orderFieldSchemaTest2() throws EEAException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     Mockito.when(dataschemaService.orderFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(false);
     expectedEx.expect(ResponseStatusException.class);
     expectedEx.expectMessage(EEAErrorMessage.SCHEMA_NOT_FOUND);
     dataSchemaControllerImpl.orderFieldSchema(1L, new OrderVO());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createTableSchemaForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    try {
+      dataSchemaControllerImpl.createTableSchema(1L, new TableSchemaVO());
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -896,6 +1175,11 @@ public class DatasetSchemaControllerImplTest {
   public void createTableSchemaTest1() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     TableSchemaVO tableSchemaVO = new TableSchemaVO();
     tableSchemaVO.setIdTableSchema("id");
@@ -915,6 +1199,11 @@ public class DatasetSchemaControllerImplTest {
   public void createTableSchemaTest2() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     when(dataschemaService.createTableSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new TableSchemaVO());
@@ -936,6 +1225,10 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateDatasetSchemaDescriptionTest1() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
     Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),
@@ -947,6 +1240,10 @@ public class DatasetSchemaControllerImplTest {
     WebformVO webform = new WebformVO();
     webform.setName("name");
     datasetSchemaVO.setWebform(webform);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("");
     dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
     Mockito.verify(dataschemaService, times(1)).updateDatasetSchemaDescription(Mockito.any(),
@@ -960,6 +1257,8 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateDatasetSchemaDescriptionTest3() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenThrow(EEAException.class);
     try {
       dataSchemaControllerImpl.updateDatasetSchema(1L, datasetSchemaVO);
@@ -1018,14 +1317,33 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void testCreateUniqueConstraintTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     List<String> fields = new ArrayList<>();
     fields.add(new ObjectId().toString());
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
     uniqueConstraint.setFieldSchemaIds(fields);
+    uniqueConstraint.setDataflowId("1");
     dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
     Mockito.verify(dataschemaService, times(1)).createUniqueConstraint(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createUniqueConstraintForbiddenTest() {
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDataflowId("1");
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    try {
+      dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -1033,7 +1351,11 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createUniqueConstraintSchemaIdErrorTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDataflowId("1");
     try {
       dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
     } catch (ResponseStatusException e) {
@@ -1048,9 +1370,13 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createUniqueConstraintNofieldsErrorTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    uniqueConstraint.setDataflowId("1");
     try {
       dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
     } catch (ResponseStatusException e) {
@@ -1065,8 +1391,12 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createUniqueConstraintTableSchemaIdErrorTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    uniqueConstraint.setDataflowId("1");
     try {
       dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
     } catch (ResponseStatusException e) {
@@ -1090,6 +1420,19 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void delteUniqueConstraintForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    try {
+      dataSchemaControllerImpl.deleteUniqueConstraint("", 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Delete unique constraint test.
    *
@@ -1097,22 +1440,11 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void deleteUniqueConstraintTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
     Mockito.verify(dataschemaService, times(1)).deleteUniqueConstraint(Mockito.any());
-  }
-
-  /**
-   * Delete unique constraint id error test.
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void deleteUniqueConstraintIdErrorTest() {
-    try {
-      dataSchemaControllerImpl.deleteUniqueConstraint(null, null);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      assertEquals(EEAErrorMessage.IDUNQUECONSTRAINT_INCORRECT, e.getReason());
-      throw e;
-    }
   }
 
   /**
@@ -1122,6 +1454,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteUniqueConstraintErrorTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     doThrow(EEAException.class).when(dataschemaService).deleteUniqueConstraint(Mockito.any());
     try {
       dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
@@ -1136,6 +1471,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateUniqueConstraintTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     List<String> fields = new ArrayList<>();
     fields.add(new ObjectId().toString());
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
@@ -1143,6 +1481,7 @@ public class DatasetSchemaControllerImplTest {
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
     uniqueConstraint.setUniqueId(new ObjectId().toString());
     uniqueConstraint.setFieldSchemaIds(fields);
+    uniqueConstraint.setDataflowId("1");
     dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
     Mockito.verify(dataschemaService, times(1)).updateUniqueConstraint(Mockito.any());
   }
@@ -1152,8 +1491,12 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintSchemaIdErrorTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setUniqueId(new ObjectId().toString());
+    uniqueConstraint.setDataflowId("1");
     try {
       dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
     } catch (ResponseStatusException e) {
@@ -1163,14 +1506,33 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void updateUniqueConstraintForbiddenTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
+    uniqueConstraint.setDataflowId("1");
+    try {
+      dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Update unique constraint table schema id error test.
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintTableSchemaIdErrorTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setUniqueId(new ObjectId().toString());
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
+    uniqueConstraint.setDataflowId("1");
     try {
       dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
     } catch (ResponseStatusException e) {
@@ -1185,9 +1547,13 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintIdErrorTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
+    uniqueConstraint.setDataflowId("1");
     try {
       dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
     } catch (ResponseStatusException e) {
@@ -1202,10 +1568,14 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintFieldErrorTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
     uniqueConstraint.setUniqueId(new ObjectId().toString());
+    uniqueConstraint.setDataflowId("1");
     try {
       dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
     } catch (ResponseStatusException e) {
@@ -1262,6 +1632,7 @@ public class DatasetSchemaControllerImplTest {
    * Gets the unique constraint test.
    *
    * @return the unique constraint test
+   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -1275,6 +1646,7 @@ public class DatasetSchemaControllerImplTest {
    * Gets the unique constraint error test.
    *
    * @return the unique constraint error test
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
@@ -1350,6 +1722,7 @@ public class DatasetSchemaControllerImplTest {
    * Gets the simple schema error test.
    *
    * @return the simple schema error test
+   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
@@ -1362,4 +1735,100 @@ public class DatasetSchemaControllerImplTest {
       throw e;
     }
   }
+
+  @Test(expected = ResponseStatusException.class)
+  public void importSchemasForbiddenTest() {
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "file.zip", "application/x-zip-compressed", "".getBytes());
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    try {
+      dataSchemaControllerImpl.importSchemas(1L, multipartFile);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testImportSchemas() throws EEAException, IOException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+    dataSchemaControllerImpl.importSchemas(1L, multipartFile);
+    Mockito.verify(dataschemaService, times(1)).importSchemas(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testImportSchemasException() throws EEAException, IOException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+
+    try {
+      doThrow(EEAException.class).when(dataschemaService).importSchemas(Mockito.any(),
+          Mockito.any());
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ZipOutputStream zip = new ZipOutputStream(baos);
+      ZipEntry entry1 = new ZipEntry("Table.schema");
+      ZipEntry entry2 = new ZipEntry("Table.qcrules");
+      zip.putNextEntry(entry1);
+      zip.putNextEntry(entry2);
+      zip.close();
+      MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+          "application/x-zip-compressed", baos.toByteArray());
+
+      dataSchemaControllerImpl.importSchemas(1L, multipartFile);
+
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void testExportSchemas() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    dataSchemaControllerImpl.exportSchemas(1L);
+    Mockito.verify(dataschemaService, times(1)).exportSchemas(Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testExportSchemasException() throws EEAException, IOException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).exportSchemas(Mockito.any());
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
+
+      dataSchemaControllerImpl.exportSchemas(1L);
+
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
 }

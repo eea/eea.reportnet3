@@ -107,7 +107,7 @@ export const TableManagement = ({
         }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['cancel']}
         onClick={onCancelRowEdit}
@@ -197,21 +197,26 @@ export const TableManagement = ({
     const deleteCascade = true;
 
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId, deleteCascade);
-      if (isDataDeleted) {
+      const response = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId, deleteCascade);
+      if (response.status >= 200 && response.status <= 299) {
         onRefresh();
       }
     } catch (error) {
       console.error('error', error);
-
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'DELETE_RECORD_BY_ID_ERROR',
-        content: { dataflowId, dataflowName, datasetId, datasetName, tableName: 'tableName' }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'DELETE_RECORD_BY_ID_ERROR',
+          content: { dataflowId, dataflowName, datasetId, datasetName, tableName: 'tableName' }
+        });
+      }
     } finally {
       manageDialogs('delete', false);
     }

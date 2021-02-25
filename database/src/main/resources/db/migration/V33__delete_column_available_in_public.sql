@@ -1,0 +1,1 @@
+ALTER TABLE public.dataset DROP COLUMN available_in_public;

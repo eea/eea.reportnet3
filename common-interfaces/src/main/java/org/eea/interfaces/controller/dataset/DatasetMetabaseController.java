@@ -7,6 +7,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -235,5 +236,31 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId);
+
+
+  /**
+   * Find reporting data set public by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the list
+   */
+  @GetMapping(value = "/private/getReportingPublic/dataflow/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(
+      @PathVariable("id") Long idDataflow);
+
+
+
+  /**
+   * Find reporting data set id by dataflow id and provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return the list
+   */
+  @GetMapping(value = "/private/dataflow/{id}/dataProvider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndProviderId(
+      @PathVariable("id") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId);
 
 }

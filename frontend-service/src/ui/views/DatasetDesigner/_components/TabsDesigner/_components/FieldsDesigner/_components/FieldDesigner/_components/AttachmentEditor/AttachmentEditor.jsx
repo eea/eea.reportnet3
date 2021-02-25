@@ -63,7 +63,7 @@ const AttachmentEditor = ({
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button label={resources.messages['save']} icon="check" onClick={() => setIsSaved(true)} />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => {

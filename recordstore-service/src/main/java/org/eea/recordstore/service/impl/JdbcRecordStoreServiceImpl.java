@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -72,65 +71,42 @@ import org.springframework.util.CollectionUtils;
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
-  /**
-   * The Constant DELETE_FROM_DATASET: {@value}.
-   */
-  private static final String DELETE_FROM_DATASET = "DELETE FROM dataset_";
-
-  /**
-   * The Constant COPY_DATASET: {@value}.
-   */
-  private static final String COPY_DATASET = "COPY dataset_";
-
-  /**
-   * The Constant SNAPSHOT_: {@value}.
-   */
-  private static final String SNAPSHOT_QUERY = "snapshot_";
-
-  /**
-   * The Constant COLLECTION: {@value}.
-   */
-  private static final String COLLECTION = "collection";
-
-  /**
-   * The Constant SCHEMA: {@value}.
-   */
-  private static final String SCHEMA = "schema";
-
-  /**
-   * The Constant SNAPSHOT: {@value}.
-   */
-  private static final String SNAPSHOT = "snapshot";
-
-  /**
-   * The Constant FILE_PATTERN_NAME.
-   */
-  private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
-
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(JdbcRecordStoreServiceImpl.class);
 
-  /**
-   * The constant GRANT_ALL_PRIVILEGES_ON_SCHEMA.
-   */
+  /** The Constant DELETE_FROM_DATASET: {@value}. */
+  private static final String DELETE_FROM_DATASET = "DELETE FROM dataset_";
+
+  /** The Constant COPY_DATASET: {@value}. */
+  private static final String COPY_DATASET = "COPY dataset_";
+
+  /** The Constant SNAPSHOT_QUERY: {@value}. */
+  private static final String SNAPSHOT_QUERY = "snapshot_";
+
+  /** The Constant COLLECTION: {@value}. */
+  private static final String COLLECTION = "collection";
+
+  /** The Constant SCHEMA: {@value}. */
+  private static final String SCHEMA = "schema";
+
+  /** The Constant SNAPSHOT: {@value}. */
+  private static final String SNAPSHOT = "snapshot";
+
+  /** The Constant FILE_PATTERN_NAME: {@value}. */
+  private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
+
+  /** The Constant GRANT_ALL_PRIVILEGES_ON_SCHEMA: {@value}. */
   private static final String GRANT_ALL_PRIVILEGES_ON_SCHEMA =
       "grant all privileges on schema %s to %s;";
-  /**
-   * The constant GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA.
-   */
+
+  /** The Constant GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA: {@value}. */
   private static final String GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA =
       "grant all privileges on all tables in schema %s to %s;";
 
-  /**
-   * The constant GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA.
-   */
+  /** The Constant GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA: {@value}. */
   private static final String GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA =
       "grant all privileges on all sequences in schema %s to %s;";
 
@@ -141,107 +117,70 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The Constant AS: {@value}. */
   private static final String AS = "') AS ";
 
-  /** The Constant AS: {@value}. */
+  /** The Constant COMMA: {@value}. */
   private static final String COMMA = ", ";
 
-  /**
-   * The user postgre db.
-   */
+  /** The user postgre db. */
   @Value("${spring.datasource.dataset.username}")
   private String userPostgreDb;
 
-  /**
-   * The pass postgre db.
-   */
+  /** The pass postgre db. */
   @Value("${spring.datasource.dataset.password}")
   private String passPostgreDb;
 
-  /**
-   * The conn string postgre.
-   */
+  /** The conn string postgre. */
   @Value("${spring.datasource.url}")
   private String connStringPostgre;
 
-  /**
-   * The sql get datasets name.
-   */
+  /** The sql get datasets name. */
   @Value("${sqlGetAllDatasetsName}")
   private String sqlGetDatasetsName;
 
-  /**
-   * the dataset users.
-   */
-
+  /** The dataset users. */
   @Value("${dataset.users}")
   private String datasetUsers;
 
-
-  /**
-   * The resource file.
-   */
+  /** The resource file. */
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
-  /**
-   * The path snapshot.
-   */
+  /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /**
-   * The time to wait before releasing notification.
-   */
+  /** The time to wait before releasing notification. */
   @Value("${dataset.creation.notification.ms}")
   private Long timeToWaitBeforeReleasingNotification;
 
-
-  /**
-   * The buffer file.
-   */
+  /** The buffer file. */
   @Value("${snapshot.bufferSize}")
   private Integer bufferFile;
 
-  /**
-   * The jdbc template.
-   */
+  /** The jdbc template. */
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  /**
-   * The data source.
-   */
+  /** The data source. */
   @Autowired
   private DataSource dataSource;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
 
-
-
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The data collection controller zuul.
-   */
+  /** The data collection controller zuul. */
   @Autowired
   private DataCollectionControllerZuul dataCollectionControllerZuul;
 
-  /**
-   * The data set snapshot controller zuul.
-   */
+  /** The data set snapshot controller zuul. */
   @Autowired
   private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
-  /**
-   * The dataset controller zuul.
-   */
+  /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
@@ -314,7 +253,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Release the lock
       String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
           : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-      removeLockByCriteria(methodSignature, dataflowId);
+      Map<String, Object> lockCriteria = new HashMap<>();
+      lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
+      lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(lockCriteria);
 
       // command to assign national coordinators and end the dataCollectionProcess.
       Map<String, Object> result = new HashMap<>();
@@ -542,26 +484,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Release the lock manually
       if (SNAPSHOT.equals(type)) {
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        removeLockByCriteria(LockSignature.CREATE_SNAPSHOT.getValue(), idDataset,
-            snapshot.getRelease());
+        Map<String, Object> createSnapshot = new HashMap<>();
+        createSnapshot.put(LiteralConstants.SIGNATURE, LockSignature.CREATE_SNAPSHOT.getValue());
+        createSnapshot.put(LiteralConstants.DATASETID, idDataset);
+        createSnapshot.put(LiteralConstants.RELEASED, snapshot.getRelease());
+        lockService.removeLockByCriteria(createSnapshot);
       }
       if (SCHEMA.equals(type)) {
-        removeLockByCriteria(LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue(), idDataset);
+        Map<String, Object> createSchemaSnapshot = new HashMap<>();
+        createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+            LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+        createSchemaSnapshot.put(LiteralConstants.DATASETID, idDataset);
+        lockService.removeLockByCriteria(createSchemaSnapshot);
       }
     }
-  }
-
-  /**
-   * Removes the lock by criteria.
-   *
-   * @param arguments the arguments
-   */
-  private void removeLockByCriteria(Object... arguments) {
-    List<Object> criteria = new ArrayList<>();
-    for (Object object : Arrays.asList(arguments)) {
-      criteria.add(object);
-    }
-    lockService.removeLockByCriteria(criteria);
   }
 
   /**
@@ -572,10 +508,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void removeLocksRelatedToPopulateEU(Long dataflowId) {
     List<ReportingDatasetVO> reportings =
         dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
-    removeLockByCriteria(LockSignature.POPULATE_EU_DATASET.getValue(), dataflowId);
+    Map<String, Object> populateEuDataset = new HashMap<>();
+    populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
+    populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.removeLockByCriteria(populateEuDataset);
 
     for (ReportingDatasetVO reporting : reportings) {
-      removeLockByCriteria(LockSignature.RELEASE_SNAPSHOT.getValue(), reporting.getId());
+      Map<String, Object> relaseSnapshots = new HashMap<>();
+      relaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      relaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
+      relaseSnapshots.put(LiteralConstants.DATAPROVIDERID, reporting.getDataProviderId());
+      lockService.removeLockByCriteria(relaseSnapshots);
     }
   }
 
@@ -613,7 +556,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
-
+    LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), idDataset);
+    LOG.info("The user set on threadPropertiesManager is {}",
+        ThreadPropertiesManager.getVariable("user"));
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
@@ -758,7 +704,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     String signature = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot) ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
             : LockSignature.RESTORE_SNAPSHOT.getValue()
-        : LockSignature.RELEASE_SNAPSHOT.getValue();
+        : null;
+
+
+
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     ConnectionDataVO conexion =
@@ -794,7 +743,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
         dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
         Map<String, Object> valueEU = new HashMap<>();
-        valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
         valueEU.put(LiteralConstants.DATASET_ID, datasetId);
         valueEU.put("snapshot_id", idSnapshot);
         kafkaSenderUtils
@@ -822,9 +770,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     } finally {
       // Release the lock manually
-      removeLockByCriteria(signature, datasetIdFromSnapshot);
+      if (null != signature) {
+        Map<String, Object> lockCriteria = new HashMap<>();
+        lockCriteria.put(LiteralConstants.SIGNATURE, signature);
+        lockCriteria.put(LiteralConstants.DATASETID, datasetIdFromSnapshot);
+        lockService.removeLockByCriteria(lockCriteria);
+      }
     }
-
   }
 
   /**
@@ -1112,14 +1064,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
     LOG.info(" Update Materialized Views");
 
-    DatasetTypeEnum type = dataSetMetabaseControllerZuul.getType(datasetId);
-    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
-
+    DataSetMetabaseVO datasetMetabaseVO =
+        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    Long dataflowId = datasetMetabaseVO.getDataflowId();
     try {
-      switch (type) {
+      switch (datasetMetabaseVO.getDatasetTypeEnum()) {
         case REPORTING:
           List<ReportingDatasetVO> reportingDatasets =
-              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
+              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(
+                  dataflowId, datasetMetabaseVO.getDataProviderId());
+
           for (ReportingDatasetVO dataset : reportingDatasets) {
             launchUpdateMaterializedQueryView(dataset.getId());
           }
@@ -1150,6 +1104,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         SecurityContextHolder.getContext().getAuthentication().getName());
     values.put("released", released);
     values.put("updateViews", false);
+    LOG.info(
+        "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
+        ThreadPropertiesManager.getVariable("user"), datasetId);
+    LOG.info("The user set on securityContext is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
   }
 
@@ -1164,12 +1123,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
     List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-    String updateQuery = "refresh materialized view dataset_";
+    String updateQuery = "refresh materialized view concurrently dataset_";
 
     for (String view : viewList) {
       executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
     }
-    LOG.info("These views: {} have been deleted.", viewList);
+    LOG.info("These views: {} have been refreshed.", viewList);
   }
 
 

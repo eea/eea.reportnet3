@@ -40,6 +40,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -508,6 +509,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
 
+    // Create group Dataschema-X-DATA_STEWARD
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_STEWARD));
 
   }
 
@@ -641,7 +645,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
     dataset.setDataProviderId(representative.getDataProviderId());
     Long idDataset = reportingDatasetRepository.save(dataset).getId();
-    datasetIdsEmail.put(idDataset, representative.getProviderAccount());
+    for (String email : representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
+        .collect(Collectors.toList())) {
+      datasetIdsEmail.put(idDataset, email);
+    }
     recordStoreControllerZuul.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
         datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,

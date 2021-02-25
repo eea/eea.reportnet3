@@ -49,7 +49,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
         }}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => {

@@ -195,8 +195,8 @@ export const WebformView = ({
   const isGroup = () => {
     const filteredField = pamsRecords
       .find(pamRecord => pamRecord.recordId === selectedTable.recordId)
-      .elements.find(element => TextUtils.areEquals(element.name, 'IsGroup'));
-    return TextUtils.areEquals(filteredField.value, 'Group');
+      ?.elements.find(element => TextUtils.areEquals(element.name, 'IsGroup'));
+    return TextUtils.areEquals(filteredField?.value, 'Group');
   };
 
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });

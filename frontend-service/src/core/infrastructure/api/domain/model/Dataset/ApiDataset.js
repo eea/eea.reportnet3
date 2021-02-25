@@ -2,8 +2,6 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
-import isNil from 'lodash/isNil';
-
 export const apiDataset = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
     try {
@@ -46,18 +44,13 @@ export const apiDataset = {
     }
   },
   deleteDataById: async datasetId => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteImportData, {
-          datasetId: datasetId
-        })
-      });
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteImportData, {
+        datasetId: datasetId
+      })
+    });
 
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset data: ${error}`);
-      return false;
-    }
+    return response;
   },
   deleteFileData: async (datasetId, fieldId) => {
     try {
@@ -75,16 +68,10 @@ export const apiDataset = {
     }
   },
   deleteRecordById: async (datasetId, recordId, deleteInCascade = false) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
-      });
-
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset table record: ${error}`);
-      return false;
-    }
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
+    });
+    return response;
   },
   deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
     const response = await HTTPRequester.delete({
@@ -104,19 +91,14 @@ export const apiDataset = {
     return response.status;
   },
   deleteTableDataById: async (datasetId, tableId) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteImportTable, {
-          datasetId: datasetId,
-          tableId: tableId
-        })
-      });
+    const response = await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteImportTable, {
+        datasetId: datasetId,
+        tableId: tableId
+      })
+    });
 
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset table data: ${error}`);
-      return false;
-    }
+    return response;
   },
 
   deleteTableDesign: async (datasetId, tableSchemaId) => {
@@ -168,6 +150,17 @@ export const apiDataset = {
       console.error(`Error getting file data: ${error}`);
       return false;
     }
+  },
+  downloadDatasetFileData: async (dataflowId, dataProviderId, fileName) => {
+    const response = await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadDatasetFileData, {
+        dataflowId,
+        dataProviderId,
+        fileName
+      })
+    });
+
+    return response.data;
   },
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {
     const response = await HTTPRequester.get({
@@ -479,18 +472,13 @@ export const apiDataset = {
     }
   },
   validateById: async datasetId => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.validateDataset, {
-          datasetId: datasetId
-        })
-      });
+    const response = await HTTPRequester.update({
+      url: getUrl(DatasetConfig.validateDataset, {
+        datasetId: datasetId
+      })
+    });
 
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error calling dataset data validation: ${error}`);
-      return false;
-    }
+    return response;
   },
   validateSqlRules: async (datasetId, datasetSchemaId) => {
     try {

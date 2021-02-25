@@ -130,7 +130,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   private static final String GET_RESOURCE_SET =
       "/auth/realms/{realm}/authz/protection/resource_set";
-  ///auth/admin/realms/{realm}/clients/{clientId}/authz/resource-server/resource --> TO BE USED Instead protection/resource_set
+  /// auth/admin/realms/{realm}/clients/{clientId}/authz/resource-server/resource --> TO BE USED
+  /// Instead protection/resource_set
 
   /**
    * The Constant GET_RESOURCE_INFO: {@value}.
@@ -282,10 +283,12 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     if (clientInfo != null) {
       this.internalClientId = clientInfo.getId();
     }
-    //List<ResourceInfo> resources = this.getResourceInfo(adminToken);
+    // List<ResourceInfo> resources = this.getResourceInfo(adminToken);
     resourceTypes = new HashMap<>();
-    /*resources.stream()
-        .forEach(resource -> resourceTypes.put(resource.getName(), resource.getType()));*/
+    /*
+     * resources.stream() .forEach(resource -> resourceTypes.put(resource.getName(),
+     * resource.getType()));
+     */
   }
 
   /**
@@ -352,12 +355,9 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     String uri = uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
         .path(GET_GROUPS_BY_USER).buildAndExpand(uriParams).toString();
-    LOG.info("ojoooooooo invocando keycloak url {}", uri);
+    LOG.info("Invoking keycloak url {}", uri);
     ResponseEntity<GroupInfo[]> responseEntity =
-        this.restTemplate
-            .exchange(
-                uri,
-                HttpMethod.GET, request, GroupInfo[].class);
+        this.restTemplate.exchange(uri, HttpMethod.GET, request, GroupInfo[].class);
 
     return Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
   }
@@ -753,7 +753,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -813,7 +813,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-            .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(ADD_ROLE_TO_USER).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 

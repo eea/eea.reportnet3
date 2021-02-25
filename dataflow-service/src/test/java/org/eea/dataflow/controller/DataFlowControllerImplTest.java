@@ -677,4 +677,51 @@ public class DataFlowControllerImplTest {
       throw e;
     }
   }
+
+  /**
+   * Gets the public dataflows test.
+   *
+   * @return the public dataflows test
+   */
+  @Test
+  public void getPublicDataflowsTest() {
+    dataFlowControllerImpl.getPublicDataflows();
+    Mockito.verify(dataflowService, times(1)).getPublicDataflows();
+  }
+
+  /**
+   * Gets the public dataflow by id test.
+   *
+   * @return the public dataflow by id test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getPublicDataflowByIdTest() throws EEAException {
+    dataFlowControllerImpl.getPublicDataflow(1L);
+    Mockito.verify(dataflowService, times(1)).getPublicDataflowById(Mockito.any());
+  }
+
+  /**
+   * Gets the public dataflow by id exception test.
+   *
+   * @return the public dataflow by id exception test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDataflowByIdExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).getPublicDataflowById(Mockito.anyLong());
+    try {
+      dataFlowControllerImpl.getPublicDataflow(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateDataFlowPublicStatusTest() throws EEAException {
+    dataFlowControllerImpl.updateDataFlowPublicStatus(1L, true);
+    Mockito.verify(dataflowService, times(1)).updateDataFlowPublicStatus(Mockito.any(),
+        Mockito.anyBoolean());
+  }
 }

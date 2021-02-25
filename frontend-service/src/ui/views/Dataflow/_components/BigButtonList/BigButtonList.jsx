@@ -3,7 +3,8 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 import remove from 'lodash/remove';
-import uniqBy from 'lodash/uniqBy';
+
+import { DataflowConfig } from 'conf/domain/model/Dataflow';
 
 import styles from './BigButtonList.module.scss';
 
@@ -13,6 +14,7 @@ import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases';
@@ -37,6 +39,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { IntegrationsUtils } from 'ui/views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -84,6 +87,7 @@ export const BigButtonList = ({
   );
   const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
+  const [isImportingDataflow, setIsImportingDataflow] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] = useState(
     false
@@ -98,12 +102,14 @@ export const BigButtonList = ({
   });
   const [newDatasetDialog, setNewDatasetDialog] = useState(false);
   const [isQCsNotValidWarningVisible, setIsQCsNotValidWarningVisible] = useState(false);
+  const [isImportSchemaVisible, setIsImportSchemaVisible] = useState(false);
   const [invalidAndDisabledRulesAmount, setInvalidAndDisabledRulesAmount] = useState({
     invalidRules: 0,
     disabledRules: 0
   });
 
   const [providerId, setProviderId] = useState(null);
+  const [showPublicInfo, setShowPublicInfo] = useState(true);
   const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
@@ -130,6 +136,12 @@ export const BigButtonList = ({
     false
   );
 
+  useCheckNotifications(
+    ['IMPORT_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_FAILED_EVENT'],
+    setIsImportingDataflow,
+    false
+  );
+
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
@@ -141,6 +153,23 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations.expirationDate]);
+
+  const checkShowPublicInfo = (
+    <div style={{ float: 'left' }}>
+      <Checkbox
+        id={`show_public_info_checkbox`}
+        inputId={`show_public_info_checkbox`}
+        isChecked={showPublicInfo}
+        onChange={e => setShowPublicInfo(e.checked)}
+        role="checkbox"
+      />
+      <label
+        onClick={() => setShowPublicInfo(!showPublicInfo)}
+        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        {resources.messages['showPublicInfo']}
+      </label>
+    </div>
+  );
 
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
@@ -156,6 +185,8 @@ export const BigButtonList = ({
     } catch (error) {
       console.error(error);
       if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      } else {
         notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
       }
     }
@@ -180,9 +211,15 @@ export const BigButtonList = ({
     setDatasetId(datasetId);
   };
 
-  const getDataHistoricReleases = (datasetId, value, providerId) => {
+  const getDataHistoricReleases = (datasetId, headerTitle) => {
     setDatasetId(datasetId);
-    setHistoricReleasesDialogHeader(value);
+    setHistoricReleasesDialogHeader(headerTitle);
+    setProviderId(null);
+  };
+
+  const getDataHistoricReleasesByRepresentatives = (headerTitle, providerId) => {
+    setDatasetId(null);
+    setHistoricReleasesDialogHeader(headerTitle);
     setProviderId(providerId);
   };
 
@@ -226,7 +263,13 @@ export const BigButtonList = ({
     setIsActiveButton(false);
 
     try {
-      return await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, true);
+      return await DataCollectionService.create(
+        dataflowId,
+        getDate(),
+        isManualTechnicalAcceptance,
+        true,
+        showPublicInfo
+      );
     } catch (error) {
       console.error(error);
       const {
@@ -238,6 +281,18 @@ export const BigButtonList = ({
       setIsActiveButton(true);
     } finally {
       setDataCollectionDialog(false);
+    }
+  };
+
+  const onImportSchema = () => {
+    setIsImportSchemaVisible(true);
+  };
+
+  const onImportSchemaError = async ({ xhr }) => {
+    if (xhr.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+    } else {
+      notificationContext.add({ type: 'IMPORT_DATASET_SCHEMA_FAILED_EVENT' });
     }
   };
 
@@ -258,6 +313,15 @@ export const BigButtonList = ({
   const onShowHistoricReleases = typeView => {
     setIsHistoricReleasesDialogVisible(true);
     setHistoricReleasesView(typeView);
+  };
+
+  const onUpload = async () => {
+    setIsImportSchemaVisible(false);
+    setIsImportingDataflow(true);
+    notificationContext.add({
+      type: 'IMPORT_DATASET_SCHEMA_INIT',
+      content: { dataflowName }
+    });
   };
 
   const onLoadEuDatasetIntegration = async datasetSchemaId => {
@@ -399,7 +463,7 @@ export const BigButtonList = ({
     isHistoricReleasesDialogVisible || isManualTechnicalAcceptanceDialogVisible ? (
       <Fragment>
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-secondary p-button-animated-blink p-button-right-aligned"
           icon={'cancel'}
           label={resources.messages['close']}
           onClick={() => {
@@ -418,7 +482,7 @@ export const BigButtonList = ({
           onClick={() => cloneDatasetSchemas()}
         />
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-secondary p-button-animated-blink p-button-right-aligned"
           icon={'cancel'}
           label={resources.messages['close']}
           onClick={() => setCloneDialogVisible(false)}
@@ -466,37 +530,36 @@ export const BigButtonList = ({
     ));
   };
 
-  const bigButtonList = uniqBy(
-    useBigButtonList({
-      dataflowId,
-      dataflowState,
-      dataProviderId,
-      getDatasetData,
-      getDataHistoricReleases,
-      getDeleteSchemaIndex,
-      handleExportEuDataset,
-      handleRedirect,
-      isActiveButton,
-      isCloningDataflow,
-      isLeadReporterOfCountry,
-      onCloneDataflow,
-      onLoadEuDatasetIntegration,
-      onLoadReceiptData,
-      onSaveName,
-      onShowCopyDataCollectionToEuDatasetModal,
-      onShowDataCollectionModal,
-      onShowExportEuDatasetModal,
-      onShowManualTechnicalAcceptanceDialog,
-      onShowHistoricReleases,
-      onShowManageReportersDialog,
-      onShowNewSchemaDialog,
-      onOpenReleaseConfirmDialog,
-      onShowUpdateDataCollectionModal,
-      setErrorDialogData,
-      updatedDatasetSchema
-    }),
-    'caption'
-  )
+  const bigButtonList = useBigButtonList({
+    dataflowId,
+    dataflowState,
+    dataProviderId,
+    getDataHistoricReleases,
+    getDataHistoricReleasesByRepresentatives,
+    getDatasetData,
+    getDeleteSchemaIndex,
+    handleExportEuDataset,
+    handleRedirect,
+    isActiveButton,
+    isCloningDataflow,
+    isLeadReporterOfCountry,
+    onCloneDataflow,
+    onImportSchema,
+    onLoadEuDatasetIntegration,
+    onLoadReceiptData,
+    onOpenReleaseConfirmDialog,
+    onSaveName,
+    onShowCopyDataCollectionToEuDatasetModal,
+    onShowDataCollectionModal,
+    onShowExportEuDatasetModal,
+    onShowHistoricReleases,
+    onShowManageReportersDialog,
+    onShowManualTechnicalAcceptanceDialog,
+    onShowNewSchemaDialog,
+    onShowUpdateDataCollectionModal,
+    setErrorDialogData,
+    updatedDatasetSchema
+  })
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
 
@@ -633,6 +696,7 @@ export const BigButtonList = ({
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
           header={resources.messages['createDataCollection']}
+          footerAddon={checkShowPublicInfo}
           labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['create']}
           onConfirm={() => setIsConfirmCollectionDialog(true)}
@@ -726,6 +790,28 @@ export const BigButtonList = ({
             invalid: invalidAndDisabledRulesAmount.invalidRules
           })}
         </ConfirmDialog>
+      )}
+
+      {isImportSchemaVisible && (
+        <CustomFileUpload
+          // dialogClassName={styles.Dialog}
+          dialogHeader={`${resources.messages['importSchema']}`}
+          dialogOnHide={() => setIsImportSchemaVisible(false)}
+          dialogVisible={isImportSchemaVisible}
+          accept=".zip"
+          chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+          className={styles.FileUpload}
+          isDialog={true}
+          fileLimit={1}
+          infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .zip`}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          mode="advanced"
+          multiple={false}
+          name="file"
+          onError={onImportSchemaError}
+          onUpload={onUpload}
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DataflowConfig.importSchema, { dataflowId })}`}
+        />
       )}
 
       <button

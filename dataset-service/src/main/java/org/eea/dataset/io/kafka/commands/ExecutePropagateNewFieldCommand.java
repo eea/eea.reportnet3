@@ -1,7 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -16,12 +16,10 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-
 
 /**
  * The Class ExecutePropagateNewFieldCommand.
@@ -29,28 +27,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
 
-
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ExecutePropagateNewFieldCommand.class);
 
-
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Autowired
-  @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /**
-   * The update record helper.
-   */
+  /** The update record helper. */
   @Autowired
   private UpdateRecordHelper updateRecordHelper;
 
@@ -58,12 +45,9 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   @Autowired
   private LockService lockService;
 
-  /**
-   * The field batch size.
-   */
+  /** The field batch size. */
   @Value("${dataset.propagation.fieldBatchSize}")
   private int fieldBatchSize;
-
 
   /**
    * Gets the event type.
@@ -74,7 +58,6 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   public EventType getEventType() {
     return EventType.COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION;
   }
-
 
   /**
    * Execute.
@@ -109,19 +92,16 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
           processMap.merge(uuid, -1, Integer::sum);
           // Release the delete field schema lock
           if (processMap.get(uuid) == 0) {
-            List<Object> criteria = new ArrayList<>();
-            criteria.add(LockSignature.DELETE_FIELD_SCHEMA.getValue());
-            criteria.add(datasetId);
-            criteria.add(fieldSchemaId);
-            lockService.removeLockByCriteria(criteria);
+            Map<String, Object> deleteFieldSchema = new HashMap<>();
+            deleteFieldSchema.put(LiteralConstants.SIGNATURE,
+                LockSignature.DELETE_FIELD_SCHEMA.getValue());
+            deleteFieldSchema.put(LiteralConstants.DATASETID, datasetId);
+            deleteFieldSchema.put(LiteralConstants.FIELDSCHEMAID, fieldSchemaId);
+            lockService.removeLockByCriteria(deleteFieldSchema);
           }
 
         }
       }
     }
-
-
   }
-
-
 }

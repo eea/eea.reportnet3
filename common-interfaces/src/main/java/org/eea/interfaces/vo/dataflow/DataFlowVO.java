@@ -22,7 +22,6 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
-
 @Getter
 @Setter
 @ToString
@@ -42,7 +41,6 @@ public class DataFlowVO implements Serializable {
 
   /** The data collections. */
   private List<DataCollectionVO> dataCollections;
-
 
   /** The eu datasets. */
   private List<EUDatasetVO> euDatasets;
@@ -88,6 +86,15 @@ public class DataFlowVO implements Serializable {
 
   /** The reporting status. */
   private DatasetStatusEnum reportingStatus;
+
+  /** The releasable. */
+  private boolean releasable;
+
+  /** The show public info. */
+  private boolean showPublicInfo;
+
+  /** The any schema available in public. */
+  private boolean anySchemaAvailableInPublic;
 
   /**
    * Equals.
