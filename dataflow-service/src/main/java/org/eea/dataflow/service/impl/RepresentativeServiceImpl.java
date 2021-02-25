@@ -412,12 +412,14 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           DataProvider dataProvider = dataProviderList.stream()
               .filter(dataProv -> contryCode.equalsIgnoreCase(dataProv.getCode())).findFirst()
               .orElse(null);
-          if (null != dataProvider && null != dataProvider.getId()) {
+          if (null != dataProvider) {
             if (null == representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(
                 dataflowId, dataProvider.getId(), email)) {
 
-              Representative representative = representativeRepository
-                  .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProvider.getId());
+              Representative representative = representativeList.stream()
+                  .filter(rep -> dataProvider.getId().equals(rep.getDataProvider().getId()))
+                  .findFirst().orElse(representativeRepository
+                      .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProvider.getId()));
 
               // if exist we dont create representative
               if (null == representative) {
