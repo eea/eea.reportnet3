@@ -144,7 +144,7 @@ export const PublicFrontpage = ({ history }) => {
             <div className={styles.showPublicDataflows}>
               <Button
                 icon="eye"
-                label="View public dataflows"
+                label="Explore reported data"
                 onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}></Button>
             </div>
           </div>
