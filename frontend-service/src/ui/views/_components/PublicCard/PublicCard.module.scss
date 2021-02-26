@@ -81,6 +81,15 @@
           }
         }
       }
+      .subtitle {
+        display: -webkit-box;
+        margin: 0.5rem 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        width: fit-content;
+      }
     }
     .legalInstrumentAndObligation {
       font-size: 1rem;
