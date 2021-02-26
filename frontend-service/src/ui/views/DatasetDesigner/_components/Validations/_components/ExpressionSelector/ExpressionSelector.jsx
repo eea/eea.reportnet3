@@ -183,7 +183,7 @@ export const ExpressionSelector = ({
   };
   return (
     <>
-      <div className={styles.section} style={validationContext.ruleEdit ? { display: 'none' } : {}}>
+      <div className={styles.section}>
         <Dropdown
           onChange={e => onExpressionTypeToggle(e.value)}
           optionLabel="label"
