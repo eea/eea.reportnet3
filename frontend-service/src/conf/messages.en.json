@@ -485,7 +485,7 @@
     "importReportingBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
     "importReportingCompletedEvent": "Loaded data completed for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importReportingFailedEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "importSchema": "Import Schema",
+    "importSchema": "Import schema/s",
     "importTable": "Import table data",
     "info": "Info",
     "integrationName": "Integration name",
