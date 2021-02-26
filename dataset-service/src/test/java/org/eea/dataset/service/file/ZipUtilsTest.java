@@ -1,6 +1,7 @@
 package org.eea.dataset.service.file;
 
 import static org.mockito.Mockito.times;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +64,6 @@ public class ZipUtilsTest {
   private IntegrationControllerZuul integrationController;
 
 
-
   /**
    * Inits the mocks.
    *
@@ -112,7 +112,6 @@ public class ZipUtilsTest {
   }
 
 
-
   /**
    * @throws IOException
    * @throws EEAException
@@ -143,12 +142,8 @@ public class ZipUtilsTest {
     MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
         "application/x-zip-compressed", baos.toByteArray());
 
-    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
-        .thenReturn("schema").thenReturn("qcrules").thenReturn("unique").thenReturn("names")
-        .thenReturn("extintegrations").thenReturn("integrity").thenReturn("ids");
     Assert.assertNotNull(zipUtils.unZipImportSchema(multipartFile));
   }
-
 
 
 }
