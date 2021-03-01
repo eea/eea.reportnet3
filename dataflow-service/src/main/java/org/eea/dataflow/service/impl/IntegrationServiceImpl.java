@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
@@ -402,9 +403,13 @@ public class IntegrationServiceImpl implements IntegrationService {
       IntegrationVO integrationVO = new IntegrationVO();
       integrationVO.setId(integrationId);
       List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);
-      if (integrations != null && !integrations.isEmpty()) {
-        integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME).execute(operation, null,
+      if (!CollectionUtils.isEmpty(integrations)
+          && (Integer) integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME)
+              .execute(operation, null, datasetId, integrations.get(0)).getExecutionResultParams()
+              .get("id") == 0) {
+        LOG_ERROR.error("Error executing external integration: datasetId={}, integration={}",
             datasetId, integrations.get(0));
+        throw new EEAException("Error executing external integration");
       }
     }
   }

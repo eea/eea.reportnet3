@@ -353,9 +353,17 @@ public class IntegrationServiceImplTest {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setId(1L);
     IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Map<String, Object> executionResultParams = new HashMap<>();
+    executionResultParams.put("id", 1);
+    ExecutionResultVO executionResultVO = new ExecutionResultVO();
+    executionResultVO.setExecutionResultParams(executionResultParams);
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+
+    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
+        integrationVO)).thenReturn(executionResultVO);
+
     integrationService.executeExternalIntegration(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
     Mockito.verify(integrationExecutorFactory, times(1)).getExecutor(Mockito.any());
