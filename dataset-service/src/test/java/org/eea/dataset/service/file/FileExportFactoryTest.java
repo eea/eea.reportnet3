@@ -43,4 +43,9 @@ public class FileExportFactoryTest {
     assertNull("is null", fileExportFactory.createContext("xml"));
   }
 
+  @Test
+  public void testCreateContextXlsx() {
+    assertNotNull("is null", fileExportFactory.createContext("xlsx"));
+  }
+
 }

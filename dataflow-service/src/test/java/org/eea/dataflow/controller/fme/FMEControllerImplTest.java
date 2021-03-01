@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller.fme;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.persistence.domain.FMEJob;
@@ -121,5 +122,18 @@ public class FMEControllerImplTest {
       Assert.assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
       throw e;
     }
+  }
+
+
+  @Test
+  public void downloadExportFileTest() {
+    assertEquals(HttpStatus.OK, fmeControllerImpl.downloadExportFile(0L, 0L, "").getStatusCode());
+  }
+
+  @Test
+  public void updateJobStatusByIdTest() {
+    fmeControllerImpl.updateJobStatusById(0L, 0L);
+    Mockito.verify(fmeCommunicationService, times(1)).updateJobStatusById(Mockito.any(),
+        Mockito.any());
   }
 }
