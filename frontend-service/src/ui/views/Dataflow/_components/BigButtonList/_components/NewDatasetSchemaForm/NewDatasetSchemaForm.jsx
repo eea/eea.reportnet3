@@ -15,14 +15,11 @@ import { DataflowService } from 'core/services/Dataflow';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserService } from 'core/services/User';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdateData, setNewDatasetDialog }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
-  const userContext = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -52,16 +49,6 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
       })
   });
 
-  const onRefreshToken = async () => {
-    try {
-      const userObject = await UserService.refreshToken();
-      userContext.onTokenRefresh(userObject);
-    } catch (error) {
-      await UserService.logout();
-      userContext.onLogout();
-    }
-  };
-
   return (
     <Formik
       ref={form}
@@ -76,7 +63,6 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
             encodeURIComponent(values.datasetSchemaName)
           );
           if (response >= 200 && response <= 299) {
-            onRefreshToken();
             onUpdateData();
             setSubmitting(false);
           } else {
