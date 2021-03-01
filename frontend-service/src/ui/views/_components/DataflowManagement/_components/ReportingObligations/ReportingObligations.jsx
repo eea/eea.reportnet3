@@ -144,7 +144,8 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
             userContext.userProps.dateFormat
           ),
           oblChoosed: oblChecked,
-          filterBy: filterData
+          filterBy: filterData,
+          pagination: { first: 0, rows: 10, page: 0 }
         }
       });
     } catch (error) {

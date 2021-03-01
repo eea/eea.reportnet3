@@ -183,11 +183,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         config.permissions.EDITOR_READ,
         config.permissions.EDITOR_WRITE
       ]);
-      if (
-        !accessPermission &&
-        !isUndefined(designerState.metaData?.dataflow?.status) &&
-        designerState.metaData?.dataflow?.status !== 'DESIGN'
-      ) {
+      if (!accessPermission) {
+        notificationContext.add({ type: 'NOT_ALLOWED_ERROR' });
         history.push(getUrl(routes.DATAFLOWS));
       }
     }
