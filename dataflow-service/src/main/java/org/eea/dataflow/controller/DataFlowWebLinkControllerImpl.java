@@ -4,6 +4,7 @@ import org.eea.dataflow.exception.EntityNotFoundException;
 import org.eea.dataflow.exception.ResourceNoFoundException;
 import org.eea.dataflow.exception.WrongDataExceptions;
 import org.eea.dataflow.service.DataflowWebLinkService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowWebLinkController;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
@@ -112,6 +113,10 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
+      if (null != e.getMessage() && e.getMessage().equals(EEAErrorMessage.URL_ALREADY_EXIST)) {
+        LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase());
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -174,6 +179,10 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
+      if (null != e.getMessage() && e.getMessage().equals(EEAErrorMessage.URL_ALREADY_EXIST)) {
+        LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase());
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
