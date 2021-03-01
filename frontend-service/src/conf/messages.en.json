@@ -995,6 +995,7 @@
     "exportDataflowLeadReportersTemplateFailedEvent": "Error exporting lead reporters template",
     "exportLeadReportersTemplate": "Export template",
     "importDataflowLeadReportersFailedEvent": "Error importing lead reporters from file",
-    "sqlSentenceSpatialNote": "<i>Note: Spatial QC functions must contain <strong>public.</strong> before the funtion:</i><br />&nbsp;&nbsp&nbsp;&nbsp;SELECT * FROM <strong>tableName</strong> WHERE public.ST_Distance (field1, field2) > X "
+    "sqlSentenceSpatialNote": "<i>Note: Spatial QC functions must contain <strong>public.</strong> before the funtion:</i><br />&nbsp;&nbsp&nbsp;&nbsp;SELECT * FROM <strong>tableName</strong> WHERE public.ST_Distance (field1, field2) > X ",
+    "files": "Files"
   }
 }
