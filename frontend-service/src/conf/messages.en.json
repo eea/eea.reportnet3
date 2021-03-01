@@ -973,7 +973,7 @@
     "availableInPublicView": "Available in public view",
     "restrictFromPublic": "Restrict from public view",
     "releaseDate": "Release date",
-    "publicDataflowsBreadcrumbs": "Public dataflows",
+    "publicDataflowsBreadcrumbs": "Dataflows",
     "publicDataflowBreadcrumbs": "Dataflow",
     "manageRolesDialogConfirmDeleteProviderHeader": "Delete data provider",
     "manageRolesDialogConfirmDeleteProviderQuestion": "Do you really want to delete this data provider?",
