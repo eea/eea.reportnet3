@@ -45,12 +45,17 @@ import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.util.KieBaseManager;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /** The Class RulesServiceImplTest. */
@@ -106,6 +111,19 @@ public class RulesServiceImplTest {
    */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
+  @Before
+  public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+    MockitoAnnotations.initMocks(this);
+  }
 
   /**
    * Delete rule by id.
@@ -694,6 +712,8 @@ public class RulesServiceImplTest {
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(integrityMapper.classToEntity(Mockito.any())).thenReturn(integritySchema);
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     rulesServiceImpl.createNewRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }

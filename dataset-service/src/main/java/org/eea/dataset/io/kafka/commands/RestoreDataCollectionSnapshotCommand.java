@@ -14,6 +14,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -69,7 +70,8 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
       if (Boolean.TRUE.equals(removed)) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(
             EventType.COPY_DATA_TO_EUDATASET_COMPLETED_EVENT, value,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).build());
       }
     }

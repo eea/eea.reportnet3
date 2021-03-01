@@ -224,7 +224,10 @@ public class DesignDatasetServiceTest {
     Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any(),
         Mockito.anyBoolean());
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     designDatasetService.copyDesignDatasets(1L, 2L);
+
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
@@ -235,6 +238,8 @@ public class DesignDatasetServiceTest {
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
     Mockito.when(designDatasetMapper.entityListToClass(Mockito.any()))

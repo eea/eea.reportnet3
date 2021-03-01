@@ -29,7 +29,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -119,8 +118,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     EventType notificationEventType = null;
     NotificationVO notificationVO = NotificationVO.builder()
-        .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
-        .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode())
+        .error("The QC Rule is disabled").build();
 
     String query = proccessQuery(datasetId, rule.getSqlSentence());
 

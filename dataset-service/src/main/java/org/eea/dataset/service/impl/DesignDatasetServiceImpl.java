@@ -40,7 +40,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,7 +290,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
       // Release the notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          null,
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(idDataflowDestination).build());
 
       // Release the lock
@@ -306,7 +307,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       LOG_ERROR.error("Error during the copy. Message: {}", e.getMessage(), e);
       // Release the error notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_EVENT,
-          null, NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          null,
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(idDataflowDestination).error("Error copying the schemas").build());
       Map<String, Object> copyDatasetSchema = new HashMap<>();
       copyDatasetSchema.put(LiteralConstants.SIGNATURE,
