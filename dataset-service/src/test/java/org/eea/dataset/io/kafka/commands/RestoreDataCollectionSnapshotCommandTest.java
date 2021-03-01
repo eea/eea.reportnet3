@@ -21,6 +21,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class RestoreDataCollectionSnapshotCommandTest.
@@ -54,8 +57,16 @@ public class RestoreDataCollectionSnapshotCommandTest {
   /** The data. */
   private Map<String, Object> data;
 
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT);
     MockitoAnnotations.initMocks(this);
@@ -70,6 +81,8 @@ public class RestoreDataCollectionSnapshotCommandTest {
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     when(euDatasetService.removeLocksRelatedToPopulateEU(Mockito.any())).thenReturn(Boolean.TRUE);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     restoreDataCollectionSnapshotCommand.execute(eeaEventVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

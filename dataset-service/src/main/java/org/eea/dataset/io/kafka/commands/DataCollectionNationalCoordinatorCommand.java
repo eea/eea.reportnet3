@@ -23,10 +23,10 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -136,7 +136,8 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
             : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).build());
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing {} event: ", successEvent, e);

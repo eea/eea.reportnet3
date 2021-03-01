@@ -1947,8 +1947,8 @@ public class DatasetSchemaServiceTest {
     DesignDataset design = new DesignDataset();
     SimpleDatasetSchemaVO simpleDatasetSchemaVO = new SimpleDatasetSchemaVO();
     SimpleTableSchemaVO table = new SimpleTableSchemaVO();
-    ArrayList<SimpleTableSchemaVO> tables = new ArrayList<SimpleTableSchemaVO>();
-    ArrayList<SimpleFieldSchemaVO> fields = new ArrayList<SimpleFieldSchemaVO>();
+    ArrayList<SimpleTableSchemaVO> tables = new ArrayList<>();
+    ArrayList<SimpleFieldSchemaVO> fields = new ArrayList<>();
     table.setFields(fields);
     tables.add(table);
     simpleDatasetSchemaVO.setTables(tables);
@@ -1999,7 +1999,7 @@ public class DatasetSchemaServiceTest {
     DataSetMetabase datasetMetabase = new DataSetMetabase();
     ObjectId id = new ObjectId();
     DesignDataset design = new DesignDataset();
-    SimpleDatasetSchemaVO simpleDatasetSchemaVO = new SimpleDatasetSchemaVO();
+    new SimpleDatasetSchemaVO();
     datasetMetabase.setDatasetSchema(id.toString());
     when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(datasetMetabase));
@@ -2130,7 +2130,8 @@ public class DatasetSchemaServiceTest {
     DataSetSchemaVO schema2VO = new DataSetSchemaVO();
     schema2VO.setIdDataSetSchema(new ObjectId().toString());
     schema2VO.setTableSchemas(new ArrayList<>());
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
 
     when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -2214,7 +2215,8 @@ public class DatasetSchemaServiceTest {
     zip.close();
     MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
         "application/x-zip-compressed", baos.toByteArray());
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataSchemaServiceImpl.importSchemas(1L, multipartFile);
     Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
   }
@@ -2233,7 +2235,8 @@ public class DatasetSchemaServiceTest {
           "application/x-zip-compressed", baos.toByteArray());
 
       Mockito.when(zipUtils.unZipImportSchema(Mockito.any())).thenThrow(new EEAException("error"));
-
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("name");
       dataSchemaServiceImpl.importSchemas(1L, multipartFile);
     } catch (Exception e) {
       assertEquals("error", e.getMessage());
