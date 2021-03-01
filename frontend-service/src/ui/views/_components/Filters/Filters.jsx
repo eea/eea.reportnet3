@@ -42,7 +42,7 @@ export const Filters = ({
   searchAll,
   searchBy = [],
   selectList,
-  selectOptions,
+  selectOptions = [],
   sendData,
   sortable,
   sortCategory,
@@ -312,7 +312,6 @@ export const Filters = ({
       initialFilteredData.forEach(item =>
         selectOptions.forEach(filterKey => {
           let currentValue = possibleOptions.get(filterKey);
-
           currentValue.add(item[filterKey]);
         })
       );
