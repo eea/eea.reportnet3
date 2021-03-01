@@ -183,16 +183,18 @@ export const ExpressionSelector = ({
   };
   return (
     <>
-      <div className={styles.section}>
-        <Dropdown
-          onChange={e => onExpressionTypeToggle(e.value)}
-          optionLabel="label"
-          options={getOptions()}
-          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
-          style={{ width: '12em' }}
-          value={expressionTypeValue}
-        />
-      </div>
+      {!validationContext.ruleEdit && (
+        <div className={styles.section}>
+          <Dropdown
+            onChange={e => onExpressionTypeToggle(e.value)}
+            optionLabel="label"
+            options={getOptions()}
+            placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
+            style={{ width: '12em' }}
+            value={expressionTypeValue}
+          />
+        </div>
+      )}
 
       <div className={styles.section}>{expressionsTypeView()} </div>
     </>
