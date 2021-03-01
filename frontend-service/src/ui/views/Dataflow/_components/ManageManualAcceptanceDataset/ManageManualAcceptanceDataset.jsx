@@ -132,7 +132,6 @@ export const ManageManualAcceptanceDataset = ({
       <InputTextarea
         className={`${styles.datasetMessage} datasetSchema-metadata-help-step`}
         collapsedHeight={85}
-        id="datasetMessage"
         id={idTextArea}
         onChange={e => onChangeMessage(e.target.value)}
         onFocus={e =>

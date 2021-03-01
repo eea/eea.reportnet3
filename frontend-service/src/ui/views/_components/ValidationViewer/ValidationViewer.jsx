@@ -344,13 +344,14 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFilteredValidations = filterData => {
+      setFirstRow(0);
       setFieldValueFilter(filterData.fieldSchemaName);
       setLevelErrorsFilter(filterData.levelError);
       setTypeEntitiesFilter(filterData.entityType);
       setTablesFilter(filterData.tableSchemaName);
 
       onLoadErrors(
-        firstRow,
+        0,
         numberRows,
         sortField,
         sortOrder,
