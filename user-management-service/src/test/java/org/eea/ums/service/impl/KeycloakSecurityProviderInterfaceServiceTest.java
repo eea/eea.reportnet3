@@ -842,14 +842,6 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
         ResourceTypeEnum.DATAFLOW));
   }
 
-  @Test
-  public void addContributorsToUserGroupTest() throws EEAException {
-    ResourceAssignationVO resource = new ResourceAssignationVO();
-    resource.setEmail("a");
-    resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
-    keycloakSecurityProviderInterfaceService.addContributorsToUserGroup(Arrays.asList(resource));
-  }
-
 }
 
 
