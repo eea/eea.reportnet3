@@ -41,17 +41,22 @@ import org.postgresql.core.BaseConnection;
 import org.postgresql.core.Encoding;
 import org.postgresql.core.QueryExecutor;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 // @RunWith(MockitoJUnitRunner.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DriverManager.class, JdbcRecordStoreServiceImpl.class})
+@PowerMockIgnore("javax.security.auth.*")
 public class JdbcRecordStoreServiceImplTest {
 
   @InjectMocks
@@ -77,8 +82,17 @@ public class JdbcRecordStoreServiceImplTest {
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
   @Before
   public void initMocks() {
+
+    authentication = PowerMockito.mock(Authentication.class);
+    securityContext = PowerMockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
 
@@ -167,6 +181,8 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
@@ -212,6 +228,8 @@ public class JdbcRecordStoreServiceImplTest {
     datasetMetabase.setDataProviderId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetMetabase);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
     Mockito.verify(kafkaSender, Mockito.times(2)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
