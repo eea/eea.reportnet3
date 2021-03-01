@@ -87,22 +87,22 @@
     }
     .europeanUnionBlackLogo {
       background-repeat: no-repeat;
-      background-image: url('/assets/images/logo--en.svg');
+      background-image: url('/assets/images/logos/logo--en.svg');
     }
 
     .europeanUnionWhiteLogo {
       background-repeat: no-repeat;
-      background-image: url('/assets/images/logo--white--en.svg');
+      background-image: url('/assets/images/logos/logo--white--en.svg');
     }
     @media (max-width: 768px) {
       .europeanUnionBlackLogo {
         background-repeat: no-repeat;
-        background-image: url('/assets/images/eu_condensed.svg');
+        background-image: url('/assets/images/logos/eu_condensed.svg');
       }
 
       .europeanUnionWhiteLogo {
         background-repeat: no-repeat;
-        background-image: url('/assets/images/logo--white--en.svg');
+        background-image: url('/assets/images/logos/logo--white--en.svg');
       }
     }
   }
@@ -115,7 +115,7 @@
       font-weight: bold;
       color: var(--blue-120);
       &::after {
-        background-image: url('/assets/images/englishIcon.jpg');
+        background-image: url('/assets/images/logos/englishIcon.jpg');
         content: '\00a0' !important;
         display: inline-block;
         width: 25px;

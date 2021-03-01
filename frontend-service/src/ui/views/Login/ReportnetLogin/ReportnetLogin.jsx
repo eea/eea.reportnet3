@@ -6,7 +6,7 @@ import { isEmpty, isUndefined } from 'lodash';
 
 import styles from './ReportnetLogin.module.css';
 
-import logo from 'assets/images/logo.png';
+import logo from 'assets/images/logos/logo.png';
 
 import { Button } from 'ui/views/_components/Button';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
