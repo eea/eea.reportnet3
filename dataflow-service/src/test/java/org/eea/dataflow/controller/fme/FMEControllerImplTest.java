@@ -1,13 +1,16 @@
 package org.eea.dataflow.controller.fme;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,9 +35,17 @@ public class FMEControllerImplTest {
   @Mock
   private FMECommunicationService fmeCommunicationService;
 
+  @Mock
+  private IntegrationService integrationService;
+
+  @Mock
+  private LockService lockService;
+
   private SecurityContext securityContext;
 
   private Authentication authentication;
+
+
 
   @Before
   public void initMocks() {
@@ -65,6 +76,7 @@ public class FMEControllerImplTest {
     fmeOperationInfoVO.setApiKey("sampleApiKey");
     fmeOperationInfoVO.setRn3JobId(1L);
     fmeOperationInfoVO.setStatusNumber(1L);
+    fmeOperationInfoVO.setDatasetId(1L);
     Mockito.when(
         fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
         .thenReturn(new FMEJob());
@@ -82,6 +94,7 @@ public class FMEControllerImplTest {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setApiKey("sampleApiKey");
     fmeOperationInfoVO.setRn3JobId(1L);
+    fmeOperationInfoVO.setDatasetId(1L);
     Mockito.when(
         fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(), Mockito.anyLong()))
         .thenThrow(new EEAForbiddenException(EEAErrorMessage.FORBIDDEN));
@@ -98,6 +111,7 @@ public class FMEControllerImplTest {
     FMEOperationInfoVO fmeOperationInfoVO = new FMEOperationInfoVO();
     fmeOperationInfoVO.setApiKey("sampleApiKey");
     fmeOperationInfoVO.setRn3JobId(1L);
+    fmeOperationInfoVO.setDatasetId(1L);
     Mockito
         .when(fmeCommunicationService.authenticateAndAuthorize(Mockito.anyString(),
             Mockito.anyLong()))
@@ -108,5 +122,18 @@ public class FMEControllerImplTest {
       Assert.assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
       throw e;
     }
+  }
+
+
+  @Test
+  public void downloadExportFileTest() {
+    assertEquals(HttpStatus.OK, fmeControllerImpl.downloadExportFile(0L, 0L, "").getStatusCode());
+  }
+
+  @Test
+  public void updateJobStatusByIdTest() {
+    fmeControllerImpl.updateJobStatusById(0L, 0L);
+    Mockito.verify(fmeCommunicationService, times(1)).updateJobStatusById(Mockito.any(),
+        Mockito.any());
   }
 }

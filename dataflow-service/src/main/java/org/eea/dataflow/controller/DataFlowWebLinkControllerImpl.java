@@ -4,6 +4,7 @@ import org.eea.dataflow.exception.EntityNotFoundException;
 import org.eea.dataflow.exception.ResourceNoFoundException;
 import org.eea.dataflow.exception.WrongDataExceptions;
 import org.eea.dataflow.service.DataflowWebLinkService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowWebLinkController;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
@@ -92,10 +93,9 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PostMapping
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
   @ApiOperation(value = "Create a Weblink", response = WeblinkVO.class)
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Successfully created Weblink"),
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully created Weblink"),
       @ApiResponse(code = 404, message = "Dataflow Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -113,6 +113,10 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
+      if (EEAErrorMessage.URL_ALREADY_EXIST.equals(e.getMessage())) {
+        LOG_ERROR.error("Weblink url already exist in dataflow : {}", dataflowId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
@@ -175,6 +179,10 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
+      if (EEAErrorMessage.URL_ALREADY_EXIST.equals(e.getMessage())) {
+        LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase());
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }

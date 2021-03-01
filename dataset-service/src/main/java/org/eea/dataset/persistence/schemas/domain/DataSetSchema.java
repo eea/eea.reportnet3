@@ -19,16 +19,9 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
 @ToString
 @Document(collection = "DataSetSchema")
 public class DataSetSchema {
-
 
   /** The id. */
   @Id
@@ -48,6 +41,10 @@ public class DataSetSchema {
   @Field(value = "tableSchemas")
   private List<TableSchema> tableSchemas;
 
+  /** The available in public. */
+  @Field(value = "availableInPublic")
+  private boolean availableInPublic;
+
   /** The web form. */
   @Field(value = "webform")
   private Webform webform;
@@ -59,7 +56,8 @@ public class DataSetSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description, webform);
+    return Objects.hash(idDataFlow, idDataSetSchema, tableSchemas, description, webform,
+        availableInPublic);
   }
 
   /**
@@ -80,7 +78,8 @@ public class DataSetSchema {
     return Objects.equals(idDataFlow, other.idDataFlow)
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas)
-        && Objects.equals(description, other.description) && Objects.equals(webform, other.webform);
+        && Objects.equals(description, other.description) && Objects.equals(webform, other.webform)
+        && Objects.equals(availableInPublic, other.availableInPublic);
 
   }
 

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -13,6 +12,7 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -24,6 +24,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class RestoreDataCollectionSnapshotCommandTest.
@@ -60,11 +63,19 @@ public class ReleaseDataSnapshotsCommandTest {
   /** The data. */
   private Map<String, Object> data;
 
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT);
     MockitoAnnotations.initMocks(this);
@@ -77,23 +88,26 @@ public class ReleaseDataSnapshotsCommandTest {
    */
   @Test
   public void testExecuteFinish() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     data = new HashMap<>();
     data.put("dataset_id", 1L);
     data.put("user", "user1");
     eeaEventVO.setData(data);
-    DataSetMetabase datasetMetabase = new DataSetMetabase();
-    datasetMetabase.setId(1L);
-    datasetMetabase.setDataflowId(1L);
-    datasetMetabase.setDataProviderId(1L);
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    dataSetMetabaseVO.setId(1L);
+    dataSetMetabaseVO.setDataflowId(1L);
+    dataSetMetabaseVO.setDataProviderId(1L);
     List<Long> datasetsId = new ArrayList<>();
     datasetsId.add(1L);
     datasetsId.add(2L);
-    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(1L)).thenReturn(null);
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setName("dataflowName");
-    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflowVO);
+    dataflowVO.setShowPublicInfo(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     releaseDataSnapshotsCommand.execute(eeaEventVO);
     Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
 

@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -7,12 +7,9 @@ import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 import styles from './LeftSideBar.module.scss';
 
 import { routes } from 'ui/routes';
-
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
 
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
-import { DatasetService } from 'core/services/Dataset';
 import { UserService } from 'core/services/User';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
@@ -46,57 +43,6 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
           setRun(false);
         }
       }
-    }
-  };
-
-  useEffect(() => {
-    if (findHiddenNotification()) downloadExportFMEFile();
-  }, [notificationContext.hidden]);
-
-  const findHiddenNotification = () => {
-    return notificationContext.hidden.find(
-      notification =>
-        notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' || 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
-    );
-  };
-
-  const downloadExportFMEFile = async () => {
-    try {
-      const [notification] = notificationContext.hidden.filter(
-        notification =>
-          notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
-          notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
-      );
-
-      const getFileName = () => {
-        const extension = notification.content.fileName.split('.').pop();
-        return `${notification.content.datasetName}.${extension}`;
-      };
-
-      let datasetData;
-
-      if (notification) {
-        notification.content.providerId
-          ? (datasetData = await DatasetService.downloadExportFile(
-              notification.content.datasetId,
-              notification.content.fileName,
-              notification.content.providerId
-            ))
-          : (datasetData = await DatasetService.downloadExportFile(
-              notification.content.datasetId,
-              notification.content.fileName
-            ));
-
-        notificationContext.add({
-          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
-          onClick: () => DownloadFile(datasetData, getFileName())
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
-    } finally {
-      notificationContext.clearHiddenNotifications();
     }
   };
 

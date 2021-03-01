@@ -10,7 +10,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
-import org.eea.thread.ThreadPropertiesManager;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -25,45 +25,37 @@ import lombok.AllArgsConstructor;
 @Component
 public class SnapshotHelper implements DisposableBean {
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SnapshotHelper.class);
-  /**
-   * The Constant LOG_ERROR.
-   */
+
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The recordStore service.
-   */
-  @Autowired
-  private RecordStoreService recordStoreService;
-
-  /**
-   * The max running tasks.
-   */
+  /** The max running tasks. */
   @Value("${snapshot.task.parallelism}")
   private int maxRunningTasks;
 
-  /**
-   * The restoration executor service.
-   */
+  /** The record store service. */
+  @Autowired
+  private RecordStoreService recordStoreService;
+
+  /** The restoration executor service. */
   private ExecutorService restorationExecutorService;
 
   /**
-   * Instantiates a new file loader helper.
+   * Instantiates a new snapshot helper.
    */
   public SnapshotHelper() {
     super();
   }
 
   /**
-   * Inits the executionservice.
+   * Inits the.
    */
   @PostConstruct
   private void init() {
-    restorationExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    restorationExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
   }
 
   /**
@@ -86,70 +78,57 @@ public class SnapshotHelper implements DisposableBean {
    * @param idSnapshot the id snapshot
    * @param idPartition the id partition
    * @param datasetType the dataset type
-   * @param user the user
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
-   *
    * @throws EEAException the eea exception
    */
   public void processRestoration(Long datasetId, Long idSnapshot, Long idPartition,
-      DatasetTypeEnum datasetType, String user, Boolean isSchemaSnapshot, Boolean deleteData)
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
       throws EEAException {
     RestorationTask restorationTask = new RestorationTask(datasetId, idSnapshot, idPartition,
-        datasetType, user, isSchemaSnapshot, deleteData);
+        datasetType, isSchemaSnapshot, deleteData);
 
     // first every task is always queued up to ensure the order
 
-    if (((ThreadPoolExecutor) restorationExecutorService).getActiveCount() == maxRunningTasks) {
+    if (((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) restorationExecutorService)
+        .getDelegateExecutorService()).getActiveCount() == maxRunningTasks) {
       LOG.info(
           "Snapshot {} will be queued up as there are no restoration threads available at the moment",
           idSnapshot);
     }
 
     this.restorationExecutorService.submit(new RestorationTasksExecutorThread(restorationTask));
-
   }
 
   /**
-   * The Class RestorationTask.
+   * Instantiates a new restoration task.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param idPartition the id partition
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
    */
-
   @AllArgsConstructor
   private static class RestorationTask {
 
-    /**
-     * The dataset id.
-     */
+    /** The dataset id. */
     Long datasetId;
 
-    /**
-     * The id snapshot.
-     */
+    /** The id snapshot. */
     Long idSnapshot;
 
-    /**
-     * The id partition.
-     */
+    /** The id partition. */
     Long idPartition;
 
-    /**
-     * The dataset type.
-     */
+    /** The dataset type. */
     DatasetTypeEnum datasetType;
 
-    /**
-     * The user.
-     */
-    String user;
-
-    /**
-     * The is schema snapshot.
-     */
+    /** The is schema snapshot. */
     Boolean isSchemaSnapshot;
 
-    /**
-     * The delete data.
-     */
+    /** The delete data. */
     Boolean deleteData;
   }
 
@@ -158,13 +137,10 @@ public class SnapshotHelper implements DisposableBean {
    */
   private class RestorationTasksExecutorThread implements Runnable {
 
-    /**
-     * The Constant MILISECONDS.
-     */
+    /** The Constant MILISECONDS. */
     private static final double MILISECONDS = 1000.0;
-    /**
-     * The restoration task.
-     */
+
+    /** The restoration task. */
     private RestorationTask restorationTask;
 
     /**
@@ -182,13 +158,14 @@ public class SnapshotHelper implements DisposableBean {
     @Override
     public void run() {
       Long currentTime = System.currentTimeMillis();
-      int workingThreads = ((ThreadPoolExecutor) restorationExecutorService).getActiveCount();
+      int workingThreads =
+          ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) restorationExecutorService)
+              .getDelegateExecutorService()).getActiveCount();
 
       LOG.info(
           "Executing restoration for snapshot {}. Working restoration threads {}, Available restoration threads {}",
           restorationTask.idSnapshot, workingThreads, maxRunningTasks - workingThreads);
       try {
-        ThreadPropertiesManager.setVariable("user", restorationTask.user);
         recordStoreService.restoreDataSnapshot(restorationTask.datasetId,
             restorationTask.idSnapshot, restorationTask.idPartition, restorationTask.datasetType,
             restorationTask.isSchemaSnapshot, restorationTask.deleteData);

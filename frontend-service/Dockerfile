@@ -1,12 +1,11 @@
-FROM node:9.6.1 as builder
+FROM node:14 as builder
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY package*.json ./
 RUN npm install --silent
-RUN npm install react-scripts@1.1.1 -g --silent
 COPY . /usr/src/app
-RUN npm run build
+RUN npm run build --verbose
  
 FROM nginx:1.14.1-alpine
 RUN apk add --no-cache jq

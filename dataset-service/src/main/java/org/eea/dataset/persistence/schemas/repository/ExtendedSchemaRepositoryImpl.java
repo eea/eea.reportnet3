@@ -346,6 +346,23 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
         new Document("$set", new Document("description", description)));
   }
 
+
+  /**
+   * Update dataset schema exportable.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param availableInPublic the available in public
+   * @return the update result
+   */
+  @Override
+  public UpdateResult updateDatasetSchemaExportable(String datasetSchemaId,
+      boolean availableInPublic) {
+    return mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
+        new Document("_id", new ObjectId(datasetSchemaId)),
+        new Document("$set", new Document("availableInPublic", availableInPublic)));
+  }
+
+
   /**
    * Find record schema.
    *
@@ -439,5 +456,29 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
 
     return null != document ? (Document) document : null;
 
+  }
+
+  /**
+   * Find available in public by id data set schema.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return true, if successful
+   */
+  @Override
+  public boolean findAvailableInPublicByIdDataSetSchema(ObjectId idDatasetSchema) {
+
+    boolean avaliable = false;
+
+    Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
+        .find(new Document("_id", idDatasetSchema))
+        .projection(new Document("availableInPublic", true)).first();
+
+    if (null != document) {
+      document = ((Document) document).get("availableInPublic");
+      if (null != document && !"".equalsIgnoreCase(document.toString())) {
+        avaliable = Boolean.parseBoolean(document.toString());
+      }
+    }
+    return avaliable;
   }
 }

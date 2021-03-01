@@ -56,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     String jwt = getJwtFromRequest(request);
+
     try {
       TokenDataVO token = null;
       if (StringUtils.hasText(jwt) && (token = tokenProvider.retrieveToken(jwt)) != null) {
@@ -68,19 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String feignInvocationUserId = request.getHeader("FeignInvocationUserId");
 
       if (!StringUtils.isEmpty(feignInvocationUser)) {
-        log.info(
-            "Invocation came from a feign client, setting security context with user {} and user id {} ",
-            feignInvocationUser, feignInvocationUserId);
-        Set<String> authorities = new HashSet<>();
-        authorities.add("FEIGN");
-        UserDetails userDetails = EeaUserDetails.create(feignInvocationUser, authorities);
-
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-        Map<String, String> details = new HashMap<>();
-        details.put(AuthenticationDetails.USER_ID, feignInvocationUserId);
-        authentication.setDetails(details);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        createFeignSecurity(feignInvocationUser, feignInvocationUserId, BEARER_TOKEN + jwt);
       } else {
         LOG_ERROR.error(
             "Could not set authentication security context: uri={}, token={}, feignInvocationUser={}",
@@ -91,6 +80,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
+  private void createFeignSecurity(String feignInvocationUser, String feignInvocationUserId,
+      String securityToken) {
+    log.info(
+        "Invocation came from a feign client, setting security context with user {} and user id {} ",
+        feignInvocationUser, feignInvocationUserId);
+    Set<String> authorities = new HashSet<>();
+    authorities.add("FEIGN");
+    UserDetails userDetails = EeaUserDetails.create(feignInvocationUser, authorities);
+
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(userDetails, securityToken,
+            userDetails.getAuthorities());
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, feignInvocationUserId);
+    authentication.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+  }
+
   /**
    * Gets the jwt from request.
    *
@@ -99,11 +106,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    * @return the jwt from request
    */
   private String getJwtFromRequest(HttpServletRequest request) {
+
     String bearerToken = request.getHeader("Authorization");
     String jwt = null;
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_TOKEN)) {
       jwt = bearerToken.substring(7, bearerToken.length());
     }
+
     return jwt;
   }
 }

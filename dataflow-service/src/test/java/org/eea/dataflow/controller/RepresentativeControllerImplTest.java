@@ -1,9 +1,12 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.service.RepresentativeService;
@@ -12,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.junit.Assert;
@@ -23,7 +27,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /** The Class RepresentativeControllerImplTest. */
@@ -48,11 +55,17 @@ public class RepresentativeControllerImplTest {
   /** The users. */
   private List<UserRepresentationVO> users;
 
+  /** The emails. */
+  private List<String> emails;
+
   /** The user. */
   private UserRepresentationVO user;
 
   /** The representative V os. */
   private List<RepresentativeVO> representativeVOs;
+
+  /** The lead reporters. */
+  private List<LeadReporterVO> leadReporters;
 
   /**
    * Inits the mocks.
@@ -63,8 +76,11 @@ public class RepresentativeControllerImplTest {
     user.setEmail("email@host.com");
     users = new ArrayList<>();
     users.add(user);
+    emails = new ArrayList<>();
+    emails.add("email@host.com");
     representativeVO = new RepresentativeVO();
-    representativeVO.setProviderAccount("email@host.com");
+    leadReporters = new ArrayList<>();
+    representativeVO.setLeadReporters(leadReporters);
     representativeVOs = new ArrayList<>();
     representativeVOs.add(representativeVO);
     MockitoAnnotations.initMocks(this);
@@ -155,74 +171,27 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void updateRepresentativeSuccessTest() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
+    when(representativeService.authorizeByRepresentativeId(Mockito.any())).thenReturn(true);
     representativeControllerImpl.updateRepresentative(representativeVO);
     Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
-  }
-
-  /**
-   * Update representative success no account test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateRepresentativeSuccessNoAccountTest() throws EEAException {
-    representativeVO.setProviderAccount(null);
-    representativeControllerImpl.updateRepresentative(representativeVO);
-    Mockito.verify(representativeService, times(1)).updateDataflowRepresentative(Mockito.any());
-
   }
 
   /**
    * Update representative exception 1 test.
-   */
-  @Test
-  public void updateRepresentativeException1Test() {
-    representativeVO.setProviderAccount("otro@host.com");
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
-    try {
-      representativeControllerImpl.updateRepresentative(representativeVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
-    }
-  }
-
-  /**
-   * Update representative exception 2 test.
    *
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateRepresentativeException2Test() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
-    when(representativeService.updateDataflowRepresentative(Mockito.any()))
-        .thenThrow(EEAException.class);
+  public void updateRepresentativeException1Test() throws EEAException {
     try {
       representativeControllerImpl.updateRepresentative(representativeVO);
     } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      assertNull(e.getReason());
     }
+
   }
 
-  /**
-   * Update representative exception 3 test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateRepresentativeException3Test() throws EEAException {
-    when(userManagementControllerZull.getUsers()).thenReturn(users);
-    when(representativeService.updateDataflowRepresentative(Mockito.any()))
-        .thenThrow(new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED));
-    try {
-      representativeControllerImpl.updateRepresentative(representativeVO);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.CONFLICT, e.getStatus());
-      assertEquals(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e.getReason());
-    }
-  }
 
   /**
    * Delete representative exception test.
@@ -272,6 +241,8 @@ public class RepresentativeControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createRepresentativeExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(representativeService).createRepresentative(Mockito.any(),
+        Mockito.any());
     try {
       representativeControllerImpl.createRepresentative(1L, new RepresentativeVO());
     } catch (ResponseStatusException e) {
@@ -304,6 +275,9 @@ public class RepresentativeControllerImplTest {
     }
   }
 
+  /**
+   * Find data providers by ids test.
+   */
   @Test
   public void findDataProvidersByIdsTest() {
     List<DataProviderVO> dataProviders = new ArrayList<>();
@@ -311,5 +285,273 @@ public class RepresentativeControllerImplTest {
         .thenReturn(dataProviders);
     assertEquals(dataProviders,
         representativeControllerImpl.findDataProvidersByIds(new ArrayList<>()));
+  }
+
+  /**
+   * Export file.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFile() throws EEAException, IOException {
+    byte[] file = null;
+    String fileName = "Dataflow-1-Lead-Reporters.csv";
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    Mockito.when(representativeService.exportFile(Mockito.any())).thenReturn(file);
+    assertEquals(new ResponseEntity<>(file, httpHeaders, HttpStatus.OK),
+        representativeControllerImpl.exportLeadReportersFile(1L));
+  }
+
+  /**
+   * Export file error.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFileError() throws EEAException, IOException {
+    Mockito.when(representativeService.exportFile(Mockito.any())).thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.exportLeadReportersFile(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(null, e.getReason());
+    }
+  }
+
+  /**
+   * Export file lead.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFileLead() throws EEAException, IOException {
+    byte[] file = null;
+    String fileName = "CountryCodes-Lead-Reporters.csv";
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    Mockito.when(representativeService.exportTemplateReportersFile(Mockito.any())).thenReturn(file);
+    assertEquals(new ResponseEntity<>(file, httpHeaders, HttpStatus.OK),
+        representativeControllerImpl.exportTemplateReportersFile(1L));
+  }
+
+  /**
+   * Export file lead error.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFileLeadError() throws EEAException, IOException {
+    Mockito.when(representativeService.exportTemplateReportersFile(Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.exportTemplateReportersFile(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(null, e.getReason());
+    }
+  }
+
+  @Test
+  public void updateLeadReporterTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("sample@email.com");
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    Mockito.when(representativeService.updateLeadReporter(Mockito.any())).thenReturn(1L);
+    Assert.assertEquals(1L,
+        representativeControllerImpl.updateLeadReporter(leadReporterVO).longValue());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterNotFoundTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("sample@email.com");
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    Mockito.when(representativeService.updateLeadReporter(Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterInvalidEmailTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("@email.com");
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterEmptyEmailTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(true);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLeadReporterUnauthorizedTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setRepresentativeId(1L);
+
+    Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
+        .thenReturn(false);
+    try {
+      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void importFileCountryTemplateTest() {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    assertNotNull(representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void importFileCountryTemplateFileExtensionTest() {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal", "csv", "content".getBytes());
+    try {
+      representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.FILE_EXTENSION, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void importFileCountryTemplateCSVExceptionTest() {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal.xlsx", "xlsx", "content".getBytes());
+    try {
+      representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.CSV_FILE_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void importFileCountryTemplateExceptionTest() throws EEAException, IOException {
+    MockMultipartFile fileMock =
+        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    when(representativeService.importFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateRepresentativeVisibilityRestrictionsTest() {
+    representativeControllerImpl.updateRepresentativeVisibilityRestrictions(1L, 1L, true);
+    Mockito.verify(representativeService, times(1)).updateRepresentativeVisibilityRestrictions(
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+  }
+
+  @Test
+  public void createLeadReporterTest() {
+    LeadReporterVO leadReporter = new LeadReporterVO();
+    leadReporter.setEmail("test@test.com");
+    assertEquals(0L, representativeControllerImpl.createLeadReporter(1L, leadReporter).longValue());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createLeadReporterNullTest() {
+    try {
+      representativeControllerImpl.createLeadReporter(null, null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createLeadReporterEmailExceptionTest() {
+    LeadReporterVO leadReporter = new LeadReporterVO();
+    leadReporter.setEmail("");
+    try {
+      representativeControllerImpl.createLeadReporter(null, leadReporter);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, ""), e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createLeadReporterExceptionTest() throws EEAException {
+    LeadReporterVO leadReporter = new LeadReporterVO();
+    leadReporter.setEmail("test@test.com");
+    Mockito.when(representativeService.createLeadReporter(Mockito.any(), Mockito.any()))
+        .thenThrow(EEAException.class);
+    try {
+      representativeControllerImpl.createLeadReporter(1L, leadReporter);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void deleteLeadReporterTest() throws EEAException {
+    representativeControllerImpl.deleteLeadReporter(0L);
+    Mockito.verify(representativeService, times(1)).deleteLeadReporter(Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteLeadReporterExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(representativeService).deleteLeadReporter(Mockito.any());
+    try {
+      representativeControllerImpl.deleteLeadReporter(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void updateInternalRepresentativeTest() {
+    assertEquals(0L, representativeControllerImpl
+        .updateInternalRepresentative(new RepresentativeVO()).longValue());
   }
 }

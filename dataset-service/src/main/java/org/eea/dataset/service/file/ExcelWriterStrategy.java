@@ -18,6 +18,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,6 +169,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     // Set records
     int nRow = 1;
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     for (RecordValue record : fileCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
 
       Row row = sheet.createRow(nRow++);

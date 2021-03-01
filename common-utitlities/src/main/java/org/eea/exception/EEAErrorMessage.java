@@ -112,6 +112,10 @@ public final class EEAErrorMessage {
   /** The Constant URL_FORMAT_INCORRECT: {@value}. */
   public static final String URL_FORMAT_INCORRECT = "Format url is incorrect";
 
+  /** The Constant URL_ALREADY_EXIST: {@value}. */
+  public static final String URL_ALREADY_EXIST = "Url already exist in this dataflow in reportnet";
+
+
   /** The Constant ID_LINK_INCORRECT: {@value}. */
   public static final String ID_LINK_INCORRECT = "Id link is incorrect";
 
@@ -157,6 +161,12 @@ public final class EEAErrorMessage {
 
   /** The Constant REPRESENTATIVE_NOT_FOUND: {@value}. */
   public static final String REPRESENTATIVE_NOT_FOUND = "Representative not found";
+
+  /** The Constant CSV_FILE_ERROR: {@value}. */
+  public static final String CSV_FILE_ERROR = "File format invalid, use csv file ";
+
+  /** The Constant DATA_FILE_ERROR: {@value}. */
+  public static final String DATA_FILE_ERROR = "File format invalid, use valid format file ";
 
   /** The Constant REPRESENTATIVE_DUPLICATED: {@value}. */
   public static final String REPRESENTATIVE_DUPLICATED = "Representative duplicated";
@@ -308,6 +318,13 @@ public final class EEAErrorMessage {
   /** The Constant PK_ID_ALREADY_EXIST: {@value}. */
   public static final String PK_ID_ALREADY_EXIST =
       "The value %s in a pk already exist in this Webform";
+
+  /** The Constant DATAFLOW_NOT_RELEASABLE: {@value}. */
+  public static final String DATAFLOW_NOT_RELEASABLE = "The dataflow %s is not releasable";
+
+  /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
+  public static final String USER_AND_COUNTRY_EXIST =
+      "Email and country already exist in this dataflow";
 
   /**
    * Instantiates a new EEA error message.

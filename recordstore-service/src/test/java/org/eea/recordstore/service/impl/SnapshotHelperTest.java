@@ -11,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,8 @@ public class SnapshotHelperTest {
 
   @Before
   public void initMocks() {
-    restorationExecutorService = Executors.newFixedThreadPool(2);
+    restorationExecutorService =
+        new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2));
     MockitoAnnotations.initMocks(this);
   }
 
@@ -48,9 +50,9 @@ public class SnapshotHelperTest {
   public void processRestorationTest() throws EEAException, SQLException, IOException,
       RecordStoreAccessException, InterruptedException {
     ReflectionTestUtils.setField(snapshotHelper, "restorationExecutorService",
-        Executors.newFixedThreadPool(2));
+        new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2)));
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
-    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
+    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
@@ -62,11 +64,11 @@ public class SnapshotHelperTest {
   public void processRestorationExceptionTest() throws EEAException, SQLException, IOException,
       RecordStoreAccessException, InterruptedException {
     ReflectionTestUtils.setField(snapshotHelper, "restorationExecutorService",
-        Executors.newFixedThreadPool(2));
+        new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2)));
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
     doThrow(new SQLException()).when(recordStoreService).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "user", true, true);
+    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, true);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
@@ -81,7 +83,6 @@ public class SnapshotHelperTest {
     snapshotHelper.destroy();
     ExecutorService z = (ExecutorService) ReflectionTestUtils.getField(snapshotHelper,
         "restorationExecutorService");
-    // Thread.sleep(1000);
     assertNotNull(z);
   }
 }

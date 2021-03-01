@@ -47,7 +47,7 @@ public class UploadDocumentFailedEventTest {
 
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
     Assert.assertEquals(5, uploadDocumentFailedEvent.getMap(NotificationVO.builder().user("user")
         .dataflowId(1L).fileName("fileName").error("error").build()).size());

@@ -11,10 +11,7 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_DATASET_DATA':
       return {
         ...state,
-        dataViewerOptions: {
-          ...state.dataViewerOptions,
-          selectedRecordErrorId: -1
-        },
+        availableInPublic: payload.availableInPublic,
         datasetDescription: payload.description,
         datasetSchema: payload.datasetSchema,
         datasetSchemaAllTables: payload.tables,
@@ -22,6 +19,7 @@ export const designerReducer = (state, { type, payload }) => {
         datasetStatistics: payload.datasetStatistics,
         dataViewerOptions: {
           ...state.dataViewerOptions,
+          selectedRecordErrorId: -1,
           tableSchemaId:
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')
@@ -46,8 +44,14 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_UNIQUES':
       return { ...state, uniqueConstraintsList: payload.data };
 
+    case 'HAS_WRITE_PERMISSIONS':
+      return { ...state, hasWritePermissions: payload.hasWritePermissions };
+
     case 'HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
+
+    case 'IS_DATAFLOW_OPEN':
+      return { ...state, isDataflowOpen: payload.isDataflowOpen };
 
     case 'UPDATED_IS_DUPLICATED':
       return { ...state, isDuplicatedToManageUnique: payload.value };
@@ -121,6 +125,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'ON_UPDATE_SCHEMA':
       return { ...state, datasetSchema: { ...state.datasetSchema, tables: payload.schema } };
+
+    case 'SET_AVAILABLE_PUBLIC_VIEW':
+      return { ...state, availableInPublic: payload };
 
     case 'SET_DATASET_HAS_DATA':
       return { ...state, datasetHasData: payload.hasData };

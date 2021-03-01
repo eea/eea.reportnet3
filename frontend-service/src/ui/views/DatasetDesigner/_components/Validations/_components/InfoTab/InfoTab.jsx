@@ -46,7 +46,7 @@ export const InfoTab = ({
 
   useEffect(() => {
     if (validationContext.level === 'field') {
-      const { tableFields } = creationFormState;
+      const { tableSqlFields } = creationFormState;
 
       const fieldDropdownOptions = {
         disabled: true,
@@ -56,17 +56,17 @@ export const InfoTab = ({
         value: null
       };
 
-      if (isNil(tableFields)) {
+      if (isNil(tableSqlFields)) {
         fieldDropdownOptions.value = null;
       }
 
-      if (!isNil(tableFields) && tableFields.length === 0) {
+      if (!isNil(tableSqlFields) && tableSqlFields.length === 0) {
         fieldDropdownOptions.placeholder = resourcesContext.messages['designSchemaTabNoFields'];
         fieldDropdownOptions.value = null;
       }
 
-      if (!isNil(tableFields) && tableFields.length > 0) {
-        fieldDropdownOptions.options = tableFields;
+      if (!isNil(tableSqlFields) && tableSqlFields.length > 0) {
+        fieldDropdownOptions.options = tableSqlFields;
         fieldDropdownOptions.disabled = false;
         fieldDropdownOptions.onChange = e => onInfoFieldChange('field', e.value);
         fieldDropdownOptions.value = creationFormState.candidateRule.field;
@@ -75,7 +75,11 @@ export const InfoTab = ({
       setFieldsDropdown(
         <Dropdown
           id={`${componentName}__field`}
-          disabled={creationFormState.candidateRule.automatic ? true : fieldDropdownOptions.disabled}
+          disabled={
+            creationFormState.candidateRule.automatic || validationContext.ruleEdit
+              ? true
+              : fieldDropdownOptions.disabled
+          }
           filterPlaceholder={fieldDropdownOptions.placeholder}
           placeholder={fieldDropdownOptions.placeholder}
           optionLabel="label"
@@ -88,7 +92,7 @@ export const InfoTab = ({
   }, [
     creationFormState.candidateRule.field,
     creationFormState.candidateRule.table,
-    creationFormState.tableFields,
+    creationFormState.tableSqlFields,
     validationContext.isVisible
   ]);
 
@@ -102,7 +106,11 @@ export const InfoTab = ({
           <label htmlFor="table">{resourcesContext.messages['table']}</label>
           <Dropdown
             appendTo={document.body}
-            disabled={creationFormState.candidateRule.automatic ? true : tableFieldOptions.disabled}
+            disabled={
+              creationFormState.candidateRule.automatic || validationContext.ruleEdit
+                ? true
+                : tableFieldOptions.disabled
+            }
             filterPlaceholder={resourcesContext.messages['table']}
             id={`${componentName}__table`}
             onChange={e => onInfoFieldChange('table', e.value)}

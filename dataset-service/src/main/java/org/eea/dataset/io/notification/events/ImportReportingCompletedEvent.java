@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -12,6 +11,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,14 +20,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImportReportingCompletedEvent implements NotificableEventHandler {
 
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
 
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  @Lazy
   @Autowired
   private DatasetSchemaService dataschemaService;
 
@@ -55,9 +53,10 @@ public class ImportReportingCompletedEvent implements NotificableEventHandler {
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long datasetId = notificationVO.getDatasetId();
-    Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
-        : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
     DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
+        : datasetVO.getDataflowId();
+
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
         : datasetVO.getDataSetName();
     String dataflowName =

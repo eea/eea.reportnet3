@@ -34,7 +34,7 @@ public class PamControllerImpl implements PamController {
    */
   @Override
   @GetMapping("/{datasetId}/getListSinglePaM/{groupPaMId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN')")
   public List<SinglePaMVO> getListSinglePaM(@PathVariable("datasetId") Long datasetId,
       @PathVariable("groupPaMId") String groupPaMId) {
     try {

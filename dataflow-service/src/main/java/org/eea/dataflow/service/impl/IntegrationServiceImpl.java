@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
@@ -28,6 +29,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -262,6 +264,7 @@ public class IntegrationServiceImpl implements IntegrationService {
    *
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
    */
   @Transactional
   @Override
@@ -295,11 +298,10 @@ public class IntegrationServiceImpl implements IntegrationService {
    */
   @Override
   public void releasePopulateEUDatasetLock(Long dataflowId) {
-    // Remove lock to the operation copy data to EU dataset
-    List<Object> criteriaCopy = new ArrayList<>();
-    criteriaCopy.add(LockSignature.POPULATE_EU_DATASET.getValue());
-    criteriaCopy.add(dataflowId);
-    lockService.removeLockByCriteria(criteriaCopy);
+    Map<String, Object> populateEuDataset = new HashMap<>();
+    populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
+    populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
+    lockService.removeLockByCriteria(populateEuDataset);
   }
 
   /**
@@ -401,9 +403,13 @@ public class IntegrationServiceImpl implements IntegrationService {
       IntegrationVO integrationVO = new IntegrationVO();
       integrationVO.setId(integrationId);
       List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);
-      if (integrations != null && !integrations.isEmpty()) {
-        integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME).execute(operation, null,
+      if (!CollectionUtils.isEmpty(integrations)
+          && (Integer) integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME)
+              .execute(operation, null, datasetId, integrations.get(0)).getExecutionResultParams()
+              .get("id") == 0) {
+        LOG_ERROR.error("Error executing external integration: datasetId={}, integration={}",
             datasetId, integrations.get(0));
+        throw new EEAException("Error executing external integration");
       }
     }
   }
@@ -425,5 +431,111 @@ public class IntegrationServiceImpl implements IntegrationService {
     }
   }
 
+  /**
+   * Release locks.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void releaseLocks(Long datasetId) {
 
+    Map<String, Object> insertRecords = new HashMap<>();
+    insertRecords.put(LiteralConstants.SIGNATURE, LockSignature.INSERT_RECORDS.getValue());
+    insertRecords.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> deleteRecords = new HashMap<>();
+    deleteRecords.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_RECORDS.getValue());
+    deleteRecords.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> updateField = new HashMap<>();
+    updateField.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_FIELD.getValue());
+    updateField.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> updateRecords = new HashMap<>();
+    updateRecords.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_RECORDS.getValue());
+    updateRecords.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> deleteDatasetValues = new HashMap<>();
+    deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+        LockSignature.DELETE_DATASET_VALUES.getValue());
+    deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> importFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> insertRecordsMultitable = new HashMap<>();
+    insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
+        LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
+    insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
+
+    lockService.removeLockByCriteria(insertRecords);
+    lockService.removeLockByCriteria(deleteRecords);
+    lockService.removeLockByCriteria(updateField);
+    lockService.removeLockByCriteria(updateRecords);
+    lockService.removeLockByCriteria(deleteDatasetValues);
+    lockService.removeLockByCriteria(importFileData);
+    lockService.removeLockByCriteria(insertRecordsMultitable);
+  }
+
+  /**
+   * Creates the lock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @param userName the user name
+   * @throws EEAException the EEA exception
+   */
+  private void createLockWithSignature(Map<String, Object> lockCriteria) throws EEAException {
+    String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    lockService.createLock(new Timestamp(System.currentTimeMillis()), user, LockType.METHOD,
+        lockCriteria);
+  }
+
+  /**
+   * Adds the locks.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void addLocks(Long datasetId) throws EEAException {
+    Map<String, Object> insertRecords = new HashMap<>();
+    insertRecords.put(LiteralConstants.SIGNATURE, LockSignature.INSERT_RECORDS.getValue());
+    insertRecords.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> deleteRecords = new HashMap<>();
+    deleteRecords.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_RECORDS.getValue());
+    deleteRecords.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> updateField = new HashMap<>();
+    updateField.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_FIELD.getValue());
+    updateField.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> updateRecords = new HashMap<>();
+    updateRecords.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_RECORDS.getValue());
+    updateRecords.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> deleteDatasetValues = new HashMap<>();
+    deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+        LockSignature.DELETE_DATASET_VALUES.getValue());
+    deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> importFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+
+    Map<String, Object> insertRecordsMultitable = new HashMap<>();
+    insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
+        LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
+    insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
+
+    createLockWithSignature(insertRecords);
+    createLockWithSignature(deleteRecords);
+    createLockWithSignature(updateField);
+    createLockWithSignature(updateRecords);
+    createLockWithSignature(deleteDatasetValues);
+    createLockWithSignature(importFileData);
+    createLockWithSignature(insertRecordsMultitable);
+  }
 }

@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -56,9 +58,9 @@ public interface DatasetService {
   /**
    * Delete import data.
    *
-   * @param dataSetId the data set id
+   * @param datasetId the data set id
    */
-  void deleteImportData(@DatasetId Long dataSetId);
+  void deleteImportData(@DatasetId Long datasetId);
 
   /**
    * Gets the table values by id.
@@ -153,10 +155,10 @@ public interface DatasetService {
   /**
    * Delete table by schema.
    *
-   * @param idTableSchema the id table schema
+   * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
    */
-  void deleteTableBySchema(String idTableSchema, @DatasetId Long datasetId);
+  void deleteTableBySchema(String tableSchemaId, @DatasetId Long datasetId);
 
   /**
    * Export file.
@@ -391,13 +393,6 @@ public interface DatasetService {
   Boolean getTableReadOnly(Long datasetId, String tableSchemaId, EntityTypeEnum type);
 
   /**
-   * Release lock.
-   *
-   * @param criteria the criteria
-   */
-  void releaseLock(Object... criteria);
-
-  /**
    * Checks if is dataset reportable. Dataset is reportable when is designDataset in dataflow with
    * status design or reportingDataset in state Draft.
    *
@@ -559,4 +554,51 @@ public interface DatasetService {
    * @return the schema if reportable
    */
   DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId);
+
+
+  /**
+   * Creates the lock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @param userName the user name
+   * @throws EEAException the EEA exception
+   */
+  void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
+      String userName) throws EEAException;
+
+
+  /**
+   * Save public file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataSetDataProvider the data set data provider
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException;
+
+
+  /**
+   * Export public file.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param fileName the fileName
+   * @return the byte[]
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
+      throws IOException, EEAException;
+
+
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  boolean checkAnySchemaAvailableInPublic(Long dataflowId);
+
+
 }

@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import dayjs from 'dayjs';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
 import styles from './HistoricReleases.module.scss';
@@ -68,11 +69,10 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     try {
       isLoading(true);
       let response = null;
-      Array.isArray(datasetId)
-        ? datasetId.length === 1
-          ? (response = await HistoricReleaseService.allHistoricReleases(datasetId[0]))
-          : (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
+      isNil(datasetId)
+        ? (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
         : (response = await HistoricReleaseService.allHistoricReleases(datasetId));
+
       response.sort((a, b) => b.releasedDate - a.releasedDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
@@ -181,39 +181,6 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     return fieldColumns;
   };
 
-  const getOrderedValidations = historicReleases => {
-    const historicReleasesWithPriority = [
-      { id: 'datasetName', index: 0 },
-      { id: 'releasedDate', index: 1 }
-    ];
-
-    return historicReleases
-      .map(error => historicReleasesWithPriority.filter(e => error === e.id))
-      .flat()
-      .sort((a, b) => a.index - b.index)
-      .map(orderedError => orderedError.id);
-  };
-
-  const renderReportingDatasetsColumns = historicReleases => {
-    const fieldColumns = getOrderedValidations(Object.keys(historicReleases[0]))
-      .filter(key => key.includes('datasetName') || key.includes('releasedDate'))
-      .map(field => {
-        let template = null;
-        if (field === 'releasedDate') template = releasedDateTemplate;
-        return (
-          <Column
-            body={template}
-            columnResizeMode="expand"
-            field={field}
-            header={resources.messages[field]}
-            key={field}
-            sortable={true}
-          />
-        );
-      });
-    return fieldColumns;
-  };
-
   if (historicReleasesState.isLoading) {
     return (
       <div className={styles.historicReleasesWithoutTable}>
@@ -240,16 +207,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         />
       )}
 
-      {datasetId.length > 1 && (
-        <Filters
-          data={historicReleasesState.data}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFiltered}
-          selectOptions={['datasetName']}
-        />
-      )}
-
-      {historicReleasesState.countryCodes.length > 1 && historicReleasesView === 'EUDataset' && (
+      {historicReleasesView === 'EUDataset' && (
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
@@ -260,7 +218,9 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
 
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
-          className={datasetId.length > 1 || historicReleasesView === 'dataCollection' ? '' : styles.noFilters}
+          className={
+            historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset' ? '' : styles.noFilters
+          }
           autoLayout={true}
           paginator={true}
           paginatorRight={getPaginatorRecordsCount()}
@@ -270,10 +230,8 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           value={historicReleasesState.filteredData}>
           {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
           {historicReleasesView === 'EUDataset' && renderEUDatasetColumns(historicReleasesState.filteredData)}
-          {datasetId.length > 1
-            ? renderReportingDatasetsColumns(historicReleasesState.filteredData)
-            : historicReleasesView === 'reportingDataset' &&
-              renderReportingDatasetColumns(historicReleasesState.filteredData)}
+          {historicReleasesView === 'reportingDataset' &&
+            renderReportingDatasetColumns(historicReleasesState.filteredData)}
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>{resources.messages['noHistoricReleasesWithSelectedParameters']}</div>

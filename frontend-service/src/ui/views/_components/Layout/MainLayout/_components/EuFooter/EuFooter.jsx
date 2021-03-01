@@ -35,7 +35,7 @@ export const EuFooter = ({ leftMargin }) => {
           <div className="rep-container">
             {bottomContent.map(link => {
               return (
-                <a key={link.title} href={link.url} target="_blank">
+                <a key={link.title} href={link.url} target="_blank" rel="noopener noreferrer">
                   {link.title}
                 </a>
               );

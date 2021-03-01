@@ -29,7 +29,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -119,8 +118,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     EventType notificationEventType = null;
     NotificationVO notificationVO = NotificationVO.builder()
-        .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
-        .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode())
+        .error("The QC Rule is disabled").build();
 
     String query = proccessQuery(datasetId, rule.getSqlSentence());
 
@@ -240,10 +240,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   * @param showNotification the show notification
    */
   @Async
   @Override
-  public void validateSQLRules(Long datasetId, String datasetSchemaId) {
+  public void validateSQLRules(Long datasetId, String datasetSchemaId, Boolean showNotification) {
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
@@ -276,14 +277,18 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           .datasetId(datasetId).dataflowId(dataflowId).invalidRules(rulesUnchecked)
           .disabledRules(rulesDisabled).build();
       LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
+      if (showNotification == null || showNotification) {
+        releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
+      }
     } else {
 
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
           .datasetId(datasetId).dataflowId(dataflowId).build();
       LOG.info("SQL rules contains 0 errors");
-      releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
+      if (showNotification == null || showNotification) {
+        releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
+      }
     }
   }
 
@@ -717,12 +722,18 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     String[] palabras = query.split("\\s+");
     for (String palabra : palabras) {
       if (palabra.contains(DATASET)) {
-        String datasetIdFromotherSchemas =
-            palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
-        datasetSchamasMap.put(
-            datasetMetabaseController
-                .findDatasetSchemaIdById(Long.parseLong(datasetIdFromotherSchemas)),
-            Long.parseLong(datasetIdFromotherSchemas));
+        try {
+          String datasetIdFromotherSchemas =
+              palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
+
+          datasetSchamasMap.put(
+              datasetMetabaseController
+                  .findDatasetSchemaIdById(Long.parseLong(datasetIdFromotherSchemas)),
+              Long.parseLong(datasetIdFromotherSchemas));
+        } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
+          LOG_ERROR.error("Error validating SQL rule, processing the sentence {}. Message {}",
+              query, e.getMessage(), e);
+        }
       }
     }
     return datasetSchamasMap;

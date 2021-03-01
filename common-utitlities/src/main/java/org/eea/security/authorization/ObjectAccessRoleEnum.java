@@ -13,10 +13,6 @@ public enum ObjectAccessRoleEnum {
    */
   DATAFLOW_REQUESTER("ROLE_DATAFLOW-%s-DATA_REQUESTER"),
   /**
-   * Dataflow steward object access role enum.
-   */
-  DATAFLOW_STEWARD("ROLE_DATAFLOW-%s-DATA_STEWARD"),
-  /**
    * Dataflow custodian object access role enum.
    */
   DATAFLOW_CUSTODIAN("ROLE_DATAFLOW-%s-DATA_CUSTODIAN"),
@@ -28,10 +24,19 @@ public enum ObjectAccessRoleEnum {
    * Dataset requester object access role enum.
    */
   DATASET_REQUESTER("ROLE_DATASET-%s-DATA_REQUESTER"),
+
+  /**
+   * Dataflow steward object access role enum.
+   */
+  DATAFLOW_STEWARD("ROLE_DATAFLOW-%s-DATA_STEWARD"),
+
   /**
    * Dataset steward object access role enum.
    */
   DATASET_STEWARD("ROLE_DATASET-%s-DATA_STEWARD"),
+
+  /** The dataschema steward. */
+  DATASCHEMA_STEWARD("ROLE_DATASCHEMA-%s-DATA_STEWARD"),
   /**
    * Dataset custodian object access role enum.
    */
@@ -60,6 +65,8 @@ public enum ObjectAccessRoleEnum {
 
   /** The dataflow editor read. */
   DATAFLOW_EDITOR_READ("ROLE_DATAFLOW-%s-EDITOR_READ"),
+
+
 
   /** The dataschema editor write. */
   DATASCHEMA_EDITOR_WRITE("ROLE_DATASCHEMA-%s-EDITOR_WRITE"),

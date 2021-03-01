@@ -38,6 +38,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
@@ -46,7 +47,6 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +57,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -139,17 +142,29 @@ public class DatasetMetabaseServiceTest {
   /** The data set metabase. */
   private DataSetMetabase dataSetMetabase;
 
+  /** The lead reporters VO. */
+  private List<LeadReporterVO> leadReportersVO;
+
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
-    ThreadPropertiesManager.setVariable("user", "user");
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     dataSetMetabase = new DataSetMetabase();
     dataSetMetabase.setId(1L);
     foreignRelations = new ForeignRelations();
     foreignRelations.setId(1L);
     foreignRelations.setIdDatasetDestination(dataSetMetabase);
+    leadReportersVO = new ArrayList<>();
+    leadReportersVO.add(new LeadReporterVO());
     MockitoAnnotations.initMocks(this);
   }
 
@@ -179,6 +194,8 @@ public class DatasetMetabaseServiceTest {
     DataProviderVO dataprovider = new DataProviderVO();
     dataprovider.setLabel("test");
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     doNothing().when(recordStoreControllerZuul).createEmptyDataset(Mockito.any(), Mockito.any());
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(dataprovider);
@@ -187,7 +204,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(reportingDatasetRepository.save(Mockito.any())).thenReturn(reporting);
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
-    representative.setProviderAccount("test@reportnet.net");
+    representative.setLeadReporters(leadReportersVO);
     datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "",
         "5d0c822ae1ccd34cfcd97e20", 1L, null, Arrays.asList(representative), 0);
 
@@ -204,11 +221,13 @@ public class DatasetMetabaseServiceTest {
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDatasetExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(kafkaSenderUtils).releaseNotificableKafkaEvent(
-        EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null, NotificationVO.builder()
-            .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(1L).build());
+        EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
+        NotificationVO.builder().user("name").dataflowId(1L).build());
     RepresentativeVO representative = new RepresentativeVO();
     representative.setDataProviderId(1L);
-    representative.setProviderAccount("test@reportnet.net");
+    representative.setLeadReporters(leadReportersVO);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     try {
       datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "datasetName",
           (new ObjectId()).toString(), 1L, null, new ArrayList<>(), 0);
@@ -393,7 +412,7 @@ public class DatasetMetabaseServiceTest {
   public void createGroupAndAddUserTest() {
 
     RepresentativeVO representative = new RepresentativeVO();
-    representative.setProviderAccount("test@reportnet.net");
+    representative.setLeadReporters(leadReportersVO);
     representative.setDataProviderId(1L);
     Map<Long, String> mapTest = new HashMap<>();
     mapTest.put(1L, "test@reportnet.net");

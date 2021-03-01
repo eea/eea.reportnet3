@@ -1,5 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
-
 export const mapReducer = (state, { type, payload }) => {
   switch (type) {
     case 'CANCEL_SAVE_MAP_NEW_POINT':

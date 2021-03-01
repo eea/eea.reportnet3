@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 /**
  * The Interface RepresentativeMapper.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = LeadReporterMapper.class)
 public interface RepresentativeMapper extends IMapper<Representative, RepresentativeVO> {
 
   /**
@@ -19,7 +19,6 @@ public interface RepresentativeMapper extends IMapper<Representative, Representa
    * @return the representative VO
    */
   @Override
-  @Mapping(source = "userMail", target = "providerAccount")
   @Mapping(source = "dataProvider.groupId", target = "dataProviderGroupId")
   @Mapping(source = "dataProvider.id", target = "dataProviderId")
   RepresentativeVO entityToClass(Representative entity);
@@ -31,8 +30,8 @@ public interface RepresentativeMapper extends IMapper<Representative, Representa
    * @return the representative
    */
   @Override
-  @Mapping(source = "providerAccount", target = "userMail")
   @Mapping(source = "dataProviderGroupId", target = "dataProvider.groupId")
   @Mapping(source = "dataProviderId", target = "dataProvider.id")
   Representative classToEntity(RepresentativeVO model);
+
 }

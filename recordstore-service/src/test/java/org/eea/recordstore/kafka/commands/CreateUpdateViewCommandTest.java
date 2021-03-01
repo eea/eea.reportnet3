@@ -55,7 +55,7 @@ public class CreateUpdateViewCommandTest {
   public void testExecute() throws Exception {
     createUpdateViewCommand.execute(eeaEventVO);
     Mockito.verify(viewHelper, Mockito.times(1)).insertViewProcces(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
 }

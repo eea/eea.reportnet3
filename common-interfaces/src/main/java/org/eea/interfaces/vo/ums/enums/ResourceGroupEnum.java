@@ -59,6 +59,9 @@ public enum ResourceGroupEnum {
 
   // DatasetSchema
 
+  /** The dataschema steward. */
+  DATASCHEMA_STEWARD("Dataschema-%s-DATA_STEWARD"),
+
   /** The dataschema custodian. */
   DATASCHEMA_CUSTODIAN("Dataschema-%s-DATA_CUSTODIAN"),
 

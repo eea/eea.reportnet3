@@ -15,6 +15,8 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.junit.Before;
@@ -58,17 +60,23 @@ public class DataSetSnapshotControllerImplTest {
   @Mock
   private ReportingDatasetRepository reportingDatasetRepository;
 
+  /** The dataflow controller zull. */
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZull;
+
   /** The security context. */
-  SecurityContext securityContext;
+  private SecurityContext securityContext;
 
   /** The authentication. */
-  Authentication authentication;
+  private Authentication authentication;
 
   /** The snapshot VO. */
-  SnapshotVO snapshotVO;
+  private SnapshotVO snapshotVO;
 
   /** The datasets. */
-  List<ReportingDataset> datasets;
+  private List<ReportingDataset> datasets;
+
+
 
   /**
    * Inits the mocks.
@@ -525,10 +533,13 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test
   public void createReleaseSnapshots() throws Exception {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setReleasable(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L);
-    Mockito.verify(datasetSnapshotService, times(1)).createReleaseSnapshots(1L, 1L);
+    dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, false);
+    Mockito.verify(datasetSnapshotService, times(1)).createReleaseSnapshots(1L, 1L, false);
   }
 
   /**
@@ -538,11 +549,14 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createReleaseSnapshotsThrow() throws Exception {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setReleasable(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L);
+    doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L, true);
     try {
-      dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L);
+      dataSetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, true);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());

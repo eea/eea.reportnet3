@@ -1,4 +1,4 @@
 {
-  "createDataCollection": "/datacollection/create?manualCheck={:isManualTechnicalAcceptance}&stopAndNotifySQLErrors={:stopAndNotifySQLErrors}",
+  "createDataCollection": "/datacollection/create?manualCheck={:isManualTechnicalAcceptance}&stopAndNotifySQLErrors={:stopAndNotifySQLErrors}&showPublicInfo={:showPublicInfo}",
   "updateDataCollectionNewRepresentatives": "/datacollection/update/{:dataflowId}"
 }

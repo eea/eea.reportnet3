@@ -265,7 +265,7 @@
         {
           "type": "FIELD",
           "name": "DescribeExistingEnvironmental",
-          "title": "Overview of existing pressures  (max. 5000 characters)",
+          "title": "Overview of existing pressures (max. 5000 characters)",
           "tooltip": "Member States shall report existing environmental, economic and social pressures that are likely to be significantly affected by climate change: e.g. loss of biodiversity, poor harvest, energy poverty, unemployment, migration. Annex I: 1.3a Footnote3"
         },
         {
@@ -573,13 +573,13 @@
         {
           "type": "FIELD",
           "name": "DescribeInstitutionalArrangements",
-          "title": "Planning, implemention, monitoring, evaluation and revision of adaptation policy  (max. 3000 characters)",
+          "title": "Planning, implementation, monitoring, evaluation and revision of adaptation policy (max. 3000 characters)",
           "tooltip": "Aspects to consider include decision making, planning and coordination related to adaptation strategies, policies, plans and goals, addressing cross-cutting issues, adjusting adaptation priorities and activities, implementing adaptation actions, including facilitating action to avert, minimise and address the adverse effect of climate change. Annex I: 2.2b"
         },
         {
           "type": "FIELD",
           "name": "DescribeEIA",
-          "title": "Integration of climate change impacts and resilience into environmental assessment procedures  (max. 750 characters)",
+          "title": "Integration of climate change impacts and resilience into environmental assessment procedures (max. 750 characters)",
           "tooltip": "Annex I: 2.2c"
         },
         {
@@ -634,7 +634,7 @@
         {
           "type": "FIELD",
           "name": "Challenges",
-          "title": "Challenges, gaps and barriers to adaptation  (max. 2000 characters)",
+          "title": "Challenges, gaps and barriers to adaptation (max. 2000 characters)",
           "tooltip": "Including those institutional, governance-related and other barriers that restrict the adaptive capacity as identified in the vulnerability assessment. Annex I: 3.2"
         },
         {
@@ -729,7 +729,7 @@
         {
           "type": "FIELD",
           "name": "OverviewEffortsClimate",
-          "title": "Overview of efforts to integrate climate change adaptation into sectoral policies, plans and programs, including disaster risk management strategies and action plans  (max. 5000 characters)",
+          "title": "Overview of efforts to integrate climate change adaptation into sectoral policies, plans and programs, including disaster risk management strategies and action plans (max. 5000 characters)",
           "tooltip": "Annex I: 3.5"
         },
         {
@@ -884,7 +884,7 @@
         {
           "type": "FIELD",
           "name": "DescribeDetailShareInformation",
-          "title": "Cooperation with Union Member States, international cooperation, and with regional and international organisations to share information and to strengthen science, institutions and adaptation knowledge  (max. 3000 characters)",
+          "title": "Cooperation with Union Member States, international cooperation, and with regional and international organisations to share information and to strengthen science, institutions and adaptation knowledge (max. 3000 characters)",
           "tooltip": "Excluding information on support to developing countries referred to in Part 2 of Annex VIII of Regulation (EU) 2018/1999. Annex I: 5.3a"
         },
         {

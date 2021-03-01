@@ -77,6 +77,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
+    availableInPublic: false,
     areLoadedSchemas: false,
     areUpdatingTables: false,
     dashDialogVisible: false,
@@ -110,6 +111,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     importButtonsList: [],
     initialDatasetDescription: '',
     isConfigureWebformDialogVisible: false,
+    isDataflowOpen: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isImportDatasetDialogVisible: false,
@@ -176,15 +178,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const accessPermission = userContext.hasContextAccessPermission(config.permissions.DATASCHEMA, datasetId, [
+        config.permissions.DATA_STEWARD,
         config.permissions.DATA_CUSTODIAN,
         config.permissions.EDITOR_READ,
         config.permissions.EDITOR_WRITE
       ]);
-      if (
-        !accessPermission &&
-        !isUndefined(designerState.metaData?.dataflow?.status) &&
-        designerState.metaData?.dataflow?.status !== 'DESIGN'
-      ) {
+      if (!accessPermission) {
+        notificationContext.add({ type: 'NOT_ALLOWED_ERROR' });
         history.push(getUrl(routes.DATAFLOWS));
       }
     }
@@ -240,13 +240,49 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     getImportList();
   }, [designerState.externalOperationsList]);
 
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      const isDataflowOpen =
+        (userContext.hasPermission(
+          [config.permissions.DATA_CUSTODIAN],
+          `${config.permissions.DATAFLOW}${dataflowId}`
+        ) ||
+          userContext.hasPermission(
+            [config.permissions.DATA_STEWARD],
+            `${config.permissions.DATAFLOW}${dataflowId}`
+          )) &&
+        designerState?.metaData?.dataflow?.status === 'DRAFT';
+      designerDispatch({
+        type: 'IS_DATAFLOW_OPEN',
+        payload: { isDataflowOpen }
+      });
+    }
+  }, [userContext, designerState?.metaData?.dataflow?.status]);
+
+  useEffect(() => {
+    if (!isUndefined(userContext.contextRoles)) {
+      if (
+        designerState?.metaData?.dataflow?.status === 'DRAFT' &&
+        !userContext.hasPermission([config.permissions.DATA_STEWARD], `${config.permissions.DATAFLOW}${dataflowId}`) &&
+        !userContext.hasPermission([config.permissions.DATA_CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`)
+      ) {
+        notificationContext.add({ type: 'NOT_ALLOWED_ERROR' });
+        history.push(getUrl(routes.DATAFLOWS));
+      }
+    }
+  }, [designerState?.metaData?.dataflow?.status, userContext]);
+
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
   const callSetMetaData = async () => {
     const metaData = await getMetadata({ datasetId, dataflowId });
     designerDispatch({
       type: 'GET_METADATA',
-      payload: { metaData, dataflowName: metaData.dataflow.name, schemaName: metaData.dataset.name }
+      payload: {
+        metaData,
+        dataflowName: metaData.dataflow.name,
+        schemaName: metaData.dataset.name
+      }
     });
   };
 
@@ -405,6 +441,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       onUpdateDescription(description);
     }
   };
+
+  const onChangeAvailableInPublicView = async checked => {
+    try {
+      designerDispatch({ type: 'SET_AVAILABLE_PUBLIC_VIEW', payload: checked });
+      await DatasetService.updateDatasetSchemaDesign(datasetId, { availableInPublic: checked });
+    } catch (error) {
+      console.error('Error during datasetSchema Available in public view update: ', error);
+    }
+  };
+
   const onChangeIsValidationSelected = options =>
     designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: options });
 
@@ -460,6 +506,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: {
+          countryName: 'DESIGN',
           dataflowId,
           dataflowName: designerState.dataflowName,
           datasetId,
@@ -467,15 +514,22 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          dataflowName: designerState.dataflowName,
-          datasetId,
-          datasetName: designerState.datasetSchemaName
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          content: {
+            countryName: 'DESIGN',
+            dataflowId,
+            dataflowName: designerState.dataflowName,
+            datasetId,
+            datasetName: designerState.datasetSchemaName
+          }
+        });
+      }
     }
   };
 
@@ -579,6 +633,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
+            availableInPublic: dataset.availableInPublic,
             datasetSchema: dataset,
             datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription,
@@ -745,6 +800,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       });
     }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'GENERIC_BLOCKED_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: designerState.datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -764,10 +829,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         content: { dataflowId, datasetId, dataflowName, datasetName }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
-        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
+          content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
+        });
+      }
     }
   };
 
@@ -815,7 +886,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         tooltipOptions={{ position: 'top' }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onHideValidationsDialog()}
@@ -825,7 +896,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderDashboardFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
@@ -841,7 +912,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         onClick={() => onImportOtherSystems()}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => cleanImportOtherSystemsDialog()}
@@ -851,7 +922,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const renderValidationsFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => manageDialogs('isValidationViewerVisible', false)}
@@ -919,7 +990,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) && !isNil(designerState.webform.value) ? renderRadioButtons() : switchView}
+          {!isNil(designerState.webform) && !isNil(designerState.webform.value) && !designerState.isDataflowOpen
+            ? renderRadioButtons()
+            : switchView}
         </div>
       </div>
     );
@@ -970,7 +1043,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['cancel']}
         onClick={() => {
@@ -992,7 +1065,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         />
       </div>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => onCloseUniqueListModal()}
@@ -1060,6 +1133,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <InputTextarea
               className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
               collapsedHeight={55}
+              disabled={designerState.isDataflowOpen}
               expandableOnClick={true}
               id="datasetDescription"
               key="datasetDescription"
@@ -1072,9 +1146,39 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
               value={designerState.datasetDescription || ''}
             />
+
             <div className={styles.datasetConfigurationButtons}>
+              <div>
+                <Checkbox
+                  id={`available_in_public_view_checkbox`}
+                  inputId={`available_in_public_view_checkbox`}
+                  isChecked={designerState.availableInPublic}
+                  onChange={e => onChangeAvailableInPublicView(e.checked)}
+                  role="checkbox"
+                />
+                <label
+                  onClick={() => {
+                    designerDispatch({
+                      type: 'SET_AVAILABLE_PUBLIC_VIEW',
+                      payload: !designerState.availableInPublic
+                    });
+                    onChangeAvailableInPublicView(!designerState.availableInPublic);
+                  }}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '11pt',
+                    fontWeight: 'bold',
+                    marginLeft: '6px',
+                    marginRight: '6px'
+                  }}>
+                  {resources.messages['availableInPublicView']}
+                </label>
+              </div>
               <Button
-                className={`p-button-secondary p-button-animated-blink datasetSchema-uniques-help-step`}
+                className={`p-button-secondary ${
+                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                } datasetSchema-uniques-help-step`}
+                disabled={designerState.isDataflowOpen}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
@@ -1085,7 +1189,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-left">
               <Fragment>
                 <Button
-                  className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+                  className={`p-button-rounded p-button-secondary ${
+                    !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                  }`}
+                  disabled={designerState.isDataflowOpen}
                   icon={'import'}
                   label={resources.messages['importDataset']}
                   onClick={
@@ -1105,7 +1212,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 )}
               </Fragment>
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                }`}
+                disabled={designerState.isDataflowOpen}
                 icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
                 id="buttonExportDataset"
                 label={resources.messages['exportDataset']}
@@ -1123,10 +1233,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && designerState.viewType['tabularData']
+                  designerState.datasetHasData && designerState.viewType['tabularData'] && !designerState.isDataflowOpen
                     ? ' p-button-animated-blink'
                     : null
                 }`}
+                disabled={designerState.isDataflowOpen}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
@@ -1136,11 +1247,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetStatistics.datasetErrors && designerState.viewType['tabularData']
+                  designerState.datasetStatistics.datasetErrors &&
+                  designerState.viewType['tabularData'] &&
+                  !designerState.isDataflowOpen
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors}
+                disabled={!designerState.datasetStatistics.datasetErrors || designerState.isDataflowOpen}
                 icon={'warning'}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
@@ -1159,7 +1272,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                }`}
+                disabled={designerState.isDataflowOpen}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
@@ -1175,18 +1291,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && 'p-button-animated-blink'
+                  designerState.datasetHasData && !designerState.isDataflowOpen && 'p-button-animated-blink'
                 }`}
-                disabled={!designerState.datasetHasData}
+                disabled={!designerState.datasetHasData || designerState.isDataflowOpen}
                 icon={'dashboard'}
                 label={resources.messages['dashboards']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
-                  !designerState.hasWritePermissions ? 'p-button-animated-blink' : null
+                  !designerState.hasWritePermissions && !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
                 }`}
-                disabled={designerState.hasWritePermissions}
+                disabled={designerState.hasWritePermissions || designerState.isDataflowOpen}
                 icon={'camera'}
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
@@ -1195,7 +1311,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Button
                 className={`p-button-rounded p-button-${
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                }  p-button-animated-blink`}
+                }  ${!designerState.isDataflowOpen ? 'p-button-animated-blink' : null}`}
+                disabled={designerState.isDataflowOpen}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
                 onClick={() => onLoadSchema()}
@@ -1220,6 +1337,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             editable={true}
             getIsTableCreated={setIsTableCreated}
             history={history}
+            isDataflowOpen={designerState.isDataflowOpen}
             isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
             isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
@@ -1352,6 +1470,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}
               hasWritePermissions={designerState.hasWritePermissions}
+              isWebformView={designerState.viewType.webform}
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
               onSelectValidation={onSelectValidation}
               schemaTables={designerState.schemaTables}

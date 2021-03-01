@@ -25,7 +25,16 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { validationReducer } from './_functions/Reducers/validationReducer';
 
 const ValidationViewer = React.memo(
-  ({ buttonsList = undefined, datasetId, levelErrorTypes, onSelectValidation, schemaTables, tables, visible }) => {
+  ({
+    buttonsList = undefined,
+    datasetId,
+    isWebformView,
+    levelErrorTypes,
+    onSelectValidation,
+    schemaTables,
+    tables,
+    visible
+  }) => {
     const resources = useContext(ResourcesContext);
 
     const [columns, setColumns] = useState([]);
@@ -335,13 +344,14 @@ const ValidationViewer = React.memo(
     };
 
     const onLoadFilteredValidations = filterData => {
+      setFirstRow(0);
       setFieldValueFilter(filterData.fieldSchemaName);
       setLevelErrorsFilter(filterData.levelError);
       setTypeEntitiesFilter(filterData.entityType);
       setTablesFilter(filterData.tableSchemaName);
 
       onLoadErrors(
-        firstRow,
+        0,
         numberRows,
         sortField,
         sortOrder,
@@ -544,11 +554,12 @@ const ValidationViewer = React.memo(
           {!isEmpty(fetchedData) ? (
             <DataTable
               autoLayout={true}
+              className={isWebformView ? styles.tableWebform : undefined}
               first={firstRow}
               lazy={true}
               loading={isLoading}
               onPage={onChangePage}
-              onRowSelect={onRowSelect}
+              onRowSelect={isWebformView ? () => {} : onRowSelect}
               onSort={onSort}
               paginator={true}
               paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}

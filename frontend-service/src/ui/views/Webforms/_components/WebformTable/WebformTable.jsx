@@ -133,14 +133,20 @@ export const WebformTable = ({
         }
       } catch (error) {
         console.error('error', error);
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'ADD_RECORDS_ERROR',
-          content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
-        });
+        if (error.response.status === 423) {
+          notificationContext.add({
+            type: 'GENERIC_BLOCKED_ERROR'
+          });
+        } else {
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+          notificationContext.add({
+            type: 'ADD_RECORDS_ERROR',
+            content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
+          });
+        }
         webformTableDispatch({
           type: 'SET_IS_ADDING_MULTIPLE',
           payload: { addingOnTableSchemaId: null, isAddingMultiple: false }

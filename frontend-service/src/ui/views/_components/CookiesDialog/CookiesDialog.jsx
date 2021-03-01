@@ -48,7 +48,7 @@ export const CookiesDialog = () => {
         <h3>Cookies</h3>
         <p>
           This site uses cookies to offer you a better browsing experience. Find out more on how we use cookies and{' '}
-          <a target="_blank" href="https://ec.europa.eu/info/cookies_en">
+          <a href="https://ec.europa.eu/info/cookies_en" target="_blank" rel="noopener noreferrer">
             how you can change your settings
           </a>
           .

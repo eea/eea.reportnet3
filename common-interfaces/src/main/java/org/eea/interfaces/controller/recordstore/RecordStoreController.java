@@ -85,7 +85,6 @@ public interface RecordStoreController {
    * @param idSnapshot the id snapshot
    * @param partitionId the partition id
    * @param datasetType the dataset type
-   * @param user the user
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
    */
@@ -94,7 +93,6 @@ public interface RecordStoreController {
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "partitionId", required = true) Long partitionId,
       @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
-      @RequestParam(value = "user", required = true) String user,
       @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
       @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData);
 

@@ -1,5 +1,4 @@
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -7,13 +6,12 @@ import { DatasetService } from 'core/services/Dataset';
 
 const getGroupValidations = (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {
   let validations = [];
-  if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
+  if (recordData?.recordValidations) {
     validations = [...recordData.recordValidations];
   }
 
-  const recordsWithFieldValidations = recordData.dataRow.filter(
-    row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
-  );
+  const recordsWithFieldValidations =
+    recordData?.dataRow.filter(row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)) || [];
 
   const getRecordValidationByErrorAndMessage = (levelError, message) => {
     return DatasetService.createValidation('RECORD', 0, levelError, message);

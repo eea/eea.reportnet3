@@ -40,6 +40,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -56,7 +57,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -508,6 +508,9 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     resourceManagementControllerZuul.createResource(
         createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.EDITOR_WRITE));
 
+    // Create group Dataschema-X-DATA_STEWARD
+    resourceManagementControllerZuul.createResource(
+        createGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA, SecurityRoleEnum.DATA_STEWARD));
 
   }
 
@@ -552,7 +555,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
               kafkaSenderUtils.releaseNotificableKafkaEvent(
                   EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
                   NotificationVO.builder()
-                      .user((String) ThreadPropertiesManager.getVariable("user"))
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
                       .dataflowId(dataflowId).build());
 
             }
@@ -589,7 +592,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         // Error notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
             null,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .dataflowId(dataflowId).error(e.getMessage()).build());
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.EXECUTION_ERROR);
@@ -641,7 +645,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
     dataset.setDataProviderId(representative.getDataProviderId());
     Long idDataset = reportingDatasetRepository.save(dataset).getId();
-    datasetIdsEmail.put(idDataset, representative.getProviderAccount());
+    for (String email : representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
+        .collect(Collectors.toList())) {
+      datasetIdsEmail.put(idDataset, email);
+    }
     recordStoreControllerZuul.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
         datasetSchemaId);
     LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,

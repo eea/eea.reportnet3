@@ -5,14 +5,17 @@
   padding-left: 0px;
   list-style: none;
 }
-
+.inputWrapper {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
 .dataProvidersDropdown {
   max-width: 16rem;
 }
 
-.btnDelete {
+.deleteButton {
   border: 1px solid var(--c-custom-gray) !important;
-  box-shadow: 0em var(--blue-100) !important;
+  box-shadow: 0 0 0 0em var(--blue-120) !important;
   color: var(--errors) !important;
   margin-left: 3px !important;
 
@@ -20,13 +23,18 @@
     box-shadow: none;
   }
 }
+.exportTemplate {
+  margin-left: 1rem !important;
+}
+
 .selectWrapper {
   display: flex;
   justify-items: center;
+  align-items: center;
   align-self: center;
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.6rem;
 }
 
 .addDataProviderButtonWrapper :global .formField {
@@ -68,5 +76,12 @@
     svg {
       width: 100px;
     }
+  }
+}
+
+.hasErrors {
+  border: 2px solid var(--errors) !important;
+  &:focus {
+    box-shadow: none !important;
   }
 }

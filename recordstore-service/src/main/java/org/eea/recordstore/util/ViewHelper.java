@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,28 +53,26 @@ public class ViewHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
-    viewExecutorService = Executors.newFixedThreadPool(maxRunningTasks);
+    viewExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
     processesList = new ArrayList<>();
   }
-
 
   /**
    * Insert view procces.
    *
    * @param datasetId the dataset id
-   * @param isMaterialized
-   * @param user the username
+   * @param isMaterialized the is materialized
    * @param checkSQL the check SQL
    */
-  public void insertViewProcces(Long datasetId, Boolean isMaterialized, String user,
-      Boolean checkSQL) {
+  public void insertViewProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // Check the number of views per dataset in this moment queued
-    switch (processesList.stream().filter(x -> datasetId.equals(x)).collect(Collectors.counting())
+    switch (processesList.stream().filter(datasetId::equals).collect(Collectors.counting())
         .toString()) {
       case "0":
         // no processes running, then we should queue it
-        viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
-            isMaterialized, user, checkSQL));
+        viewExecutorService.execute(
+            () -> executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL));
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       case "1":
@@ -104,15 +103,13 @@ public class ViewHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param isMaterialized the is materialized
-   * @param user the user
    * @param checkSQL the check SQL
    */
-  public void finishProcces(Long datasetId, Boolean isMaterialized, String user, Boolean checkSQL) {
+  public void finishProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // If we hace two dataset view generating process we have to execute it again
-    if (2 == processesList.stream().filter(x -> datasetId.equals(x))
-        .collect(Collectors.counting())) {
-      viewExecutorService.execute(() -> executeCreateUpdateMaterializedQueryView(datasetId,
-          isMaterialized, user, checkSQL));
+    if (2 == processesList.stream().filter(datasetId::equals).collect(Collectors.counting())) {
+      viewExecutorService.execute(
+          () -> executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL));
     }
     // update the proesses list in every recordstore instance
     releaseDeleteViewProccesEvent(datasetId);
@@ -130,23 +127,20 @@ public class ViewHelper implements DisposableBean {
     }
   }
 
-
-
   /**
    * Initialize create update materialized query view.
    *
    * @param datasetId the dataset id
    * @param isMaterialized the is materialized
-   * @param user the user
    * @param checkSQL the check SQL
    */
   public void executeCreateUpdateMaterializedQueryView(Long datasetId, Boolean isMaterialized,
-      String user, Boolean checkSQL) {
+      Boolean checkSQL) {
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
     if (Boolean.TRUE.equals(checkSQL)) {
-      releaseValidateManualQCEvent(datasetId, user, true);
+      releaseValidateManualQCEvent(datasetId, true);
     }
-    releaseFinishViewProcessEvent(datasetId, isMaterialized, user, checkSQL);
+    releaseFinishViewProcessEvent(datasetId, isMaterialized, checkSQL);
   }
 
 
@@ -164,36 +158,30 @@ public class ViewHelper implements DisposableBean {
    * Release validate manual QC event.
    *
    * @param datasetId the dataset id
-   * @param user the user
    * @param checkNoSQL the check no SQL
    */
-  private void releaseValidateManualQCEvent(Long datasetId, String user, boolean checkNoSQL) {
+  private void releaseValidateManualQCEvent(Long datasetId, boolean checkNoSQL) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
     result.put("checkNoSQL", checkNoSQL);
-    result.put(LiteralConstants.USER, user);
     kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATE_MANUAL_QC_COMMAND, result);
   }
-
 
   /**
    * Release finish view process event.
    *
    * @param datasetId the dataset id
    * @param isMaterialized the is materialized
-   * @param user the user
    * @param checkNoSQL the check no SQL
    */
-  private void releaseFinishViewProcessEvent(Long datasetId, Boolean isMaterialized, String user,
+  private void releaseFinishViewProcessEvent(Long datasetId, Boolean isMaterialized,
       boolean checkNoSQL) {
     Map<String, Object> result = new HashMap<>();
     result.put(LiteralConstants.DATASET_ID, datasetId);
     result.put("isMaterialized", isMaterialized);
     result.put("checkNoSQL", checkNoSQL);
-    result.put(LiteralConstants.USER, user);
     kafkaSenderUtils.releaseKafkaEvent(EventType.FINISH_VIEW_PROCCES_EVENT, result);
   }
-
 
   /**
    * Destroy.

@@ -207,10 +207,9 @@ public class RecordStoreControllerImplTest {
   @Test
   public void testRestoreSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
-    recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, "", true,
-        false);
+    recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, false);
     Mockito.verify(restoreSnapshotHelper, times(1)).processRestoration(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test

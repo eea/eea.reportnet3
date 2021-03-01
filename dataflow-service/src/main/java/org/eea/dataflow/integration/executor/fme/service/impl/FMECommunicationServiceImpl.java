@@ -2,7 +2,6 @@ package org.eea.dataflow.integration.executor.fme.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +19,10 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -59,94 +60,66 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class FMECommunicationServiceImpl implements FMECommunicationService {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMECommunicationServiceImpl.class);
 
-  /**
-   * The Constant APPLICATION_JSON: {@value}.
-   */
+  /** The Constant APPLICATION_JSON: {@value}. */
   private static final String APPLICATION_JSON = "application/json";
 
-  /**
-   * The Constant CONTENT_TYPE: {@value}.
-   */
+  /** The Constant CONTENT_TYPE: {@value}. */
   private static final String CONTENT_TYPE = "Content-Type";
 
-  /**
-   * The Constant ACCEPT: {@value}.
-   */
+  /** The Constant ACCEPT: {@value}. */
   private static final String ACCEPT = "Accept";
 
-  /**
-   * The Constant DATASETID: {@value}.
-   */
+  /** The Constant DATASETID: {@value}. */
   private static final String DATASETID = "datasetId";
 
-  /**
-   * The Constant PROVIDERID: {@value}.
-   */
+  /** The Constant PROVIDERID: {@value}. */
   private static final String PROVIDERID = "providerId";
 
-  /**
-   * The fme host.
-   */
+  /** The fme host. */
   @Value("${integration.fme.host}")
   private String fmeHost;
 
-  /**
-   * The fme scheme.
-   */
+  /** The fme scheme. */
   @Value("${integration.fme.scheme}")
   private String fmeScheme;
 
-  /**
-   * The fme token.
-   */
+  /** The fme token. */
   @Value("${integration.fme.token}")
   private String fmeToken;
 
-  /**
-   * The fme collection mapper.
-   */
+  /** The fme collection mapper. */
   @Autowired
   private FMECollectionMapper fmeCollectionMapper;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The rest template.
-   */
+  /** The rest template. */
   @Autowired
   private RestTemplate restTemplate;
 
-  /**
-   * The user management controller zull.
-   */
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /**
-   * The fme job repository.
-   */
+  /** The fme job repository. */
   @Autowired
   private FMEJobRepository fmeJobRepository;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The dataset metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /**
    * Submit async job.
@@ -179,11 +152,11 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
 
       if (null != checkResult && null != checkResult.getBody()
-          && null != checkResult.getBody()
-          .getId()) { //NOSONAR check result and body are verified not to be null. false positive
+          && null != checkResult.getBody().getId()) { // NOSONAR check result and body are verified
+                                                      // not to be null. false positive
         LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
-        result = checkResult.getBody()
-            .getId(); //NOSONAR check result and body are verified not to be null. false positive
+        result = checkResult.getBody().getId(); // NOSONAR check result and body are verified not to
+                                                // be null. false positive
       } else {
         throw new IllegalStateException("Error submitting job to FME, no result retrieved");
       }
@@ -314,15 +287,16 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     ResponseEntity<byte[]> checkResult = null;
     try {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-              .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
+          .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
           byte[].class);
     } catch (HttpClientErrorException e) {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     }
     InputStream stream = null;
     if (null != checkResult && null != checkResult.getBody()) {
-      stream = new ByteArrayInputStream(checkResult
-          .getBody()); //NOSONAR  check result and body are verified not to be null. false positive
+      stream = new ByteArrayInputStream(checkResult.getBody()); // NOSONAR check result and body are
+                                                                // verified not to be null. false
+                                                                // positive
     } else {
       stream = new ByteArrayInputStream(new byte[0]);
     }
@@ -552,7 +526,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       Long datasetId, String userName, boolean notificationRequired) {
 
     EventType eventType = null;
-
+    // Release lock related to Releasing Process
+    releaseLockReleasingProcess(datasetId);
     if (isStatusCompleted) {
       if (notificationRequired) {
         if (isReporting) {
@@ -570,8 +545,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
     }
 
-    lockService
-        .removeLockByCriteria(Arrays.asList(LockSignature.IMPORT_FILE_DATA.getValue(), datasetId));
+    Map<String, Object> importFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importFileData);
 
     return eventType;
   }
@@ -633,6 +610,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   private EventType importFromOtherSystemNotification(boolean isReporting,
       boolean isStatusCompleted, Long datasetId, String userName) {
     EventType eventType;
+    // Release lock related to Releasing Process
+    releaseLockReleasingProcess(datasetId);
     if (isStatusCompleted) {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
@@ -661,6 +640,24 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     values.put(LiteralConstants.DATASET_ID, datasetId);
     values.put(LiteralConstants.USER, userName);
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
+  }
+
+  /**
+   * Release lock releasing process.
+   *
+   * @param datasetId the dataset id
+   */
+  private void releaseLockReleasingProcess(Long datasetId) {
+    // Release lock to the releasing process
+    DataSetMetabaseVO datasetMetabaseVO =
+        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      Map<String, Object> releaseSnapshots = new HashMap<>();
+      releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      releaseSnapshots.put(LiteralConstants.DATAFLOWID, datasetMetabaseVO.getDataflowId());
+      releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, datasetMetabaseVO.getDataProviderId());
+      lockService.removeLockByCriteria(releaseSnapshots);
+    }
   }
 
   /**

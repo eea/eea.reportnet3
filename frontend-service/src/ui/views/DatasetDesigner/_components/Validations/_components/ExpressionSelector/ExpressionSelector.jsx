@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
+import { config } from 'conf';
+
 import styles from './ExpressionSelector.module.scss';
 
 import { Dropdown } from 'primereact/dropdown';
@@ -51,6 +53,17 @@ export const ExpressionSelector = ({
 
   const getOptions = () => {
     if (validationContext.level === 'field') {
+      const {
+        validations: {
+          bannedTypes: { nonSql }
+        }
+      } = config;
+      const {
+        candidateRule: { fieldType }
+      } = creationFormState;
+      if (nonSql.includes(fieldType?.toLowerCase())) {
+        return [{ label: resources.messages['sqlSentence'], value: 'sqlSentence' }];
+      }
       return [
         { label: resources.messages['fieldComparisonLabel'], value: 'fieldTab' },
         { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
@@ -170,16 +183,18 @@ export const ExpressionSelector = ({
   };
   return (
     <>
-      <div className={styles.section} style={validationContext.ruleEdit ? { display: 'none' } : {}}>
-        <Dropdown
-          onChange={e => onExpressionTypeToggle(e.value)}
-          optionLabel="label"
-          options={getOptions()}
-          placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
-          style={{ width: '12em' }}
-          value={expressionTypeValue}
-        />
-      </div>
+      {!validationContext.ruleEdit && (
+        <div className={styles.section}>
+          <Dropdown
+            onChange={e => onExpressionTypeToggle(e.value)}
+            optionLabel="label"
+            options={getOptions()}
+            placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
+            style={{ width: '12em' }}
+            value={expressionTypeValue}
+          />
+        </div>
+      )}
 
       <div className={styles.section}>{expressionsTypeView()} </div>
     </>

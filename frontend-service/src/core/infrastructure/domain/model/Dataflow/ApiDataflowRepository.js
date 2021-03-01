@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import orderBy from 'lodash/orderBy';
 import dayjs from 'dayjs';
 
 import { config } from 'conf';
@@ -94,8 +95,13 @@ const all = async userData => {
 
     for (let i = 0; i < pendingDataflowsDTO.length; i++) {
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-      if (pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN']) {
+      if (pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN'] && pendingDataflowsDTO[i].releasable) {
         pendingDataflowsDTO[i].status = 'OPEN';
+      } else if (
+        pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN'] &&
+        !pendingDataflowsDTO[i].releasable
+      ) {
+        pendingDataflowsDTO[i].status = 'CLOSED';
       }
       dataflows.push({
         ...pendingDataflowsDTO[i],
@@ -104,9 +110,9 @@ const all = async userData => {
     }
   }
 
-  const groupByUserRequesetStatus = CoreUtils.onGroupBy('userRequestStatus');
+  const groupByUserRequestStatus = CoreUtils.onGroupBy('userRequestStatus');
 
-  const dataflowsData = groupByUserRequesetStatus(dataflows);
+  const dataflowsData = groupByUserRequestStatus(dataflows);
 
   const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
   Object.keys(dataflowsData).forEach(key => {
@@ -302,6 +308,10 @@ const deleteById = async dataflowId => {
   return await apiDataflow.deleteById(dataflowId);
 };
 
+const downloadById = async dataflowId => {
+  return await apiDataflow.downloadById(dataflowId);
+};
+
 const getAllSchemas = async dataflowId => {
   const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
   const datasetSchemas = datasetSchemasDTO.map(datasetSchemaDTO => {
@@ -374,6 +384,16 @@ const getAllSchemas = async dataflowId => {
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
+const getPublicDataflowData = async dataflowId => {
+  const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
+
+  const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO);
+
+  publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
+
+  return publicDataflowData;
+};
+
 const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.generateApiKey(dataflowId, dataProviderId, isCustodian);
 
@@ -398,6 +418,7 @@ const parseDataflowDTOs = dataflowDTOs => {
 
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
+    anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
@@ -407,12 +428,14 @@ const parseDataflowDTO = dataflowDTO =>
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
+    isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
     reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
+    showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     userRequestStatus: dataflowDTO.userRequestStatus,
     userRole: dataflowDTO.userRole,
@@ -477,11 +500,14 @@ const parseDatasetListDTO = datasetsDTO => {
 
 const parseDatasetDTO = datasetDTO =>
   new Dataset({
+    availableInPublic: datasetDTO.availableInPublic,
     datasetId: datasetDTO.id,
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
+    publicFileName: datasetDTO.publicFileName,
+    releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });
@@ -554,13 +580,20 @@ const parseRepresentativeDTO = representativeDTO => {
   return new Representative({
     dataProviderGroupId: representativeDTO.dataProviderGroupId,
     dataProviderId: representativeDTO.dataProviderId,
+    hasDatasets: representativeDTO.hasDatasets,
     id: representativeDTO.id,
     isReceiptDownloaded: representativeDTO.receiptDownloaded,
     isReceiptOutdated: representativeDTO.receiptOutdated,
-    providerAccount: representativeDTO.providerAccount,
-    hasDatasets: representativeDTO.hasDatasets
+    leadReporters: parseLeadReporters(representativeDTO.leadReporters)
   });
 };
+
+const parseLeadReporters = (leadReporters = []) =>
+  leadReporters.map(leadReporter => ({
+    account: leadReporter.email,
+    id: leadReporter.id,
+    representativeId: leadReporter.representativeId
+  }));
 
 const parseWebLinkListDTO = webLinksDTO => {
   if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
@@ -578,6 +611,26 @@ const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 const pending = async () => {
   const pendingDataflowsDTO = await apiDataflow.pending();
   return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
+};
+
+const publicData = async () => {
+  const publicDataflows = await apiDataflow.publicData();
+
+  const publicDataflowsDTO = publicDataflows.map(
+    publicDataflow =>
+      new Dataflow({
+        description: publicDataflow.description,
+        expirationDate:
+          publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
+        id: publicDataflow.id,
+        name: publicDataflow.name,
+        obligation: parseObligationDTO(publicDataflow.obligation),
+        status: publicDataflow.status,
+        isReleasable: publicDataflow.releasable
+      })
+  );
+
+  return publicDataflowsDTO;
 };
 
 const reject = async dataflowId => {
@@ -600,8 +653,8 @@ const schemasValidation = async dataflowId => {
   return await apiDataflow.schemasValidation(dataflowId);
 };
 
-const update = async (dataflowId, name, description, obligationId) =>
-  await apiDataflow.update(dataflowId, name, description, obligationId);
+const update = async (dataflowId, name, description, obligationId, isReleasable) =>
+  await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable);
 
 export const ApiDataflowRepository = {
   accept,
@@ -615,11 +668,14 @@ export const ApiDataflowRepository = {
   datasetsReleasedStatus,
   datasetsValidationStatistics,
   deleteById,
+  downloadById,
   generateApiKey,
   getAllSchemas,
   getApiKey,
+  getPublicDataflowData,
   newEmptyDatasetSchema,
   pending,
+  publicData,
   reject,
   reporting,
   schemasValidation,

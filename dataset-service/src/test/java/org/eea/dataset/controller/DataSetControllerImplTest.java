@@ -33,6 +33,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,15 +58,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RunWith(MockitoJUnitRunner.class)
 public class DataSetControllerImplTest {
 
-  /**
-   * The data set controller impl.
-   */
+  /** The data set controller impl. */
   @InjectMocks
   private DataSetControllerImpl dataSetControllerImpl;
 
-  /**
-   * The dataset service.
-   */
+  /** The dataset service. */
   @Mock
   private DatasetServiceImpl datasetService;
 
@@ -73,9 +70,11 @@ public class DataSetControllerImplTest {
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
-  /**
-   * The design dataset service.
-   */
+  /** The lock service. */
+  @Mock
+  private LockService lockService;
+
+  /** The design dataset service. */
   @Mock
   private DesignDatasetServiceImpl designDatasetService;
 
@@ -83,48 +82,32 @@ public class DataSetControllerImplTest {
   @Mock
   private DatasetSchemaService datasetSchemaService;
 
-  /**
-   * The records.
-   */
-  private List<RecordVO> records;
-
-  /**
-   * The record ids.
-   */
-  private String recordId;
-
-  /**
-   * The update record helper.
-   */
+  /** The update record helper. */
   @Mock
   private UpdateRecordHelper updateRecordHelper;
 
-  /**
-   * The file treatment helper.
-   */
+  /** The file treatment helper. */
   @Mock
   private FileTreatmentHelper fileTreatmentHelper;
 
-  /**
-   * The security context.
-   */
+  /** The delete helper. */
+  @Mock
+  private DeleteHelper deleteHelper;
+
+  /** The records. */
+  private List<RecordVO> records;
+
+  /** The record id. */
+  private String recordId;
+
+  /** The security context. */
   private SecurityContext securityContext;
 
-  /**
-   * The authentication.
-   */
+  /** The authentication. */
   private Authentication authentication;
 
   /** The file mock. */
   private MockMultipartFile fileMock;
-
-
-  /**
-   * The delete helper.
-   */
-  @Mock
-  private DeleteHelper deleteHelper;
-
 
   /**
    * Inits the mocks.
@@ -480,6 +463,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test delete import table fixed number exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteImportTableFixedNumberException() throws Exception {
     try {
@@ -611,6 +599,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test delete record fixed number exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordFixedNumberException() throws Exception {
     try {
@@ -862,6 +855,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test get attachment.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testGetAttachment() throws Exception {
 
@@ -873,6 +871,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).getAttachment(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test get attachment exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testGetAttachmentException() throws Exception {
 
@@ -885,6 +888,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test update attachment.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testUpdateAttachment() throws Exception {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
@@ -902,6 +910,11 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test update attachment with limits.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testUpdateAttachmentWithLimits() throws Exception {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
@@ -921,6 +934,11 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test update attachment exception dataset not found.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateAttachmentExceptionDatasetNotFound() throws Exception {
     MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
@@ -934,6 +952,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test update attachment exception field not found.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateAttachmentExceptionFieldNotFound() throws Exception {
     MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
@@ -952,6 +975,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test update attachment exception invalid attachment.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateAttachmentExceptionInvalidAttachment() throws Exception {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
@@ -976,6 +1004,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test update attachment exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testUpdateAttachmentException() throws Exception {
 
@@ -999,6 +1032,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Test delete attachment.
+   *
+   * @throws Exception the exception
+   */
   @Test
   public void testDeleteAttachment() throws Exception {
 
@@ -1006,6 +1044,11 @@ public class DataSetControllerImplTest {
     Mockito.verify(datasetService, times(1)).deleteAttachment(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Test delete attachment exception.
+   *
+   * @throws Exception the exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void testDeleteAttachmentException() throws Exception {
     Mockito.doThrow(new EEAException()).when(datasetService).deleteAttachment(Mockito.anyLong(),
@@ -1018,6 +1061,12 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Export file test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void exportFileTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
@@ -1029,6 +1078,12 @@ public class DataSetControllerImplTest {
     Assert.assertEquals(1, result.getBody().length);
   }
 
+  /**
+   * Export file exception invalid schema test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = ResponseStatusException.class)
   public void exportFileExceptionInvalidSchemaTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
@@ -1041,6 +1096,12 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Export file exception exporting test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = ResponseStatusException.class)
   public void exportFileExceptionExportingTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
@@ -1055,6 +1116,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Export file through integration test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportFileThroughIntegrationTest() throws EEAException {
     Mockito.doNothing().when(datasetService).exportFileThroughIntegration(Mockito.anyLong(),
@@ -1064,6 +1130,11 @@ public class DataSetControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Export file through integration exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void exportFileThroughIntegrationExceptionTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(datasetService)
@@ -1076,6 +1147,9 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Delete data to replace test.
+   */
   @Test
   public void deleteDataToReplaceTest() {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -1086,6 +1160,11 @@ public class DataSetControllerImplTest {
         Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Insert records test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRecordsTest() throws EEAException {
     dataSetControllerImpl.insertRecords(1L, "", new ArrayList<RecordVO>());
@@ -1093,6 +1172,11 @@ public class DataSetControllerImplTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Inser records exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void inserRecordsExceptionTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(updateRecordHelper)
@@ -1105,6 +1189,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Insert records multi table.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void insertRecordsMultiTable() throws EEAException {
     dataSetControllerImpl.insertRecordsMultiTable(1L, new ArrayList<TableVO>());
@@ -1112,6 +1201,11 @@ public class DataSetControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Insert records multi table exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void insertRecordsMultiTableExceptionTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(updateRecordHelper)
@@ -1124,6 +1218,11 @@ public class DataSetControllerImplTest {
     }
   }
 
+  /**
+   * Import file data test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void importFileDataTest() throws EEAException {
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
@@ -1133,12 +1232,17 @@ public class DataSetControllerImplTest {
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean());
   }
 
+  /**
+   * Import file data exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void importFileDataExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean());
-    Mockito.when(file.getName()).thenReturn("fileName.csv");
+    Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     try {
       dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true);
     } catch (ResponseStatusException e) {
@@ -1147,4 +1251,22 @@ public class DataSetControllerImplTest {
     }
 
   }
+
+  /**
+   * Export public file throws.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportPublicFileThrows() throws EEAException, IOException {
+    Mockito.doThrow(EEAException.class).when(datasetService).exportPublicFile(Mockito.anyLong(),
+        Mockito.any(), Mockito.anyString());
+    ResponseEntity<?> value = dataSetControllerImpl.exportPublicFile(Mockito.anyLong(),
+        Mockito.any(), Mockito.anyString());
+    assertEquals(null, value.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
+
+  }
+
 }

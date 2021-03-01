@@ -93,7 +93,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
-  const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
@@ -159,7 +158,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   useEffect(() => {
     onLoadDatasetSchema();
-  }, [isDataDeleted]);
+  }, []);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -348,25 +347,31 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onConfirmDelete = async () => {
     try {
-      setDeleteDialogVisible(false);
-      const dataDeleted = await DatasetService.deleteDataById(datasetId);
-      if (dataDeleted) {
-        setIsDataDeleted(true);
-      }
-    } catch (error) {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
-        type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        type: 'DELETE_DATASET_DATA_INIT'
       });
+      setDeleteDialogVisible(false);
+      await DatasetService.deleteDataById(datasetId);
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            dataflowName,
+            datasetName
+          }
+        });
+      }
     }
   };
 
@@ -376,23 +381,19 @@ export const Dataset = withRouter(({ match, history }) => {
       await DatasetService.validateDataById(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
-      notificationContext.add({
-        type: 'VALIDATE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        });
+      }
     }
   };
 
@@ -408,6 +409,16 @@ export const Dataset = withRouter(({ match, history }) => {
         content: { dataflowId, datasetId, datasetName: datasetSchemaName }
       });
     }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'GENERIC_BLOCKED_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          datasetName: datasetSchemaName
+        }
+      });
+    }
   };
 
   const onImportOtherSystems = async () => {
@@ -418,7 +429,7 @@ export const Dataset = withRouter(({ match, history }) => {
         datasetId,
         replaceData
       );
-      if (dataImported) {
+      if (dataImported.status >= 200 && dataImported.status <= 299) {
         setIsDataLoaded(true);
       }
       const {
@@ -429,14 +440,20 @@ export const Dataset = withRouter(({ match, history }) => {
         type: 'DATASET_IMPORT_INIT',
         content: { dataflowId, datasetId, dataflowName, datasetName }
       });
-    } catch {
-      notificationContext.add({
-        type: 'EXTERNAL_IMPORT_REPORING_FROM_OTHER_SYSTEM_ERROR',
-        content: {
-          dataflowName: dataflowName,
-          datasetName: datasetName
-        }
-      });
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        notificationContext.add({
+          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
+          content: {
+            dataflowName: dataflowName,
+            datasetName: datasetName
+          }
+        });
+      }
     }
   };
   useEffect(() => {
@@ -529,7 +546,7 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   useCheckNotifications(
-    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
     onLoadDataflow
   );
 
@@ -708,7 +725,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const validationListFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => onSetVisible(setValidationListDialogVisible, false)}
@@ -752,7 +769,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const renderDashboardFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => onSetVisible(setDashDialogVisible, false)}
@@ -768,7 +785,7 @@ export const Dataset = withRouter(({ match, history }) => {
         onClick={() => onImportOtherSystems()}
       />
       <Button
-        className="p-button-secondary"
+        className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => cleanImportOtherSystemsDialog()}
@@ -800,7 +817,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const renderValidationsFooter = (
     <Button
-      className="p-button-secondary p-button-animated-blink"
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => setValidationsVisible(false)}
@@ -962,7 +979,6 @@ export const Dataset = withRouter(({ match, history }) => {
         <TabsSchema
           isReportingWebform={isReportingWebform}
           hasWritePermissions={hasWritePermissions}
-          isDatasetDeleted={isDataDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isValidationSelected={dataViewerOptions.isValidationSelected}
@@ -985,6 +1001,7 @@ export const Dataset = withRouter(({ match, history }) => {
         <Webforms
           dataflowId={dataflowId}
           datasetId={datasetId}
+          isReleasing={dataset.isReleasing}
           isReporting
           state={{
             datasetSchema: { tables: datasetSchemaAllTables },
@@ -1007,6 +1024,7 @@ export const Dataset = withRouter(({ match, history }) => {
             datasetId={datasetId}
             datasetName={datasetName}
             hasWritePermissions={hasWritePermissions}
+            isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
             schemaTables={schemaTables}

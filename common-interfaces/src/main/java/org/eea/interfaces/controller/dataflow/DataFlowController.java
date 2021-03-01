@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -153,4 +154,32 @@ public interface DataFlowController {
   void updateDataFlowStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("status") TypeStatusEnum status,
       @RequestParam(value = "deadLineDate", required = false) Date deadLineDate);
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  @GetMapping("/getPublicDataflows")
+  List<DataflowPublicVO> getPublicDataflows();
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+
+  @GetMapping("/getPublicDataflow/{dataflowId}")
+  DataflowPublicVO getPublicDataflow(@PathVariable("dataflowId") Long dataflowId);
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @PutMapping("private/updatePublicStatus")
+  void updateDataFlowPublicStatus(@RequestParam("dataflowId") Long dataflowId,
+      @RequestParam("showPublicInfo") boolean showPublicInfo);
+
+
 }

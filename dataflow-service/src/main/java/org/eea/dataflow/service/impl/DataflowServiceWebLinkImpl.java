@@ -123,6 +123,13 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
       throw new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     weblink.setDataflow(dataflow.get());
+
+    Optional<Weblink> weblinkfound =
+        webLinkRepository.findByUrlAndDataflowId(weblink.getUrl(), idDataflow);
+    if (weblinkfound.isPresent()) {
+      throw new EEAException(EEAErrorMessage.URL_ALREADY_EXIST);
+    }
+
     webLinkRepository.save(weblink);
     LOG.info("Save the link: {}, with description: {} , in {}", weblink.getUrl(),
         weblink.getDescription(), dataflow.get().getName());
@@ -195,13 +202,21 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
       throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
-    Optional<Weblink> webLinkFound = webLinkRepository.findById(weblink.getId());
-    if (!webLinkFound.isPresent()) {
+    Optional<Weblink> weblinkFound = webLinkRepository.findById(weblink.getId());
+    if (!weblinkFound.isPresent()) {
       throw new EntityNotFoundException(EEAErrorMessage.ID_LINK_NOT_FOUND);
     }
-    webLinkFound.get().setDescription(weblink.getDescription());
-    webLinkFound.get().setUrl(weblink.getUrl());
-    webLinkRepository.save(webLinkFound.get());
+
+    Optional<Weblink> weblinkExist =
+        webLinkRepository.findByUrlAndDataflowId(weblink.getUrl(), dataFlowId);
+    if (weblinkExist.isPresent()
+        && !weblinkExist.get().getId().equals(weblinkFound.get().getId())) {
+      throw new EEAException(EEAErrorMessage.URL_ALREADY_EXIST);
+    }
+
+    weblinkFound.get().setDescription(weblink.getDescription());
+    weblinkFound.get().setUrl(weblink.getUrl());
+    webLinkRepository.save(weblinkFound.get());
     LOG.info("Save the link with id : {}", weblink.getId());
 
   }

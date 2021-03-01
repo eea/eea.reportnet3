@@ -18,11 +18,12 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,6 +42,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   private ValidationRepository validationRepository;
 
   /** The kafka sender utils. */
+  @Lazy
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
@@ -76,7 +78,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
+
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+
+    LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
 
     // with one id we take all the datasets with the same dataProviderId and dataflowId
     DataSetMetabase dataset =
@@ -98,7 +104,8 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
             "Error in the releasing process of the dataflowId {} and dataProviderId {}, the datasets have blocker errors",
             dataset.getDataflowId(), dataset.getDataProviderId());
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId)
                 .error("One or more datasets have blockers errors, Release aborted")
                 .providerId(dataset.getDataProviderId()).build());

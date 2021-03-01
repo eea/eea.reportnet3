@@ -78,26 +78,31 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
 
     try {
-      const isDataDeleted = await DatasetService.deleteRecordById(
+      const response = await DatasetService.deleteRecordById(
         datasetId,
         selectedRecordId,
         webformRecordState.record?.elements?.some(element => element.deleteInCascade)
       );
-      if (isDataDeleted) {
+      if (response.status >= 200 && response.status <= 299) {
         onRefresh();
         handleDialogs('deleteRow', false);
       }
     } catch (error) {
       console.error('error', error);
-
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'DELETE_RECORD_BY_ID_ERROR',
-        content: { dataflowId, dataflowName, datasetId, datasetName, tableName }
-      });
+      if (error.response.status === 423) {
+        notificationContext.add({
+          type: 'GENERIC_BLOCKED_ERROR'
+        });
+      } else {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+        notificationContext.add({
+          type: 'DELETE_RECORD_BY_ID_ERROR',
+          content: { dataflowId, dataflowName, datasetId, datasetName, tableName }
+        });
+      }
     }
   };
 
@@ -423,7 +428,9 @@ export const WebformRecord = ({
         ) : (
           <ul className={styles.errorList}>
             {errorMessages.map(msg => (
-              <li className={styles.errorItem}>{msg}</li>
+              <li key={msg} className={styles.errorItem}>
+                {msg}
+              </li>
             ))}
           </ul>
         )}

@@ -98,7 +98,7 @@ export const ManageManualAcceptanceDataset = ({
         />
       </span>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
         onClick={() => manageDialogs(false)}
@@ -121,7 +121,6 @@ export const ManageManualAcceptanceDataset = ({
         visible={isManageManualAcceptanceDatasetDialogVisible}>
         {children}
       </Dialog>
-      }
     </Fragment>
   );
 
@@ -133,7 +132,6 @@ export const ManageManualAcceptanceDataset = ({
       <InputTextarea
         className={`${styles.datasetMessage} datasetSchema-metadata-help-step`}
         collapsedHeight={85}
-        id="datasetMessage"
         id={idTextArea}
         onChange={e => onChangeMessage(e.target.value)}
         onFocus={e =>
