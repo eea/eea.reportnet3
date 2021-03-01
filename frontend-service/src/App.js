@@ -22,6 +22,7 @@ import { PublicDataflowInformation } from 'ui/views/PublicDataflowInformation';
 import { PublicDataflows } from 'ui/views/PublicDataflows';
 import { PublicFrontpage } from 'ui/views/PublicFrontpage';
 import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
+import { ScrollToTop } from 'ui/views/_components/ScrollToTop';
 import { Settings } from 'ui/views/Settings';
 
 import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
@@ -48,31 +49,33 @@ const App = () => {
                       <BreadCrumbProvider>
                         <Notifications />
                         <Router>
-                          <Switch>
-                            <Route exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
-                            <Route
-                              exact
-                              path={routes.PUBLIC_DATAFLOW_INFORMATION}
-                              component={PublicDataflowInformation}
-                            />
-                            <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
-                            <Route exact path={routes.LOGIN} component={ReportnetLogin} />
-                            <Route exact path={routes.EULOGIN} component={EULogin} />
-                            <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK} component={Feedback} />
-                            <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK_CUSTODIAN} component={Feedback} />
-                            <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
-                            <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
-                            <PrivateRoute exact path={routes.DATAFLOW_REPRESENTATIVE} component={Dataflow} />
-                            <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
-                            <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
-                            <PrivateRoute exact path={routes.DATAFLOWS_ERROR} component={Dataflows} />
-                            <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
-                            <PrivateRoute exact path={routes.DATASET} component={Dataset} />
-                            <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
-                            <PrivateRoute exact path={routes.EU_DATASET} component={EUDataset} />
-                            <Route exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />
-                            <PrivateRoute exact path={routes.SETTINGS} component={Settings} />
-                          </Switch>
+                          <ScrollToTop>
+                            <Switch>
+                              <Route exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
+                              <Route
+                                exact
+                                path={routes.PUBLIC_DATAFLOW_INFORMATION}
+                                component={PublicDataflowInformation}
+                              />
+                              <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
+                              <Route exact path={routes.LOGIN} component={ReportnetLogin} />
+                              <Route exact path={routes.EULOGIN} component={EULogin} />
+                              <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK} component={Feedback} />
+                              <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK_CUSTODIAN} component={Feedback} />
+                              <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
+                              <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
+                              <PrivateRoute exact path={routes.DATAFLOW_REPRESENTATIVE} component={Dataflow} />
+                              <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
+                              <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
+                              <PrivateRoute exact path={routes.DATAFLOWS_ERROR} component={Dataflows} />
+                              <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
+                              <PrivateRoute exact path={routes.DATASET} component={Dataset} />
+                              <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
+                              <PrivateRoute exact path={routes.EU_DATASET} component={EUDataset} />
+                              <Route exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />
+                              <PrivateRoute exact path={routes.SETTINGS} component={Settings} />
+                            </Switch>
+                          </ScrollToTop>
                         </Router>
                       </BreadCrumbProvider>
                     </LoadingProvider>
