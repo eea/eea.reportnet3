@@ -23,7 +23,7 @@
 
   &::before {
     content: '';
-    background-image: url('/assets/img/logo.png') !important;
+    background-image: url('/assets/images/logo.png') !important;
     background-size: 50%;
     background-repeat: no-repeat;
     background-position: 150% 50%;
@@ -98,7 +98,7 @@
     opacity: 0.8;
 
     &::before {
-      background-image: url('/assets/img/logo-blanco.png') !important;
+      background-image: url('/assets/images/logo-blanco.png') !important;
       background-position: 150% 50%;
       background-repeat: no-repeat;
       background-size: 50%;
@@ -118,7 +118,7 @@
   //   background: var(--c-lilac-100);
 
   //   &::before {
-  //     background-image: url('/assets/img/logo.png') !important;
+  //     background-image: url('/assets/images/logo.png') !important;
   //     background-position: 150% 50%;
   //     background-repeat: no-repeat;
   //     background-size: 50%;
@@ -152,7 +152,7 @@
     border-radius: 15px;
     opacity: 1;
 
-    background-image: url('/assets/img/logo.png');
+    background-image: url('/assets/images/logo.png');
     background-size: 50%;
     background-repeat: no-repeat;
     background-position: 150% 50%;
@@ -189,7 +189,7 @@
       border-radius: 15px;
       opacity: 1;
 
-      background-image: url('/assets/img/logo.png');
+      background-image: url('/assets/images/logo.png');
       background-size: 50%;
       background-repeat: no-repeat;
       background-position: 150% 50%;
