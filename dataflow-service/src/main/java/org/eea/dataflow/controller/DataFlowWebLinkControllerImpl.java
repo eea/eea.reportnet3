@@ -114,7 +114,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
       if (EEAErrorMessage.URL_ALREADY_EXIST.equals(e.getMessage())) {
-        LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase());
+        LOG_ERROR.error("Weblink url already exist in dataflow : {}", dataflowId);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
       }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
