@@ -47,6 +47,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 // @RunWith(MockitoJUnitRunner.class)
@@ -79,6 +81,10 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Before
   public void initMocks() {
+
+    SecurityContextHolder.clearContext();
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.initMocks(this);
 

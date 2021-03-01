@@ -57,7 +57,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -556,7 +555,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
               kafkaSenderUtils.releaseNotificableKafkaEvent(
                   EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
                   NotificationVO.builder()
-                      .user((String) ThreadPropertiesManager.getVariable("user"))
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
                       .dataflowId(dataflowId).build());
 
             }
@@ -593,7 +592,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         // Error notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
             null,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .dataflowId(dataflowId).error(e.getMessage()).build());
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.EXECUTION_ERROR);

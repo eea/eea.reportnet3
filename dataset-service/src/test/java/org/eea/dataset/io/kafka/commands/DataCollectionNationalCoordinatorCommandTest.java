@@ -27,6 +27,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class RestoreDataCollectionSnapshotCommandTest.
@@ -71,6 +73,9 @@ public class DataCollectionNationalCoordinatorCommandTest {
   public void initMocks() {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.DATACOLLECTION_NATIONAL_COORDINATOR_EVENT);
+    SecurityContextHolder.clearContext();
+    SecurityContextHolder.getContext()
+        .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     MockitoAnnotations.initMocks(this);
   }
 

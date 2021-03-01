@@ -435,10 +435,7 @@ const useBigButtonList = ({
     ];
   };
 
-  const isReleasing =
-    !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.length >= 1
-      ? dataflowState.data.datasets[0].isReleasing
-      : false;
+  const isReleasing = dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing);
 
   const onBuildReleaseButton = () => {
     return [
