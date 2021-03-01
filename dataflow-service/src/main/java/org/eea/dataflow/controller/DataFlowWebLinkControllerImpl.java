@@ -113,7 +113,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      if (null != e.getMessage() && e.getMessage().equals(EEAErrorMessage.URL_ALREADY_EXIST)) {
+      if (EEAErrorMessage.URL_ALREADY_EXIST.equals(e.getMessage())) {
         LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase());
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
       }
@@ -179,7 +179,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      if (null != e.getMessage() && e.getMessage().equals(EEAErrorMessage.URL_ALREADY_EXIST)) {
+      if (EEAErrorMessage.URL_ALREADY_EXIST.equals(e.getMessage())) {
         LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase());
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
       }
