@@ -601,4 +601,14 @@ public interface DatasetService {
   boolean checkAnySchemaAvailableInPublic(Long dataflowId);
 
 
+  /**
+   * Initialize dataset.
+   *
+   * @param idDataset the id dataset
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  void initializeDataset(Long idDataset, String idDatasetSchema) throws EEAException;
+
+
 }

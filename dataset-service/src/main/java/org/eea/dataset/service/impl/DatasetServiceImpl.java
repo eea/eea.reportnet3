@@ -3368,6 +3368,62 @@ public class DatasetServiceImpl implements DatasetService {
     LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
   }
 
+  @Override
+  @Transactional
+  public void initializeDataset(Long idDataset, String idDatasetSchema) throws EEAException {
+
+    // 1.Insert the dataset schema into DatasetValue
+    DatasetValue dataset = new DatasetValue();
+    dataset.setIdDatasetSchema(idDatasetSchema);
+    dataset.setId(idDataset);
+
+    // 2.Search the table schemas of the dataset and then insert it into TableValue
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+    List<TableValue> tableValues = new ArrayList<>();
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      TableValue tv = new TableValue();
+      tv.setIdTableSchema(tableSchema.getIdTableSchema().toString());
+      tv.setDatasetId(dataset);
+      tableValues.add(tv);
+    }
+    dataset.setTableValues(tableValues);
+    datasetRepository.save(dataset);
+
+
+    List<Statistics> statsList = new ArrayList<>();
+
+    DataSetMetabase datasetMb =
+        dataSetMetabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
+
+    Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+
+      mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+          tableSchema.getNameTableSchema());
+    }
+
+    for (TableValue tableValue : tableValues) {
+      statsList.addAll(processTableStats(tableValue, idDataset, mapIdNameDatasetSchema));
+    }
+
+    Statistics statsIdDatasetSchema = fillStat(idDataset, null, "idDataSetSchema", idDatasetSchema);
+    statsList.add(statsIdDatasetSchema);
+
+    Statistics statsNameDatasetSchema =
+        fillStat(idDataset, null, "nameDataSetSchema", datasetMb.getDataSetName());
+    statsList.add(statsNameDatasetSchema);
+
+    Statistics statsDatasetErrors = fillStat(idDataset, null, "datasetErrors", "false");
+    statsList.add(statsDatasetErrors);
+
+    statisticsRepository.deleteStatsByIdDataset(idDataset);
+    statisticsRepository.flush();
+    statisticsRepository.saveAll(statsList);
+
+    LOG.info("Statistics save to datasetId {}.", idDataset);
+
+  }
+
 
 
 }

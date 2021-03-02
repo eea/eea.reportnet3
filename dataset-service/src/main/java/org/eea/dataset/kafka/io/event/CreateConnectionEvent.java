@@ -66,9 +66,11 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
             .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
         // Initialize the dataset values (insert datasetId and tables into dataset_value and
         // table_value of the new schema)
-        datasetService.insertSchema(idDataset, idDatasetSchema);
+        // datasetService.insertSchema(idDataset, idDatasetSchema);
         // First insert of the statistics
-        datasetService.saveStatistics(idDataset);
+        // datasetService.saveStatistics(idDataset);
+
+        datasetService.initializeDataset(idDataset, idDatasetSchema);
 
         Map<String, Object> result = new HashMap<>();
         result.put(LiteralConstants.DATASET_ID, idDataset.toString());
