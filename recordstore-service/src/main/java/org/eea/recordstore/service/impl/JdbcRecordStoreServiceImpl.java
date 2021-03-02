@@ -46,7 +46,6 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
@@ -559,7 +558,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), idDataset);
     LOG.info("The user set on threadPropertiesManager is {}",
-        ThreadPropertiesManager.getVariable("user"));
+        SecurityContextHolder.getContext().getAuthentication().getName());
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
@@ -572,7 +571,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         break;
       case COLLECTION:
         Map<String, Object> valueEU = new HashMap<>();
-        valueEU.put("user", ThreadPropertiesManager.getVariable("user"));
+        valueEU.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
         valueEU.put("dataset_id", idDataset);
         valueEU.put("snapshot_id", idSnapshot);
         kafkaSenderUtils.releaseKafkaEvent(EventType.ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT,
@@ -893,7 +892,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
-            NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).error(error).build());
       } catch (EEAException ex) {
         LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
@@ -1023,7 +1023,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
-
+    LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
+        isMaterialized);
     DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
     // delete all views because some names can be changed
     try {
@@ -1106,7 +1107,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     values.put("updateViews", false);
     LOG.info(
         "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
-        ThreadPropertiesManager.getVariable("user"), datasetId);
+        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
     LOG.info("The user set on securityContext is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);

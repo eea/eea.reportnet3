@@ -21,6 +21,7 @@ import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.model.ImportSchemas;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -41,34 +42,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class ZipUtils {
 
-  /** The Constant LOG. */
+  /**
+   * The Constant LOG.
+   */
   private static final Logger LOG = LoggerFactory.getLogger(ZipUtils.class);
 
-  /** The Constant LOG_ERROR. */
+  /**
+   * The Constant LOG_ERROR.
+   */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
 
-
-  /** The integration controller. */
+  /**
+   * The integration controller.
+   */
   @Autowired
   private IntegrationControllerZuul integrationController;
 
 
-  /** The rules repository. */
+  /**
+   * The rules repository.
+   */
   @Autowired
   private RulesRepository rulesRepository;
 
-  /** The unique constraint repository. */
+  /**
+   * The unique constraint repository.
+   */
   @Autowired
   private UniqueConstraintRepository uniqueConstraintRepository;
 
-  /** The rules controller zuul. */
+  /**
+   * The rules controller zuul.
+   */
   @Autowired
   private RulesControllerZuul rulesControllerZuul;
-
 
 
   /**
@@ -87,7 +95,7 @@ public class ZipUtils {
     ImportSchemas fileUnziped = new ImportSchemas();
     try (InputStream input = multipartFile.getInputStream()) {
       String fileName = multipartFile.getOriginalFilename();
-      String multipartFileMimeType = datasetService.getMimetype(fileName);
+      String multipartFileMimeType = getMimetype(fileName);
 
       List<DataSetSchema> schemas = new ArrayList<>();
       Map<String, String> schemaNames = new HashMap<>();
@@ -99,10 +107,10 @@ public class ZipUtils {
 
       if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
         try (ZipInputStream zip = new ZipInputStream(input)) {
-          for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
+          for (ZipEntry entry; (entry = zip.getNextEntry()) != null; ) {
 
             String entryName = entry.getName();
-            String mimeType = datasetService.getMimetype(entryName);
+            String mimeType = getMimetype(entryName);
             switch (mimeType.toLowerCase()) {
               case "schema":
                 schemas = unzippingSchemaClasses(zip, schemas);
@@ -202,6 +210,15 @@ public class ZipUtils {
 
   }
 
+  private String getMimetype(final String file) throws EEAException {
+    String mimeType = null;
+    final int location = file.lastIndexOf('.');
+    if (location == -1) {
+      throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
+    }
+    mimeType = file.substring(location + 1);
+    return mimeType;
+  }
 
   /**
    * Zip schema classes.
@@ -552,7 +569,6 @@ public class ZipUtils {
     }
     return integrities;
   }
-
 
 
 }

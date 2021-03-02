@@ -29,6 +29,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public class KieBaseManagerTest {
 
@@ -53,9 +56,16 @@ public class KieBaseManagerTest {
   private DataSetSchema datasetSchema;
   private ObjectId id;
   private FieldSchema fieldSchema;
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
 
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
     id = new ObjectId();
     datasetSchema = new DataSetSchema();
@@ -257,6 +267,8 @@ public class KieBaseManagerTest {
     rule.setRuleId(id);
     rule.setShortCode("123");
     rule.setThenCondition(thenCondition);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -285,6 +297,8 @@ public class KieBaseManagerTest {
         .thenReturn(document);
     Mockito.when(ruleExpressionService.isDataTypeCompatible(Mockito.anyString(), Mockito.any(),
         Mockito.any())).thenReturn(true);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -306,6 +320,8 @@ public class KieBaseManagerTest {
     rule.setThenCondition(thenCondition);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     kieBaseManager.validateRule(id.toString(), rule);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

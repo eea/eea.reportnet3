@@ -11,6 +11,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,14 +20,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeleteTableCompletedEvent implements NotificableEventHandler {
 
-  /** The dataset metabase service. */
+  /**
+   * The dataset metabase service.
+   */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
 
+  @Lazy
   @Autowired
   private DatasetSchemaService dataschemaService;
 
-  /** The dataflow controller zuul. */
+  /**
+   * The dataflow controller zuul.
+   */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
@@ -44,7 +50,9 @@ public class DeleteTableCompletedEvent implements NotificableEventHandler {
    * Gets the map.
    *
    * @param notificationVO the notification VO
+   *
    * @return the map
+   *
    * @throws EEAException the EEA exception
    */
   @Override

@@ -64,7 +64,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +71,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -286,7 +286,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // Release the notification
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(failEvent, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).error(errorMessage).build());
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing {} event: ", failEvent, e);
@@ -428,7 +429,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
     if (errorsCount > 0 || disabledRules > 0) {
       NotificationVO notificationVO = NotificationVO.builder()
-          .user((String) ThreadPropertiesManager.getVariable("user")).dataflowId(dataflowId)
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .dataflowId(dataflowId)
           .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
           .disabledRules(disabledRules).build();
       LOG.info("Data Collection creation proccess stopped: there are SQL rules containing errors");

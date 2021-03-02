@@ -195,7 +195,8 @@ public class SqlRulesServiceImplTest {
 
     Mockito.when(euDatasetController.findEUDatasetByDataflowId(Mockito.anyLong()))
         .thenReturn(euDatasetList);
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -222,6 +223,8 @@ public class SqlRulesServiceImplTest {
     Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
     when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong())).thenReturn(schema);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -268,7 +271,8 @@ public class SqlRulesServiceImplTest {
         .thenReturn(DatasetTypeEnum.REPORTING);
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong()))
         .thenReturn(schema);
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -295,6 +299,8 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.EUDATASET);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -327,7 +333,8 @@ public class SqlRulesServiceImplTest {
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong()))
         .thenReturn(schema);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.anyLong())).thenReturn(1L);
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
