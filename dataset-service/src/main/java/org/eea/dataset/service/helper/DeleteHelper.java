@@ -85,7 +85,7 @@ public class DeleteHelper {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
+      LOG_ERROR.error("Error releasing notification: {}", e.getMessage(), e);
     }
   }
 
