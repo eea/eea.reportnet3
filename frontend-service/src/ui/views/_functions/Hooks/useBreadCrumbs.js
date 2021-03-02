@@ -102,7 +102,13 @@ export const useBreadCrumbs = ({
       label: breadCrumbContext.prevModel[3].label
     };
   };
-
+  const getPublicCountriesCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.PUBLIC_COUNTRIES, {}, true)),
+      href: getUrl(routes.PUBLIC_COUNTRIES, {}, true),
+      label: resources.messages['publicCountriesBreadcrumbs']
+    };
+  };
   const getPublicDataflowCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
@@ -192,6 +198,9 @@ export const useBreadCrumbs = ({
       breadCrumbContext.add([getHomeCrumb(), getSettingsCrumb()]);
     }
 
+    if (currentPage === CurrentPage.PUBLIC_COUNTRIES) {
+      breadCrumbContext.add([getPublicHomeCrumb(), getPublicCountriesCrumb()]);
+    }
     if (currentPage === CurrentPage.PUBLIC_DATAFLOW) {
       breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb(), getPublicDataflowCrumb()]);
     }

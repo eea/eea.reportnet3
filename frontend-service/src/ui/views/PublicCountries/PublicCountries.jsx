@@ -17,6 +17,10 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { DataflowService } from 'core/services/Dataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const PublicCountries = withRouter(({ history }) => {
@@ -26,6 +30,8 @@ export const PublicCountries = withRouter(({ history }) => {
   const [contentStyles, setContentStyles] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [publicCountries, setPublicCountries] = useState([]);
+
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRIES, history });
 
   useEffect(() => {
     onLoadPublicCountries();
@@ -54,7 +60,6 @@ export const PublicCountries = withRouter(({ history }) => {
   };
 
   const onOpenCountry = countryId => {
-    console.log('rowData', countryId);
     return history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryId }, true));
   };
 
