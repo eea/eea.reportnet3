@@ -24,7 +24,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -47,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -378,9 +378,9 @@ public class RulesServiceImpl implements RulesService {
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
           integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
       // send notification
-      NotificationVO notificationVO =
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
-              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build();
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build();
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
           notificationVO);
 

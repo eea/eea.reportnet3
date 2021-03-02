@@ -16,7 +16,7 @@ export const routes = {
   EULOGIN: '/eulogin',
   LOGIN: '/login',
   PRIVACY_STATEMENT: '/privacyPolicy',
-  PUBLIC_DATAFLOW_INFORMATION: '/publicDataflow/:dataflowId',
-  PUBLIC_DATAFLOWS: '/publicDataflows',
+  PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId',
+  PUBLIC_DATAFLOWS: '/public/dataflows',
   SETTINGS: '/settings'
 };

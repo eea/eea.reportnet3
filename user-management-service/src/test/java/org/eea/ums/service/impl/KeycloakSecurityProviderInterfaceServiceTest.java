@@ -3,7 +3,6 @@ package org.eea.ums.service.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -230,8 +229,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   @Test
   public void checkAccessPermission() {
     when(keycloakConnectorService.checkUserPermision("Dataflow",
-        new AccessScopeEnum[]{AccessScopeEnum.CREATE})).thenReturn("PERMIT");
-    AccessScopeEnum[] scopes = new AccessScopeEnum[]{AccessScopeEnum.CREATE};
+        new AccessScopeEnum[] {AccessScopeEnum.CREATE})).thenReturn("PERMIT");
+    AccessScopeEnum[] scopes = new AccessScopeEnum[] {AccessScopeEnum.CREATE};
     boolean checkedAccessPermission =
         keycloakSecurityProviderInterfaceService.checkAccessPermission("Dataflow", scopes);
     Assert.assertTrue(checkedAccessPermission);
@@ -634,7 +633,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
   @Test(expected = EEAException.class)
   public void removeContributorFromUserGroupNoUser() throws EEAException {
     GroupInfo[] groups = {new GroupInfo()};
-    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{});
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[] {});
     // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
     ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
@@ -657,7 +656,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     resources.add(resource);
     UserRepresentation user = new UserRepresentation();
     user.setEmail("a");
-    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{user});
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[] {user});
     // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
     ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
@@ -674,7 +673,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     resource.setEmail("a");
     resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE);
     resources.add(resource);
-    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[]{});
+    List<UserRepresentation> users = Arrays.asList(new UserRepresentation[] {});
     // Mockito.when(keycloakConnectorService.getUsers()).thenReturn(users);
     ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users", users);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(groups);
@@ -693,13 +692,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     UserRepresentation userRepresentation = new UserRepresentation();
     userRepresentation.setEmail(userMail);
     userRepresentation.setId("user1");
-    UserRepresentation[] userRepresentations = new UserRepresentation[]{userRepresentation};
+    UserRepresentation[] userRepresentations = new UserRepresentation[] {userRepresentation};
     Mockito.when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
 
     Optional<UserRepresentation> contributor = Optional.empty();
-    ReflectionTestUtils
-        .setField(keycloakSecurityProviderInterfaceService, "users",
-            new ArrayList<>());
+    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users",
+        new ArrayList<>());
     GroupInfo[] groups = new GroupInfo[1];
     GroupInfo groupInfo = new GroupInfo();
     groupInfo.setName(groupName);
@@ -707,11 +705,11 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groups[0] = groupInfo;
 
     Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groups);
-    keycloakSecurityProviderInterfaceService
-        .addContributorToUserGroup(contributor, userMail, groupName);
+    keycloakSecurityProviderInterfaceService.addContributorToUserGroup(contributor, userMail,
+        groupName);
 
-    Mockito.verify(keycloakConnectorService, Mockito.times(1))
-        .addUserToGroup(Mockito.eq("user1"), Mockito.eq("group1"));
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).addUserToGroup(Mockito.eq("user1"),
+        Mockito.eq("group1"));
   }
 
   @Test(expected = EEAException.class)
@@ -720,13 +718,12 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     String userMail = "test@reportnet.net";
     String groupName = "group1";
 
-    UserRepresentation[] userRepresentations = new UserRepresentation[]{};
+    UserRepresentation[] userRepresentations = new UserRepresentation[] {};
     Mockito.when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
     Optional<UserRepresentation> contributor = Optional.empty();
 
-    ReflectionTestUtils
-        .setField(keycloakSecurityProviderInterfaceService, "users",
-            new ArrayList<>());
+    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users",
+        new ArrayList<>());
     GroupInfo[] groups = new GroupInfo[1];
     GroupInfo groupInfo = new GroupInfo();
     groupInfo.setName(groupName);
@@ -736,8 +733,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groups);
 
     try {
-      keycloakSecurityProviderInterfaceService
-          .addContributorToUserGroup(contributor, userMail, groupName);
+      keycloakSecurityProviderInterfaceService.addContributorToUserGroup(contributor, userMail,
+          groupName);
     } catch (EEAException e) {
       Assert.assertEquals(String.format(
           "Error, user with mail %s not found and it was impossible to add it to the group %s",
@@ -745,14 +742,14 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
       throw e;
     }
 
-    Mockito.verify(keycloakConnectorService, Mockito.times(1))
-        .addUserToGroup(Mockito.eq("user1"), Mockito.eq("group1"));
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).addUserToGroup(Mockito.eq("user1"),
+        Mockito.eq("group1"));
   }
 
   @Test
   public void authenticateEmail() {
-    ReflectionTestUtils
-        .setField(keycloakSecurityProviderInterfaceService, "users", new ArrayList<>());
+    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users",
+        new ArrayList<>());
     // Configuration of user representations for "userId1"
     UserRepresentation[] userRepresentations = new UserRepresentation[1];
     UserRepresentation userRepresentation = new UserRepresentation();
@@ -781,8 +778,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     when(keycloakConnectorService.getUserRoles(Mockito.eq("userId1")))
         .thenReturn(roleRepresentations);
 
-    TokenVO result = keycloakSecurityProviderInterfaceService
-        .authenticateEmail("userName1@reportnet.net");
+    TokenVO result =
+        keycloakSecurityProviderInterfaceService.authenticateEmail("userName1@reportnet.net");
     Assert.assertNotNull(result);
     Assert.assertEquals("userId1", result.getUserId());
     Assert.assertEquals("userName1", result.getPreferredUsername());
@@ -795,8 +792,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
 
   @Test
   public void authenticateEmailAuthFail() {
-    ReflectionTestUtils
-        .setField(keycloakSecurityProviderInterfaceService, "users", new ArrayList<>());
+    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users",
+        new ArrayList<>());
     // Configuration of user representations for "userId1"
     UserRepresentation[] userRepresentations = new UserRepresentation[1];
     UserRepresentation userRepresentation = new UserRepresentation();
@@ -825,12 +822,26 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     when(keycloakConnectorService.getUserRoles(Mockito.eq("userId1")))
         .thenReturn(roleRepresentations);
 
-    TokenVO result = keycloakSecurityProviderInterfaceService
-        .authenticateEmail("userName1@reportnet.net");
+    TokenVO result =
+        keycloakSecurityProviderInterfaceService.authenticateEmail("userName1@reportnet.net");
     Assert.assertNull(result);
 
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).getUsers();
   }
+
+  @Test
+  public void getGroupsByIdResourceTypeTest() {
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setName("Dataflow-0-LEAD_REPORTER");
+    groupInfo.setPath("/Dataflow-0-LEAD_REPORTER");
+    groupInfos[0] = groupInfo;
+    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+
+    assertNotNull("is null", keycloakSecurityProviderInterfaceService.getGroupsByIdResourceType(0L,
+        ResourceTypeEnum.DATAFLOW));
+  }
+
 }
 
 

@@ -135,6 +135,27 @@ public class FMEIntegrationExecutorServiceTest {
   }
 
   /**
+   * Fme execution importfrom other sistem test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void fmeExecutionImportfromOtherSistemTest() throws EEAException {
+    integration.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setId(1L);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dataset);
+    when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
+    fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM,
+        "test", 1L, integration);
+    Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
+  }
+
+  /**
    * Fme execution export EU dataset test.
    *
    * @throws EEAException the EEA exception

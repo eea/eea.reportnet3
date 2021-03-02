@@ -48,6 +48,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /** The Class DataCollectionServiceTest. */
 @RunWith(MockitoJUnitRunner.class)
@@ -132,11 +135,19 @@ public class DataCollectionServiceImplTest {
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;
 
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     leadReportersVO = new ArrayList<>();
     leadReportersVO.add(new LeadReporterVO());
     MockitoAnnotations.initMocks(this);
@@ -217,6 +228,8 @@ public class DataCollectionServiceImplTest {
     Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(Mockito.any());
     Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
         Mockito.any(), Mockito.any());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.undoDataCollectionCreation(
         new ArrayList<>(Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)), 1L, true);
     Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(Mockito.any(),
@@ -236,6 +249,8 @@ public class DataCollectionServiceImplTest {
     Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(Mockito.any());
     Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
         Mockito.any(), Mockito.any());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.undoDataCollectionCreation(new ArrayList<>(), 1L, false);
     Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -277,6 +292,8 @@ public class DataCollectionServiceImplTest {
         .deleteResourceByDatasetId(Mockito.any());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.updateDataCollection(1L);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -367,6 +384,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(designs);
     Mockito.when(rulesControllerZuul.getAllDisabledRules(Mockito.any(), Mockito.any()))
         .thenReturn(1);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
@@ -376,6 +395,8 @@ public class DataCollectionServiceImplTest {
     List<DesignDatasetVO> designs = new ArrayList<>();
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
@@ -411,6 +432,8 @@ public class DataCollectionServiceImplTest {
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.doNothing().when(connection).rollback();
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -451,6 +474,8 @@ public class DataCollectionServiceImplTest {
         .deleteResourceByDatasetId(Mockito.any());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }

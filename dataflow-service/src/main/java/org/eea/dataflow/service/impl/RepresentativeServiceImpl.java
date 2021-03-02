@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
@@ -303,13 +304,19 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       List<Representative> representativeList =
           representativeRepository.findAllByDataflow_Id(dataflowId);
       for (Representative representative : representativeList) {
-        List<String> usersRepresentative = representative.getLeadReporters().stream()
-            .map(LeadReporter::getEmail).collect(Collectors.toList());
-        usersRepresentative.stream().forEach(users -> {
+        if (CollectionUtils.isEmpty(representative.getLeadReporters())) {
           fieldsToWrite[0] = representative.getDataProvider().getCode();
-          fieldsToWrite[1] = users;
+          fieldsToWrite[1] = "";
           csvWriter.writeNext(fieldsToWrite);
-        });
+        } else {
+          List<String> usersRepresentative = representative.getLeadReporters().stream()
+              .map(LeadReporter::getEmail).collect(Collectors.toList());
+          usersRepresentative.stream().forEach(users -> {
+            fieldsToWrite[0] = representative.getDataProvider().getCode();
+            fieldsToWrite[1] = users;
+            csvWriter.writeNext(fieldsToWrite);
+          });
+        }
 
       }
     } catch (IOException e) {

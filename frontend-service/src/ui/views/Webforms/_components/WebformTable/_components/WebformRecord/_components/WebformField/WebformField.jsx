@@ -210,15 +210,18 @@ export const WebformField = ({
         }
       }
     } catch (error) {
-      console.error('error', error);
-      if (updateInCascade) {
-        notificationContext.add({
-          type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR'
-        });
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        notificationContext.add({
-          type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR'
-        });
+        if (updateInCascade) {
+          notificationContext.add({
+            type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR'
+          });
+        } else {
+          notificationContext.add({
+            type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR'
+          });
+        }
       }
     } finally {
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
