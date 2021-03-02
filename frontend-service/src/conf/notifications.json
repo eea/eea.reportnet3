@@ -855,6 +855,9 @@
         },
         {
           "key": "DELETE_TABLE_DATA_INIT"
+        },
+        {
+          "key": "RELEASE_START_EVENT"
         }
       ]
     }
