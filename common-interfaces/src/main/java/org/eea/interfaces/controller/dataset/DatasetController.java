@@ -171,27 +171,19 @@ public interface DatasetController {
    * Delete import data.
    *
    * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
    */
   @DeleteMapping("/{datasetId}/deleteImportData")
-  void deleteImportData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+  void deleteImportData(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Delete import table.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
    */
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
   void deleteImportTable(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("tableSchemaId") String tableSchemaId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @PathVariable("tableSchemaId") String tableSchemaId);
 
   /**
    * Export file.

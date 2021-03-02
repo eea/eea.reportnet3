@@ -474,21 +474,9 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportData")
-  @PreAuthorize("(checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'EUDATASET_CUSTODIAN')) OR secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'EUDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'EUDATASET_CUSTODIAN')")
   public void deleteImportData(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
-
-    // Rest API only: Check if the dataflow belongs to the dataset
-    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
-      String errorMessage =
-          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG_ERROR.error(errorMessage);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-    }
-
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId) {
     // This method will release the lock
     deleteHelper.executeDeleteDatasetProcess(datasetId);
   }
@@ -503,22 +491,10 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
-  @PreAuthorize("(checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'EUDATASET_CUSTODIAN')) OR secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'EUDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'EUDATASET_CUSTODIAN')")
   public void deleteImportTable(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
-
-    // Rest API only: Check if the dataflow belongs to the dataset
-    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
-      String errorMessage =
-          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG_ERROR.error(errorMessage);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-    }
-
+      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId) {
     // This method will release the lock
     deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
   }
