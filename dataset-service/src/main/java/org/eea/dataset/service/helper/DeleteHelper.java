@@ -26,6 +26,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeleteHelper {
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DeleteHelper.class);
 
@@ -57,8 +60,7 @@ public class DeleteHelper {
    * @throws EEAException the EEA exception
    */
   @Async
-  public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId)
-      throws EEAException {
+  public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId) {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
 
@@ -80,7 +82,11 @@ public class DeleteHelper {
         .tableSchemaId(tableSchemaId).build();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-    kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing notification: {}", e.getMessage(), e);
+    }
   }
 
 
@@ -91,7 +97,7 @@ public class DeleteHelper {
    * @throws EEAException the EEA exception
    */
   @Async
-  public void executeDeleteDatasetProcess(final Long datasetId) throws EEAException {
+  public void executeDeleteDatasetProcess(final Long datasetId) {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId);
 
@@ -109,8 +115,12 @@ public class DeleteHelper {
         .build();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
-        value, notificationVO);
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
+          value, notificationVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
+    }
   }
 
 
