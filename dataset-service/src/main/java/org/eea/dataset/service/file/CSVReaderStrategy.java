@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.opencsv.CSVParser;
@@ -26,6 +27,10 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.NoArgsConstructor;
+
+/**
+ * Instantiates a new CSV reader strategy.
+ */
 
 /**
  * Instantiates a new CSV reader strategy.
@@ -253,12 +258,36 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
     if (!atLeastOneFieldSchema) {
       LOG_ERROR.error(
-          "Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}",
-          datasetId, idTableSchema);
+          "Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}, expectedHeaders={}, actualHeaders={}",
+          datasetId, idTableSchema, getFieldNames(idTableSchema, dataSetSchema), values);
       throw new EEAException("No headers matching FieldSchemas");
     }
 
     return headers;
+  }
+
+  /**
+   * Gets the field names.
+   *
+   * @param tableSchemaId the table schema id
+   * @param dataSetSchemaVO the data set schema VO
+   * @return the field names
+   */
+  private List<String> getFieldNames(String tableSchemaId, DataSetSchemaVO dataSetSchemaVO) {
+    List<String> fieldNames = new ArrayList<>();
+
+    if (null != tableSchemaId) {
+      for (TableSchemaVO tableSchemaVO : dataSetSchemaVO.getTableSchemas()) {
+        if (tableSchemaId.equals(tableSchemaVO.getIdTableSchema())) {
+          for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
+            fieldNames.add(fieldSchemaVO.getName());
+          }
+          break;
+        }
+      }
+    }
+
+    return fieldNames;
   }
 
   /**
