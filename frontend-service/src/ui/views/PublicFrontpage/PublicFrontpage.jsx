@@ -141,11 +141,17 @@ export const PublicFrontpage = ({ history }) => {
         </div>
         <div className={`rep-container`}>
           <div className={`${styles.pageContent} rep-row`}>
-            <div className={styles.showPublicDataflows}>
+            <div className={styles.showPublicData}>
               <Button
                 icon="eye"
                 label="View dataflows status and explore reported data"
                 onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}></Button>
+            </div>
+            <div className={`${styles.showPublicData}`}>
+              <Button
+                icon="eye"
+                label="See dataflows by country"
+                onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}></Button>
             </div>
           </div>
           <div className={`${styles.pageContent} rep-row`}>
