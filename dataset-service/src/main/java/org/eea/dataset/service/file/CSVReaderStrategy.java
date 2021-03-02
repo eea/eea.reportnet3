@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.opencsv.CSVParser;
@@ -30,48 +31,39 @@ import lombok.NoArgsConstructor;
 /**
  * Instantiates a new CSV reader strategy.
  */
+
+/**
+ * Instantiates a new CSV reader strategy.
+ */
 @NoArgsConstructor
 public class CSVReaderStrategy implements ReaderStrategy {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
-  /**
-   * The delimiter.
-   */
+  /** The delimiter. */
   private char delimiter;
 
-  /**
-   * The dataset id.
-   */
+  /** The dataset id. */
   private Long datasetId;
 
-  /**
-   * The parse common.
-   */
+  /** The file common. */
   private FileCommonUtils fileCommon;
 
-  /**
-   * The field max length.
-   */
+  /** The field max length. */
   private int fieldMaxLength;
 
-
-  /** the provider Code. */
+  /** The provider code. */
   private String providerCode;
 
   /**
    * Instantiates a new CSV reader strategy.
    *
    * @param delimiter the delimiter
-   * @param fileCommon the parse common
+   * @param fileCommon the file common
    * @param datasetId the dataset id
    * @param fieldMaxLength the field max length
    */
@@ -109,9 +101,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
-   *
    * @return the data set VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -128,9 +118,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
-   *
    * @return the data set VO
-   *
    * @throws EEAException the EEA exception
    */
   private DataSetVO readLines(final InputStream inputStream, final Long dataflowId,
@@ -242,11 +230,13 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param values the values
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
-   *
    * @return the list
+   * @throws EEAException the EEA exception
    */
   private List<FieldSchemaVO> setHeaders(final List<String> values, final String idTableSchema,
-      DataSetSchemaVO dataSetSchema) {
+      DataSetSchemaVO dataSetSchema) throws EEAException {
+
+    boolean atLeastOneFieldSchema = false;
     List<FieldSchemaVO> headers = new ArrayList<>();
 
     for (String value : values) {
@@ -255,6 +245,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
         final FieldSchemaVO fieldSchema =
             fileCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
         if (null != fieldSchema) {
+          atLeastOneFieldSchema = true;
           header.setId(fieldSchema.getId());
           header.setType(fieldSchema.getType());
           header.setReadOnly(
@@ -264,7 +255,39 @@ public class CSVReaderStrategy implements ReaderStrategy {
       header.setName(value);
       headers.add(header);
     }
+
+    if (!atLeastOneFieldSchema) {
+      LOG_ERROR.error(
+          "Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}, expectedHeaders={}, actualHeaders={}",
+          datasetId, idTableSchema, getFieldNames(idTableSchema, dataSetSchema), values);
+      throw new EEAException("No headers matching FieldSchemas");
+    }
+
     return headers;
+  }
+
+  /**
+   * Gets the field names.
+   *
+   * @param tableSchemaId the table schema id
+   * @param dataSetSchemaVO the data set schema VO
+   * @return the field names
+   */
+  private List<String> getFieldNames(String tableSchemaId, DataSetSchemaVO dataSetSchemaVO) {
+    List<String> fieldNames = new ArrayList<>();
+
+    if (null != tableSchemaId) {
+      for (TableSchemaVO tableSchemaVO : dataSetSchemaVO.getTableSchemas()) {
+        if (tableSchemaId.equals(tableSchemaVO.getIdTableSchema())) {
+          for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
+            fieldNames.add(fieldSchemaVO.getName());
+          }
+          break;
+        }
+      }
+    }
+
+    return fieldNames;
   }
 
   /**
