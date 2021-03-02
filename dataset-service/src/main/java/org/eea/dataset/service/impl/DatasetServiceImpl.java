@@ -385,7 +385,6 @@ public class DatasetServiceImpl implements DatasetService {
     deleteRecords(datasetId, tableSchemaId);
   }
 
-
   /**
    * Delete records.
    *
