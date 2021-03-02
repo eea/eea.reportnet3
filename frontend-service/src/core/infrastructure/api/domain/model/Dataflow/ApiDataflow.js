@@ -105,6 +105,18 @@ export const apiDataflow = {
     });
     return response.data;
   },
+  getAllDataflowsUserList: async () => {
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getAllDataflowsUserList)
+    });
+    return response.data;
+  },
+  getUserList: async (dataflowId, representativeId) => {
+    const response = await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getUserList, { dataflowId, representativeId })
+    });
+    return response.data;
+  },
   pending: async () => {
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.getDataflows)

@@ -14,6 +14,8 @@
   "getApiKey": "/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}",
   "getApiKeyCustodian": "/user/getApiKey?dataflowId={:dataflowId}",
   "getDataflows": "/dataflow/getDataflows",
+  "getAllDataflowsUserList": "/user/getUserRolesAllDataflows",
+  "getUserList": "/user/getUserRolesByDataflow/{:dataflowId}/dataProviderId/{:representativeId}",
   "getPublicDataflowData": "/dataflow/getPublicDataflow/{:dataflowId}",
   "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
   "importSchema": "/dataschema/import?dataflowId={:dataflowId}",

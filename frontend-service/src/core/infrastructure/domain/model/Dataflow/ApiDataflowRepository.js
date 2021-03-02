@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
+import sortBy from 'lodash/sortBy';
 import dayjs from 'dayjs';
 
 import { config } from 'conf';
@@ -401,6 +402,49 @@ const getPercentageOfValue = (val, total) => {
   return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
 };
 
+const getAllDataflowsUserList = async () => {
+  const usersListDTO = [
+    {
+      dataflowId: 0,
+      dataflowName: 'dataflowName',
+      users: [
+        {
+          email: 'miriam.provider@reportnet.net',
+          roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+        },
+        {
+          email: 'mikel.provider@reportnet.net',
+          roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+        }
+      ]
+    },
+    {
+      dataflowId: 2,
+      dataflowName: 'dataflowName2',
+      users: [
+        {
+          email: 'miriam.provider@reportnet.net',
+          roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+        },
+        {
+          email: 'mikel.provider@reportnet.net',
+          roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+        }
+      ]
+    }
+  ];
+  // const usersListDTO = await apiDataflow.getAllDataflowsUserList();
+  const allDataflowsUserList = parseAllDataflowsUserList(usersListDTO);
+  return allDataflowsUserList;
+};
+
+const getUserList = async (dataflowId, representativeId) => {
+  const response = await apiDataflow.getUserList(dataflowId, representativeId);
+  const usersList = parseUsersList(response);
+  console.log('usersList', usersList);
+  return sortBy(usersList, 'email');
+};
+
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
   return newEmptyDatasetSchemaResponse;
@@ -595,6 +639,43 @@ const parseLeadReporters = (leadReporters = []) =>
     representativeId: leadReporter.representativeId
   }));
 
+const parseAllDataflowsUserList = allDataflowsUserListDTO => {
+  allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
+    dataflow.users.forEach((user, usersIndex) => {
+      user.roles.forEach((role, roleIndex) => {
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = role.replace('_', ' ');
+      });
+    });
+  });
+  const usersList = [];
+  allDataflowsUserListDTO.forEach(dataflow => {
+    const { dataflowId, dataflowName } = dataflow;
+    dataflow.users.forEach(parsedUser => {
+      const { email, roles } = parsedUser;
+      roles.forEach(role => {
+        usersList.push({ dataflowId, dataflowName, email, role });
+      });
+    });
+  });
+  return usersList;
+};
+
+const parseUsersList = usersListDTO => {
+  usersListDTO.forEach((user, usersIndex) => {
+    user.roles.forEach((role, roleIndex) => {
+      usersListDTO[usersIndex].roles[roleIndex] = role.replace('_', ' ');
+    });
+  });
+  const usersList = [];
+  usersListDTO.forEach(parsedUser => {
+    const { email, roles } = parsedUser;
+    roles.forEach(role => {
+      usersList.push({ email, role });
+    });
+  });
+  return usersList;
+};
+
 const parseWebLinkListDTO = webLinksDTO => {
   if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
     const webLinks = [];
@@ -672,6 +753,8 @@ export const ApiDataflowRepository = {
   generateApiKey,
   getAllSchemas,
   getApiKey,
+  getAllDataflowsUserList,
+  getUserList,
   getPublicDataflowData,
   newEmptyDatasetSchema,
   pending,
