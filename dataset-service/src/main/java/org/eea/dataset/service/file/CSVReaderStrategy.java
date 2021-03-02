@@ -252,7 +252,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
     }
 
     if (!atLeastOneFieldSchema) {
-      LOG_ERROR.error("Error parsing CSV file: No headers matching FieldSchemas");
+      LOG_ERROR.error(
+          "Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}",
+          datasetId, idTableSchema);
       throw new EEAException("No headers matching FieldSchemas");
     }
 
