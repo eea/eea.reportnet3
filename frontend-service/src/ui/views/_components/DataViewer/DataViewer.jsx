@@ -690,7 +690,6 @@ const DataViewer = withRouter(
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
           try {
-            //without await. We don't have to wait for the response.
             const response = await DatasetService.updateFieldById(
               datasetId,
               cell.field,
