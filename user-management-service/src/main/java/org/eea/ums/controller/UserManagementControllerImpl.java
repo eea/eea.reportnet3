@@ -748,7 +748,6 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
 
-
   /**
    * Gets the resources by user email.
    *
