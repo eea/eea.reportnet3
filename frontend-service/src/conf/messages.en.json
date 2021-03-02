@@ -997,6 +997,6 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
-    "duplicatedWeblinkError": "Duplicated Description/Url. Please check it."
+    "duplicatedWeblinkError": "Duplicated description/URL. Please check it."
   }
 }
