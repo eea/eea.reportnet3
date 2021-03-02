@@ -609,8 +609,10 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateField")
+  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN')")
-  public void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field,
+  public void updateField(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @RequestBody FieldVO field,
       @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableReadOnly(datasetId, field.getIdFieldSchema(),

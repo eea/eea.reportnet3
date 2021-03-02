@@ -147,12 +147,9 @@ const useBigButtonList = ({
   const receiptBigButton = onBuildReceiptButton();
 
   const getIsReleasing = () => {
-    const datasetsProviderId =
-      !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.length >= 1
-        ? dataflowState.data.datasets.filter(dataset => dataset.dataProviderId === dataProviderId)
-        : false;
-
-    return datasetsProviderId ? datasetsProviderId[0].isReleasing : false;
+    return dataflowState?.data?.datasets?.some(
+      dataset => dataset.isReleasing && dataset.dataProviderId === dataProviderId
+    );
   };
 
   const onBuildReleaseButton = () => {

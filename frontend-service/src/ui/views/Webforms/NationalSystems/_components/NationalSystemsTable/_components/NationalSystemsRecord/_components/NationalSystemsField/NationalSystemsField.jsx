@@ -24,6 +24,7 @@ import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { nationalSystemsFieldReducer } from './_functions/Reducers/nationalSystemsFieldReducer';
@@ -41,6 +42,7 @@ export const NationalSystemsField = ({
 }) => {
   const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
 
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
@@ -103,7 +105,11 @@ export const NationalSystemsField = ({
     try {
       await DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue);
     } catch (error) {
-      console.error('error', error);
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' });
+      }
     }
   };
 

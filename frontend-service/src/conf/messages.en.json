@@ -973,7 +973,7 @@
     "availableInPublicView": "Available in public view",
     "restrictFromPublic": "Restrict from public view",
     "releaseDate": "Release date",
-    "publicDataflowsBreadcrumbs": "Public dataflows",
+    "publicDataflowsBreadcrumbs": "Dataflows",
     "publicDataflowBreadcrumbs": "Dataflow",
     "manageRolesDialogConfirmDeleteProviderHeader": "Delete data provider",
     "manageRolesDialogConfirmDeleteProviderQuestion": "Do you really want to delete this data provider?",
@@ -994,6 +994,8 @@
     "exportDataflowLeadReportersFailedEvent": "Error exporting lead reporters",
     "exportDataflowLeadReportersTemplateFailedEvent": "Error exporting lead reporters template",
     "exportLeadReportersTemplate": "Export template",
-    "importDataflowLeadReportersFailedEvent": "Error importing lead reporters from file"
+    "importDataflowLeadReportersFailedEvent": "Error importing lead reporters from file",
+    "sqlSentenceSpatialNote": "<i>Note: Spatial QC functions must contain <strong>public.</strong> before the funtion:</i><br />&nbsp;&nbsp&nbsp;&nbsp;SELECT * FROM <strong>tableName</strong> WHERE public.ST_Distance (field1, field2) > X ",
+    "files": "Files"
   }
 }

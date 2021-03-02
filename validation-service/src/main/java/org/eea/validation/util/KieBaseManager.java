@@ -15,7 +15,6 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -38,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /** The Class KieBaseManager. */
@@ -273,8 +273,9 @@ public class KieBaseManager {
     String ruleExpressionString = rule.getWhenCondition();
     EventType notificationEventType = null;
     NotificationVO notificationVO = NotificationVO.builder()
-        .user((String) ThreadPropertiesManager.getVariable("user")).datasetSchemaId(datasetSchemaId)
-        .shortCode(rule.getShortCode()).error("The QC Rule is disabled").build();
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode())
+        .error("The QC Rule is disabled").build();
 
     switch (ruleType) {
       case RECORD:

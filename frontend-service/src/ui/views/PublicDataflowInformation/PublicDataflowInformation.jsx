@@ -1,11 +1,15 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniq from 'lodash/uniq';
+
+import { config } from 'conf';
 
 import styles from './PublicDataflowInformation.module.scss';
 
@@ -21,6 +25,7 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
@@ -34,9 +39,12 @@ export const PublicDataflowInformation = withRouter(
     }
   }) => {
     const resources = useContext(ResourcesContext);
+    const themeContext = useContext(ThemeContext);
 
+    const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [representatives, setRepresentatives] = useState({});
 
     const notificationContext = useContext(NotificationContext);
 
@@ -48,19 +56,40 @@ export const PublicDataflowInformation = withRouter(
       onLoadDataflowData();
     }, []);
 
-    const downloadFileBodyColumn = rowData => (
-      <div
-        className={styles.downloadIcon}
-        onClick={() => onFileDownload(rowData.dataProviderId, rowData.publicFileName)}>
-        {!isNil(rowData.publicFileName) && (
-          <FontAwesomeIcon icon={AwesomeIcons(getFileExtension(rowData.publicFileName))} />
-        )}
-      </div>
-    );
+    useEffect(() => {
+      parseDataflowData();
+    }, [datasets]);
 
-    const getFileExtension = file => {
-      const splittedFile = file.split('.');
-      return splittedFile[splittedFile.length - 1];
+    useEffect(() => {
+      if (!themeContext.headerCollapse) {
+        setContentStyles({ marginTop: `${config.theme.cookieConsentHeight + 6}px` });
+      } else {
+        setContentStyles({});
+      }
+    }, [themeContext.headerCollapse]);
+
+    const getPublicFileName = fileName => {
+      const splittedFileName = fileName.split('-');
+      return splittedFileName[1];
+    };
+
+    const downloadFileBodyColumn = rowData => {
+      if (rowData.publicsFileName != 0) {
+        return (
+          <div className={styles.filesContainer}>
+            {rowData.publicsFileName.map(publicFileName => (
+              <span
+                className={styles.downloadIcon}
+                onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
+                <FontAwesomeIcon icon={AwesomeIcons('xlsx')} data-tip data-for={publicFileName} />
+                <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
+                  <span>{getPublicFileName(publicFileName)}</span>
+                </ReactTooltip>
+              </span>
+            ))}
+          </div>
+        );
+      }
     };
 
     const getHeader = fieldHeader => {
@@ -69,17 +98,14 @@ export const PublicDataflowInformation = withRouter(
         case 'datasetSchemaName':
           header = resources.messages['countries'];
           break;
-        case 'name':
-          header = resources.messages['datasetName'];
-          break;
         case 'releaseDate':
           header = resources.messages['releaseDate'];
           break;
         case 'isReleased':
           header = resources.messages['isReleased'];
           break;
-        case 'publicFileName':
-          header = resources.messages['file'];
+        case 'publicsFileName':
+          header = resources.messages['files'];
           break;
         default:
           break;
@@ -87,18 +113,17 @@ export const PublicDataflowInformation = withRouter(
       return header;
     };
 
-    const getOrderedColumns = datasets => {
-      const datasetsWithPriority = [
+    const getOrderedColumns = representatives => {
+      const representativesWithPriority = [
         { id: 'id', index: 0 },
         { id: 'datasetSchemaName', index: 1 },
-        { id: 'name', index: 2 },
-        { id: 'isReleased', index: 3 },
-        { id: 'releaseDate', index: 4 },
-        { id: 'publicFileName', index: 5 }
+        { id: 'isReleased', index: 2 },
+        { id: 'releaseDate', index: 3 },
+        { id: 'publicsFileName', index: 4 }
       ];
 
-      return datasets
-        .map(field => datasetsWithPriority.filter(e => field === e.id))
+      return representatives
+        .map(field => representativesWithPriority.filter(e => field === e.id))
         .flat()
         .sort((a, b) => a.index - b.index)
         .map(orderedField => orderedField.id);
@@ -138,20 +163,50 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const renderColumns = datasets => {
-      const fieldColumns = getOrderedColumns(Object.keys(datasets[0]))
+    const parseDataflowData = () => {
+      const parsedDatasets = [];
+
+      const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
+
+      !isNil(datasets) &&
+        datasetsSchemaName.forEach(datasetSchemaName => {
+          const publicsFileName = [];
+          datasets.forEach(dataset => {
+            if (dataset.datasetSchemaName === datasetSchemaName) {
+              if (!isNil(dataset.publicFileName)) {
+                publicsFileName.push(dataset.publicFileName);
+              }
+              const parsedDataset = {
+                datasetSchemaName: datasetSchemaName,
+                dataProviderId: dataset.dataProviderId,
+                isReleased: dataset.isReleased,
+                releaseDate: dataset.releaseDate,
+                publicsFileName: publicsFileName
+              };
+              parsedDatasets.push(parsedDataset);
+            }
+          });
+        });
+
+      let set = new Set(parsedDatasets.map(JSON.stringify));
+      let uniqParsedDatasets = Array.from(set).map(JSON.parse);
+
+      setRepresentatives(uniqParsedDatasets);
+    };
+
+    const renderColumns = representatives => {
+      const fieldColumns = getOrderedColumns(Object.keys(representatives[0]))
         .filter(
           key =>
             key.includes('datasetSchemaName') ||
-            key.includes('name') ||
             key.includes('isReleased') ||
             key.includes('releaseDate') ||
-            key.includes('publicFileName')
+            key.includes('publicsFileName')
         )
         .map(field => {
           let template = null;
           if (field === 'isReleased') template = isReleasedBodyColumn;
-          if (field === 'publicFileName') template = downloadFileBodyColumn;
+          if (field === 'publicsFileName') template = downloadFileBodyColumn;
           return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
         });
 
@@ -160,25 +215,13 @@ export const PublicDataflowInformation = withRouter(
 
     return (
       <PublicLayout>
-        <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`}>
+        <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`} style={contentStyles}>
           {!isLoading ? (
-            !isEmpty(datasets) ? (
+            !isEmpty(representatives) ? (
               <Fragment>
                 <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-                <DataTable
-                  autoLayout={true}
-                  paginator={true}
-                  paginatorRight={
-                    <span>
-                      {`${resources.messages['totalRecords']}  ${datasets.length}`}{' '}
-                      {resources.messages['records'].toLowerCase()}
-                    </span>
-                  }
-                  rows={10}
-                  rowsPerPageOptions={[5, 10, 15]}
-                  totalRecords={datasets.length}
-                  value={datasets}>
-                  {renderColumns(datasets)}
+                <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
+                  {renderColumns(representatives)}
                 </DataTable>
               </Fragment>
             ) : (

@@ -55,13 +55,11 @@ export const PublicDataflows = withRouter(({ history, match }) => {
     return history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true));
   };
 
-  // if (isLoading) return <Spinner />;
-
   return (
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
-          <h1 className={styles.title}>Public dataflows</h1>
+          <h1 className={styles.title}>Dataflows</h1>
           <div className={styles.dataflowsList}>
             {!isLoading ? (
               publicDataflows.map(dataflow => (
