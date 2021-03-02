@@ -11,8 +11,8 @@ import styles from './PublicFrontpage.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Card } from './_components/Card';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
-import Illustration from 'assets/images/public_illustration.png';
-import logo from 'assets/images/logo.png';
+import Illustration from 'assets/images/logos/public_illustration.png';
+import logo from 'assets/images/logos/logo.png';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 

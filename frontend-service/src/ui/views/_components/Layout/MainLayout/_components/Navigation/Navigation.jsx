@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import logo from 'assets/images/logo.png';
+import logo from 'assets/images/logos/logo.png';
 import styles from './Navigation.module.css';
 
 import { routes } from 'ui/routes';
