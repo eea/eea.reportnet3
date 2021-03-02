@@ -995,7 +995,8 @@
     "writeMessagePlaceholder": "Write your message",
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
-    "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "wrongWeblinkError": "Invalid URL. Please check it.",
+    "yes": "Yes",
+    "duplicatedWeblinkError": "Duplicated Description/Url. Please check it."
   }
 }
