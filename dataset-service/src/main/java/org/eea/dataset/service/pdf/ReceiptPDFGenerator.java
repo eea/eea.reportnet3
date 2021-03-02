@@ -184,8 +184,7 @@ public class ReceiptPDFGenerator {
     fontSize = 40f;
     x = 133f;
     y -= spaceBetweenLines * 4 - fontSize;
-    text = "The above-mentioned files were submitted by user: " + receipt.getUserName() + " ("
-        + receipt.getFullUserName() + ")";
+    text = "Submitted by user: " + receipt.getEmail();
     printLinePDF(contentStream, text, font, fontSize, x, y);
     contentStream.close();
   }
