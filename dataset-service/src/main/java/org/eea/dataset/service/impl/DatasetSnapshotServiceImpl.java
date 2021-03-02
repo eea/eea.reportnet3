@@ -848,9 +848,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     UserRepresentationVO user = userManagementControllerZull.getUserByUserId(
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID));
-    receipt.setUserName(user.getUsername());
-    receipt.setFullUserName((null != user.getFirstName() ? user.getFirstName() : "") + " "
-        + (null != user.getLastName() ? user.getLastName() : ""));
+    receipt.setEmail(user.getEmail());
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);

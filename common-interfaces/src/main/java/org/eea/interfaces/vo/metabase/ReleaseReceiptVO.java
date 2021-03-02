@@ -40,8 +40,5 @@ public class ReleaseReceiptVO implements Serializable {
   private Integer obligationId;
 
   /** The user name. */
-  private String userName;
-
-  /** The full user name. */
-  private String fullUserName;
+  private String email;
 }
