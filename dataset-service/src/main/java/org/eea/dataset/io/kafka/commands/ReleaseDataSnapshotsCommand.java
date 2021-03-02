@@ -17,10 +17,10 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -112,7 +112,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {}",
           dataset.getDataflowId(), dataset.getDataProviderId());
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
-          NotificationVO.builder().user((String) ThreadPropertiesManager.getVariable("user"))
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
               .providerId(dataset.getDataProviderId()).build());
     }

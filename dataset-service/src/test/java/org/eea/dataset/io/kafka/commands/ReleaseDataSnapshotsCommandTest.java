@@ -24,6 +24,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class RestoreDataCollectionSnapshotCommandTest.
@@ -60,11 +63,19 @@ public class ReleaseDataSnapshotsCommandTest {
   /** The data. */
   private Map<String, Object> data;
 
+  private SecurityContext securityContext;
+
+  private Authentication authentication;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT);
     MockitoAnnotations.initMocks(this);
@@ -77,6 +88,8 @@ public class ReleaseDataSnapshotsCommandTest {
    */
   @Test
   public void testExecuteFinish() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     data = new HashMap<>();
     data.put("dataset_id", 1L);
     data.put("user", "user1");

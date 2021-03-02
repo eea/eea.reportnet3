@@ -1,5 +1,6 @@
 package org.eea.dataflow.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
@@ -155,6 +156,24 @@ public class IntegrationServiceImplTest {
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     integrationService.deleteIntegration(1L);
     Mockito.verify(crudManager, times(1)).delete(Mockito.any());
+  }
+
+  /**
+   * Delete integration exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteIntegrationExceptionTest() throws EEAException {
+    Mockito.when(integrationRepository.findOperationById(Mockito.any()))
+        .thenReturn(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    try {
+      integrationService.deleteIntegration(1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.FORBIDDEN_EXPORT_EU_DATASET_INTEGRATION_DELETION,
+          e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -324,19 +343,37 @@ public class IntegrationServiceImplTest {
         Mockito.anyString());
   }
 
+  /**
+   * Execute external integration test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeExternalIntegrationTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setId(1L);
     IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Map<String, Object> executionResultParams = new HashMap<>();
+    executionResultParams.put("id", 1);
+    ExecutionResultVO executionResultVO = new ExecutionResultVO();
+    executionResultVO.setExecutionResultParams(executionResultParams);
     Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
     Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+
+    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
+        integrationVO)).thenReturn(executionResultVO);
+
     integrationService.executeExternalIntegration(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
     Mockito.verify(integrationExecutorFactory, times(1)).getExecutor(Mockito.any());
   }
 
+  /**
+   * Execute external integration replacing data test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeExternalIntegrationReplacingDataTest() throws EEAException {
 
@@ -348,6 +385,11 @@ public class IntegrationServiceImplTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Copy integrations test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void copyIntegrationsTest() throws EEAException {
     List<String> originDatasetSchemaIds = new ArrayList<>();
@@ -362,6 +404,11 @@ public class IntegrationServiceImplTest {
     Mockito.verify(crudManager, times(1)).get(Mockito.any());
   }
 
+  /**
+   * Adds the populate EU dataset lock test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void addPopulateEUDatasetLockTest() throws EEAException {
 
@@ -376,12 +423,20 @@ public class IntegrationServiceImplTest {
   }
 
 
+  /**
+   * Release populate EU dataset lock test.
+   */
   @Test
   public void releasePopulateEUDatasetLockTest() {
     integrationService.releasePopulateEUDatasetLock(1L);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
+  /**
+   * Creates the integrations test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createIntegrationsTest() throws EEAException {
     IntegrationVO integrationVO = new IntegrationVO();
@@ -393,5 +448,24 @@ public class IntegrationServiceImplTest {
     Mockito.verify(crudManager, times(1)).create(Mockito.any());
   }
 
+  /**
+   * Release locks test.
+   */
+  @Test
+  public void releaseLocksTest() {
+    integrationService.releaseLocks(0L);
+    Mockito.verify(lockService, times(7)).removeLockByCriteria(Mockito.any());
+  }
 
+  /**
+   * Adds the locks test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void addLocksTest() throws EEAException {
+    integrationService.addLocks(0L);
+    Mockito.verify(lockService, times(7)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
 }

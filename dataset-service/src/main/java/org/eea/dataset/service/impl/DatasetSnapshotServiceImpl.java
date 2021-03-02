@@ -62,6 +62,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
@@ -1180,6 +1181,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Map<String, Object> populateEuDataset = new HashMap<>();
     populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
     populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
-    lockService.createLock(timestamp, userName, LockType.METHOD, populateEuDataset);
+    LockVO lockVO = lockService.findByCriteria(populateEuDataset);
+    if (lockVO == null) {
+      lockService.createLock(timestamp, userName, LockType.METHOD, populateEuDataset);
+    }
   }
 }
