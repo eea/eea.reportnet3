@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
-import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -747,28 +746,6 @@ public class UserManagementControllerImpl implements UserManagementController {
 
 
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
-  }
-
-  /**
-   * Gets the user roles all dataflows.
-   *
-   * @return the user roles all dataflows
-   */
-  @Override
-  @PreAuthorize("isAuthenticated()")
-  @GetMapping("/getUserRolesAllDataflows")
-  public List<DataflowUserRoleVO> getUserRolesAllDataflows() {
-    List<Long> dataProviderIds = new ArrayList<>();
-    List<DataflowUserRoleVO> result = new ArrayList<>();
-    try {
-      // get providerId and check if user is National coordinator
-      dataProviderIds = userRoleService.getProviderIds();
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
-    }
-    dataProviderIds.stream()
-        .forEach(dataProvider -> result.addAll(userRoleService.getUserRoles(dataProvider)));
-    return result;
   }
 
   /**

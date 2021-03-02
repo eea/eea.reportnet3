@@ -189,7 +189,6 @@ public interface RepresentativeController {
    */
   @PutMapping("/private/update")
   Long updateInternalRepresentative(@RequestBody RepresentativeVO dataflowRepresentativeVO);
-}
 
   /**
    * Find data providers by code.

@@ -176,4 +176,12 @@ public interface RepresentativeService {
    * @return the list
    */
   List<DataProviderVO> findDataProvidersByCode(String code);
+
+  /**
+   * Gets the provider ids.
+   *
+   * @return the provider ids
+   * @throws EEAException the EEA exception
+   */
+  List<Long> getProviderIds() throws EEAException;
 }

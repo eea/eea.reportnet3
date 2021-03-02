@@ -2,20 +2,12 @@ package org.eea.ums.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import org.eea.exception.EEAErrorMessage;
-import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -24,8 +16,6 @@ import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,11 +24,6 @@ import org.springframework.stereotype.Service;
 @Service("UserRoleService")
 public class UserRoleServiceImpl implements UserRoleService {
 
-  /** The Constant REGEX: {@value}. */
-  private static final String REGEX = "-";
-
-  /** The Constant ROLE_PROVIDER: {@value}. */
-  private static final String ROLE_PROVIDER = "ROLE_PROVIDER-";
 
   /** The keycloak connector service. */
   @Autowired
@@ -94,33 +79,6 @@ public class UserRoleServiceImpl implements UserRoleService {
       usersMap.forEach((k, v) -> finalList.add(v));
     }
     return finalList;
-  }
-
-
-  /**
-   * Gets the user roles.
-   *
-   * @param dataProviderId the data provider id
-   * @return the user roles
-   */
-  @Override
-  public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId) {
-    List<DataFlowVO> dataflowList = dataflowControllerZuul.findDataflows();
-    List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
-    for (DataFlowVO dataflowVO : dataflowList) {
-      if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
-        DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
-        dataflowUserRoleVO.setDataflowId(dataflowVO.getId());
-        dataflowUserRoleVO.setDataflowName(dataflowVO.getName());
-        dataflowUserRoleVO
-            .setUsers(getUserRolesByDataflowCountry(dataflowVO.getId(), dataProviderId));
-        if (!dataflowUserRoleVO.getUsers().isEmpty()) {
-          dataflowUserRoleVOList.add(dataflowUserRoleVO);
-        }
-      }
-    }
-    return dataflowUserRoleVOList;
-
   }
 
 
@@ -209,44 +167,7 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
 
-  /**
-   * Gets the provider ids.
-   *
-   * @return the provider ids
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<Long> getProviderIds() throws EEAException {
-    List<DataProviderVO> dataProviders = null;
-    String countryCode = getCountryCodeNC();
-    if (null != countryCode) {
-      dataProviders = representativeControllerZuul.findDataProvidersByCode(countryCode);
-    } else {
-      throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
-    }
-    return dataProviders.stream().map(provider -> provider.getId()).collect(Collectors.toList());
-  }
 
-
-  /**
-   * Gets the country code NC.
-   *
-   * @return the country code NC
-   */
-  private String getCountryCodeNC() {
-    Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
-        .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
-        .collect(Collectors.toList());
-    String countryCode = null;
-    for (String auth : authorities) {
-      if (null != auth && auth.contains(ROLE_PROVIDER)) {
-        String[] roleSplit = auth.split(REGEX);
-        countryCode = roleSplit[1];
-        break;
-      }
-    }
-    return countryCode;
-  }
 }
 
 

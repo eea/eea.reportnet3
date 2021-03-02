@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +53,11 @@ import io.jsonwebtoken.lang.Collections;
 @Service("dataflowRepresentativeService")
 public class RepresentativeServiceImpl implements RepresentativeService {
 
+  /** The Constant REGEX: {@value}. */
+  private static final String REGEX = "-";
+
+  /** The Constant ROLE_PROVIDER: {@value}. */
+  private static final String ROLE_PROVIDER = "ROLE_PROVIDER-";
 
   /** The representative repository. */
   @Autowired
@@ -272,10 +279,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    */
   @Override
   public List<DataProviderVO> findDataProvidersByCode(String code) {
-    List<DataProviderVO> list = new ArrayList<>();
+    List<DataProviderVO> dataProviderResultList = new ArrayList<>();
     List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
-    dataProviders.forEach(dataProvider -> list.add(dataProviderMapper.entityToClass(dataProvider)));
-    return list;
+    dataProviders.forEach(
+        dataProvider -> dataProviderResultList.add(dataProviderMapper.entityToClass(dataProvider)));
+    return dataProviderResultList;
   }
 
   /**
@@ -700,5 +708,45 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     resource.setResourceGroup(group);
 
     return resource;
+  }
+
+  /**
+   * Gets the provider ids.
+   *
+   * @return the provider ids
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Long> getProviderIds() throws EEAException {
+    List<DataProviderVO> dataProviders = null;
+    String countryCode = getCountryCodeNC();
+    if (null != countryCode) {
+      dataProviders = findDataProvidersByCode(countryCode);
+    } else {
+      throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
+    }
+    return dataProviders.stream().map(provider -> provider.getId()).collect(Collectors.toList());
+  }
+
+
+
+  /**
+   * Gets the country code NC.
+   *
+   * @return the country code NC
+   */
+  private String getCountryCodeNC() {
+    Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
+        .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
+        .collect(Collectors.toList());
+    String countryCode = null;
+    for (String auth : authorities) {
+      if (null != auth && auth.contains(ROLE_PROVIDER)) {
+        String[] roleSplit = auth.split(REGEX);
+        countryCode = roleSplit[1];
+        break;
+      }
+    }
+    return countryCode;
   }
 }
