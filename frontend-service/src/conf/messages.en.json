@@ -1005,6 +1005,8 @@
     "email": "Email",
     "dataflowId": "Dataflow id",
     "user": "User",
-    "dataflowName": "Dataflow"
+    "dataflowName": "Dataflow",
+    "wrongWeblinkError": "Invalid URL. Please check it.",
+    "duplicatedWeblinkError": "Duplicated description/URL. Please check it."
   }
 }
