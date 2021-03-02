@@ -996,6 +996,15 @@
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "dataflowUsersList": "Dataflow users list",
+    "noUsers": "There are no users yet",
+    "noUsersWithSelectedParameters": "There are no user with the selected parameters",
+    "allDataflowsUserList": "All dataflows user list",
+    "allDataflowsUserListHeader": "All dataflows user list",
+    "email": "Email",
+    "dataflowId": "Dataflow id",
+    "user": "User",
+    "dataflowName": "Dataflow"
   }
 }
