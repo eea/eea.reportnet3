@@ -403,36 +403,6 @@ const getPercentageOfValue = (val, total) => {
 };
 
 const getAllDataflowsUserList = async () => {
-  // const usersListDTO = [
-  //   {
-  //     dataflowId: 0,
-  //     dataflowName: 'dataflowName',
-  //     users: [
-  //       {
-  //         email: 'miriam.provider@reportnet.net',
-  //         roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-  //       },
-  //       {
-  //         email: 'mikel.provider@reportnet.net',
-  //         roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     dataflowId: 2,
-  //     dataflowName: 'dataflowName2',
-  //     users: [
-  //       {
-  //         email: 'miriam.provider@reportnet.net',
-  //         roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-  //       },
-  //       {
-  //         email: 'mikel.provider@reportnet.net',
-  //         roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-  //       }
-  //     ]
-  //   }
-  // ];
   const usersListDTO = await apiDataflow.getAllDataflowsUserList();
   const allDataflowsUserList = parseAllDataflowsUserList(usersListDTO);
   return allDataflowsUserList;
