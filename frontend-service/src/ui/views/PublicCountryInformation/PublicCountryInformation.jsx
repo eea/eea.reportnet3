@@ -6,15 +6,14 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { config } from 'conf';
-import { routes } from 'ui/routes';
 
 import styles from './PublicCountryInformation.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
-// import { PublicCard } from 'ui/views/_components/PublicCard';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
+import { Title } from 'ui/views/_components/Title';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
@@ -106,212 +105,82 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   };
   const onLoadPublicCountryInformation = async () => {
     try {
-      const publicData = [
-        {
-          id: 1,
-          dataflowName: 'Dataflow 1',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
+      const publicData = {
+        countryCode: 'SP',
+        id: '2',
+        name: 'spain',
+        dataflows: [
+          {
+            id: 1,
+            dataflowName: 'Dataflow 1',
+            obligation: {
+              obligationId: 693,
+              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
+            },
+            legalInstrument: {
+              alias: 'Air Quality Directive IPR',
+              id: 650,
+              title: 'obligation 1'
+            },
+            status: 'open',
+            releaseDate: '2021-02-26 10:02',
+            isReleased: true,
+            publicsFileName: ['Austria-Schema 1']
           },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
+          {
+            id: 1,
+            dataflowName: 'Dataflow 2',
+            obligation: {
+              obligationId: 693,
+              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
+            },
+            legalInstrument: {
+              alias: 'Air Quality Directive IPR',
+              id: 650,
+              title: 'obligation 1'
+            },
+            status: 'closed',
+            releaseDate: '2021-01-26 10:02',
+            isReleased: true,
+            publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
           },
-          status: 'open',
-          releaseDate: '2021-02-26 10:02',
-          isReleased: true,
-          publicsFileName: ['Austria-Schema 1']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 2',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
+          {
+            id: 1,
+            dataflowName: 'Dataflow 1',
+            obligation: {
+              obligationId: 693,
+              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
+            },
+            legalInstrument: {
+              alias: 'Air Quality Directive IPR',
+              id: 650,
+              title: 'obligation 1'
+            },
+            status: 'open',
+            releaseDate: '2021-02-26 10:02',
+            isReleased: true,
+            publicsFileName: ['Austria-Schema 1']
           },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'closed',
-          releaseDate: '2021-01-26 10:02',
-          isReleased: true,
-          publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 1',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'open',
-          releaseDate: '2021-02-26 10:02',
-          isReleased: true,
-          publicsFileName: ['Austria-Schema 1']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 2',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'closed',
-          releaseDate: '2021-01-26 10:02',
-          isReleased: true,
-          publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 1',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'open',
-          releaseDate: '2021-02-26 10:02',
-          isReleased: true,
-          publicsFileName: ['Austria-Schema 1']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 2',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'closed',
-          releaseDate: '2021-01-26 10:02',
-          isReleased: true,
-          publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 1',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'open',
-          releaseDate: '2021-02-26 10:02',
-          isReleased: true,
-          publicsFileName: ['Austria-Schema 1']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 2',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'closed',
-          releaseDate: '2021-01-26 10:02',
-          isReleased: true,
-          publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 1',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'open',
-          releaseDate: '2021-02-26 10:02',
-          isReleased: true,
-          publicsFileName: ['Austria-Schema 1']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 2',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'closed',
-          releaseDate: '2021-01-26 10:02',
-          isReleased: true,
-          publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 1',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'open',
-          releaseDate: '2021-02-26 10:02',
-          isReleased: true,
-          publicsFileName: ['Austria-Schema 1']
-        },
-        {
-          id: 1,
-          dataflowName: 'Dataflow 2',
-          obligation: {
-            obligationId: 693,
-            title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-          },
-          legalInstrument: {
-            alias: 'Air Quality Directive IPR',
-            id: 650,
-            title: 'obligation 1'
-          },
-          status: 'closed',
-          releaseDate: '2021-01-26 10:02',
-          isReleased: true,
-          publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
-        }
-      ];
+
+          {
+            id: 1,
+            dataflowName: 'Dataflow 1',
+            obligation: {
+              obligationId: 693,
+              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
+            },
+            legalInstrument: {
+              alias: 'Air Quality Directive IPR',
+              id: 650,
+              title: 'obligation 1'
+            },
+            status: 'open',
+            releaseDate: '2021-02-26 10:02',
+            isReleased: true,
+            publicsFileName: ['Austria-Schema 1']
+          }
+        ]
+      };
       setPublicCountryInformation(publicData);
     } catch (error) {
       console.error('error', error);
@@ -320,8 +189,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   };
 
-  const renderColumns = countries => {
-    const fieldColumns = Object.keys(countries[0])
+  const renderColumns = dataflows => {
+    const fieldColumns = Object.keys(dataflows[0])
       .filter(key => !key.includes('id'))
       .map(field => {
         let template = null;
@@ -348,6 +217,14 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>Countries</h1>
+          <h1 className={styles.title}>
+            <Title
+              icon={'clone'}
+              iconSize={'4rem'}
+              subtitle={resources.messages['dataflows']}
+              title={publicCountryInformation.name?.charAt(0).toUpperCase() + publicCountryInformation.name?.slice(1)}
+            />
+          </h1>
           <div className={styles.countriesList}>
             {!isLoading ? (
               <DataTable
