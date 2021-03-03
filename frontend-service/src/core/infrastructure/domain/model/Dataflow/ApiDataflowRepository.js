@@ -286,7 +286,7 @@ const downloadById = async dataflowId => await apiDataflow.downloadById(dataflow
 
 const getAllSchemas = async dataflowId => {
   const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
-  const datasetSchemas = datasetSchemasDTO.map(datasetSchemaDTO => {
+  const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {
     const dataset = new Dataset({
       datasetSchemaDescription: datasetSchemaDTO.description,
       datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
@@ -325,19 +325,20 @@ const getAllSchemas = async dataflowId => {
             });
           })
         : null;
+
       return new DatasetTable({
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
-        tableSchemaToPrefill: datasetTableDTO.toPrefill,
-        tableSchemaId: datasetTableDTO.idTableSchema,
+        records: records,
+        recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null,
         tableSchemaDescription: datasetTableDTO.description,
         tableSchemaFixedNumber: datasetTableDTO.fixedNumber,
+        tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaName: datasetTableDTO.nameTableSchema,
         tableSchemaNotEmpty: datasetTableDTO.notEmpty,
         tableSchemaReadOnly: datasetTableDTO.readOnly,
-        records: records,
-        recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
+        tableSchemaToPrefill: datasetTableDTO.toPrefill
       });
     });
 
@@ -350,7 +351,9 @@ const getAllSchemas = async dataflowId => {
     const textB = b.datasetSchemaName.toUpperCase();
     return textA < textB ? -1 : textA > textB ? 1 : 0;
   });
-  return datasetSchemas;
+  datasetSchemasDTO.data = datasetSchemas;
+
+  return datasetSchemasDTO;
 };
 
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>

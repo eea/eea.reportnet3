@@ -5,10 +5,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 export const apiDataflow = {
   all: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflows) }),
 
-  allSchemas: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.allSchemas, { dataflowId }) });
-    return response.data;
-  },
+  allSchemas: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.allSchemas, { dataflowId }) }),
 
   cloneDatasetSchemas: async (sourceDataflowId, targetDataflowId) => {
     return await HTTPRequester.post({
