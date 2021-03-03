@@ -216,7 +216,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
-          <h1 className={styles.title}>Countries</h1>
           <h1 className={styles.title}>
             <Title
               icon={'clone'}
@@ -229,9 +228,17 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             {!isLoading ? (
               <DataTable
                 autoLayout={true}
-                totalRecords={publicCountryInformation.length}
-                value={publicCountryInformation}>
-                {renderColumns(publicCountryInformation)}
+                paginator={true}
+                paginatorRight={
+                  <span>{`${resources.messages['totalRecords']}  ${
+                    publicCountryInformation.dataflows.length
+                  } ${resources.messages['records'].toLowerCase()}`}</span>
+                }
+                rows={10}
+                rowsPerPageOptions={[5, 10, 15]}
+                totalRecords={publicCountryInformation.dataflows.length}
+                value={publicCountryInformation.dataflows}>
+                {renderColumns(publicCountryInformation.dataflows)}
               </DataTable>
             ) : (
               <Spinner style={{ top: 0, left: 0 }} />
