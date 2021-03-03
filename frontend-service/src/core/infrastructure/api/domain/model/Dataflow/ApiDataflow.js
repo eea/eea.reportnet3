@@ -21,13 +21,11 @@ export const apiDataflow = {
   },
 
   dataflowDetails: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.dataflowDetails, { dataflowId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.dataflowDetails, { dataflowId }) });
   },
 
   datasetsFinalFeedback: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.datasetsFinalFeedback, { dataflowId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.datasetsFinalFeedback, { dataflowId }) });
   },
 
   datasetsReleasedStatus: async dataflowId => {

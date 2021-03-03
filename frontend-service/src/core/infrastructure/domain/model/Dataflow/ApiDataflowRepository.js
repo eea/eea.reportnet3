@@ -232,7 +232,7 @@ const datasetsValidationStatistics = async datasetSchemaId => {
 
 const datasetsFinalFeedback = async dataflowId => {
   const datasetsFinalFeedbackDTO = await apiDataflow.datasetsFinalFeedback(dataflowId);
-  const datasetsFeedback = datasetsFinalFeedbackDTO.map(dataset => {
+  datasetsFinalFeedbackDTO.data = datasetsFinalFeedbackDTO.data.map(dataset => {
     return {
       dataProviderName: dataset.dataSetName,
       datasetName: dataset.nameDatasetSchema,
@@ -242,7 +242,7 @@ const datasetsFinalFeedback = async dataflowId => {
     };
   });
 
-  return datasetsFeedback;
+  return datasetsFinalFeedbackDTO;
 };
 
 const datasetsReleasedStatus = async dataflowId => {
@@ -278,7 +278,12 @@ const datasetsReleasedStatus = async dataflowId => {
   return releasedStatusData;
 };
 
-const dataflowDetails = async dataflowId => parseDataflowDTO(await apiDataflow.dataflowDetails(dataflowId));
+const dataflowDetails = async dataflowId => {
+  const dataflowDetails = await apiDataflow.dataflowDetails(dataflowId);
+  dataflowDetails.data = parseDataflowDTO(dataflowDetails.data);
+
+  return dataflowDetails;
+};
 
 const deleteById = async dataflowId => await apiDataflow.deleteById(dataflowId);
 

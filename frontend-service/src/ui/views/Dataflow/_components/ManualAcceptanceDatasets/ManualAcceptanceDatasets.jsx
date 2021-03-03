@@ -32,12 +32,7 @@ export const ManualAcceptanceDatasets = ({
 
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
-    {
-      data: [],
-      filtered: false,
-      filteredData: [],
-      isLoading: true
-    }
+    { data: [], filtered: false, filteredData: [], isLoading: true }
   );
 
   useEffect(() => {
@@ -67,14 +62,10 @@ export const ManualAcceptanceDatasets = ({
     try {
       isLoading(true);
 
-      const response = await DataflowService.datasetsFinalFeedback(dataflowId);
+      const { data } = await DataflowService.datasetsFinalFeedback(dataflowId);
       manualAcceptanceDatasetsDispatch({
         type: 'INITIAL_LOAD',
-        payload: {
-          data: response,
-          filteredData: response,
-          filtered: false
-        }
+        payload: { data, filteredData: data, filtered: false }
       });
       refreshManualAcceptanceDatasets(false);
     } catch (error) {

@@ -50,8 +50,8 @@ export const DataflowDashboards = withRouter(
     }, []);
 
     const getDataflowName = async () => {
-      const dataflowData = await DataflowService.dataflowDetails(dataflowId);
-      setDataflowName(dataflowData.name);
+      const { data } = await DataflowService.dataflowDetails(dataflowId);
+      setDataflowName(data.name);
     };
 
     const onLoadDataSchemas = async () => {

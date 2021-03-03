@@ -121,13 +121,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const getDataflowName = async () => {
     try {
-      const dataflowData = await DataflowService.dataflowDetails(dataflowId);
-      setDataflowName(dataflowData.name);
+      const { data } = await DataflowService.dataflowDetails(dataflowId);
+      setDataflowName(data.name);
     } catch (error) {
-      notificationContext.add({
-        type: 'DATAFLOW_DETAILS_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
   };
 
