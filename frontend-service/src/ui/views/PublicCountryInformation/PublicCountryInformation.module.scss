@@ -1,0 +1,22 @@
+.container {
+  flex: 1 auto;
+  height: 100%;
+  padding-bottom: 4rem;
+  &.isLoading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.checkedValueColumn {
+  text-align: center;
+}
+
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--documenticon-color);
+  text-align: center;
+}

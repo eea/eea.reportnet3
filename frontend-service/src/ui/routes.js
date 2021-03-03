@@ -17,6 +17,7 @@ export const routes = {
   LOGIN: '/login',
   PRIVACY_STATEMENT: '/privacyPolicy',
   PUBLIC_COUNTRIES: '/public/countries',
+  PUBLIC_COUNTRY_INFORMATION: '/public/country/:countryId',
   PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId',
   PUBLIC_DATAFLOWS: '/public/dataflows',
   SETTINGS: '/settings'

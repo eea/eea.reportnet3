@@ -19,6 +19,7 @@ import { Notifications } from 'ui/views/_components/Notifications';
 import { PrivacyStatement } from 'ui/views/PrivacyStatement';
 import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
 import { PublicCountries } from 'ui/views/PublicCountries';
+import { PublicCountryInformation } from 'ui/views/PublicCountryInformation';
 import { PublicDataflowInformation } from 'ui/views/PublicDataflowInformation';
 import { PublicDataflows } from 'ui/views/PublicDataflows';
 import { PublicFrontpage } from 'ui/views/PublicFrontpage';
@@ -53,6 +54,11 @@ const App = () => {
                           <ScrollToTop>
                             <Switch>
                               <Route exact path={routes.PUBLIC_COUNTRIES} component={PublicCountries} />
+                              <Route
+                                exact
+                                path={routes.PUBLIC_COUNTRY_INFORMATION}
+                                component={PublicCountryInformation}
+                              />
                               <Route exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
                               <Route
                                 exact
