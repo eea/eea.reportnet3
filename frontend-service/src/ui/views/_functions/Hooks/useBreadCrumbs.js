@@ -11,6 +11,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 export const useBreadCrumbs = ({
+  countryId,
   currentPage,
   dataflowId,
   dataflowStateData,
@@ -109,6 +110,13 @@ export const useBreadCrumbs = ({
       label: resources.messages['publicCountriesBreadcrumbs']
     };
   };
+  const getPublicCountryCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryId }, true)),
+      href: getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryId }, true),
+      label: resources.messages['publicCountryBreadcrumbs']
+    };
+  };
   const getPublicDataflowCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
@@ -201,6 +209,11 @@ export const useBreadCrumbs = ({
     if (currentPage === CurrentPage.PUBLIC_COUNTRIES) {
       breadCrumbContext.add([getPublicHomeCrumb(), getPublicCountriesCrumb()]);
     }
+
+    if (currentPage === CurrentPage.PUBLIC_COUNTRY) {
+      breadCrumbContext.add([getPublicHomeCrumb(), getPublicCountriesCrumb(), getPublicCountryCrumb()]);
+    }
+
     if (currentPage === CurrentPage.PUBLIC_DATAFLOW) {
       breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb(), getPublicDataflowCrumb()]);
     }

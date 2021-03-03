@@ -21,13 +21,25 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { DataflowService } from 'core/services/Dataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+
+import { CurrentPage } from 'ui/views/_functions/Utils';
+
 export const PublicCountryInformation = withRouter(({ match, history }) => {
+  const {
+    params: { countryId }
+  } = match;
+
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [publicCountryInformation, setPublicCountryInformation] = useState([]);
+
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryId, history });
+
   useEffect(() => {
     onLoadPublicCountryInformation();
   }, []);
@@ -39,6 +51,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
+
   const getPublicFileName = fileName => {
     const splittedFileName = fileName.split('-');
     return splittedFileName[1];
@@ -329,6 +342,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       </span>
     </a>
   );
+
   return (
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
