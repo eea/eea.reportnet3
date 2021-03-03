@@ -2,6 +2,8 @@ package org.eea.dataset.io.notification.events;
 
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.junit.Assert;
@@ -27,7 +29,9 @@ public class ReleaseFinishEventTest {
   @Mock
   private DatasetService datasetService;
 
-
+  /** The representative controller zuul. */
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Inits the mocks.
@@ -69,8 +73,11 @@ public class ReleaseFinishEventTest {
    */
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setLabel("SPAIN");
     Mockito.when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    Mockito.when(representativeControllerZuul.findDataProviderById(1L)).thenReturn(dataProviderVO);
     Assert.assertEquals(4, releaseFinishEvent
-        .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
+        .getMap(NotificationVO.builder().user("user").providerId(1L).datasetId(1L).build()).size());
   }
 }

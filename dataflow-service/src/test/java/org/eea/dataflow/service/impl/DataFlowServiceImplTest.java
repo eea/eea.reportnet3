@@ -966,4 +966,10 @@ public class DataFlowServiceImplTest {
         Mockito.anyBoolean());
   }
 
+  @Test
+  public void getUserRolesTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    assertNotNull("is null", dataflowServiceImpl.getUserRoles(1L, Arrays.asList(dataflowVO)));
+  }
 }

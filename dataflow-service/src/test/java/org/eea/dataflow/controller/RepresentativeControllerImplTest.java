@@ -554,4 +554,9 @@ public class RepresentativeControllerImplTest {
     assertEquals(0L, representativeControllerImpl
         .updateInternalRepresentative(new RepresentativeVO()).longValue());
   }
+
+  @Test
+  public void findDataProvidersByCodeTest() {
+    assertNotNull("is null", representativeControllerImpl.findDataProvidersByCode("ES"));
+  }
 }
