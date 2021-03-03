@@ -28,9 +28,7 @@ import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
 const getUserRoles = userRoles => {
   const userRoleToDataflow = [];
-  userRoles.filter(userRol => {
-    return !userRol.duplicatedRoles && userRoleToDataflow.push(userRol);
-  });
+  userRoles.filter(userRol => !userRol.duplicatedRoles && userRoleToDataflow.push(userRol));
 
   const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
   const dataflowDuplicatedRoles = [];
@@ -135,9 +133,7 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   const allDatasetLevelErrors = [];
   datasetsDashboardsDataDTO.forEach(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
-    datasetReporters.push({
-      reporterName: dataset.nameDataSetSchema
-    });
+    datasetReporters.push({ reporterName: dataset.nameDataSetSchema });
     allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
     dataset.tables.forEach((table, i) => {
       let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
@@ -275,19 +271,15 @@ const datasetsReleasedStatus = async dataflowId => {
   });
 
   const releasedStatusData = {
+    labels: Array.from(new Set(reporters)),
     releasedData: isReleased,
-    unReleasedData: isNotReleased,
-    labels: Array.from(new Set(reporters))
+    unReleasedData: isNotReleased
   };
 
   return releasedStatusData;
 };
 
-const dataflowDetails = async dataflowId => {
-  const dataflowDetailsDTO = await apiDataflow.dataflowDetails(dataflowId);
-  const dataflowDetails = parseDataflowDTO(dataflowDetailsDTO);
-  return dataflowDetails;
-};
+const dataflowDetails = async dataflowId => parseDataflowDTO(await apiDataflow.dataflowDetails(dataflowId));
 
 const deleteById = async dataflowId => await apiDataflow.deleteById(dataflowId);
 
@@ -419,6 +411,7 @@ const parseDataflowDTO = dataflowDTO =>
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
+
 const parseDataCollectionListDTO = dataCollectionsDTO => {
   if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
     const dataCollections = [];
@@ -617,12 +610,11 @@ const reporting = async dataflowId => {
   return dataflow;
 };
 
-const schemasValidation = async dataflowId => {
-  return await apiDataflow.schemasValidation(dataflowId);
-};
+const schemasValidation = async dataflowId => await apiDataflow.schemasValidation(dataflowId);
 
-const update = async (dataflowId, name, description, obligationId, isReleasable) =>
-  await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable);
+const update = async (dataflowId, name, description, obligationId, isReleasable) => {
+  return await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable);
+};
 
 export const ApiDataflowRepository = {
   all,
