@@ -3,13 +3,6 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiDataflow = {
-  accept: async dataflowId => {
-    return await HTTPRequester.update({
-      url: getUrl(DataflowConfig.acceptDataflow, { dataflowId, type: 'ACCEPTED' }),
-      data: { id: dataflowId }
-    });
-  },
-
   all: async () => {
     const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflows) });
     return response.data;
@@ -96,14 +89,6 @@ export const apiDataflow = {
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
     const response = await HTTPRequester.post({
       url: getUrl(DataflowConfig.newEmptyDatasetSchema, { dataflowId, datasetSchemaName })
-    });
-    return response.status;
-  },
-
-  reject: async dataflowId => {
-    const response = await HTTPRequester.update({
-      url: getUrl(DataflowConfig.rejectDataflow, { dataflowId, type: 'REJECTED' }),
-      data: { id: dataflowId }
     });
     return response.status;
   },

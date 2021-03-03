@@ -1,28 +1,24 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
 import uuid from 'uuid';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
+import isNil from 'lodash/isNil';
 
 import styles from './DataflowsItem.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { Button } from 'ui/views/_components/Button';
-
-import { DataflowService } from 'core/services/Dataflow';
-
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows = () => {}, type }) => {
+const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {}, type }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -34,31 +30,6 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
     setIsPinned(itemContent.pinned === 'pinned');
   }, [itemContent, isPinning]);
 
-  const onAccept = async () => {
-    try {
-      const response = await DataflowService.accept(itemContent.requestId);
-      if (response.status >= 200 && response.status <= 299) {
-        dataFetch();
-      } else {
-        console.error('AcceptDataflow error with status: ', response);
-      }
-    } catch (error) {
-      console.error('AcceptDataflow error: ', error);
-    }
-  };
-
-  const onReject = async () => {
-    try {
-      const status = await DataflowService.reject(itemContent.requestId);
-      if (status >= 200 && status <= 299) {
-        dataFetch();
-      } else {
-        console.error('RejectDataflow error with status: ', status);
-      }
-    } catch (error) {
-      console.error('RejectDataflow error: ', error);
-    }
-  };
   const layout = children => {
     return (
       <div
@@ -74,17 +45,11 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
         {type === 'accepted' ? (
           <Link
             className={`${styles.containerLink}`}
-            to={getUrl(
-              routes.DATAFLOW,
-              {
-                dataflowId: itemContent.id
-              },
-              true
-            )}>
+            to={getUrl(routes.DATAFLOW, { dataflowId: itemContent.id }, true)}>
             {children}
           </Link>
         ) : (
-          <>{children}</>
+          <Fragment>{children}</Fragment>
         )}
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
@@ -104,21 +69,19 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
   const idTooltip = uuid.v4();
 
   return layout(
-    <>
+    <Fragment>
       <div className={`${styles.icon}`}>
         <FontAwesomeIcon icon={AwesomeIcons('clone')} />
       </div>
 
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
         <p>
-          <>
-            <span>{`${resources.messages['deliveryDate']}: `}</span>
-            <span className={`${styles.dateBlock}`}>
-              {itemContent.expirationDate == '-'
-                ? resources.messages['pending']
-                : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
-            </span>
-          </>
+          <span>{`${resources.messages['deliveryDate']}: `}</span>
+          <span className={`${styles.dateBlock}`}>
+            {itemContent.expirationDate == '-'
+              ? resources.messages['pending']
+              : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+          </span>
         </p>
       </div>
 
@@ -156,57 +119,16 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
       <div className={`${styles.obligation} `}>
         <p className="dataflowList-obligation-description-help-step">
           {!isNil(itemContent.legalInstrument) ? (
-            <>
+            <Fragment>
               <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span> {itemContent.legalInstrument}
-            </>
+            </Fragment>
           ) : null}
         </p>
         <p>
-          <>
-            <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
-          </>
+          <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
         </p>
       </div>
-
-      <div className={`${styles.toolbar}`}>
-        {type === 'pending' ? (
-          <>
-            <Button
-              layout="simple"
-              className={`${styles.rep_button}`}
-              onClick={() => onAccept()}
-              label={resources.messages['accept']}
-            />
-            <Button
-              className={`${styles.rep_button}`}
-              onClick={() => onReject()}
-              label={resources.messages['reject']}
-            />
-          </>
-        ) : (
-          false && (
-            <>
-              <span
-                className={styles.btn}
-                href="#"
-                onClick={e => {
-                  e.preventDefault();
-                }}>
-                <FontAwesomeIcon icon={AwesomeIcons('comments')} />
-              </span>
-              <span
-                className={styles.btn}
-                href="http://"
-                onClick={e => {
-                  e.preventDefault();
-                }}>
-                <FontAwesomeIcon icon={AwesomeIcons('share')} />
-              </span>
-            </>
-          )
-        )}
-      </div>
-    </>
+    </Fragment>
   );
 };
 

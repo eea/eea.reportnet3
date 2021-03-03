@@ -1,7 +1,6 @@
 import { ApiDataflowRepository } from 'core/infrastructure/domain/model/Dataflow/ApiDataflowRepository';
 
 export const DataflowRepository = {
-  accept: () => Promise.reject('[DataflowRepository#accept] must be implemented'),
   all: () => Promise.reject('[DataflowRepository#all] must be implemented'),
   cloneDatasetSchemas: () => Promise.reject('[DataflowRepository#cloneDatasetSchemas] must be implemented'),
   create: () => Promise.reject('[DataflowRepository#create] must be implemented'),
@@ -16,7 +15,6 @@ export const DataflowRepository = {
   getPublicDataflowData: () => Promise.reject('[DataflowRepository#getPublicDataflowData] must be implemented'),
   metadata: () => Promise.reject('[DataflowRepository#metadata] must be implemented'),
   newEmptyDatasetSchema: () => Promise.reject('[DataflowRepository#newEmptyDatasetSchema] must be implemented'),
-  reject: () => Promise.reject('[DataflowRepository#reject] must be implemented'),
   reporting: () => Promise.reject('[DataflowRepository#reporting] must be implemented'),
   schemasValidation: () => Promise.reject('[DataflowRepository#schemasValidation] must be implemented'),
   update: () => Promise.reject('[DataflowRepository#update] must be implemented')

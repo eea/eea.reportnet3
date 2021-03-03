@@ -26,8 +26,6 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
-const accept = async dataflowId => await apiDataflow.accept(dataflowId);
-
 const getUserRoles = userRoles => {
   const userRoleToDataflow = [];
   userRoles.filter(userRol => {
@@ -615,11 +613,6 @@ const publicData = async () => {
   return publicDataflowsDTO;
 };
 
-const reject = async dataflowId => {
-  const status = await apiDataflow.reject(dataflowId);
-  return status;
-};
-
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
   const dataflow = parseDataflowDTO(reportingDataflowDTO);
@@ -639,7 +632,6 @@ const update = async (dataflowId, name, description, obligationId, isReleasable)
   await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable);
 
 export const ApiDataflowRepository = {
-  accept,
   all,
   cloneDatasetSchemas,
   create,
@@ -655,7 +647,6 @@ export const ApiDataflowRepository = {
   getPublicDataflowData,
   newEmptyDatasetSchema,
   publicData,
-  reject,
   reporting,
   schemasValidation,
   update
