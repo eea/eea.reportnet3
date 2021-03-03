@@ -289,13 +289,9 @@ const dataflowDetails = async dataflowId => {
   return dataflowDetails;
 };
 
-const deleteById = async dataflowId => {
-  return await apiDataflow.deleteById(dataflowId);
-};
+const deleteById = async dataflowId => await apiDataflow.deleteById(dataflowId);
 
-const downloadById = async dataflowId => {
-  return await apiDataflow.downloadById(dataflowId);
-};
+const downloadById = async dataflowId => await apiDataflow.downloadById(dataflowId);
 
 const getAllSchemas = async dataflowId => {
   const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
@@ -382,13 +378,10 @@ const getPublicDataflowData = async dataflowId => {
 const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.generateApiKey(dataflowId, dataProviderId, isCustodian);
 
-const getPercentageOfValue = (val, total) => {
-  return total === 0 ? '0.00' : ((val / total) * 100).toFixed(2);
-};
+const getPercentageOfValue = (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2));
 
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
-  const newEmptyDatasetSchemaResponse = await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
-  return newEmptyDatasetSchemaResponse;
+  return await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
 };
 
 const parseDataflowDTOs = dataflowDTOs => {

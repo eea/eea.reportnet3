@@ -14,27 +14,25 @@ export const apiDataflow = {
   },
 
   cloneDatasetSchemas: async (sourceDataflowId, targetDataflowId) => {
-    const response = await HTTPRequester.post({
+    return await HTTPRequester.post({
       url: getUrl(DataflowConfig.cloneDatasetSchemas, { sourceDataflowId, targetDataflowId })
     });
-    return response;
   },
 
   create: async (name, description, obligationId) => {
-    const response = await HTTPRequester.post({
+    return await HTTPRequester.post({
       url: getUrl(DataflowConfig.createDataflow),
       data: { name, description, obligation: { obligationId }, releasable: true }
     });
-    return response;
+  },
+
+  dataflowDetails: async dataflowId => {
+    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.dataflowDetails, { dataflowId }) });
+    return response.data;
   },
 
   datasetsFinalFeedback: async dataflowId => {
     const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.datasetsFinalFeedback, { dataflowId }) });
-    return response.data;
-  },
-
-  datasetsValidationStatistics: async datasetSchemaId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.globalStatistics, { datasetSchemaId }) });
     return response.data;
   },
 
@@ -43,14 +41,13 @@ export const apiDataflow = {
     return response.data;
   },
 
-  dataflowDetails: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.dataflowDetails, { dataflowId }) });
+  datasetsValidationStatistics: async datasetSchemaId => {
+    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.globalStatistics, { datasetSchemaId }) });
     return response.data;
   },
 
   deleteById: async dataflowId => {
-    const response = await HTTPRequester.delete({ url: getUrl(DataflowConfig.deleteDataflow, { dataflowId }) });
-    return response;
+    return await HTTPRequester.delete({ url: getUrl(DataflowConfig.deleteDataflow, { dataflowId }) });
   },
 
   downloadById: async dataflowId => {
@@ -58,26 +55,21 @@ export const apiDataflow = {
     return response.data;
   },
 
-  getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
-    let url = isCustodian
-      ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
-      : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
-
-    const response = await HTTPRequester.get({ url: url });
-    return response.data;
-  },
-
   generateApiKey: async (dataflowId, dataProviderId, isCustodian) => {
-    let url = isCustodian
+    const url = isCustodian
       ? getUrl(DataflowConfig.generateApiKeyCustodian, { dataflowId })
       : getUrl(DataflowConfig.generateApiKey, { dataflowId, dataProviderId });
 
-    const response = await HTTPRequester.post({ url: url });
+    const response = await HTTPRequester.post({ url });
     return response.data;
   },
 
-  publicData: async () => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.publicData) });
+  getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
+    const url = isCustodian
+      ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
+      : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
+
+    const response = await HTTPRequester.get({ url });
     return response.data;
   },
 
@@ -87,10 +79,14 @@ export const apiDataflow = {
   },
 
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
-    const response = await HTTPRequester.post({
+    return await HTTPRequester.post({
       url: getUrl(DataflowConfig.newEmptyDatasetSchema, { dataflowId, datasetSchemaName })
     });
-    return response.status;
+  },
+
+  publicData: async () => {
+    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.publicData) });
+    return response.data;
   },
 
   reporting: async dataflowId => {
