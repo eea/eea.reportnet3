@@ -998,6 +998,8 @@
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
     "publicCountriesBreadcrumbs": "Public countries",
-    "publicCountryBreadcrumbs": "Country"
+    "publicCountryBreadcrumbs": "Country",
+    "eeaCountries": "EEA Member countries",
+    "otherCountries": "Other countries and territories"
   }
 }

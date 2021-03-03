@@ -78,15 +78,46 @@ export const PublicCountries = withRouter(({ history }) => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>Countries</h1>
-          <div className={styles.countriesList}>
+          <div>
             {!isLoading ? (
-              <DataTable
-                autoLayout={true}
-                onRowClick={event => onOpenCountry(event.data.id)}
-                totalRecords={publicCountries.length}
-                value={publicCountries}>
-                {renderColumns(publicCountries)}
-              </DataTable>
+              <>
+                <h3>{resources.messages['eeaCountries']}</h3>
+                <div className={styles.countriesWrapper}>
+                  {config.countriesByGroup.eeaCountries.map(country => {
+                    const countryCode = country.code;
+                    return (
+                      <div key={country.code}>
+                        <a
+                          href={getUrl(routes.COUNTRY)}
+                          onClick={e => {
+                            e.preventDefault();
+                            history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+                          }}>
+                          {country.name}
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
+                <h3>{resources.messages['otherCountries']}</h3>
+                <div className={styles.countriesWrapper}>
+                  {config.countriesByGroup.otherCountries.map(country => {
+                    const countryCode = country.code;
+                    return (
+                      <div key={country.code}>
+                        <a
+                          href={getUrl(routes.COUNTRY)}
+                          onClick={e => {
+                            e.preventDefault();
+                            history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+                          }}>
+                          {country.name}
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             ) : (
               <Spinner style={{ top: 0, left: 0 }} />
             )}

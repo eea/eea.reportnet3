@@ -1,0 +1,218 @@
+{
+  "eeaCountries": [
+    {
+      "name": "Austria",
+      "code": "at"
+    },
+    {
+      "name": "Belgium",
+      "code": "be"
+    },
+    {
+      "name": "Bulgarian",
+      "code": "bg"
+    },
+    {
+      "name": "Croatia",
+      "code": "hr"
+    },
+    {
+      "name": "Cyprus",
+      "code": "cy"
+    },
+    {
+      "name": "Czechia",
+      "code": "cz"
+    },
+    {
+      "name": "Denmark",
+      "code": "dk"
+    },
+    {
+      "name": "Estonia",
+      "code": "ee"
+    },
+    {
+      "name": "Finland",
+      "code": "fi"
+    },
+    {
+      "name": "France",
+      "code": "fr"
+    },
+    {
+      "name": "Germany",
+      "code": "de"
+    },
+    {
+      "name": "Greece",
+      "code": "el"
+    },
+    {
+      "name": "Hungary",
+      "code": "hu"
+    },
+    {
+      "name": "Ireland",
+      "code": "ie"
+    },
+    {
+      "name": "Italy",
+      "code": "it"
+    },
+    {
+      "name": "Latvia",
+      "code": "lv"
+    },
+    {
+      "name": "Liechtenstein",
+      "code": "li"
+    },
+    {
+      "name": "Lithuania",
+      "code": "lt"
+    },
+    {
+      "name": "Luxembourg",
+      "code": "lu"
+    },
+    {
+      "name": "Malta",
+      "code": "mt"
+    },
+    {
+      "name": "Netherlands",
+      "code": "nl"
+    },
+    {
+      "name": "Norway",
+      "code": "no"
+    },
+    {
+      "name": "Poland",
+      "code": "pl"
+    },
+    {
+      "name": "Portugal",
+      "code": "pt"
+    },
+    {
+      "name": "Romania",
+      "code": "ro"
+    },
+    {
+      "name": "Slovakia",
+      "code": "sk"
+    },
+    {
+      "name": "Slovenia",
+      "code": "sl"
+    },
+    {
+      "name": "Spain",
+      "code": "es"
+    },
+    {
+      "name": "Sweden",
+      "code": "se"
+    },
+    {
+      "name": "Switzerland",
+      "code": "ch"
+    },
+    {
+      "name": "Turkey",
+      "code": "tr"
+    }
+  ],
+  "otherCountries": [
+    {
+      "name": "Albania",
+      "code": "al"
+    },
+    {
+      "name": "Andorra",
+      "code": "ad"
+    },
+    {
+      "name": "Armenia",
+      "code": "am"
+    },
+    {
+      "name": "Azerbaijan",
+      "code": "az"
+    },
+    {
+      "name": "Belarus",
+      "code": "by"
+    },
+    {
+      "name": "Bosnia and Herzegovina",
+      "code": "ba"
+    },
+    {
+      "name": "Georgia",
+      "code": "ge"
+    },
+    {
+      "name": "Gibraltar",
+      "code": "gi"
+    },
+    {
+      "name": "Kazakhstan",
+      "code": "kz"
+    },
+    {
+      "name": "Kosovo (UNSCR 1244/99)",
+      "code": "xk"
+    },
+    {
+      "name": "Kyrgyzstan",
+      "code": "kg"
+    },
+    {
+      "name": "Moldova",
+      "code": "md"
+    },
+    {
+      "name": "Monaco",
+      "code": "mc"
+    },
+    {
+      "name": "Montenegro",
+      "code": "me"
+    },
+    {
+      "name": "North Macedonia",
+      "code": "mk"
+    },
+    {
+      "name": "Russia",
+      "code": "ru"
+    },
+    {
+      "name": "Serbia",
+      "code": "rs"
+    },
+    {
+      "name": "Tajikistan",
+      "code": "tj"
+    },
+    {
+      "name": "Turkmenistan",
+      "code": "tm"
+    },
+    {
+      "name": "Ukraine",
+      "code": "ua"
+    },
+    {
+      "name": "United Kingdom",
+      "code": "gb"
+    },
+    {
+      "name": "Uzbekistan",
+      "code": "uz"
+    }
+  ]
+}

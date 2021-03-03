@@ -10,15 +10,20 @@
       font-size: 2.25rem;
     }
 
-    .countriesList {
+    .countriesWrapper {
       display: flex;
-      flex-direction: row;
       flex-wrap: wrap;
       margin-bottom: 2rem;
       padding-bottom: 4rem;
 
       @media (max-width: 1349px) {
         justify-content: space-between;
+      }
+
+      > div {
+        flex-basis: 15%;
+        margin-bottom: 1rem;
+        cursor: pointer;
       }
     }
   }
