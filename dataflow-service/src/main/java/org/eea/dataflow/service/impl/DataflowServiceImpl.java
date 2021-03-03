@@ -743,9 +743,13 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-    dataflowVO.setReportingDatasets(
-        datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+      dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
+          .findReportingDataSetIdByDataflowId(id).stream()
+          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    } else {
+      dataflowVO.setReportingDatasets(new ArrayList<>());
+    }
     // Add the design datasets
     dataflowVO.setDesignDatasets(
         datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id).stream()
