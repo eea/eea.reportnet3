@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -5,7 +6,6 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
-import dayjs from 'dayjs';
 
 import { config } from 'conf';
 import DataflowConf from 'conf/dataflow.config.json';
@@ -26,15 +26,7 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
-const accept = async dataflowId => {
-  const status = await apiDataflow.accept(dataflowId);
-  return status;
-};
-
-const accepted = async () => {
-  const acceptedDataflowsDTO = await apiDataflow.accepted();
-  return parseDataflowDTOs(acceptedDataflowsDTO.filter(item => item.userRequestStatus === 'ACCEPTED'));
-};
+const accept = async dataflowId => await apiDataflow.accept(dataflowId);
 
 const getUserRoles = userRoles => {
   const userRoleToDataflow = [];
@@ -125,11 +117,6 @@ const create = async (name, description, obligationId) => await apiDataflow.crea
 
 const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
   await apiDataflow.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
-
-const completed = async () => {
-  const completedDataflowsDTO = await apiDataflow.completed();
-  return parseDataflowDTOs(completedDataflowsDTO);
-};
 
 const datasetsValidationStatistics = async datasetSchemaId => {
   const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
@@ -608,11 +595,6 @@ const parseWebLinkListDTO = webLinksDTO => {
 
 const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 
-const pending = async () => {
-  const pendingDataflowsDTO = await apiDataflow.pending();
-  return parseDataflowDTOs(pendingDataflowsDTO.filter(item => item.userRequestStatus === 'PENDING'));
-};
-
 const publicData = async () => {
   const publicDataflows = await apiDataflow.publicData();
 
@@ -658,10 +640,8 @@ const update = async (dataflowId, name, description, obligationId, isReleasable)
 
 export const ApiDataflowRepository = {
   accept,
-  accepted,
   all,
   cloneDatasetSchemas,
-  completed,
   create,
   dataflowDetails,
   datasetsFinalFeedback,
@@ -674,7 +654,6 @@ export const ApiDataflowRepository = {
   getApiKey,
   getPublicDataflowData,
   newEmptyDatasetSchema,
-  pending,
   publicData,
   reject,
   reporting,

@@ -36,11 +36,11 @@ const DataflowsItem = ({ dataFetch, isCustodian, itemContent, reorderDataflows =
 
   const onAccept = async () => {
     try {
-      const status = await DataflowService.accept(itemContent.requestId);
-      if (status >= 200 && status <= 299) {
+      const response = await DataflowService.accept(itemContent.requestId);
+      if (response.status >= 200 && response.status <= 299) {
         dataFetch();
       } else {
-        console.error('AcceptDataflow error with status: ', status);
+        console.error('AcceptDataflow error with status: ', response);
       }
     } catch (error) {
       console.error('AcceptDataflow error: ', error);

@@ -25,10 +25,8 @@ import { ValidateSchemas } from './ValidateSchemas';
 
 export const DataflowService = {
   accept: Accept({ dataflowRepository }),
-  accepted: GetAccepted({ dataflowRepository }),
   all: GetAll({ dataflowRepository }),
   cloneDatasetSchemas: CloneDatasetSchemas({ dataflowRepository }),
-  completed: GetCompleted({ dataflowRepository }),
   create: Create({ dataflowRepository }),
   dataflowDetails: GetDetails({ dataflowRepository }),
   datasetsFinalFeedback: DatasetsFinalFeedback({ dataflowRepository }),
@@ -41,7 +39,6 @@ export const DataflowService = {
   getPublicDataflowData: GetPublicDataflowData({ dataflowRepository }),
   generateApiKey: GenerateApiKey({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
-  pending: GetPending({ dataflowRepository }),
   publicData: GetPublicData({ dataflowRepository }),
   reject: Reject({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
