@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -54,13 +54,7 @@ const useBigButtonList = ({
     config.permissions.DATA_CUSTODIAN
   ]);
 
-  useEffect(() => {
-    if (!isNil(userContext.contextRoles)) {
-      setButtonsVisibility(getButtonsVisibility());
-    }
-  }, [userContext, dataflowState.data.datasets]);
-
-  const getButtonsVisibility = () => {
+  const getButtonsVisibility = useCallback(() => {
     const isDesigner =
       isLeadDesigner ||
       userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
@@ -97,7 +91,21 @@ const useBigButtonList = ({
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry
     };
-  };
+  }, [
+    dataflowId,
+    dataflowState.data.datasets,
+    dataflowState.data.manualAcceptance,
+    dataflowState.status,
+    isLeadDesigner,
+    isLeadReporterOfCountry,
+    userContext
+  ]);
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      setButtonsVisibility(getButtonsVisibility());
+    }
+  }, [userContext, dataflowState.data.datasets, getButtonsVisibility]);
 
   const manageReportersBigButton = [
     {
@@ -512,6 +520,17 @@ const useBigButtonList = ({
     }
   ];
 
+  const testDatasetBigButton = [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: 'dataset',
+      caption: resources.messages['testDatasetBigButton'],
+      handleRedirect: () => handleRedirect(getUrl(routes.TEST_DATASET, { dataflowId }, true)),
+      layout: 'defaultBigButton',
+      visibility: true
+    }
+  ];
+
   const receiptBigButton = onBuildReceiptButton();
 
   const releaseBigButton = onBuildReleaseButton();
@@ -519,6 +538,7 @@ const useBigButtonList = ({
   return [
     ...manageReportersBigButton,
     ...helpBigButton,
+    ...testDatasetBigButton,
     ...designDatasetModels,
     ...feedbackBigButton,
     ...dashboardBigButton,

@@ -997,6 +997,7 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
-    "duplicatedWeblinkError": "Duplicated description/URL. Please check it."
+    "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
+    "testDatasetBigButton": "Test Dataset"
   }
 }

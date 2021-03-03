@@ -9,15 +9,24 @@
 
 window.env = {
   // This option can be retrieved in "src/index.js" with "window.env.REACT_APP_BACKEND".
-  // REACT_APP_BACKEND: 'http://rn3beta-backend.altia.es',
-  REACT_APP_BACKEND: 'http://rn3sandbox-api.altia.es',
   //REACT_APP_BACKEND: 'http://localhost:3000',
+
+  /**
+   * Sandbox
+   */
+  // REACT_APP_BACKEND: 'http://rn3sandbox-api.altia.es',
+  // REACT_APP_EULOGIN: false,
+  // EULOGIN_URL:
+  //   'http://rn3dev-api.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3dev.altia.es%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
+  // WEBSOCKET_URL: 'ws://rn3sandbox.altia.es/communication/reportnet-websocket',
+
+  /**
+   * Beta
+   */
+  REACT_APP_BACKEND: 'http://rn3dev-api.altia.es',
   REACT_APP_EULOGIN: false,
   EULOGIN_URL:
     'http://rn3dev-api.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3dev.altia.es%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
-  WEBSOCKET_URL: 'ws://rn3sandbox.altia.es/communication/reportnet-websocket',
-  // EULOGIN_URL:
-  //   'http://reportnet3-backend.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3beta.altia.es%2Feulogin%2F&state=1489230d-c1b1-4e25-8b85-1f9a5b109171&response_mode=fragment&response_type=code&scope=openid',
-  // WEBSOCKET_URL: 'ws://rn3sandbox.altia.es/communication/reportnet-websocket'
+  WEBSOCKET_URL: 'ws://rn3dev-api.altia.es/communication/reportnet-websocket',
   DOCUMENTATION_FOLDER: 'test'
 };
