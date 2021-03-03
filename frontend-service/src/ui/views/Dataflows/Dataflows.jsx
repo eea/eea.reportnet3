@@ -87,29 +87,13 @@ const Dataflows = withRouter(({ match, history }) => {
     }
   }, [userContext.contextRoles]);
 
-  // useEffect(() => {
-  //   if (dataflowsState.isCustodian) {
-  //     leftSideBarContext.addModels([
-  //       {
-  //         className: 'dataflowList-left-side-bar-create-dataflow-help-step',
-  //         icon: 'plus',
-  //         label: 'createNewDataflow',
-  //         onClick: () => manageDialogs('isAddDialogVisible', true),
-  //         title: 'createNewDataflow'
-  //       }
-  //     ]);
-  //   } else {
-  //     leftSideBarContext.removeModels();
-  //   }
-  // }, [dataflowsState.isCustodian]);
-
   useEffect(() => {
     leftSideBarContext.removeModels();
 
     const createBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: dataflowsState.isCustodian || dataflowsState.isNationalCoordinator,
+      isVisible: dataflowsState.isCustodian,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isAddDialogVisible', true),
       title: 'createNewDataflow'
@@ -168,7 +152,7 @@ const Dataflows = withRouter(({ match, history }) => {
       userContext.hasPermission([config.permissions.DATA_CUSTODIAN]) ||
       userContext.hasPermission([config.permissions.DATA_STEWARD]);
 
-    const isNationalCoordinator = userContext.hasPermission([config.permissions.DATA_CUSTODIAN]);
+    const isNationalCoordinator = userContext.hasPermission([config.permissions.NATIONAL_COORDINATOR]);
 
     dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian, isNationalCoordinator } });
   };
