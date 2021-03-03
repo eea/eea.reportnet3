@@ -70,8 +70,8 @@ const getUserRoles = userRoles => {
 };
 
 const all = async userData => {
-  const pendingDataflowsDTO = await apiDataflow.all(userData);
-  const dataflows = !userData ? pendingDataflowsDTO : [];
+  const dataflowsDTO = await apiDataflow.all(userData);
+  const dataflows = !userData ? dataflowsDTO.data : [];
   const userRoles = [];
 
   if (userData) {
@@ -81,19 +81,18 @@ const all = async userData => {
       return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: config.permissions[role] });
     });
 
-    for (let i = 0; i < pendingDataflowsDTO.length; i++) {
+    for (let index = 0; index < dataflowsDTO.data.length; index++) {
+      const dataflow = dataflowsDTO.data[index];
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-      if (pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN'] && pendingDataflowsDTO[i].releasable) {
-        pendingDataflowsDTO[i].status = 'OPEN';
-      } else if (
-        pendingDataflowsDTO[i].status === DataflowConf.dataflowStatus['OPEN'] &&
-        !pendingDataflowsDTO[i].releasable
-      ) {
-        pendingDataflowsDTO[i].status = 'CLOSED';
+      const isOpen = dataflow.status === DataflowConf.dataflowStatus['OPEN'];
+
+      if (isOpen) {
+        dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
       }
+
       dataflows.push({
-        ...pendingDataflowsDTO[i],
-        ...(isDuplicated ? getUserRoles(userRoles) : userRoles).find(item => item.id === pendingDataflowsDTO[i].id)
+        ...dataflow,
+        ...(isDuplicated ? getUserRoles(userRoles) : userRoles).find(item => item.id === dataflow.id)
       });
     }
   }
@@ -103,10 +102,10 @@ const all = async userData => {
   const dataflowsData = groupByUserRequestStatus(dataflows);
 
   const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
-  Object.keys(dataflowsData).forEach(key => {
-    allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key]);
-  });
-  return allDataflows;
+  Object.keys(dataflowsData).forEach(key => (allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key])));
+  dataflowsDTO.data = allDataflows;
+
+  return dataflowsDTO;
 };
 
 const create = async (name, description, obligationId) => await apiDataflow.create(name, description, obligationId);

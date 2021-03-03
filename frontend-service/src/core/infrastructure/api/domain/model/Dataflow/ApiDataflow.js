@@ -3,10 +3,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiDataflow = {
-  all: async () => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflows) });
-    return response.data;
-  },
+  all: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflows) }),
 
   allSchemas: async dataflowId => {
     const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.allSchemas, { dataflowId }) });
