@@ -995,7 +995,7 @@
     "writeMessagePlaceholder": "Write your message",
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
-    "wrongWebLinkError": "Invalid URL. Please check it.",
+    "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
     "dataflowUsersList": "Dataflow users list",
     "noUsers": "There are no users yet",
