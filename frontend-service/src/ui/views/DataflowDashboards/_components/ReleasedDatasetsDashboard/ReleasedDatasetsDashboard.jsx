@@ -13,13 +13,11 @@ import { StatusList } from 'ui/views/_components/StatusList';
 import { DataflowService } from 'core/services/Dataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-// import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 export const ReleasedDatasetsDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
-  // const themeContext = useContext(ThemeContext);
 
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
