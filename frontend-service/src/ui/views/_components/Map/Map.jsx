@@ -20,7 +20,7 @@ import { Map as MapComponent, FeatureGroup, GeoJSON, Marker, Popup } from 'react
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import newMarkerIcon from 'assets/images/newMarker.png';
+import newMarkerIcon from 'assets/images/logos/newMarker.png';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';

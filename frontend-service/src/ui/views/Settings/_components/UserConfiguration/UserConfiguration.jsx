@@ -1,6 +1,17 @@
 import React, { Fragment, useContext } from 'react';
 import styles from './userConfiguration.module.scss';
 
+import DarkGray from 'assets/images/layers/DarkGray.png';
+import Gray from 'assets/images/layers/Gray.png';
+import Imagery from 'assets/images/layers/Imagery.png';
+import ImageryClarity from 'assets/images/layers/ImageryClarity.png';
+import ImageryFirefly from 'assets/images/layers/ImageryFirefly.png';
+import NationalGeographic from 'assets/images/layers/NationalGeographic.png';
+import Oceans from 'assets/images/layers/Oceans.png';
+import ShadedRelief from 'assets/images/layers/ShadedRelief.png';
+import Streets from 'assets/images/layers/Streets.png';
+import Topographic from 'assets/images/layers/Topographic.png';
+
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { TitleWithItem } from 'ui/views/_components/TitleWithItem';
@@ -18,6 +29,33 @@ const UserConfiguration = () => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
+  const loadImage = layer => {
+    switch (layer) {
+      case 'Topographic':
+        return Topographic;
+      case 'Streets':
+        return Streets;
+      case 'National Geographic':
+        return NationalGeographic;
+      case 'Oceans':
+        return Oceans;
+      case 'Gray':
+        return Gray;
+      case 'Dark Gray':
+        return DarkGray;
+      case 'Imagery':
+        return Imagery;
+      case 'Imagery (Clarity)':
+        return ImageryClarity;
+      case 'Imagery (Firefly)':
+        return ImageryFirefly;
+      case 'Shaded Relief':
+        return ShadedRelief;
+      default:
+        return '';
+    }
+  };
+
   const basemapTemplate = option => {
     if (!option.value) {
       return option.label;
@@ -25,7 +63,8 @@ const UserConfiguration = () => {
       return (
         <div className={`p-clearfix ${styles.basemapItem}`}>
           <span style={{ margin: '.5em .25em 0 0.5em' }}>{option.label}</span>
-          <img alt={option.label} src={`assets/img/layers/${option.value}.png`} />
+          {console.log(option.label)}
+          <img alt={option.label} src={loadImage(option.label)} />
         </div>
       );
     }
