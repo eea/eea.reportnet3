@@ -85,8 +85,8 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataflowName = async () => {
     try {
-      const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
-      euDatasetDispatch({ type: 'GET_DATAFLOW_NAME', payload: { name: dataflowData.name } });
+      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
+      euDatasetDispatch({ type: 'GET_DATAFLOW_NAME', payload: { name: data.name } });
     } catch (error) {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
