@@ -15,11 +15,11 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 import { Title } from 'ui/views/_components/Title';
 
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
-
 import { DataflowService } from 'core/services/Dataflow';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
@@ -30,6 +30,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     params: { countryId }
   } = match;
 
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
@@ -183,7 +184,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       };
       setPublicCountryInformation(publicData);
     } catch (error) {
-      console.error('error', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
     } finally {
       setIsLoading(false);
     }
