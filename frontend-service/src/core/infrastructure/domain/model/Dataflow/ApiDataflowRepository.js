@@ -115,14 +115,14 @@ const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
 
 const datasetsValidationStatistics = async datasetSchemaId => {
   const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
-  datasetsDashboardsDataDTO.sort((a, b) => {
+  datasetsDashboardsDataDTO.data.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
 
   const datasetsDashboardsData = {};
-  datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.idDataSetSchema;
+  datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.data.idDataSetSchema;
 
   const datasetReporters = [];
   const tables = [];
@@ -130,7 +130,7 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   let tableValues = [];
   let levelErrors = [];
   const allDatasetLevelErrors = [];
-  datasetsDashboardsDataDTO.forEach(dataset => {
+  datasetsDashboardsDataDTO.data.forEach(dataset => {
     datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
     datasetReporters.push({ reporterName: dataset.nameDataSetSchema });
     allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
@@ -227,7 +227,9 @@ const datasetsValidationStatistics = async datasetSchemaId => {
   datasetsDashboardsData.datasetReporters = datasetReporters;
   datasetsDashboardsData.levelErrors = levelErrors;
   datasetsDashboardsData.tables = tables;
-  return datasetsDashboardsData;
+  datasetsDashboardsDataDTO.data = datasetsDashboardsData;
+
+  return datasetsDashboardsDataDTO;
 };
 
 const datasetsFinalFeedback = async dataflowId => {

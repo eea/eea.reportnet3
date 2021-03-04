@@ -33,8 +33,7 @@ export const apiDataflow = {
   },
 
   datasetsValidationStatistics: async datasetSchemaId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.globalStatistics, { datasetSchemaId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.globalStatistics, { datasetSchemaId }) });
   },
 
   deleteById: async dataflowId => {
