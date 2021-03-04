@@ -1007,6 +1007,7 @@
     "user": "User",
     "dataflowName": "Dataflow",
     "wrongWeblinkError": "Invalid URL. Please check it.",
-    "duplicatedWeblinkError": "Duplicated description/URL. Please check it."
+    "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
+    "loadUsersListError": "Error loading users list"
   }
 }

@@ -13,9 +13,11 @@ import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const UserList = ({ dataflowId, representativeId }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [userListData, setUserListData] = useState([]);
@@ -46,7 +48,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
       setUserListData(users);
       setFilteredData(users);
     } catch (error) {
-      console.error(error);
+      notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' });
     } finally {
       setIsLoading(false);
     }
