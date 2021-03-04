@@ -353,22 +353,13 @@ const Dataflow = withRouter(({ history, match }) => {
     });
 
   const setIsCopyDataCollectionToEuDatasetLoading = value =>
-    dataflowDispatch({
-      type: 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING',
-      payload: { isLoading: value }
-    });
+    dataflowDispatch({ type: 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING', payload: { isLoading: value } });
 
   const setIsExportEuDatasetLoading = value =>
-    dataflowDispatch({
-      type: 'SET_IS_EXPORT_EU_DATASET',
-      payload: { isExportEuDatasetLoading: value }
-    });
+    dataflowDispatch({ type: 'SET_IS_EXPORT_EU_DATASET', payload: { isExportEuDatasetLoading: value } });
 
   const setIsReleaseable = isReleasable =>
-    dataflowDispatch({
-      type: 'SET_IS_RELEASABLE',
-      payload: { isReleasable: isReleasable }
-    });
+    dataflowDispatch({ type: 'SET_IS_RELEASABLE', payload: { isReleasable: isReleasable } });
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
@@ -379,24 +370,15 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   const setIsReceiptLoading = isReceiptLoading => {
-    dataflowDispatch({
-      type: 'SET_IS_RECEIPT_LOADING',
-      payload: { isReceiptLoading }
-    });
+    dataflowDispatch({ type: 'SET_IS_RECEIPT_LOADING', payload: { isReceiptLoading } });
   };
 
   const setIsReceiptOutdated = isReceiptOutdated => {
-    dataflowDispatch({
-      type: 'SET_IS_RECEIPT_OUTDATED',
-      payload: { isReceiptOutdated }
-    });
+    dataflowDispatch({ type: 'SET_IS_RECEIPT_OUTDATED', payload: { isReceiptOutdated } });
   };
 
   const onCleanUpReceipt = () => {
-    dataflowDispatch({
-      type: 'ON_CLEAN_UP_RECEIPT',
-      payload: { isReceiptLoading: false, isReceiptOutdated: false }
-    });
+    dataflowDispatch({ type: 'ON_CLEAN_UP_RECEIPT', payload: { isReceiptLoading: false, isReceiptOutdated: false } });
   };
 
   const onEditDataflow = (newName, newDescription) => {
@@ -421,9 +403,7 @@ const Dataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error(error);
-      notificationContext.add({
-        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT'
-      });
+      notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' });
     }
   };
 
@@ -488,12 +468,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadReportingDataflow = async () => {
     try {
-      const dataflow = await DataflowService.reporting(dataflowId);
+      const dataflowResponse = await DataflowService.reporting(dataflowId);
+      const dataflow = dataflowResponse.data;
+
       Promise.resolve(dataflow).then(res => {
-        dataflowDispatch({
-          type: 'SET_IS_FETCHING_DATA',
-          payload: { isFetchingData: false }
-        });
+        dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       });
 
       dataflowDispatch({
@@ -575,9 +554,7 @@ const Dataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error(`Error while downloading the file: ${error}`);
-      notificationContext.add({
-        type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT'
-      });
+      notificationContext.add({ type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' });
     }
   };
 
@@ -607,7 +584,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.schemasValidation(dataflowId);
 
-    dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult } });
+    dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult: validationResult.data } });
   };
 
   const onSaveName = async (value, index) => {
@@ -629,18 +606,13 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmExport = async () => {
     try {
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
-      const response = await DataflowService.downloadById(dataflowId);
-      if (!isNil(response)) {
-        DownloadFile(
-          response,
-          `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`
-        );
+      const { data } = await DataflowService.downloadById(dataflowId);
+      if (!isNil(data)) {
+        DownloadFile(data, `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`);
       }
     } catch (error) {
       console.error(error);
-      notificationContext.add({
-        type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT'
-      });
+      notificationContext.add({ type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT' });
     } finally {
       manageDialogs('isExportDialogVisible', false);
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: false });
@@ -710,10 +682,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onCloseIsReleaseableDialog = () => {
     manageDialogs('isReleaseableDialogVisible', false);
     if (dataflowState.data.isReleasable !== dataflowState.isReleasable) {
-      dataflowDispatch({
-        type: 'SET_IS_RELEASABLE',
-        payload: { isReleasable: dataflowState.data.isReleasable }
-      });
+      dataflowDispatch({ type: 'SET_IS_RELEASABLE', payload: { isReleasable: dataflowState.data.isReleasable } });
     }
   };
 

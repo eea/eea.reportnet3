@@ -71,14 +71,14 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const onLoadDataflows = async () => {
     try {
-      const allDataflows = await DataflowService.all(userContext.contextRoles);
+      const { data } = await DataflowService.all(userContext.contextRoles);
       cloneSchemasDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          accepted: parseDataflowList(allDataflows.accepted),
-          allDataflows,
-          completed: allDataflows.completed,
-          pending: allDataflows.pending
+          accepted: parseDataflowList(data.accepted),
+          allDataflows: data,
+          completed: data.completed,
+          pending: data.pending
         }
       });
     } catch (error) {
