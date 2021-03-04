@@ -629,18 +629,13 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmExport = async () => {
     try {
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
-      const response = await DataflowService.downloadById(dataflowId);
-      if (!isNil(response)) {
-        DownloadFile(
-          response,
-          `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`
-        );
+      const { data } = await DataflowService.downloadById(dataflowId);
+      if (!isNil(data)) {
+        DownloadFile(data, `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`);
       }
     } catch (error) {
       console.error(error);
-      notificationContext.add({
-        type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT'
-      });
+      notificationContext.add({ type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT' });
     } finally {
       manageDialogs('isExportDialogVisible', false);
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: false });

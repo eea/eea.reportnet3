@@ -247,35 +247,32 @@ const datasetsFinalFeedback = async dataflowId => {
 
 const datasetsReleasedStatus = async dataflowId => {
   const datasetsReleasedStatusDTO = await apiDataflow.datasetsReleasedStatus(dataflowId);
-  datasetsReleasedStatusDTO.sort((a, b) => {
+  datasetsReleasedStatusDTO.data.sort((a, b) => {
     let datasetName_A = a.dataSetName;
     let datasetName_B = b.dataSetName;
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
 
-  const reporters = [];
-  datasetsReleasedStatusDTO.map(dataset => {
-    reporters.push(dataset.dataSetName);
-  });
+  const reporters = datasetsReleasedStatusDTO.data.map(dataset => dataset.dataSetName);
 
   const groupByReporter = CoreUtils.onGroupBy('dataSetName');
 
-  const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO)).length).fill(0);
+  const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO.data)).length).fill(0);
   const isNotReleased = [...isReleased];
 
-  Object.values(groupByReporter(datasetsReleasedStatusDTO)).forEach((reporter, i) => {
+  Object.values(groupByReporter(datasetsReleasedStatusDTO.data)).forEach((reporter, i) => {
     reporter.forEach(dataset => {
       dataset.isReleased ? (isReleased[i] += 1) : (isNotReleased[i] += 1);
     });
   });
 
-  const releasedStatusData = {
+  datasetsReleasedStatusDTO.data = {
     labels: Array.from(new Set(reporters)),
     releasedData: isReleased,
     unReleasedData: isNotReleased
   };
 
-  return releasedStatusData;
+  return datasetsReleasedStatusDTO;
 };
 
 const dataflowDetails = async dataflowId => {

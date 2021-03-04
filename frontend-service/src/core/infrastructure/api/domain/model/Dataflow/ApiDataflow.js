@@ -29,8 +29,7 @@ export const apiDataflow = {
   },
 
   datasetsReleasedStatus: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.datasetsReleasedStatus, { dataflowId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.datasetsReleasedStatus, { dataflowId }) });
   },
 
   datasetsValidationStatistics: async datasetSchemaId => {
@@ -43,8 +42,7 @@ export const apiDataflow = {
   },
 
   downloadById: async dataflowId => {
-    const response = await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchema, { dataflowId }) });
-    return response.data;
+    return await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchema, { dataflowId }) });
   },
 
   generateApiKey: async (dataflowId, dataProviderId, isCustodian) => {

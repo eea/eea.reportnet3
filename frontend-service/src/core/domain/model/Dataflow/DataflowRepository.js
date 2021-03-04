@@ -10,6 +10,7 @@ export const DataflowRepository = {
   datasetsValidationStatistics: () =>
     Promise.reject('[DataflowRepository#datasetsValidationStatistics] must be implemented'),
   deleteById: () => Promise.reject('[DataflowRepository#deleteById] must be implemented'),
+  downloadById: () => Promise.reject('[DataflowRepository#downloadById] must be implemented'),
   generateApiKey: () => Promise.reject('[DataflowRepository#generateApiKey] must be implemented'),
   getAllSchemas: () => Promise.reject('[DataflowRepository#getAllSchemas] must be implemented'),
   getApiKey: () => Promise.reject('[DataflowRepository#getApiKey] must be implemented'),
