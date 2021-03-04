@@ -106,16 +106,14 @@ export const apiDataflow = {
     return response.data;
   },
   getAllDataflowsUserList: async () => {
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(DataflowConfig.getAllDataflowsUserList)
     });
-    return response;
   },
   getUserList: async (dataflowId, representativeId) => {
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(DataflowConfig.getUserList, { dataflowId, representativeId })
     });
-    return response;
   },
   pending: async () => {
     const response = await HTTPRequester.get({

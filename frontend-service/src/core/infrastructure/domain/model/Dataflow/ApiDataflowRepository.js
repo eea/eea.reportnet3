@@ -404,8 +404,7 @@ const getPercentageOfValue = (val, total) => {
 
 const getAllDataflowsUserList = async () => {
   const usersListDTO = await apiDataflow.getAllDataflowsUserList();
-  const allDataflowsUserList = parseAllDataflowsUserList(usersListDTO.data);
-  return allDataflowsUserList;
+  return parseAllDataflowsUserList(usersListDTO.data);
 };
 
 const getUserList = async (dataflowId, representativeId) => {
