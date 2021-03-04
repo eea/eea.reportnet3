@@ -3343,27 +3343,25 @@ public class DatasetServiceImpl implements DatasetService {
         schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-      LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-          tableSchema.getIdTableSchema());
-
       // we find if in any table have one field type ATTACHMENT
       List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
           .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
           .collect(Collectors.toList());
       if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
 
+        LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+            tableSchema.getIdTableSchema());
         // We took every field for every table
         for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-
-          LOG.info(
-              "We  are in tableSchema with id {}, checking field {} looking if we have attachments files",
-              tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
-
           List<AttachmentValue> attachmentValue = attachmentRepository
               .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
 
           // if there are filled we create a folder and inside of any folder we create the fields
           if (!CollectionUtils.isEmpty(attachmentValue)) {
+            LOG.info(
+                "We  are in tableSchema with id {}, checking field {} and we have attachments files",
+                tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+
             for (AttachmentValue attachment : attachmentValue) {
               try {
                 ZipEntry eFieldAttach =
