@@ -50,8 +50,7 @@ export const apiDataflow = {
       ? getUrl(DataflowConfig.generateApiKeyCustodian, { dataflowId })
       : getUrl(DataflowConfig.generateApiKey, { dataflowId, dataProviderId });
 
-    const response = await HTTPRequester.post({ url });
-    return response.data;
+    return await HTTPRequester.post({ url });
   },
 
   getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
@@ -59,8 +58,7 @@ export const apiDataflow = {
       ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
       : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
 
-    const response = await HTTPRequester.get({ url });
-    return response.data;
+    return await HTTPRequester.get({ url });
   },
 
   getPublicDataflowData: async dataflowId => {
