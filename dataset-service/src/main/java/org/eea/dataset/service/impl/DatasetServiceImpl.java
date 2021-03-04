@@ -1,6 +1,8 @@
 package org.eea.dataset.service.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
@@ -14,7 +16,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipOutputStream;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -384,7 +390,6 @@ public class DatasetServiceImpl implements DatasetService {
   public void deleteTableBySchema(final String tableSchemaId, final Long datasetId) {
     deleteRecords(datasetId, tableSchemaId);
   }
-
 
   /**
    * Delete records.
@@ -3177,7 +3182,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Save public files.
    *
    * @param dataflowId the dataflow id
-   * @param dataSetMetabase the data set metabase
+   * @param dataSetDataProvider the data set data provider
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
@@ -3234,7 +3239,7 @@ public class DatasetServiceImpl implements DatasetService {
       throws IOException, EEAException {
     // we compound the route and create the file
     File file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-        "dataProvider-" + dataProviderId.toString()), fileName + ".xlsx");
+        "dataProvider-" + dataProviderId.toString()), fileName);
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
@@ -3244,9 +3249,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Creeate all dataset files.
    *
-   * @param dataset the dataset
    * @param dataflowId the dataflow id
-   * @param pathDataProvider the path data provider
    * @param dataProviderId the data provider id
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -3279,16 +3282,16 @@ public class DatasetServiceImpl implements DatasetService {
           // we save the file in its files
           if (null != file) {
             String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
-                dataProvider.getLabel(), datasetDesingName);
+                dataProvider.getCode(), datasetDesingName);
+            String nameFileScape = nameFileUnique + ".xlsx";
 
-            FileUtils
-                .writeByteArrayToFile(
-                    new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-                        "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".xlsx"),
-                    file);
+            // we create the files and zip with the document if it is necessary
+            createFilesAndZip(dataflowId, dataProviderId, datasetToFile, file, nameFileUnique,
+                nameFileScape);
+
 
             // we save the file in metabase with the name without the route
-            datasetToFile.setPublicFileName(nameFileUnique);
+            datasetToFile.setPublicFileName(nameFileUnique + ".zip");
             dataSetMetabaseRepository.save(datasetToFile);
           }
         } catch (EEAException e) {
@@ -3304,6 +3307,81 @@ public class DatasetServiceImpl implements DatasetService {
         dataSetMetabaseRepository.save(datasetToFile);
       }
     }
+  }
+
+  /**
+   * Creates the files and zip.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param datasetToFile the dataset to file
+   * @param file the file
+   * @param nameFileUnique the name file unique
+   * @param nameFileScape the name file scape
+   * @throws FileNotFoundException the file not found exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void createFilesAndZip(Long dataflowId, Long dataProviderId,
+      DataSetMetabase datasetToFile, byte[] file, String nameFileUnique, String nameFileScape)
+      throws IOException {
+
+    // we create folder to save the file.zip
+    File fileFolderProvider =
+        new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
+            "dataProvider-" + dataProviderId.toString());
+    fileFolderProvider.mkdirs();
+
+    // we create the file.zip
+    File fileWriteZip =
+        new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+            "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
+
+    // create the context to add all files in a treemap inside to attachment and file information
+    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
+    // we get the dataschema and check every table to see if find any field attachemnt
+    DataSetSchema dataSetSchema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
+    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+
+      // we find if in any table have one field type ATTACHMENT
+      List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+          .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+          .collect(Collectors.toList());
+      if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+
+        // We took every field for every table
+        for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+
+          List<AttachmentValue> attachmentValue = attachmentRepository
+              .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
+
+          // if there are filled we create a folder and inside of any folder we create the fields
+          if (!CollectionUtils.isEmpty(attachmentValue)) {
+            File fileTables = new File(tableSchema.getNameTableSchema());
+            ZipEntry eTable = new ZipEntry(tableSchema.getNameTableSchema() + "/");
+            out.putNextEntry(eTable);
+            for (AttachmentValue attachment : attachmentValue) {
+              try {
+                ZipEntry eFieldAttach =
+                    new ZipEntry(tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                out.putNextEntry(eFieldAttach);
+                out.write(attachment.getContent(), 0, attachment.getContent().length);
+              } catch (ZipException e) {
+                LOG.info("Error creating file {} because already exist", attachment.getFileName(),
+                    e);
+              }
+              out.closeEntry();
+            }
+          }
+        }
+
+      }
+    }
+    ZipEntry e = new ZipEntry(nameFileScape);
+    out.putNextEntry(e);
+    out.write(file, 0, file.length);
+    out.closeEntry();
+    out.close();
   }
 
 
