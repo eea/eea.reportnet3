@@ -152,7 +152,11 @@ const Dataflows = withRouter(({ match, history }) => {
       userContext.hasPermission([config.permissions.DATA_CUSTODIAN]) ||
       userContext.hasPermission([config.permissions.DATA_STEWARD]);
 
-    const isNationalCoordinator = userContext.hasPermission([config.permissions.NATIONAL_COORDINATOR]);
+    const isNationalCoordinator = userContext.hasContextAccessPermission(
+      config.permissions.NATIONAL_COORDINATOR_PREFIX,
+      null,
+      [config.permissions.NATIONAL_COORDINATOR]
+    );
 
     dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian, isNationalCoordinator } });
   };
