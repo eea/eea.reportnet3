@@ -109,13 +109,13 @@ export const apiDataflow = {
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.getAllDataflowsUserList)
     });
-    return response.data;
+    return response;
   },
   getUserList: async (dataflowId, representativeId) => {
     const response = await HTTPRequester.get({
       url: getUrl(DataflowConfig.getUserList, { dataflowId, representativeId })
     });
-    return response.data;
+    return response;
   },
   pending: async () => {
     const response = await HTTPRequester.get({
