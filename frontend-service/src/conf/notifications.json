@@ -638,7 +638,7 @@
           "key": "RELEASE_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
+            "parameters": ["dataflowId", "dataProvider"]
           }
         },
         {
