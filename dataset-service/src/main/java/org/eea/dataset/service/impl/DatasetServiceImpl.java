@@ -3349,17 +3349,19 @@ public class DatasetServiceImpl implements DatasetService {
           .collect(Collectors.toList());
       if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
 
+        LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+            tableSchema.getIdTableSchema());
         // We took every field for every table
         for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-
           List<AttachmentValue> attachmentValue = attachmentRepository
               .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
 
           // if there are filled we create a folder and inside of any folder we create the fields
           if (!CollectionUtils.isEmpty(attachmentValue)) {
-            File fileTables = new File(tableSchema.getNameTableSchema());
-            ZipEntry eTable = new ZipEntry(tableSchema.getNameTableSchema() + "/");
-            out.putNextEntry(eTable);
+            LOG.info(
+                "We  are in tableSchema with id {}, checking field {} and we have attachments files",
+                tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+
             for (AttachmentValue attachment : attachmentValue) {
               try {
                 ZipEntry eFieldAttach =
@@ -3377,11 +3379,13 @@ public class DatasetServiceImpl implements DatasetService {
 
       }
     }
+
     ZipEntry e = new ZipEntry(nameFileScape);
     out.putNextEntry(e);
     out.write(file, 0, file.length);
     out.closeEntry();
     out.close();
+    LOG.info("We create file {} in the route ", fileWriteZip.toString());
   }
 
 
