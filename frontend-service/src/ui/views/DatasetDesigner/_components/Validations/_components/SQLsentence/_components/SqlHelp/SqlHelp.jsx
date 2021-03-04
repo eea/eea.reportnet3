@@ -50,12 +50,13 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
       params: { dataflowId }
     } = match;
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasetSpinner', value: true } });
-    const { data } = await DataflowService.getAllSchemas(dataflowId);
+    const dataflowDetails = await DataflowService.getAllSchemas(dataflowId);
     const dataflowData = await DataflowService.reporting(dataflowId);
-    const { designDatasets } = dataflowData;
+
+    const { designDatasets } = dataflowData.data;
     dispatch({
       type: 'UPDATE_PROPERTY',
-      payload: { key: 'rawDatasets', value: { dataflowDetails: data, designDatasets } }
+      payload: { key: 'rawDatasets', value: { dataflowDetails: dataflowDetails.data, designDatasets } }
     });
   };
 

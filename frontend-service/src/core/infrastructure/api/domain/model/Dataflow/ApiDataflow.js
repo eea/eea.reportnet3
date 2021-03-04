@@ -80,13 +80,11 @@ export const apiDataflow = {
   },
 
   reporting: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
   },
 
   schemasValidation: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.dataSchemasValidation, { dataflowId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.dataSchemasValidation, { dataflowId }) });
   },
 
   update: async (dataflowId, name, description, obligationId, isReleasable) => {

@@ -605,13 +605,15 @@ const publicData = async () => {
 
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
-  const dataflow = parseDataflowDTO(reportingDataflowDTO);
+  const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
   dataflow.datasets.sort((a, b) => {
     let datasetName_A = a.datasetSchemaName;
     let datasetName_B = b.datasetSchemaName;
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
-  return dataflow;
+  reportingDataflowDTO.data = dataflow;
+
+  return reportingDataflowDTO;
 };
 
 const schemasValidation = async dataflowId => await apiDataflow.schemasValidation(dataflowId);

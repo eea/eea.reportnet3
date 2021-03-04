@@ -33,8 +33,8 @@ export const DataCollection = withRouter(({ match, history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [dataflowName, setDataflowName] = useState('');
   const [dataCollectionName, setDataCollectionName] = useState();
+  const [dataflowName, setDataflowName] = useState('');
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,10 +64,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
       setDataflowName(data.name);
     } catch (error) {
-      notificationContext.add({
-        type: 'DATAFLOW_DETAILS_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
   };
 
@@ -76,21 +73,15 @@ export const DataCollection = withRouter(({ match, history }) => {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
       console.error('METADATA error', error);
-      notificationContext.add({
-        type: 'GET_METADATA_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
   };
 
   const onLoadDataflowData = async () => {
     try {
-      const dataflowData = await DataflowService.reporting(match.params.dataflowId);
-      const dataCollection = dataflowData
-        ? dataflowData.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
+      const { data } = await DataflowService.reporting(match.params.dataflowId);
+      const dataCollection = data
+        ? data.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
         : [];
       const [firstDataCollection] = dataCollection;
       if (!isEmpty(firstDataCollection)) {
@@ -103,12 +94,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'REPORTING_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { dataflowId, datasetId, dataflowName, datasetName }
       });
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -167,15 +153,7 @@ export const DataCollection = withRouter(({ match, history }) => {
           data: { path }
         }
       } = error;
-      const datasetError = {
-        type: '',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
-      };
+      const datasetError = { type: '', content: { dataflowId, datasetId, dataflowName, datasetName } };
       if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.dataSchema, { datasetId }))) {
         datasetError.type = 'SCHEMA_BY_ID_ERROR';
       } else {
@@ -208,10 +186,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const layout = children => {
     return (
-      <MainLayout
-        leftSideBarConfig={{
-          buttons: []
-        }}>
+      <MainLayout leftSideBarConfig={{ buttons: [] }}>
         <Growl ref={growlRef} />
         <div className="rep-container">{children}</div>
       </MainLayout>

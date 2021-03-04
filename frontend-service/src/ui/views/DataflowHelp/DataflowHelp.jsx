@@ -152,11 +152,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadDatasetsSchemas = async () => {
     try {
-      const dataflow = await DataflowService.reporting(dataflowId);
+      const { data } = await DataflowService.reporting(dataflowId);
 
       if (!isCustodian) {
-        if (!isEmpty(dataflow.datasets)) {
-          const uniqueDatasetSchemas = dataflow.datasets.filter((dataset, pos, arr) => {
+        if (!isEmpty(data.datasets)) {
+          const uniqueDatasetSchemas = data.datasets.filter((dataset, pos, arr) => {
             return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
           });
           const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
@@ -169,8 +169,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           setIsLoadingSchemas(false);
         }
       } else {
-        if (!isEmpty(dataflow.designDatasets)) {
-          const datasetSchemas = dataflow.designDatasets.map(async designDataset => {
+        if (!isEmpty(data.designDatasets)) {
+          const datasetSchemas = data.designDatasets.map(async designDataset => {
             return await onLoadDatasetSchema(designDataset.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
@@ -181,10 +181,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         }
       }
     } catch (error) {
-      notificationContext.add({
-        type: 'LOAD_DATASETS_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} });
     } finally {
       setIsLoading(false);
     }
