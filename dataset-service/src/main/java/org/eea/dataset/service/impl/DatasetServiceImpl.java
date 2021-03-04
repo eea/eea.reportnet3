@@ -3343,6 +3343,8 @@ public class DatasetServiceImpl implements DatasetService {
         schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
+      LOG.info("We check are in tableSchema with id {}", tableSchema.getIdTableSchema());
+
       // we find if in any table have one field type ATTACHMENT
       List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
           .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
@@ -3352,15 +3354,21 @@ public class DatasetServiceImpl implements DatasetService {
         // We took every field for every table
         for (FieldSchema fieldAttach : fieldSchemaAttachment) {
 
+          LOG.info("We check are in tableSchema with id {}, checking field {} ",
+              tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+
           List<AttachmentValue> attachmentValue = attachmentRepository
               .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
 
           // if there are filled we create a folder and inside of any folder we create the fields
           if (!CollectionUtils.isEmpty(attachmentValue)) {
-            File fileTables = new File(tableSchema.getNameTableSchema());
-            ZipEntry eTable = new ZipEntry(tableSchema.getNameTableSchema() + "/");
-            out.putNextEntry(eTable);
             for (AttachmentValue attachment : attachmentValue) {
+
+              LOG.info(
+                  "We check are in tableSchema with id {}, checking field {}  with value field{}",
+                  tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema(),
+                  attachment.getFileName());
+
               try {
                 ZipEntry eFieldAttach =
                     new ZipEntry(tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
