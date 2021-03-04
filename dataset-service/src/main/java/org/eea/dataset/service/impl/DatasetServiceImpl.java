@@ -3343,7 +3343,8 @@ public class DatasetServiceImpl implements DatasetService {
         schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-      LOG.info("We check are in tableSchema with id {}", tableSchema.getIdTableSchema());
+      LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+          tableSchema.getIdTableSchema());
 
       // we find if in any table have one field type ATTACHMENT
       List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
@@ -3354,7 +3355,8 @@ public class DatasetServiceImpl implements DatasetService {
         // We took every field for every table
         for (FieldSchema fieldAttach : fieldSchemaAttachment) {
 
-          LOG.info("We check are in tableSchema with id {}, checking field {} ",
+          LOG.info(
+              "We  are in tableSchema with id {}, checking field {} looking if we have attachments files",
               tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
 
           List<AttachmentValue> attachmentValue = attachmentRepository
@@ -3363,12 +3365,6 @@ public class DatasetServiceImpl implements DatasetService {
           // if there are filled we create a folder and inside of any folder we create the fields
           if (!CollectionUtils.isEmpty(attachmentValue)) {
             for (AttachmentValue attachment : attachmentValue) {
-
-              LOG.info(
-                  "We check are in tableSchema with id {}, checking field {}  with value field{}",
-                  tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema(),
-                  attachment.getFileName());
-
               try {
                 ZipEntry eFieldAttach =
                     new ZipEntry(tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
@@ -3385,11 +3381,13 @@ public class DatasetServiceImpl implements DatasetService {
 
       }
     }
+
     ZipEntry e = new ZipEntry(nameFileScape);
     out.putNextEntry(e);
     out.write(file, 0, file.length);
     out.closeEntry();
     out.close();
+    LOG.info("We create file {} in the route ", fileWriteZip.toString());
   }
 
 
