@@ -124,18 +124,14 @@ const Dataflows = withRouter(({ match, history }) => {
   const dataFetch = async () => {
     isLoading(true);
     try {
-      const allDataflows = await DataflowService.all(userContext.contextRoles);
+      const { data } = await DataflowService.all(userContext.contextRoles);
       dataflowsDispatch({
         type: 'INITIAL_LOAD',
-        payload: {
-          accepted: allDataflows.accepted,
-          allDataflows,
-          completed: allDataflows.completed,
-          pending: allDataflows.pending
-        }
+        payload: { accepted: data.accepted, allDataflows: data, completed: data.completed, pending: data.pending }
       });
     } catch (error) {
       console.error('dataFetch error: ', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
     }
     isLoading(false);
   };
