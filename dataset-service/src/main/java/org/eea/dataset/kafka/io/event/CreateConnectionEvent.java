@@ -1,15 +1,11 @@
 package org.eea.dataset.kafka.io.event;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -34,9 +30,6 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
   @Autowired
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
-
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Gets the event type.
@@ -64,20 +57,9 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
         Long idDataset = Long.valueOf(aux[aux.length - 1]);
         TenantResolver
             .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
-        // Initialize the dataset values (insert datasetId and tables into dataset_value and
-        // table_value of the new schema)
-        // datasetService.insertSchema(idDataset, idDatasetSchema);
-        // First insert of the statistics
-        // datasetService.saveStatistics(idDataset);
-
+        // Dataset data and statistics initialization.
         datasetService.initializeDataset(idDataset, idDatasetSchema);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put(LiteralConstants.DATASET_ID, idDataset.toString());
-        result.put(LiteralConstants.ID_DATASET_SCHEMA, idDatasetSchema);
-        if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(idDataset))) {
-          sendEvent(result);
-        }
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error executing the processes after creating a new empty dataset. Error message: {}",
@@ -91,13 +73,5 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
   }
 
 
-  /**
-   * Send event spread Data to copy prefilled tables in reporting datasets and data collection.
-   *
-   * @param result the result
-   */
-  private void sendEvent(Map<String, Object> result) {
-    kafkaSenderUtils.releaseKafkaEvent(EventType.SPREAD_DATA_EVENT, result);
 
-  }
 }

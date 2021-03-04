@@ -88,7 +88,6 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
-import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -113,6 +112,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -638,7 +638,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveStatistics(final Long datasetId) throws EEAException {
-
+    Long currentTime = System.currentTimeMillis();
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
 
     if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
@@ -690,8 +690,8 @@ public class DatasetServiceImpl implements DatasetService {
       statisticsRepository.deleteStatsByIdDataset(datasetId);
       statisticsRepository.flush();
       statisticsRepository.saveAll(statsList);
-
-      LOG.info("Statistics save to datasetId {}.", datasetId);
+      Double totalTime = (System.currentTimeMillis() - currentTime) / 1000.0d;
+      LOG.info("Statistics save to datasetId {}. with this time: {}.", datasetId, totalTime);
     } else {
       LOG_ERROR.error("No dataset found to save statistics. DatasetId:{}", datasetId);
     }
@@ -1825,35 +1825,31 @@ public class DatasetServiceImpl implements DatasetService {
    * @param originDatasetDesign the designs
    * @param targetDatasetId the dataset id
    */
-  @Override
-  public void spreadDataPrefill(DesignDataset originDatasetDesign, Long targetDatasetId) {
+  private void spreadDataPrefill(DataSetSchema datasetSchema, Long originId,
+      DataSetMetabase targetDataset) {
     // get tables from schema
-    List<TableSchema> listOfTablesFiltered =
-        getTablesFromSchema(originDatasetDesign.getDatasetSchema());
+    List<TableSchema> listOfTablesFiltered = getTablesFromSchema(datasetSchema);
     // get the data from designs datasets
     if (!listOfTablesFiltered.isEmpty()) {
-
-      TenantResolver
-          .setTenantName(String.format(DATASET_ID, originDatasetDesign.getId().toString()));
-
+      TenantResolver.setTenantName(String.format(DATASET_ID, originId));
       List<RecordValue> targetRecords = new ArrayList<>();
 
       // fill the data
       DatasetValue ds = new DatasetValue();
-      ds.setId(targetDatasetId);
+      ds.setId(targetDataset.getId());
 
       Optional<PartitionDataSetMetabase> datasetPartition =
-          partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDatasetId);
+          partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset.getId());
       Long datasetPartitionId = datasetPartition.orElse(new PartitionDataSetMetabase()).getId();
       // attachment values
       List<AttachmentValue> attachments = new ArrayList<>();
       Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
       iterableAttachments.forEach(attachments::add);
-      recordDesingAssignation(targetDatasetId, originDatasetDesign, targetRecords,
-          datasetPartitionId, attachments, listOfTablesFiltered);
+      recordDesingAssignation(targetDataset, originId, targetRecords, datasetPartitionId,
+          attachments, listOfTablesFiltered);
       if (!targetRecords.isEmpty()) {
         // save values
-        TenantResolver.setTenantName(String.format(DATASET_ID, targetDatasetId));
+        TenantResolver.setTenantName(String.format(DATASET_ID, targetDataset.getId()));
         recordRepository.saveAll(targetRecords);
         // copy attachments too
         if (!attachments.isEmpty()) {
@@ -1894,7 +1890,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param attachments the attachments
    * @param listOfTablesFiltered the list of tables filtered
    */
-  private void recordDesingAssignation(Long targetDatasetId, DesignDataset originDatasetDesign,
+  private void recordDesingAssignation(DataSetMetabase targetDataset, Long originId,
       List<RecordValue> targetRecords, Long datasetPartitionId, List<AttachmentValue> attachments,
       List<TableSchema> listOfTablesFiltered) {
 
@@ -1905,8 +1901,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     });
 
-    Long dataProviderId =
-        datasetMetabaseService.findDatasetMetabase(targetDatasetId).getDataProviderId();
+    Long dataProviderId = targetDataset.getDataProviderId();
     final DataProviderVO dataproviderVO =
         null != dataProviderId ? representativeControllerZuul.findDataProviderById(dataProviderId)
             : new DataProviderVO();
@@ -1918,11 +1913,12 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<FieldValue> pagedFieldValues;
       Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
+      TenantResolver.setTenantName(String.format(DATASET_ID, originId));
       TableValue targetTable =
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-      while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+      while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
+              .isEmpty()) {
 
         processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
             dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
@@ -1930,12 +1926,9 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValuePage = fieldValuePage.next();
       }
 
-
     });
 
   }
-
-  // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
 
   /**
    * Process record page.
@@ -1950,6 +1943,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetPartitionId the dataset partition id
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    */
+  // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
   // and Cognitive Complexity
   private void processRecordPage(List<FieldValue> pagedFieldValues, List<RecordValue> targetRecords,
       Map<String, RecordValue> mapTargetRecordValues,
@@ -1994,11 +1988,10 @@ public class DatasetServiceImpl implements DatasetService {
 
       auxField.setRecord(mapTargetRecordValues.get(originRecordId));
 
-      if (DataType.ATTACHMENT.equals(field.getType())) {
-        if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
-          dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
-          dictionaryIdFieldAttachment.get(field.getId()).setId(null);
-        }
+      if (DataType.ATTACHMENT.equals(field.getType())
+          && dictionaryIdFieldAttachment.containsKey(field.getId())) {
+        dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
+        dictionaryIdFieldAttachment.get(field.getId()).setId(null);
 
       }
       auxField.setGeometry(field.getGeometry());
@@ -2018,8 +2011,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @return the tables from schema
    */
-  private List<TableSchema> getTablesFromSchema(String idDatasetSchema) {
-    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+  private List<TableSchema> getTablesFromSchema(DataSetSchema schema) {
     List<TableSchema> listOfTables = schema.getTableSchemas();
     List<TableSchema> listOfTablesFiltered = new ArrayList<>();
     for (TableSchema desingTableToPrefill : listOfTables) {
@@ -2044,34 +2036,6 @@ public class DatasetServiceImpl implements DatasetService {
     return dataflowControllerZuul.getMetabaseById(dataflowId);
   }
 
-  /**
-   * Creates field values for a given record.
-   *
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param attachments the attachments
-   * @param recordAux the record aux
-   * @param fieldValues the field values
-   * @param fieldValuesOnlyValues the field values only values
-   */
-  private void createFieldValueForRecord(Map<String, String> dictionaryOriginTargetObjectId,
-      Map<String, AttachmentValue> attachments, RecordValue recordAux, List<FieldValue> fieldValues,
-      List<FieldValue> fieldValuesOnlyValues) {
-    for (FieldValue field : fieldValues) {
-      FieldValue auxField = new FieldValue();
-      auxField.setValue(field.getValue());
-      auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
-      auxField.setType(field.getType());
-      auxField.setRecord(recordAux);
-      fieldValuesOnlyValues.add(auxField);
-      if (DataType.ATTACHMENT.equals(field.getType())) {
-        if (attachments.containsKey(field.getId())) {
-          attachments.get(field.getId()).setFieldValue(auxField);
-          attachments.get(field.getId()).setId(null);
-        }
-
-      }
-    }
-  }
 
   /**
    * Obtain partition.
@@ -2378,23 +2342,13 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
     Long totalRecordsWithInfos = Long.valueOf(idsInfos.size());
 
-    TableStatisticsVO tableStats = new TableStatisticsVO();
-    tableStats.setIdTableSchema(tableValue.getIdTableSchema());
     Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
-    tableStats.setTotalRecords(countRecords);
 
     Long totalTableErrors = totalRecordsWithBlockers + totalRecordsWithErrors
         + totalRecordsWithWarnings + totalRecordsWithInfos;
 
     totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
 
-    tableStats.setNameTableSchema(mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
-    tableStats.setTotalErrors(totalTableErrors);
-    tableStats.setTotalRecordsWithBlockers(totalRecordsWithBlockers);
-    tableStats.setTotalRecordsWithErrors(totalRecordsWithErrors);
-    tableStats.setTotalRecordsWithWarnings(totalRecordsWithWarnings);
-    tableStats.setTotalRecordsWithInfos(totalRecordsWithInfos);
-    tableStats.setTableErrors(totalTableErrors > 0);
 
     List<Statistics> stats = new ArrayList<>();
 
@@ -2818,9 +2772,9 @@ public class DatasetServiceImpl implements DatasetService {
 
       // run through the origin table, getting its records and fields and translating them into the
       // new schema
-      while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+      while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
+              .isEmpty()) {
         LOG.info(
             "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
             fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
@@ -3369,13 +3323,13 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   @Override
-  @Transactional
-  public void initializeDataset(Long idDataset, String idDatasetSchema) throws EEAException {
+  @Async
+  public void initializeDataset(Long datasetId, String idDatasetSchema) throws EEAException {
 
     // 1.Insert the dataset schema into DatasetValue
     DatasetValue dataset = new DatasetValue();
     dataset.setIdDatasetSchema(idDatasetSchema);
-    dataset.setId(idDataset);
+    dataset.setId(datasetId);
 
     // 2.Search the table schemas of the dataset and then insert it into TableValue
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
@@ -3387,43 +3341,78 @@ public class DatasetServiceImpl implements DatasetService {
       tableValues.add(tv);
     }
     dataset.setTableValues(tableValues);
+    TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
     datasetRepository.save(dataset);
 
 
     List<Statistics> statsList = new ArrayList<>();
 
     DataSetMetabase datasetMb =
-        dataSetMetabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
 
     Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-
       mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
           tableSchema.getNameTableSchema());
     }
 
     for (TableValue tableValue : tableValues) {
-      statsList.addAll(processTableStats(tableValue, idDataset, mapIdNameDatasetSchema));
+      statsList.addAll(
+          initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema));
     }
 
-    Statistics statsIdDatasetSchema = fillStat(idDataset, null, "idDataSetSchema", idDatasetSchema);
+    Statistics statsIdDatasetSchema = fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema);
     statsList.add(statsIdDatasetSchema);
 
     Statistics statsNameDatasetSchema =
-        fillStat(idDataset, null, "nameDataSetSchema", datasetMb.getDataSetName());
+        fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName());
     statsList.add(statsNameDatasetSchema);
 
-    Statistics statsDatasetErrors = fillStat(idDataset, null, "datasetErrors", "false");
+    Statistics statsDatasetErrors = fillStat(datasetId, null, "datasetErrors", "false");
     statsList.add(statsDatasetErrors);
 
-    statisticsRepository.deleteStatsByIdDataset(idDataset);
-    statisticsRepository.flush();
+    TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
     statisticsRepository.saveAll(statsList);
 
-    LOG.info("Statistics save to datasetId {}.", idDataset);
+    LOG.info("Statistics save to datasetId {}.", datasetId);
 
+    if (DatasetTypeEnum.REPORTING.equals(getDatasetType(datasetId))) {
+      DesignDataset originDatasetDesign =
+          designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
+      if (null != originDatasetDesign) {
+        // and we have found the design dataset
+        // with data to be copied into the
+        // target dataset
+        spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
+      }
+    }
   }
 
+  private List<Statistics> initializeTableStats(final String tableSchemaId, final Long datasetId,
+      final Map<String, String> mapIdNameDatasetSchema) {
+    List<Statistics> stats = new ArrayList<>();
 
+    stats.add(fillStat(datasetId, tableSchemaId, "idTableSchema", tableSchemaId));
+    stats.add(fillStat(datasetId, tableSchemaId, "nameTableSchema",
+        mapIdNameDatasetSchema.get(tableSchemaId)));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalErrors", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecords", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithBlockers", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithErrors", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithWarnings", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithInfos", "0"));
+
+    Statistics statsTableErrors = new Statistics();
+    statsTableErrors.setIdTableSchema(tableSchemaId);
+    statsTableErrors.setStatName("tableErrors");
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(datasetId);
+    statsTableErrors.setDataset(reporting);
+    statsTableErrors.setValue("false");
+
+    stats.add(statsTableErrors);
+
+    return stats;
+  }
 
 }

@@ -1204,7 +1204,7 @@ public class DatasetServiceTest {
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(recordValues);
     when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
         .thenReturn("5cf0e9b3b793310e9ceca190");
-    DataSetSchema datasetSchema = new DataSetSchema();
+    new DataSetSchema();
     datasetService.updateRecords(1L, new ArrayList<>(), false);
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
@@ -2067,7 +2067,7 @@ public class DatasetServiceTest {
     recordValue.setFields(Arrays.asList(fieldValue));
     when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
         .thenReturn("5cf0e9b3b793310e9ceca190");
-    DataSetSchema datasetSchema = new DataSetSchema();
+    new DataSetSchema();
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
     datasetService.updateRecords(1L, new ArrayList<>(), false);
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
@@ -2086,7 +2086,7 @@ public class DatasetServiceTest {
     when(recordMapper.classListToEntity(Mockito.any())).thenReturn(Arrays.asList(recordValue));
     when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
         .thenReturn("5cf0e9b3b793310e9ceca190");
-    DataSetSchema datasetSchema = new DataSetSchema();
+    new DataSetSchema();
     datasetService.updateRecords(1L, new ArrayList<>(), false);
     Mockito.verify(recordMapper, times(1)).classListToEntity(Mockito.any());
   }
@@ -2513,7 +2513,7 @@ public class DatasetServiceTest {
     desingTableSchemas.add(desingTableSchema);
     schema.setTableSchemas(desingTableSchemas);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    datasetService.spreadDataPrefill(desingDataset, 2L);
+    // datasetService.spreadDataPrefill(desingDataset, 2L);
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
@@ -2582,7 +2582,7 @@ public class DatasetServiceTest {
     dataprovider.setCode("ES");
     when(representativeControllerZuul.findDataProviderById(Mockito.any())).thenReturn(dataprovider);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    datasetService.spreadDataPrefill(desingDataset, 2L);
+    // datasetService.spreadDataPrefill(desingDataset, 2L);
     Mockito.verify(representativeControllerZuul, times(1)).findDataProviderById(Mockito.any());
 
   }

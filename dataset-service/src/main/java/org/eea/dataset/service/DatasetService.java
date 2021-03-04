@@ -8,7 +8,6 @@ import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -529,14 +528,6 @@ public interface DatasetService {
   String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
 
   /**
-   * Spread data Prefill.
-   *
-   * @param designs the designs
-   * @param datasetId the dataset id
-   */
-  void spreadDataPrefill(DesignDataset designs, Long datasetId);
-
-  /**
    * Gets the dataset type, if it's a design, reporting, datacollection or eudataset .
    *
    * @param datasetId the dataset id
@@ -604,11 +595,11 @@ public interface DatasetService {
   /**
    * Initialize dataset.
    *
-   * @param idDataset the id dataset
+   * @param datasetId the id dataset
    * @param idDatasetSchema the id dataset schema
    * @throws EEAException the EEA exception
    */
-  void initializeDataset(Long idDataset, String idDatasetSchema) throws EEAException;
+  void initializeDataset(Long datasetId, String idDatasetSchema) throws EEAException;
 
 
 }

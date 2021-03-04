@@ -123,7 +123,7 @@ public class CreateConnectionEventTest {
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
     createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.any());
+    Mockito.verify(datasetService, times(1)).initializeDataset(Mockito.any(), Mockito.any());
   }
 
 
@@ -139,8 +139,9 @@ public class CreateConnectionEventTest {
     data.put("dataset_id", "dataset_1");
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
-    Mockito.doThrow(EEAException.class).when(datasetService).saveStatistics(Mockito.any());
+    Mockito.doThrow(EEAException.class).when(datasetService).initializeDataset(Mockito.any(),
+        Mockito.any());
     createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.any());
+    Mockito.verify(datasetService, times(1)).initializeDataset(Mockito.any(), Mockito.any());
   }
 }
