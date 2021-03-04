@@ -363,12 +363,12 @@ const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
 
 const getPublicDataflowData = async dataflowId => {
   const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
-
-  const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO);
+  const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
 
   publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
+  publicDataflowDataDTO.data = publicDataflowData;
 
-  return publicDataflowData;
+  return publicDataflowDataDTO;
 };
 
 const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
@@ -586,21 +586,21 @@ const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 const publicData = async () => {
   const publicDataflows = await apiDataflow.publicData();
 
-  const publicDataflowsDTO = publicDataflows.map(
+  publicDataflows.data = publicDataflows.data.map(
     publicDataflow =>
       new Dataflow({
         description: publicDataflow.description,
         expirationDate:
           publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
         id: publicDataflow.id,
+        isReleasable: publicDataflow.releasable,
         name: publicDataflow.name,
         obligation: parseObligationDTO(publicDataflow.obligation),
-        status: publicDataflow.status,
-        isReleasable: publicDataflow.releasable
+        status: publicDataflow.status
       })
   );
 
-  return publicDataflowsDTO;
+  return publicDataflows;
 };
 
 const reporting = async dataflowId => {

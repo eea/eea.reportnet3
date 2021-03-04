@@ -64,8 +64,7 @@ export const apiDataflow = {
   },
 
   getPublicDataflowData: async dataflowId => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) });
   },
 
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
@@ -74,10 +73,7 @@ export const apiDataflow = {
     });
   },
 
-  publicData: async () => {
-    const response = await HTTPRequester.get({ url: getUrl(DataflowConfig.publicData) });
-    return response.data;
-  },
+  publicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.publicData) }),
 
   reporting: async dataflowId => {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
