@@ -411,7 +411,6 @@ const getAllDataflowsUserList = async () => {
 const getUserList = async (dataflowId, representativeId) => {
   const response = await apiDataflow.getUserList(dataflowId, representativeId);
   const usersList = parseUsersList(response);
-  console.log('usersList', usersList);
   return sortBy(usersList, 'email');
 };
 

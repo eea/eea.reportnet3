@@ -46,7 +46,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
       setUserListData(users);
       setFilteredData(users);
     } catch (error) {
-      console.log('error', error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -67,13 +67,6 @@ export const UserList = ({ dataflowId, representativeId }) => {
   );
 
   const onLoadFilteredData = value => setFilteredData(value);
-
-  const renderColumns = users => {
-    const fieldColumns = Object.keys(users[0])
-      .filter(key => key.includes('dataflowName'))
-      .map(field => <Column field={field} header={resources.messages['dataflowName']} key={field} sortable={true} />);
-    return fieldColumns;
-  };
 
   return (
     <div className={styles.container}>
