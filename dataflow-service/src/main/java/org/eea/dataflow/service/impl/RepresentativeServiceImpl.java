@@ -413,7 +413,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         if (dataLine.length == 2 && null != dataLine[1]) {
           email = dataLine[1].replaceAll("\"", "").replaceAll("\r", "");
           if (StringUtils.isNotBlank(email)) {
-            user = userManagementControllerZull.getUserByEmail(email);
+            user = userManagementControllerZull.getUserByEmail(email.toLowerCase());
           }
         }
         if (!countryCodeList.contains(contryCode) && null == user) {
@@ -428,7 +428,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               .orElse(null);
           if (null != dataProvider) {
             if (null == representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(
-                dataflowId, dataProvider.getId(), email)) {
+                dataflowId, dataProvider.getId(), email.toLowerCase())) {
 
               Representative representative = representativeList.stream()
                   .filter(rep -> dataProvider.getId().equals(rep.getDataProvider().getId()))
@@ -449,7 +449,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 if (StringUtils.isNotBlank(email)) {
                   LeadReporter leadReporter = new LeadReporter();
                   leadReporter.setRepresentative(representative);
-                  leadReporter.setEmail(email);
+                  leadReporter.setEmail(email.toLowerCase());
                   representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
                 } else {
                   representative.setLeadReporters(new ArrayList<>());
@@ -458,7 +458,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               } else {
                 List<LeadReporter> leadReporters = representative.getLeadReporters();
                 if (StringUtils.isNotBlank(email)) {
-                  final String innerEmail = email;
+                  final String innerEmail = email.toLowerCase();
                   if (leadReporters.stream().noneMatch(rep -> innerEmail.equals(rep.getEmail()))) {
                     LeadReporter leadReporter = new LeadReporter();
                     leadReporter.setRepresentative(representative);
@@ -479,7 +479,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
         }
         fieldsToWrite[0] = contryCode;
-        fieldsToWrite[1] = email;
+        fieldsToWrite[1] = email.toLowerCase();
         csvWriter.writeNext(fieldsToWrite);
       }
       if (!Collections.isEmpty(representativeList)) {
@@ -509,7 +509,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public Long createLeadReporter(Long representativeId, LeadReporterVO leadReporterVO)
       throws EEAException {
 
-    String email = leadReporterVO.getEmail();
+    String email = leadReporterVO.getEmail().toLowerCase();
+    leadReporterVO.setEmail(email);
     Representative representative =
         representativeRepository.findById(representativeId).orElse(null);
 
@@ -556,15 +557,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
       }
       if (leadReporterVO.getEmail() != null) {
+        leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
         UserRepresentationVO newUser =
-            userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail());
+            userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
         if (newUser == null) {
           throw new EEAException(EEAErrorMessage.USER_NOTFOUND);
         }
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
-            .filter(reporter -> leadReporterVO.getEmail().equals(reporter.getEmail()))
+            .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
             .collect(Collectors.counting()) == 0) {
-          modifyLeadReporterPermissions(leadReporter.getEmail(), representative, true);
+          modifyLeadReporterPermissions(leadReporter.getEmail().toLowerCase(), representative,
+              true);
           modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
           leadReporter.setEmail(leadReporterVO.getEmail());
         }
