@@ -229,6 +229,7 @@ public class DataFlowServiceImplTest {
     weblinkVO2.setDescription("aaa");
     weblinks.add(weblinkVO);
     weblinks.add(weblinkVO2);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
 
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
@@ -606,6 +607,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -633,6 +635,7 @@ public class DataFlowServiceImplTest {
   @Test
   public void deleteDataFlowEmpty() throws Exception {
     DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -677,6 +680,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
 
     doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(1L, Boolean.TRUE);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -717,6 +721,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -762,6 +767,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -809,6 +815,7 @@ public class DataFlowServiceImplTest {
   @Test(expected = EEAException.class)
   public void deleteDataFlowThrowsDeleteRepresentative() throws Exception {
     DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     List<RepresentativeVO> representatives = new ArrayList<>();
     RepresentativeVO representative = new RepresentativeVO();
     representatives.add(representative);
@@ -858,6 +865,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -966,4 +974,10 @@ public class DataFlowServiceImplTest {
         Mockito.anyBoolean());
   }
 
+  @Test
+  public void getUserRolesTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    assertNotNull("is null", dataflowServiceImpl.getUserRoles(1L, Arrays.asList(dataflowVO)));
+  }
 }

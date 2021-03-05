@@ -8,8 +8,8 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.1",
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@fortawesome/react-fontawesome": "^0.1.11",
-    "@stomp/stompjs": "^5.4.2",
-    "axios": "^0.19.0",
+    "@stomp/stompjs": "^6.1.0",
+    "axios": "^0.21.1",
     "bootstrap": "^4.3.1",
     "chart.js": "^2.9.3",
     "classnames": "^2.2.6",
@@ -22,9 +22,9 @@
     "jwt-decode": "^2.2.0",
     "leaflet": "^1.6.0",
     "leaflet-draw": "^1.0.4",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "mapbox-gl": "^1.10.1",
-    "node-sass": "^4.14.1",
+    "sass": "^1.32.8",
     "primeicons": "^2.0.0",
     "primereact": "^4.2.1",
     "proj4leaflet": "^1.0.2",
@@ -37,7 +37,7 @@
     "react-mapbox-gl": "^4.8.6",
     "react-perf-devtool": "^3.1.8",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "^3.4.3",
+    "react-scripts": "^4.0.3",
     "react-tooltip": "^3.11.1",
     "uuid": "^3.3.3",
     "yup": "^0.27.0"
@@ -67,13 +67,14 @@
     ]
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@storybook/addon-actions": "^5.1.11",
-    "@storybook/addon-knobs": "^5.3.17",
-    "@storybook/addon-links": "^5.1.11",
-    "@storybook/addons": "^5.1.11",
-    "@storybook/react": "^5.3.17",
-    "prettier": "2.0.2",
+    "@babel/core": "^7.13.8",
+    "@storybook/addon-actions": "^6.1.20",
+    "@storybook/addon-knobs": "^6.1.20",
+    "@storybook/addon-links": "^6.1.20",
+    "@storybook/addons": "^6.1.20",
+    "@storybook/react": "^6.1.20",
+    "eslint-config-prettier": "^8.1.0",
+    "prettier": "2.2.1",
     "react-test-renderer": "^16.9.0"
   }
 }

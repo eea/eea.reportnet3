@@ -35,7 +35,7 @@ const UserCard = React.memo(() => {
           title="logout"
           onClick={async e => {
             e.preventDefault();
-            userContext.socket.disconnect(() => {});
+            userContext.socket.deactivate();
             try {
               await UserService.logout();
             } catch (error) {
