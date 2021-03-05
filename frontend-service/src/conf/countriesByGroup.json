@@ -2,217 +2,221 @@
   "eeaCountries": [
     {
       "name": "Austria",
-      "code": "at"
+      "code": "AT"
     },
     {
       "name": "Belgium",
-      "code": "be"
+      "code": "BE"
     },
     {
       "name": "Bulgarian",
-      "code": "bg"
+      "code": "BG"
     },
     {
       "name": "Croatia",
-      "code": "hr"
+      "code": "HR"
     },
     {
       "name": "Cyprus",
-      "code": "cy"
+      "code": "CY"
     },
     {
       "name": "Czechia",
-      "code": "cz"
+      "code": "CZ"
     },
     {
       "name": "Denmark",
-      "code": "dk"
+      "code": "DK"
     },
     {
       "name": "Estonia",
-      "code": "ee"
+      "code": "EE"
     },
     {
       "name": "Finland",
-      "code": "fi"
+      "code": "FI"
     },
     {
       "name": "France",
-      "code": "fr"
+      "code": "FR"
     },
     {
       "name": "Germany",
-      "code": "de"
+      "code": "DE"
     },
     {
       "name": "Greece",
-      "code": "el"
+      "code": "GR"
     },
     {
       "name": "Hungary",
-      "code": "hu"
+      "code": "HU"
+    },
+    {
+      "name": "Iceland",
+      "code": "IS"
     },
     {
       "name": "Ireland",
-      "code": "ie"
+      "code": "IE"
     },
     {
       "name": "Italy",
-      "code": "it"
+      "code": "IT"
     },
     {
       "name": "Latvia",
-      "code": "lv"
+      "code": "LV"
     },
     {
       "name": "Liechtenstein",
-      "code": "li"
+      "code": "LI"
     },
     {
       "name": "Lithuania",
-      "code": "lt"
+      "code": "LT"
     },
     {
       "name": "Luxembourg",
-      "code": "lu"
+      "code": "LU"
     },
     {
       "name": "Malta",
-      "code": "mt"
+      "code": "MT"
     },
     {
       "name": "Netherlands",
-      "code": "nl"
+      "code": "NL"
     },
     {
       "name": "Norway",
-      "code": "no"
+      "code": "NO"
     },
     {
       "name": "Poland",
-      "code": "pl"
+      "code": "PL"
     },
     {
       "name": "Portugal",
-      "code": "pt"
+      "code": "PT"
     },
     {
       "name": "Romania",
-      "code": "ro"
+      "code": "RO"
     },
     {
       "name": "Slovakia",
-      "code": "sk"
+      "code": "SK"
     },
     {
       "name": "Slovenia",
-      "code": "sl"
+      "code": "SI"
     },
     {
       "name": "Spain",
-      "code": "es"
+      "code": "ES"
     },
     {
       "name": "Sweden",
-      "code": "se"
+      "code": "SE"
     },
     {
       "name": "Switzerland",
-      "code": "ch"
+      "code": "CH"
     },
     {
       "name": "Turkey",
-      "code": "tr"
+      "code": "TR"
     }
   ],
   "otherCountries": [
     {
       "name": "Albania",
-      "code": "al"
+      "code": "AL"
     },
     {
       "name": "Andorra",
-      "code": "ad"
+      "code": "AD"
     },
     {
       "name": "Armenia",
-      "code": "am"
+      "code": "AM"
     },
     {
       "name": "Azerbaijan",
-      "code": "az"
+      "code": "AZ"
     },
     {
       "name": "Belarus",
-      "code": "by"
+      "code": "BY"
     },
     {
       "name": "Bosnia and Herzegovina",
-      "code": "ba"
+      "code": "BA"
     },
     {
       "name": "Georgia",
-      "code": "ge"
+      "code": "GE"
     },
     {
       "name": "Gibraltar",
-      "code": "gi"
+      "code": "GI"
     },
     {
       "name": "Kazakhstan",
-      "code": "kz"
+      "code": "KZ"
     },
     {
       "name": "Kosovo (UNSCR 1244/99)",
-      "code": "xk"
+      "code": "XK"
     },
     {
       "name": "Kyrgyzstan",
-      "code": "kg"
+      "code": "KG"
     },
     {
       "name": "Moldova",
-      "code": "md"
+      "code": "MD"
     },
     {
       "name": "Monaco",
-      "code": "mc"
+      "code": "MC"
     },
     {
       "name": "Montenegro",
-      "code": "me"
+      "code": "ME"
     },
     {
       "name": "North Macedonia",
-      "code": "mk"
+      "code": "MK"
     },
     {
       "name": "Russia",
-      "code": "ru"
+      "code": "RU"
     },
     {
       "name": "Serbia",
-      "code": "rs"
+      "code": "RS"
     },
     {
       "name": "Tajikistan",
-      "code": "tj"
+      "code": "TJ"
     },
     {
       "name": "Turkmenistan",
-      "code": "tm"
+      "code": "TM"
     },
     {
       "name": "Ukraine",
-      "code": "ua"
+      "code": "UA"
     },
     {
       "name": "United Kingdom",
-      "code": "gb"
+      "code": "GB"
     },
     {
       "name": "Uzbekistan",
-      "code": "uz"
+      "code": "UZ"
     }
   ]
 }
