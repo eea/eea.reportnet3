@@ -1,6 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -124,7 +125,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       Date ahora = new Date();
       SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       createSnapshotVO.setDescription("Release " + formateador.format(ahora));
-      datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null);
+      Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
+      datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
+          dateRelease.toString());
     }
   }
 

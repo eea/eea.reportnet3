@@ -4,13 +4,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
@@ -270,11 +274,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
+   * @param dateRelease the date release
    */
   @Override
   @Async
   public void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO,
-      Long partitionIdDestination) {
+      Long partitionIdDestination, String dateRelease) {
 
 
     try {
@@ -318,7 +323,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (partitionIdDestination != null) {
         idPartition = partitionIdDestination;
       }
-      recordStoreControllerZuul.createSnapshotData(idDataset, snap.getId(), idPartition);
+
+      recordStoreControllerZuul.createSnapshotData(idDataset, snap.getId(), idPartition,
+          dateRelease);
 
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
@@ -430,14 +437,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param dateRelease the date release
    * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
    */
   @Override
   @Async
-  public void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException {
-
-    // First of all, we create a lock to prevent copy data from DC to EU dataset while this process
-    // is releasign to DC
+  public void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease)
+      throws EEAException, ParseException {
 
     Long providerId = 0L;
     DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
@@ -451,16 +458,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
 
     // Get the dataCollection
-    DataSetMetabase designDataset = metabaseRepository.findById(idDataset).orElse(null);
+    DataSetMetabase dataset = metabaseRepository.findById(idDataset).orElse(null);
 
     // Mark the released dataset with the status
     String datasetSchema = "";
-    if (designDataset != null) {
-      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(designDataset.getDataflowId());
-      datasetSchema = designDataset.getDatasetSchema();
-      designDataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
+    if (dataset != null) {
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+      datasetSchema = dataset.getDatasetSchema();
+      dataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
           : DatasetStatusEnum.RELEASED);
-      metabaseRepository.save(designDataset);
+      metabaseRepository.save(dataset);
     }
     Optional<DataCollection> dataCollection =
         dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
@@ -468,12 +475,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
 
     // Delete data of the same provider
-    deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection);
+    Date dateReleasing = null;
+    if (StringUtils.isNotBlank(dateRelease)) {
+      dateReleasing = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
+    }
+    deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection,
+        dateReleasing);
 
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
     value.put(LiteralConstants.USER,
         SecurityContextHolder.getContext().getAuthentication().getName());
+    value.put("dateRelease", dateRelease);
     LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
@@ -490,7 +503,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   private void deleteDataProvider(Long idDataset, Long idSnapshot, final Long idDataProvider,
-      DataProviderVO provider, Long idDataCollection) throws EEAException {
+      DataProviderVO provider, Long idDataCollection, Date dateRelease) throws EEAException {
     Long idDataflow = datasetService.getDataFlowIdById(idDataset);
     if (provider != null && idDataCollection != null) {
       TenantResolver
@@ -523,7 +536,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         // Add the date of the release
         Optional<Snapshot> snapshot = snapshotRepository.findById(idSnapshot);
         if (snapshot.isPresent()) {
-          snapshot.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+          // snapshot.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+          snapshot.get().setDateReleased(dateRelease);
           snapshotRepository.save(snapshot.get());
         }
 
@@ -631,7 +645,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 3. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
-      recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition);
+      recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null);
       LOG.info("Snapshot schema {} data files created", idSnapshot);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset schema {}", idDataset, e);

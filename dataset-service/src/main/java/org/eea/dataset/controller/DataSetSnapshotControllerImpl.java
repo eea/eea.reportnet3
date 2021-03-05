@@ -1,6 +1,7 @@
 package org.eea.dataset.controller;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -149,7 +150,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null);
+    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null);
   }
 
   /**
@@ -216,6 +217,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    *
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
+   * @param dateRelease the date release
    */
   @Override
   @HystrixCommand
@@ -223,7 +225,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
   public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot) {
+      @PathVariable("idSnapshot") Long idSnapshot,
+      @RequestParam("dateRelease") String dateRelease) {
 
     LOG.info("The user invoking DataSetSnaphotControllerImpl.releaseSnapshot is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -237,8 +240,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot);
-    } catch (EEAException e) {
+      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease);
+    } catch (EEAException | ParseException e) {
       LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }

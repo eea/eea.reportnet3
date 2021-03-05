@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
@@ -47,11 +48,12 @@ public interface DatasetSnapshotService {
    * Adds the snapshot.
    *
    * @param idDataset the id dataset
-   * @param description the description
-   * @param released the released
+   * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
+   * @param dateRelease the date release
    */
-  void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination);
+  void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination,
+      String dateRelease);
 
   /**
    * Removes the snapshot.
@@ -91,9 +93,12 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param dateRelease the date release
    * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease)
+      throws EEAException, ParseException;
 
 
   /**
