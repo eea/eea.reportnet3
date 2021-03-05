@@ -37,7 +37,7 @@ export const PublicCountries = withRouter(({ history }) => {
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
-          <h1 className={styles.title}>Countries</h1>
+          <h1 className={styles.title}>{resources.messages['countriesPageTitle']}</h1>
           <div>
             <h3>{resources.messages['eeaCountries']}</h3>
             <div className={styles.countriesWrapper}>
