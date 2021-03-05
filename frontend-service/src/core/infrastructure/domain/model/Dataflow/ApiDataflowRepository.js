@@ -25,6 +25,7 @@ import { Representative } from 'core/domain/model/Representative/Representative'
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
+import { Country } from 'core/domain/model/Obligation/Country/Country';
 
 const getUserRoles = userRoles => {
   const userRoleToDataflow = [];
@@ -363,6 +364,207 @@ const getAllSchemas = async dataflowId => {
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
+const getPublicDataflowsByCountryCode = async countryCode => {
+  // const publicDataflowsByCountryCodeDTO = await apiDataflow.getPublicDataflowsByCountryCode(countryCode);
+  const publicDataflowsByCountryCodeDTO = {
+    twoLetter: 'SP',
+    spatialId: 1,
+    name: 'Spain',
+    dataflows: [
+      {
+        id: 70,
+        reportingDatasets: [
+          {
+            dataSetName: 'Germany',
+            isReleased: true,
+            dateReleased: 1604012000,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema1',
+            publicFileName: 'schema1'
+          },
+          {
+            dataSetName: 'Spain',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 1,
+            nameDatasetSchema: 'schema1',
+            publicFileName: null
+          },
+          {
+            dataSetName: 'France',
+            isReleased: true,
+            dateReleased: 1604012000,
+            dataProviderId: 2,
+            nameDatasetSchema: 'schema2',
+            publicFileName: 'schema2'
+          },
+          {
+            dataSetName: 'Germany',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema2',
+            publicFileName: null
+          },
+          {
+            dataSetName: 'Spain',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 1,
+            nameDatasetSchema: 'schema2'
+          },
+          {
+            dataSetName: 'France',
+            isReleased: true,
+            dateReleased: 1604013000,
+            dataProviderId: 2,
+            nameDatasetSchema: 'schema3',
+            publicFileName: 'schema3'
+          },
+          {
+            dataSetName: 'Spain',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 1,
+            nameDatasetSchema: 'schema3'
+          }
+        ],
+        description: 'd',
+        name: 'dataflow',
+        deadlineDate: 1604012000,
+        status: 'closed',
+        obligation: {
+          obligationId: 671,
+          oblTitle: '(C) Information on the assessment regime (Article 7)',
+          description:
+            'Article 7\r\nAssessment regime\r\n1. In accordance with the procedure referred to in Article 5 of this Decision, Member States shall make available the information set out in Part C of Annex II on the assessment regime to be applied in the following calendar year for each pollutant within individual zones and agglomerations in accordance with Article 4 of Directive 2004/107/EC and Articles 5 and 9 of Directive 2008/50/EC.\r\n2. Member States shall make the information referred to in paragraph 1 available to the Commission no later than 31 December of each calendar year. Member States may indicate that there have been no changes to the information previously made available.',
+          validSince: 1324076400000,
+          validTo: 253402210800000,
+          comment: null,
+          nextDeadline: 1601503200000,
+          legalInstrument: {
+            sourceId: '650',
+            sourceTitle:
+              '2011/850/EU: Commission Implementing Decision of 12 December 2011 laying down rules for Directives 2004/107/EC and 2008/50/EC of the European Parliament and of the Council as regards the reciprocal exchange of information and reporting on ambient air quality',
+            sourceAlias: 'Air Quality Directive IPR'
+          },
+          client: null,
+          countries: null,
+          issues: null,
+          reportFreq: null,
+          reportFreqDetail: null
+        },
+        status: 'open'
+      },
+      {
+        id: 70,
+        reportingDatasets: [
+          {
+            dataSetName: 'Germany',
+            isReleased: true,
+            dateReleased: 1604012000,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema1',
+            publicFileName: 'schema1'
+          },
+          {
+            dataSetName: 'Spain',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 1,
+            nameDatasetSchema: 'schema1',
+            publicFileName: null
+          },
+          {
+            dataSetName: 'France',
+            isReleased: true,
+            dateReleased: 1604012000,
+            dataProviderId: 2,
+            nameDatasetSchema: 'schema2',
+            publicFileName: 'schema2'
+          },
+          {
+            dataSetName: 'Germany',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema2',
+            publicFileName: null
+          },
+          {
+            dataSetName: 'Spain',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 1,
+            nameDatasetSchema: 'schema2'
+          },
+          {
+            dataSetName: 'France',
+            isReleased: true,
+            dateReleased: 1604013000,
+            dataProviderId: 2,
+            nameDatasetSchema: 'schema3',
+            publicFileName: 'schema3'
+          },
+          {
+            dataSetName: 'Spain',
+            isReleased: false,
+            dateReleased: null,
+            dataProviderId: 1,
+            nameDatasetSchema: 'schema3'
+          }
+        ],
+        description: 'd',
+        name: 'dataflow',
+        deadlineDate: 1604012000,
+        status: 'open',
+        obligation: {
+          obligationId: 671,
+          oblTitle: '(C) Information on the assessment regime (Article 7)',
+          description:
+            'Article 7\r\nAssessment regime\r\n1. In accordance with the procedure referred to in Article 5 of this Decision, Member States shall make available the information set out in Part C of Annex II on the assessment regime to be applied in the following calendar year for each pollutant within individual zones and agglomerations in accordance with Article 4 of Directive 2004/107/EC and Articles 5 and 9 of Directive 2008/50/EC.\r\n2. Member States shall make the information referred to in paragraph 1 available to the Commission no later than 31 December of each calendar year. Member States may indicate that there have been no changes to the information previously made available.',
+          validSince: 1324076400000,
+          validTo: 253402210800000,
+          comment: null,
+          nextDeadline: 1601503200000,
+          legalInstrument: {
+            sourceId: '650',
+            sourceTitle:
+              '2011/850/EU: Commission Implementing Decision of 12 December 2011 laying down rules for Directives 2004/107/EC and 2008/50/EC of the European Parliament and of the Council as regards the reciprocal exchange of information and reporting on ambient air quality',
+            sourceAlias: 'Air Quality Directive IPR'
+          },
+          client: null,
+          countries: null,
+          issues: null,
+          reportFreq: null,
+          reportFreqDetail: null
+        }
+      }
+    ]
+  };
+  return parseCountry(publicDataflowsByCountryCodeDTO);
+};
+
+const parseCountry = countryDTO => {
+  return new Country({
+    countryCode: countryDTO.twoLetter,
+    id: countryDTO.spatialId,
+    name: countryDTO.name,
+    dataflows: parseDataflowListDTO(countryDTO.dataflows)
+  });
+};
+
+const parseDataflowListDTO = dataflowsDTO => {
+  if (!isNull(dataflowsDTO) && !isUndefined(dataflowsDTO)) {
+    const dataflows = [];
+    dataflowsDTO.forEach(dataflowDTO => {
+      dataflows.push(parseDataflowDTO(dataflowDTO));
+    });
+    return dataflows;
+  }
+  return;
+};
+
 const getPublicDataflowData = async dataflowId => {
   const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
   const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
@@ -637,6 +839,7 @@ export const ApiDataflowRepository = {
   generateApiKey,
   getAllSchemas,
   getApiKey,
+  getPublicDataflowsByCountryCode,
   getPublicDataflowData,
   newEmptyDatasetSchema,
   publicData,

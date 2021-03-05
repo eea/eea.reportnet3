@@ -5,6 +5,9 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
 import { config } from 'conf';
 
 import styles from './PublicCountryInformation.module.scss';
@@ -35,6 +38,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
+  const [dataflows, setDataflows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [publicCountryInformation, setPublicCountryInformation] = useState([]);
 
@@ -52,6 +56,40 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   }, [themeContext.headerCollapse]);
 
+  const getHeader = fieldHeader => {
+    console.log('fieldHeader', fieldHeader);
+    let header;
+    switch (fieldHeader) {
+      case 'name':
+        header = resources.messages['name'];
+        break;
+      case 'obligation':
+        header = resources.messages['obligationTitle'];
+        break;
+      case 'legalInstrument':
+        header = resources.messages['legalInstrument'];
+        break;
+      case 'expirationDate':
+        header = resources.messages['dueDate'];
+        break;
+      case 'status':
+        header = resources.messages['status'];
+        break;
+      case 'isReleased':
+        header = resources.messages['delivered'];
+        break;
+      case 'releasedDate':
+        header = resources.messages['releasedDate'];
+        break;
+      case 'publicsFileName':
+        header = resources.messages['files'];
+        break;
+      default:
+        break;
+    }
+    return header;
+  };
+
   const getPublicFileName = fileName => {
     const splittedFileName = fileName.split('-');
     return splittedFileName[1];
@@ -66,7 +104,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               {/* onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}> */}
               <FontAwesomeIcon icon={AwesomeIcons('xlsx')} data-tip data-for={publicFileName} />
               <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
-                <span>{getPublicFileName(publicFileName)}</span>
+                {/* <span>{getPublicFileName(publicFileName)}</span> */}
+                <span>{publicFileName}</span>
               </ReactTooltip>
             </span>
           ))}
@@ -75,114 +114,35 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   };
 
-  const isReleasedBodyColumn = rowData => {
-    return (
-      <div className={styles.checkedValueColumn}>
-        {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-      </div>
-    );
-  };
+  const isReleasedBodyColumn = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
 
-  const legalInstrumentBodyColumn = rowData => {
-    return (
-      <div onClick={e => e.stopPropagation()}>
-        {renderRedirectText(
-          rowData.legalInstrument.alias,
-          `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument.id}`
-        )}
-      </div>
-    );
-  };
+  const legalInstrumentBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      {renderRedirectText(
+        rowData.legalInstrument.alias,
+        `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument.id}`
+      )}
+    </div>
+  );
 
-  const obligationBodyColumn = rowData => {
-    return (
-      <div onClick={e => e.stopPropagation()}>
-        {renderRedirectText(
-          rowData.obligation.title,
-          `https://rod.eionet.europa.eu/obligations/${rowData.obligation.obligationId}`
-        )}
-      </div>
-    );
-  };
+  const obligationBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      {renderRedirectText(
+        rowData.obligation.title,
+        `https://rod.eionet.europa.eu/obligations/${rowData.obligation.obligationId}`
+      )}
+    </div>
+  );
+
   const onLoadPublicCountryInformation = async () => {
     try {
-      const publicData = {
-        countryCode: 'SP',
-        id: '2',
-        name: 'spain',
-        dataflows: [
-          {
-            id: 1,
-            dataflowName: 'Dataflow 1',
-            obligation: {
-              obligationId: 693,
-              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-            },
-            legalInstrument: {
-              alias: 'Air Quality Directive IPR',
-              id: 650,
-              title: 'obligation 1'
-            },
-            status: 'open',
-            releaseDate: '2021-02-26 10:02',
-            isReleased: true,
-            publicsFileName: ['Austria-Schema 1']
-          },
-          {
-            id: 1,
-            dataflowName: 'Dataflow 2',
-            obligation: {
-              obligationId: 693,
-              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-            },
-            legalInstrument: {
-              alias: 'Air Quality Directive IPR',
-              id: 650,
-              title: 'obligation 1'
-            },
-            status: 'closed',
-            releaseDate: '2021-01-26 10:02',
-            isReleased: true,
-            publicsFileName: ['France-Schema 1', 'France-Schema 2', 'France-Schema 3']
-          },
-          {
-            id: 1,
-            dataflowName: 'Dataflow 1',
-            obligation: {
-              obligationId: 693,
-              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-            },
-            legalInstrument: {
-              alias: 'Air Quality Directive IPR',
-              id: 650,
-              title: 'obligation 1'
-            },
-            status: 'open',
-            releaseDate: '2021-02-26 10:02',
-            isReleased: true,
-            publicsFileName: ['Austria-Schema 1']
-          },
-
-          {
-            id: 1,
-            dataflowName: 'Dataflow 1',
-            obligation: {
-              obligationId: 693,
-              title: '(B) Preliminary  information on zones and agglomerations  (Article 6)'
-            },
-            legalInstrument: {
-              alias: 'Air Quality Directive IPR',
-              id: 650,
-              title: 'obligation 1'
-            },
-            status: 'open',
-            releaseDate: '2021-02-26 10:02',
-            isReleased: true,
-            publicsFileName: ['Austria-Schema 1']
-          }
-        ]
-      };
+      const publicData = await DataflowService.getPublicDataflowsByCountryCode(countryCode);
       setPublicCountryInformation(publicData);
+      parseDataflows(publicData.dataflows);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
     } finally {
@@ -190,8 +150,54 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   };
 
+  const parseDataflows = dataflows => {
+    const parsedDataflows = [];
+    dataflows.forEach(dataflow => {
+      const isReleased = dataflow.datasets.some(dataset => dataset.isReleased);
+      const publicsFileName = [];
+      dataflow.datasets.forEach(dataset => {
+        if (!isNil(dataset.publicFileName)) {
+          publicsFileName.push(dataset.publicFileName);
+        }
+      });
+      const parsedDataflow = {
+        id: dataflow.id,
+        name: dataflow.name,
+        obligation: dataflow.obligation,
+        legalInstrument: dataflow.obligation.legalInstruments,
+        status: dataflow.status,
+        expirationDate: dataflow.expirationDate,
+        isReleased: isReleased,
+        releasedDate: isReleased && dataflow.datasets[0].releaseDate,
+        publicsFileName: publicsFileName
+      };
+      parsedDataflows.push(parsedDataflow);
+    });
+    setDataflows(parsedDataflows);
+  };
+
+  const getOrderedColumns = dataflows => {
+    const dataflowsWithPriority = [
+      { id: 'id', index: 0 },
+      { id: 'name', index: 1 },
+      { id: 'obligation', index: 2 },
+      { id: 'legalInstrument', index: 3 },
+      { id: 'expirationDate', index: 4 },
+      { id: 'status', index: 5 },
+      { id: 'isReleased', index: 6 },
+      { id: 'releasedDate', index: 7 },
+      { id: 'publicsFileName', index: 8 }
+    ];
+
+    return dataflows
+      .map(field => dataflowsWithPriority.filter(e => field === e.id))
+      .flat()
+      .sort((a, b) => a.index - b.index)
+      .map(orderedField => orderedField.id);
+  };
+
   const renderColumns = dataflows => {
-    const fieldColumns = Object.keys(dataflows[0])
+    const fieldColumns = getOrderedColumns(Object.keys(dataflows[0]))
       .filter(key => !key.includes('id'))
       .map(field => {
         let template = null;
@@ -199,7 +205,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'legalInstrument') template = legalInstrumentBodyColumn;
         if (field === 'obligation') template = obligationBodyColumn;
         if (field === 'publicsFileName') template = downloadFileBodyColumn;
-        return <Column body={template} field={field} header={resources.messages[field]} key={field} sortable={true} />;
+        return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
       });
 
     return fieldColumns;
@@ -215,37 +221,39 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   return (
     <PublicLayout>
-      <div className={styles.content} style={contentStyles}>
-        <div className={`rep-container ${styles.repContainer}`}>
-          <h1 className={styles.title}>
-            <Title
-              icon={'clone'}
-              iconSize={'4rem'}
-              subtitle={resources.messages['dataflows']}
-              title={publicCountryInformation.name?.charAt(0).toUpperCase() + publicCountryInformation.name?.slice(1)}
-            />
-          </h1>
-          <div className={styles.countriesList}>
-            {!isLoading ? (
-              <DataTable
-                autoLayout={true}
-                paginator={true}
-                paginatorRight={
-                  <span>{`${resources.messages['totalRecords']}  ${
-                    publicCountryInformation.dataflows.length
-                  } ${resources.messages['records'].toLowerCase()}`}</span>
-                }
-                rows={10}
-                rowsPerPageOptions={[5, 10, 15]}
-                totalRecords={publicCountryInformation.dataflows.length}
-                value={publicCountryInformation.dataflows}>
-                {renderColumns(publicCountryInformation.dataflows)}
-              </DataTable>
-            ) : (
-              <Spinner style={{ top: 0, left: 0 }} />
-            )}
-          </div>
-        </div>
+      <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`} style={contentStyles}>
+        {!isLoading ? (
+          !isEmpty(dataflows) ? (
+            <>
+              <Title
+                icon={'clone'}
+                iconSize={'4rem'}
+                subtitle={resources.messages['dataflows']}
+                title={publicCountryInformation.name?.charAt(0).toUpperCase() + publicCountryInformation.name?.slice(1)}
+              />
+              <div className={styles.countriesList}>
+                <DataTable
+                  autoLayout={true}
+                  paginator={true}
+                  paginatorRight={
+                    <span>{`${resources.messages['totalRecords']}  ${dataflows.length} ${resources.messages[
+                      'records'
+                    ].toLowerCase()}`}</span>
+                  }
+                  rows={10}
+                  rowsPerPageOptions={[5, 10, 15]}
+                  totalRecords={dataflows.length}
+                  value={dataflows}>
+                  {renderColumns(dataflows)}
+                </DataTable>
+              </div>
+            </>
+          ) : (
+            <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+          )
+        ) : (
+          <Spinner style={{ top: 0, left: 0 }} />
+        )}
       </div>
     </PublicLayout>
   );

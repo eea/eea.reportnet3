@@ -11,6 +11,7 @@ import { GetAllSchemas } from './GetAllSchemas';
 import { GetApiKey } from './GetApiKey';
 import { GetDatasetStatisticStatus } from './GetDatasetStatisticStatus';
 import { GetDetails } from './GetDetails';
+import { GetPublicDataflowsByCountryCode } from './GetPublicDataflowsByCountryCode';
 import { GetPublicData } from './GetPublicData';
 import { GetPublicDataflowData } from './GetPublicDataflowData';
 import { GetReleasedDashboards } from './GetReleasedDashboards';
@@ -30,6 +31,7 @@ export const DataflowService = {
   downloadById: Download({ dataflowRepository }),
   getAllSchemas: GetAllSchemas({ dataflowRepository }),
   getApiKey: GetApiKey({ dataflowRepository }),
+  getPublicDataflowsByCountryCode: GetPublicDataflowsByCountryCode({ dataflowRepository }),
   getPublicDataflowData: GetPublicDataflowData({ dataflowRepository }),
   generateApiKey: GenerateApiKey({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),

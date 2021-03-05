@@ -14,6 +14,8 @@ export const DataflowRepository = {
   generateApiKey: () => Promise.reject('[DataflowRepository#generateApiKey] must be implemented'),
   getAllSchemas: () => Promise.reject('[DataflowRepository#getAllSchemas] must be implemented'),
   getApiKey: () => Promise.reject('[DataflowRepository#getApiKey] must be implemented'),
+  getPublicDataflowsByCountryCode: () =>
+    Promise.reject('[DataflowRepository#getPublicDataflowsByCountryCode] must be implemented'),
   getPublicDataflowData: () => Promise.reject('[DataflowRepository#getPublicDataflowData] must be implemented'),
   metadata: () => Promise.reject('[DataflowRepository#metadata] must be implemented'),
   newEmptyDatasetSchema: () => Promise.reject('[DataflowRepository#newEmptyDatasetSchema] must be implemented'),

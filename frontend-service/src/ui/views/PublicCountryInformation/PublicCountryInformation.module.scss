@@ -1,7 +1,6 @@
 .container {
   flex: 1 auto;
   height: 100%;
-  padding-bottom: 4rem;
   &.isLoading {
     display: flex;
     flex-direction: column;
@@ -19,4 +18,13 @@
   cursor: pointer;
   color: var(--documenticon-color);
   text-align: center;
+}
+
+.noDataflows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
 }

@@ -64,6 +64,10 @@ export const apiDataflow = {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) });
   },
 
+  getPublicDataflowsByCountryCode: async countryCode => {
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowsByCountryCode, { countryCode }) });
+  },
+
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
     return await HTTPRequester.post({
       url: getUrl(DataflowConfig.newEmptyDatasetSchema, { dataflowId, datasetSchemaName })
