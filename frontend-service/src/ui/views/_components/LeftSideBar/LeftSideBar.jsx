@@ -113,7 +113,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
 
   const userLogout = async () => {
     {
-      userContext.socket.disconnect(() => {});
+      userContext.socket.deactivate();
       try {
         await UserService.logout();
       } catch (error) {
