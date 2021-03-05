@@ -102,7 +102,7 @@ export const PublicDataflowInformation = withRouter(
           header = resources.messages['releaseDate'];
           break;
         case 'isReleased':
-          header = resources.messages['isReleased'];
+          header = resources.messages['delivered'];
           break;
         case 'publicsFileName':
           header = resources.messages['files'];
