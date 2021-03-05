@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { isEmpty, isUndefined } from 'lodash';
 
-import styles from './ReportnetLogin.module.css';
+import styles from './ReportnetLogin.module.scss';
 
 import logo from 'assets/images/logos/logo.png';
 
