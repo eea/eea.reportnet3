@@ -27,7 +27,7 @@ import { CurrentPage } from 'ui/views/_functions/Utils';
 
 export const PublicCountryInformation = withRouter(({ match, history }) => {
   const {
-    params: { countryId }
+    params: { countryCode }
   } = match;
 
   const notificationContext = useContext(NotificationContext);
@@ -38,7 +38,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [publicCountryInformation, setPublicCountryInformation] = useState([]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryId, history });
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode, history });
 
   useEffect(() => {
     onLoadPublicCountryInformation();

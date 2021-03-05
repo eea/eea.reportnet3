@@ -11,7 +11,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 export const useBreadCrumbs = ({
-  countryId,
+  countryCode,
   currentPage,
   dataflowId,
   dataflowStateData,
@@ -112,8 +112,8 @@ export const useBreadCrumbs = ({
   };
   const getPublicCountryCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryId }, true)),
-      href: getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryId }, true),
+      command: () => history.push(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryCode }, true)),
+      href: getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true),
       label: resources.messages['publicCountryBreadcrumbs']
     };
   };
