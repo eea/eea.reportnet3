@@ -16,6 +16,8 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { TextUtils } from 'ui/views/_functions/Utils';
+
 import { WebLinkService } from 'core/services/WebLink';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -78,7 +80,17 @@ export const WebLinks = ({
   }, [webLinks, weblinkItem]);
 
   const addWeblinkSchema = Yup.object().shape({
-    description: Yup.string().required(' ').max(255, resources.messages['webLinkDescriptionValidationMax']),
+    description: Yup.string()
+      .required(' ')
+      .max(255, resources.messages['webLinkDescriptionValidationMax'])
+      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
+        return isNil(
+          webLinks.find(
+            weblink =>
+              TextUtils.areEquals(weblink.description, value) && TextUtils.areEquals(weblink.url, this.parent.url)
+          )
+        );
+      }),
     url: Yup.string()
       .lowercase()
       .matches(
@@ -86,6 +98,15 @@ export const WebLinks = ({
         resources.messages['urlError']
       )
       .required(' ')
+      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
+        return isNil(
+          webLinks.find(
+            weblink =>
+              TextUtils.areEquals(weblink.description, this.parent.description) &&
+              TextUtils.areEquals(weblink.url, value)
+          )
+        );
+      })
   });
 
   const fieldsArray = [
@@ -148,7 +169,6 @@ export const WebLinks = ({
   const onSaveRecord = async (e, setSubmitting) => {
     setWeblinkItem(e);
     setSubmitting(true);
-
     if (isNil(weblinkItem.id)) {
       try {
         const newWeblink = await WebLinkService.create(dataflowId, e);
@@ -163,7 +183,11 @@ export const WebLinks = ({
 
         if (error.response.status === 400) {
           notificationContext.add({
-            type: 'WRONG_WEB_LINK_ERROR'
+            type: 'WRONG_WEBLINK_ERROR'
+          });
+        } else if (error.response.status === 409) {
+          notificationContext.add({
+            type: 'DUPLICATED_WEBLINK_ERROR'
           });
         }
       } finally {
@@ -185,7 +209,11 @@ export const WebLinks = ({
 
         if (error.response.status === 400) {
           notificationContext.add({
-            type: 'WRONG_WEB_LINK_ERROR'
+            type: 'WRONG_WEBLINK_ERROR'
+          });
+        } else if (error.response.status === 409) {
+          notificationContext.add({
+            type: 'DUPLICATED_WEBLINK_ERROR'
           });
         }
       } finally {

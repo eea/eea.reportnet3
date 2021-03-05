@@ -619,10 +619,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         });
       };
       const getDatasetSchemas = async () => {
-        designerDispatch({
-          type: 'LOAD_DATASET_SCHEMAS',
-          payload: { schemas: await DataflowService.getAllSchemas(dataflowId) }
-        });
+        const { data } = await DataflowService.getAllSchemas(dataflowId);
+        designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: data } });
       };
 
       getDatasetSchemaId();
