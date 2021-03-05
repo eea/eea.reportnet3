@@ -41,6 +41,7 @@ import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
+import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -638,11 +639,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveStatistics(final Long datasetId) throws EEAException {
-    Long currentTime = System.currentTimeMillis();
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
 
     if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
-      List<Statistics> statsList = new ArrayList<>();
+      List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
       List<TableValue> allTableValues = dataset.getTableValues();
 
       DataSetMetabase datasetMb =
@@ -658,9 +658,8 @@ public class DatasetServiceImpl implements DatasetService {
             tableSchema.getNameTableSchema());
       }
 
-      for (TableValue tableValue : allTableValues) {
-        statsList.addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema));
-      }
+      allTableValues.parallelStream().forEach(tableValue -> statsList
+          .addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema)));
 
       // Check dataset validations
       Boolean datasetErrors = false;
@@ -675,23 +674,15 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
 
-      Statistics statsIdDatasetSchema =
-          fillStat(datasetId, null, "idDataSetSchema", dataset.getIdDatasetSchema());
-      statsList.add(statsIdDatasetSchema);
+      statsList.add(fillStat(datasetId, null, "idDataSetSchema", dataset.getIdDatasetSchema()));
+      statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
+      statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
-      Statistics statsNameDatasetSchema =
-          fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName());
-      statsList.add(statsNameDatasetSchema);
-
-      Statistics statsDatasetErrors =
-          fillStat(datasetId, null, "datasetErrors", datasetErrors.toString());
-      statsList.add(statsDatasetErrors);
 
       statisticsRepository.deleteStatsByIdDataset(datasetId);
       statisticsRepository.flush();
       statisticsRepository.saveAll(statsList);
-      Double totalTime = (System.currentTimeMillis() - currentTime) / 1000.0d;
-      LOG.info("Statistics save to datasetId {}. with this time: {}.", datasetId, totalTime);
+      LOG.info("Statistics saved to datasetId {}.", datasetId);
     } else {
       LOG_ERROR.error("No dataset found to save statistics. DatasetId:{}", datasetId);
     }
@@ -2282,53 +2273,52 @@ public class DatasetServiceImpl implements DatasetService {
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
 
-    Set<Long> recordIdsFromRecordWithValidationBlocker =
+    List<IDError> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
+            tableValue.getIdTableSchema());
 
-    Set<Long> recordIdsFromFieldWithValidationBlocker =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
+    List<IDError> recordIdsFromFieldWithValidationBlocker = recordValidationRepository
+        .findRecordIdFromFieldWithValidationsByLevelError(datasetId, tableValue.getIdTableSchema());
 
-    Set<Long> recordIdsFromRecordWithValidationError =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
+    Set<String> idsBlockers = new HashSet<>();
+    Set<String> idsErrors = new HashSet<>();
+    Set<String> idsWarnings = new HashSet<>();
+    Set<String> idsInfos = new HashSet<>();
+    recordIdsFromRecordWithValidationBlocker.stream().forEach(keyset -> {
+      switch (keyset.getLevelError()) {
+        case "BLOCKER":
+          idsBlockers.add(keyset.getId());
+          break;
+        case "ERROR":
+          idsErrors.add(keyset.getId());
+          break;
+        case "WARNING":
+          idsWarnings.add(keyset.getId());
+          break;
+        case "INFO":
+          idsInfos.add(keyset.getId());
+          break;
+        default:
+      }
+    });
 
-    Set<Long> recordIdsFromFieldWithValidationError =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
-
-    Set<Long> recordIdsFromRecordWithValidationWarning =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
-
-    Set<Long> recordIdsFromFieldWithValidationWarning =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
-
-    Set<Long> recordIdsFromRecordWithValidationInfo =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
-
-    Set<Long> recordIdsFromFieldWithValidationInfo =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
-
-    Set<Long> idsBlockers = new HashSet<>();
-    idsBlockers.addAll(recordIdsFromRecordWithValidationBlocker);
-    idsBlockers.addAll(recordIdsFromFieldWithValidationBlocker);
-
-    Set<Long> idsErrors = new HashSet<>();
-    idsErrors.addAll(recordIdsFromRecordWithValidationError);
-    idsErrors.addAll(recordIdsFromFieldWithValidationError);
-
-    Set<Long> idsWarnings = new HashSet<>();
-    idsWarnings.addAll(recordIdsFromRecordWithValidationWarning);
-    idsWarnings.addAll(recordIdsFromFieldWithValidationWarning);
-
-    Set<Long> idsInfos = new HashSet<>();
-    idsInfos.addAll(recordIdsFromRecordWithValidationInfo);
-    idsInfos.addAll(recordIdsFromFieldWithValidationInfo);
+    recordIdsFromFieldWithValidationBlocker.stream().forEach(keyset -> {
+      switch (keyset.getLevelError()) {
+        case "BLOCKER":
+          idsBlockers.add(keyset.getId());
+          break;
+        case "ERROR":
+          idsErrors.add(keyset.getId());
+          break;
+        case "WARNING":
+          idsWarnings.add(keyset.getId());
+          break;
+        case "INFO":
+          idsInfos.add(keyset.getId());
+          break;
+        default:
+      }
+    });
 
     idsErrors.removeAll(idsBlockers);
     idsWarnings.removeAll(idsBlockers);
@@ -2344,37 +2334,36 @@ public class DatasetServiceImpl implements DatasetService {
 
     Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
 
-    Long totalTableErrors = totalRecordsWithBlockers + totalRecordsWithErrors
-        + totalRecordsWithWarnings + totalRecordsWithInfos;
-
-    totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
+    Long totalTableErrors =
+        totalRecordsWithBlockers + totalRecordsWithErrors + totalRecordsWithWarnings
+            + totalRecordsWithInfos + tableValue.getTableValidations().size();
 
 
     List<Statistics> stats = new ArrayList<>();
 
-    Statistics statsIdTable = fillStat(datasetId, tableValue.getIdTableSchema(), "idTableSchema",
-        tableValue.getIdTableSchema());
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "idTableSchema",
+        tableValue.getIdTableSchema()));
 
-    Statistics statsNameTable = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "nameTableSchema", mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "nameTableSchema",
+        mapIdNameDatasetSchema.get(tableValue.getIdTableSchema())));
 
-    Statistics statsTotalTableError = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalErrors", totalTableErrors.toString());
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalErrors",
+        totalTableErrors.toString()));
 
-    Statistics statsTotalRecords =
-        fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecords", countRecords.toString());
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecords",
+        countRecords.toString()));
 
-    Statistics statsTotalRecordsWithBlockers = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithBlockers", totalRecordsWithBlockers.toString());
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithBlockers",
+        totalRecordsWithBlockers.toString()));
 
-    Statistics statsTotalRecordsWithErrors = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithErrors", totalRecordsWithErrors.toString());
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithErrors",
+        totalRecordsWithErrors.toString()));
 
-    Statistics statsTotalRecordsWithWarnings = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithWarnings", totalRecordsWithWarnings.toString());
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithWarnings",
+        totalRecordsWithWarnings.toString()));
 
-    Statistics statsTotalRecordsWithInfos = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithInfos", totalRecordsWithInfos.toString());
+    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithInfos",
+        totalRecordsWithInfos.toString()));
 
     Statistics statsTableErrors = new Statistics();
     statsTableErrors.setIdTableSchema(tableValue.getIdTableSchema());
@@ -2385,17 +2374,9 @@ public class DatasetServiceImpl implements DatasetService {
     if (tableValue.getTableValidations() != null && !tableValue.getTableValidations().isEmpty()) {
       statsTableErrors.setValue("true");
     } else {
-      statsTableErrors.setValue(totalTableErrors > 0 ? "true" : "false");
+      statsTableErrors.setValue(String.valueOf(totalTableErrors > 0));
     }
 
-    stats.add(statsIdTable);
-    stats.add(statsNameTable);
-    stats.add(statsTotalTableError);
-    stats.add(statsTotalRecords);
-    stats.add(statsTotalRecordsWithBlockers);
-    stats.add(statsTotalRecordsWithErrors);
-    stats.add(statsTotalRecordsWithWarnings);
-    stats.add(statsTotalRecordsWithInfos);
     stats.add(statsTableErrors);
 
     return stats;
@@ -3345,7 +3326,7 @@ public class DatasetServiceImpl implements DatasetService {
     datasetRepository.save(dataset);
 
 
-    List<Statistics> statsList = new ArrayList<>();
+    List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
 
     DataSetMetabase datasetMb =
         dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
@@ -3356,10 +3337,8 @@ public class DatasetServiceImpl implements DatasetService {
           tableSchema.getNameTableSchema());
     }
 
-    for (TableValue tableValue : tableValues) {
-      statsList.addAll(
-          initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema));
-    }
+    tableValues.parallelStream().forEach(tableValue -> statsList.addAll(
+        initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema)));
 
     Statistics statsIdDatasetSchema = fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema);
     statsList.add(statsIdDatasetSchema);
@@ -3368,8 +3347,7 @@ public class DatasetServiceImpl implements DatasetService {
         fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName());
     statsList.add(statsNameDatasetSchema);
 
-    Statistics statsDatasetErrors = fillStat(datasetId, null, "datasetErrors", "false");
-    statsList.add(statsDatasetErrors);
+    statsList.add(fillStat(datasetId, null, "datasetErrors", "false"));
 
     TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
     statisticsRepository.saveAll(statsList);
