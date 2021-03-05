@@ -364,7 +364,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
     }
     Pattern p = Pattern.compile(EMAIL_REGEX);
-    Matcher m = p.matcher(leadReporterVO.getEmail());
+    Matcher m = p.matcher(leadReporterVO.getEmail().toLowerCase());
     boolean result = m.matches();
     if (Boolean.FALSE.equals(result)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
