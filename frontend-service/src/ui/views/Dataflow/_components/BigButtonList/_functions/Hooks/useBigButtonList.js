@@ -55,6 +55,9 @@ const useBigButtonList = ({
   ]);
 
   const getButtonsVisibility = useCallback(() => {
+    const isCustodian = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
+      config.permissions.DATA_CUSTODIAN
+    ]);
     const isDesigner =
       isLeadDesigner ||
       userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
@@ -89,7 +92,8 @@ const useBigButtonList = ({
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry
+      release: isLeadReporterOfCountry,
+      testDatasetVisibility: isDraftStatus && isCustodian
     };
   }, [
     dataflowId,
@@ -523,11 +527,11 @@ const useBigButtonList = ({
   const testDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
-      buttonIcon: 'dataset',
+      buttonIcon: 'representative',
       caption: resources.messages['testDatasetBigButton'],
-      handleRedirect: () => handleRedirect(getUrl(routes.TEST_DATASET, { dataflowId }, true)),
+      handleRedirect: () => handleRedirect(getUrl(routes.TEST_DATASETS, { dataflowId }, true)),
       layout: 'defaultBigButton',
-      visibility: true
+      visibility: buttonsVisibility.testDatasetVisibility
     }
   ];
 

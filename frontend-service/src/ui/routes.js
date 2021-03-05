@@ -18,5 +18,6 @@ export const routes = {
   PRIVACY_STATEMENT: '/privacyPolicy',
   PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId',
   PUBLIC_DATAFLOWS: '/public/dataflows',
-  SETTINGS: '/settings'
+  SETTINGS: '/settings',
+  TEST_DATASETS: '/dataflow/:dataflowId/testDatasets'
 };
