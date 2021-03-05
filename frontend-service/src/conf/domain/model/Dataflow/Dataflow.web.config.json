@@ -1,5 +1,4 @@
 {
-  "acceptDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
   "allSchemas": "/dataschema/getSchemas/dataflow/{:dataflowId}",
   "cloneDatasetSchemas": "/dataschema/copy?sourceDataflow={:sourceDataflowId}&targetDataflow={:targetDataflowId}",
   "createDataflow": "/dataflow",
@@ -19,6 +18,5 @@
   "importSchema": "/dataschema/import?dataflowId={:dataflowId}",
   "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",
   "newEmptyDatasetSchema": "/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}",
-  "rejectDataflow": "/dataflow/updateStatusRequest/{:dataflowId}?type={:type}",
   "publicData": "/dataflow/getPublicDataflows"
 }

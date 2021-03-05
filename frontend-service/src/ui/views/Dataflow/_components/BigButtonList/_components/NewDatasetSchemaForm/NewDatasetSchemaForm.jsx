@@ -62,7 +62,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
             dataflowId,
             encodeURIComponent(values.datasetSchemaName)
           );
-          if (response >= 200 && response <= 299) {
+          if (response.status >= 200 && response.status <= 299) {
             onUpdateData();
             setSubmitting(false);
           } else {

@@ -995,13 +995,14 @@
     "writeMessagePlaceholder": "Write your message",
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
-    "wrongWebLinkError": "Invalid URL. Please check it.",
+    "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
     "publicCountriesBreadcrumbs": "Public countries",
     "publicCountryBreadcrumbs": "Country",
     "eeaCountries": "EEA Member countries",
     "otherCountries": "Other countries and territories",
     "loadDataflowsByCountryError": "Error loading dataflows by country",
+    "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
     "countriesPageTitle": "Countries"
   }
 }

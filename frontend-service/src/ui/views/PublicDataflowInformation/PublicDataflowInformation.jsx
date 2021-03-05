@@ -155,7 +155,8 @@ export const PublicDataflowInformation = withRouter(
 
     const onLoadDataflowData = async () => {
       try {
-        setDataflowData(await DataflowService.getPublicDataflowData(dataflowId));
+        const { data } = await DataflowService.getPublicDataflowData(dataflowId);
+        setDataflowData(data);
       } catch (error) {
         console.error('error', error);
       } finally {
