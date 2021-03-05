@@ -29,7 +29,7 @@ const ReportnetLogin = ({ history }) => {
   const checkIsEmptyUserName = () =>
     userName.length === 0
       ? setErrors(previousErrors => {
-          return { ...previousErrors, userName: resources.messages.loginFormUserError };
+          return { ...previousErrors, userName: resources.messages['loginFormUserError'] };
         })
       : setErrors(previousErrors => {
           return { ...previousErrors, userName: '' };
@@ -38,7 +38,7 @@ const ReportnetLogin = ({ history }) => {
   const checkIsEmptyPassword = () =>
     password.length === 0
       ? setErrors(previousErrors => {
-          return { ...previousErrors, password: resources.messages.loginFormPasswordError };
+          return { ...previousErrors, password: resources.messages['loginFormPasswordError'] };
         })
       : setErrors(previousErrors => {
           return { ...previousErrors, password: '' };
@@ -66,7 +66,7 @@ const ReportnetLogin = ({ history }) => {
         userContext.onLogout();
         const errorResponse = error.response;
         if (!isUndefined(errorResponse) && errorResponse.status === 500) {
-          setLoginError(resources.messages.loginFormError);
+          setLoginError(resources.messages['loginFormError']);
           console.error(errorResponse.data.message);
         }
       }
@@ -80,7 +80,7 @@ const ReportnetLogin = ({ history }) => {
         <div className={`${styles.loginBox}`}>
           <div className={styles.logo}>
             <img src={logo} alt="Reportnet" />
-            <h1>{resources.messages.appName}</h1>
+            <h1>{resources.messages['appName']}</h1>
             {!isEmpty(loginError) && <div className={styles.error}>{loginError}</div>}
             {/* <Link to={routes.DATAFLOWS}>cast</Link> */}
           </div>
@@ -128,7 +128,7 @@ const ReportnetLogin = ({ history }) => {
                 disabled={isSubmitting}
                 layout="simple"
                 type="button"
-                label={resources.messages.login}
+                label={resources.messages['login']}
                 className="rp-btn primary"
                 onClick={() => onLogin()}
               />
