@@ -439,12 +439,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param dateRelease the date release
    * @throws EEAException the EEA exception
-   * @throws ParseException the parse exception
    */
   @Override
   @Async
   public void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease)
-      throws EEAException, ParseException {
+      throws EEAException {
 
     Long providerId = 0L;
     DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
@@ -477,7 +476,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Delete data of the same provider
     Date dateReleasing = null;
     if (StringUtils.isNotBlank(dateRelease)) {
-      dateReleasing = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
+      try {
+        dateReleasing = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
+      } catch (ParseException e) {
+        LOG_ERROR.error("Error parsing the date of the release. Message: {}", e.getMessage());
+        throw new EEAException(
+            "Error during the snapshot release. Problem parsing the date of the release");
+      }
     }
     deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection,
         dateReleasing);

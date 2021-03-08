@@ -1,7 +1,6 @@
 package org.eea.dataset.controller;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -241,7 +240,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease);
-    } catch (EEAException | ParseException e) {
+    } catch (EEAException e) {
       LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
     }
