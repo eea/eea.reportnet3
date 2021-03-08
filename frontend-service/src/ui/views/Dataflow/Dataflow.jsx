@@ -720,6 +720,57 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const getBigButtonList = () => {
+    if (isNil(representativeId)) {
+      return (
+        <BigButtonList
+          className="dataflow-big-buttons-help-step"
+          dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
+          handleRedirect={handleRedirect}
+          isLeadReporterOfCountry={isLeadReporterOfCountry}
+          onCleanUpReceipt={onCleanUpReceipt}
+          onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          onSaveName={onSaveName}
+          onShowManageReportersDialog={onShowManageReportersDialog}
+          onUpdateData={setIsDataUpdated}
+          setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
+          setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
+          setIsReceiptLoading={setIsReceiptLoading}
+          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+        />
+      );
+    } else {
+      if (representativeId === 'XX') {
+        return (
+          <BigButtonListRepresentative
+            dataflowState={dataflowState}
+            dataProviderId={dataProviderId}
+            handleRedirect={handleRedirect}
+            isLeadReporterOfCountry={isLeadReporterOfCountry}
+            match={match}
+            onCleanUpReceipt={onCleanUpReceipt}
+            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+            setIsReceiptLoading={setIsReceiptLoading}
+          />
+        );
+      }
+
+      return (
+        <BigButtonListRepresentative
+          dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
+          handleRedirect={handleRedirect}
+          isLeadReporterOfCountry={isLeadReporterOfCountry}
+          match={match}
+          onCleanUpReceipt={onCleanUpReceipt}
+          onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          setIsReceiptLoading={setIsReceiptLoading}
+        />
+      );
+    }
+  };
+
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
       <div className="rep-container">{children}</div>
@@ -738,35 +789,7 @@ const Dataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
 
-        {isNil(representativeId) ? (
-          <BigButtonList
-            className="dataflow-big-buttons-help-step"
-            dataflowState={dataflowState}
-            dataProviderId={dataProviderId}
-            handleRedirect={handleRedirect}
-            isLeadReporterOfCountry={isLeadReporterOfCountry}
-            onCleanUpReceipt={onCleanUpReceipt}
-            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
-            onSaveName={onSaveName}
-            onShowManageReportersDialog={onShowManageReportersDialog}
-            onUpdateData={setIsDataUpdated}
-            setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
-            setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
-            setIsReceiptLoading={setIsReceiptLoading}
-            setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-          />
-        ) : (
-          <BigButtonListRepresentative
-            dataflowState={dataflowState}
-            dataProviderId={dataProviderId}
-            handleRedirect={handleRedirect}
-            isLeadReporterOfCountry={isLeadReporterOfCountry}
-            match={match}
-            onCleanUpReceipt={onCleanUpReceipt}
-            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
-            setIsReceiptLoading={setIsReceiptLoading}
-          />
-        )}
+        {getBigButtonList()}
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
