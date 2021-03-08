@@ -4,7 +4,7 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return { ...state, ...payload };
 
     case 'HAS_PERMISSION':
-      return { ...state, isCustodian: payload.isCustodian };
+      return { ...state, isCustodian: payload.isCustodian, isNationalCoordinator: payload.isNationalCoordinator };
 
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };

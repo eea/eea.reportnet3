@@ -997,9 +997,19 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
+    "dataflowUsersList": "Dataflow users list",
+    "noUsers": "There are no users yet",
+    "noUsersWithSelectedParameters": "There are no user with the selected parameters",
+    "allDataflowsUserList": "All dataflows user list",
+    "allDataflowsUserListHeader": "All dataflows user list",
+    "email": "Email",
+    "dataflowId": "Dataflow id",
+    "user": "User",
+    "dataflowName": "Dataflow",
     "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
+    "loadUsersListError": "Error loading users list",
     "loginFormUserError": "A user name is required",
     "loginFormPasswordError": "A password is required",
-    "loginFormError":"Incorrect username or password"
+    "loginFormError": "Incorrect username or password"
   }
 }

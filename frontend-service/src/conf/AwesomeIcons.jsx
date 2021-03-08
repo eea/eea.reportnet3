@@ -81,6 +81,7 @@ import {
   faToggleOff,
   faTrashAlt,
   faUserCircle,
+  faUsers,
   faUserCog,
   faUsersCog,
   faUserShield,
@@ -365,6 +366,8 @@ export const AwesomeIcons = icon => {
       return faFileImage;
     case 'url':
       return faGlobeEurope;
+    case 'users':
+      return faUsers;
     case 'user-profile':
       return faUserCircle;
     case 'userConfig':
