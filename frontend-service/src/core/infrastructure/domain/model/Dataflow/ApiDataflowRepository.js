@@ -662,6 +662,11 @@ const reporting = async dataflowId => {
     let datasetName_B = b.datasetSchemaName;
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
   });
+  dataflow.designDatasets.sort((a, b) => {
+    let datasetName_A = a.datasetSchemaName;
+    let datasetName_B = b.datasetSchemaName;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
   reportingDataflowDTO.data = dataflow;
 
   return reportingDataflowDTO;
