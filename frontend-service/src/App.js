@@ -24,6 +24,7 @@ import { PublicFrontpage } from 'ui/views/PublicFrontpage';
 import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
 import { ScrollToTop } from 'ui/views/_components/ScrollToTop';
 import { Settings } from 'ui/views/Settings';
+import { TestDatasets } from 'ui/views/TestDatasets';
 
 import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
 import { DialogProvider } from 'ui/views/_functions/Providers/DialogProvider';
@@ -74,6 +75,7 @@ const App = () => {
                               <PrivateRoute exact path={routes.EU_DATASET} component={EUDataset} />
                               <Route exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />
                               <PrivateRoute exact path={routes.SETTINGS} component={Settings} />
+                              <PrivateRoute exact path={routes.TEST_DATASETS} component={TestDatasets} />
                             </Switch>
                           </ScrollToTop>
                         </Router>

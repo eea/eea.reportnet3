@@ -133,6 +133,15 @@ export const useBreadCrumbs = ({
     };
   };
 
+  const getTestDatasetsCrumb = () => {
+    return {
+      command: history.push(getUrl(routes.TEST_DATASETS, {}, true)),
+      href: getUrl(getUrl(routes.TEST_DATASETS, { dataflowId }, true)),
+      icon: 'dataset',
+      label: resources.messages['testDatasetBreadcrumbs']
+    };
+  };
+
   const setBreadCrumbs = () => {
     if (currentPage === CurrentPage.DATA_COLLECTION) {
       breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataCollectionCrumb()]);
@@ -200,8 +209,12 @@ export const useBreadCrumbs = ({
       breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb()]);
     }
 
-    if (currentPage == CurrentPage.PUBLIC_INDEX) {
+    if (currentPage === CurrentPage.PUBLIC_INDEX) {
       breadCrumbContext.add([]);
+    }
+
+    if (currentPage === CurrentPage.TEST_DATASETS) {
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getTestDatasetsCrumb()]);
     }
   };
 
