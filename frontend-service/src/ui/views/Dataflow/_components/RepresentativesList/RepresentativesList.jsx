@@ -5,7 +5,6 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
-import uuid from 'uuid';
 
 import styles from './RepresentativesList.module.scss';
 
@@ -58,7 +57,6 @@ const RepresentativesList = ({
     refresher: false,
     representativeIdToDelete: '',
     representatives: [],
-    representativesHaveError: [],
     selectedDataProviderGroup: null,
     unusedDataProvidersOptions: []
   };

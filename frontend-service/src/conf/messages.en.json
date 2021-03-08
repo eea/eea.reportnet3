@@ -1007,6 +1007,9 @@
     "user": "User",
     "dataflowName": "Dataflow",
     "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
-    "loadUsersListError": "Error loading users list"
+    "loadUsersListError": "Error loading users list",
+    "loginFormUserError": "A user name is required",
+    "loginFormPasswordError": "A password is required",
+    "loginFormError": "Incorrect username or password"
   }
 }
