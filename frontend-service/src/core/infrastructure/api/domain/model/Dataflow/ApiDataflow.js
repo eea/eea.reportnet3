@@ -52,6 +52,10 @@ export const apiDataflow = {
     return await HTTPRequester.post({ url });
   },
 
+  getAllDataflowsUserList: async () => {
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getAllDataflowsUserList) });
+  },
+
   getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
     const url = isCustodian
       ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
@@ -66,6 +70,10 @@ export const apiDataflow = {
 
   getPublicDataflowsByCountryCode: async countryCode => {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowsByCountryCode, { countryCode }) });
+  },
+
+  getUserList: async (dataflowId, representativeId) => {
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getUserList, { dataflowId, representativeId }) });
   },
 
   newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
