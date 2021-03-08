@@ -3,8 +3,12 @@ package org.eea.recordstore.controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -141,6 +145,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
+   * @param dateRelease the date release
    */
   @Override
   @HystrixCommand
@@ -148,7 +153,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
-      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset) {
+      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
+      @RequestParam(value = "dateRelease", required = false) String dateRelease) {
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
@@ -157,9 +163,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
       LOG.info("The user set on threadPropertiesManager is {}",
           ThreadPropertiesManager.getVariable("user"));
-      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset);
+      Date dateReleasing = null;
+      if (StringUtils.isNotBlank(dateRelease)) {
+        dateReleasing = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
+      }
+      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease);
       LOG.info("Snapshot created");
-    } catch (SQLException | IOException | RecordStoreAccessException | EEAException e) {
+    } catch (SQLException | IOException | RecordStoreAccessException | EEAException
+        | ParseException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
