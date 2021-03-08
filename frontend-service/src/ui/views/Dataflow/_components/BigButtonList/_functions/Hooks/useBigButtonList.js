@@ -529,7 +529,9 @@ const useBigButtonList = ({
       buttonClass: 'schemaDataset',
       buttonIcon: 'representative',
       caption: resources.messages['testDatasetBigButton'],
-      handleRedirect: () => handleRedirect(getUrl(routes.TEST_DATASETS, { dataflowId }, true)),
+      handleRedirect: () => {
+        handleRedirect(getUrl(routes.TEST_DATASETS, { dataflowId }, true));
+      },
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.testDatasetVisibility
     }
