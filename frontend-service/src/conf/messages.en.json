@@ -113,7 +113,7 @@
     "countryCode": "Country code",
     "create": "Create",
     "createDataCollection": "Create data collections",
-    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, QC's, snapshots, etc). You will be able to manage new reporters.",
+    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, snapshots, etc). You will be able to manage new lead reporters, QC checks and external configurations.",
     "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
     "createDataCollectionError": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "createDataCollectionInit": "Creating data collection",
@@ -999,6 +999,19 @@
     "yes": "Yes",
     "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
     "testDatasetBigButton": "Test",
-    "testDatasetBreadcrumbs": "Test Datasets"
+    "testDatasetBreadcrumbs": "Test Datasets",
+    "dataflowUsersList": "Dataflow users list",
+    "noUsers": "There are no users yet",
+    "noUsersWithSelectedParameters": "There are no user with the selected parameters",
+    "allDataflowsUserList": "All dataflows user list",
+    "allDataflowsUserListHeader": "All dataflows user list",
+    "email": "Email",
+    "dataflowId": "Dataflow id",
+    "user": "User",
+    "dataflowName": "Dataflow",
+    "loadUsersListError": "Error loading users list",
+    "loginFormUserError": "A user name is required",
+    "loginFormPasswordError": "A password is required",
+    "loginFormError": "Incorrect username or password"
   }
 }

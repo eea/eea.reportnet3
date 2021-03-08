@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
@@ -57,12 +57,9 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
 
   const changeUserProperties = async userProperties => {
     try {
-      const response = await UserService.updateAttributes(userProperties);
-      return response;
+      return await UserService.updateAttributes(userProperties);
     } catch (error) {
-      notificationContext.add({
-        type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
-      });
+      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });
     }
   };
 
@@ -146,9 +143,8 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
           filteredData.map((dataflow, i) => (
-            <>
+            <Fragment>
               <DataflowsItem
-                dataFetch={dataFetch}
                 isCustodian={isCustodian}
                 itemContent={dataflow}
                 key={dataflow.id}
@@ -156,7 +152,7 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
                 type={type}
               />
               {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
-            </>
+            </Fragment>
           ))
         ) : (
           <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
