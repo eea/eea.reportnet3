@@ -123,11 +123,12 @@ export const IntegrationsList = ({
       if (isCreating || isUpdating || integrationsList.isDeleting) {
         isLoading(false);
       }
-      const response = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
-      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: response, filteredData: response } });
-      integrationsList(response);
+      const integrations = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
+      integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: integrations, filteredData: integrations } });
+      integrationsList(integrations);
       refreshList(false);
     } catch (error) {
+      console.log(error);
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
       isLoading(false);
