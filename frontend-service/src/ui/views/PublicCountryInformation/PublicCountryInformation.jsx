@@ -165,7 +165,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         name: dataflow.name,
         obligation: dataflow.obligation,
         legalInstrument: dataflow.obligation.legalInstruments,
-        status: dataflow.status,
+        status: dataflow.status.charAt(0).toUpperCase() + dataflow.status.slice(1),
         expirationDate: dataflow.expirationDate,
         isReleased: isReleased,
         releasedDate: isReleased && dataflow.datasets[0].releaseDate,
