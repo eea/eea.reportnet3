@@ -1003,6 +1003,9 @@
     "otherCountries": "Other countries and territories",
     "loadDataflowsByCountryError": "Error loading dataflows by country",
     "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
-    "countriesPageTitle": "Countries"
+    "countriesPageTitle": "Countries",
+    "loginFormUserError": "A user name is required",
+    "loginFormPasswordError": "A password is required",
+    "loginFormError": "Incorrect username or password"
   }
 }
