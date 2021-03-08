@@ -1,9 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useRef, useState } from 'react';
-
-import * as Yup from 'yup';
-import { Formik, Field, Form } from 'formik';
-import { isEmpty } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
 
 import styles from './SnapshotSliderBar.module.scss';
 
@@ -12,16 +8,18 @@ import { Sidebar } from 'primereact/sidebar';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
-import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 
 const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
+  const [hasError, setHasError] = useState(false);
+  const [inputValue, setInputValue] = useState('');
   const [slideBarStyle, setSlideBarStyle] = useState({});
+
   const dialogContext = useContext(DialogContext);
-  const snapshotContext = useContext(SnapshotContext);
   const resources = useContext(ResourcesContext);
-  const form = useRef(null);
+  const snapshotContext = useContext(SnapshotContext);
 
   const isVisible = snapshotContext.isSnapshotsBarVisible;
   const setIsVisible = snapshotContext.setIsSnapshotsBarVisible;
@@ -63,13 +61,31 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
     });
   };
 
-  const snapshotValidationSchema = Yup.object().shape({
-    createSnapshotDescription: Yup.string().max(255, resources.messages['snapshotDescriptionValidationMax']).required()
-  });
+  const hasCorrectDescriptionLength = description => {
+    return description.length > 0 && description.length <= 255;
+  };
 
-  if (isVisible) {
-    form.current.resetForm();
-  }
+  const onConfirmClick = () => {
+    if (hasCorrectDescriptionLength(inputValue)) {
+      snapshotContext.snapshotDispatch({
+        type: 'CREATE_SNAPSHOT',
+        payload: {
+          description: inputValue
+        }
+      });
+      setInputValue('');
+      setHasError(false);
+    } else {
+      setHasError(true);
+    }
+  };
+
+  const onPressEnter = event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onConfirmClick();
+    }
+  };
 
   return (
     <Sidebar
@@ -85,49 +101,37 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
           <h3>{resources.messages.createSnapshotTitle}</h3>
         </div>
         <div className={`${styles.newContainer} ${styles.section}`}>
-          <Formik
-            ref={form}
-            initialValues={{ createSnapshotDescription: '' }}
-            validationSchema={snapshotValidationSchema}
-            onSubmit={values => {
-              snapshotContext.snapshotDispatch({
-                type: 'CREATE_SNAPSHOT',
-                payload: {
-                  description: values.createSnapshotDescription
-                }
-              });
-              values.createSnapshotDescription = '';
-            }}
-            render={({ errors, touched }) => (
-              <Form className={styles.createForm}>
-                <div
-                  className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
-                    !isEmpty(errors.createSnapshotDescription) && touched.createSnapshotDescription ? ' error' : ''
-                  }`}>
-                  <Field
-                    autoComplete="off"
-                    className={styles.formField}
-                    id="createSnapshotDescription"
-                    maxLength={255}
-                    name="createSnapshotDescription"
-                    placeholder={resources.messages.createSnapshotPlaceholder}
-                    type="text"
-                  />
-                  <label htmlFor="createSnapshotDescription" className="srOnly">
-                    {resources.messages['createSnapshotPlaceholder']}
-                  </label>
-                  <div className={styles.createButtonWrapper}>
-                    <Button
-                      className={`${styles.createSnapshotButton} rp-btn secondary`}
-                      tooltip={resources.messages.createSnapshotTooltip}
-                      type="submit"
-                      icon="plus"
-                    />
-                  </div>
-                </div>
-              </Form>
-            )}
-          />
+          <div className={styles.createForm}>
+            <div
+              className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
+                hasError ? ' error' : ''
+              }`}>
+              <input
+                autoComplete="off"
+                className={styles.formField}
+                id="createSnapshotDescription"
+                maxLength={255}
+                name="createSnapshotDescription"
+                onChange={e => setInputValue(e.target.value)}
+                placeholder={resources.messages.createSnapshotPlaceholder}
+                type="text"
+                onKeyDown={e => onPressEnter(e)}
+                value={inputValue}
+              />
+              <label htmlFor="createSnapshotDescription" className="srOnly">
+                {resources.messages['createSnapshotPlaceholder']}
+              </label>
+              <div className={styles.createButtonWrapper}>
+                <Button
+                  onClick={() => onConfirmClick()}
+                  className={`${styles.createSnapshotButton} rp-btn secondary`}
+                  tooltip={resources.messages.createSnapshotTooltip}
+                  type="submit"
+                  icon="plus"
+                />
+              </div>
+            </div>
+          </div>
         </div>
         {isLoadingSnapshotListData ? (
           <Spinner />

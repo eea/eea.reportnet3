@@ -61,10 +61,7 @@ const useStatusFilter = dataArray => {
 
   const [updatedState, statusDispatcher] = useReducer(reducer, initialState);
 
-  return {
-    updatedState,
-    statusDispatcher
-  };
+  return { statusDispatcher, updatedState };
 };
 
 export { useStatusFilter };

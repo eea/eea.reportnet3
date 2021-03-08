@@ -995,12 +995,26 @@
     "writeMessagePlaceholder": "Write your message",
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
-    "wrongWebLinkError": "Invalid URL. Please check it.",
+    "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
     "publicCountriesBreadcrumbs": "Public countries",
     "publicCountryBreadcrumbs": "Country",
     "eeaCountries": "EEA Member countries",
     "otherCountries": "Other countries and territories",
-    "loadDataflowsByCountryError": "Error loading dataflows by country"
+    "loadDataflowsByCountryError": "Error loading dataflows by country",
+    "dataflowUsersList": "Dataflow users list",
+    "noUsers": "There are no users yet",
+    "noUsersWithSelectedParameters": "There are no user with the selected parameters",
+    "allDataflowsUserList": "All dataflows user list",
+    "allDataflowsUserListHeader": "All dataflows user list",
+    "email": "Email",
+    "dataflowId": "Dataflow id",
+    "user": "User",
+    "dataflowName": "Dataflow",
+    "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
+    "loadUsersListError": "Error loading users list",
+    "loginFormUserError": "A user name is required",
+    "loginFormPasswordError": "A password is required",
+    "loginFormError": "Incorrect username or password"
   }
 }
