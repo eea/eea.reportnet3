@@ -48,17 +48,11 @@ export const PublicDataflowInformation = withRouter(
 
     const notificationContext = useContext(NotificationContext);
 
-    const { datasets } = dataflowData;
-
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
     useEffect(() => {
       onLoadDataflowData();
     }, []);
-
-    useEffect(() => {
-      parseDataflowData();
-    }, [datasets]);
 
     useEffect(() => {
       if (!themeContext.headerCollapse) {
@@ -157,6 +151,7 @@ export const PublicDataflowInformation = withRouter(
       try {
         const { data } = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
+        parseDataflowData(data.datasets);
       } catch (error) {
         console.error('error', error);
       } finally {
@@ -164,7 +159,7 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const parseDataflowData = () => {
+    const parseDataflowData = datasets => {
       const parsedDatasets = [];
 
       const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
