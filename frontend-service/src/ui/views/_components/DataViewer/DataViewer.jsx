@@ -593,13 +593,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         }
       } finally {
@@ -608,10 +602,15 @@ const DataViewer = withRouter(
     };
 
     const onConfirmDeleteAttachment = async () => {
-      const fileDeleted = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
-      if (fileDeleted) {
-        RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
-        setIsDeleteAttachmentVisible(false);
+      try {
+        const { status } = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
+
+        if (status >= 200 && status <= 299) {
+          RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
+          setIsDeleteAttachmentVisible(false);
+        }
+      } catch (error) {
+        console.error('error', error);
       }
     };
 
@@ -628,9 +627,7 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({
-            type: 'GENERIC_BLOCKED_ERROR'
-          });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
           const {
             dataflow: { name: dataflowName },
@@ -638,13 +635,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'DELETE_RECORD_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         }
       } finally {

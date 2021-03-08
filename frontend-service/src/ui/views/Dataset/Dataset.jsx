@@ -844,41 +844,37 @@ export const Dataset = withRouter(({ match, history }) => {
                 />
                 {!isEmpty(externalOperationsList.importOtherSystems) && (
                   <Menu
+                    id="importDataSetMenu"
                     model={importButtonsList}
+                    onShow={e => getPosition(e)}
                     popup={true}
                     ref={importMenuRef}
-                    id="importDataSetMenu"
-                    onShow={e => {
-                      getPosition(e);
-                    }}
                   />
                 )}
               </Fragment>
             )}
             <Button
-              id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
               icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+              id="buttonExportDataset"
               label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
               className={styles.exportSubmenu}
+              id="exportDataSetMenu"
               model={exportButtonsList}
+              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
-              id="exportDataSetMenu"
-              onShow={e => {
-                getPosition(e);
-              }}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
                 !hasWritePermissions ? null : 'p-button-animated-blink dataset-deleteDataset-help-step'
               }`}
+              disabled={!hasWritePermissions}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
-              disabled={!hasWritePermissions}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>

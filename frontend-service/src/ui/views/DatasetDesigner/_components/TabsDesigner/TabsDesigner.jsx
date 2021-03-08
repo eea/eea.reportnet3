@@ -216,26 +216,23 @@ export const TabsDesigner = withRouter(
 
     const addTable = async (header, tabIndex) => {
       try {
-        const response = await DatasetService.addTableDesign(datasetId, header);
+        const { data, status } = await DatasetService.addTableDesign(datasetId, header);
 
-        if (response.status < 200 || response.status > 299) {
-          console.error('Error during table Add');
-        } else {
+        if (status >= 200 && status <= 299) {
           const inmTabs = [...tabs];
-          inmTabs[tabIndex].tableSchemaId = response.data.idTableSchema;
-          inmTabs[tabIndex].recordId = response.data.recordSchema.idRecordSchema;
-          inmTabs[tabIndex].recordSchemaId = response.data.recordSchema.idRecordSchema;
+          inmTabs[tabIndex].tableSchemaId = data.idTableSchema;
+          inmTabs[tabIndex].recordId = data.recordSchema.idRecordSchema;
+          inmTabs[tabIndex].recordSchemaId = data.recordSchema.idRecordSchema;
           inmTabs[tabIndex].header = header;
           inmTabs[tabIndex].tableSchemaName = header;
           inmTabs[tabIndex].newTab = false;
           inmTabs[tabIndex].showContextMenu = false;
-          setActiveTableSchemaId(response.data.idTableSchema);
+          setActiveTableSchemaId(data.idTableSchema);
           setTabs(inmTabs);
           getIsTableCreated(true);
         }
       } catch (error) {
         console.error('Error during field Add: ', error);
-      } finally {
       }
     };
 

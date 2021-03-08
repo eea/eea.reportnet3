@@ -82,11 +82,15 @@ export const NationalSystemsField = ({
   };
 
   const onConfirmDeleteAttachment = async () => {
-    const isFileDeleted = await DatasetService.deleteFileData(datasetId, field.fieldId);
+    try {
+      const { status } = await DatasetService.deleteFileData(datasetId, field.fieldId);
 
-    if (isFileDeleted) {
-      onFillField(field, field.fieldSchemaId, '');
-      handleDialogs('deleteAttachment', false);
+      if (status >= 200 && status <= 299) {
+        onFillField(field, field.fieldSchemaId, '');
+        handleDialogs('deleteAttachment', false);
+      }
+    } catch (error) {
+      console.error('error', error);
     }
   };
 

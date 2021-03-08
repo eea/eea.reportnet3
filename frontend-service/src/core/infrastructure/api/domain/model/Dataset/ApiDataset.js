@@ -11,55 +11,37 @@ export const apiDataset = {
   },
 
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
-    const response = await HTTPRequester.post({
-      url: getUrl(DatasetConfig.addNewRecord, { datasetId: datasetId, tableSchemaId: tableSchemaId }),
+    return await HTTPRequester.post({
+      url: getUrl(DatasetConfig.addNewRecord, { datasetId, tableSchemaId }),
       data: datasetTableRecords
     });
-    return response;
   },
 
   addTableDesign: async (datasetId, tableSchemaName) => {
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(DatasetConfig.addTableDesign, { datasetId }),
-        data: { nameTableSchema: tableSchemaName, notEmpty: true }
-      });
-      return response;
-    } catch (error) {
-      console.error(`Error adding table to dataset design data: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.post({
+      url: getUrl(DatasetConfig.addTableDesign, { datasetId }),
+      data: { nameTableSchema: tableSchemaName, notEmpty: true }
+    });
   },
 
   deleteDataById: async datasetId => {
-    const response = await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteImportData, { datasetId }) });
-    return response;
+    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteImportData, { datasetId }) });
   },
 
   deleteFileData: async (datasetId, fieldId) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteFileData, { datasetId, fieldId })
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting file data: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteFileData, { datasetId, fieldId }) });
   },
 
   deleteRecordById: async (datasetId, recordId, deleteInCascade = false) => {
-    const response = await HTTPRequester.delete({
+    return await HTTPRequester.delete({
       url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
     });
-    return response;
   },
 
   deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
-    const response = await HTTPRequester.delete({
+    return await HTTPRequester.delete({
       url: getUrl(DatasetConfig.deleteRecordFieldDesign, { datasetId, fieldSchemaId })
     });
-    return response;
   },
 
   deleteSchemaById: async datasetId => {

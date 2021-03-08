@@ -93,10 +93,15 @@ export const WebformField = ({
   };
 
   const onConfirmDeleteAttachment = async () => {
-    const fileDeleted = await DatasetService.deleteFileData(datasetId, selectedFieldId);
-    if (fileDeleted) {
-      onFillField(record, selectedFieldSchemaId, '');
-      onToggleDeleteAttachmentDialogVisible(false);
+    try {
+      const { status } = await DatasetService.deleteFileData(datasetId, selectedFieldId);
+
+      if (status >= 200 && status <= 299) {
+        onFillField(record, selectedFieldSchemaId, '');
+        onToggleDeleteAttachmentDialogVisible(false);
+      }
+    } catch (error) {
+      console.error('error', error);
     }
   };
   const onFileDownload = async (fileName, fieldId) => {
