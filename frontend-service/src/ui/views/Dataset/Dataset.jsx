@@ -344,16 +344,12 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onConfirmDelete = async () => {
     try {
-      notificationContext.add({
-        type: 'DELETE_DATASET_DATA_INIT'
-      });
+      notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       setDeleteDialogVisible(false);
       await DatasetService.deleteDataById(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
         const {
           dataflow: { name: dataflowName },
@@ -361,12 +357,7 @@ export const Dataset = withRouter(({ match, history }) => {
         } = await getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName
-          }
+          content: { dataflowId, datasetId, dataflowName, datasetName }
         });
       }
     }

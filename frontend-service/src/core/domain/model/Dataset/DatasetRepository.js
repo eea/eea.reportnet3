@@ -1,6 +1,7 @@
 import { ApiDatasetRepository } from 'core/infrastructure/domain/model/Dataset/ApiDatasetRepository';
 
 export const DatasetRepository = {
+  addRecordFieldDesign: () => Promise.reject('[DatasetRepository#addRecordFieldDesign] must be implemented'),
   addRecordsById: () => Promise.reject('[DatasetRepository#addRecordsById] must be implemented'),
   addTableDesign: () => Promise.reject('[DatasetRepository#addTableDesign] must be implemented'),
   createValidation: () => Promise.reject('[DatasetRepository#createValidation] must be implemented'),

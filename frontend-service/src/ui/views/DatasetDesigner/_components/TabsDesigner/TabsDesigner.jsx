@@ -277,36 +277,32 @@ export const TabsDesigner = withRouter(
     };
 
     const deleteTable = async deletedTableSchemaId => {
-      const tableDeleted = await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
-      if (tableDeleted) {
-        const inmTabs = [...tabs];
-        const deletedTabIndx = TabsUtils.getIndexByTableProperty(deletedTableSchemaId, inmTabs, 'tableSchemaId');
-        inmTabs.splice(deletedTabIndx, 1);
-        inmTabs.forEach(tab => {
-          if (tab.addTab) {
-            tab.index = -1;
-            tab.tableSchemaId = '';
+      try {
+        const response = await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
+        if (response.status >= 200 && response.status <= 299) {
+          const inmTabs = [...tabs];
+          const deletedTabIndx = TabsUtils.getIndexByTableProperty(deletedTableSchemaId, inmTabs, 'tableSchemaId');
+          inmTabs.splice(deletedTabIndx, 1);
+          inmTabs.forEach(tab => {
+            if (tab.addTab) {
+              tab.index = -1;
+              tab.tableSchemaId = '';
+            }
+          });
+          if (tableSchemaId === deletedTableSchemaId) {
+            setActiveTableSchemaId(inmTabs[0].tableSchemaId);
           }
-        });
-        if (tableSchemaId === deletedTableSchemaId) {
-          setActiveTableSchemaId(inmTabs[0].tableSchemaId);
+          onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
+          setTabs(inmTabs);
         }
-        onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
-        setTabs(inmTabs);
-      } else {
-        console.error('There has been an error while deleting the tab');
+      } catch (error) {
+        console.error('error', error);
       }
     };
 
     const errorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button
-          label={resources.messages['ok']}
-          icon="check"
-          onClick={() => {
-            setIsErrorDialogVisible(false);
-          }}
-        />
+        <Button label={resources.messages['ok']} icon="check" onClick={() => setIsErrorDialogVisible(false)} />
       </div>
     );
 

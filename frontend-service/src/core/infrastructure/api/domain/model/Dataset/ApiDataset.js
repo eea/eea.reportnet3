@@ -4,16 +4,10 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiDataset = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(DatasetConfig.addNewRecordFieldDesign, { datasetId }),
-        data: datasetTableRecordField
-      });
-      return response;
-    } catch (error) {
-      console.error(`Error adding record to dataset design data: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.post({
+      url: getUrl(DatasetConfig.addNewRecordFieldDesign, { datasetId }),
+      data: datasetTableRecordField
+    });
   },
 
   addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
@@ -69,8 +63,7 @@ export const apiDataset = {
   },
 
   deleteSchemaById: async datasetId => {
-    const response = await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteDataSchema, { datasetId }) });
-    return response.status;
+    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteDataSchema, { datasetId }) });
   },
 
   deleteTableDataById: async (datasetId, tableId) => {
@@ -81,15 +74,7 @@ export const apiDataset = {
   },
 
   deleteTableDesign: async (datasetId, tableSchemaId) => {
-    try {
-      const response = await HTTPRequester.delete({
-        url: getUrl(DatasetConfig.deleteTableDesign, { datasetId, tableSchemaId })
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error deleting dataset table design data: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableDesign, { datasetId, tableSchemaId }) });
   },
 
   downloadDatasetFileData: async (dataflowId, dataProviderId, fileName) => {
