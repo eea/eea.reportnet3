@@ -14,11 +14,13 @@ import styles from './PublicCountryInformation.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 import { Title } from 'ui/views/_components/Title';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -57,7 +59,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   }, [themeContext.headerCollapse]);
 
   const getHeader = fieldHeader => {
-    console.log('fieldHeader', fieldHeader);
     let header;
     switch (fieldHeader) {
       case 'name':
@@ -96,16 +97,16 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   };
 
   const downloadFileBodyColumn = rowData => {
-    if (rowData.publicsFileName != 0) {
+    if (rowData.publicFilesNames != 0) {
       return (
         <div className={styles.filesContainer}>
-          {rowData.publicsFileName.map(publicFileName => (
-            <span className={styles.downloadIcon}>
-              {/* onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}> */}
-              <FontAwesomeIcon icon={AwesomeIcons('xlsx')} data-tip data-for={publicFileName} />
-              <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
-                {/* <span>{getPublicFileName(publicFileName)}</span> */}
-                <span>{publicFileName}</span>
+          {rowData.publicFilesNames.map(publicFileName => (
+            <span
+              className={styles.downloadIcon}
+              onClick={() => onFileDownload(rowData.id, publicFileName.dataProviderId, publicFileName.fileName)}>
+              <FontAwesomeIcon icon={AwesomeIcons('xlsx')} data-tip data-for={publicFileName.fileName} />
+              <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName.fileName} place="top">
+                <span>{getPublicFileName(publicFileName.fileName)}</span>
               </ReactTooltip>
             </span>
           ))}
@@ -138,6 +139,24 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     </div>
   );
 
+  const onFileDownload = async (dataflowId, dataProviderId, fileName) => {
+    try {
+      const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+
+      DownloadFile(fileContent, `${fileName}.xlsx`);
+    } catch (error) {
+      if (error.response.status === 404) {
+        notificationContext.add({
+          type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
+        });
+      } else {
+        notificationContext.add({
+          type: 'DOWNLOAD_DATASET_FILE_ERROR'
+        });
+      }
+    }
+  };
+
   const onLoadPublicCountryInformation = async () => {
     try {
       const publicData = await DataflowService.getPublicDataflowsByCountryCode(countryCode);
@@ -154,10 +173,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     const parsedDataflows = [];
     dataflows.forEach(dataflow => {
       const isReleased = dataflow.datasets.some(dataset => dataset.isReleased);
-      const publicsFileName = [];
+      const publicFilesNames = [];
       dataflow.datasets.forEach(dataset => {
         if (!isNil(dataset.publicFileName)) {
-          publicsFileName.push(dataset.publicFileName);
+          publicFilesNames.push({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName });
         }
       });
       const parsedDataflow = {
@@ -169,7 +188,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         expirationDate: dataflow.expirationDate,
         isReleased: isReleased,
         releasedDate: isReleased && dataflow.datasets[0].releaseDate,
-        publicsFileName: publicsFileName
+        publicFilesNames: publicFilesNames
       };
       parsedDataflows.push(parsedDataflow);
     });
@@ -186,7 +205,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'status', index: 5 },
       { id: 'isReleased', index: 6 },
       { id: 'releasedDate', index: 7 },
-      { id: 'publicsFileName', index: 8 }
+      { id: 'publicFilesNames', index: 8 }
     ];
 
     return dataflows
@@ -204,7 +223,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'isReleased') template = isReleasedBodyColumn;
         if (field === 'legalInstrument') template = legalInstrumentBodyColumn;
         if (field === 'obligation') template = obligationBodyColumn;
-        if (field === 'publicsFileName') template = downloadFileBodyColumn;
+        if (field === 'publicFilesNames') template = downloadFileBodyColumn;
         return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
       });
 

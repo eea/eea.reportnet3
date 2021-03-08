@@ -378,10 +378,10 @@ const getPublicDataflowsByCountryCode = async countryCode => {
           {
             dataSetName: 'Germany',
             isReleased: true,
-            dateReleased: 1604012000,
+            dateReleased: 1604052000,
             dataProviderId: 5,
             nameDatasetSchema: 'schema1',
-            publicFileName: 'schema1'
+            publicFileName: 'Spain-schema1'
           },
           {
             dataSetName: 'Spain',
@@ -394,10 +394,10 @@ const getPublicDataflowsByCountryCode = async countryCode => {
           {
             dataSetName: 'France',
             isReleased: true,
-            dateReleased: 1604012000,
+            dateReleased: 1604032000,
             dataProviderId: 2,
             nameDatasetSchema: 'schema2',
-            publicFileName: 'schema2'
+            publicFileName: 'France-schema2'
           },
           {
             dataSetName: 'Germany',
@@ -412,27 +412,29 @@ const getPublicDataflowsByCountryCode = async countryCode => {
             isReleased: false,
             dateReleased: null,
             dataProviderId: 1,
-            nameDatasetSchema: 'schema2'
+            nameDatasetSchema: 'schema2',
+            publicFileName: null
           },
           {
             dataSetName: 'France',
             isReleased: true,
-            dateReleased: 1604013000,
+            dateReleased: 1604023000,
             dataProviderId: 2,
             nameDatasetSchema: 'schema3',
-            publicFileName: 'schema3'
+            publicFileName: 'Austria-schema3'
           },
           {
             dataSetName: 'Spain',
             isReleased: false,
             dateReleased: null,
             dataProviderId: 1,
-            nameDatasetSchema: 'schema3'
+            nameDatasetSchema: 'schema3',
+            publicFileName: null
           }
         ],
         description: 'd',
         name: 'dataflow',
-        deadlineDate: 1604012000,
+        deadlineDate: 1606012000,
         status: 'closed',
         obligation: {
           obligationId: 671,
@@ -458,15 +460,15 @@ const getPublicDataflowsByCountryCode = async countryCode => {
         status: 'open'
       },
       {
-        id: 70,
+        id: 71,
         reportingDatasets: [
           {
             dataSetName: 'Germany',
             isReleased: true,
-            dateReleased: 1604012000,
+            dateReleased: 1604019000,
             dataProviderId: 5,
             nameDatasetSchema: 'schema1',
-            publicFileName: 'schema1'
+            publicFileName: 'Italy-schema1'
           },
           {
             dataSetName: 'Spain',
@@ -479,10 +481,10 @@ const getPublicDataflowsByCountryCode = async countryCode => {
           {
             dataSetName: 'France',
             isReleased: true,
-            dateReleased: 1604012000,
+            dateReleased: 1604014000,
             dataProviderId: 2,
             nameDatasetSchema: 'schema2',
-            publicFileName: 'schema2'
+            publicFileName: 'France-schema2'
           },
           {
             dataSetName: 'Germany',
@@ -497,7 +499,8 @@ const getPublicDataflowsByCountryCode = async countryCode => {
             isReleased: false,
             dateReleased: null,
             dataProviderId: 1,
-            nameDatasetSchema: 'schema2'
+            nameDatasetSchema: 'schema2',
+            publicFileName: null
           },
           {
             dataSetName: 'France',
@@ -505,14 +508,15 @@ const getPublicDataflowsByCountryCode = async countryCode => {
             dateReleased: 1604013000,
             dataProviderId: 2,
             nameDatasetSchema: 'schema3',
-            publicFileName: 'schema3'
+            publicFileName: 'Spain-schema3'
           },
           {
             dataSetName: 'Spain',
             isReleased: false,
             dateReleased: null,
             dataProviderId: 1,
-            nameDatasetSchema: 'schema3'
+            nameDatasetSchema: 'schema3',
+            publicFileName: 'Austria-schema3'
           }
         ],
         description: 'd',
@@ -546,26 +550,6 @@ const getPublicDataflowsByCountryCode = async countryCode => {
   return parseCountry(publicDataflowsByCountryCodeDTO);
 };
 
-const parseCountry = countryDTO => {
-  return new Country({
-    countryCode: countryDTO.twoLetter,
-    id: countryDTO.spatialId,
-    name: countryDTO.name,
-    dataflows: parseDataflowListDTO(countryDTO.dataflows)
-  });
-};
-
-const parseDataflowListDTO = dataflowsDTO => {
-  if (!isNull(dataflowsDTO) && !isUndefined(dataflowsDTO)) {
-    const dataflows = [];
-    dataflowsDTO.forEach(dataflowDTO => {
-      dataflows.push(parseDataflowDTO(dataflowDTO));
-    });
-    return dataflows;
-  }
-  return;
-};
-
 const getPublicDataflowData = async dataflowId => {
   const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
   const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
@@ -594,6 +578,26 @@ const getUserList = async (dataflowId, representativeId) => {
 
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   return await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
+};
+
+const parseCountry = countryDTO => {
+  return new Country({
+    countryCode: countryDTO.twoLetter,
+    id: countryDTO.spatialId,
+    name: countryDTO.name,
+    dataflows: parseDataflowListDTO(countryDTO.dataflows)
+  });
+};
+
+const parseDataflowListDTO = dataflowsDTO => {
+  if (!isNull(dataflowsDTO) && !isUndefined(dataflowsDTO)) {
+    const dataflows = [];
+    dataflowsDTO.forEach(dataflowDTO => {
+      dataflows.push(parseDataflowDTO(dataflowDTO));
+    });
+    return dataflows;
+  }
+  return;
 };
 
 const parseDataflowDTOs = dataflowDTOs => {
