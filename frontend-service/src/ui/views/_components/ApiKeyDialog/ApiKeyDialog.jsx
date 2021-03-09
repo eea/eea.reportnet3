@@ -42,8 +42,8 @@ const ApiKeyDialog = ({
   const onGetApiKey = async () => {
     setIsKeyLoading(true);
     try {
-      const responseApiKey = await DataflowService.getApiKey(dataflowId, dataProviderId, isCustodian);
-      setApiKey(responseApiKey);
+      const { data } = await DataflowService.getApiKey(dataflowId, dataProviderId, isCustodian);
+      setApiKey(data);
     } catch (error) {
       console.error('Error on getting Api key:', error);
     } finally {
@@ -53,10 +53,9 @@ const ApiKeyDialog = ({
 
   const onGenerateApiKey = async () => {
     setIsKeyLoading(true);
-
     try {
-      const responseApiKey = await DataflowService.generateApiKey(dataflowId, dataProviderId, isCustodian);
-      setApiKey(responseApiKey);
+      const { data } = await DataflowService.generateApiKey(dataflowId, dataProviderId, isCustodian);
+      setApiKey(data);
     } catch (error) {
       console.error('Error on generating Api key:', error);
     } finally {
