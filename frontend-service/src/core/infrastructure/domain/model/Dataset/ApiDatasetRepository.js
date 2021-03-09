@@ -599,8 +599,8 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.required = record.required;
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.validExtensions = record.validExtensions;
-  const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
-  return recordUpdated;
+
+  return await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
 
 const updateRecordsById = async (datasetId, record, updateInCascade) => {

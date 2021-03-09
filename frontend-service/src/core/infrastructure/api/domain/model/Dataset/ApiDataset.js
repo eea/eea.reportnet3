@@ -246,11 +246,10 @@ export const apiDataset = {
   },
 
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) => {
-    const response = await HTTPRequester.update({
+    return await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDatasetFeedbackStatus),
       data: { dataflowId, datasetId, message, status: feedbackStatus }
     });
-    return response;
   },
 
   updateDatasetSchemaById: async (datasetId, datasetSchema) => {
@@ -267,24 +266,17 @@ export const apiDataset = {
   },
 
   updateFieldById: async (datasetId, datasetTableRecords, updateInCascade = false) => {
-    const response = await HTTPRequester.update({
+    return await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableDataField, { datasetId, updateInCascade }),
       data: datasetTableRecords
     });
-    return response;
   },
 
   updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateRecordFieldDesign, { datasetId }),
-        data: datasetTableRecordField
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error updating dataset record design: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateRecordFieldDesign, { datasetId }),
+      data: datasetTableRecordField
+    });
   },
 
   updateRecordsById: async (datasetId, datasetTableRecords, updateInCascade = false) => {
