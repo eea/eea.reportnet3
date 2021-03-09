@@ -118,9 +118,13 @@ export const NationalSystemsField = ({
   };
 
   const onFileDownload = async (fileName, fieldId) => {
-    const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+    try {
+      const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
 
-    DownloadFile(fileContent, fileName);
+      DownloadFile(data, fileName);
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const onFillField = (field, option, value) => {

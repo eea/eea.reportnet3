@@ -49,10 +49,7 @@ export const apiDataset = {
   },
 
   deleteTableDataById: async (datasetId, tableId) => {
-    const response = await HTTPRequester.delete({
-      url: getUrl(DatasetConfig.deleteImportTable, { datasetId: datasetId, tableId: tableId })
-    });
-    return response;
+    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteImportTable, { datasetId, tableId }) });
   },
 
   deleteTableDesign: async (datasetId, tableSchemaId) => {
@@ -75,15 +72,7 @@ export const apiDataset = {
   },
 
   downloadFileData: async (datasetId, fieldId) => {
-    try {
-      const response = await HTTPRequester.download({
-        url: getUrl(DatasetConfig.downloadFileData, { datasetId, fieldId })
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Error getting file data: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.download({ url: getUrl(DatasetConfig.downloadFileData, { datasetId, fieldId }) });
   },
 
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {

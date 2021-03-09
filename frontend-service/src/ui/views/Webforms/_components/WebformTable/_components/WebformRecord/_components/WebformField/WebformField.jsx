@@ -104,10 +104,15 @@ export const WebformField = ({
       console.error('error', error);
     }
   };
-  const onFileDownload = async (fileName, fieldId) => {
-    const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
 
-    DownloadFile(fileContent, fileName);
+  const onFileDownload = async (fileName, fieldId) => {
+    try {
+      const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
+
+      DownloadFile(data, fileName);
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const onFilter = async (filter, field) => {
