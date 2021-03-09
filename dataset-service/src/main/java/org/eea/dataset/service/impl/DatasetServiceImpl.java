@@ -60,6 +60,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -273,6 +274,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The pk catalogue repository. */
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
+
+  /** The Test dataset repository. */
+  @Autowired
+  private TestDatasetRepository testDatasetRepository;
 
   /**
    * Process file.
@@ -2896,7 +2901,10 @@ public class DatasetServiceImpl implements DatasetService {
       type = DatasetTypeEnum.COLLECTION;
     } else if (dataSetMetabaseRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.EUDATASET;
+    } else if (testDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.TEST;
     }
+
     return type;
   }
 
@@ -3428,7 +3436,8 @@ public class DatasetServiceImpl implements DatasetService {
 
     LOG.info("Statistics save to datasetId {}.", datasetId);
 
-    if (DatasetTypeEnum.REPORTING.equals(getDatasetType(datasetId))) {
+    if (DatasetTypeEnum.REPORTING.equals(getDatasetType(datasetId))
+        || DatasetTypeEnum.TEST.equals(getDatasetType(datasetId))) {
       DesignDataset originDatasetDesign =
           designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
       if (null != originDatasetDesign) {
