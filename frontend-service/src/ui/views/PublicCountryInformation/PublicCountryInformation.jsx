@@ -5,6 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -42,12 +43,16 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const [contentStyles, setContentStyles] = useState({});
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
+  const [firstRow, setFirstRow] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [numberRows, setNumberRows] = useState(10);
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState(0);
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode, history });
 
   useEffect(() => {
-    onLoadPublicCountryInformation();
+    onLoadPublicCountryInformation(sortOrder, firstRow, numberRows, sortField);
   }, []);
 
   useEffect(() => {
@@ -130,9 +135,16 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadPublicCountryInformation = async () => {
+  const onLoadPublicCountryInformation = async (sortOrder, firstRow, numberRows, sortField, isChangedPage) => {
     try {
-      const response = await DataflowService.getPublicDataflowsByCountryCode(countryCode);
+      let pageNum = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
+      const response = await DataflowService.getPublicDataflowsByCountryCode(
+        countryCode,
+        sortOrder,
+        pageNum,
+        numberRows,
+        sortField
+      );
       parseDataflows(response);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
@@ -156,7 +168,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         name: dataflow.name,
         obligation: dataflow.obligation,
         legalInstrument: dataflow.obligation.legalInstruments,
-        status: dataflow.status.charAt(0).toUpperCase() + dataflow.status.slice(1),
+        status: capitalize(dataflow.status),
         expirationDate: dataflow.expirationDate,
         isReleased: isReleased,
         releasedDate: isReleased && dataflow.datasets[0].releaseDate,
@@ -197,7 +209,15 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
-        return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
+        return (
+          <Column
+            body={template}
+            field={field}
+            header={getHeader(field)}
+            key={field}
+            sortable={field === 'publicsFileName' ? false : true}
+          />
+        );
       });
 
     return fieldColumns;
