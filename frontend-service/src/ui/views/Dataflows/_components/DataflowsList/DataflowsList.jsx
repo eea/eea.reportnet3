@@ -21,7 +21,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
 
-const DataflowsList = ({ className, content = [], dataFetch, description, isCustodian, title, type }) => {
+const DataflowsList = ({ className, content = [], description, isCustodian, title }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -149,7 +149,6 @@ const DataflowsList = ({ className, content = [], dataFetch, description, isCust
                 itemContent={dataflow}
                 key={dataflow.id}
                 reorderDataflows={reorderDataflows}
-                type={type}
               />
               {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
             </Fragment>
