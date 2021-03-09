@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -44,6 +45,9 @@ public class DataFlowVO implements Serializable {
 
   /** The eu datasets. */
   private List<EUDatasetVO> euDatasets;
+
+  /** The est dataset. */
+  private List<TestDatasetVO> testDatasets;
 
   /** The description. */
   private String description;

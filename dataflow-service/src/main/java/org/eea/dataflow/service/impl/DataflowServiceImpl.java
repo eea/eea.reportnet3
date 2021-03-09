@@ -31,6 +31,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -141,6 +142,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
+
+  /** The dataset Test controller zuul. */
+  @Autowired
+  private TestDatasetControllerZuul testDataSetControllerZuul;
 
 
   /**
@@ -768,6 +773,8 @@ public class DataflowServiceImpl implements DataflowService {
         .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
     // and the eu datasets
     datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
+    // add the test datasets
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
@@ -790,6 +797,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Add the EU datasets
     dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the Test datasets
+    dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
         .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives
