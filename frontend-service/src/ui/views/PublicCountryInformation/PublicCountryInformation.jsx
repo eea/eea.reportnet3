@@ -40,6 +40,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
+  const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [publicCountryInformation, setPublicCountryInformation] = useState([]);
@@ -49,6 +50,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   useEffect(() => {
     onLoadPublicCountryInformation();
   }, []);
+
+  useEffect(() => {
+    !isNil(countryCode) && getCountryName();
+  }, [countryCode]);
 
   useEffect(() => {
     if (!themeContext.headerCollapse) {
@@ -215,6 +220,17 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       .map(orderedField => orderedField.id);
   };
 
+  const getCountryName = () => {
+    if (!isNil(config.countriesByGroup)) {
+      const allCountries = config.countriesByGroup['eeaCountries'].concat(config.countriesByGroup['otherCountries']);
+      allCountries.forEach(country => {
+        if (countryCode === country.code) {
+          setCountryName(country.name);
+        }
+      });
+    }
+  };
+
   const renderColumns = dataflows => {
     const fieldColumns = getOrderedColumns(Object.keys(dataflows[0]))
       .filter(key => !key.includes('id'))
@@ -244,12 +260,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         {!isLoading ? (
           !isEmpty(dataflows) ? (
             <>
-              <Title
-                icon={'clone'}
-                iconSize={'4rem'}
-                subtitle={resources.messages['dataflows']}
-                title={publicCountryInformation.name?.charAt(0).toUpperCase() + publicCountryInformation.name?.slice(1)}
-              />
+              <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
               <div className={styles.countriesList}>
                 <DataTable
                   autoLayout={true}
