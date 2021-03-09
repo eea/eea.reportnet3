@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
@@ -28,6 +31,7 @@ import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.service.impl.DatasetMetabaseServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -135,6 +139,10 @@ public class DatasetMetabaseServiceTest {
   /** The data flow controller zuul. */
   @Mock
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The test dataset repository. */
+  @Mock
+  private TestDatasetRepository testDatasetRepository;
 
   /** The foreign relations. */
   private ForeignRelations foreignRelations;
@@ -544,6 +552,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(testDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     Assert.assertNull(datasetMetabaseService.getDatasetType(1L));
   }
 

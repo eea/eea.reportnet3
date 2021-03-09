@@ -241,6 +241,10 @@ public enum EventType {
   RELEASE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_completed_key",
       true),
 
+  /** The release provider completed event. */
+  RELEASE_PROVIDER_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "dataset_provider_released_completed_key", true),
+
   /** The release snapshot onebyone completed event. */
   RELEASE_ONEBYONE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "dataset_onebyone_released_completed_key", true),

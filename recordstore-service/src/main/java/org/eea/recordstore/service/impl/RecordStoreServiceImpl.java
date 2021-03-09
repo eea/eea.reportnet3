@@ -313,14 +313,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
-   *
+   * @param dateRelease the date release
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
-  public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset)
-      throws SQLException, IOException, RecordStoreAccessException {
+  public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
+      String dateRelease) throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 

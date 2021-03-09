@@ -13,18 +13,17 @@ import { StatusList } from 'ui/views/_components/StatusList';
 import { DataflowService } from 'core/services/Dataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatusFilter';
 
 export const ReleasedDatasetsDashboard = dataflowId => {
   const resources = useContext(ResourcesContext);
-  const themeContext = useContext(ThemeContext);
+
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
   const [releasedDashboardData, setReleasedDashboardData] = useState([]);
 
-  const { updatedState, statusDispatcher } = useStatusFilter(releasedDashboardData);
+  const { statusDispatcher, updatedState } = useStatusFilter(releasedDashboardData);
 
   useEffect(() => {
     onLoadDashboard();
@@ -32,8 +31,8 @@ export const ReleasedDatasetsDashboard = dataflowId => {
 
   const onLoadDashboard = async () => {
     try {
-      const releasedData = await DataflowService.datasetsReleasedStatus(dataflowId.dataflowId);
-      setReleasedDashboardData(buildReleasedDashboardObject(releasedData));
+      const { data } = await DataflowService.datasetsReleasedStatus(dataflowId.dataflowId);
+      setReleasedDashboardData(buildReleasedDashboardObject(data));
     } catch (error) {
       onErrorLoadingDashboard(error);
     } finally {

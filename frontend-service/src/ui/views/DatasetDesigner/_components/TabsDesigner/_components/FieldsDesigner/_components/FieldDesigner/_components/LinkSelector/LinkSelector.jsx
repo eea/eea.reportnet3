@@ -77,7 +77,7 @@ const LinkSelector = withRouter(
         setIsLoading(true);
         const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
         setIsLoading(false);
-        setDatasetSchemas(datasetSchemasDTO);
+        setDatasetSchemas(datasetSchemasDTO.data);
       };
 
       getDatasetSchemas();

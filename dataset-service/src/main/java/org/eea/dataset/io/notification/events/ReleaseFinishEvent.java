@@ -60,7 +60,6 @@ public class ReleaseFinishEvent implements NotificableEventHandler {
     notification.put("dataflowId", dataflowId);
     notification.put("dataflowName", notificationVO.getDataflowName());
     notification.put("dataProvider", dataProviderLabel);
-    notification.put("providerId", notificationVO.getProviderId());
     return notification;
   }
 
