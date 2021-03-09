@@ -82,7 +82,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'releasedDate':
         header = resources.messages['releasedDate'];
         break;
-      case 'publicsFileName':
+      case 'publicFilesNames':
         header = resources.messages['files'];
         break;
       default:
