@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
 
 export const PublicCard = ({
+  card,
   animation,
   dataflowId,
   dueDate,
@@ -18,7 +19,8 @@ export const PublicCard = ({
   onCardClick,
   isReleasable,
   subtitle,
-  title
+  title,
+  externalCard
 }) => {
   const idTooltip = uuid.v4();
 
@@ -30,10 +32,24 @@ export const PublicCard = ({
     </a>
   );
 
-  return (
-    <div
-      className={`${styles.card} ${animation ? styles.clickable : undefined}`}
-      onClick={() => onCardClick(dataflowId)}>
+  const externalCardLayout = children => {
+    return (
+      <a className={styles.card} target="_blank" href={card.dataFlowUrl}>
+        {children}
+      </a>
+    );
+  };
+
+  const internalCardLayout = children => {
+    return (
+      <div className={`${styles.card} ${animation ? styles.clickable : ''}`} onClick={() => onCardClick(dataflowId)}>
+        {children}
+      </div>
+    );
+  };
+
+  const getCardBody = () => {
+    return (
       <div className={styles.content}>
         <div className={styles.text}>
           <h3 className={styles.title} className={styles.link} title={title.text}>
@@ -88,8 +104,13 @@ export const PublicCard = ({
           </span>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  if (externalCard) {
+    return externalCardLayout(getCardBody());
+  }
+  return internalCardLayout(getCardBody());
 };
 
 PublicCard.propTypes = {
