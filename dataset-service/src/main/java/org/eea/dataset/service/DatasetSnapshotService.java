@@ -47,11 +47,12 @@ public interface DatasetSnapshotService {
    * Adds the snapshot.
    *
    * @param idDataset the id dataset
-   * @param description the description
-   * @param released the released
+   * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
+   * @param dateRelease the date release
    */
-  void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination);
+  void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination,
+      String dateRelease);
 
   /**
    * Removes the snapshot.
@@ -91,9 +92,10 @@ public interface DatasetSnapshotService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
+   * @param dateRelease the date release
    * @throws EEAException the EEA exception
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot) throws EEAException;
+  void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease) throws EEAException;
 
 
   /**
