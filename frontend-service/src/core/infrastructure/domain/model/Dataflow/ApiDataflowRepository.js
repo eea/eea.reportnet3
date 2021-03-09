@@ -98,13 +98,7 @@ const all = async userData => {
     }
   }
 
-  const groupByUserRequestStatus = CoreUtils.onGroupBy('userRequestStatus');
-
-  const dataflowsData = groupByUserRequestStatus(dataflows);
-
-  const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
-  Object.keys(dataflowsData).forEach(key => (allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key])));
-  dataflowsDTO.data = allDataflows;
+  dataflowsDTO.data = parseDataflowDTOs(dataflows);
 
   return dataflowsDTO;
 };
@@ -425,7 +419,6 @@ const parseDataflowDTO = dataflowDTO =>
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
-    userRequestStatus: dataflowDTO.userRequestStatus,
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
@@ -658,6 +651,11 @@ const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
   const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
   dataflow.datasets.sort((a, b) => {
+    let datasetName_A = a.datasetSchemaName;
+    let datasetName_B = b.datasetSchemaName;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
+  dataflow.designDatasets.sort((a, b) => {
     let datasetName_A = a.datasetSchemaName;
     let datasetName_B = b.datasetSchemaName;
     return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;

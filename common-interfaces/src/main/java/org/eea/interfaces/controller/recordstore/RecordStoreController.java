@@ -70,11 +70,13 @@ public interface RecordStoreController {
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
+   * @param dateRelease the date release
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
   void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
-      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset);
+      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
+      @RequestParam(value = "dateRelease", required = false) String dateRelease);
 
 
 
