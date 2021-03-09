@@ -280,8 +280,8 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getFileExtensions = async () => {
     try {
-      const response = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
-      setExternalOperationsList(ExtensionUtils.groupOperations('operation', response));
+      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);      
+      setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
@@ -313,13 +313,10 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getDataflowName = async () => {
     try {
-      const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
-      setDataflowName(dataflowData.name);
+      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
+      setDataflowName(data.name);
     } catch (error) {
-      notificationContext.add({
-        type: 'DATAFLOW_DETAILS_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
   };
 
@@ -518,8 +515,8 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onLoadDataflow = async () => {
     try {
-      const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      const dataset = dataflow.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      const { data } = await DataflowService.reporting(match.params.dataflowId);
+      const dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       setIsDatasetReleased(dataset[0].isReleased);
 
       setDataset(dataset[0]);
@@ -530,12 +527,7 @@ export const Dataset = withRouter(({ match, history }) => {
       } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'REPORTING_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { dataflowId, datasetId, dataflowName, datasetName }
       });
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));

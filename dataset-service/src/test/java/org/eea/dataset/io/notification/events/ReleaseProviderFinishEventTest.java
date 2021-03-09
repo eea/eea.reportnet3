@@ -17,12 +17,12 @@ import org.mockito.MockitoAnnotations;
 /**
  * The Class ReleaseBlockedEventTest.
  */
-public class ReleaseFinishEventTest {
+public class ReleaseProviderFinishEventTest {
 
 
   /** The release blocked event. */
   @InjectMocks
-  private ReleaseFinishEvent releaseFinishEvent;
+  private ReleaseProviderFinishEvent releaseProviderFinishEvent;
 
 
   /** The dataset metabase controller. */
@@ -48,7 +48,8 @@ public class ReleaseFinishEventTest {
    */
   @Test
   public void getEventTypeTest() {
-    Assert.assertEquals(EventType.RELEASE_COMPLETED_EVENT, releaseFinishEvent.getEventType());
+    Assert.assertEquals(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
+        releaseProviderFinishEvent.getEventType());
   }
 
   /**
@@ -59,8 +60,8 @@ public class ReleaseFinishEventTest {
    */
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(4,
-        releaseFinishEvent.getMap(
+    Assert.assertEquals(5,
+        releaseProviderFinishEvent.getMap(
             NotificationVO.builder().user("user").datasetId(1L).datasetName("datasetName").build())
             .size());
   }
@@ -77,7 +78,7 @@ public class ReleaseFinishEventTest {
     dataProviderVO.setLabel("SPAIN");
     Mockito.when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
     Mockito.when(representativeControllerZuul.findDataProviderById(1L)).thenReturn(dataProviderVO);
-    Assert.assertEquals(4, releaseFinishEvent
+    Assert.assertEquals(5, releaseProviderFinishEvent
         .getMap(NotificationVO.builder().user("user").providerId(1L).datasetId(1L).build()).size());
   }
 }

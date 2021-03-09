@@ -339,8 +339,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const getFileExtensions = async () => {
     try {
-      const response = await IntegrationService.allExtensionsOperations(dataflowId, designerState.datasetSchemaId);
-      const externalOperations = ExtensionUtils.groupOperations('operation', response);
+      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, designerState.datasetSchemaId);
+      const externalOperations = ExtensionUtils.groupOperations('operation', allExtensions);
       designerDispatch({
         type: 'LOAD_EXTERNAL_OPERATIONS',
         payload: {
@@ -619,10 +619,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         });
       };
       const getDatasetSchemas = async () => {
-        designerDispatch({
-          type: 'LOAD_DATASET_SCHEMAS',
-          payload: { schemas: await DataflowService.getAllSchemas(dataflowId) }
-        });
+        const { data } = await DataflowService.getAllSchemas(dataflowId);
+        designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: data } });
       };
 
       getDatasetSchemaId();

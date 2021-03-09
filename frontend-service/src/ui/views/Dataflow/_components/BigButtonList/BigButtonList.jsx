@@ -110,7 +110,7 @@ export const BigButtonList = ({
 
   const [providerId, setProviderId] = useState(null);
   const [showPublicInfo, setShowPublicInfo] = useState(true);
-  const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
+  const hasExpirationDate = new Date(dataflowState.obligations?.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
   const dataflowId = dataflowState.id;
@@ -152,7 +152,7 @@ export const BigButtonList = ({
 
   useEffect(() => {
     getExpirationDate();
-  }, [dataflowState.obligations.expirationDate]);
+  }, [dataflowState.obligations?.expirationDate]);
 
   const checkShowPublicInfo = (
     <div style={{ float: 'left' }}>
@@ -230,7 +230,7 @@ export const BigButtonList = ({
 
   const getExpirationDate = () => {
     setDataCollectionDueDate(
-      !isNil(dataflowState.obligations.expirationDate) &&
+      !isNil(dataflowState.obligations?.expirationDate) &&
         new Date(dataflowState.obligations.expirationDate) > new Date()
         ? new Date(dataflowState.obligations.expirationDate)
         : null
@@ -327,7 +327,6 @@ export const BigButtonList = ({
   const onLoadEuDatasetIntegration = async datasetSchemaId => {
     try {
       const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
-
       setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });

@@ -20,14 +20,12 @@ import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
-import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
-import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -44,7 +42,6 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -90,10 +87,6 @@ public class DataFlowServiceImplTest {
   /** The dataflow repository. */
   @Mock
   private DataflowRepository dataflowRepository;
-
-  /** The user request repository. */
-  @Mock
-  private UserRequestRepository userRequestRepository;
 
   /** The contributor repository. */
   @Mock
@@ -286,7 +279,6 @@ public class DataFlowServiceImplTest {
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
     dfVO.setObligation(obligation);
-    dfVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
     List<DataFlowVO> dataflowsVO = new ArrayList<>();
     dataflowsVO.add(dfVO);
 
@@ -332,21 +324,6 @@ public class DataFlowServiceImplTest {
     assertEquals("fail", dataflowsVO, dataflowServiceImpl.getDataflows(Mockito.any()));
   }
 
-  /**
-   * Gets the pending by user.
-   *
-   * @return the pending by user
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void getPendingByUser() throws EEAException {
-    when(dataflowRepository.findByStatusAndUserRequester(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<>());
-    dataflowServiceImpl.getPendingByUser(Mockito.any(), Mockito.any());
-    assertEquals("fail", new ArrayList<>(),
-        dataflowServiceImpl.getPendingByUser(Mockito.any(), Mockito.any()));
-  }
 
   /**
    * Gets the completed empty.
@@ -380,46 +357,6 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted("1L", pageable);
     assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
-  }
-
-
-  /**
-   * Update user request status.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateUserRequestStatus() throws EEAException {
-    Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-    Optional<UserRequest> ur = Optional.of(new UserRequest());
-    Set<Dataflow> dfs = new HashSet<>();
-    Dataflow df = new Dataflow();
-    df.setId(1L);
-    dfs.add(df);
-    ur.get().setDataflows(dfs);
-
-    when(userRequestRepository.findById(Mockito.anyLong())).thenReturn(ur);
-    Mockito.doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
-        Mockito.any());
-
-    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
-    Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Update user request status 2.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateUserRequestStatus2() throws EEAException {
-    Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.REJECTED);
-    Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
   }
 
 
