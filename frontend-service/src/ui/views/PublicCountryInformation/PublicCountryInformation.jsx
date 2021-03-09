@@ -52,7 +52,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode, history });
 
   useEffect(() => {
-    onLoadPublicCountryInformation(sortOrder, firstRow, numberRows, sortField);
+    onLoadPublicCountryInformation(sortOrder, sortField, firstRow, numberRows);
   }, []);
 
   useEffect(() => {
@@ -117,6 +117,13 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     return splittedFileName[1];
   };
 
+  const onChangePage = event => {
+    const isChangedPage = true;
+    setNumberRows(event.rows);
+    setFirstRow(event.first);
+    onLoadPublicCountryInformation(sortOrder, sortField, event.first, event.rows, isChangedPage);
+  };
+
   const onFileDownload = async (dataflowId, dataProviderId, fileName) => {
     try {
       const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
@@ -135,7 +142,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadPublicCountryInformation = async (sortOrder, firstRow, numberRows, sortField, isChangedPage) => {
+  const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows, isChangedPage) => {
     try {
       let pageNum = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
       const response = await DataflowService.getPublicDataflowsByCountryCode(
@@ -215,7 +222,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             field={field}
             header={getHeader(field)}
             key={field}
-            sortable={field === 'publicsFileName' ? false : true}
+            sortable={field === 'publicFilesNames' ? false : true}
           />
         );
       });
@@ -296,9 +303,11 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               <div className={styles.countriesList}>
                 <DataTable
                   autoLayout={true}
+                  first={firstRow}
+                  onPage={onChangePage}
                   paginator={true}
                   paginatorRight={
-                    <span>{`${resources.messages['totalRecords']}  ${dataflows.length} ${resources.messages[
+                    <span>{`${resources.messages['totalRecords']} ${dataflows.length} ${resources.messages[
                       'records'
                     ].toLowerCase()}`}</span>
                   }
