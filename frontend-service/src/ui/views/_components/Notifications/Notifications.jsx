@@ -73,7 +73,11 @@ const Notifications = () => {
           ));
 
       if (userContext.userProps.notificationSound) {
-        playNotificationSound(440.0, 'sine');
+        if (notification.type === 'error') {
+          playNotificationSound(187.31, 'triangle');
+        } else if (notification.type === 'success') {
+          playNotificationSound(440.0, 'sine');
+        }
       }
 
       growlRef.current.show({
