@@ -46,7 +46,7 @@ public class DataFlowVO implements Serializable {
   /** The eu datasets. */
   private List<EUDatasetVO> euDatasets;
 
-  /** The est dataset. */
+  /** The test dataset. */
   private List<TestDatasetVO> testDatasets;
 
   /** The description. */

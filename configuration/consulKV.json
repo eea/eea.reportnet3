@@ -468,6 +468,18 @@
     "value": "ZmFsc2U="
   },
   {
+    "key": "config/apiGateway/zuul.routes.testdataset.path",
+    "value": "L3Rlc3REYXRhc2V0Lyoq"
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.testdataset.serviceId",
+    "value": "dGVzdERhdGFzZXQ="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.testdataset.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
     "key": "config/apiGateway/zuul.routes.datasetmetabase.path",
     "value": "L2RhdGFzZXRtZXRhYmFzZS8qKg=="
   },

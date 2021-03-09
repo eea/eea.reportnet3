@@ -6,9 +6,8 @@ import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
 
 
-
 /**
- * The Interface EUDatasetMapper.
+ * The Interface TestDatasetMapper.
  */
 @Mapper(componentModel = "spring")
 public interface TestDatasetMapper extends IMapper<TestDataset, TestDatasetVO> {
