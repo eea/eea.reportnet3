@@ -44,6 +44,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -590,6 +591,33 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowPublicList;
   }
 
+
+  /**
+   * Gets the user roles.
+   *
+   * @param dataProviderId the data provider id
+   * @return the user roles
+   */
+  @Override
+  public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList) {
+    List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
+    for (DataFlowVO dataflowVO : dataflowList) {
+      if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+        DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
+        dataflowUserRoleVO.setDataflowId(dataflowVO.getId());
+        dataflowUserRoleVO.setDataflowName(dataflowVO.getName());
+        dataflowUserRoleVO.setUsers(userManagementControllerZull
+            .getUserRolesByDataflowAndCountry(dataflowVO.getId(), dataProviderId));
+        if (!dataflowUserRoleVO.getUsers().isEmpty()) {
+          dataflowUserRoleVOList.add(dataflowUserRoleVO);
+        }
+      }
+    }
+    return dataflowUserRoleVOList;
+
+  }
+
+
   /**
    * Gets the public dataflow by id.
    *
@@ -743,9 +771,13 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-    dataflowVO.setReportingDatasets(
-        datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+      dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
+          .findReportingDataSetIdByDataflowId(id).stream()
+          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    } else {
+      dataflowVO.setReportingDatasets(new ArrayList<>());
+    }
     // Add the design datasets
     dataflowVO.setDesignDatasets(
         datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id).stream()

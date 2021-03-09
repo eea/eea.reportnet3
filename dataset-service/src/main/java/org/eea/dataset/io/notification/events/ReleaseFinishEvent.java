@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -20,6 +22,10 @@ public class ReleaseFinishEvent implements NotificableEventHandler {
   /** The dataset service. */
   @Autowired
   private DatasetService datasetService;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Gets the event type.
@@ -43,10 +49,17 @@ public class ReleaseFinishEvent implements NotificableEventHandler {
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
 
+    String dataProviderLabel = "";
+    if (null != notificationVO.getProviderId()) {
+      DataProviderVO dataProviderVO =
+          representativeControllerZuul.findDataProviderById(notificationVO.getProviderId());
+      dataProviderLabel = dataProviderVO.getLabel();
+    }
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
     notification.put("dataflowName", notificationVO.getDataflowName());
+    notification.put("dataProvider", dataProviderLabel);
     notification.put("providerId", notificationVO.getProviderId());
     return notification;
   }

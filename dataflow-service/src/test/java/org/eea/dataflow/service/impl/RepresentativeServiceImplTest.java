@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -598,6 +599,11 @@ public class RepresentativeServiceImplTest {
     representativeServiceImpl.updateRepresentativeVisibilityRestrictions(1L, 1L, true);
     Mockito.verify(representativeRepository, times(1)).updateRepresentativeVisibilityRestrictions(
         Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean());
+  }
+
+  @Test
+  public void findDataProvidersByCodeTest() {
+    assertNotNull("is null", representativeServiceImpl.findDataProvidersByCode("ES"));
   }
 
 }

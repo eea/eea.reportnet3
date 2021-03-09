@@ -78,6 +78,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+    String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
 
     Long nextData = datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
     if (null != nextData) {
@@ -88,7 +89,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       Date ahora = new Date();
       SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
       createSnapshotVO.setDescription("Release " + formateador.format(ahora));
-      datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null);
+
+      datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease);
     } else {
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
 

@@ -63,7 +63,6 @@ const UserConfiguration = () => {
       return (
         <div className={`p-clearfix ${styles.basemapItem}`}>
           <span style={{ margin: '.5em .25em 0 0.5em' }}>{option.label}</span>
-          {console.log(option.label)}
           <img alt={option.label} src={loadImage(option.label)} />
         </div>
       );
