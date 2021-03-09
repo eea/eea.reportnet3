@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  * The Class RestoreDatasetSnapshotFailedEvent.
  */
 @Component
-public class ReleaseFinishEvent implements NotificableEventHandler {
+public class ReleaseProviderFinishEvent implements NotificableEventHandler {
 
 
   /** The dataset service. */
@@ -34,7 +34,7 @@ public class ReleaseFinishEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.RELEASE_COMPLETED_EVENT;
+    return EventType.RELEASE_PROVIDER_COMPLETED_EVENT;
   }
 
   /**
@@ -60,6 +60,7 @@ public class ReleaseFinishEvent implements NotificableEventHandler {
     notification.put("dataflowId", dataflowId);
     notification.put("dataflowName", notificationVO.getDataflowName());
     notification.put("dataProvider", dataProviderLabel);
+    notification.put("representativeId", notificationVO.getProviderId());
     return notification;
   }
 
