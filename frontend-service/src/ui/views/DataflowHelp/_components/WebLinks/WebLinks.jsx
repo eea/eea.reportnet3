@@ -18,6 +18,7 @@ import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { TextUtils } from 'ui/views/_functions/Utils';
 
+import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
 import { WebLinkService } from 'core/services/WebLink';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -93,10 +94,7 @@ export const WebLinks = ({
       }),
     url: Yup.string()
       .lowercase()
-      .matches(
-        /^(sftp:\/\/www\.|sftp:\/\/|ftp:\/\/www\.|ftp:\/\/|http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,63}(:[0-9]{1,5})?(\/.*)?$/,
-        resources.messages['urlError']
-      )
+      .matches(RegularExpressions['url'], resources.messages['urlError'])
       .required(' ')
       .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
         return isNil(
