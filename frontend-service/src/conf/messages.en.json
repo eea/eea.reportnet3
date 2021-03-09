@@ -1010,6 +1010,12 @@
     "loadUsersListError": "Error loading users list",
     "loginFormUserError": "A user name is required",
     "loginFormPasswordError": "A password is required",
-    "loginFormError": "Incorrect username or password"
+    "loginFormError": "Incorrect username or password",
+    "userNotificationSound": "Notification sound",
+    "userSettingsNotificationSoundSubtitle": "Configure if you want to play a sound on each notification.",
+    "noSound": "No sound",
+    "sound": "Sound",
+    "toggleNotificationSoundOff": "Switch off notification sound",
+    "toggleNotificationSoundOn": "Switch on notification sound"
   }
 }

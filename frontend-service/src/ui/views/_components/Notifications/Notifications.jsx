@@ -11,6 +11,7 @@ import { Growl } from 'primereact/growl';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Notifications = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -18,6 +19,7 @@ const Notifications = () => {
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   let growlRef = useRef();
 
@@ -70,6 +72,10 @@ const Notifications = () => {
               }}></div>
           ));
 
+      if (userContext.userProps.notificationSound) {
+        playNotificationSound(440.0, 'sine');
+      }
+
       growlRef.current.show({
         severity: notification.type,
         summary: resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
@@ -83,6 +89,18 @@ const Notifications = () => {
       notificationContext.clearToShow();
     }
   }, [notificationContext.toShow]);
+
+  const playNotificationSound = (frequency, type) => {
+    var context = new AudioContext();
+    var o = context.createOscillator();
+    var g = context.createGain();
+    o.type = type;
+    o.connect(g);
+    o.frequency.value = frequency;
+    g.connect(context.destination);
+    o.start(0);
+    g.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 1);
+  };
 
   const recalculatePosition = () => {
     if (headerHeight === 180) {

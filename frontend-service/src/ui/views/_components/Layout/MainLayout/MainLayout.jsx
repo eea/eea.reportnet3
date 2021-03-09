@@ -102,6 +102,7 @@ const MainLayout = ({ children, isPublic = false }) => {
       userContext.onChangeDateFormat(userConfiguration.dateFormat);
       userContext.onChangePinnedDataflows(userConfiguration.pinnedDataflows);
       userContext.onChangeRowsPerPage(parseInt(userConfiguration.rowsPerPage));
+      userContext.onToggleNotificationSound(userConfiguration.notificationSound);
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
       userContext.onToggleVisualTheme(userConfiguration.visualTheme);
       userContext.onUserFileUpload(userConfiguration.userImage);

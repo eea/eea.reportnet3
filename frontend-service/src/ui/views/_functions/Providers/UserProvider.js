@@ -14,6 +14,7 @@ const userSettingsDefaultState = {
     basemapLayer: { label: 'Topographic', value: 'Topographic' },
     dateFormat: 'YYYY-MM-DD',
     listView: true,
+    notificationSound: false,
     pinnedDataflows: [],
     rowsPerPage: 10,
     showLogoutConfirmation: true,
@@ -80,6 +81,10 @@ export const UserProvider = ({ children }) => {
 
         onToggleAmPm24hFormat: hoursFormat => {
           userDispatcher({ type: 'TOGGLE_DATE_FORMAT_AM_PM_24H', payload: hoursFormat });
+        },
+
+        onToggleNotificationSound: notificationSound => {
+          userDispatcher({ type: 'TOGGLE_NOTIFICATION_SOUND', payload: notificationSound });
         },
 
         onToggleLogoutConfirm: logoutConfirmation => {

@@ -180,6 +180,30 @@ const UserConfiguration = () => {
     </Fragment>
   );
 
+  const notificationSoundSwitch = (
+    <Fragment>
+      <span className={styles.switchTextInput}>{resources.messages['noSound']}</span>
+      <InputSwitch
+        checked={userContext.userProps.notificationSound}
+        onChange={async e => {
+          userContext.onToggleNotificationSound(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.notificationSound = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onToggleNotificationSound(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.notificationSound === true
+            ? resources.messages['toggleNotificationSoundOff']
+            : resources.messages['toggleNotificationSoundOn']
+        }
+      />
+      <span className={styles.switchTextInput}>{resources.messages['sound']}</span>
+    </Fragment>
+  );
+
   const chooseTypeViewSwitch = (
     <Fragment>
       <span className={styles.switchTextInput}>{`${resources.messages['magazineView']}`}</span>
@@ -276,6 +300,16 @@ const UserConfiguration = () => {
     />
   );
 
+  const soundConfiguration = (
+    <TitleWithItem
+      title={resources.messages['userNotificationSound']}
+      icon="sound"
+      iconSize="2rem"
+      subtitle={resources.messages['userSettingsNotificationSoundSubtitle']}
+      items={[notificationSoundSwitch]}
+    />
+  );
+
   const rowsInPaginationConfiguration = (
     <TitleWithItem
       title={resources.messages['userRowsInPagination']}
@@ -321,6 +355,7 @@ const UserConfiguration = () => {
         {themeConfiguration}
         {viewConfiguration}
         {logoutConfiguration}
+        {soundConfiguration}
         {basemapLayerConfiguration}
       </div>
     </React.Fragment>
