@@ -473,7 +473,7 @@
   },
   {
     "key": "config/apiGateway/zuul.routes.testdataset.serviceId",
-    "value": "dGVzdERhdGFzZXQ="
+    "value": "ZGF0YXNldA=="
   },
   {
     "key": "config/apiGateway/zuul.routes.testdataset.stripPrefix",
