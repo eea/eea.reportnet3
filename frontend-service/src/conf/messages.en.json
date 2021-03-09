@@ -1016,6 +1016,7 @@
     "loadUsersListError": "Error loading users list",
     "loginFormUserError": "A user name is required",
     "loginFormPasswordError": "A password is required",
-    "loginFormError": "Incorrect username or password"
+    "loginFormError": "Incorrect username or password",
+    "restrictFromPublicField": "Restrict from public"
   }
 }

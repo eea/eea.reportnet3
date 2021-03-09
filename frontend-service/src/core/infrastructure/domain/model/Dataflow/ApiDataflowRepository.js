@@ -368,74 +368,43 @@ const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
 const getPublicDataflowsByCountryCode = async countryCode => {
   // const publicDataflowsByCountryCodeDTO = await apiDataflow.getPublicDataflowsByCountryCode(countryCode);
   const publicDataflowsByCountryCodeDTO = {
-    twoLetter: 'SP',
-    spatialId: 1,
-    name: 'Spain',
-    dataflows: [
+    data: [
       {
         id: 70,
         reportingDatasets: [
           {
             dataSetName: 'Germany',
             isReleased: true,
-            dateReleased: 1604052000,
+            dateReleased: 1604062000,
             dataProviderId: 5,
-            nameDatasetSchema: 'schema1',
-            publicFileName: 'Spain-schema1'
-          },
-          {
-            dataSetName: 'Spain',
-            isReleased: false,
-            dateReleased: null,
-            dataProviderId: 1,
-            nameDatasetSchema: 'schema1',
-            publicFileName: null
-          },
-          {
-            dataSetName: 'France',
-            isReleased: true,
-            dateReleased: 1604032000,
-            dataProviderId: 2,
-            nameDatasetSchema: 'schema2',
-            publicFileName: 'France-schema2'
+            nameDatasetSchema: 'schema1.1',
+            publicFileName: 'germany-schema1.1',
+            restrictFromPublic: false
           },
           {
             dataSetName: 'Germany',
-            isReleased: false,
-            dateReleased: null,
-            dataProviderId: 5,
-            nameDatasetSchema: 'schema2',
-            publicFileName: null
-          },
-          {
-            dataSetName: 'Spain',
-            isReleased: false,
-            dateReleased: null,
-            dataProviderId: 1,
-            nameDatasetSchema: 'schema2',
-            publicFileName: null
-          },
-          {
-            dataSetName: 'France',
             isReleased: true,
-            dateReleased: 1604023000,
-            dataProviderId: 2,
-            nameDatasetSchema: 'schema3',
-            publicFileName: 'Austria-schema3'
+            dateReleased: 1604062000,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema1.2',
+            publicFileName: 'germany-schema1.2',
+            restrictFromPublic: false
           },
           {
-            dataSetName: 'Spain',
-            isReleased: false,
-            dateReleased: null,
-            dataProviderId: 1,
-            nameDatasetSchema: 'schema3',
-            publicFileName: null
+            dataSetName: 'Germany',
+            isReleased: true,
+            dateReleased: 1604062000,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema1.3',
+            publicFileName: 'germany-schema1.3',
+            restrictFromPublic: false
           }
         ],
         description: 'd',
         name: 'dataflow',
         deadlineDate: 1606012000,
-        status: 'closed',
+        status: 'DRAFT',
+        releasable: false,
         obligation: {
           obligationId: 671,
           oblTitle: '(C) Information on the assessment regime (Article 7)',
@@ -456,8 +425,65 @@ const getPublicDataflowsByCountryCode = async countryCode => {
           issues: null,
           reportFreq: null,
           reportFreqDetail: null
-        },
-        status: 'open'
+        }
+      },
+      {
+        id: 70,
+        reportingDatasets: [
+          {
+            dataSetName: 'Germany',
+            isReleased: true,
+            dateReleased: 1604052000,
+            dataProviderId: 5,
+            nameDatasetSchema: 'germany-schema1',
+            publicFileName: null,
+            restrictFromPublic: false
+          },
+          {
+            dataSetName: 'Germany',
+            isReleased: true,
+            dateReleased: 1604052000,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema2',
+            publicFileName: null,
+            restrictFromPublic: false
+          },
+          {
+            dataSetName: 'Germany',
+            isReleased: true,
+            dateReleased: 1604052000,
+            dataProviderId: 5,
+            nameDatasetSchema: 'schema3',
+            publicFileName: 'germany-schema3',
+            restrictFromPublic: false
+          }
+        ],
+        description: 'd',
+        name: 'dataflow',
+        deadlineDate: 1606012000,
+        status: 'CLOSED',
+        releasable: false,
+        obligation: {
+          obligationId: 671,
+          oblTitle: '(C) Information on the assessment regime (Article 7)',
+          description:
+            'Article 7\r\nAssessment regime\r\n1. In accordance with the procedure referred to in Article 5 of this Decision, Member States shall make available the information set out in Part C of Annex II on the assessment regime to be applied in the following calendar year for each pollutant within individual zones and agglomerations in accordance with Article 4 of Directive 2004/107/EC and Articles 5 and 9 of Directive 2008/50/EC.\r\n2. Member States shall make the information referred to in paragraph 1 available to the Commission no later than 31 December of each calendar year. Member States may indicate that there have been no changes to the information previously made available.',
+          validSince: 1324076400000,
+          validTo: 253402210800000,
+          comment: null,
+          nextDeadline: 1601503200000,
+          legalInstrument: {
+            sourceId: '650',
+            sourceTitle:
+              '2011/850/EU: Commission Implementing Decision of 12 December 2011 laying down rules for Directives 2004/107/EC and 2008/50/EC of the European Parliament and of the Council as regards the reciprocal exchange of information and reporting on ambient air quality',
+            sourceAlias: 'Air Quality Directive IPR'
+          },
+          client: null,
+          countries: null,
+          issues: null,
+          reportFreq: null,
+          reportFreqDetail: null
+        }
       },
       {
         id: 71,
@@ -465,26 +491,11 @@ const getPublicDataflowsByCountryCode = async countryCode => {
           {
             dataSetName: 'Germany',
             isReleased: true,
-            dateReleased: 1604019000,
+            dateReleased: 1604052000,
             dataProviderId: 5,
             nameDatasetSchema: 'schema1',
-            publicFileName: 'Italy-schema1'
-          },
-          {
-            dataSetName: 'Spain',
-            isReleased: false,
-            dateReleased: null,
-            dataProviderId: 1,
-            nameDatasetSchema: 'schema1',
-            publicFileName: null
-          },
-          {
-            dataSetName: 'France',
-            isReleased: true,
-            dateReleased: 1604014000,
-            dataProviderId: 2,
-            nameDatasetSchema: 'schema2',
-            publicFileName: 'France-schema2'
+            publicFileName: null,
+            restrictFromPublic: true
           },
           {
             dataSetName: 'Germany',
@@ -492,37 +503,24 @@ const getPublicDataflowsByCountryCode = async countryCode => {
             dateReleased: null,
             dataProviderId: 5,
             nameDatasetSchema: 'schema2',
-            publicFileName: null
+            publicFileName: null,
+            restrictFromPublic: true
           },
           {
-            dataSetName: 'Spain',
+            dataSetName: 'Germany',
             isReleased: false,
             dateReleased: null,
-            dataProviderId: 1,
-            nameDatasetSchema: 'schema2',
-            publicFileName: null
-          },
-          {
-            dataSetName: 'France',
-            isReleased: true,
-            dateReleased: 1604013000,
-            dataProviderId: 2,
+            dataProviderId: 5,
             nameDatasetSchema: 'schema3',
-            publicFileName: 'Spain-schema3'
-          },
-          {
-            dataSetName: 'Spain',
-            isReleased: false,
-            dateReleased: null,
-            dataProviderId: 1,
-            nameDatasetSchema: 'schema3',
-            publicFileName: 'Austria-schema3'
+            publicFileName: null,
+            restrictFromPublic: true
           }
         ],
         description: 'd',
         name: 'dataflow',
         deadlineDate: 1604012000,
-        status: 'open',
+        status: 'CLOSED',
+        releasable: false,
         obligation: {
           obligationId: 671,
           oblTitle: '(C) Information on the assessment regime (Article 7)',
@@ -547,7 +545,8 @@ const getPublicDataflowsByCountryCode = async countryCode => {
       }
     ]
   };
-  return parseCountry(publicDataflowsByCountryCodeDTO);
+
+  return parseDataflowListDTO(publicDataflowsByCountryCodeDTO.data);
 };
 
 const getPublicDataflowData = async dataflowId => {
@@ -578,15 +577,6 @@ const getUserList = async (dataflowId, representativeId) => {
 
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   return await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
-};
-
-const parseCountry = countryDTO => {
-  return new Country({
-    countryCode: countryDTO.twoLetter,
-    id: countryDTO.spatialId,
-    name: countryDTO.name,
-    dataflows: parseDataflowListDTO(countryDTO.dataflows)
-  });
 };
 
 const parseDataflowListDTO = dataflowsDTO => {
@@ -703,6 +693,7 @@ const parseDatasetDTO = datasetDTO =>
     isReleasing: datasetDTO.releasing,
     publicFileName: datasetDTO.publicFileName,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
+    restrictFromPublic: datasetDTO.restrictFromPublic,
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });

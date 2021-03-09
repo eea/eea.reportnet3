@@ -43,7 +43,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [publicCountryInformation, setPublicCountryInformation] = useState([]);
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode, history });
 
@@ -102,7 +101,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   };
 
   const downloadFileBodyColumn = rowData => {
-    if (rowData.publicFilesNames != 0) {
+    if (!rowData.restrictFromPublic) {
       return (
         <div className={styles.filesContainer}>
           {rowData.publicFilesNames.map(publicFileName => (
@@ -117,6 +116,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           ))}
         </div>
       );
+    } else {
+      return <div>{resources.messages['restrictFromPublicField']}</div>;
     }
   };
 
@@ -164,9 +165,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const onLoadPublicCountryInformation = async () => {
     try {
-      const publicData = await DataflowService.getPublicDataflowsByCountryCode(countryCode);
-      setPublicCountryInformation(publicData);
-      parseDataflows(publicData.dataflows);
+      const response = await DataflowService.getPublicDataflowsByCountryCode(countryCode);
+      parseDataflows(response);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
     } finally {
@@ -193,6 +193,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         expirationDate: dataflow.expirationDate,
         isReleased: isReleased,
         releasedDate: isReleased && dataflow.datasets[0].releaseDate,
+        restrictFromPublic: dataflow.datasets[0].restrictFromPublic,
         publicFilesNames: publicFilesNames
       };
       parsedDataflows.push(parsedDataflow);
