@@ -8,7 +8,6 @@ import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -120,8 +119,6 @@ public class CreateConnectionEventTest {
     data.put("dataset_id", "dataset_1");
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
-    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
     createConnectionCommand.execute(eeaEventVO);
     Mockito.verify(datasetService, times(1)).initializeDataset(Mockito.any(), Mockito.any());
   }

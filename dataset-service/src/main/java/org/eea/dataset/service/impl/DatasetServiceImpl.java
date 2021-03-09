@@ -140,6 +140,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
   private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
+
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -1813,8 +1814,9 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Spread data prefill.
    *
-   * @param originDatasetDesign the designs
-   * @param targetDatasetId the dataset id
+   * @param datasetSchema the dataset schema
+   * @param originId the origin id
+   * @param targetDataset the target dataset
    */
   private void spreadDataPrefill(DataSetSchema datasetSchema, Long originId,
       DataSetMetabase targetDataset) {
@@ -1874,8 +1876,8 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Record desing assignation.
    *
-   * @param targetDatasetId the target dataset id
-   * @param originDatasetDesign the origin dataset design
+   * @param targetDataset the target dataset
+   * @param originId the origin id
    * @param targetRecords the record design values list
    * @param datasetPartitionId the dataset partition id
    * @param attachments the attachments
@@ -1998,8 +2000,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Gets the tables from schema.
    *
-   * @param idDatasetSchema the id dataset schema
-   *
+   * @param schema the schema
    * @return the tables from schema
    */
   private List<TableSchema> getTablesFromSchema(DataSetSchema schema) {
@@ -2272,11 +2273,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
-
+    // Find record ids with errors
     List<IDError> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema());
-
     List<IDError> recordIdsFromFieldWithValidationBlocker = recordValidationRepository
         .findRecordIdFromFieldWithValidationsByLevelError(datasetId, tableValue.getIdTableSchema());
 
@@ -2284,40 +2284,12 @@ public class DatasetServiceImpl implements DatasetService {
     Set<String> idsErrors = new HashSet<>();
     Set<String> idsWarnings = new HashSet<>();
     Set<String> idsInfos = new HashSet<>();
+    // Sort errors by criticality
     recordIdsFromRecordWithValidationBlocker.stream().forEach(keyset -> {
-      switch (keyset.getLevelError()) {
-        case "BLOCKER":
-          idsBlockers.add(keyset.getId());
-          break;
-        case "ERROR":
-          idsErrors.add(keyset.getId());
-          break;
-        case "WARNING":
-          idsWarnings.add(keyset.getId());
-          break;
-        case "INFO":
-          idsInfos.add(keyset.getId());
-          break;
-        default:
-      }
+      filterErrors(idsBlockers, idsErrors, idsWarnings, idsInfos, keyset);
     });
-
     recordIdsFromFieldWithValidationBlocker.stream().forEach(keyset -> {
-      switch (keyset.getLevelError()) {
-        case "BLOCKER":
-          idsBlockers.add(keyset.getId());
-          break;
-        case "ERROR":
-          idsErrors.add(keyset.getId());
-          break;
-        case "WARNING":
-          idsWarnings.add(keyset.getId());
-          break;
-        case "INFO":
-          idsInfos.add(keyset.getId());
-          break;
-        default:
-      }
+      filterErrors(idsBlockers, idsErrors, idsWarnings, idsInfos, keyset);
     });
 
     idsErrors.removeAll(idsBlockers);
@@ -2332,41 +2304,30 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
     Long totalRecordsWithInfos = Long.valueOf(idsInfos.size());
 
+    List<Statistics> stats = new ArrayList<>();
     Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
 
     Long totalTableErrors =
         totalRecordsWithBlockers + totalRecordsWithErrors + totalRecordsWithWarnings
             + totalRecordsWithInfos + tableValue.getTableValidations().size();
-
-
-    List<Statistics> stats = new ArrayList<>();
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "idTableSchema",
-        tableValue.getIdTableSchema()));
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "nameTableSchema",
-        mapIdNameDatasetSchema.get(tableValue.getIdTableSchema())));
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalErrors",
-        totalTableErrors.toString()));
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecords",
-        countRecords.toString()));
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithBlockers",
+    // Fill different stats
+    String tableSchemaId = tableValue.getIdTableSchema();
+    stats.add(fillStat(datasetId, tableSchemaId, "idTableSchema", tableValue.getIdTableSchema()));
+    stats.add(fillStat(datasetId, tableSchemaId, "nameTableSchema",
+        mapIdNameDatasetSchema.get(tableSchemaId)));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalErrors", totalTableErrors.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecords", countRecords.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithBlockers",
         totalRecordsWithBlockers.toString()));
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithErrors",
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithErrors",
         totalRecordsWithErrors.toString()));
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithWarnings",
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithWarnings",
         totalRecordsWithWarnings.toString()));
-
-    stats.add(fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecordsWithInfos",
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithInfos",
         totalRecordsWithInfos.toString()));
 
     Statistics statsTableErrors = new Statistics();
-    statsTableErrors.setIdTableSchema(tableValue.getIdTableSchema());
+    statsTableErrors.setIdTableSchema(tableSchemaId);
     statsTableErrors.setStatName("tableErrors");
     ReportingDataset reporting = new ReportingDataset();
     reporting.setId(datasetId);
@@ -2380,6 +2341,34 @@ public class DatasetServiceImpl implements DatasetService {
     stats.add(statsTableErrors);
 
     return stats;
+  }
+
+  /**
+   * Filter errors.
+   *
+   * @param idsBlockers the ids blockers
+   * @param idsErrors the ids errors
+   * @param idsWarnings the ids warnings
+   * @param idsInfos the ids infos
+   * @param keyset the keyset
+   */
+  private void filterErrors(Set<String> idsBlockers, Set<String> idsErrors, Set<String> idsWarnings,
+      Set<String> idsInfos, IDError keyset) {
+    switch (keyset.getLevelError()) {
+      case "BLOCKER":
+        idsBlockers.add(keyset.getId());
+        break;
+      case "ERROR":
+        idsErrors.add(keyset.getId());
+        break;
+      case "WARNING":
+        idsWarnings.add(keyset.getId());
+        break;
+      case "INFO":
+        idsInfos.add(keyset.getId());
+        break;
+      default:
+    }
   }
 
   /**
@@ -3111,7 +3100,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Save public files.
    *
    * @param dataflowId the dataflow id
-   * @param dataSetMetabase the data set metabase
+   * @param dataSetDataProvider the data set data provider
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
@@ -3178,9 +3167,7 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Creeate all dataset files.
    *
-   * @param dataset the dataset
    * @param dataflowId the dataflow id
-   * @param pathDataProvider the path data provider
    * @param dataProviderId the data provider id
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -3303,6 +3290,13 @@ public class DatasetServiceImpl implements DatasetService {
     LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
   }
 
+  /**
+   * Initialize dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Async
   public void initializeDataset(Long datasetId, String idDatasetSchema) throws EEAException {
@@ -3340,12 +3334,9 @@ public class DatasetServiceImpl implements DatasetService {
     tableValues.parallelStream().forEach(tableValue -> statsList.addAll(
         initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema)));
 
-    Statistics statsIdDatasetSchema = fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema);
-    statsList.add(statsIdDatasetSchema);
+    statsList.add(fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema));
 
-    Statistics statsNameDatasetSchema =
-        fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName());
-    statsList.add(statsNameDatasetSchema);
+    statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
 
     statsList.add(fillStat(datasetId, null, "datasetErrors", "false"));
 
@@ -3366,6 +3357,14 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
+  /**
+   * Initialize table stats.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetId the dataset id
+   * @param mapIdNameDatasetSchema the map id name dataset schema
+   * @return the list
+   */
   private List<Statistics> initializeTableStats(final String tableSchemaId, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
     List<Statistics> stats = new ArrayList<>();
