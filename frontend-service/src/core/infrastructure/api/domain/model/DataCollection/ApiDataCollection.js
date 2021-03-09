@@ -4,7 +4,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const apiDataCollection = {
   create: async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo) => {
-    const response = await HTTPRequester.post({
+    return await HTTPRequester.post({
       url: getUrl(DataCollectionConfig.createDataCollection, {
         isManualTechnicalAcceptance,
         stopAndNotifySQLErrors,
@@ -16,14 +16,12 @@ const apiDataCollection = {
         dueDate: endDate
       }
     });
-    return response;
   },
 
   update: async dataflowId => {
-    const response = await HTTPRequester.update({
+    return await HTTPRequester.update({
       url: getUrl(DataCollectionConfig.updateDataCollectionNewRepresentatives, { dataflowId })
     });
-    return response;
   }
 };
 export { apiDataCollection };
