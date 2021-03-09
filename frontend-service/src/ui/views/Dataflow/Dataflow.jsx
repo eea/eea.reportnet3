@@ -623,20 +623,22 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async (value, index) => {
-    await DatasetService.updateSchemaNameById(
-      dataflowState.designDatasetSchemas[index].datasetId,
-      encodeURIComponent(value)
-    );
-    const updatedTitles = [...dataflowState.updatedDatasetSchema];
-    updatedTitles[index].schemaName = value;
-    setUpdatedDatasetSchema(updatedTitles);
+    try {
+      await DatasetService.updateSchemaNameById(
+        dataflowState.designDatasetSchemas[index].datasetId,
+        encodeURIComponent(value)
+      );
+      const updatedTitles = [...dataflowState.updatedDatasetSchema];
+      updatedTitles[index].schemaName = value;
+      setUpdatedDatasetSchema(updatedTitles);
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
-  const onOpenReleaseConfirmDialog = () => {
-    manageDialogs('isReleaseDialogVisible', true);
-  };
+  const onOpenReleaseConfirmDialog = () => manageDialogs('isReleaseDialogVisible', true);
 
   const onConfirmExport = async () => {
     try {

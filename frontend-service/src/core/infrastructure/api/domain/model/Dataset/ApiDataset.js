@@ -295,10 +295,9 @@ export const apiDataset = {
   },
 
   updateSchemaNameById: async (datasetId, datasetSchemaName) => {
-    const response = await HTTPRequester.update({
+    return await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDataSchemaName, { datasetId, datasetSchemaName })
     });
-    return response.status;
   },
 
   updateTableDescriptionDesign: async (
@@ -310,36 +309,24 @@ export const apiDataset = {
     tableSchemaNotEmpty,
     tableSchemaFixedNumber
   ) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
-        data: {
-          idTableSchema: tableSchemaId,
-          description: tableSchemaDescription,
-          fixedNumber: tableSchemaFixedNumber,
-          notEmpty: tableSchemaNotEmpty,
-          readOnly: tableSchemaIsReadOnly,
-          toPrefill: tableSchemaToPrefill
-        }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error updating dataset design name: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
+      data: {
+        description: tableSchemaDescription,
+        fixedNumber: tableSchemaFixedNumber,
+        idTableSchema: tableSchemaId,
+        notEmpty: tableSchemaNotEmpty,
+        readOnly: tableSchemaIsReadOnly,
+        toPrefill: tableSchemaToPrefill
+      }
+    });
   },
 
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
-        data: { idTableSchema: tableSchemaId, nameTableSchema: tableSchemaName }
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error updating dataset design name: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
+      data: { idTableSchema: tableSchemaId, nameTableSchema: tableSchemaName }
+    });
   },
 
   validateById: async datasetId => {
@@ -347,14 +334,6 @@ export const apiDataset = {
   },
 
   validateSqlRules: async (datasetId, datasetSchemaId) => {
-    try {
-      const response = await HTTPRequester.post({
-        url: getUrl(DatasetConfig.validateSql, { datasetId, datasetSchemaId })
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error calling sql rules validation: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.post({ url: getUrl(DatasetConfig.validateSql, { datasetId, datasetSchemaId }) });
   }
 };

@@ -652,7 +652,7 @@ const updateTableDescriptionDesign = async (
   tableSchemaNotEmpty,
   tableSchemaFixedNumber
 ) => {
-  const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
+  return await apiDataset.updateTableDescriptionDesign(
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
@@ -661,18 +661,13 @@ const updateTableDescriptionDesign = async (
     tableSchemaNotEmpty,
     tableSchemaFixedNumber
   );
-  return tableSchemaUpdated;
 };
 
 const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) => {
-  const tableSchemaUpdated = await apiDataset.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
-  return tableSchemaUpdated;
+  return await apiDataset.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
 };
 
-const validateDataById = async datasetId => {
-  const dataValidation = await apiDataset.validateById(datasetId);
-  return dataValidation;
-};
+const validateDataById = async datasetId => await apiDataset.validateById(datasetId);
 
 const validateSqlRules = async (datasetId, datasetSchemaId) => {
   return await apiDataset.validateSqlRules(datasetId, datasetSchemaId);

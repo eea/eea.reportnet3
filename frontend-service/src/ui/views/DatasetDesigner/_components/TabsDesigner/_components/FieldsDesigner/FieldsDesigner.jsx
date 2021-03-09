@@ -522,7 +522,7 @@ export const FieldsDesigner = ({
 
   const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     try {
-      const tableUpdated = await DatasetService.updateTableDescriptionDesign(
+      const { status } = await DatasetService.updateTableDescriptionDesign(
         toPrefill,
         table.tableSchemaId,
         tableDescriptionValue,
@@ -531,9 +531,7 @@ export const FieldsDesigner = ({
         notEmpty,
         fixedNumber
       );
-      if (!tableUpdated) {
-        console.error('Error during table description update');
-      } else {
+      if (status >= 200 && status <= 299) {
         onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
       }
     } catch (error) {

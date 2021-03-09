@@ -438,14 +438,18 @@ export const TabsDesigner = withRouter(
     };
 
     const updateTableName = async (tableSchemaId, tableSchemaName) => {
-      const tableUpdated = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
-      if (tableUpdated) {
-        const inmTabs = [...tabs];
-        inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-        inmTabs[
-          TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
-        ].tableSchemaName = tableSchemaName;
-        setTabs(inmTabs);
+      try {
+        const { status } = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
+        if (status >= 200 && status <= 299) {
+          const inmTabs = [...tabs];
+          inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
+          inmTabs[
+            TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
+          ].tableSchemaName = tableSchemaName;
+          setTabs(inmTabs);
+        }
+      } catch (error) {
+        console.error('error', error);
       }
     };
 

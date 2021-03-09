@@ -815,7 +815,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const validateQcRules = async () => {
     setSqlValidationRunning(true);
     try {
-      const response = await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
+      await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
     } catch (error) {
       console.error('error', error);
     }
@@ -849,9 +849,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         className="p-button-secondary p-button-animated-blink"
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resources.messages['validateSqlRulesBtn']}
-        onClick={() => {
-          validateQcRules();
-        }}
+        onClick={() => validateQcRules()}
         tooltip={resources.messages['validateRulesBtnTootip']}
         tooltipOptions={{ position: 'top' }}
       />
