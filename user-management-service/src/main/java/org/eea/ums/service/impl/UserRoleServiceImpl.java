@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 @Service("UserRoleService")
 public class UserRoleServiceImpl implements UserRoleService {
 
+
   /** The keycloak connector service. */
   @Autowired
   private KeycloakConnectorService keycloakConnectorService;
@@ -46,9 +47,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     List<Long> datasetIds = datasetMetabaseControllerZuul
         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
     if (null != datasetIds && !datasetIds.isEmpty()) {
-      for (Long long1 : datasetIds) {
-        getGroupInfoMap(groupInfoMap, long1);
-      }
+      getGroupInfoMap(groupInfoMap, datasetIds.get(0));
 
       Map<String, UserRoleVO> usersMap = new HashMap<>();
       // CUSTODIAN
@@ -71,7 +70,6 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
     return finalList;
   }
-
 
 
   /**
@@ -157,6 +155,9 @@ public class UserRoleServiceImpl implements UserRoleService {
       }
     }
   }
+
+
+
 }
 
 

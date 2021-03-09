@@ -112,8 +112,9 @@ public final class EEAErrorMessage {
   /** The Constant URL_FORMAT_INCORRECT: {@value}. */
   public static final String URL_FORMAT_INCORRECT = "Format url is incorrect";
 
-  /** The Constant URL_ALREADY_EXIST: {@value}. */
-  public static final String URL_ALREADY_EXIST = "Url already exist in this dataflow in reportnet";
+  /** The Constant WEBLINK_ALREADY_EXIST: {@value}. */
+  public static final String WEBLINK_ALREADY_EXIST =
+      "Weblink already exist in this dataflow in reportnet";
 
 
   /** The Constant ID_LINK_INCORRECT: {@value}. */

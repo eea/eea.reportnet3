@@ -22,7 +22,10 @@ public interface WebLinkRepository extends CrudRepository<Weblink, Long> {
    * Exists by url.
    *
    * @param url the url
+   * @param description the description
+   * @param dataflowId the dataflow id
    * @return true, if successful
    */
-  Optional<Weblink> findByUrlAndDataflowId(String url, Long dataflowId);
+  Optional<Weblink> findByUrlAndDescriptionAndDataflowId(String url, String description,
+      Long dataflowId);
 }

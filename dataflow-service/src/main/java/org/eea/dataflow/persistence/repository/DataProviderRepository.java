@@ -26,4 +26,12 @@ public interface DataProviderRepository extends CrudRepository<DataProvider, Lon
    * @return the list
    */
   List<DataProvider> findAllByGroupId(Long groupId);
+
+  /**
+   * Find by code.
+   *
+   * @param code the code
+   * @return the list
+   */
+  List<DataProvider> findByCode(String code);
 }

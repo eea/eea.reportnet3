@@ -18,7 +18,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
-const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {}, type }) => {
+const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -33,24 +33,14 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {}, 
   const layout = children => {
     return (
       <div
-        className={
-          type === 'accepted' || type === 'completed'
-            ? `${styles.container} ${styles.accepted} ${
-                styles[itemContent.status]
-              } dataflowList-first-dataflow-help-step`
-            : `${styles.container} ${styles[itemContent.status]}`
-        }
+        className={`${styles.container} ${styles.accepted} ${
+          styles[itemContent.status]
+        } dataflowList-first-dataflow-help-step`}
         onMouseEnter={() => setIsPinShowed(true)}
         onMouseLeave={() => setIsPinShowed(false)}>
-        {type === 'accepted' ? (
-          <Link
-            className={`${styles.containerLink}`}
-            to={getUrl(routes.DATAFLOW, { dataflowId: itemContent.id }, true)}>
-            {children}
-          </Link>
-        ) : (
-          <Fragment>{children}</Fragment>
-        )}
+        <Link className={`${styles.containerLink}`} to={getUrl(routes.DATAFLOW, { dataflowId: itemContent.id }, true)}>
+          {children}
+        </Link>
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
             className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
