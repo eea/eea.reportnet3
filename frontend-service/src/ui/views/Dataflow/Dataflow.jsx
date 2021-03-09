@@ -475,15 +475,14 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
-    const hasUserListRights = userContext.hasPermission(
-      [
-        config.permissions.LEAD_REPORTER,
-        config.permissions.NATIONAL_COORDINATOR,
-        config.permissions.DATA_STEWARD,
-        config.permissions.DATA_CUSTODIAN
-      ],
-      `${config.permissions.DATAFLOW}${dataflowId}`
-    );
+    const hasUserListRights =
+      userContext.hasPermission(
+        [config.permissions.LEAD_REPORTER, config.permissions.DATA_STEWARD, config.permissions.DATA_CUSTODIAN],
+        `${config.permissions.DATAFLOW}${dataflowId}`
+      ) ||
+      userContext.hasContextAccessPermission(config.permissions.NATIONAL_COORDINATOR_PREFIX, null, [
+        config.permissions.NATIONAL_COORDINATOR
+      ]);
 
     const entity = isNil(representativeId)
       ? `${config.permissions['DATAFLOW']}${dataflowId}`
