@@ -23,6 +23,7 @@ const useSocket = () => {
         //   console.log(str);
         // },
         reconnectDelay: 1000,
+        connectionTimeout: 30000,
         beforeConnect: () => {
           const token = UserService.getToken();
           stompClient.connectHeaders = { token };

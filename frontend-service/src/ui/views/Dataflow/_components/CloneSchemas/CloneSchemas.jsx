@@ -29,15 +29,12 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const userContext = useContext(UserContext);
 
   const [cloneSchemasState, cloneSchemasDispatch] = useReducer(cloneSchemasReducer, {
-    accepted: [],
-    allDataflows: {},
+    allDataflows: [],
     chosenDataflow: { id: null, name: '' },
-    completed: [],
     filtered: false,
     filteredData: [],
     isLoading: true,
-    pagination: { first: 0, rows: 10, page: 0 },
-    pending: []
+    pagination: { first: 0, rows: 10, page: 0 }
   });
 
   useEffect(() => {
@@ -53,12 +50,12 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const getPaginatorRecordsCount = () => {
     return (
       <Fragment>
-        {cloneSchemasState.filtered && cloneSchemasState.accepted.length !== cloneSchemasState.filteredData.length
+        {cloneSchemasState.filtered && cloneSchemasState.allDataflows.length !== cloneSchemasState.filteredData.length
           ? `${resources.messages['filtered']} : ${cloneSchemasState.filteredData.length} | `
           : ''}
-        {resources.messages['totalRecords']} {cloneSchemasState.accepted.length}{' '}
+        {resources.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
         {resources.messages['records'].toLowerCase()}
-        {cloneSchemasState.filtered && cloneSchemasState.accepted.length === cloneSchemasState.filteredData.length
+        {cloneSchemasState.filtered && cloneSchemasState.allDataflows.length === cloneSchemasState.filteredData.length
           ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
@@ -71,16 +68,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const onLoadDataflows = async () => {
     try {
-      const allDataflows = await DataflowService.all(userContext.contextRoles);
-      cloneSchemasDispatch({
-        type: 'INITIAL_LOAD',
-        payload: {
-          accepted: parseDataflowList(allDataflows.accepted),
-          allDataflows,
-          completed: allDataflows.completed,
-          pending: allDataflows.pending
-        }
-      });
+      const { data } = await DataflowService.all(userContext.contextRoles);
+      cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: parseDataflowList(data) } });
     } catch (error) {
       console.error('onLoadDataflows error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -162,7 +151,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       </div>
       <div className={styles.filters}>
         <Filters
-          data={cloneSchemasState.accepted}
+          data={cloneSchemasState.allDataflows}
           dateOptions={['expirationDate']}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredState}

@@ -8,11 +8,6 @@
     "dataflowObligationEmpty": "Dataflow Obligation empty",
     "copyWithErrors": "The snapshot contains blocker errors"
   },
-  "userRequestStatus": {
-    "accepted": [],
-    "completed": [],
-    "pending": []
-  },
   "filterItems": {
     "input": ["name", "description", "legalInstrument", "obligationTitle"],
     "select": ["status", "userRole", "pinned"],

@@ -1,5 +1,5 @@
 {
-  "STRING_LENGTH_MAX": 22,
+  "STRING_LENGTH_MAX": 42,
   "notificationSchema": [
     {
       "key": "error",
@@ -577,6 +577,9 @@
         },
         {
           "key": "DUPLICATED_WEBLINK_ERROR"
+        },
+        {
+          "key": "LOAD_USERS_LIST_ERROR"
         }
       ]
     },
