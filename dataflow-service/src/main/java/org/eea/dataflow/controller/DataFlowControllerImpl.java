@@ -212,31 +212,6 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
   /**
-   * Update user request.
-   *
-   * @param idUserRequest the id user request
-   * @param type the type
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
-  @PutMapping("/updateStatusRequest/{idUserRequest}")
-  @ApiOperation(value = "Update a Join Request's Status for a User")
-  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
-  public void updateUserRequest(
-      @ApiParam(value = "User request Id",
-          example = "0") @PathVariable("idUserRequest") Long idUserRequest,
-      @ApiParam(type = "Object",
-          value = "Join Request Status") @RequestParam("type") TypeRequestEnum type) {
-    try {
-      dataflowService.updateUserRequestStatus(idUserRequest, type);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    }
-  }
-
-  /**
    * Adds the contributor.
    *
    * @param dataflowId the dataflow id

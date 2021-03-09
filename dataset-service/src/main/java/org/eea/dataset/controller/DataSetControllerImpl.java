@@ -843,11 +843,11 @@ public class DataSetControllerImpl implements DatasetController {
       @PathVariable Long dataProviderId, @RequestParam String fileName) {
 
     try {
-      File excelContent = datasetService.exportPublicFile(dataflowId, dataProviderId, fileName);
-      InputStreamResource resource = new InputStreamResource(new FileInputStream(excelContent));
+      File zipContent = datasetService.exportPublicFile(dataflowId, dataProviderId, fileName);
+      InputStreamResource resource = new InputStreamResource(new FileInputStream(zipContent));
       HttpHeaders header = new HttpHeaders();
-      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
-      return ResponseEntity.ok().headers(header).contentLength(excelContent.length())
+      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      return ResponseEntity.ok().headers(header).contentLength(zipContent.length())
           .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);

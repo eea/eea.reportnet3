@@ -80,16 +80,6 @@ public interface DataFlowController {
   List<DataFlowVO> findDataflows();
 
   /**
-   * Update user request.
-   *
-   * @param idUserRequest the id user request
-   * @param type the type
-   */
-  @PutMapping("/updateStatusRequest/{idUserRequest}")
-  void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest,
-      @RequestParam("type") TypeRequestEnum type);
-
-  /**
    * Adds the contributor.
    *
    * @param dataflowId the dataflow id
