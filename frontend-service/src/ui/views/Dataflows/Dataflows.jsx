@@ -1,14 +1,13 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './Dataflows.module.scss';
 
 import { config } from 'conf';
-import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
+import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'ui/views/_components/Button';
 import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
@@ -34,10 +33,11 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
 
-const Dataflows = withRouter(({ match, history }) => {
+const Dataflows = withRouter(({ history, match }) => {
   const {
     params: { errorType: dataflowsErrorType }
   } = match;
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -60,16 +60,13 @@ const Dataflows = withRouter(({ match, history }) => {
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
-    accepted: [],
-    allDataflows: {},
-    completed: [],
+    allDataflows: [],
     isAddDialogVisible: false,
     isCustodian: null,
     isLoading: true,
     isNationalCoordinator: false,
     isRepObDialogVisible: false,
-    isUserListVisible: false,
-    pending: []
+    isUserListVisible: false
   });
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
@@ -125,10 +122,7 @@ const Dataflows = withRouter(({ match, history }) => {
     isLoading(true);
     try {
       const { data } = await DataflowService.all(userContext.contextRoles);
-      dataflowsDispatch({
-        type: 'INITIAL_LOAD',
-        payload: { accepted: data.accepted, allDataflows: data, completed: data.completed, pending: data.pending }
-      });
+      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data } });
     } catch (error) {
       console.error('dataFetch error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -179,48 +173,23 @@ const Dataflows = withRouter(({ match, history }) => {
     />
   );
 
-  const layout = children => (
+  const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
 
-  if (dataflowsState.isLoading) return layout(<Spinner />);
+  if (dataflowsState.isLoading) return renderLayout(<Spinner />);
 
-  return layout(
+  return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
-        {tabMenuActiveItem.tabKey === 'pending' ? (
-          <Fragment>
-            {/* <DataflowsList
-              className="dataflowList-pending-help-step"
-              content={dataflowsState.pending}
-              dataFetch={dataFetch}
-              description={resources.messages['pendingDataflowText']}
-              title={resources.messages['pendingDataflowTitle']}
-              type="pending"
-            /> */}
-            <DataflowsList
-              className="dataflowList-accepted-help-step"
-              content={dataflowsState.accepted}
-              dataFetch={dataFetch}
-              isCustodian={dataflowsState.isCustodian}
-              type="accepted"
-            />
-          </Fragment>
-        ) : (
-          <Fragment>
-            <DataflowsList
-              content={dataflowsState.completed}
-              dataFetch={dataFetch}
-              description={resources.messages.completedDataflowText}
-              isCustodian={dataflowsState.isCustodian}
-              title={resources.messages.completedDataflowTitle}
-              type="completed"
-            />
-          </Fragment>
-        )}
+        <DataflowsList
+          className="dataflowList-accepted-help-step"
+          content={dataflowsState.allDataflows}
+          isCustodian={dataflowsState.isCustodian}
+        />
       </div>
 
       {dataflowsState.isUserListVisible && (

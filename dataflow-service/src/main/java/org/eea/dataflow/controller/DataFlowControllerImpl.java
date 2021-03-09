@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
@@ -15,6 +16,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -61,6 +63,10 @@ public class DataFlowControllerImpl implements DataFlowController {
   /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
+
+  /** The representative service. */
+  @Autowired
+  private RepresentativeService representativeService;
 
   /**
    * Find by id.
@@ -506,6 +512,42 @@ public class DataFlowControllerImpl implements DataFlowController {
       @RequestParam("showPublicInfo") boolean showPublicInfo) {
     dataflowService.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
   }
+
+
+  /**
+   * Gets the user roles all dataflows.
+   *
+   * @return the user roles all dataflows
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getUserRolesAllDataflows")
+  public List<DataflowUserRoleVO> getUserRolesAllDataflows() {
+    List<Long> dataProviderIds = new ArrayList<>();
+    List<DataflowUserRoleVO> result = new ArrayList<>();
+    List<DataFlowVO> dataflows;
+    try {
+      // get providerId and check if user is National coordinator
+      dataProviderIds = representativeService.getProviderIds();
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
+    }
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+
+    try {
+      dataflows = dataflowService.getDataflows(userId);
+      dataProviderIds.stream().forEach(
+          dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return result;
+  }
+
 
   /**
    * Checks if is user data custodian.
