@@ -62,6 +62,17 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   }, [themeContext.headerCollapse]);
 
+  const getCountryName = () => {
+    if (!isNil(config.countriesByGroup)) {
+      const allCountries = config.countriesByGroup['eeaCountries'].concat(config.countriesByGroup['otherCountries']);
+      allCountries.forEach(country => {
+        if (countryCode === country.code) {
+          setCountryName(country.name);
+        }
+      });
+    }
+  };
+
   const getHeader = fieldHeader => {
     let header;
     switch (fieldHeader) {
@@ -90,6 +101,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         header = resources.messages['files'];
         break;
       default:
+        header = fieldHeader;
         break;
     }
     return header;
@@ -99,51 +111,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     const splittedFileName = fileName.split('-');
     return splittedFileName[1];
   };
-
-  const downloadFileBodyColumn = rowData => {
-    if (!rowData.restrictFromPublic) {
-      return (
-        <div className={styles.filesContainer}>
-          {rowData.publicFilesNames.map(publicFileName => (
-            <span
-              className={styles.downloadIcon}
-              onClick={() => onFileDownload(rowData.id, publicFileName.dataProviderId, publicFileName.fileName)}>
-              <FontAwesomeIcon icon={AwesomeIcons('xlsx')} data-tip data-for={publicFileName.fileName} />
-              <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName.fileName} place="top">
-                <span>{getPublicFileName(publicFileName.fileName)}</span>
-              </ReactTooltip>
-            </span>
-          ))}
-        </div>
-      );
-    } else {
-      return <div>{resources.messages['restrictFromPublicField']}</div>;
-    }
-  };
-
-  const isReleasedBodyColumn = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-    </div>
-  );
-
-  const legalInstrumentBodyColumn = rowData => (
-    <div onClick={e => e.stopPropagation()}>
-      {renderRedirectText(
-        rowData.legalInstrument.alias,
-        `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument.id}`
-      )}
-    </div>
-  );
-
-  const obligationBodyColumn = rowData => (
-    <div onClick={e => e.stopPropagation()}>
-      {renderRedirectText(
-        rowData.obligation.title,
-        `https://rod.eionet.europa.eu/obligations/${rowData.obligation.obligationId}`
-      )}
-    </div>
-  );
 
   const onFileDownload = async (dataflowId, dataProviderId, fileName) => {
     try {
@@ -221,31 +188,75 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       .map(orderedField => orderedField.id);
   };
 
-  const getCountryName = () => {
-    if (!isNil(config.countriesByGroup)) {
-      const allCountries = config.countriesByGroup['eeaCountries'].concat(config.countriesByGroup['otherCountries']);
-      allCountries.forEach(country => {
-        if (countryCode === country.code) {
-          setCountryName(country.name);
-        }
-      });
-    }
-  };
-
   const renderColumns = dataflows => {
     const fieldColumns = getOrderedColumns(Object.keys(dataflows[0]))
       .filter(key => !key.includes('id'))
       .map(field => {
         let template = null;
-        if (field === 'isReleased') template = isReleasedBodyColumn;
-        if (field === 'legalInstrument') template = legalInstrumentBodyColumn;
-        if (field === 'obligation') template = obligationBodyColumn;
-        if (field === 'publicFilesNames') template = downloadFileBodyColumn;
+        if (field === 'isReleased') template = renderIsReleasedBodyColumn;
+        if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
+        if (field === 'obligation') template = renderObligationBodyColumn;
+        if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
         return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
       });
 
     return fieldColumns;
   };
+
+  const renderDownloadFileBodyColumn = rowData => {
+    if (!rowData.restrictFromPublic) {
+      return (
+        <div className={styles.filesContainer}>
+          {rowData.publicFilesNames.map(publicFileName => (
+            <span
+              className={styles.filesIcon}
+              onClick={() => onFileDownload(rowData.id, publicFileName.dataProviderId, publicFileName.fileName)}>
+              <FontAwesomeIcon
+                className={styles.cursorPointer}
+                icon={AwesomeIcons('xlsx')}
+                data-tip
+                data-for={publicFileName.fileName}
+              />
+              <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName.fileName} place="top">
+                <span>{getPublicFileName(publicFileName.fileName)}</span>
+              </ReactTooltip>
+            </span>
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <div className={styles.filesContainer}>
+          <FontAwesomeIcon className={styles.filesIcon} icon={AwesomeIcons('exclamationCircle')} />
+          <span className={styles.filesText}>{resources.messages['restrictFromPublicField']}</span>
+        </div>
+      );
+    }
+  };
+
+  const renderIsReleasedBodyColumn = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
+  const renderLegalInstrumentBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      {renderRedirectText(
+        rowData.legalInstrument.alias,
+        `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument.id}`
+      )}
+    </div>
+  );
+
+  const renderObligationBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      {renderRedirectText(
+        rowData.obligation.title,
+        `https://rod.eionet.europa.eu/obligations/${rowData.obligation.obligationId}`
+      )}
+    </div>
+  );
 
   const renderRedirectText = (text, url) => (
     <a href={url} target="_blank" title={text}>
