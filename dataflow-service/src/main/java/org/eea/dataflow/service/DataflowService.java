@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -187,4 +188,12 @@ public interface DataflowService {
    * @param showPublicInfo the show public info
    */
   void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo);
+
+  /**
+   * Gets the user roles.
+   *
+   * @param dataProviderId the data provider id
+   * @return the user roles
+   */
+  List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList);
 }

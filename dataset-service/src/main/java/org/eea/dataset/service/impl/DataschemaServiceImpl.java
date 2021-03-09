@@ -2251,10 +2251,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
           dictionaryOriginTargetObjectId);
 
-      // Create the views necessary to the validation in the new datasets created
-      // Also, launch a SQL QC Validation
+      // Launch a SQL QC Validation
       mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
-        recordStoreControllerZuul.createUpdateQueryView(datasetCreated, false);
         rulesControllerZuul.validateSqlRules(datasetCreated,
             dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()), false);
       });
@@ -2346,7 +2344,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     // save the schema with the new values
     schemasRepository.updateSchemaDocument(schema);
-
+    // Create the view
+    recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
     return dictionaryOriginTargetObjectId;
   }
 
