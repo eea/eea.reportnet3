@@ -20,12 +20,14 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
+import org.eea.dataset.persistence.metabase.domain.TestDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
@@ -214,6 +216,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The eu dataset repository. */
   @Autowired
   private EUDatasetRepository euDatasetRepository;
+
+  /** The test dataset repository. */
+  @Autowired
+  private TestDatasetRepository testDatasetRepository;
 
   /** The reporting dataset repository. */
   @Autowired
@@ -777,6 +783,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
         if (euDataset.isPresent()) {
           datasetDestination.setId(euDataset.get().getId());
+        }
+      } else if (DatasetTypeEnum.TEST.equals(typeDataset)) {
+        Optional<TestDataset> testDataset = testDatasetRepository
+            .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
+        if (testDataset.isPresent()) {
+          datasetDestination.setId(testDataset.get().getId());
         }
       }
       foreignRelation.setIdDatasetDestination(datasetDestination);
