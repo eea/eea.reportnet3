@@ -35,6 +35,7 @@ import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
+import { UserList } from 'ui/views/_components/UserList';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -76,11 +77,13 @@ const Dataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     formHasRepresentatives: false,
     hasRepresentativesWithoutDatasets: false,
+    hasUserListRights: false,
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
     isCopyDataCollectionToEuDatasetLoading: false,
     isCustodian: false,
+    isUserListVisible: false,
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
@@ -236,6 +239,15 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'releasingLeftSideBarButton'
       };
 
+      const userListBtn = {
+        className: 'dataflow-properties-help-step',
+        icon: 'users',
+        isVisible: (dataflowState.hasUserListRights && !isNil(representativeId)) || isLeadReporterOfCountry,
+        label: 'dataflowUsersList',
+        onClick: () => manageDialogs('isUserListVisible', true),
+        title: 'dataflowUsersList'
+      };
+
       const allButtons = [
         propertiesBtn,
         editBtn,
@@ -243,7 +255,8 @@ const Dataflow = withRouter(({ history, match }) => {
         exportSchemaBtn,
         apiKeyBtn,
         manageReportersBtn,
-        manageEditorsBtn
+        manageEditorsBtn,
+        userListBtn
       ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
@@ -433,6 +446,15 @@ const Dataflow = withRouter(({ history, match }) => {
     </>
   );
 
+  const dataflowUsersListFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isUserListVisible', false)}
+    />
+  );
+
   const getCurrentDatasetId = () => {
     if (isEmpty(dataflowState.data)) return null;
 
@@ -453,6 +475,16 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.DATAFLOW}${dataflowId}`
     );
 
+    const hasUserListRights = userContext.hasPermission(
+      [
+        config.permissions.LEAD_REPORTER,
+        config.permissions.NATIONAL_COORDINATOR,
+        config.permissions.DATA_STEWARD,
+        config.permissions.DATA_CUSTODIAN
+      ],
+      `${config.permissions.DATAFLOW}${dataflowId}`
+    );
+
     const entity = isNil(representativeId)
       ? `${config.permissions['DATAFLOW']}${dataflowId}`
       : `${config.permissions['DATASET']}${currentDatasetId}`;
@@ -463,7 +495,10 @@ const Dataflow = withRouter(({ history, match }) => {
       userRole => userRole === config.permissions['DATA_STEWARD'] || userRole === config.permissions['DATA_CUSTODIAN']
     );
 
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { hasWritePermissions, isCustodian, userRoles } });
+    dataflowDispatch({
+      type: 'LOAD_PERMISSIONS',
+      payload: { hasWritePermissions, isCustodian, userRoles, hasUserListRights }
+    });
   };
 
   const onLoadReportingDataflow = async () => {
@@ -876,6 +911,16 @@ const Dataflow = withRouter(({ history, match }) => {
               dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
             })}`}
           />
+        )}
+
+        {dataflowState.isUserListVisible && (
+          <Dialog
+            footer={dataflowUsersListFooter}
+            header={resources.messages['dataflowUsersList']}
+            onHide={() => manageDialogs('isUserListVisible', false)}
+            visible={dataflowState.isUserListVisible}>
+            <UserList dataflowId={dataflowId} representativeId={dataProviderId} />
+          </Dialog>
         )}
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />

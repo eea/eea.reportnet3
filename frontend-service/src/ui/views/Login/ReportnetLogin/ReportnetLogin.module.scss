@@ -65,3 +65,10 @@
   /* width: 80%; */
   margin: 1rem;
 }
+
+.hasErrors {
+  border: 2px solid var(--errors) !important;
+  &:focus {
+    box-shadow: none !important;
+  }
+}
