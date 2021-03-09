@@ -128,7 +128,6 @@ export const IntegrationsList = ({
       integrationsList(integrations);
       refreshList(false);
     } catch (error) {
-      console.log(error);
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
       isLoading(false);

@@ -39,43 +39,33 @@ export const apiIntegration = {
   },
 
   getProcesses: async (repositoryName, datasetId) => {
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(IntegrationConfig.getProcesses, { datasetId, repositoryName })
     });
-
-    return response.data;
   },
 
   getRepositories: async datasetId => {
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(IntegrationConfig.getRepositories, { datasetId })
     });
-
-    return response.data;
   },
 
   runIntegration: async (integrationId, datasetId, replaceData) => {
     if (isUndefined(replaceData)) {
-      const response = await HTTPRequester.post({
+      return await HTTPRequester.post({
         url: getUrl(IntegrationConfig.runIntegration, { integrationId, datasetId })
       });
-
-      return response.data;
     } else {
-      const response = await HTTPRequester.post({
+      return await HTTPRequester.post({
         url: getUrl(IntegrationConfig.runIntegrationWithReplace, { integrationId, datasetId, replaceData })
       });
-
-      return response.data;
     }
   },
 
   update: async integration => {
-    const response = await HTTPRequester.update({
+    return await HTTPRequester.update({
       url: getUrl(IntegrationConfig.update),
       data: integration
     });
-
-    return response;
   }
 };

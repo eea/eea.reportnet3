@@ -280,8 +280,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
-      console.log({ allExtensions });
+      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);      
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });

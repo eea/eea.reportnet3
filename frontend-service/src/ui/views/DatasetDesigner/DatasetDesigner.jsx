@@ -340,7 +340,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getFileExtensions = async () => {
     try {
       const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, designerState.datasetSchemaId);
-      console.log({ allExtensions });
       const externalOperations = ExtensionUtils.groupOperations('operation', allExtensions);
       designerDispatch({
         type: 'LOAD_EXTERNAL_OPERATIONS',
