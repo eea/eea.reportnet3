@@ -6,6 +6,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -171,6 +172,7 @@ public interface DataFlowController {
 
   @GetMapping("/getPublicDataflow/{dataflowId}")
   DataflowPublicVO getPublicDataflow(@PathVariable("dataflowId") Long dataflowId);
+
   /**
    * Update data flow public status.
    *
@@ -181,5 +183,11 @@ public interface DataFlowController {
   void updateDataFlowPublicStatus(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("showPublicInfo") boolean showPublicInfo);
 
-
+  /**
+   * Gets the user roles all dataflows.
+   *
+   * @return the user roles all dataflows
+   */
+  @GetMapping("/getUserRolesAllDataflows")
+  List<DataflowUserRoleVO> getUserRolesAllDataflows();
 }

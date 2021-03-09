@@ -385,7 +385,6 @@ public class DatasetServiceImpl implements DatasetService {
     deleteRecords(datasetId, tableSchemaId);
   }
 
-
   /**
    * Delete records.
    *
@@ -3279,13 +3278,13 @@ public class DatasetServiceImpl implements DatasetService {
           // we save the file in its files
           if (null != file) {
             String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
-                dataProvider.getLabel(), datasetDesingName);
+                dataProvider.getCode(), datasetDesingName);
+            String nameFileScape = nameFileUnique + ".xlsx";
 
-            FileUtils
-                .writeByteArrayToFile(
-                    new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-                        "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".xlsx"),
-                    file);
+            FileUtils.writeByteArrayToFile(
+                new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+                    "dataProvider-" + dataProviderId.toString()), nameFileScape),
+                file);
 
             // we save the file in metabase with the name without the route
             datasetToFile.setPublicFileName(nameFileUnique);

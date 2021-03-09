@@ -280,11 +280,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       // created)
       integrationControllerZuul.copyIntegrations(copy);
 
-      // Create the views necessary to the validation in the new datasets created
-      dictionaryOriginTargetDatasetsId
-          .forEach((Long datasetOrigin, Long datasetDestination) -> recordStoreControllerZuul
-              .createUpdateQueryView(datasetDestination, false));
-
       // Copy the data inside the design datasets, but only the tables that are prefilled
       datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
 
@@ -389,7 +384,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
     }
     // save the schema with the new values
     schemasRepository.updateSchemaDocument(schema);
-
+    // Create the views necessary to the validation in the new datasets created
+    recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
     return dictionaryOriginTargetObjectId;
   }
 

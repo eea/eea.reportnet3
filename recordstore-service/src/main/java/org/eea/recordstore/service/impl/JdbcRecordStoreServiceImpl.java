@@ -369,15 +369,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
-   *
+   * @param dateRelease the date release
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
-  public void createDataSnapshot(Long idDataset, Long idSnapshot, Long idPartitionDataset)
-      throws SQLException, IOException, EEAException {
+  public void createDataSnapshot(Long idDataset, Long idSnapshot, Long idPartitionDataset,
+      String dateRelease) throws SQLException, IOException, EEAException {
 
     ConnectionDataVO connectionDataVO =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
@@ -449,7 +449,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} data files created", idSnapshot);
 
-      notificationCreateAndCheckRelease(idDataset, idSnapshot, type);
+      notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease);
 
       // release snapshot when the user press create+release
     } catch (Exception e) {
@@ -552,7 +552,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @return the event type
    */
-  private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type) {
+  private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type,
+      String dateRelease) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
     LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
@@ -563,7 +564,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
         if (Boolean.TRUE.equals(snapshot.getRelease())) {
-          dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot);
+          dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease);
         } else {
           releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
               idDataset, null);

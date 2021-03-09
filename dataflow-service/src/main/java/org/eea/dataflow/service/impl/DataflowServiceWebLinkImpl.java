@@ -124,10 +124,11 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     }
     weblink.setDataflow(dataflow.get());
 
-    Optional<Weblink> weblinkfound =
-        webLinkRepository.findByUrlAndDataflowId(weblink.getUrl(), idDataflow);
+    // we check the weblink if exist in this dataflow
+    Optional<Weblink> weblinkfound = webLinkRepository.findByUrlAndDescriptionAndDataflowId(
+        weblink.getUrl(), weblink.getDescription(), idDataflow);
     if (weblinkfound.isPresent()) {
-      throw new EEAException(EEAErrorMessage.URL_ALREADY_EXIST);
+      throw new EEAException(EEAErrorMessage.WEBLINK_ALREADY_EXIST);
     }
 
     webLinkRepository.save(weblink);
@@ -207,11 +208,12 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
       throw new EntityNotFoundException(EEAErrorMessage.ID_LINK_NOT_FOUND);
     }
 
-    Optional<Weblink> weblinkExist =
-        webLinkRepository.findByUrlAndDataflowId(weblink.getUrl(), dataFlowId);
+    // we check the weblink if exist in this dataflow
+    Optional<Weblink> weblinkExist = webLinkRepository.findByUrlAndDescriptionAndDataflowId(
+        weblink.getUrl(), weblink.getDescription(), dataFlowId);
     if (weblinkExist.isPresent()
         && !weblinkExist.get().getId().equals(weblinkFound.get().getId())) {
-      throw new EEAException(EEAErrorMessage.URL_ALREADY_EXIST);
+      throw new EEAException(EEAErrorMessage.WEBLINK_ALREADY_EXIST);
     }
 
     weblinkFound.get().setDescription(weblink.getDescription());

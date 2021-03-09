@@ -113,9 +113,9 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      if (EEAErrorMessage.URL_ALREADY_EXIST.equals(e.getMessage())) {
+      if (EEAErrorMessage.WEBLINK_ALREADY_EXIST.equals(e.getMessage())) {
         LOG_ERROR.error("Weblink url already exist in dataflow : {}", dataflowId);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
       }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -179,9 +179,9 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAException e) {
-      if (EEAErrorMessage.URL_ALREADY_EXIST.equals(e.getMessage())) {
-        LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase());
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      if (EEAErrorMessage.WEBLINK_ALREADY_EXIST.equals(e.getMessage())) {
+        LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase(), e);
+        throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
       }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

@@ -126,59 +126,6 @@ public class DataSetControllerImplTest {
   }
 
   /**
-   * Test delete import data throw non provided.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportDataThrowNonProvided() throws Exception {
-    dataSetControllerImpl.deleteImportData(null);
-  }
-
-  /**
-   * Test delete import data throwInvalid.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportDataThrowInvalid() throws Exception {
-    dataSetControllerImpl.deleteImportData(-2L);
-  }
-
-  /**
-   * Test delete import data throw internal server.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testDeleteImportDataSuccess() throws Exception {
-    doNothing().when(deleteHelper).executeDeleteDatasetProcess(Mockito.any());
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetControllerImpl.deleteImportData(1L);
-    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.any());
-  }
-
-  /**
-   * Test delete dataset values exception deleting.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteDatasetValuesExceptionDeleting() throws EEAException {
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    doThrow(new EEAException()).when(deleteHelper).executeDeleteDatasetProcess(Mockito.any());
-    try {
-      dataSetControllerImpl.deleteImportData(1L);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-      throw e;
-    }
-  }
-
-  /**
    * Test get data tables values exception entry 1.
    *
    * @throws Exception the exception
@@ -406,86 +353,6 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetPositionFromAnyObjectIdException3() throws Exception {
     dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
-  }
-
-
-
-  /**
-   * Test delete import table.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testDeleteImportTable() throws EEAException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetControllerImpl.deleteImportTable(1L, "");
-    Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.any(), Mockito.any());
-  }
-
-
-  /**
-   * Test delete import table throw.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportTableThrow() throws EEAException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    doThrow(new EEAException()).when(deleteHelper).executeDeleteTableProcess(Mockito.any(),
-        Mockito.any());
-    dataSetControllerImpl.deleteImportTable(1L, "");
-
-  }
-
-
-  /**
-   * Test delete import table read only exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportTableReadOnlyException() throws Exception {
-    try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-          .thenReturn(true);
-
-      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-      Mockito.when(authentication.getName()).thenReturn("user");
-
-      dataSetControllerImpl.deleteImportTable(1L, "");
-    } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
-      throw e;
-    }
-  }
-
-  /**
-   * Test delete import table fixed number exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testDeleteImportTableFixedNumberException() throws Exception {
-    try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
-          Mockito.any())).thenReturn(true);
-
-      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-      Mockito.when(authentication.getName()).thenReturn("user");
-
-      dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190");
-    } catch (ResponseStatusException e) {
-      assertEquals(
-          String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, "5cf0e9b3b793310e9ceca190"),
-          e.getReason());
-      throw e;
-    }
   }
 
   /**
@@ -1269,4 +1136,16 @@ public class DataSetControllerImplTest {
 
   }
 
+  @Test
+  public void deleteImportDataTest() {
+    dataSetControllerImpl.deleteImportData(1L);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong());
+  }
+
+  @Test
+  public void deleteImportTableTest() {
+    dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190");
+    Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
+        Mockito.any());
+  }
 }
