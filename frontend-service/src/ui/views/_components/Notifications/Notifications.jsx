@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 
 import styles from './Notifications.module.scss';
 
+import logo from 'assets/images/logos/logo.png';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 
@@ -22,6 +23,14 @@ const Notifications = () => {
   const userContext = useContext(UserContext);
 
   let growlRef = useRef();
+
+  useEffect(() => {
+    if (!('Notification' in window)) {
+      console.log('This browser does not support desktop notification');
+    } else {
+      Notification.requestPermission();
+    }
+  }, []);
 
   useEffect(() => {
     const header = document.getElementById('header');
@@ -87,6 +96,34 @@ const Notifications = () => {
         life: notification.lifeTime,
         sticky: notification.fixed
       });
+      if (notification.type === 'error' || notification.type === 'success') {
+        console.log(
+          message,
+          logo,
+          DOMPurify.sanitize(notification.message, {
+            ALLOWED_TAGS: ['a'],
+            ALLOWED_ATTR: [],
+            KEEP_CONTENT: true
+          })
+        );
+        const options = {
+          body: DOMPurify.sanitize(notification.message, {
+            ALLOWED_TAGS: [],
+            ALLOWED_ATTR: [],
+            KEEP_CONTENT: true
+          }),
+          icon: logo,
+          dir: 'ltr'
+        };
+        const pushNotification = new Notification(
+          resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
+          options
+        );
+        pushNotification.onclick = function (event) {
+          window.focus();
+        };
+        console.log(pushNotification);
+      }
     });
 
     if (notificationContext.toShow.length > 0) {
