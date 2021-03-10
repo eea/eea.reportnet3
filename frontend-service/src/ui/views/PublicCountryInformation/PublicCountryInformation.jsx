@@ -295,11 +295,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   );
 
   const renderRedirectText = (text, url) => (
-    <a href={url} target="_blank" title={text}>
-      <span>
-        {text} <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
-      </span>
-    </a>
+    <span>
+      {text}{' '}
+      <a href={url} target="_blank" title={text}>
+        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
+      </a>
+    </span>
   );
 
   return (
