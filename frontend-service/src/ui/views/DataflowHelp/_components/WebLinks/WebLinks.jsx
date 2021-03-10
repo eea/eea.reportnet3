@@ -179,58 +179,62 @@ export const WebLinks = ({
   };
 
   const onSaveRecord = async () => {
+    checkIsCorrectInputValue('description');
+    checkIsCorrectInputValue('url');
+
     webLinksDispatch({ type: 'ON_SAVE_RECORD', payload: { webLink: webLinksState.webLink } });
+    if (!webLinksState.errors.url.hasErrors && !webLinksState.errors.description.hasErrors) {
+      if (isNil(webLinksState.webLink.id)) {
+        try {
+          const newWeblink = await WebLinkService.create(dataflowId, webLinksState.webLink);
 
-    if (isNil(webLinksState.webLink.id)) {
-      try {
-        const newWeblink = await WebLinkService.create(dataflowId, webLinksState.webLink);
+          if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
+            onLoadWebLinks();
+          }
 
-        if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
-          onLoadWebLinks();
+          onHideAddEditDialog();
+        } catch (error) {
+          console.error('Error on save new Weblink: ', error);
+
+          if (error.response.status === 400) {
+            notificationContext.add({
+              type: 'WRONG_WEBLINK_ERROR'
+            });
+          } else if (error.response.status === 409) {
+            notificationContext.add({
+              type: 'DUPLICATED_WEBLINK_ERROR'
+            });
+          }
+        } finally {
+          webLinksDispatch({ type: 'SET_IS_SUBMITTING', payload: { isSubmitting: false } });
         }
+      } else {
+        webLinksDispatch({ type: 'ON_EDIT_RECORD_START', payload: { editingId: webLinksState.webLink.id } });
+        try {
+          const weblinkToEdit = await WebLinkService.update(dataflowId, webLinksState.webLink);
 
-        onHideAddEditDialog();
-      } catch (error) {
-        console.error('Error on save new Weblink: ', error);
+          if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
+            onLoadWebLinks();
+          }
 
-        if (error.response.status === 400) {
-          notificationContext.add({
-            type: 'WRONG_WEBLINK_ERROR'
-          });
-        } else if (error.response.status === 409) {
-          notificationContext.add({
-            type: 'DUPLICATED_WEBLINK_ERROR'
-          });
-        }
-      } finally {
-        webLinksDispatch({ type: 'SET_IS_SUBMITTING', payload: { isSubmitting: false } });
-      }
-    } else {
-      webLinksDispatch({ type: 'ON_EDIT_RECORD_START', payload: { editingId: webLinksState.webLink.id } });
-      try {
-        const weblinkToEdit = await WebLinkService.update(dataflowId, webLinksState.webLink);
+          onHideAddEditDialog();
+        } catch (error) {
+          console.error('Error on update new Weblink: ', error);
 
-        if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
-          onLoadWebLinks();
-        }
-
-        onHideAddEditDialog();
-      } catch (error) {
-        console.error('Error on update new Weblink: ', error);
-
-        if (error.response.status === 400) {
-          notificationContext.add({
-            type: 'WRONG_WEBLINK_ERROR'
-          });
-        } else if (error.response.status === 409) {
-          notificationContext.add({
-            type: 'DUPLICATED_WEBLINK_ERROR'
+          if (error.response.status === 400) {
+            notificationContext.add({
+              type: 'WRONG_WEBLINK_ERROR'
+            });
+          } else if (error.response.status === 409) {
+            notificationContext.add({
+              type: 'DUPLICATED_WEBLINK_ERROR'
+            });
+          }
+        } finally {
+          webLinksDispatch({
+            type: 'ON_EDIT_RECORD_END'
           });
         }
-      } finally {
-        webLinksDispatch({
-          type: 'ON_EDIT_RECORD_END'
-        });
       }
     }
   };
@@ -419,11 +423,7 @@ export const WebLinks = ({
                 <Button
                   onClick={() => onSaveRecord()}
                   label={isNil(webLinksState.webLink.id) ? resources.messages['add'] : resources.messages['edit']}
-                  disabled={
-                    webLinksState.isSubmitting ||
-                    webLinksState.errors.description.hasErrors ||
-                    webLinksState.errors.url.hasErrors
-                  }
+                  disabled={webLinksState.isSubmitting}
                   icon={getButtonIcon(webLinksState.isSubmitting)}
                 />
                 <Button

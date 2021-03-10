@@ -27,7 +27,8 @@ export const webLinksReducer = (state, { type, payload }) => {
       return {
         ...state,
         isEditing: false,
-        isSubmitting: false
+        isSubmitting: false,
+        editingId: null
       };
 
     case 'ON_EDIT_RECORD_START':
@@ -45,9 +46,7 @@ export const webLinksReducer = (state, { type, payload }) => {
           url: { message: '', hasErrors: false }
         },
         isAddOrEditWeblinkDialogVisible: false,
-        webLink: emptyWebLink,
-        editingId: null,
-        deletingId: null
+        webLink: emptyWebLink
       };
 
     case 'ON_HIDE_DELETE_DIALOG':
