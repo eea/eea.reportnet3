@@ -1006,7 +1006,7 @@
     "dataflowId": "Dataflow id",
     "user": "User",
     "dataflowName": "Dataflow",
-    "duplicatedWeblinkError": "Duplicated description/URL. Please check it.",
+    "duplicatedWeblinkError": "Description and URL are duplicated. Please check it",
     "loadUsersListError": "Error loading users list",
     "loginFormUserError": "A user name is required",
     "loginFormPasswordError": "A password is required",
