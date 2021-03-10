@@ -45,7 +45,11 @@ export const webLinksReducer = (state, { type, payload }) => {
           url: { message: '', hasErrors: false }
         },
         isAddOrEditWeblinkDialogVisible: false,
-        webLink: emptyWebLink
+        webLink: emptyWebLink,
+        editingId: null,
+        deletingId: null
+      };
+
       };
 
     case 'ON_HIDE_DELETE_DIALOG':
