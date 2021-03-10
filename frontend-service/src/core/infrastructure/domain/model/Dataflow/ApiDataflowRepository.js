@@ -359,10 +359,6 @@ const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
 const getPublicDataflowsByCountryCode = async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
-  console.log('sortOrder apirepository', sortOrder);
-  console.log('numberRows apirepository', numberRows);
-  console.log('sortField apirepository', sortField);
-  console.log('pageNum apirepository', pageNum);
   // const publicDataflowsByCountryCodeDTOAux = await apiDataflow.getPublicDataflowsByCountryCode(
   //   countryCode,
   //   sortOrder,

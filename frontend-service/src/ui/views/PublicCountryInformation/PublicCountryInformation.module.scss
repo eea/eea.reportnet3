@@ -19,7 +19,7 @@
   align-items: center;
 
   .filesIcon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--documenticon-color);
 
     .cursorPointer {
@@ -27,8 +27,10 @@
     }
   }
 
-  .filesText {
-    margin-left: 0.5rem !important;
+  .restrictFromPublicIcon {
+    font-size: 1.3rem;
+    color: var(--statusBox-warning-color);
+    cursor: pointer;
   }
 }
 

@@ -263,8 +263,15 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     } else {
       return (
         <div className={styles.filesContainer}>
-          <FontAwesomeIcon className={styles.filesIcon} icon={AwesomeIcons('exclamationCircle')} />
-          <span className={styles.filesText}>{resources.messages['restrictFromPublicField']}</span>
+          <FontAwesomeIcon
+            className={styles.restrictFromPublicIcon}
+            icon={AwesomeIcons('exclamationCircle')}
+            data-tip
+            data-for={'restrincFromPublicField'}
+          />
+          <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrincFromPublicField'} place="top">
+            <span>{resources.messages['restrictFromPublicField']}</span>
+          </ReactTooltip>
         </div>
       );
     }
