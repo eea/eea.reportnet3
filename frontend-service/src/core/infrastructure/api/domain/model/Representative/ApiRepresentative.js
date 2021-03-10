@@ -3,8 +3,8 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const apiRepresentative = {
-  add: async (dataflowId, dataProviderGroupId, dataProviderId) => {
-    const response = await HTTPRequester.post({
+  add: async (dataflowId, dataProviderGroupId, dataProviderId) =>
+    await HTTPRequester.post({
       url: getUrl(RepresentativeConfig.add, {
         dataflowId
       }),
@@ -12,89 +12,57 @@ const apiRepresentative = {
         dataProviderId,
         dataProviderGroupId
       }
-    });
-    return response;
-  },
-
-  addLeadReporter: async (leadReporterAccount, representativeId) => {
-    return await HTTPRequester.post({
+    }),
+  addLeadReporter: async (leadReporterAccount, representativeId) =>
+    await HTTPRequester.post({
       url: getUrl(RepresentativeConfig.addLeadReporter, { representativeId }),
       data: { email: leadReporterAccount }
-    });
-  },
-
-  allDataProviders: async dataProviderGroupId => {
-    const response = await HTTPRequester.get({
+    }),
+  allDataProviders: async dataProviderGroupId =>
+    await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.allDataProviders, {
         dataProviderGroupId
       })
-    });
-    return response;
-  },
-
-  allRepresentatives: async dataflowId => {
-    const response = await HTTPRequester.get({
+    }),
+  allRepresentatives: async dataflowId =>
+    await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.allRepresentatives, {
         dataflowId: dataflowId
       })
-    });
-    return response;
-  },
-
-  deleteById: async representativeId => {
-    const response = await HTTPRequester.delete({
+    }),
+  deleteById: async representativeId =>
+    await HTTPRequester.delete({
       url: getUrl(RepresentativeConfig.deleteById, {
         representativeId
       })
-    });
-
-    return response;
-  },
-
-  deleteLeadReporter: async leadReporterId => {
-    return await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId }) });
-  },
-
-  downloadById: async dataflowId => {
-    const response = await HTTPRequester.download({
+    }),
+  deleteLeadReporter: async leadReporterId =>
+    await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId }) }),
+  downloadById: async dataflowId =>
+    await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentatives, { dataflowId })
-    });
-
-    return response.data;
-  },
-
-  downloadTemplateById: async dataProviderGroupId => {
-    const response = await HTTPRequester.download({
+    }),
+  downloadTemplateById: async dataProviderGroupId =>
+    await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentativesTemplate, { dataProviderGroupId })
-    });
-
-    return response.data;
-  },
-
-  getProviderTypes: async () => {
-    const response = await HTTPRequester.get({
+    }),
+  getProviderTypes: async () =>
+    await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.getProviderTypes, {})
-    });
-    return response;
-  },
-
-  updateDataProviderId: async (representativeId, dataProviderId) => {
-    const response = await HTTPRequester.update({
+    }),
+  updateDataProviderId: async (representativeId, dataProviderId) =>
+    await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateDataProviderId, {}),
       data: {
         id: representativeId,
         dataProviderId: dataProviderId
       }
-    });
-    return response;
-  },
-
-  updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId) => {
-    return await HTTPRequester.update({
+    }),
+  updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId) =>
+    await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateLeadReporter, {}),
       data: { email: leadReporterAccount, id: leadReporterId, representativeId }
-    });
-  }
+    })
 };
 
 export { apiRepresentative };
