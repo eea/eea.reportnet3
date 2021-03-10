@@ -144,6 +144,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows, isChangedPage) => {
     try {
+      if (sortOrder === -1) {
+        sortOrder = 0;
+      }
       let pageNum = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
       const response = await DataflowService.getPublicDataflowsByCountryCode(
         countryCode,
@@ -158,6 +161,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onSort = event => {
+    setSortOrder(event.sortOrder);
+    setSortField(event.sortField);
+    onLoadPublicCountryInformation(event.sortOrder, event.sortField, firstRow, numberRows);
   };
 
   const parseDataflows = dataflows => {
@@ -305,6 +314,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                   autoLayout={true}
                   first={firstRow}
                   onPage={onChangePage}
+                  onSort={onSort}
                   paginator={true}
                   paginatorRight={
                     <span>{`${resources.messages['totalRecords']} ${dataflows.length} ${resources.messages[
@@ -313,6 +323,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                   }
                   rows={10}
                   rowsPerPageOptions={[5, 10, 15]}
+                  sortField={sortField}
+                  sortOrder={sortOrder}
                   totalRecords={dataflows.length}
                   value={dataflows}>
                   {renderColumns(dataflows)}

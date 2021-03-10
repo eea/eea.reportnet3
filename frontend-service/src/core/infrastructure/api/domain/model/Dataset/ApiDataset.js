@@ -96,6 +96,10 @@ export const apiDataset = {
     if (asc === -1) {
       asc = 0;
     }
+    console.log('pageNum', pageNum);
+    console.log('pageSize', pageSize);
+    console.log('asc', asc);
+    console.log('sortField', sortField);
     const response = await HTTPRequester.get({
       url: getUrl(DatasetConfig.listValidations, {
         datasetId: datasetId,
