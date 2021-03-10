@@ -1012,6 +1012,7 @@
     "loginFormPasswordError": "A password is required",
     "loginFormError": "Incorrect username or password",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
-    "releaseStartEvent": "Releasing data to data collection."
+    "releaseStartEvent": "Releasing data to data collection.",
+    "dataflowNameValidationMax":"Dataflow name is too long"
   }
 }
