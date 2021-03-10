@@ -474,6 +474,28 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflowService.getPublicDataflows();
   }
 
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param sortField the sort field
+   * @param asc the asc
+   * @return the public dataflows by country
+   */
+  @Override
+  @GetMapping("/public/country/{countryCode}")
+  public List<DataflowPublicVO> getPublicDataflowsByCountry(
+      @ApiParam(value = "Country Code",
+          example = "AL") @PathVariable("countryCode") String countryCode,
+      @RequestParam(value = "pageNum", defaultValue = "1", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+      @RequestParam(value = "sortField", required = false) String sortField,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
+    return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
+        pageSize);
+  }
 
   /**
    * Update data flow public status.
@@ -522,6 +544,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     return result;
   }
+
 
 
   /**

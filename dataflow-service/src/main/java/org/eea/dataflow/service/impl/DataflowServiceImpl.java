@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -35,11 +37,13 @@ import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -140,6 +144,9 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset Test controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDataSetControllerZuul;
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
 
   /**
@@ -560,6 +567,26 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowPublicList;
   }
 
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  @Override
+  public List<DataflowPublicVO> getPublicDataflowsByCountry(String countryCode, String header,
+      boolean asc, int page, int pageSize) {
+    // get the entity
+    List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
+        .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
+    List<DataProviderVO> providerId =
+        representativeControllerZuul.findDataProvidersByCode(countryCode);
+    setReportings(dataflowPublicList, providerId);
+
+    // sort and paging
+    sortPublicDataflows(dataflowPublicList, header, asc);
+    return getPage(dataflowPublicList, page, pageSize);
+  }
+
 
   /**
    * Gets the user roles.
@@ -606,6 +633,116 @@ public class DataflowServiceImpl implements DataflowService {
 
     findObligationPublicDataflow(dataflowPublicVO);
     return dataflowPublicVO;
+  }
+
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Override
+  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
+    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
+  }
+
+
+  /**
+   * Sets the reportings.
+   *
+   * @param dataflowPublicList the dataflow public list
+   * @param providerId the provider id
+   */
+  private void setReportings(List<DataflowPublicVO> dataflowPublicList,
+      List<DataProviderVO> providerId) {
+    dataflowPublicList.stream().forEach(dataflow -> {
+      findObligationPublicDataflow(dataflow);
+      for (DataProviderVO dataProviderVO : providerId) {
+        List<ReportingDatasetPublicVO> reportings =
+            datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowIdAndProviderId(
+                dataflow.getId(), dataProviderVO.getId());
+        if (!reportings.isEmpty()) {
+          dataflow.setReportingDatasets(reportings);
+        }
+      }
+    });
+  }
+
+  /**
+   * Sort public dataflows.
+   *
+   * @param dataflowPublicList the dataflow public list
+   * @param header the header
+   * @param asc the asc
+   */
+  private void sortPublicDataflows(List<DataflowPublicVO> dataflowPublicList, String header,
+      boolean asc) {
+    Comparator<DataflowPublicVO> compare = null;
+    // get compare
+    if (null != header) {
+      switch (header) {
+        case "name":
+          compare = Comparator.comparing(DataflowPublicVO::getName)
+              .thenComparing(DataflowPublicVO::getName);
+          break;
+        case "obligation":
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle()
+              .compareTo(o2.getObligation().getOblTitle());
+          break;
+        case "legalInstrument":
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle()
+              .compareTo(o2.getObligation().getOblTitle());
+          break;
+        case "status":
+          compare = Comparator.comparing(DataflowPublicVO::isReleasable)
+              .thenComparing(DataflowPublicVO::isReleasable);
+          break;
+        case "expirationDate":
+          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate)
+              .thenComparing(DataflowPublicVO::getDeadlineDate);
+          break;
+        case "isReleased":
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getReportingDatasets().get(0)
+              .getIsReleased().compareTo(o2.getReportingDatasets().get(0).getIsReleased());
+          break;
+        case "releaseDate":
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getReportingDatasets().get(0)
+              .getDateReleased().compareTo(o2.getReportingDatasets().get(0).getDateReleased());
+          break;
+
+      }
+
+      // order by
+      if (null != compare && asc) {
+        Collections.sort(dataflowPublicList, compare);
+      } else if (null != compare && asc) {
+        Collections.sort(dataflowPublicList, compare.reversed());
+      }
+    }
+  }
+
+  /**
+   * Gets the page.
+   *
+   * @param <T> the generic type
+   * @param sourceList the source list
+   * @param page the page
+   * @param pageSize the page size
+   * @return the page
+   */
+  private static <T> List<T> getPage(List<T> sourceList, int page, int pageSize) {
+    if (pageSize <= 0 || page <= 0) {
+      throw new IllegalArgumentException("invalid page size or PageNum: " + pageSize + "-" + page);
+    }
+
+    int fromIndex = (page - 1) * pageSize;
+    if (sourceList == null || sourceList.size() <= fromIndex) {
+      return Collections.emptyList();
+    }
+
+    // toIndex exclusive
+    return sourceList.subList(fromIndex, Math.min(fromIndex + pageSize, sourceList.size()));
   }
 
   /**
@@ -822,14 +959,4 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
-  /**
-   * Update data flow public status.
-   *
-   * @param dataflowId the dataflow id
-   * @param showPublicInfo the show public info
-   */
-  @Override
-  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
-    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
-  }
 }
