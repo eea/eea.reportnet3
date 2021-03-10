@@ -7,25 +7,33 @@ import { apiIntegration } from 'core/infrastructure/api/domain/model/Integration
 import { Integration } from 'core/domain/model/Integration/Integration';
 
 const all = async (dataflowId, datasetSchemaId) => {
-  return parseIntegrationsList(await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId, dataflowId)));
+  const integrationsDTO = await apiIntegration.all(parseDatasetSchemaId(datasetSchemaId, dataflowId));
+  return parseIntegrationsList(integrationsDTO.data);
 };
 
-const allExtensionsOperations = async (dataflowId, datasetSchemaId) =>
-  parseIntegrationsOperationsExtensionsList(
-    await apiIntegration.allExtensionsOperations(parseDatasetSchemaId(datasetSchemaId, dataflowId))
+const allExtensionsOperations = async (dataflowId, datasetSchemaId) => {
+  const integrationsDTO = await apiIntegration.allExtensionsOperations(
+    parseDatasetSchemaId(datasetSchemaId, dataflowId)
   );
-
+  return parseIntegrationsOperationsExtensionsList(integrationsDTO.data);
+};
 const create = async integration => apiIntegration.create(parseManageIntegration(integration));
 
 const deleteById = async (dataflowId, integrationId) => await apiIntegration.deleteById(dataflowId, integrationId);
 
-const findEUDatasetIntegration = async datasetSchemaId =>
-  parseIntegration(await apiIntegration.findEUDatasetIntegration(datasetSchemaId));
+const findEUDatasetIntegration = async datasetSchemaId => {
+  const eUDatasetIntegrationsDTO = await apiIntegration.findEUDatasetIntegration(datasetSchemaId);
+  return parseIntegration(eUDatasetIntegrationsDTO.data);
+};
+const getProcesses = async (repositoryName, datasetId) => {
+  const processes = await apiIntegration.getProcesses(repositoryName, datasetId);
+  return parseProcessList(processes.data);
+};
 
-const getProcesses = async (repositoryName, datasetId) =>
-  parseProcessList(await apiIntegration.getProcesses(repositoryName, datasetId));
-
-const getRepositories = async datasetId => parseRepositoryList(await apiIntegration.getRepositories(datasetId));
+const getRepositories = async datasetId => {
+  const repositories = await apiIntegration.getRepositories(datasetId);
+  return parseRepositoryList(repositories.data);
+};
 
 const update = async integration => apiIntegration.update(parseManageIntegration(integration));
 
@@ -123,9 +131,8 @@ const parseKeyValue = list => {
   return listDTO;
 };
 
-const runIntegration = async (integrationId, datasetId, replaceData) => {
-  return await apiIntegration.runIntegration(integrationId, datasetId, replaceData);
-};
+const runIntegration = async (integrationId, datasetId, replaceData) =>
+  await apiIntegration.runIntegration(integrationId, datasetId, replaceData);
 
 export const ApiIntegrationRepository = {
   all,

@@ -13,6 +13,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -24,12 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
-import {
-  isDuplicatedLeadReporter,
-  isValidEmail,
-  onExportLeadReportersTemplate,
-  parseLeadReporters
-} from './_functions/Utils/representativeUtils';
+import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 const RepresentativesList = ({
@@ -268,6 +264,22 @@ const RepresentativesList = ({
     }
   };
 
+  const onExportLeadReportersTemplate = async () => {
+    try {
+      const { data } = await RepresentativeService.downloadTemplateById(
+        formState.selectedDataProviderGroup?.dataProviderGroupId
+      );
+      if (!isNil(data)) {
+        DownloadFile(data, `GroupId_${formState.selectedDataProviderGroup?.dataProviderGroupId}_Template.csv`);
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({
+        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
+      });
+    }
+  };
+
   const onKeyDown = (event, representativeId, dataProviderId, leadReporter) => {
     if (TextUtils.areEquals(event.key, 'Enter')) {
       onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
@@ -428,16 +440,7 @@ const RepresentativesList = ({
             disabled={isEmpty(formState.selectedDataProviderGroup)}
             icon={'export'}
             label={resources.messages['exportLeadReportersTemplate']}
-            onClick={() => {
-              try {
-                onExportLeadReportersTemplate(formState.selectedDataProviderGroup);
-              } catch (error) {
-                console.error(error);
-                notificationContext.add({
-                  type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
-                });
-              }
-            }}
+            onClick={onExportLeadReportersTemplate}
           />
         </div>
       </div>

@@ -731,7 +731,7 @@
     "releaseBlockedEvent": "Releasing process is being blocked by another action, please wait",
     "releaseBlockersFailedEvent": "You can't release data with <strong>blocker</strong> errors. Please check it and try again.",
     "releaseButtonTooltip": "Reporting is closed for this dataflow - If necessary, contact helpdesk for information about resubmission",
-    "releaseCompletedEvent": "<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> released successfully",
+    "releaseCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
     "released": "Released",
     "releaseDashboard": "Release status dashboard",
     "releaseDataCollection": "Release to data collection",
@@ -1012,6 +1012,8 @@
     "loadUsersListError": "Error loading users list",
     "loginFormUserError": "A user name is required",
     "loginFormPasswordError": "A password is required",
-    "loginFormError": "Incorrect username or password"
+    "loginFormError": "Incorrect username or password",
+    "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
+    "releaseStartEvent": "Releasing data to data collection."
   }
 }
