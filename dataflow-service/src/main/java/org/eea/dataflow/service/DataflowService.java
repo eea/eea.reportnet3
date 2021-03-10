@@ -196,4 +196,12 @@ public interface DataflowService {
    * @return the user roles
    */
   List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList);
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @return the public dataflows
+   */
+  List<DataflowPublicVO> getPublicDataflowsByCountry(String countryCode, String header, boolean asc,
+      int page, int pageSize);
 }

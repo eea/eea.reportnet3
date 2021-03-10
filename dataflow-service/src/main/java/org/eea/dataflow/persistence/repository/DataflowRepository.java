@@ -120,6 +120,9 @@ public interface DataflowRepository
    */
   List<Dataflow> findByShowPublicInfoTrue();
 
+  @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode ")
+  List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
+
   /**
    * Find by id and available true.
    *

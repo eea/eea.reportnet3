@@ -457,4 +457,22 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public List<DataProviderVO> findDataProvidersByCode(@PathVariable("code") String code) {
     return representativeService.findDataProvidersByCode(code);
   }
+
+  /**
+   * Find representatives by id data flow and provider id list.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerIdList the provider id list
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/private/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Representatives based on a dataflowId and providerId List",
+      response = RepresentativeControllerZuul.class, responseContainer = "List", hidden = true)
+  public List<RepresentativeVO> findRepresentativesByDataFlowIdAndProviderIdList(
+      @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerIdList") List<Long> providerIdList) {
+    return representativeService.findRepresentativesByDataflowIdAndDataproviderList(dataflowId,
+        providerIdList);
+  }
 }
