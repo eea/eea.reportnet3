@@ -1,7 +1,6 @@
 import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './Dataflows.module.scss';
