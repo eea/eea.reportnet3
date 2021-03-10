@@ -8,8 +8,8 @@ import isUndefined from 'lodash/isUndefined';
 import { apiDataset } from 'core/infrastructure/api/domain/model/Dataset';
 import { apiValidation } from 'core/infrastructure/api/domain/model/Validation';
 
-import { DatasetError } from 'core/domain/model/Dataset/DatasetError/DatasetError';
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { DatasetError } from 'core/domain/model/Dataset/DatasetError/DatasetError';
 import { DatasetTable } from 'core/domain/model/Dataset/DatasetTable/DatasetTable';
 import { DatasetTableField } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableField/DatasetTableField';
 import { DatasetTableRecord } from 'core/domain/model/Dataset/DatasetTable/DatasetRecord/DatasetTableRecord';
@@ -599,8 +599,8 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.required = record.required;
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.validExtensions = record.validExtensions;
-  const recordUpdated = await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
-  return recordUpdated;
+
+  return await apiDataset.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
 
 const updateRecordsById = async (datasetId, record, updateInCascade) => {
@@ -652,7 +652,7 @@ const updateTableDescriptionDesign = async (
   tableSchemaNotEmpty,
   tableSchemaFixedNumber
 ) => {
-  const tableSchemaUpdated = await apiDataset.updateTableDescriptionDesign(
+  return await apiDataset.updateTableDescriptionDesign(
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
@@ -661,18 +661,13 @@ const updateTableDescriptionDesign = async (
     tableSchemaNotEmpty,
     tableSchemaFixedNumber
   );
-  return tableSchemaUpdated;
 };
 
 const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) => {
-  const tableSchemaUpdated = await apiDataset.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
-  return tableSchemaUpdated;
+  return await apiDataset.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
 };
 
-const validateDataById = async datasetId => {
-  const dataValidation = await apiDataset.validateById(datasetId);
-  return dataValidation;
-};
+const validateDataById = async datasetId => await apiDataset.validateById(datasetId);
 
 const validateSqlRules = async (datasetId, datasetSchemaId) => {
   return await apiDataset.validateSqlRules(datasetId, datasetSchemaId);
