@@ -249,7 +249,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               onClick={() => onFileDownload(rowData.id, publicFileName.dataProviderId, publicFileName.fileName)}>
               <FontAwesomeIcon
                 className={styles.cursorPointer}
-                icon={AwesomeIcons('xlsx')}
+                icon={AwesomeIcons('7z')}
                 data-tip
                 data-for={publicFileName.fileName}
               />
