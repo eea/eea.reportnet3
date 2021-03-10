@@ -193,12 +193,7 @@ export const FieldsDesigner = ({
     if (checked) {
       setToPrefill(true);
     }
-    updateTableDesign({
-      readOnly: checked,
-      toPrefill: checked === false ? toPrefill : true,
-      fixedNumber,
-      notEmpty
-    });
+    updateTableDesign({ fixedNumber, notEmpty, readOnly: checked, toPrefill: checked === false ? toPrefill : true });
   };
 
   const onChangeToPrefill = checked => {
@@ -212,10 +207,10 @@ export const FieldsDesigner = ({
       setToPrefill(true);
     }
     updateTableDesign({
-      readOnly: isReadOnlyTable,
-      toPrefill: checked === false ? toPrefill : true,
       fixedNumber: checked,
-      notEmpty
+      notEmpty,
+      readOnly: isReadOnlyTable,
+      toPrefill: checked === false ? toPrefill : true
     });
   };
 
@@ -248,36 +243,25 @@ export const FieldsDesigner = ({
 
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
-      const response = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
+      const { status } = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
 
-      if (response.status >= 200 && response.status <= 299) {
+      if (status >= 200 && status <= 299) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
         onChangeFields(inmFields, TextUtils.areEquals(deletedFieldType, 'LINK'), table.tableSchemaId);
         setFields(inmFields);
-      } else {
-        console.error('Error during field delete');
       }
     } catch (error) {
       console.error('Error during field delete');
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       }
-    } finally {
     }
   };
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        label={resources.messages['ok']}
-        icon="check"
-        onClick={() => {
-          setIsErrorDialogVisible(false);
-        }}
-      />
+      <Button icon="check" label={resources.messages['ok']} onClick={() => setIsErrorDialogVisible(false)} />
     </div>
   );
 
@@ -312,8 +296,8 @@ export const FieldsDesigner = ({
     }
 
     link.referencedField = {
-      fieldSchemaId: referencedField.idPk,
       datasetSchemaId: referencedField.idDatasetSchema,
+      fieldSchemaId: referencedField.idPk,
       tableSchemaId: tableSchema
     };
     return link;
@@ -327,8 +311,8 @@ export const FieldsDesigner = ({
             description: field.description,
             field: field['fieldId'],
             header: field['name'],
-            pk: field['pk'],
             maxSize: field['maxSize'],
+            pk: field['pk'],
             pkHasMultipleValues: field['pkHasMultipleValues'],
             readOnly: field['readOnly'],
             recordId: field['recordId'],
@@ -352,6 +336,7 @@ export const FieldsDesigner = ({
           isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
+          onChangeIsValidationSelected={onChangeIsValidationSelected}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           recordPositionId={recordPositionId}
@@ -360,7 +345,6 @@ export const FieldsDesigner = ({
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
-          onChangeIsValidationSelected={onChangeIsValidationSelected}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}
           tableName={table.tableSchemaName}
@@ -393,10 +377,10 @@ export const FieldsDesigner = ({
       return <Spinner className={styles.positioning} />;
     } else {
       return (
-        <>
+        <Fragment>
           {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
           {!viewType['tabularData'] && renderNewField()}
-        </>
+        </Fragment>
       );
     }
   };
@@ -538,7 +522,7 @@ export const FieldsDesigner = ({
 
   const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     try {
-      const tableUpdated = await DatasetService.updateTableDescriptionDesign(
+      const { status } = await DatasetService.updateTableDescriptionDesign(
         toPrefill,
         table.tableSchemaId,
         tableDescriptionValue,
@@ -547,9 +531,7 @@ export const FieldsDesigner = ({
         notEmpty,
         fixedNumber
       );
-      if (!tableUpdated) {
-        console.error('Error during table description update');
-      } else {
+      if (status >= 200 && status <= 299) {
         onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
       }
     } catch (error) {

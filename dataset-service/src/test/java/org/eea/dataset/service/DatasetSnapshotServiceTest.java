@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -297,7 +298,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString());
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -312,8 +313,8 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L);
+        Mockito.any(), Mockito.any());
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString());
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -331,7 +332,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L);
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString());
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -432,7 +433,8 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
-    datasetSnapshotService.releaseSnapshot(1L, 1L);
+    datasetSnapshotService.releaseSnapshot(1L, 1L,
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString());
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
 
@@ -472,7 +474,8 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
-    datasetSnapshotService.releaseSnapshot(1L, 1L);
+    datasetSnapshotService.releaseSnapshot(1L, 1L,
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString());
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
 
@@ -499,7 +502,8 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(new DataProviderVO());
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
-    datasetSnapshotService.releaseSnapshot(1L, 1L);
+    datasetSnapshotService.releaseSnapshot(1L, 1L,
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString());
     Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
@@ -518,7 +522,8 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(metabase);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
-    datasetSnapshotService.releaseSnapshot(1L, 1L);
+    datasetSnapshotService.releaseSnapshot(1L, 1L,
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString());
     Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
@@ -548,7 +553,8 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
-    datasetSnapshotService.releaseSnapshot(1L, 1L);
+    datasetSnapshotService.releaseSnapshot(1L, 1L,
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString());
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
 
@@ -599,7 +605,7 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
     doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
     when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());

@@ -98,13 +98,7 @@ const all = async userData => {
     }
   }
 
-  const groupByUserRequestStatus = CoreUtils.onGroupBy('userRequestStatus');
-
-  const dataflowsData = groupByUserRequestStatus(dataflows);
-
-  const allDataflows = cloneDeep(DataflowConf.userRequestStatus);
-  Object.keys(dataflowsData).forEach(key => (allDataflows[key.toLowerCase()] = parseDataflowDTOs(dataflowsData[key])));
-  dataflowsDTO.data = allDataflows;
+  dataflowsDTO.data = parseDataflowDTOs(dataflows);
 
   return dataflowsDTO;
 };
@@ -425,7 +419,6 @@ const parseDataflowDTO = dataflowDTO =>
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
-    userRequestStatus: dataflowDTO.userRequestStatus,
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });

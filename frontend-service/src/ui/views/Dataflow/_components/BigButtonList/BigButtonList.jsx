@@ -327,7 +327,6 @@ export const BigButtonList = ({
   const onLoadEuDatasetIntegration = async datasetSchemaId => {
     try {
       const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
-
       setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
@@ -351,8 +350,8 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      const response = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
-      if (response >= 200 && response <= 299) {
+      const { status } = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
+      if (status >= 200 && status <= 299) {
         onUpdateData();
         setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
       }

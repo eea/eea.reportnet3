@@ -90,9 +90,7 @@ export const WebformRecord = ({
     } catch (error) {
       console.error('error', error);
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
         const {
           dataflow: { name: dataflowName },
