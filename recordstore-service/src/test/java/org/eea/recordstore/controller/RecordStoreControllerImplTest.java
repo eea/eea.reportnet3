@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -198,10 +199,11 @@ public class RecordStoreControllerImplTest {
   @Test
   public void testCreateSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
-    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L);
+    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L,
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString());
 
     Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   @Test

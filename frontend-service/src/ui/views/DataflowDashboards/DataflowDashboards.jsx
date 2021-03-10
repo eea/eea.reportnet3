@@ -50,18 +50,16 @@ export const DataflowDashboards = withRouter(
     }, []);
 
     const getDataflowName = async () => {
-      const dataflowData = await DataflowService.dataflowDetails(dataflowId);
-      setDataflowName(dataflowData.name);
+      const { data } = await DataflowService.dataflowDetails(dataflowId);
+      setDataflowName(data.name);
     };
 
     const onLoadDataSchemas = async () => {
       try {
-        const dataflow = await DataflowService.reporting(dataflowId);
-        setDataSchema(dataflow.designDatasets);
+        const { data } = await DataflowService.reporting(dataflowId);
+        setDataSchema(data.designDatasets);
         setDashboardInitialValues(
-          dataflow.designDatasets.forEach(schema => {
-            dashboardInitialValues[schema.datasetSchemaId] = true;
-          })
+          data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))
         );
       } catch (error) {
         if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {

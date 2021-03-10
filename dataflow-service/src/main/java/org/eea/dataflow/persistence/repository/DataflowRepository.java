@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.eea.dataflow.persistence.domain.Dataflow;
-import org.eea.dataflow.persistence.domain.DataflowWithRequestType;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,32 +25,6 @@ public interface DataflowRepository
    * @return the list
    */
   List<Dataflow> findByStatus(TypeStatusEnum status);
-
-  /**
-   * Find pending accepted.
-   *
-   * @param userIdRequester the user id requester
-   * @return the list
-   */
-  @Query("SELECT df as dataflow, ur.requestType as typeRequestEnum, ur.id as requestId from Dataflow df "
-      + "JOIN df.userRequests ur WHERE ur.requestType in ('PENDING') "
-      + " AND ur.userRequester = :idRequester AND df.status not in ('COMPLETED') ORDER BY df.deadlineDate ASC")
-  List<DataflowWithRequestType> findPending(@Param("idRequester") String userIdRequester);
-
-
-
-  /**
-   * Find by status and user requester.
-   *
-   * @param typeRequest the type request
-   * @param userIdRequester the user id requester
-   * @return the list
-   */
-  @Query("SELECT df from Dataflow df JOIN df.userRequests ur WHERE ur.requestType = :type "
-      + " AND ur.userRequester = :idRequester ORDER BY df.deadlineDate ASC")
-  List<Dataflow> findByStatusAndUserRequester(@Param("type") TypeRequestEnum typeRequest,
-      @Param("idRequester") String userIdRequester);
-
 
   /**
    * Find by name ignore case.

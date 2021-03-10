@@ -34,11 +34,11 @@ export const UserProvider = ({ children }) => {
         hasPermission: (permissions, entity) => {
           let allow = false;
           if (isUndefined(entity)) {
-            if (permissions.filter(permission => userState.accessRole.includes(permission)).length > 0) allow = true;
+            allow = permissions.some(permission => userState.accessRole.includes(permission));
           } else {
             permissions.forEach(permission => {
               const role = `${entity}-${permission}`;
-              if (userState.contextRoles.includes(role)) allow = true;
+              allow = userState.contextRoles.includes(role);
             });
           }
           return allow;
@@ -48,14 +48,14 @@ export const UserProvider = ({ children }) => {
           if (isNil(userState.contextRoles)) {
             return false;
           }
-          let hasPermissions = false;
-          allowedPermissions.forEach(allowedPermission => {
-            const permission = `${entity}${entityID}-${allowedPermission}`;
-            if (userState.contextRoles.includes(permission)) {
-              hasPermissions = true;
+          return allowedPermissions.some(allowedPermission => {
+            if (isNil(entityID)) {
+              return userState.contextRoles.some(role => role.startsWith(entity) && role.endsWith(allowedPermission));
+            } else {
+              const permission = `${entity}${entityID}-${allowedPermission}`;
+              return userState.contextRoles.includes(permission);
             }
           });
-          return hasPermissions;
         },
 
         getUserRole: entity => {

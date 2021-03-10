@@ -732,7 +732,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      const fieldUpdated = await DatasetService.updateRecordFieldDesign(datasetId, {
+      const { status } = await DatasetService.updateRecordFieldDesign(datasetId, {
         codelistItems,
         description,
         fieldSchemaId,
@@ -753,10 +753,7 @@ export const FieldDesigner = ({
         validExtensions
       });
 
-      if (!fieldUpdated) {
-        console.error('Error during field Update');
-        dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
-      } else {
+      if (status >= 200 && status <= 299) {
         onFieldUpdate({
           codelistItems,
           description,
@@ -778,6 +775,9 @@ export const FieldDesigner = ({
           type,
           validExtensions
         });
+      } else {
+        console.error('Error during field Update');
+        dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);

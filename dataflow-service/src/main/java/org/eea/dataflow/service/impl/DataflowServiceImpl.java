@@ -17,12 +17,10 @@ import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
-import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
-import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -33,6 +31,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -118,10 +117,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /** The user request repository. */
-  @Autowired
-  private UserRequestRepository userRequestRepository;
-
   /** The contributor repository. */
   @Autowired
   private ContributorRepository contributorRepository;
@@ -146,9 +141,13 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
 
+  /** The dataset Test controller zuul. */
+  @Autowired
+  private TestDatasetControllerZuul testDataSetControllerZuul;
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
 
   /**
    * Gets the by id.
@@ -210,7 +209,6 @@ public class DataflowServiceImpl implements DataflowService {
             .map(ResourceAccessVO::getId).collect(Collectors.toList()))
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-          dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
           List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
           if (!map.isEmpty() && null != datasetsStatusList) {
             setReportingDatasetStatus(datasetsStatusList, dataflowVO);
@@ -335,38 +333,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type)
       throws EEAException {
-    List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
+    List<Dataflow> dataflows = new ArrayList();
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
     return dataflowNoContentMapper.entityListToClass(dataflows);
-  }
-
-  /**
-   * Update user request status.
-   *
-   * @param userRequestId the user request id
-   * @param type the type
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type)
-      throws EEAException {
-
-    userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
-    LOG.info("Update the Metabase request status of the requestId: {}. New status: {}",
-        userRequestId, type);
-    if (TypeRequestEnum.ACCEPTED.equals(type)) {
-      // add the resource to the user id in keycloak
-      Long dataflowId = 0L;
-      UserRequest ur = userRequestRepository.findById(userRequestId).orElse(new UserRequest());
-      if (ur.getDataflows() != null) {
-        for (Dataflow df : ur.getDataflows()) {
-          dataflowId = df.getId();
-        }
-        userManagementControllerZull.addUserToResource(dataflowId,
-            ResourceGroupEnum.DATAFLOW_LEAD_REPORTER);
-        LOG.info("The dataflow {} has been added into keycloak", dataflowId);
-      }
-    }
   }
 
   /**
@@ -891,6 +860,8 @@ public class DataflowServiceImpl implements DataflowService {
         .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
     // and the eu datasets
     datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
+    // add the test datasets
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
@@ -913,6 +884,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Add the EU datasets
     dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the Test datasets
+    dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
         .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives

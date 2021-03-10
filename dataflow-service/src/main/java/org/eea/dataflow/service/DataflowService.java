@@ -80,18 +80,6 @@ public interface DataflowService {
    */
   List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
 
-
-  /**
-   * Update user request status.
-   *
-   * @param userRequestId the user request id
-   * @param type the type
-   *
-   * @throws EEAException the EEA exception
-   */
-  void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
-
-
   /**
    * Adds the contributor to dataflow.
    *

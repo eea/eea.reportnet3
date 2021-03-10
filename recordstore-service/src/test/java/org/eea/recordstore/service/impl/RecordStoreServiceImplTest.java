@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -229,7 +230,7 @@ public class RecordStoreServiceImplTest {
   @Test(expected = UnsupportedOperationException.class)
   public void createDataSnapshotTest()
       throws RecordStoreAccessException, SQLException, IOException {
-    recordStoreServiceImpl.createDataSnapshot(1L, 1L, 1L);
+    recordStoreServiceImpl.createDataSnapshot(1L, 1L, 1L, new Date().toString());
   }
 
   /**

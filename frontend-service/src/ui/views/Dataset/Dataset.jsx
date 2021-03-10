@@ -280,8 +280,8 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getFileExtensions = async () => {
     try {
-      const response = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
-      setExternalOperationsList(ExtensionUtils.groupOperations('operation', response));
+      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);      
+      setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
@@ -313,13 +313,10 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getDataflowName = async () => {
     try {
-      const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
-      setDataflowName(dataflowData.name);
+      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
+      setDataflowName(data.name);
     } catch (error) {
-      notificationContext.add({
-        type: 'DATAFLOW_DETAILS_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
   };
 
@@ -347,16 +344,12 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onConfirmDelete = async () => {
     try {
-      notificationContext.add({
-        type: 'DELETE_DATASET_DATA_INIT'
-      });
+      notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       setDeleteDialogVisible(false);
       await DatasetService.deleteDataById(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
         const {
           dataflow: { name: dataflowName },
@@ -364,12 +357,7 @@ export const Dataset = withRouter(({ match, history }) => {
         } = await getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName
-          }
+          content: { dataflowId, datasetId, dataflowName, datasetName }
         });
       }
     }
@@ -518,8 +506,8 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onLoadDataflow = async () => {
     try {
-      const dataflow = await DataflowService.reporting(match.params.dataflowId);
-      const dataset = dataflow.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      const { data } = await DataflowService.reporting(match.params.dataflowId);
+      const dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       setIsDatasetReleased(dataset[0].isReleased);
 
       setDataset(dataset[0]);
@@ -530,12 +518,7 @@ export const Dataset = withRouter(({ match, history }) => {
       } = await getMetadata({ dataflowId, datasetId });
       notificationContext.add({
         type: 'REPORTING_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName
-        }
+        content: { dataflowId, datasetId, dataflowName, datasetName }
       });
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -861,41 +844,37 @@ export const Dataset = withRouter(({ match, history }) => {
                 />
                 {!isEmpty(externalOperationsList.importOtherSystems) && (
                   <Menu
+                    id="importDataSetMenu"
                     model={importButtonsList}
+                    onShow={e => getPosition(e)}
                     popup={true}
                     ref={importMenuRef}
-                    id="importDataSetMenu"
-                    onShow={e => {
-                      getPosition(e);
-                    }}
                   />
                 )}
               </Fragment>
             )}
             <Button
-              id="buttonExportDataset"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
               icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+              id="buttonExportDataset"
               label={resources.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
               className={styles.exportSubmenu}
+              id="exportDataSetMenu"
               model={exportButtonsList}
+              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
-              id="exportDataSetMenu"
-              onShow={e => {
-                getPosition(e);
-              }}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
                 !hasWritePermissions ? null : 'p-button-animated-blink dataset-deleteDataset-help-step'
               }`}
+              disabled={!hasWritePermissions}
               icon={'trash'}
               label={resources.messages['deleteDatasetData']}
-              disabled={!hasWritePermissions}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>

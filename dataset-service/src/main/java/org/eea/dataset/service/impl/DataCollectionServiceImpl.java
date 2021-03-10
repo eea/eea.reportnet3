@@ -20,12 +20,14 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
+import org.eea.dataset.persistence.metabase.domain.TestDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
@@ -95,6 +97,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The Constant NAME_EU: {@value}. */
   private static final String NAME_EU = "EU Dataset - %s";
 
+  /** The Constant NAME_TEST: {@value}. */
+  private static final String NAME_TEST = "Test Dataset - %s";
+
   /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
@@ -111,12 +116,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String INSERT_EU_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
 
+  /** The Constant INSERT_TEST_INTO_DATASET: {@value}. */
+  private static final String INSERT_TEST_INTO_DATASET =
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
+
   /** The Constant INSERT_DC_INTO_DATA_COLLECTION: {@value}. */
   private static final String INSERT_DC_INTO_DATA_COLLECTION =
       "insert into data_collection (id, due_date) values (%d, '%s')";
 
   /** The Constant INSERT_EU_INTO_EU_DATASET: {@value}. */
   private static final String INSERT_EU_INTO_EU_DATASET = "insert into eu_dataset (id) values (%d)";
+
+  /** The Constant INSERT_TEST_INTO_TEST_DATASET: {@value}. */
+  private static final String INSERT_TEST_INTO_TEST_DATASET =
+      "insert into test_dataset (id) values (%d)";
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
@@ -203,6 +216,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The eu dataset repository. */
   @Autowired
   private EUDatasetRepository euDatasetRepository;
+
+  /** The test dataset repository. */
+  @Autowired
+  private TestDatasetRepository testDatasetRepository;
 
   /** The reporting dataset repository. */
   @Autowired
@@ -488,16 +505,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         statement.addBatch(
             String.format(UPDATE_REPRESENTATIVE_HAS_DATASETS, true, representative.getId()));
       }
+      Map<Long, String> datasetIdsAndSchemaIdsFromTEST = new HashMap<>();
+      List<Long> testDatasetIds = new ArrayList<>();
 
       List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
       List<FKDataCollection> newDCsRegistry = new ArrayList<>();
       List<FKDataCollection> newEUsRegistry = new ArrayList<>();
+      List<FKDataCollection> newTESTsRegistry = new ArrayList<>();
       List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
       for (DesignDatasetVO design : designs) {
         RulesSchemaVO rulesSchemaVO =
             rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema());
         List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
         if (isCreation) {
+
           // 6. Create DataCollection in metabase
           Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
           dataCollectionIds.add(dataCollectionId);
@@ -510,21 +531,32 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           datasetIdsAndSchemaIds.put(euDatasetId, design.getDatasetSchema());
           datasetIdsAndSchemaIdsFromEU.put(euDatasetId, design.getDatasetSchema());
 
+          // 6c. Create Test Dataset in metabase
+          Long testDatasetId = persistTest(statement, design, time, dataflowId);
+          testDatasetIds.add(testDatasetId);
+          datasetIdsAndSchemaIds.put(testDatasetId, design.getDatasetSchema());
+          datasetIdsAndSchemaIdsFromTEST.put(testDatasetId, design.getDatasetSchema());
+
           prepareFKAndIntegrityForEUandDC(dataCollectionId, newDCsRegistry,
               lIntegrityDataCollections, design, integritieVOs);
           prepareFKAndIntegrityForEUandDC(euDatasetId, newEUsRegistry, lIntegrityDataCollections,
               design, integritieVOs);
+          prepareFKAndIntegrityForEUandDC(testDatasetId, newTESTsRegistry,
+              lIntegrityDataCollections, design, integritieVOs);
         }
 
         // 7. Create Reporting Dataset in metabase
         createReportingDatasetInMetabase(dataflowId, time, representatives, map, datasetIdsEmails,
             datasetIdsAndSchemaIds, statement, newReportingDatasetsRegistry,
             lIntegrityDataCollections, design, integritieVOs);
+
+
       }
 
       statement.executeBatch();
       // 8. Create permissions
-      createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, dataflowId);
+      createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, testDatasetIds,
+          dataflowId);
       // 9. Delete editors
       removePermissionEditors(dataflowId);
 
@@ -534,6 +566,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       addForeignRelationsFromNewReportings(newReportingDatasetsRegistry);
       addForeignRelationsFromNewDCandEUs(newDCsRegistry);
       addForeignRelationsFromNewDCandEUs(newEUsRegistry);
+      addForeignRelationsFromNewDCandEUs(newTESTsRegistry);
       if (lIntegrityDataCollections != null) {
         addDatasetForeignRelations(lIntegrityDataCollections);
       }
@@ -550,6 +583,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       releaseLockAndRollback(connection, dataflowId, isCreation);
     } finally {
       connection.setAutoCommit(true);
+    }
+  }
+
+  private Long persistTest(Statement metabaseStatement, DesignDatasetVO design, String time,
+      Long dataflowId) throws SQLException {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_TEST_INTO_DATASET, time,
+        dataflowId, String.format(NAME_TEST, design.getDataSetName().replace("'", "''")),
+        design.getDatasetSchema()))) {
+      rs.next();
+      Long datasetId = rs.getLong(1);
+      metabaseStatement.addBatch(String.format(INSERT_TEST_INTO_TEST_DATASET, datasetId));
+      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
+      return datasetId;
     }
   }
 
@@ -738,6 +784,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (euDataset.isPresent()) {
           datasetDestination.setId(euDataset.get().getId());
         }
+      } else if (DatasetTypeEnum.TEST.equals(typeDataset)) {
+        Optional<TestDataset> testDataset = testDatasetRepository
+            .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
+        if (testDataset.isPresent()) {
+          datasetDestination.setId(testDataset.get().getId());
+        }
       }
       foreignRelation.setIdDatasetDestination(datasetDestination);
       foreignRelation.setIdPk(integrityDataCollection.getIdDatasetSchemaOrigin());
@@ -848,13 +900,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @throws EEAException the EEA exception
    */
   private void createPermissions(Map<Long, List<String>> datasetIdsEmails,
-      List<Long> dataCollectionIds, List<Long> euDatasetIds, Long dataflowId) throws EEAException {
+      List<Long> dataCollectionIds, List<Long> euDatasetIds, List<Long> testDatasetIds,
+      Long dataflowId) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> assignments = new ArrayList<>();
 
-    createGroupsAndAssings(dataflowId, dataCollectionIds, euDatasetIds, datasetIdsEmails, groups,
-        assignments);
+    createGroupsAndAssings(dataflowId, dataCollectionIds, euDatasetIds, testDatasetIds,
+        datasetIdsEmails, groups, assignments);
 
     // Persist changes in KeyCloak guaranteeing transactionality
     // Insert in chunks to prevent Hystrix timeout
@@ -924,7 +977,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param assignments the assignments
    */
   private void createGroupsAndAssings(Long dataflowId, List<Long> dataCollectionIds,
-      List<Long> euDatasetIds, Map<Long, List<String>> datasetIdsEmails,
+      List<Long> euDatasetIds, List<Long> testDatasetIds, Map<Long, List<String>> datasetIdsEmails,
       List<ResourceInfoVO> groups, List<ResourceAssignationVO> assignments) {
 
     List<UserRepresentationVO> stewards =
@@ -975,6 +1028,29 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (UserRepresentationVO custodian : custodians) {
         assignments.add(createAssignments(euDatasetId, custodian.getEmail(),
             ResourceGroupEnum.EUDATASET_CUSTODIAN));
+      }
+    }
+
+    for (Long testDatasetId : testDatasetIds) {
+
+      // Create TestDataset-%s-DATA_STEWARD
+      groups.add(
+          createGroup(testDatasetId, ResourceTypeEnum.TEST_DATASET, SecurityRoleEnum.DATA_STEWARD));
+
+      // Create TestDataset-%s-DATA_CUSTODIAN
+      groups.add(createGroup(testDatasetId, ResourceTypeEnum.TEST_DATASET,
+          SecurityRoleEnum.DATA_CUSTODIAN));
+
+      // Assign TestDataset-%s-DATA_STEWARD
+      for (UserRepresentationVO steward : stewards) {
+        assignments.add(createAssignments(testDatasetId, steward.getEmail(),
+            ResourceGroupEnum.TESTDATASET_STEWARD));
+      }
+
+      // Assign TestDataset-%s-DATA_CUSTODIAN
+      for (UserRepresentationVO custodian : custodians) {
+        assignments.add(createAssignments(testDatasetId, custodian.getEmail(),
+            ResourceGroupEnum.TESTDATASET_CUSTODIAN));
       }
     }
 
