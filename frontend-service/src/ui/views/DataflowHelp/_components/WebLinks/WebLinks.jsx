@@ -77,16 +77,6 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns: webLinkColArray } });
   }, [webLinks, webLinksState.webLink, isToolbarVisible]);
 
-  const checkIsDuplicatedWebLink = () => {
-    return !isNil(
-      webLinks.find(
-        webLink =>
-          TextUtils.areEquals(webLink.description, webLinksState.webLink.description) &&
-          TextUtils.areEquals(webLink.url, webLinksState.webLink.url)
-      )
-    );
-  };
-
   const checkIsValidUrl = url => RegularExpressions['url'].test(url);
 
   const checkIsCorrectLength = inputValue => inputValue.length <= 255;
@@ -107,10 +97,7 @@ export const WebLinks = ({
     } else if (inputName === 'url' && !checkIsValidUrl(inputValue)) {
       message = resources.messages['urlError'];
       hasErrors = true;
-    } /* else if (checkIsDuplicatedWebLink()) {
-      message = resources.messages['duplicatedWeblinkError'];
-      hasErrors = true;
-    } */
+    }
 
     setErrors(inputName, { message, hasErrors });
 
