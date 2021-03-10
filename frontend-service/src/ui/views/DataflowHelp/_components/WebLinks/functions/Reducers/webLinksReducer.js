@@ -50,8 +50,6 @@ export const webLinksReducer = (state, { type, payload }) => {
         deletingId: null
       };
 
-      };
-
     case 'ON_HIDE_DELETE_DIALOG':
       return {
         ...state,
