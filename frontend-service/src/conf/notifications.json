@@ -792,6 +792,13 @@
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
           }
+        },
+        {
+          "key": "RELEASE_PROVIDER_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW_REPRESENTATIVE",
+            "parameters": ["dataflowId", "dataProvider", "representativeId"]
+          }
         }
       ]
     },
