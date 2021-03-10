@@ -1,8 +1,5 @@
 import React, { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
-/* import * as Yup from 'yup';
-import { ErrorMessage, Field, Form, Formik } from 'formik'; */
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './DataflowManagementForm.module.scss';
@@ -16,7 +13,6 @@ import { DataflowService } from 'core/services/Dataflow';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { InputText } from 'ui/views/_components/InputText';
 
 const DataflowManagementForm = forwardRef(
   ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onSearch, onSubmit, refresh }, ref) => {
@@ -25,9 +21,13 @@ const DataflowManagementForm = forwardRef(
 
     const [hasErrors, setHasErrors] = useState(false);
     const [isNameDuplicated, setIsNameDuplicated] = useState(false);
-    const [isObligationEmpty, setIsObligationEmpty] = useState(false);
     const [name, setName] = useState(data.name);
     const [description, setDescription] = useState(data.description);
+    const [errors, setErrors] = useState({
+      description: { message: '', hasErrors: false },
+      name: { message: '', hasErrors: false },
+      obligation: { message: '', hasErrors: false }
+    });
 
     const form = useRef(null);
     const inputRef = useRef(null);
@@ -36,18 +36,6 @@ const DataflowManagementForm = forwardRef(
       if (!isNil(inputRef) && refresh) inputRef.current.focus();
     }, [hasErrors, inputRef.current, refresh]);
 
-    useEffect(() => {
-      if (!isNil(form.current) && refresh) {
-        // form.current.resetForm();
-        setHasErrors(false);
-        setIsNameDuplicated(false);
-        setIsObligationEmpty(false);
-      }
-    }, [refresh, form.current]);
-
-    // useImperativeHandle(ref, () => ({
-    //   handleSubmit: () => form.current.handleSubmit()
-    // }));
     useImperativeHandle(ref, () => ({
       handleSubmit: onConfirm
     }));
@@ -58,11 +46,34 @@ const DataflowManagementForm = forwardRef(
       obligation: Yup.object({ title: Yup.string().required(' ') })
     }); */
 
-    const onConfirm = async values => {
+    const checkIsCorrectLength = inputValue => inputValue.length <= 255;
+
+    const checkIsEmptyInput = inputValue => inputValue === '';
+
+    const checkInput = (inputValue, inputName) => {
+      let hasErrors = false;
+      let message = '';
+
+      if (checkIsEmptyInput(inputValue)) {
+        message = '';
+        hasErrors = true;
+      } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
+        message = resources.messages['dataflowDescriptionValidationMax'];
+        hasErrors = true;
+      } else if (inputName === 'name' && !checkIsCorrectLength(inputValue)) {
+        message = resources.messages['dataflowNameValidationMax'];
+        hasErrors = true;
+      }
+
+      setErrors(previousErrors => {
+        return { ...previousErrors, [inputName]: { message, hasErrors } };
+      });
+
+      return hasErrors;
+    };
+
+    const onConfirm = async () => {
       onSubmit(true);
-      // Promise.resolve(dataflow).then(res => {
-      //   dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
-      // });
 
       try {
         if (isEditForm) {
@@ -94,64 +105,67 @@ const DataflowManagementForm = forwardRef(
       <>
         <form ref={form}>
           <fieldset>
-            {/* <div className={`formField${(!isEmpty(errors.name) && touched.name) || isNameDuplicated ? ' error' : ''}`}> */}
-            <input
-              autoComplete="off"
-              id="dataflowName"
-              ref={inputRef}
-              maxLength={255}
-              name="name"
-              placeholder={resources.messages['createDataflowName']}
-              onChange={event => {
-                getData({ ...data, name: event.target.value });
-                setName(event.target.value);
-                setIsNameDuplicated(false);
-                setHasErrors(false);
-              }}
-              type="text"
-              value={name}
-            />
-            <label htmlFor="dataflowName" className="srOnly">
-              {resources.messages['createDataflowName']}
-            </label>
-            {/* {errors.name.message !== '' && (
-                  <ErrorMessage message={errors.name.message} />
-                )} */}
-            {/* </div> */}
+            <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
+              <input
+                autoComplete="off"
+                id="dataflowName"
+                ref={inputRef}
+                // maxLength={255}
+                onBlur={() => checkInput(name, 'name')}
+                onKeyPress={e => {
+                  if (e.key === 'Enter' && !checkInput(name, 'name')) onConfirm();
+                }}
+                name="name"
+                placeholder={resources.messages['createDataflowName']}
+                onChange={event => {
+                  getData({ ...data, name: event.target.value });
+                  setName(event.target.value);
+                  setIsNameDuplicated(false);
+                  setHasErrors(false);
+                }}
+                type="text"
+                value={name}
+              />
+              <label htmlFor="dataflowName" className="srOnly">
+                {resources.messages['createDataflowName']}
+              </label>
+              {errors.name.message !== '' && <ErrorMessage message={errors.name.message} />}
+            </div>
 
-            {/* <div className={`formField${!isEmpty(errors.description) && touched.description ? ' error' : ''}`}> */}
-            <input
-              autoComplete="off"
-              id="dataflowDescription"
-              name="description"
-              component="textarea"
-              rows="10"
-              onChange={event => {
-                getData({ ...data, description: event.target.value });
-                setDescription(event.target.value);
-              }}
-              placeholder={resources.messages['createDataflowDescription']}
-              value={description}
-            />
-            <label htmlFor="dataflowDescription" className="srOnly">
-              {resources.messages['createDataflowDescription']}
-            </label>
-            {/*  {errors.description.message !== '' && (
-                  <ErrorMessage message={errors.description.message} />
-                )} */}
-            {/* </div> */}
+            <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
+              <textarea
+                autoComplete="off"
+                id="dataflowDescription"
+                name="description"
+                onBlur={() => checkInput(description, 'description')}
+                onKeyPress={e => {
+                  if (e.key === 'Enter' && !checkInput(description, 'description')) onConfirm();
+                }}
+                component="textarea"
+                rows={10}
+                onChange={event => {
+                  getData({ ...data, description: event.target.value });
+                  setDescription(event.target.value);
+                }}
+                placeholder={resources.messages['createDataflowDescription']}
+                value={description}
+              />
+              <label htmlFor="dataflowDescription" className="srOnly">
+                {resources.messages['createDataflowDescription']}
+              </label>
+              {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
+            </div>
 
             <div className={`${styles.search}`}>
               <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
-              <InputText
+              <input
                 id="searchObligation"
-                /*  className={`${styles.searchInput} ${
-                (!isEmpty(errors.obligation) && !isEmpty(touched.obligation) && touched.obligation.title) ||
-                isObligationEmpty
-                  ? styles.searchErrors
-                  : ''
-              }`} */
+                className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
                 name="obligation.title"
+                onBlur={() => checkInput(data.obligation.title, 'obligation')}
+                onKeyPress={e => {
+                  if (e.key === 'Enter' && !checkInput(data.obligation.title, 'obligation')) onConfirm();
+                }}
                 placeholder={resources.messages['associatedObligation']}
                 readOnly={true}
                 type="text"
@@ -160,9 +174,7 @@ const DataflowManagementForm = forwardRef(
               <label htmlFor="searchObligation" className="srOnly">
                 {resources.messages['searchObligations']}
               </label>
-              {/*  {errors.obligationTitle.message !== '' && (
-                  <ErrorMessage message={errors.obligationTitle.message} />
-                )} */}
+              {errors.obligation.message !== '' && <ErrorMessage message={errors.obligation.message} />}
             </div>
           </fieldset>
         </form>
