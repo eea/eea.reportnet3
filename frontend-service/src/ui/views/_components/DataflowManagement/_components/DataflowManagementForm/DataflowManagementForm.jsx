@@ -42,7 +42,7 @@ const DataflowManagementForm = forwardRef(
 
     const checkIsEmptyInput = inputValue => inputValue.trim() === '';
 
-    const checkIsCorrectInput = (inputValue, inputName) => {
+    const checkIsCorrectInputValue = (inputValue, inputName) => {
       let hasErrors = false;
       let message = '';
 
@@ -66,9 +66,9 @@ const DataflowManagementForm = forwardRef(
 
     const onConfirm = async () => {
       if (
-        !checkIsCorrectInput(data.obligation.title, 'obligation') &&
-        !checkIsCorrectInput(name, 'name') &&
-        !checkIsCorrectInput(description, 'description')
+        !checkIsCorrectInputValue(data.obligation.title, 'obligation') &&
+        !checkIsCorrectInputValue(name, 'name') &&
+        !checkIsCorrectInputValue(description, 'description')
       ) {
         onSubmit(true);
 
@@ -111,9 +111,9 @@ const DataflowManagementForm = forwardRef(
               autoComplete="off"
               id="dataflowName"
               ref={inputRef}
-              onBlur={() => checkIsCorrectInput(name, 'name')}
+              onBlur={() => checkIsCorrectInputValue(name, 'name')}
               onKeyPress={e => {
-                if (e.key === 'Enter' && !checkIsCorrectInput(name, 'name')) onConfirm();
+                if (e.key === 'Enter' && !checkIsCorrectInputValue(name, 'name')) onConfirm();
               }}
               name="name"
               placeholder={resources.messages['createDataflowName']}
@@ -135,7 +135,7 @@ const DataflowManagementForm = forwardRef(
               autoComplete="off"
               id="dataflowDescription"
               name="description"
-              onBlur={() => checkIsCorrectInput(description, 'description')}
+              onBlur={() => checkIsCorrectInputValue(description, 'description')}
               component="textarea"
               rows={10}
               onChange={event => {
@@ -157,9 +157,9 @@ const DataflowManagementForm = forwardRef(
               id="searchObligation"
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               name="obligation.title"
-              onBlur={() => checkIsCorrectInput(data.obligation.title, 'obligation')}
+              onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
               onKeyPress={e => {
-                if (e.key === 'Enter' && !checkIsCorrectInput(data.obligation.title, 'obligation')) onConfirm();
+                if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
               }}
               placeholder={resources.messages['associatedObligation']}
               readOnly={true}

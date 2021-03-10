@@ -93,7 +93,7 @@ export const WebLinks = ({
 
   const checkIsEmptyInput = inputValue => inputValue === '';
 
-  const checkInput = inputName => {
+  const checkIsCorrectInputValue = inputName => {
     let hasErrors = false;
     let message = '';
     const inputValue = webLinksState.webLink[inputName];
@@ -394,9 +394,9 @@ export const WebLinks = ({
                   onChange={e => {
                     onDescriptionChange(e.target.value);
                   }}
-                  onBlur={() => checkInput('description')}
+                  onBlur={() => checkIsCorrectInputValue('description')}
                   onKeyPress={e => {
-                    if (e.key === 'Enter' && !checkInput('description')) onSaveRecord();
+                    if (e.key === 'Enter' && !checkIsCorrectInputValue('description')) onSaveRecord();
                   }}
                   name="description"
                   placeholder={resources.messages['description']}
@@ -416,7 +416,7 @@ export const WebLinks = ({
                   id={`urlWebLinks`}
                   name="url"
                   onChange={e => onWeblinkUrlChange(e.target.value)}
-                  onBlur={() => checkInput('url')}
+                  onBlur={() => checkIsCorrectInputValue('url')}
                   placeholder={resources.messages['url']}
                   type="text"
                   value={webLinksState.webLink.url}
