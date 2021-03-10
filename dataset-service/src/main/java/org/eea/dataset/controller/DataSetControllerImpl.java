@@ -62,6 +62,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 /**
  * The Class DataSetControllerImpl.
@@ -640,7 +641,8 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @GetMapping("/{datasetId}/etlExport")
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "100000000")})
   @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
   public ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
