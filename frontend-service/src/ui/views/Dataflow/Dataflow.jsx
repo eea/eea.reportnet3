@@ -411,10 +411,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onExportLeadReporters = async () => {
     try {
-      const response = await RepresentativeService.downloadById(dataflowId);
-      if (!isNil(response)) {
+      const { data } = await RepresentativeService.downloadById(dataflowId);
+      if (!isNil(data)) {
         DownloadFile(
-          response,
+          data,
           `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Lead_Reporters.csv`
         );
       }
@@ -669,6 +669,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
+      notificationContext.add({ type: 'RELEASE_START_EVENT' });
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
@@ -787,7 +788,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            onConfirm={() => onConfirmRelease()}
+            onConfirm={onConfirmRelease}
             onHide={() => {
               manageDialogs('isReleaseDialogVisible', false);
               if (dataflowState.restrictFromPublic) {
