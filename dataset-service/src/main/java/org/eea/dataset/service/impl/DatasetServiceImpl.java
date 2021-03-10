@@ -1338,6 +1338,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException {
 
     // Get the datasetSchemaId by the datasetId
