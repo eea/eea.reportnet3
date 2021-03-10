@@ -265,11 +265,11 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         <div className={styles.filesContainer}>
           <FontAwesomeIcon
             className={styles.restrictFromPublicIcon}
-            icon={AwesomeIcons('exclamationCircle')}
+            icon={AwesomeIcons('lock')}
             data-tip
-            data-for={'restrincFromPublicField'}
+            data-for={'restrictFromPublicField'}
           />
-          <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrincFromPublicField'} place="top">
+          <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
             <span>{resources.messages['restrictFromPublicField']}</span>
           </ReactTooltip>
         </div>
@@ -339,7 +339,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                 </DataTable>
                 <div className={styles.tableLegendContainer}>
                   <span>*</span>
-                  <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('exclamationCircle')} />
+                  <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
                   <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
                 </div>
               </div>

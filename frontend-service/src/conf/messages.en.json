@@ -1017,7 +1017,7 @@
     "loginFormUserError": "A user name is required",
     "loginFormPasswordError": "A password is required",
     "loginFormError": "Incorrect username or password",
-    "restrictFromPublicField": "Restrict from public",
+    "restrictFromPublicField": "Restricted from public view by country",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
     "releaseStartEvent": "Releasing data to data collection."
   }
