@@ -45,15 +45,16 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
-import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { ExtensionUtils, MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
-import { getUrl } from 'core/infrastructure/CoreUtils';
 import {
   useContextMenu,
   useLoadColsSchemasAndColumnOptions,
   useRecordErrorPosition,
   useSetColumns
 } from './_functions/Hooks/DataViewerHooks';
+
+import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
+import { ExtensionUtils, MetadataUtils, RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 const DataViewer = withRouter(
@@ -228,9 +229,13 @@ const DataViewer = withRouter(
     const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
     const onFileDownload = async (fileName, fieldId) => {
-      const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+      try {
+        const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
 
-      DownloadFile(fileContent, fileName);
+        DownloadFile(data, fileName);
+      } catch (error) {
+        console.error('error', error);
+      }
     };
 
     const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
@@ -574,18 +579,14 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteTable = async () => {
       try {
-        notificationContext.add({
-          type: 'DELETE_TABLE_DATA_INIT'
-        });
+        notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
         await DatasetService.deleteTableDataById(datasetId, tableId);
         setFetchedData([]);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({
-            type: 'GENERIC_BLOCKED_ERROR'
-          });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
           const {
             dataflow: { name: dataflowName },
@@ -593,13 +594,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         }
       } finally {
@@ -608,10 +603,15 @@ const DataViewer = withRouter(
     };
 
     const onConfirmDeleteAttachment = async () => {
-      const fileDeleted = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
-      if (fileDeleted) {
-        RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
-        setIsDeleteAttachmentVisible(false);
+      try {
+        const { status } = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
+
+        if (status >= 200 && status <= 299) {
+          RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
+          setIsDeleteAttachmentVisible(false);
+        }
+      } catch (error) {
+        console.error('error', error);
       }
     };
 
@@ -628,9 +628,7 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({
-            type: 'GENERIC_BLOCKED_ERROR'
-          });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
           const {
             dataflow: { name: dataflowName },
@@ -638,13 +636,7 @@ const DataViewer = withRouter(
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
             type: 'DELETE_RECORD_BY_ID_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
           });
         }
       } finally {

@@ -93,16 +93,26 @@ export const WebformField = ({
   };
 
   const onConfirmDeleteAttachment = async () => {
-    const fileDeleted = await DatasetService.deleteFileData(datasetId, selectedFieldId);
-    if (fileDeleted) {
-      onFillField(record, selectedFieldSchemaId, '');
-      onToggleDeleteAttachmentDialogVisible(false);
+    try {
+      const { status } = await DatasetService.deleteFileData(datasetId, selectedFieldId);
+
+      if (status >= 200 && status <= 299) {
+        onFillField(record, selectedFieldSchemaId, '');
+        onToggleDeleteAttachmentDialogVisible(false);
+      }
+    } catch (error) {
+      console.error('error', error);
     }
   };
-  const onFileDownload = async (fileName, fieldId) => {
-    const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
 
-    DownloadFile(fileContent, fileName);
+  const onFileDownload = async (fileName, fieldId) => {
+    try {
+      const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
+
+      DownloadFile(data, fileName);
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const onFilter = async (filter, field) => {
@@ -214,13 +224,9 @@ export const WebformField = ({
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
         if (updateInCascade) {
-          notificationContext.add({
-            type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR'
-          });
+          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' });
         } else {
-          notificationContext.add({
-            type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR'
-          });
+          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' });
         }
       }
     } finally {
