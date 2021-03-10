@@ -168,6 +168,7 @@ export const PublicFrontpage = ({ history }) => {
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
+                    externalCard={true}
                   />
                 ))}
               </div>

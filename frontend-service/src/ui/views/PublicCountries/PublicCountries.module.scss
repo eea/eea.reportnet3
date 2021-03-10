@@ -16,6 +16,11 @@
       margin-bottom: 2rem;
       padding-bottom: 4rem;
 
+      &::after {
+        content: '';
+        flex: auto;
+      }
+
       @media (max-width: 1349px) {
         justify-content: space-between;
       }
