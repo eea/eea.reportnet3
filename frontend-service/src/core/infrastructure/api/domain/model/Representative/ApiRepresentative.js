@@ -13,27 +13,23 @@ const apiRepresentative = {
         dataProviderGroupId
       }
     }),
-
   addLeadReporter: async (leadReporterAccount, representativeId) =>
     await HTTPRequester.post({
       url: getUrl(RepresentativeConfig.addLeadReporter, { representativeId }),
       data: { email: leadReporterAccount }
     }),
-
   allDataProviders: async dataProviderGroupId =>
     await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.allDataProviders, {
         dataProviderGroupId
       })
     }),
-
   allRepresentatives: async dataflowId =>
     await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.allRepresentatives, {
         dataflowId: dataflowId
       })
     }),
-
   deleteById: async representativeId =>
     await HTTPRequester.delete({
       url: getUrl(RepresentativeConfig.deleteById, {
@@ -42,28 +38,18 @@ const apiRepresentative = {
     }),
   deleteLeadReporter: async leadReporterId =>
     await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId }) }),
-
-  downloadById: async dataflowId => {
-    const response = await HTTPRequester.download({
+  downloadById: async dataflowId =>
+    await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentatives, { dataflowId })
-    });
-
-    return response.data;
-  },
-
-  downloadTemplateById: async dataProviderGroupId => {
-    const response = await HTTPRequester.download({
+    }),
+  downloadTemplateById: async dataProviderGroupId =>
+    await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentativesTemplate, { dataProviderGroupId })
-    });
-
-    return response.data;
-  },
-
+    }),
   getProviderTypes: async () =>
     await HTTPRequester.get({
       url: getUrl(RepresentativeConfig.getProviderTypes, {})
     }),
-
   updateDataProviderId: async (representativeId, dataProviderId) =>
     await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateDataProviderId, {}),
@@ -72,7 +58,6 @@ const apiRepresentative = {
         dataProviderId: dataProviderId
       }
     }),
-
   updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId) =>
     await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateLeadReporter, {}),

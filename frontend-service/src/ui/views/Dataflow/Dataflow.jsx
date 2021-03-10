@@ -407,10 +407,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onExportLeadReporters = async () => {
     try {
-      const response = await RepresentativeService.downloadById(dataflowId);
-      if (!isNil(response)) {
+      const { data } = await RepresentativeService.downloadById(dataflowId);
+      if (!isNil(data)) {
         DownloadFile(
-          response,
+          data,
           `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Lead_Reporters.csv`
         );
       }
