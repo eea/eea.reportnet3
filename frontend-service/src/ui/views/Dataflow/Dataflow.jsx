@@ -83,7 +83,6 @@ const Dataflow = withRouter(({ history, match }) => {
     isApiKeyDialogVisible: false,
     isCopyDataCollectionToEuDatasetLoading: false,
     isCustodian: false,
-    isUserListVisible: false,
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
@@ -95,6 +94,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isImportLeadReportersVisible: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
+    isNationalCoordinator: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
@@ -104,6 +104,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseDialogVisible: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
+    isUserListVisible: false,
     name: '',
     obligations: {},
     representativesImport: false,
@@ -242,7 +243,10 @@ const Dataflow = withRouter(({ history, match }) => {
       const userListBtn = {
         className: 'dataflow-properties-help-step',
         icon: 'users',
-        isVisible: (dataflowState.hasUserListRights && !isNil(representativeId)) || isLeadReporterOfCountry,
+        isVisible:
+          (dataflowState.hasUserListRights && !isNil(representativeId)) ||
+          isLeadReporterOfCountry ||
+          dataflowState.isNationalCoordinator,
         label: 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title: 'dataflowUsersList'
@@ -476,13 +480,14 @@ const Dataflow = withRouter(({ history, match }) => {
     );
 
     const hasUserListRights = userContext.hasPermission(
-      [
-        config.permissions.LEAD_REPORTER,
-        config.permissions.NATIONAL_COORDINATOR,
-        config.permissions.DATA_STEWARD,
-        config.permissions.DATA_CUSTODIAN
-      ],
+      [config.permissions.LEAD_REPORTER, config.permissions.DATA_STEWARD, config.permissions.DATA_CUSTODIAN],
       `${config.permissions.DATAFLOW}${dataflowId}`
+    );
+
+    const isNationalCoordinator = userContext.hasContextAccessPermission(
+      config.permissions.NATIONAL_COORDINATOR_PREFIX,
+      null,
+      [config.permissions.NATIONAL_COORDINATOR]
     );
 
     const entity = isNil(representativeId)
@@ -497,7 +502,13 @@ const Dataflow = withRouter(({ history, match }) => {
 
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
-      payload: { hasWritePermissions, isCustodian, userRoles, hasUserListRights }
+      payload: {
+        hasWritePermissions,
+        isCustodian,
+        userRoles,
+        hasUserListRights,
+        isNationalCoordinator
+      }
     });
   };
 
