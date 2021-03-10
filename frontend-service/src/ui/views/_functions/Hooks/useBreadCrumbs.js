@@ -78,6 +78,14 @@ export const useBreadCrumbs = ({
 
   const getRepresentativeCrumb = () => {
     if (representativeId) {
+      if (representativeId === 'XX') {
+        return {
+          command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
+          href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
+          label: resources.messages['testDatasetBreadcrumbs'],
+          icon: 'clone'
+        };
+      }
       const representatives = dataflowStateData.datasets.map(dataset => {
         return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
       });
@@ -135,8 +143,8 @@ export const useBreadCrumbs = ({
 
   const getTestDatasetsCrumb = () => {
     return {
-      command: history.push(getUrl(routes.TEST_DATASETS, {}, true)),
-      href: getUrl(getUrl(routes.TEST_DATASETS, { dataflowId }, true)),
+      command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
+      href: getUrl(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       icon: 'dataset',
       label: resources.messages['testDatasetBreadcrumbs']
     };
