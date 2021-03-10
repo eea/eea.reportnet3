@@ -132,12 +132,12 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
 
-      if (!isEmpty(datasetSchema)) {
+      if (!isEmpty(datasetSchema.data)) {
         if (isCustodian) {
           const datasetMetaData = await DatasetService.getMetaData(datasetId);
-          datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
+          datasetSchema.data.datasetSchemaName = datasetMetaData.datasetSchemaName;
         }
-        return datasetSchema;
+        return datasetSchema.data;
       }
     } catch (error) {
       notificationContext.add({
@@ -146,7 +146,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           datasetId
         }
       });
-    } finally {
     }
   };
 

@@ -594,27 +594,29 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
         const tableSchemaList = [];
-        dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
+        dataset.data.tables.forEach(table =>
+          tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId })
+        );
 
         const datasetStatisticsDTO = await getStatisticsById(
           datasetId,
-          dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
+          dataset.data.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
 
         setIsLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
-            availableInPublic: dataset.availableInPublic,
-            datasetSchema: dataset,
+            availableInPublic: dataset.data.availableInPublic,
+            datasetSchema: dataset.data,
             datasetStatistics: datasetStatisticsDTO,
-            description: dataset.datasetSchemaDescription,
-            levelErrorTypes: dataset.levelErrorTypes,
-            previousWebform: WebformsConfig.filter(item => item.value === dataset.webform)[0],
-            schemaId: dataset.datasetSchemaId,
-            tables: dataset.tables,
+            description: dataset.data.datasetSchemaDescription,
+            levelErrorTypes: dataset.data.levelErrorTypes,
+            previousWebform: WebformsConfig.filter(item => item.value === dataset.data.webform)[0],
+            schemaId: dataset.data.datasetSchemaId,
+            tables: dataset.data.tables,
             schemaTables: tableSchemaList,
-            webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
+            webform: WebformsConfig.filter(item => item.value === dataset.data.webform)[0]
           }
         });
       };

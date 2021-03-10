@@ -193,25 +193,20 @@ export const apiDataset = {
   },
 
   orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
-    const response = await HTTPRequester.update({
+    return await HTTPRequester.update({
       url: getUrl(DatasetConfig.orderFieldSchemaDesign, { datasetId, position }),
       data: { id: fieldSchemaId, position }
     });
-    return response.status >= 200 && response.status <= 299;
   },
 
   orderTableSchema: async (datasetId, position, tableSchemaId) => {
-    const response = await HTTPRequester.update({
+    return await HTTPRequester.update({
       url: getUrl(DatasetConfig.orderTableSchemaDesign, { datasetId, position }),
       data: { id: tableSchemaId, position }
     });
-    return response.status >= 200 && response.status <= 299;
   },
 
-  schemaById: async datasetId => {
-    const response = await HTTPRequester.get({ url: getUrl(DatasetConfig.dataSchema, { datasetId }) });
-    return response.data;
-  },
+  schemaById: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.dataSchema, { datasetId }) }),
 
   statisticsById: async datasetId => {
     const response = await HTTPRequester.get({ url: getUrl(DatasetConfig.loadStatistics, { datasetId: datasetId }) });
@@ -229,20 +224,19 @@ export const apiDataset = {
     fieldSchemaId,
     value
   ) => {
-    const response = await HTTPRequester.get({
-      url: getUrl(DatasetConfig.dataViewer, {
-        datasetId: datasetId,
-        fields: fields,
+    return await HTTPRequester.get({
+      url: getUrl(DatasetConfig.loadTableData, {
+        datasetId,
+        fields,
         fieldSchemaId,
         idRules: ruleId,
-        levelError: levelError,
-        pageNum: pageNum,
-        pageSize: pageSize,
-        tableSchemaId: tableSchemaId,
+        levelError,
+        pageNum,
+        pageSize,
+        tableSchemaId,
         value
       })
     });
-    return response.data;
   },
 
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) => {

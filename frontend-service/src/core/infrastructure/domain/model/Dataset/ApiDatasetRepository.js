@@ -357,13 +357,11 @@ const isValidJSON = value => {
 };
 
 const orderFieldSchema = async (datasetId, position, fieldSchemaId) => {
-  const fieldOrdered = await apiDataset.orderFieldSchema(datasetId, position, fieldSchemaId);
-  return fieldOrdered;
+  return await apiDataset.orderFieldSchema(datasetId, position, fieldSchemaId);
 };
 
 const orderTableSchema = async (datasetId, position, tableSchemaId) => {
-  const tableOrdered = await apiDataset.orderTableSchema(datasetId, position, tableSchemaId);
-  return tableOrdered;
+  return await apiDataset.orderTableSchema(datasetId, position, tableSchemaId);
 };
 
 const parseValue = (type, value, feToBe = false) => {
@@ -428,18 +426,18 @@ const parseValue = (type, value, feToBe = false) => {
 
 const schemaById = async datasetId => {
   const datasetSchemaDTO = await apiDataset.schemaById(datasetId);
-  const rulesDTO = await apiValidation.getAll(datasetSchemaDTO.idDataSetSchema);
+  const rulesDTO = await apiValidation.getAll(datasetSchemaDTO.data.idDataSetSchema);
 
   const dataset = new Dataset({
-    availableInPublic: datasetSchemaDTO.availableInPublic,
-    datasetSchemaDescription: datasetSchemaDTO.description,
-    datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
-    datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
+    availableInPublic: datasetSchemaDTO.data.availableInPublic,
+    datasetSchemaDescription: datasetSchemaDTO.data.description,
+    datasetSchemaId: datasetSchemaDTO.data.idDataSetSchema,
+    datasetSchemaName: datasetSchemaDTO.data.nameDatasetSchema,
     levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : [],
-    webform: datasetSchemaDTO.webform ? datasetSchemaDTO.webform.name : null
+    webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform.name : null
   });
 
-  const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
+  const tables = datasetSchemaDTO.data.tableSchemas.map(datasetTableDTO => {
     const records = !isNull(datasetTableDTO.recordSchema)
       ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
           const fields = !isNull(dataTableRecordDTO.fieldSchema)
@@ -488,8 +486,9 @@ const schemaById = async datasetId => {
     });
   });
   dataset.tables = tables;
+  datasetSchemaDTO.data = dataset;
 
-  return dataset;
+  return datasetSchemaDTO;
 };
 
 const tableDataById = async (
@@ -516,13 +515,14 @@ const tableDataById = async (
   );
   const table = new DatasetTable({});
 
-  table.tableSchemaId = tableDataDTO.idTableSchema;
-  table.totalRecords = isEmpty(ruleId) || isNil(ruleId) ? tableDataDTO.totalRecords : tableDataDTO.totalFilteredRecords;
-  table.totalFilteredRecords = tableDataDTO.totalFilteredRecords;
+  table.tableSchemaId = tableDataDTO.data.idTableSchema;
+  table.totalRecords =
+    isEmpty(ruleId) || isNil(ruleId) ? tableDataDTO.data.totalRecords : tableDataDTO.data.totalFilteredRecords;
+  table.totalFilteredRecords = tableDataDTO.data.totalFilteredRecords;
 
   let field;
 
-  const records = tableDataDTO.records.map(dataTableRecordDTO => {
+  const records = tableDataDTO.data.records.map(dataTableRecordDTO => {
     const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
       field = new DatasetTableField({
         fieldId: DataTableFieldDTO.id,
@@ -548,10 +548,10 @@ const tableDataById = async (
     });
     const record = new DatasetTableRecord({
       datasetPartitionId: dataTableRecordDTO.datasetPartitionId,
+      fields: fields,
       providerCode: dataTableRecordDTO.dataProviderCode,
       recordId: dataTableRecordDTO.id,
-      recordSchemaId: dataTableRecordDTO.idRecordSchema,
-      fields: fields
+      recordSchemaId: dataTableRecordDTO.idRecordSchema
     });
 
     if (!isNull(dataTableRecordDTO.recordValidations)) {
@@ -569,8 +569,9 @@ const tableDataById = async (
   });
 
   table.records = records;
+  tableDataDTO.data = table;
 
-  return table;
+  return tableDataDTO;
 };
 
 const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {

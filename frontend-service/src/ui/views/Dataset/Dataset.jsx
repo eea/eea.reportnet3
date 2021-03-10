@@ -280,7 +280,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);      
+      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
@@ -536,12 +536,12 @@ export const Dataset = withRouter(({ match, history }) => {
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
-      setDatasetSchemaAllTables(datasetSchema.tables);
-      setDatasetSchemaName(datasetSchema.datasetSchemaName);
-      setLevelErrorTypes(datasetSchema.levelErrorTypes);
-      setWebformData(datasetSchema.webform);
-      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
-      return datasetSchema;
+      setDatasetSchemaAllTables(datasetSchema.data.tables);
+      setDatasetSchemaName(datasetSchema.data.datasetSchemaName);
+      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
+      setWebformData(datasetSchema.data.webform);
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.data.webform));
+      return datasetSchema.data;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }

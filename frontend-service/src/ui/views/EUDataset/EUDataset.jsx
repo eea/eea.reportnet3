@@ -98,13 +98,13 @@ export const EUDataset = withRouter(({ history, match }) => {
       euDatasetDispatch({
         type: 'GET_DATA_SCHEMA',
         payload: {
-          allTables: datasetSchema.tables,
-          errorTypes: datasetSchema.levelErrorTypes,
-          schemaId: datasetSchema.datasetSchemaId,
-          schemaName: datasetSchema.datasetSchemaName
+          allTables: datasetSchema.data.tables,
+          errorTypes: datasetSchema.data.levelErrorTypes,
+          schemaId: datasetSchema.data.datasetSchemaId,
+          schemaName: datasetSchema.data.datasetSchemaName
         }
       });
-      return datasetSchema;
+      return datasetSchema.data;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
