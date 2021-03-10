@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -112,6 +115,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,7 +123,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -278,6 +281,19 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Test dataset repository. */
   @Autowired
   private TestDatasetRepository testDatasetRepository;
+
+  /** The view executor service. */
+  private ExecutorService initializeExecutorService;
+
+  /** The max running tasks. */
+  @Value("${dataset.tasks.parallelism}")
+  private int maxRunningTasks;
+
+  @PostConstruct
+  private void init() {
+    initializeExecutorService = new EEADelegatingSecurityContextExecutorService(
+        Executors.newFixedThreadPool(maxRunningTasks));
+  }
 
   /**
    * Process file.
@@ -3389,63 +3405,67 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   @Override
-  @Async
-  public void initializeDataset(Long datasetId, String idDatasetSchema) throws EEAException {
+  public void initializeDataset(Long datasetId, String idDatasetSchema) {
+    try {
+      // 1.Insert the dataset schema into DatasetValue
+      DatasetValue dataset = new DatasetValue();
+      dataset.setIdDatasetSchema(idDatasetSchema);
+      dataset.setId(datasetId);
 
-    // 1.Insert the dataset schema into DatasetValue
-    DatasetValue dataset = new DatasetValue();
-    dataset.setIdDatasetSchema(idDatasetSchema);
-    dataset.setId(datasetId);
-
-    // 2.Search the table schemas of the dataset and then insert it into TableValue
-    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
-    List<TableValue> tableValues = new ArrayList<>();
-    for (TableSchema tableSchema : schema.getTableSchemas()) {
-      TableValue tv = new TableValue();
-      tv.setIdTableSchema(tableSchema.getIdTableSchema().toString());
-      tv.setDatasetId(dataset);
-      tableValues.add(tv);
-    }
-    dataset.setTableValues(tableValues);
-    TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
-    datasetRepository.save(dataset);
-
-
-    List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
-
-    DataSetMetabase datasetMb =
-        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
-
-    Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
-    for (TableSchema tableSchema : schema.getTableSchemas()) {
-      mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
-          tableSchema.getNameTableSchema());
-    }
-
-    tableValues.parallelStream().forEach(tableValue -> statsList.addAll(
-        initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema)));
-
-    statsList.add(fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema));
-
-    statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
-
-    statsList.add(fillStat(datasetId, null, "datasetErrors", "false"));
-
-    TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
-    statisticsRepository.saveAll(statsList);
-
-    LOG.info("Statistics save to datasetId {}.", datasetId);
-
-    if (DatasetTypeEnum.REPORTING.equals(getDatasetType(datasetId))
-        || DatasetTypeEnum.TEST.equals(getDatasetType(datasetId))) {
-      DesignDataset originDatasetDesign =
-          designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
-      if (null != originDatasetDesign) {
-        // and we have found the design dataset
-        // with data to be copied into the
-        // target dataset
-        spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
+      // 2.Search the table schemas of the dataset and then insert it into TableValue
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+      List<TableValue> tableValues = new ArrayList<>();
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        TableValue tv = new TableValue();
+        tv.setIdTableSchema(tableSchema.getIdTableSchema().toString());
+        tv.setDatasetId(dataset);
+        tableValues.add(tv);
       }
+      dataset.setTableValues(tableValues);
+      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+      datasetRepository.save(dataset);
+
+
+      List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
+
+      DataSetMetabase datasetMb =
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+
+      Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+            tableSchema.getNameTableSchema());
+      }
+
+      tableValues.parallelStream().forEach(tableValue -> statsList.addAll(
+          initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema)));
+
+      statsList.add(fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema));
+
+      statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
+
+      statsList.add(fillStat(datasetId, null, "datasetErrors", "false"));
+
+      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+      statisticsRepository.saveAll(statsList);
+
+      LOG.info("Statistics save to datasetId {}.", datasetId);
+
+      if (DatasetTypeEnum.REPORTING.equals(getDatasetType(datasetId))
+          || DatasetTypeEnum.TEST.equals(getDatasetType(datasetId))) {
+        DesignDataset originDatasetDesign =
+            designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
+        if (null != originDatasetDesign) {
+          // and we have found the design dataset
+          // with data to be copied into the
+          // target dataset
+          spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
+        }
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error executing the processes after creating a new empty dataset. Error message: {}",
+          e.getMessage(), e);
     }
   }
 
@@ -3484,4 +3504,14 @@ public class DatasetServiceImpl implements DatasetService {
     return stats;
   }
 
+  /**
+   * Execute initialize dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  @Override
+  public void executeInitializeDataset(Long datasetId, String idDatasetSchema) {
+    initializeExecutorService.execute(() -> initializeDataset(datasetId, idDatasetSchema));
+  }
 }

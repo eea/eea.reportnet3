@@ -2,7 +2,6 @@ package org.eea.dataset.kafka.io.event;
 
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetService;
-import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -52,19 +51,12 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
     String dataset = (String) eeaEventVO.getData().get(LiteralConstants.DATASET_ID);
     String idDatasetSchema = (String) eeaEventVO.getData().get(LiteralConstants.ID_DATASET_SCHEMA);
     if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
-      try {
-        String[] aux = dataset.split("_");
-        Long idDataset = Long.valueOf(aux[aux.length - 1]);
-        TenantResolver
-            .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
-        // Dataset data and statistics initialization.
-        datasetService.initializeDataset(idDataset, idDatasetSchema);
+      String[] aux = dataset.split("_");
+      Long idDataset = Long.valueOf(aux[aux.length - 1]);
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
+      // Dataset data and statistics initialization.
+      datasetService.executeInitializeDataset(idDataset, idDatasetSchema);
 
-      } catch (EEAException e) {
-        LOG_ERROR.error(
-            "Error executing the processes after creating a new empty dataset. Error message: {}",
-            e.getMessage(), e);
-      }
     } else {
       LOG_ERROR.error(
           "Error creating the processes creating a new dataset connection because of the null datasetId or idDatasetSchema. DatasetId: {}. IdDatasetSchema: {}",

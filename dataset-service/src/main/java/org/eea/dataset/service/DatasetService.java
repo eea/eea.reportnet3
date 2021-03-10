@@ -599,7 +599,14 @@ public interface DatasetService {
    * @param idDatasetSchema the id dataset schema
    * @throws EEAException the EEA exception
    */
-  void initializeDataset(Long datasetId, String idDatasetSchema) throws EEAException;
+  void initializeDataset(Long datasetId, String idDatasetSchema);
 
+  /**
+   * Execute initialize dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  void executeInitializeDataset(Long datasetId, String idDatasetSchema);
 
 }

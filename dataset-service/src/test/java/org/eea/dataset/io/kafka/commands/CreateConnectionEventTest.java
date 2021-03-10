@@ -120,25 +120,7 @@ public class CreateConnectionEventTest {
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
     createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).initializeDataset(Mockito.any(), Mockito.any());
+    Mockito.verify(datasetService, times(1)).executeInitializeDataset(Mockito.any(), Mockito.any());
   }
 
-
-  /**
-   * Execute test 5.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeTest5() throws EEAException {
-    eeaEventVO.setEventType(EventType.CONNECTION_CREATED_EVENT);
-    data = new HashMap<>();
-    data.put("dataset_id", "dataset_1");
-    data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
-    eeaEventVO.setData(data);
-    Mockito.doThrow(EEAException.class).when(datasetService).initializeDataset(Mockito.any(),
-        Mockito.any());
-    createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).initializeDataset(Mockito.any(), Mockito.any());
-  }
 }
