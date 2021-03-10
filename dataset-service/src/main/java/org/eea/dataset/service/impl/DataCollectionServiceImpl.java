@@ -414,8 +414,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<Long> dataCollectionIds = new ArrayList<>();
       Map<Long, List<String>> datasetIdsEmails = new HashMap<>();
       Map<Long, String> datasetIdsAndSchemaIds = new HashMap<>();
-      Map<Long, String> datasetIdsAndSchemaIdsFromDC = new HashMap<>();
-      Map<Long, String> datasetIdsAndSchemaIdsFromEU = new HashMap<>();
       List<Long> euDatasetIds = new ArrayList<>();
 
       try (Connection connection = metabaseDataSource.getConnection();
@@ -423,8 +421,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         processDataCollectionAndRoles(dataflowId, dueDate, isCreation, manualCheck, time, designs,
             representatives, map, dataCollectionIds, datasetIdsEmails, datasetIdsAndSchemaIds,
-            datasetIdsAndSchemaIdsFromDC, datasetIdsAndSchemaIdsFromEU, euDatasetIds, connection,
-            statement);
+            euDatasetIds, connection, statement);
       } catch (SQLException e) {
         LOG_ERROR.error("Error rolling back: ", e);
       }
@@ -489,9 +486,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean manualCheck, String time, List<DesignDatasetVO> designs,
       List<RepresentativeVO> representatives, Map<Long, String> map, List<Long> dataCollectionIds,
       Map<Long, List<String>> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
-      Map<Long, String> datasetIdsAndSchemaIdsFromDC,
-      Map<Long, String> datasetIdsAndSchemaIdsFromEU, List<Long> euDatasetIds,
-      Connection connection, Statement statement) throws SQLException {
+      List<Long> euDatasetIds, Connection connection, Statement statement) throws SQLException {
     try {
       connection.setAutoCommit(false);
 
@@ -505,7 +500,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         statement.addBatch(
             String.format(UPDATE_REPRESENTATIVE_HAS_DATASETS, true, representative.getId()));
       }
-      Map<Long, String> datasetIdsAndSchemaIdsFromTEST = new HashMap<>();
       List<Long> testDatasetIds = new ArrayList<>();
 
       List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
@@ -523,19 +517,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           Long dataCollectionId = persistDC(statement, design, time, dataflowId, dueDate);
           dataCollectionIds.add(dataCollectionId);
           datasetIdsAndSchemaIds.put(dataCollectionId, design.getDatasetSchema());
-          datasetIdsAndSchemaIdsFromDC.put(dataCollectionId, design.getDatasetSchema());
 
           // 6b. Create the EU Dataset
           Long euDatasetId = persistEU(statement, design, time, dataflowId);
           euDatasetIds.add(euDatasetId);
           datasetIdsAndSchemaIds.put(euDatasetId, design.getDatasetSchema());
-          datasetIdsAndSchemaIdsFromEU.put(euDatasetId, design.getDatasetSchema());
 
           // 6c. Create Test Dataset in metabase
           Long testDatasetId = persistTest(statement, design, time, dataflowId);
           testDatasetIds.add(testDatasetId);
           datasetIdsAndSchemaIds.put(testDatasetId, design.getDatasetSchema());
-          datasetIdsAndSchemaIdsFromTEST.put(testDatasetId, design.getDatasetSchema());
 
           prepareFKAndIntegrityForEUandDC(dataCollectionId, newDCsRegistry,
               lIntegrityDataCollections, design, integritieVOs);
