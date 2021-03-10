@@ -587,6 +587,67 @@ public class DataflowServiceImpl implements DataflowService {
     return getPage(dataflowPublicList, page, pageSize);
   }
 
+
+  /**
+   * Gets the user roles.
+   *
+   * @param dataProviderId the data provider id
+   * @return the user roles
+   */
+  @Override
+  public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList) {
+    List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
+    for (DataFlowVO dataflowVO : dataflowList) {
+      if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+        DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
+        dataflowUserRoleVO.setDataflowId(dataflowVO.getId());
+        dataflowUserRoleVO.setDataflowName(dataflowVO.getName());
+        dataflowUserRoleVO.setUsers(userManagementControllerZull
+            .getUserRolesByDataflowAndCountry(dataflowVO.getId(), dataProviderId));
+        if (!dataflowUserRoleVO.getUsers().isEmpty()) {
+          dataflowUserRoleVOList.add(dataflowUserRoleVO);
+        }
+      }
+    }
+    return dataflowUserRoleVOList;
+
+  }
+
+
+  /**
+   * Gets the public dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the public dataflow by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DataflowPublicVO getPublicDataflowById(Long dataflowId) throws EEAException {
+    DataflowPublicVO dataflowPublicVO = dataflowPublicMapper
+        .entityToClass(dataflowRepository.findByIdAndShowPublicInfoTrue(dataflowId));
+    if (null == dataflowPublicVO) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    dataflowPublicVO.setReportingDatasets(
+        datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
+
+    findObligationPublicDataflow(dataflowPublicVO);
+    return dataflowPublicVO;
+  }
+
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Override
+  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
+    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
+  }
+
+
   /**
    * Sets the reportings.
    *
@@ -682,53 +743,6 @@ public class DataflowServiceImpl implements DataflowService {
 
     // toIndex exclusive
     return sourceList.subList(fromIndex, Math.min(fromIndex + pageSize, sourceList.size()));
-  }
-
-  /**
-   * Gets the user roles.
-   *
-   * @param dataProviderId the data provider id
-   * @return the user roles
-   */
-  @Override
-  public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList) {
-    List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
-    for (DataFlowVO dataflowVO : dataflowList) {
-      if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
-        DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
-        dataflowUserRoleVO.setDataflowId(dataflowVO.getId());
-        dataflowUserRoleVO.setDataflowName(dataflowVO.getName());
-        dataflowUserRoleVO.setUsers(userManagementControllerZull
-            .getUserRolesByDataflowAndCountry(dataflowVO.getId(), dataProviderId));
-        if (!dataflowUserRoleVO.getUsers().isEmpty()) {
-          dataflowUserRoleVOList.add(dataflowUserRoleVO);
-        }
-      }
-    }
-    return dataflowUserRoleVOList;
-
-  }
-
-
-  /**
-   * Gets the public dataflow by id.
-   *
-   * @param dataflowId the dataflow id
-   * @return the public dataflow by id
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public DataflowPublicVO getPublicDataflowById(Long dataflowId) throws EEAException {
-    DataflowPublicVO dataflowPublicVO = dataflowPublicMapper
-        .entityToClass(dataflowRepository.findByIdAndShowPublicInfoTrue(dataflowId));
-    if (null == dataflowPublicVO) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    dataflowPublicVO.setReportingDatasets(
-        datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
-
-    findObligationPublicDataflow(dataflowPublicVO);
-    return dataflowPublicVO;
   }
 
   /**
@@ -945,14 +959,4 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
-  /**
-   * Update data flow public status.
-   *
-   * @param dataflowId the dataflow id
-   * @param showPublicInfo the show public info
-   */
-  @Override
-  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
-    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
-  }
 }
