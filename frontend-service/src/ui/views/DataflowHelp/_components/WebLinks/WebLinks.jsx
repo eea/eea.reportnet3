@@ -80,17 +80,7 @@ export const WebLinks = ({
   }, [webLinks, weblinkItem]);
 
   const addWeblinkSchema = Yup.object().shape({
-    description: Yup.string()
-      .required(' ')
-      .max(255, resources.messages['webLinkDescriptionValidationMax'])
-      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
-        return isNil(
-          webLinks.find(
-            weblink =>
-              TextUtils.areEquals(weblink.description, value) && TextUtils.areEquals(weblink.url, this.parent.url)
-          )
-        );
-      }),
+    description: Yup.string().required(' ').max(255, resources.messages['webLinkDescriptionValidationMax']),
     url: Yup.string()
       .lowercase()
       .matches(
@@ -98,15 +88,6 @@ export const WebLinks = ({
         resources.messages['urlError']
       )
       .required(' ')
-      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
-        return isNil(
-          webLinks.find(
-            weblink =>
-              TextUtils.areEquals(weblink.description, this.parent.description) &&
-              TextUtils.areEquals(weblink.url, value)
-          )
-        );
-      })
   });
 
   const fieldsArray = [
