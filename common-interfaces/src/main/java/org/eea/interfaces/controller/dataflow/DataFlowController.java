@@ -195,7 +195,7 @@ public interface DataFlowController {
   public List<DataflowPublicVO> getPublicDataflowsByCountry(
       @PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
       @RequestParam(value = "sortField", required = false) String sortField,
       @RequestParam(value = "asc", defaultValue = "true") boolean asc);
 }

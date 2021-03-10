@@ -244,7 +244,8 @@ public interface DatasetMetabaseController {
    * @param idDataflow the id dataflow
    * @return the list
    */
-  @GetMapping(value = "/private/public/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/reportingPublic/dataflow/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(
       @PathVariable("id") Long idDataflow);
 
@@ -255,7 +256,7 @@ public interface DatasetMetabaseController {
    * @param providerId the provider id
    * @return the list
    */
-  @GetMapping(value = "/private/public/dataflow/{id}/provider/{providerId}",
+  @GetMapping(value = "/private/reportingPublic/dataflow/{id}/provider/{providerId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowIdAndProviderId(
       @PathVariable("id") Long dataflowId, @PathVariable("providerId") Long providerId);

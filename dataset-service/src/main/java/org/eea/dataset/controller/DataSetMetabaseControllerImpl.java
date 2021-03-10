@@ -403,7 +403,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/private/public/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/reportingPublic/dataflow/{id}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(
       @PathVariable("id") Long dataflowId) {
     return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
@@ -411,7 +412,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
 
   @Override
   @HystrixCommand
-  @GetMapping(value = "/private/public/dataflow/{id}/provider/{providerId}",
+  @GetMapping(value = "/private/reportingPublic/dataflow/{id}/provider/{providerId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowIdAndProviderId(
       @PathVariable("id") Long dataflowId, @PathVariable("providerId") Long providerId) {
