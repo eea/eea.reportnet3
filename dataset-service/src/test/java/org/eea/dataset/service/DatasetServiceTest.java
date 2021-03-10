@@ -2565,6 +2565,7 @@ public class DatasetServiceTest {
   public void getDatasetTypeEUTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    when(testDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
     when(dataSetMetabaseRepository.existsById(Mockito.any())).thenReturn(true);
     assertEquals(DatasetTypeEnum.EUDATASET, datasetService.getDatasetType(1L));
@@ -2574,8 +2575,6 @@ public class DatasetServiceTest {
   public void getDatasetTypeTestTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
-    when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
-    when(dataSetMetabaseRepository.existsById(Mockito.any())).thenReturn(false);
     when(testDatasetRepository.existsById(Mockito.any())).thenReturn(true);
     assertEquals(DatasetTypeEnum.TEST, datasetService.getDatasetType(1L));
   }
@@ -3016,6 +3015,5 @@ public class DatasetServiceTest {
     datasetService.executeInitializeDataset(1L, "5cf0e9b3b793310e9ceca190");
     Thread.sleep(1000);
     Mockito.verify(schemasRepository, Mockito.times(1)).findByIdDataSetSchema(Mockito.any());
-    Thread.currentThread().interrupt();
   }
 }

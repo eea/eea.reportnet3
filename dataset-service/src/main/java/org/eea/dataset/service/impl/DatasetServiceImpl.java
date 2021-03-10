@@ -286,7 +286,7 @@ public class DatasetServiceImpl implements DatasetService {
   private ExecutorService initializeExecutorService;
 
   /** The max running tasks. */
-  @Value("${dataset.tasks.parallelism}")
+  @Value("${dataset.task.parallelism}")
   private int maxRunningTasks;
 
   @PostConstruct
@@ -2913,12 +2913,12 @@ public class DatasetServiceImpl implements DatasetService {
       type = DatasetTypeEnum.REPORTING;
     } else if (designDatasetRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.DESIGN;
+    } else if (testDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.TEST;
     } else if (dataCollectionRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.COLLECTION;
     } else if (dataSetMetabaseRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.EUDATASET;
-    } else if (testDatasetRepository.existsById(datasetId)) {
-      type = DatasetTypeEnum.TEST;
     }
 
     return type;
@@ -3450,9 +3450,8 @@ public class DatasetServiceImpl implements DatasetService {
       statisticsRepository.saveAll(statsList);
 
       LOG.info("Statistics save to datasetId {}.", datasetId);
-
-      if (DatasetTypeEnum.REPORTING.equals(getDatasetType(datasetId))
-          || DatasetTypeEnum.TEST.equals(getDatasetType(datasetId))) {
+      DatasetTypeEnum type = getDatasetType(datasetId);
+      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)) {
         DesignDataset originDatasetDesign =
             designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
         if (null != originDatasetDesign) {
