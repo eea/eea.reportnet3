@@ -236,7 +236,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           disabled={(editingId === weblink.id && isEditing) || (deletingId === weblink.id && isDeleting)}
           icon={getEditButtonIcon()}
-          onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsAddOrEditWeblinkDialogVisible(true);
+          }}
           type="button"
         />
 
@@ -244,7 +247,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           disabled={(deletingId === weblink.id && isDeleting) || (editingId === weblink.id && isEditing)}
           icon={getDeleteButtonIcon()}
-          onClick={() => setIsConfirmDeleteVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsConfirmDeleteVisible(true);
+          }}
           type="button"
         />
       </div>
@@ -293,7 +299,6 @@ export const WebLinks = ({
       <DataTable
         autoLayout={true}
         loading={isLoading}
-        onRowSelect={e => setWeblinkItem(Object.assign({}, e.data))}
         onSort={e => {
           setSortFieldWeblinks(e.sortField);
           setSortOrderWeblinks(e.sortOrder);
