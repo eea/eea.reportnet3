@@ -91,7 +91,7 @@ export const WebLinks = ({
 
   const checkIsCorrectLength = inputValue => inputValue.length <= 255;
 
-  const checkIsEmptyInput = inputValue => inputValue === '';
+  const checkIsEmptyInput = inputValue => inputValue.trim() === '';
 
   const checkIsCorrectInputValue = inputName => {
     let hasErrors = false;
