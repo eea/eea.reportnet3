@@ -210,8 +210,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadWebLinks = async () => {
     try {
-      let loadedWebLinks = await WebLinkService.all(dataflowId);
-      loadedWebLinks = loadedWebLinks.sort(sortByProperty('description'));
+      const { data } = await WebLinkService.all(dataflowId);
+      const loadedWebLinks = data.weblinks.sort(sortByProperty('description'));
       setWebLinks(loadedWebLinks);
     } catch (error) {
       notificationContext.add({

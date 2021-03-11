@@ -136,9 +136,9 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'ON_DELETE_START', payload: { deletingId: webLinksState.webLink.id } });
 
     try {
-      const weblinkToDelete = await WebLinkService.deleteWeblink(webLinksState.webLink);
+      const { status } = await WebLinkService.deleteWeblink(webLinksState.webLink);
 
-      if (weblinkToDelete.isDeleted) {
+      if (status >= 200 && status <= 299) {
         onLoadWebLinks();
       }
     } catch (error) {
@@ -183,9 +183,9 @@ export const WebLinks = ({
       webLinksDispatch({ type: 'ON_SAVE_RECORD', payload: { webLink: webLinksState.webLink } });
       if (isNil(webLinksState.webLink.id)) {
         try {
-          const newWeblink = await WebLinkService.create(dataflowId, webLinksState.webLink);
+          const { status } = await WebLinkService.create(dataflowId, webLinksState.webLink);
 
-          if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
+          if (status >= 200 && status <= 299) {
             onLoadWebLinks();
           }
 
@@ -208,9 +208,9 @@ export const WebLinks = ({
       } else {
         webLinksDispatch({ type: 'ON_EDIT_RECORD_START', payload: { editingId: webLinksState.webLink.id } });
         try {
-          const weblinkToEdit = await WebLinkService.update(dataflowId, webLinksState.webLink);
+          const { status } = await WebLinkService.update(dataflowId, webLinksState.webLink);
 
-          if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
+          if (status >= 200 && status <= 299) {
             onLoadWebLinks();
           }
 
