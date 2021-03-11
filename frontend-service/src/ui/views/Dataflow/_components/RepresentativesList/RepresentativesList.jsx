@@ -155,7 +155,7 @@ const RepresentativesList = ({
   const getProviderTypes = async () => {
     try {
       const providerTypes = await RepresentativeService.getProviderTypes();
-      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes } });
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: providerTypes.data } });
     } catch (error) {
       console.error('error on  RepresentativeService.getProviderTypes', error);
     }

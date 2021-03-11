@@ -74,4 +74,15 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
   void updateRepresentativeVisibilityRestrictions(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId,
       @Param("restrictFromPublic") boolean restrictFromPublic);
+
+
+  /**
+   * Find by dataflow and data provider id in.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderIdList the data provider id list
+   * @return the list
+   */
+  List<Representative> findByDataflowIdAndDataProviderIdIn(Long dataflowId,
+      List<Long> dataProviderIdList);
 }

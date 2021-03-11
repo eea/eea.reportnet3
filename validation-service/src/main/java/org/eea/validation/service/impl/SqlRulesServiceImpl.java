@@ -15,10 +15,12 @@ import org.eea.interfaces.controller.dataset.DataCollectionController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.dataset.EUDatasetController;
+import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -93,6 +95,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The representative controller. */
   @Autowired
   private RepresentativeController representativeController;
+
+  @Autowired
+  private TestDatasetControllerZuul testDatasetControllerZuul;
 
   /** The rule mapper. */
   @Autowired
@@ -594,12 +599,44 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           query = modifyQueryForReportingDataset(datasetId, query, datasetSchemasMap, dataflowId,
               datasetIdOldNew);
           break;
+        case TEST:
+          query = modifyQueryForTestDataset(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
+          break;
         case DESIGN:
         default:
           break;
       }
     }
 
+    return query;
+  }
+
+  /**
+   * Modify query for test dataset.
+   *
+   * @param query the query
+   * @param datasetSchemasMap the dataset schemas map
+   * @param dataflowId the dataflow id
+   * @param datasetIdOldNew the dataset id old new
+   * @return the string
+   */
+  private String modifyQueryForTestDataset(String query, Map<String, Long> datasetSchemasMap,
+      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+    List<TestDatasetVO> testDatasetVOList =
+        testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId);
+    Map<String, Long> testDatasetSchamasMap = new HashMap<>();
+    for (TestDatasetVO testDataset : testDatasetVOList) {
+      testDatasetSchamasMap.put(testDataset.getDatasetSchema(), testDataset.getId());
+    }
+    for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
+      String key = auxDatasetMap.getKey();
+      Long testDatasetId = testDatasetSchamasMap.get(key);
+      datasetIdOldNew.put(auxDatasetMap.getValue(), testDatasetId);
+    }
+    for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
+      query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
+          DATASET + auxDatasetOldAndNew.getValue());
+    }
     return query;
   }
 

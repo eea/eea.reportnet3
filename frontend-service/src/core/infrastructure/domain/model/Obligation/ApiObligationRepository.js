@@ -12,22 +12,22 @@ import { Organization } from 'core/domain/model/Obligation/Organization/Organiza
 
 const getCountries = async () => {
   const countriesDTO = await apiObligation.getCountries();
-  return parseCountryList(countriesDTO);
+  return parseCountryList(countriesDTO.data);
 };
 
 const getIssues = async () => {
   const issuesDTO = await apiObligation.getIssues();
-  return parseIssueList(issuesDTO);
+  return parseIssueList(issuesDTO.data);
 };
 
 const getOrganizations = async () => {
   const clientsDTO = await apiObligation.getOrganizations();
-  return parseOrganizationList(clientsDTO);
+  return parseOrganizationList(clientsDTO.data);
 };
 
 const obligationById = async obligationId => {
   const obligationByIdDTO = await apiObligation.obligationById(obligationId);
-  return parseObligation(obligationByIdDTO);
+  return parseObligation(obligationByIdDTO.data);
 };
 
 const opened = async filterData => {
@@ -44,10 +44,10 @@ const opened = async filterData => {
       issueId,
       organizationId
     );
-    return parseObligationList(openedObligationsDTO);
+    return parseObligationList(openedObligationsDTO.data);
   } else {
     const openedObligationsDTO = await apiObligation.openedObligations();
-    return parseObligationList(openedObligationsDTO);
+    return parseObligationList(openedObligationsDTO.data);
   }
 };
 

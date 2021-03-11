@@ -17,6 +17,8 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.slf4j.Logger;
@@ -53,6 +55,9 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   @Autowired
   private ReportingDatasetPublicMapper reportingDatasetPublicMapper;
 
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -90,9 +95,50 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    */
   @Override
   public List<ReportingDatasetPublicVO> getDataSetPublicByDataflow(Long dataflowId) {
-    return reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
+    List<ReportingDatasetPublicVO> reportings =
+        reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
+    setRestrictFromPublic(reportings, dataflowId);
+    return reportings;
   }
 
+
+  /**
+   * Gets the data set public by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data set public by dataflow
+   */
+  @Override
+  public List<ReportingDatasetPublicVO> getDataSetPublicByDataflowAndProviderId(Long dataflowId,
+      Long providerId) {
+    List<ReportingDatasetPublicVO> reportings = reportingDatasetPublicMapper
+        .entityListToClass(getDataSetIdByDataflowIdAndDataProviderId(dataflowId, providerId));
+    setRestrictFromPublic(reportings, dataflowId);
+    return reportings;
+  }
+
+  /**
+   * Sets the restrict from public.
+   *
+   * @param reportings the reportings
+   * @param dataflowId the dataflow id
+   */
+  private void setRestrictFromPublic(List<ReportingDatasetPublicVO> reportings, Long dataflowId) {
+    List<Long> providerIds = reportings.stream().map(ReportingDatasetPublicVO::getDataProviderId)
+        .collect(Collectors.toList());
+    if (!providerIds.isEmpty()) {
+      List<RepresentativeVO> representatives = representativeControllerZuul
+          .findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, providerIds);
+      for (ReportingDatasetPublicVO reporting : reportings) {
+        for (RepresentativeVO representativeVO : representatives) {
+          if (reporting.getDataProviderId() == representativeVO.getDataProviderId()) {
+            reporting.setRestrictFromPublic(representativeVO.isRestrictFromPublic());
+            break;
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Gets the dataset schema names.

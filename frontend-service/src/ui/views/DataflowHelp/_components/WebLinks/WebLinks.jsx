@@ -80,17 +80,7 @@ export const WebLinks = ({
   }, [webLinks, weblinkItem]);
 
   const addWeblinkSchema = Yup.object().shape({
-    description: Yup.string()
-      .required(' ')
-      .max(255, resources.messages['webLinkDescriptionValidationMax'])
-      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
-        return isNil(
-          webLinks.find(
-            weblink =>
-              TextUtils.areEquals(weblink.description, value) && TextUtils.areEquals(weblink.url, this.parent.url)
-          )
-        );
-      }),
+    description: Yup.string().required(' ').max(255, resources.messages['webLinkDescriptionValidationMax']),
     url: Yup.string()
       .lowercase()
       .matches(
@@ -98,15 +88,6 @@ export const WebLinks = ({
         resources.messages['urlError']
       )
       .required(' ')
-      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
-        return isNil(
-          webLinks.find(
-            weblink =>
-              TextUtils.areEquals(weblink.description, this.parent.description) &&
-              TextUtils.areEquals(weblink.url, value)
-          )
-        );
-      })
   });
 
   const fieldsArray = [
@@ -255,7 +236,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           disabled={(editingId === weblink.id && isEditing) || (deletingId === weblink.id && isDeleting)}
           icon={getEditButtonIcon()}
-          onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsAddOrEditWeblinkDialogVisible(true);
+          }}
           type="button"
         />
 
@@ -263,7 +247,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           disabled={(deletingId === weblink.id && isDeleting) || (editingId === weblink.id && isEditing)}
           icon={getDeleteButtonIcon()}
-          onClick={() => setIsConfirmDeleteVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsConfirmDeleteVisible(true);
+          }}
           type="button"
         />
       </div>
@@ -312,7 +299,6 @@ export const WebLinks = ({
       <DataTable
         autoLayout={true}
         loading={isLoading}
-        onRowSelect={e => setWeblinkItem(Object.assign({}, e.data))}
         onSort={e => {
           setSortFieldWeblinks(e.sortField);
           setSortOrderWeblinks(e.sortOrder);
