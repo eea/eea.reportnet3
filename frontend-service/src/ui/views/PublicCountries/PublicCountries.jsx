@@ -38,43 +38,43 @@ export const PublicCountries = withRouter(({ history }) => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resources.messages['countriesPageTitle']}</h1>
-          <div>
-            <h3>{resources.messages['eeaCountries']}</h3>
-            <div className={styles.countriesWrapper}>
-              {config.countriesByGroup.eeaCountries.map(country => {
-                const countryCode = country.code;
-                return (
-                  <div key={country.code}>
-                    <a
-                      href={getUrl(routes.COUNTRY)}
-                      onClick={e => {
-                        e.preventDefault();
-                        history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-                      }}>
-                      {country.name}
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-            <h3>{resources.messages['otherCountries']}</h3>
-            <div className={styles.countriesWrapper}>
-              {config.countriesByGroup.otherCountries.map(country => {
-                const countryCode = country.code;
-                return (
-                  <div key={country.code}>
-                    <a
-                      href={getUrl(routes.COUNTRY)}
-                      onClick={e => {
-                        e.preventDefault();
-                        history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-                      }}>
-                      {country.name}
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
+          <h2>{resources.messages['eeaCountries']}</h2>
+          <div className={styles.countriesWrapper}>
+            {config.countriesByGroup.eeaCountries.map(country => {
+              const countryCode = country.code;
+              return (
+                <div key={country.code}>
+                  <a
+                    className={styles.country}
+                    href={getUrl(routes.COUNTRY)}
+                    onClick={e => {
+                      e.preventDefault();
+                      history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+                    }}>
+                    <h3>{country.name}</h3>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+          <h2>{resources.messages['otherCountries']}</h2>
+          <div className={styles.countriesWrapper}>
+            {config.countriesByGroup.otherCountries.map(country => {
+              const countryCode = country.code;
+              return (
+                <div
+                  key={country.code}
+                  href={getUrl(routes.COUNTRY)}
+                  onClick={e => {
+                    e.preventDefault();
+                    history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+                  }}>
+                  {/* <a className={styles.country}> */}
+                  <h3>{country.name}</h3>
+                  {/* </a> */}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
