@@ -71,19 +71,23 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
+    amPm24h: true,
     basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
+    listView: true,
+    notificationSound: false,
     pinnedDataflows: [],
-    showLogoutConfirmation: true,
+    pushNotifications: true,
     rowsPerPage: 10,
-    visualTheme: 'light',
+    showLogoutConfirmation: true,
     userImage: [],
-    amPm24h: true,
-    listView: true
+    visualTheme: 'light'
   };
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
     userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
+    userConfiguration.notificationSound = userDefaultConfiguration.notificationSound;
+    userConfiguration.pushNotifications = userDefaultConfiguration.pushNotifications;
     userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
     userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
@@ -103,6 +107,18 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;
+
+    userConfiguration.notificationSound = isNil(userConfigurationDTO.notificationSound)
+      ? userDefaultConfiguration.notificationSound
+      : userConfigurationDTO.notificationSound[0] === 'false'
+      ? (userConfiguration.notificationSound = false)
+      : (userConfiguration.notificationSound = true);
+
+    userConfiguration.pushNotifications = isNil(userConfigurationDTO.pushNotifications)
+      ? userDefaultConfiguration.pushNotifications
+      : userConfigurationDTO.pushNotifications[0] === 'false'
+      ? (userConfiguration.pushNotifications = false)
+      : (userConfiguration.pushNotifications = true);
 
     userConfiguration.showLogoutConfirmation = isNil(userConfigurationDTO.showLogoutConfirmation)
       ? userDefaultConfiguration.showLogoutConfirmation

@@ -21,6 +21,22 @@ export const userReducer = (state, { type, payload }) => {
         ...state,
         ...payload.user
       };
+    case 'TOGGLE_NOTIFICATION_SOUND':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          notificationSound: payload
+        }
+      };
+    case 'TOGGLE_PUSH_NOTIFICATIONS':
+      return {
+        ...state,
+        userProps: {
+          ...state.userProps,
+          pushNotifications: payload
+        }
+      };
     case 'TOGGLE_LOGOUT_CONFIRM':
       return {
         ...state,

@@ -6,11 +6,14 @@ import DOMPurify from 'dompurify';
 
 import styles from './Notifications.module.scss';
 
+import logo from 'assets/images/logos/logo.png';
+import logoError from 'assets/images/logos/logo_error.png';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const Notifications = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -18,8 +21,15 @@ const Notifications = () => {
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   let growlRef = useRef();
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      Notification.requestPermission();
+    }
+  }, []);
 
   useEffect(() => {
     const header = document.getElementById('header');
@@ -70,6 +80,14 @@ const Notifications = () => {
               }}></div>
           ));
 
+      if (userContext.userProps.notificationSound) {
+        if (notification.type === 'error') {
+          playNotificationSound(187.31, 'triangle');
+        } else if (notification.type === 'success') {
+          playNotificationSound(440.0, 'sine');
+        }
+      }
+
       growlRef.current.show({
         severity: notification.type,
         summary: resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
@@ -77,12 +95,52 @@ const Notifications = () => {
         life: notification.lifeTime,
         sticky: notification.fixed
       });
+
+      if (userContext.userProps.pushNotifications && document.visibilityState === 'hidden') {
+        if (notification.type === 'error' || notification.type === 'success') {
+          const options = {
+            body: DOMPurify.sanitize(notification.message, {
+              ALLOWED_TAGS: [],
+              ALLOWED_ATTR: [],
+              KEEP_CONTENT: true
+            }),
+            icon: notification.type === 'success' ? logo : logoError,
+            dir: 'ltr'
+          };
+          const pushNotification = new Notification(
+            resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
+            options
+          );
+          pushNotification.onclick = () => {
+            window.focus();
+            if (!isNil(notification.redirectionUrl)) {
+              window.location.href = `${window.location.protocol}//${window.location.hostname}${
+                window.location.port !== '' && window.location.port.toString() !== '80'
+                  ? `:${window.location.port}`
+                  : ''
+              }${notification.redirectionUrl}`;
+            }
+          };
+        }
+      }
     });
 
     if (notificationContext.toShow.length > 0) {
       notificationContext.clearToShow();
     }
   }, [notificationContext.toShow]);
+
+  const playNotificationSound = (frequency, type) => {
+    var context = new AudioContext();
+    var o = context.createOscillator();
+    var g = context.createGain();
+    o.type = type;
+    o.connect(g);
+    o.frequency.value = frequency;
+    g.connect(context.destination);
+    o.start(0);
+    g.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 1);
+  };
 
   const recalculatePosition = () => {
     if (headerHeight === 180) {
