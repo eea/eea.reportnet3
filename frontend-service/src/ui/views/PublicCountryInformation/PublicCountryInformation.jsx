@@ -148,14 +148,14 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         sortOrder = 0;
       }
       let pageNum = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
-      const response = await DataflowService.getPublicDataflowsByCountryCode(
+      const { data } = await DataflowService.getPublicDataflowsByCountryCode(
         countryCode,
         sortOrder,
         pageNum,
         numberRows,
         sortField
       );
-      parseDataflows(response);
+      parseDataflows(data);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
     } finally {
