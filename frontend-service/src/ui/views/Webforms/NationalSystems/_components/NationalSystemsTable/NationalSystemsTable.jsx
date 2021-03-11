@@ -57,8 +57,8 @@ export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, t
         ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
       );
 
-      setData(parseData(response.records, tables, schemaTables));
-      setSchemaData(response);
+      setData(parseData(response.data.records, tables, schemaTables));
+      setSchemaData(response.data);
     } catch (error) {
       console.error('error', error);
     } finally {

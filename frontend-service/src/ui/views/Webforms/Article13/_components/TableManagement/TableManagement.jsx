@@ -249,18 +249,16 @@ export const TableManagement = ({
     });
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
-      return {
-        tableSchemaId: parentTable.tableSchemaId,
-        tableSchemaName: parentTable.tableSchemaName,
-        data: await DatasetService.tableDataById(
-          datasetId,
-          parentTable.tableSchemaId,
-          '',
-          300,
-          sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
-          ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-        )
-      };
+      const { data } = await DatasetService.tableDataById(
+        datasetId,
+        parentTable.tableSchemaId,
+        '',
+        300,
+        sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+        ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+      );
+
+      return { data, tableSchemaId: parentTable.tableSchemaId, tableSchemaName: parentTable.tableSchemaName };
     });
     Promise.all(parentTablesDataPromises)
       .then(parentTableData => tableManagementDispatch({ type: 'SET_PARENT_TABLES_DATA', payload: parentTableData }))
