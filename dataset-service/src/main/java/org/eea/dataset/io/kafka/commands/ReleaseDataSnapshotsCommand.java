@@ -3,6 +3,7 @@ package org.eea.dataset.io.kafka.commands;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import io.jsonwebtoken.lang.Collections;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -113,11 +115,28 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
       LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {}",
           dataset.getDataflowId(), dataset.getDataProviderId());
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
-              .providerId(dataset.getDataProviderId()).build());
+
+
+      List<Long> datasetMetabaseListIds =
+          datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
+              dataset.getDataProviderId());
+
+      // we send diferent notification if have morethan one dataset or have only one to redirect
+      if (!Collections.isEmpty(datasetMetabaseListIds) && datasetMetabaseListIds.size() > 1) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
+            null,
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                .providerId(dataset.getDataProviderId()).build());
+      } else {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                .providerId(dataset.getDataProviderId()).build());
+      }
+
     }
 
   }

@@ -102,6 +102,13 @@ public enum ResourceGroupEnum {
   /** The eudataset custodian. */
   EUDATASET_CUSTODIAN("EUDataset-%s-DATA_CUSTODIAN"),
 
+  /** The testdataset steward. */
+  TESTDATASET_STEWARD("TestDataset-%s-DATA_STEWARD"),
+
+  /** The testdataset custodian. */
+  TESTDATASET_CUSTODIAN("TestDataset-%s-DATA_CUSTODIAN"),
+
+
   /** The provider national coordinator. */
   // DATAPROVIDER-%-NATIONAL_COORDINATOR
   PROVIDER_NATIONAL_COORDINATOR("Provider-%s-NATIONAL_COORDINATOR");
