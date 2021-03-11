@@ -69,9 +69,9 @@ export const PublicCountries = withRouter(({ history }) => {
                     e.preventDefault();
                     history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
                   }}>
-                  {/* <a className={styles.country}> */}
-                  <h3>{country.name}</h3>
-                  {/* </a> */}
+                  <a className={styles.country}>
+                    <h3>{country.name}</h3>
+                  </a>
                 </div>
               );
             })}
