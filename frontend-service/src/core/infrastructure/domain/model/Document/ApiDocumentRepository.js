@@ -46,10 +46,4 @@ const getCountryName = countryCode => {
   return config.languages.filter(language => language.code === countryCode).map(name => name.name);
 };
 
-export const ApiDocumentRepository = {
-  all,
-  deleteDocument,
-  downloadDocumentById,
-  editDocument,
-  uploadDocument
-};
+export const ApiDocumentRepository = { all, deleteDocument, downloadDocumentById, editDocument, uploadDocument };
