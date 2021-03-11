@@ -715,7 +715,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       const webformObject = { webform: { name: designerState.selectedWebform.value } };
       const response = await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
-      if (response) {
+      if (response.status >= 200 && response.status <= 299) {
         onLoadSchema();
       }
     } catch (error) {

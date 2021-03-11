@@ -121,14 +121,14 @@ const errorsById = async (
     tablesFilter
   );
   const dataset = new Dataset({
-    datasetId: datasetErrorsDTO.idDataset,
-    datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
-    datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
-    totalRecords: datasetErrorsDTO.totalRecords,
-    totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
+    datasetId: datasetErrorsDTO.data.idDataset,
+    datasetSchemaId: datasetErrorsDTO.data.idDatasetSchema,
+    datasetSchemaName: datasetErrorsDTO.data.nameDataSetSchema,
+    totalRecords: datasetErrorsDTO.data.totalRecords,
+    totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
   });
 
-  const errors = datasetErrorsDTO.errors.map(
+  const errors = datasetErrorsDTO.data.errors.map(
     datasetErrorDTO =>
       datasetErrorDTO &&
       new DatasetError({
@@ -146,7 +146,8 @@ const errorsById = async (
   );
 
   dataset.errors = errors;
-  return dataset;
+  datasetErrorsDTO.data = dataset;
+  return datasetErrorsDTO;
 };
 
 const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
@@ -274,7 +275,7 @@ const getReferencedFieldValues = async (
     datasetSchemaId,
     resultsNumber
   );
-  return referencedFieldValuesDTO.map(
+  referencedFieldValuesDTO.data = referencedFieldValuesDTO.data.map(
     referencedFieldDTO =>
       new DatasetTableField({
         fieldId: referencedFieldDTO.id,
@@ -284,6 +285,8 @@ const getReferencedFieldValues = async (
         value: referencedFieldDTO.value
       })
   );
+
+  return referencedFieldValuesDTO;
 };
 
 const getAllLevelErrorsFromRuleValidations = rulesDTO =>
@@ -314,15 +317,15 @@ const groupedErrorsById = async (
     tablesFilter
   );
   const dataset = new Dataset({
-    datasetId: datasetErrorsDTO.idDataset,
-    datasetSchemaId: datasetErrorsDTO.idDatasetSchema,
-    datasetSchemaName: datasetErrorsDTO.nameDataSetSchema,
-    totalErrors: datasetErrorsDTO.totalErrors,
-    totalRecords: datasetErrorsDTO.totalRecords,
-    totalFilteredErrors: datasetErrorsDTO.totalFilteredRecords
+    datasetId: datasetErrorsDTO.data.idDataset,
+    datasetSchemaId: datasetErrorsDTO.data.idDatasetSchema,
+    datasetSchemaName: datasetErrorsDTO.data.nameDataSetSchema,
+    totalErrors: datasetErrorsDTO.data.totalErrors,
+    totalRecords: datasetErrorsDTO.data.totalRecords,
+    totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
   });
 
-  const errors = datasetErrorsDTO.errors.map(
+  const errors = datasetErrorsDTO.data.errors.map(
     datasetErrorDTO =>
       datasetErrorDTO &&
       new DatasetError({
@@ -342,7 +345,8 @@ const groupedErrorsById = async (
   );
 
   dataset.errors = errors;
-  return dataset;
+  datasetErrorsDTO.data = dataset;
+  return datasetErrorsDTO;
 };
 
 const isValidJSON = value => {

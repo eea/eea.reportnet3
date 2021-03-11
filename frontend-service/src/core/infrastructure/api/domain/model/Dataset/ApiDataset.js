@@ -96,20 +96,19 @@ export const apiDataset = {
     if (asc === -1) {
       asc = 0;
     }
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(DatasetConfig.listValidations, {
-        datasetId: datasetId,
-        pageNum: pageNum,
-        pageSize: pageSize,
-        sortField: sortField,
-        asc: asc,
-        fieldValueFilter: fieldValueFilter,
-        levelErrorsFilter: levelErrorsFilter,
-        typeEntitiesFilter: typeEntitiesFilter,
-        tableFilter: tablesFilter
+        asc,
+        datasetId,
+        fieldValueFilter,
+        levelErrorsFilter,
+        pageNum,
+        pageSize,
+        sortField,
+        tableFilter: tablesFilter,
+        typeEntitiesFilter
       })
     });
-    return response.data;
   },
 
   exportDataById: async (datasetId, fileType) => {
@@ -149,7 +148,7 @@ export const apiDataset = {
     datasetSchemaId = '',
     resultsNumber = ''
   ) => {
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(DatasetConfig.referencedFieldValues, {
         conditionalValue,
         datasetId,
@@ -159,7 +158,6 @@ export const apiDataset = {
         searchToken: searchToken !== '' ? searchToken : undefined
       })
     });
-    return response.data;
   },
 
   groupedErrorsById: async (
@@ -176,20 +174,19 @@ export const apiDataset = {
     if (asc === -1) {
       asc = 0;
     }
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(DatasetConfig.listGroupedValidations, {
-        datasetId: datasetId,
-        pageNum: pageNum,
-        pageSize: pageSize,
-        sortField: sortField,
-        asc: asc,
-        fieldValueFilter: fieldValueFilter,
-        levelErrorsFilter: levelErrorsFilter,
-        typeEntitiesFilter: typeEntitiesFilter,
+        datasetId,
+        pageNum,
+        pageSize,
+        sortField,
+        asc,
+        fieldValueFilter,
+        levelErrorsFilter,
+        typeEntitiesFilter,
         tableFilter: tablesFilter
       })
     });
-    return response.data;
   },
 
   orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
@@ -247,16 +244,10 @@ export const apiDataset = {
   },
 
   updateDatasetSchemaById: async (datasetId, datasetSchema) => {
-    try {
-      const response = await HTTPRequester.update({
-        url: getUrl(DatasetConfig.updateDatasetSchemaDesign, { datasetId }),
-        data: datasetSchema
-      });
-      return response.status >= 200 && response.status <= 299;
-    } catch (error) {
-      console.error(`Error updating dataset design name: ${error}`);
-      return false;
-    }
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateDatasetSchemaDesign, { datasetId }),
+      data: datasetSchema
+    });
   },
 
   updateFieldById: async (datasetId, datasetTableRecords, updateInCascade = false) => {
