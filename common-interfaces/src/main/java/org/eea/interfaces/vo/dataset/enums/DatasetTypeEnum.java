@@ -14,6 +14,9 @@ public enum DatasetTypeEnum {
   /** The collection. */
   COLLECTION("COLLECTION"),
 
+  /** The test. */
+  TEST("TEST"),
+
   /** The eudataset. */
   EUDATASET("EUDATASET");
 

@@ -1,0 +1,78 @@
+package org.eea.dataset.service.impl;
+
+import java.util.List;
+import org.eea.dataset.mapper.TestDatasetMapper;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.TestDataset;
+import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
+import org.eea.dataset.service.TestDatasetService;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.TestDatasetVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * The Class TestDatasetServiceImpl.
+ */
+@Service
+public class TestDatasetServiceImpl implements TestDatasetService {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(TestDatasetServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant SIGNATURE: {@value}. */
+  private static final String SIGNATURE = "signature";
+
+  /** The Test dataset repository. */
+  @Autowired
+  private TestDatasetRepository testDatasetRepository;
+
+  /** The Test dataset mapper. */
+  @Autowired
+  private TestDatasetMapper testDatasetMapper;
+
+  /** The partition data set metabase repository. */
+  @Autowired
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
+
+  /**
+   * Gets the EU dataset by dataflow id.
+   *
+   * @param idDataflow the id dataflow
+   * @return the Test dataset by dataflow id
+   */
+  @Override
+  public List<TestDatasetVO> getTestDatasetByDataflowId(Long idDataflow) {
+    List<TestDataset> testDatasets = testDatasetRepository.findByDataflowId(idDataflow);
+    return testDatasetMapper.entityListToClass(testDatasets);
+  }
+
+
+  /**
+   * Obtain partition.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @return the partition data set metabase
+   * @throws EEAException the EEA exception
+   */
+  private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
+      throws EEAException {
+    final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(datasetId, user).orElse(null);
+    if (partition == null) {
+      LOG_ERROR.error(EEAErrorMessage.PARTITION_ID_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
+    }
+    return partition;
+  }
+
+
+}

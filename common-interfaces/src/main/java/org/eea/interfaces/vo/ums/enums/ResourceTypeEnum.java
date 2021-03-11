@@ -35,6 +35,10 @@ public enum ResourceTypeEnum {
 
   /** The eu dataset. */
   EU_DATASET("EUDataset"),
+
+  /** The Test dataset. */
+  TEST_DATASET("TestDataset"),
+
   /**
    * Join request resource enum.
    */
