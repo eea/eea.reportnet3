@@ -5,7 +5,7 @@
   "addTableDesign": "/dataschema/{:datasetId}/tableSchema",
   "dataSchema": "/dataschema/datasetId/{:datasetId}",
   "datasetMetaData": "/datasetmetabase/{:datasetId}",
-  "dataViewer": "/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}",
+  "loadTableData": "/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}",
   "deleteDataSchema": "/dataschema/dataset/{:datasetId}",
   "deleteFileData": "/dataset/{:datasetId}/field/{:fieldId}/attachment",
   "deleteImportData": "/dataset/{:datasetId}/deleteImportData",

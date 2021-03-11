@@ -133,7 +133,7 @@ export const PublicDataflowInformation = withRouter(
       try {
         const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
 
-        DownloadFile(fileContent, fileName);
+        DownloadFile(fileContent.data, fileName);
       } catch (error) {
         if (error.response.status === 404) {
           notificationContext.add({

@@ -231,7 +231,7 @@ const ValidationViewer = React.memo(
       let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
 
       if (grouped) {
-        datasetErrors = await DatasetService.groupedErrorsById(
+        const { data } = await DatasetService.groupedErrorsById(
           datasetId,
           pageNums,
           numberRows,
@@ -242,6 +242,7 @@ const ValidationViewer = React.memo(
           typeEntitiesFilter,
           tablesFilter
         );
+        datasetErrors = data;
         addTableSchemaId(datasetErrors.errors);
         validationDispatch({
           type: 'SET_TOTAL_GROUPED_ERRORS',
@@ -251,7 +252,7 @@ const ValidationViewer = React.memo(
           }
         });
       } else {
-        datasetErrors = await DatasetService.errorsById(
+        const { data } = await DatasetService.errorsById(
           datasetId,
           pageNums,
           numberRows,
@@ -262,14 +263,12 @@ const ValidationViewer = React.memo(
           typeEntitiesFilter,
           tablesFilter
         );
+        datasetErrors = data;
       }
 
       validationDispatch({
         type: 'SET_TOTALS_ERRORS',
-        payload: {
-          totalFilteredRecords: datasetErrors.totalFilteredErrors,
-          totalRecords: datasetErrors.totalRecords
-        }
+        payload: { totalFilteredRecords: datasetErrors.totalFilteredErrors, totalRecords: datasetErrors.totalRecords }
       });
       setFetchedData(datasetErrors.errors);
       setIsLoading(false);
@@ -369,9 +368,14 @@ const ValidationViewer = React.memo(
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
       setIsLoading(true);
-      const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
-      setIsLoading(false);
-      return errorPosition;
+      try {
+        const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
+        return errorPosition.data;
+      } catch (error) {
+        console.error('error', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     const onSort = event => {

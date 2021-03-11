@@ -280,7 +280,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);      
+      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
@@ -496,7 +496,8 @@ export const Dataset = withRouter(({ match, history }) => {
     setIsLoadingFile(true);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
-      setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
+      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
+      setExportDatasetData(datasetData.data);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {
@@ -529,19 +530,25 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   useCheckNotifications(
-    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    [
+      'RELEASE_COMPLETED_EVENT',
+      'RELEASE_PROVIDER_COMPLETED_EVENT',
+      'RELEASE_FAILED_EVENT',
+      'RELEASE_BLOCKED_EVENT',
+      'RELEASE_BLOCKERS_FAILED_EVENT'
+    ],
     onLoadDataflow
   );
 
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.schemaById(datasetId);
-      setDatasetSchemaAllTables(datasetSchema.tables);
-      setDatasetSchemaName(datasetSchema.datasetSchemaName);
-      setLevelErrorTypes(datasetSchema.levelErrorTypes);
-      setWebformData(datasetSchema.webform);
-      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
-      return datasetSchema;
+      setDatasetSchemaAllTables(datasetSchema.data.tables);
+      setDatasetSchemaName(datasetSchema.data.datasetSchemaName);
+      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
+      setWebformData(datasetSchema.data.webform);
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.data.webform));
+      return datasetSchema.data;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
@@ -550,7 +557,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return datasetStatistics;
+      return datasetStatistics.data;
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
