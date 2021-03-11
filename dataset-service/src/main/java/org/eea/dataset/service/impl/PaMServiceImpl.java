@@ -11,7 +11,6 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAException;
@@ -50,12 +49,6 @@ public class PaMServiceImpl implements PaMService {
   @Autowired
   private FileCommonUtils fileCommonUtils;
 
-  /**
-   * The dataset service.
-   */
-  @Autowired
-  private DatasetService datasetService;
-
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
@@ -79,7 +72,7 @@ public class PaMServiceImpl implements PaMService {
   public List<SinglePaMVO> getListSinglePaM(Long datasetId, String groupPaMId) throws EEAException {
 
     // get dataflowId
-    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    Long dataflowId = datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId();
     // get datasetSchema
     Map<String, String> schemaIds = getPaMsSchemaIds(datasetId, dataflowId);
 
@@ -818,8 +811,8 @@ public class PaMServiceImpl implements PaMService {
       DataSetSchemaVO schemaFK, Map<String, String> schemaIds) {
     String idFieldSchemaPKString = getIdFieldSchemaPK(idFieldSchemaFK, schemaFK);
     // Id Dataset contains PK list
-    Long datasetIdRefered =
-        datasetService.getReferencedDatasetId(datasetIdReference, idFieldSchemaPKString);
+    Long datasetIdRefered = datasetMetabaseService
+        .getDatasetDestinationForeignRelation(datasetIdReference, idFieldSchemaPKString);
     schemaIds.put(PaMConstants.DATASET_ID_PK, datasetIdRefered.toString());
     // Get PK Schema
     String pkSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetIdRefered);

@@ -108,10 +108,10 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       setLoading(true);
       const datasetSchema = await DatasetService.schemaById(datasetId);
-      setLevelErrorTypes(datasetSchema.levelErrorTypes);
+      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
       const tableSchemaNamesList = [];
       setTableSchema(
-        datasetSchema.tables.map(tableSchema => {
+        datasetSchema.data.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
             id: tableSchema['tableSchemaId'],
@@ -121,7 +121,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         })
       );
       setTableSchemaColumns(
-        datasetSchema.tables.map(table => {
+        datasetSchema.data.tables.map(table => {
           return table.records[0].fields.map(field => {
             return {
               codelistItems: field['codelistItems'],

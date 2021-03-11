@@ -92,25 +92,6 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " AND fv.record.tableValue.datasetId.id=?1 and fv.record.tableValue.idTableSchema=?2")
   Set<Long> findRecordIdWithValidations(Long datasetId, String idTableSchema);
 
-
-  /**
-   * Find record id from record with validations by level error.
-   *
-   * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
-   * @param typeError the type error
-   *
-   * @return the hash set
-   */
-  @Query("SELECT rv.recordValue.id FROM RecordValidation rv  "
-      + " WHERE rv.recordValue.tableValue.datasetId.id=:datasetId "
-      + " AND rv.recordValue.tableValue.idTableSchema=:idTableSchema "
-      + " AND rv.validation.levelError=:typeError")
-  Set<Long> findRecordIdFromRecordWithValidationsByLevelError(@Param("datasetId") Long datasetId,
-      @Param("idTableSchema") String idTableSchema, @Param("typeError") ErrorTypeEnum typeError);
-
-
-
   /**
    * Count record id from record with error validations.
    *
@@ -137,23 +118,6 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + "join table_value tv on rval.id_table=tv.id and v.level_error='ERROR' and tv.id_table_schema=:idTableSchema)) ids")
   Long countRecordIdFromRecordWithWarningValidations(@Param("idTableSchema") String idTableSchema);
 
-
-  /**
-   * Find record id from field with validations by level error.
-   *
-   * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
-   * @param typeError the type error
-   *
-   * @return the hash set
-   */
-  @Query("SELECT fv.fieldValue.record.id FROM FieldValidation fv  "
-      + " WHERE  fv.fieldValue.record.tableValue.datasetId.id=:datasetId "
-      + " AND fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema "
-      + " AND fv.validation.levelError=:typeError")
-  Set<Long> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
-      @Param("idTableSchema") String idTableSchema, @Param("typeError") ErrorTypeEnum typeError);
-
   /**
    * Find by validation ids.
    *
@@ -164,4 +128,38 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   List<RecordValidation> findByValidationIds(@Param("ids") List<Long> ids);
 
 
+  /**
+   * Find record id from record with validations by level error.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the map
+   */
+  @Query("SELECT rv.recordValue.id AS id,rv.validation.levelError AS levelError FROM RecordValidation rv  "
+      + " WHERE rv.recordValue.tableValue.datasetId.id=:datasetId "
+      + " AND rv.recordValue.tableValue.idTableSchema=:idTableSchema ")
+  List<IDError> findRecordIdFromRecordWithValidationsByLevelError(
+      @Param("datasetId") Long datasetId, @Param("idTableSchema") String idTableSchema);
+
+  /**
+   * Find record id from field with validations by level error.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the map
+   */
+  @Query("SELECT fv.fieldValue.record.id AS id, fv.validation.levelError AS levelError FROM FieldValidation fv  "
+      + " WHERE  fv.fieldValue.record.tableValue.datasetId.id=:datasetId "
+      + " AND fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema ")
+  List<IDError> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
+      @Param("idTableSchema") String idTableSchema);
+
+  /**
+   * The Interface IDError.
+   */
+  public interface IDError {
+    String getId();
+
+    String getLevelError();
+  }
 }

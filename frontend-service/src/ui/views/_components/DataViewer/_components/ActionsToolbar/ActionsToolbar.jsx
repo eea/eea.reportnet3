@@ -123,7 +123,8 @@ const ActionsToolbar = ({
     setIsLoadingFile(true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
-      setExportTableData(await DatasetService.exportTableDataById(datasetId, tableId, fileType));
+      const { data } = await DatasetService.exportTableDataById(datasetId, tableId, fileType);
+      setExportTableData(data);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
