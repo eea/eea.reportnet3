@@ -1,4 +1,4 @@
-import { apiWebLink } from 'core/infrastructure/api/domain/model/WebLink';
+import { apiWebLink } from 'core/infrastructure/api/domain/model/WebLinks';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 const all = async dataflowId => {
