@@ -66,14 +66,10 @@ const downloadById = async dataflowId => {
   return await apiRepresentative.downloadById(dataflowId);
 };
 
-const downloadTemplateById = async dataProviderGroupId => {
-  return await apiRepresentative.downloadTemplateById(dataProviderGroupId);
-};
+const downloadTemplateById = async dataProviderGroupId =>
+  await apiRepresentative.downloadTemplateById(dataProviderGroupId);
 
-const getProviderTypes = async () => {
-  const dataProviderTypesDTO = await apiRepresentative.getProviderTypes();
-  return dataProviderTypesDTO.data;
-};
+const getProviderTypes = async () => await apiRepresentative.getProviderTypes();
 
 const updateDataProviderId = async (representativeId, dataProviderId) =>
   await apiRepresentative.updateDataProviderId(representativeId, dataProviderId);
