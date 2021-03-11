@@ -345,7 +345,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               </div>
             </>
           ) : (
-            <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+            <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
           )
         ) : (
           <Spinner style={{ top: 0, left: 0 }} />

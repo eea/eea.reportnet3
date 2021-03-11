@@ -1019,6 +1019,7 @@
     "loginFormError": "Incorrect username or password",
     "restrictFromPublicField": "Restricted from public view by country",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
-    "releaseStartEvent": "Releasing data to data collection."
+    "releaseStartEvent": "Releasing data to data collection.",
+    "noDataflows": "There are no dataflows yet"
   }
 }
