@@ -1,8 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
-
-import { RepresentativeService } from 'core/services/Representative';
 
 const parseInsideLeadReporters = (leadReporters = []) => {
   const reporters = {};
@@ -13,13 +10,6 @@ const parseInsideLeadReporters = (leadReporters = []) => {
     reporters['empty'] = '';
   }
   return reporters;
-};
-
-export const onExportLeadReportersTemplate = async selectedDataProviderGroup => {
-  const response = await RepresentativeService.downloadTemplateById(selectedDataProviderGroup.dataProviderGroupId);
-  if (!isNil(response)) {
-    DownloadFile(response, `GroupId_${selectedDataProviderGroup.dataProviderGroupId}_Template.csv`);
-  }
 };
 
 export const parseLeadReporters = (representatives = []) => {

@@ -92,7 +92,10 @@ public enum ObjectAccessRoleEnum {
   DATASET_NATIONAL_COORDINATOR("ROLE_DATASET-%s-NATIONAL_COORDINATOR"),
 
   /** The eudataset custodian. */
-  EUDATASET_CUSTODIAN("ROLE_EUDATASET-%s-DATA_CUSTODIAN");
+  EUDATASET_CUSTODIAN("ROLE_EUDATASET-%s-DATA_CUSTODIAN"),
+
+  /** The testdataset custodian. */
+  TESTDATASET_CUSTODIAN("ROLE_TESTDATASET-%s-DATA_CUSTODIAN");
 
 
   /** The expression. */
