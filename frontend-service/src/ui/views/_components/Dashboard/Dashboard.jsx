@@ -83,12 +83,12 @@ const Dashboard = withRouter(
       const onLoadStatistics = async () => {
         setIsLoading(true);
         const dataset = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-        setLevelErrorTypes(dataset.levelErrorTypes);
-        const tableNames = dataset.tables.map(table => table.tableSchemaName);
-        setDashboardTitle(dataset.datasetSchemaName);
+        setLevelErrorTypes(dataset.data.levelErrorTypes);
+        const tableNames = dataset.data.tables.map(table => table.tableSchemaName);
+        setDashboardTitle(dataset.data.datasetSchemaName);
         setDashboardData({
           labels: tableNames,
-          datasets: getDashboardBarsByDatasetData(dataset)
+          datasets: getDashboardBarsByDatasetData(dataset.data)
         });
 
         setIsLoading(false);
