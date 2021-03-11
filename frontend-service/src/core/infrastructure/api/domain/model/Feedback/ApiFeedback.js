@@ -16,13 +16,6 @@ export const apiFeedback = {
     });
   },
 
-  loadMessagesByFlag: async (dataflowId, page, read, dataProviderId) => {
-    const response = await HTTPRequester.get({
-      url: getUrl(FeedbackConfig.loadMessagesByFlag, { dataflowId, page, read, providerId: dataProviderId })
-    });
-    return response.data;
-  },
-
   markAsRead: async (dataflowId, messages) => {
     return await HTTPRequester.update({ url: getUrl(FeedbackConfig.markAsRead, { dataflowId }), data: messages });
   }

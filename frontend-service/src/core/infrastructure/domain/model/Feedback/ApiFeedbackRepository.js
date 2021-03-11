@@ -12,12 +12,6 @@ const loadMessages = async (dataflowId, page, dataProviderId) => {
   return response;
 };
 
-const loadMessagesByFlag = async (dataflowId, page, read, dataProviderId) => {
-  const response = await apiFeedback.loadMessagesByFlag(dataflowId, page, read, dataProviderId);
-  const messagesDTO = response.map(message => new Feedback({ ...message }));
-  return reverse(messagesDTO);
-};
-
 const markAsRead = async (dataflowId, messages) => await apiFeedback.markAsRead(dataflowId, messages);
 
-export const ApiFeedbackRepository = { create, loadMessages, loadMessagesByFlag, markAsRead };
+export const ApiFeedbackRepository = { create, loadMessages, markAsRead };
