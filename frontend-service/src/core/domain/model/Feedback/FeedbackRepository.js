@@ -3,6 +3,7 @@ import { ApiFeedbackRepository } from 'core/infrastructure/domain/model/Feedback
 export const FeedbackRepository = {
   create: () => Promise.reject('[FeedbackRepository#create] must be implemented'),
   loadMessages: () => Promise.reject('[FeedbackRepository#loadMessages] must be implemented'),
+  loadMessagesByFlag: () => Promise.reject('[FeedbackRepository#loadMessagesByFlag] must be implemented'),
   markAsRead: () => Promise.reject('[FeedbackRepository#markAsRead] must be implemented')
 };
 
