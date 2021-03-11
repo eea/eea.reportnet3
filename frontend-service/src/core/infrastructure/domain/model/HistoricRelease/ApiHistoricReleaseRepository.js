@@ -4,13 +4,17 @@ import { apiHistoricRelease } from 'core/infrastructure/api/domain/model/Histori
 import { HistoricRelease } from 'core/domain/model/HistoricRelease/HistoricRelease';
 
 const allHistoricReleases = async datasetId => {
-  const historicReleasesDTO = await apiHistoricRelease.allHistoricReleases(datasetId);
-  return parseReleases(historicReleasesDTO);
+  const response = await apiHistoricRelease.allHistoricReleases(datasetId);
+  response.data = parseReleases(response.data);
+
+  return response;
 };
 
 const allRepresentativeHistoricReleases = async (dataflowId, dataProviderId) => {
-  const historicReleasesDTO = await apiHistoricRelease.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
-  return parseReleases(historicReleasesDTO);
+  const response = await apiHistoricRelease.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
+  response.data = parseReleases(response.data);
+
+  return response;
 };
 
 const parseReleases = historicReleasesDTO => {
@@ -18,10 +22,10 @@ const parseReleases = historicReleasesDTO => {
     return historicReleasesDTO.map(
       historicReleaseDTO =>
         new HistoricRelease({
-          id: historicReleaseDTO.id,
           countryCode: historicReleaseDTO.countryCode,
           datasetId: historicReleaseDTO.datasetId,
           datasetName: historicReleaseDTO.datasetName,
+          id: historicReleaseDTO.id,
           isDataCollectionReleased: historicReleaseDTO.dcrelease,
           isEUReleased: historicReleaseDTO.eurelease,
           releasedDate: historicReleaseDTO.dateReleased
@@ -31,7 +35,4 @@ const parseReleases = historicReleasesDTO => {
   return;
 };
 
-export const ApiHistoricReleaseRepository = {
-  allHistoricReleases,
-  allRepresentativeHistoricReleases
-};
+export const ApiHistoricReleaseRepository = { allHistoricReleases, allRepresentativeHistoricReleases };
