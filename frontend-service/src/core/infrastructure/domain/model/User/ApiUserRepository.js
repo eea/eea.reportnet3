@@ -77,6 +77,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
     listView: true,
     notificationSound: false,
     pinnedDataflows: [],
+    pushNotifications: true,
     rowsPerPage: 10,
     showLogoutConfirmation: true,
     userImage: [],
@@ -86,6 +87,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
     userConfiguration.notificationSound = userDefaultConfiguration.notificationSound;
+    userConfiguration.pushNotifications = userDefaultConfiguration.pushNotifications;
     userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
     userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
@@ -111,6 +113,12 @@ const parseConfigurationDTO = userConfigurationDTO => {
       : userConfigurationDTO.notificationSound[0] === 'false'
       ? (userConfiguration.notificationSound = false)
       : (userConfiguration.notificationSound = true);
+
+    userConfiguration.pushNotifications = isNil(userConfigurationDTO.pushNotifications)
+      ? userDefaultConfiguration.pushNotifications
+      : userConfigurationDTO.pushNotifications[0] === 'false'
+      ? (userConfiguration.pushNotifications = false)
+      : (userConfiguration.pushNotifications = true);
 
     userConfiguration.showLogoutConfirmation = isNil(userConfigurationDTO.showLogoutConfirmation)
       ? userDefaultConfiguration.showLogoutConfirmation

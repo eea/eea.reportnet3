@@ -15,6 +15,7 @@ const userSettingsDefaultState = {
     dateFormat: 'YYYY-MM-DD',
     listView: true,
     notificationSound: false,
+    pushNotifications: false,
     pinnedDataflows: [],
     rowsPerPage: 10,
     showLogoutConfirmation: true,
@@ -85,6 +86,10 @@ export const UserProvider = ({ children }) => {
 
         onToggleNotificationSound: notificationSound => {
           userDispatcher({ type: 'TOGGLE_NOTIFICATION_SOUND', payload: notificationSound });
+        },
+
+        onTogglePushNotifications: pushNotifications => {
+          userDispatcher({ type: 'TOGGLE_PUSH_NOTIFICATIONS', payload: pushNotifications });
         },
 
         onToggleLogoutConfirm: logoutConfirmation => {

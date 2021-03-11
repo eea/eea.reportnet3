@@ -103,6 +103,7 @@ const MainLayout = ({ children, isPublic = false }) => {
       userContext.onChangePinnedDataflows(userConfiguration.pinnedDataflows);
       userContext.onChangeRowsPerPage(parseInt(userConfiguration.rowsPerPage));
       userContext.onToggleNotificationSound(userConfiguration.notificationSound);
+      userContext.onTogglePushNotifications(userConfiguration.pushNotifications);
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
       userContext.onToggleVisualTheme(userConfiguration.visualTheme);
       userContext.onUserFileUpload(userConfiguration.userImage);

@@ -7,6 +7,7 @@ import DOMPurify from 'dompurify';
 import styles from './Notifications.module.scss';
 
 import logo from 'assets/images/logos/logo.png';
+import logoError from 'assets/images/logos/logo_error.png';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 
@@ -25,9 +26,7 @@ const Notifications = () => {
   let growlRef = useRef();
 
   useEffect(() => {
-    if (!('Notification' in window)) {
-      console.log('This browser does not support desktop notification');
-    } else {
+    if ('Notification' in window) {
       Notification.requestPermission();
     }
   }, []);
@@ -96,37 +95,33 @@ const Notifications = () => {
         life: notification.lifeTime,
         sticky: notification.fixed
       });
-      if (notification.type === 'error' || notification.type === 'success') {
-        console.log(
-          message,
-          logo,
-          DOMPurify.sanitize(notification.message, {
-            ALLOWED_TAGS: ['a'],
-            ALLOWED_ATTR: [],
-            KEEP_CONTENT: true
-          }),
-          DOMPurify.sanitize(notification.message, {
-            ALLOWED_TAGS: ['a', 'strong'],
-            ALLOWED_ATTR: ['href', 'title']
-          })
-        );
-        const options = {
-          body: DOMPurify.sanitize(notification.message, {
-            ALLOWED_TAGS: [],
-            ALLOWED_ATTR: [],
-            KEEP_CONTENT: true
-          }),
-          icon: logo,
-          dir: 'ltr'
-        };
-        const pushNotification = new Notification(
-          resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
-          options
-        );
-        pushNotification.onclick = function (event) {
-          window.focus();
-        };
-        console.log(pushNotification);
+
+      if (userContext.userProps.pushNotifications && document.visibilityState === 'hidden') {
+        if (notification.type === 'error' || notification.type === 'success') {
+          const options = {
+            body: DOMPurify.sanitize(notification.message, {
+              ALLOWED_TAGS: [],
+              ALLOWED_ATTR: [],
+              KEEP_CONTENT: true
+            }),
+            icon: notification.type === 'success' ? logo : logoError,
+            dir: 'ltr'
+          };
+          const pushNotification = new Notification(
+            resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
+            options
+          );
+          pushNotification.onclick = () => {
+            window.focus();
+            if (!isNil(notification.redirectionUrl)) {
+              window.location.href = `${window.location.protocol}//${window.location.hostname}${
+                window.location.port !== '' && window.location.port.toString() !== '80'
+                  ? `:${window.location.port}`
+                  : ''
+              }${notification.redirectionUrl}`;
+            }
+          };
+        }
       }
     });
 
