@@ -113,6 +113,40 @@ public class ReleaseDataSnapshotsCommandTest {
 
   }
 
+  @Test
+  public void testExecuteFinish2Datas() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+    data = new HashMap<>();
+    data.put("dataset_id", 1L);
+    data.put("user", "user1");
+    eeaEventVO.setData(data);
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    dataSetMetabaseVO.setId(1L);
+    dataSetMetabaseVO.setDataflowId(1L);
+    dataSetMetabaseVO.setDataProviderId(1L);
+    List<Long> datasetsId = new ArrayList<>();
+    datasetsId.add(1L);
+    datasetsId.add(2L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
+    Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(1L)).thenReturn(null);
+
+    List<Long> idsLong = new ArrayList();
+    idsLong.add(1L);
+    idsLong.add(2L);
+    Mockito.when(datasetMetabaseService
+        .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
+        .thenReturn(idsLong);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setName("dataflowName");
+    dataflowVO.setId(1L);
+    dataflowVO.setShowPublicInfo(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    releaseDataSnapshotsCommand.execute(eeaEventVO);
+    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
+
+  }
+
   /**
    * Test execute with blockers.
    *

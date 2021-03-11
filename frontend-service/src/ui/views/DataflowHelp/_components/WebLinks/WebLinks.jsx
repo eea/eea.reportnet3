@@ -14,8 +14,6 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
-import { TextUtils } from 'ui/views/_functions/Utils';
-
 import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
 import { WebLinkService } from 'core/services/WebLink';
 
@@ -163,7 +161,6 @@ export const WebLinks = ({
   };
 
   const onWeblinkUrlChange = inputValue => {
-    console.log('inputValue', inputValue);
     webLinksDispatch({ type: 'ON_URL_CHANGE', payload: { url: inputValue } });
   };
 
@@ -182,8 +179,8 @@ export const WebLinks = ({
     checkIsCorrectInputValue('description');
     checkIsCorrectInputValue('url');
 
-    webLinksDispatch({ type: 'ON_SAVE_RECORD', payload: { webLink: webLinksState.webLink } });
     if (!webLinksState.errors.url.hasErrors && !webLinksState.errors.description.hasErrors) {
+      webLinksDispatch({ type: 'ON_SAVE_RECORD', payload: { webLink: webLinksState.webLink } });
       if (isNil(webLinksState.webLink.id)) {
         try {
           const newWeblink = await WebLinkService.create(dataflowId, webLinksState.webLink);
@@ -275,7 +272,10 @@ export const WebLinks = ({
             (webLinksState.deletingId === webLink.id && webLinksState.isDeleting)
           }
           icon={getEditButtonIcon()}
-          onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
+          onClick={() => {
+            webLinksDispatch({ type: 'SET_WEB_LINK', payload: { webLink } });
+            setIsAddOrEditWeblinkDialogVisible(true);
+          }}
           type="button"
         />
 
@@ -286,7 +286,10 @@ export const WebLinks = ({
             (webLinksState.editingId === webLink.id && webLinksState.isEditing)
           }
           icon={getDeleteButtonIcon()}
-          onClick={() => setIsConfirmDeleteVisible(true)}
+          onClick={() => {
+            webLinksDispatch({ type: 'SET_WEB_LINK', payload: { webLink } });
+            setIsConfirmDeleteVisible(true);
+          }}
           type="button"
         />
       </div>
@@ -343,9 +346,6 @@ export const WebLinks = ({
       <DataTable
         autoLayout={true}
         loading={webLinksState.isLoading}
-        onRowSelect={e => {
-          webLinksDispatch({ type: 'SET_WEB_LINK', payload: { webLink: Object.assign({}, e.data) } });
-        }}
         onSort={e => {
           setSortFieldWeblinks(e.sortField);
           setSortOrderWeblinks(e.sortOrder);

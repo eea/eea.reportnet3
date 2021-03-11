@@ -24,6 +24,7 @@ import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
+import org.eea.dataset.persistence.metabase.domain.TestDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -31,6 +32,7 @@ import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -137,6 +139,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The eu dataset repository. */
   @Autowired
   private EUDatasetRepository euDatasetRepository;
+
+  /** The test dataset repository. */
+  @Autowired
+  private TestDatasetRepository testDatasetRepository;
 
 
   /**
@@ -580,6 +586,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
                 dataflowId, dataset.getId(), datasetName);
             this.createGroupDcAndAddUser(dataset.getId());
             break;
+          case TEST:
+            dataset = new TestDataset();
+            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+            testDatasetRepository.save((TestDataset) dataset);
+            recordStoreControllerZuul.createEmptyDataset(
+                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
+            LOG.info("New Test Dataset created into the dataflow {}. DatasetId {} with name {}",
+                dataflowId, dataset.getId(), datasetName);
+            this.createGroupDcAndAddUser(dataset.getId());
+            break;
           default:
             throw new EEAException("Unsupported datasetType: " + datasetType);
         }
@@ -752,6 +768,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       type = DatasetTypeEnum.COLLECTION;
     } else if (euDatasetRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.EUDATASET;
+    } else if (testDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.TEST;
     }
 
     return type;
