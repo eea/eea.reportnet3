@@ -379,6 +379,7 @@ const DataViewer = withRouter(
         }
         setFetchedData(dataFiltered);
       };
+
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
       setIsLoading(true);
       try {
@@ -386,7 +387,7 @@ const DataViewer = withRouter(
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
-        const tableData = await DatasetService.tableDataById(
+        const { data } = await DatasetService.tableDataById(
           datasetId,
           tableId,
           Math.floor(fRow / nRows),
@@ -395,31 +396,29 @@ const DataViewer = withRouter(
           levelErrorValidations,
           groupedRules
         );
-        if (!isEmpty(tableData.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
-        if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(tableData)) {
-          if (!isUndefined(tableData.records) && tableData.records.length > 0) {
+
+        if (!isEmpty(data.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
+        if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(data)) {
+          if (!isUndefined(data.records) && data.records.length > 0) {
             dispatchRecords({
               type: 'SET_NEW_RECORD',
-              payload: RecordUtils.createEmptyObject(colsSchema, tableData.records[0])
+              payload: RecordUtils.createEmptyObject(colsSchema, data.records[0])
             });
           } else {
-            dispatchRecords({
-              type: 'SET_NEW_RECORD',
-              payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-            });
+            dispatchRecords({ type: 'SET_NEW_RECORD', payload: RecordUtils.createEmptyObject(colsSchema, undefined) });
           }
         }
-        if (!isUndefined(tableData.records)) {
-          filterDataResponse(tableData);
+        if (!isUndefined(data.records)) {
+          filterDataResponse(data);
         } else {
           setFetchedData([]);
         }
 
-        if (tableData.totalRecords !== records.totalRecords) {
-          dispatchRecords({ type: 'SET_TOTAL', payload: tableData.totalRecords });
+        if (data.totalRecords !== records.totalRecords) {
+          dispatchRecords({ type: 'SET_TOTAL', payload: data.totalRecords });
         }
-        if (tableData.totalFilteredRecords !== records.totalFilteredRecords) {
-          dispatchRecords({ type: 'SET_FILTERED', payload: tableData.totalFilteredRecords });
+        if (data.totalFilteredRecords !== records.totalFilteredRecords) {
+          dispatchRecords({ type: 'SET_FILTERED', payload: data.totalFilteredRecords });
         }
 
         setIsLoading(false);
@@ -431,12 +430,7 @@ const DataViewer = withRouter(
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
         notificationContext.add({
           type: 'TABLE_DATA_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName,
-            datasetName
-          }
+          content: { dataflowId, datasetId, dataflowName, datasetName }
         });
       } finally {
         setIsLoading(false);

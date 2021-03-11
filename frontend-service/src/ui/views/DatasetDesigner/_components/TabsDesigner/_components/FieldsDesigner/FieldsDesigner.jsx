@@ -505,7 +505,7 @@ export const FieldsDesigner = ({
           : droppedFieldIdx,
         inmFields[draggedFieldIdx].fieldId
       );
-      if (fieldOrdered) {
+      if (fieldOrdered.status >= 200 && fieldOrdered.status <= 299) {
         setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
         onChangeFields(inmFields, false, table.tableSchemaId);
       }
