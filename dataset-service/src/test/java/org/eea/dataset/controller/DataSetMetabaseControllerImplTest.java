@@ -285,4 +285,12 @@ public class DataSetMetabaseControllerImplTest {
         .getDataSetIdByDataflowIdAndDataProviderId(Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void findReportingDataSetPublicByDataflowIdAndProviderId() {
+    dataSetMetabaseControllerImpl.findReportingDataSetPublicByDataflowIdAndProviderId(1L, 1L);
+    Mockito.verify(reportingDatasetService, times(1))
+        .getDataSetPublicByDataflowAndProviderId(Mockito.any(), Mockito.any());
+  }
+
+
 }

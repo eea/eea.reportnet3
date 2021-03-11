@@ -144,6 +144,7 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset Test controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDataSetControllerZuul;
+
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
@@ -732,11 +733,11 @@ public class DataflowServiceImpl implements DataflowService {
    * @return the page
    */
   private static <T> List<T> getPage(List<T> sourceList, int page, int pageSize) {
-    if (pageSize <= 0 || page <= 0) {
+    if (pageSize <= 0 || page < 0) {
       throw new IllegalArgumentException("invalid page size or PageNum: " + pageSize + "-" + page);
     }
 
-    int fromIndex = (page - 1) * pageSize;
+    int fromIndex = (page) * pageSize;
     if (sourceList == null || sourceList.size() <= fromIndex) {
       return Collections.emptyList();
     }

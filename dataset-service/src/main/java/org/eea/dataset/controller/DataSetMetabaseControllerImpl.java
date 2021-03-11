@@ -416,7 +416,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowIdAndProviderId(
       @PathVariable("id") Long dataflowId, @PathVariable("providerId") Long providerId) {
-    return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
+    return reportingDatasetService.getDataSetPublicByDataflowAndProviderId(dataflowId, providerId);
   }
 
 
