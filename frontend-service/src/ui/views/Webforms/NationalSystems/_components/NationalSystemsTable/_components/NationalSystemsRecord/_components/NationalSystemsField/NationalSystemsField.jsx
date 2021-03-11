@@ -82,11 +82,15 @@ export const NationalSystemsField = ({
   };
 
   const onConfirmDeleteAttachment = async () => {
-    const isFileDeleted = await DatasetService.deleteFileData(datasetId, field.fieldId);
+    try {
+      const { status } = await DatasetService.deleteFileData(datasetId, field.fieldId);
 
-    if (isFileDeleted) {
-      onFillField(field, field.fieldSchemaId, '');
-      handleDialogs('deleteAttachment', false);
+      if (status >= 200 && status <= 299) {
+        onFillField(field, field.fieldSchemaId, '');
+        handleDialogs('deleteAttachment', false);
+      }
+    } catch (error) {
+      console.error('error', error);
     }
   };
 
@@ -114,9 +118,13 @@ export const NationalSystemsField = ({
   };
 
   const onFileDownload = async (fileName, fieldId) => {
-    const fileContent = await DatasetService.downloadFileData(datasetId, fieldId);
+    try {
+      const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
 
-    DownloadFile(fileContent, fileName);
+      DownloadFile(data, fileName);
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const onFillField = (field, option, value) => {

@@ -180,4 +180,22 @@ public interface DataFlowController {
    */
   @GetMapping("/getUserRolesAllDataflows")
   List<DataflowUserRoleVO> getUserRolesAllDataflows();
+
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param sortField the sort field
+   * @param asc the asc
+   * @return the public dataflows by country
+   */
+  @GetMapping("/public/country/{countryCode}")
+  public List<DataflowPublicVO> getPublicDataflowsByCountry(
+      @PathVariable("countryCode") String countryCode,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+      @RequestParam(value = "sortField", required = false) String sortField,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc);
 }

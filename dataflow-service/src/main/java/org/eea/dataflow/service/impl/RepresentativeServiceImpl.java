@@ -274,16 +274,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /**
    * Find data providers by ids.
    *
-   * @param dataProviderIds the data provider ids
+   * @param code the code
    * @return the list
    */
   @Override
   public List<DataProviderVO> findDataProvidersByCode(String code) {
-    List<DataProviderVO> dataProviderResultList = new ArrayList<>();
     List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
-    dataProviders.forEach(
-        dataProvider -> dataProviderResultList.add(dataProviderMapper.entityToClass(dataProvider)));
-    return dataProviderResultList;
+    return dataProviderMapper.entityListToClass(dataProviders);
   }
 
   /**
@@ -300,6 +297,19 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         .entityListToClass(representativeRepository.findByDataflowIdAndEmail(dataflowId, email));
   }
 
+  /**
+   * Find representatives by dataflow and dataprovider list.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderIdList the data provider id list
+   * @return the list
+   */
+  @Override
+  public List<RepresentativeVO> findRepresentativesByDataflowIdAndDataproviderList(Long dataflowId,
+      List<Long> dataProviderIdList) {
+    return representativeMapper.entityListToClass(representativeRepository
+        .findByDataflowIdAndDataProviderIdIn(dataflowId, dataProviderIdList));
+  }
 
   /**
    * Export file.

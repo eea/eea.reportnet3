@@ -15,6 +15,7 @@ import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -131,6 +132,8 @@ public class PaMServiceImplTest {
     recordSchema.setFieldSchema(fieldsSchemas);
     tableSchema.setRecordSchema(recordSchema);
     schema.setTableSchemas(tablesSchema);
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDataflowId(1L);
 
     fieldValueList = new ArrayList<>();
     FieldValue fieldValue = new FieldValue();
@@ -144,9 +147,9 @@ public class PaMServiceImplTest {
         .thenReturn(fieldSchema);
     when(fieldRepository.findFirstByIdFieldSchemaAndValue(Mockito.any(), Mockito.any()))
         .thenReturn(fieldValue);
-    when(
-        fieldRepository.findByFieldSchemaAndValue(Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(fieldValueList);
+    when(fieldRepository.findByFieldSchemaAndValue(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(fieldValueList);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(datasetVO);
     assertNotNull(paMServiceImpl.getListSinglePaM(1L, "1"));
   }
 

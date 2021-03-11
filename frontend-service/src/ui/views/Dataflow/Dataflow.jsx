@@ -83,7 +83,6 @@ const Dataflow = withRouter(({ history, match }) => {
     isApiKeyDialogVisible: false,
     isCopyDataCollectionToEuDatasetLoading: false,
     isCustodian: false,
-    isUserListVisible: false,
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
@@ -95,6 +94,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isImportLeadReportersVisible: false,
     isManageRightsDialogVisible: false,
     isManageRolesDialogVisible: false,
+    isNationalCoordinator: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
@@ -104,6 +104,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseDialogVisible: false,
     isShareRightsDialogVisible: false,
     isSnapshotDialogVisible: false,
+    isUserListVisible: false,
     name: '',
     obligations: {},
     representativesImport: false,
@@ -242,7 +243,10 @@ const Dataflow = withRouter(({ history, match }) => {
       const userListBtn = {
         className: 'dataflow-properties-help-step',
         icon: 'users',
-        isVisible: (dataflowState.hasUserListRights && !isNil(representativeId)) || isLeadReporterOfCountry,
+        isVisible:
+          (dataflowState.hasUserListRights && !isNil(representativeId)) ||
+          isLeadReporterOfCountry ||
+          dataflowState.isNationalCoordinator,
         label: 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title: 'dataflowUsersList'
@@ -407,10 +411,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onExportLeadReporters = async () => {
     try {
-      const response = await RepresentativeService.downloadById(dataflowId);
-      if (!isNil(response)) {
+      const { data } = await RepresentativeService.downloadById(dataflowId);
+      if (!isNil(data)) {
         DownloadFile(
-          response,
+          data,
           `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Lead_Reporters.csv`
         );
       }
@@ -476,13 +480,14 @@ const Dataflow = withRouter(({ history, match }) => {
     );
 
     const hasUserListRights = userContext.hasPermission(
-      [
-        config.permissions.LEAD_REPORTER,
-        config.permissions.NATIONAL_COORDINATOR,
-        config.permissions.DATA_STEWARD,
-        config.permissions.DATA_CUSTODIAN
-      ],
+      [config.permissions.LEAD_REPORTER, config.permissions.DATA_STEWARD, config.permissions.DATA_CUSTODIAN],
       `${config.permissions.DATAFLOW}${dataflowId}`
+    );
+
+    const isNationalCoordinator = userContext.hasContextAccessPermission(
+      config.permissions.NATIONAL_COORDINATOR_PREFIX,
+      null,
+      [config.permissions.NATIONAL_COORDINATOR]
     );
 
     const entity = isNil(representativeId)
@@ -497,7 +502,13 @@ const Dataflow = withRouter(({ history, match }) => {
 
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
-      payload: { hasWritePermissions, isCustodian, userRoles, hasUserListRights }
+      payload: {
+        hasWritePermissions,
+        isCustodian,
+        userRoles,
+        hasUserListRights,
+        isNationalCoordinator
+      }
     });
   };
 
@@ -623,20 +634,22 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const onSaveName = async (value, index) => {
-    await DatasetService.updateSchemaNameById(
-      dataflowState.designDatasetSchemas[index].datasetId,
-      encodeURIComponent(value)
-    );
-    const updatedTitles = [...dataflowState.updatedDatasetSchema];
-    updatedTitles[index].schemaName = value;
-    setUpdatedDatasetSchema(updatedTitles);
+    try {
+      await DatasetService.updateSchemaNameById(
+        dataflowState.designDatasetSchemas[index].datasetId,
+        encodeURIComponent(value)
+      );
+      const updatedTitles = [...dataflowState.updatedDatasetSchema];
+      updatedTitles[index].schemaName = value;
+      setUpdatedDatasetSchema(updatedTitles);
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
-  const onOpenReleaseConfirmDialog = () => {
-    manageDialogs('isReleaseDialogVisible', true);
-  };
+  const onOpenReleaseConfirmDialog = () => manageDialogs('isReleaseDialogVisible', true);
 
   const onConfirmExport = async () => {
     try {
@@ -656,6 +669,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
+      notificationContext.add({ type: 'RELEASE_START_EVENT' });
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
@@ -774,7 +788,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            onConfirm={() => onConfirmRelease()}
+            onConfirm={onConfirmRelease}
             onHide={() => {
               manageDialogs('isReleaseDialogVisible', false);
               if (dataflowState.restrictFromPublic) {

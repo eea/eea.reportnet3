@@ -1,7 +1,7 @@
 import { datasetRepository } from 'core/domain/model/Dataset/DatasetRepository';
 
-import { AddRecords } from './AddRecords';
 import { AddRecordFieldDesign } from './AddRecordFieldDesign';
+import { AddRecords } from './AddRecords';
 import { AddTableDesign } from './AddTableDesign';
 import { CreateValidation } from './CreateValidation';
 import { DeleteData } from './DeleteData';
@@ -11,9 +11,9 @@ import { DeleteRecordFieldDesign } from './DeleteRecordFieldDesign';
 import { DeleteSchema } from './DeleteSchema';
 import { DeleteTableData } from './DeleteTableData';
 import { DeleteTableDesign } from './DeleteTableDesign';
+import { DownloadDatasetFileData } from './DownloadDatasetFileData';
 import { DownloadExportFile } from './DownloadExportFile';
 import { DownloadFileData } from './DownloadFileData';
-import { DownloadDatasetFileData } from './DownloadDatasetFileData';
 import { ExportData } from './ExportData';
 import { ExportDatasetDataExternal } from './ExportDatasetDataExternal';
 import { ExportTableData } from './ExportTableData';
@@ -50,11 +50,11 @@ export const DatasetService = {
   deleteSchemaById: DeleteSchema({ datasetRepository }),
   deleteTableDataById: DeleteTableData({ datasetRepository }),
   deleteTableDesign: DeleteTableDesign({ datasetRepository }),
+  downloadDatasetFileData: DownloadDatasetFileData({ datasetRepository }),
   downloadExportFile: DownloadExportFile({ datasetRepository }),
   downloadFileData: DownloadFileData({ datasetRepository }),
-  downloadDatasetFileData: DownloadDatasetFileData({ datasetRepository }),
-  errorsById: GetErrors({ datasetRepository }),
   errorPositionByObjectId: GetErrorPosition({ datasetRepository }),
+  errorsById: GetErrors({ datasetRepository }),
   errorStatisticsById: GetStatistics({ datasetRepository }),
   exportDataById: ExportData({ datasetRepository }),
   exportDatasetDataExternal: ExportDatasetDataExternal({ datasetRepository }),
