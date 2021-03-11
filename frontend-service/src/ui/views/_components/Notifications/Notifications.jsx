@@ -104,6 +104,10 @@ const Notifications = () => {
             ALLOWED_TAGS: ['a'],
             ALLOWED_ATTR: [],
             KEEP_CONTENT: true
+          }),
+          DOMPurify.sanitize(notification.message, {
+            ALLOWED_TAGS: ['a', 'strong'],
+            ALLOWED_ATTR: ['href', 'title']
           })
         );
         const options = {
