@@ -423,7 +423,7 @@ export const TabsDesigner = withRouter(
           draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
           tabs[draggedTabIdx].tableSchemaId
         );
-        if (tableOrdered) {
+        if (tableOrdered.status >= 200 && tableOrdered.status <= 299) {
           const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
 
           shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));

@@ -160,7 +160,7 @@ export const WebformTable = ({
     try {
       const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
 
-      const parentTableData = await DatasetService.tableDataById(
+      const { data } = await DatasetService.tableDataById(
         datasetId,
         webform.tableSchemaId,
         '',
@@ -171,7 +171,7 @@ export const WebformTable = ({
         fieldSchema || fieldId,
         selectedTable.pamsId
       );
-      if (!isNil(parentTableData.records)) {
+      if (!isNil(data.records)) {
         const tables = getTableElements(webform);
         const tableSchemaIds = tables.map(table => table.tableSchemaId);
 
@@ -191,15 +191,9 @@ export const WebformTable = ({
             fieldSchema || fieldId,
             selectedTable.pamsId
           );
-          tableData[tableSchemaId] = tableChildData;
-          // 'tableChildData', tableChildData;
+          tableData[tableSchemaId] = tableChildData.data;
         }
-        const records = onParseWebformRecords(
-          parentTableData.records,
-          webform,
-          tableData,
-          parentTableData.totalRecords
-        );
+        const records = onParseWebformRecords(data.records, webform, tableData, data.totalRecords);
 
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
