@@ -619,7 +619,7 @@ const Dataflow = withRouter(({ history, match }) => {
     });
   };
 
-  useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   useCheckNotifications(
     ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
