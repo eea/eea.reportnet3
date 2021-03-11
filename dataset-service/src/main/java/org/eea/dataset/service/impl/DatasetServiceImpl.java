@@ -3365,6 +3365,7 @@ public class DatasetServiceImpl implements DatasetService {
     outputStream.write("}".getBytes());
     LOG.info("Finish ETL Export proccess");
   }
+
   /**
    * Initialize dataset.
    *
@@ -3481,6 +3482,7 @@ public class DatasetServiceImpl implements DatasetService {
   public void executeInitializeDataset(Long datasetId, String idDatasetSchema) {
     initializeExecutorService.execute(() -> initializeDataset(datasetId, idDatasetSchema));
   }
+
   /**
    * Export ETL table VO list.
    *
@@ -3556,7 +3558,7 @@ public class DatasetServiceImpl implements DatasetService {
     for (int i = 0; i < nPages; i++) {
       LOG.info("etlExport: page={}, total={}", i, nPages);
 
-      List<RecordValue> recordlist = recordRepository.findByTableValueNoOrder(
+      List<RecordValue> recordlist = recordRepository.findByTableValueNoOrderOptimized(
           tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 1000));
       int nRecords = recordlist.size();
 
@@ -3598,5 +3600,4 @@ public class DatasetServiceImpl implements DatasetService {
     ObjectMapper mapper = new ObjectMapper();
     outputStream.write(mapper.writeValueAsBytes(etlRecordVO));
   }
-
 }
