@@ -534,7 +534,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
 
-      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
+      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData.data, name: datasetName } });
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {

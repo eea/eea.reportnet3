@@ -233,19 +233,14 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
-const exportDataById = async (datasetId, fileType) => {
-  const datasetData = await apiDataset.exportDataById(datasetId, fileType);
-  return datasetData;
-};
+const exportDataById = async (datasetId, fileType) => await apiDataset.exportDataById(datasetId, fileType);
 
 const exportDatasetDataExternal = async (datasetId, integrationId) => {
-  const datasetData = await apiDataset.exportDatasetDataExternal(datasetId, integrationId);
-  return datasetData;
+  return await apiDataset.exportDatasetDataExternal(datasetId, integrationId);
 };
 
 const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
-  const datasetTableData = await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
-  return datasetTableData;
+  return await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
 };
 
 const getMetaData = async datasetId => {

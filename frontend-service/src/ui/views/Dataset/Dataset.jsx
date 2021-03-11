@@ -496,7 +496,8 @@ export const Dataset = withRouter(({ match, history }) => {
     setIsLoadingFile(true);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
-      setExportDatasetData(await DatasetService.exportDataById(datasetId, fileType));
+      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
+      setExportDatasetData(datasetData.data);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {

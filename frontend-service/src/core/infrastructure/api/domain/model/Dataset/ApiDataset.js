@@ -57,18 +57,16 @@ export const apiDataset = {
   },
 
   downloadDatasetFileData: async (dataflowId, dataProviderId, fileName) => {
-    const response = await HTTPRequester.download({
+    return await HTTPRequester.download({
       url: getUrl(DatasetConfig.downloadDatasetFileData, { dataflowId, dataProviderId, fileName })
     });
-    return response.data;
   },
 
   downloadExportFile: async (datasetId, fileName, providerId = null) => {
     const url = providerId
       ? getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName, providerId })
       : getUrl(DatasetConfig.downloadExportFileNoProviderId, { datasetId, fileName });
-    const response = await HTTPRequester.download({ url });
-    return response.data;
+    return await HTTPRequester.download({ url });
   },
 
   downloadFileData: async (datasetId, fieldId) => {
@@ -112,27 +110,24 @@ export const apiDataset = {
   },
 
   exportDataById: async (datasetId, fileType) => {
-    const response = await HTTPRequester.download({
+    return await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetData, { datasetId: datasetId, fileType: fileType }),
       headers: { 'Content-Type': 'application/octet-stream' }
     });
-    return response.data;
   },
 
   exportDatasetDataExternal: async (datasetId, integrationId) => {
-    const response = await HTTPRequester.download({
+    return await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetDataExternal, { datasetId, integrationId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     });
-    return response.data;
   },
 
   exportTableDataById: async (datasetId, tableSchemaId, fileType) => {
-    const response = await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetTableData, { datasetId, tableSchemaId, fileType }),
+    return await HTTPRequester.download({
+      url: getUrl(DatasetConfig.exportDatasetTableData, { datasetId, fileType, tableSchemaId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     });
-    return response.data;
   },
 
   getMetaData: async datasetId => {
