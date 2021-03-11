@@ -280,7 +280,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);      
+      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
@@ -529,7 +529,13 @@ export const Dataset = withRouter(({ match, history }) => {
   };
 
   useCheckNotifications(
-    ['RELEASE_COMPLETED_EVENT', 'RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    [
+      'RELEASE_COMPLETED_EVENT',
+      'RELEASE_PROVIDER_COMPLETED_EVENT',
+      'RELEASE_FAILED_EVENT',
+      'RELEASE_BLOCKED_EVENT',
+      'RELEASE_BLOCKERS_FAILED_EVENT'
+    ],
     onLoadDataflow
   );
 
