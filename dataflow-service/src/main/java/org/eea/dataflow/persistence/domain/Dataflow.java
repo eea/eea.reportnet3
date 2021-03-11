@@ -12,9 +12,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -93,12 +90,6 @@ public class Dataflow {
   /** The weblinks. */
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private List<Weblink> weblinks;
-
-  /** The user requests. */
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  @JoinTable(name = "dataflow_user_request", joinColumns = @JoinColumn(name = "dataflow_id"),
-      inverseJoinColumns = @JoinColumn(name = "user_request_id"))
-  private Set<UserRequest> userRequests;
 
   /** The dataflow representatives. */
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)

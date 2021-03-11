@@ -5,51 +5,42 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiIntegration = {
-  all: async integration => {
-    return await HTTPRequester.update({
+  all: async integration =>
+    await HTTPRequester.update({
       url: getUrl(IntegrationConfig.all),
       data: integration
-    });
-  },
+    }),
 
-  allExtensionsOperations: async integration => {
-    return await HTTPRequester.update({
+  allExtensionsOperations: async integration =>
+    await HTTPRequester.update({
       url: getUrl(IntegrationConfig.allExtensionsOperations),
       data: integration
-    });
-  },
+    }),
 
-  create: async integration => {
-    return await HTTPRequester.post({
+  create: async integration =>
+    await HTTPRequester.post({
       url: getUrl(IntegrationConfig.create),
       data: integration
-    });
-  },
+    }),
 
-  deleteById: async (dataflowId, integrationId) => {
-    return await HTTPRequester.delete({
+  deleteById: async (dataflowId, integrationId) =>
+    await HTTPRequester.delete({
       url: getUrl(IntegrationConfig.delete, { dataflowId, integrationId })
-    });
-  },
+    }),
 
-  findEUDatasetIntegration: async datasetSchemaId => {
-    return await HTTPRequester.get({
+  findEUDatasetIntegration: async datasetSchemaId =>
+    await HTTPRequester.get({
       url: getUrl(IntegrationConfig.euDatasetIntegration, { datasetSchemaId })
-    });
-  },
+    }),
 
-  getProcesses: async (repositoryName, datasetId) => {
-    return await HTTPRequester.get({
+  getProcesses: async (repositoryName, datasetId) =>
+    await HTTPRequester.get({
       url: getUrl(IntegrationConfig.getProcesses, { datasetId, repositoryName })
-    });
-  },
-
-  getRepositories: async datasetId => {
-    return await HTTPRequester.get({
+    }),
+  getRepositories: async datasetId =>
+    await HTTPRequester.get({
       url: getUrl(IntegrationConfig.getRepositories, { datasetId })
-    });
-  },
-
+    }),
   runIntegration: async (integrationId, datasetId, replaceData) => {
     if (isUndefined(replaceData)) {
       return await HTTPRequester.post({
@@ -62,10 +53,9 @@ export const apiIntegration = {
     }
   },
 
-  update: async integration => {
-    return await HTTPRequester.update({
+  update: async integration =>
+    await HTTPRequester.update({
       url: getUrl(IntegrationConfig.update),
       data: integration
-    });
-  }
+    })
 };
