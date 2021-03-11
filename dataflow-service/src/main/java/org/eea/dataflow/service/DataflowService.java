@@ -80,18 +80,6 @@ public interface DataflowService {
    */
   List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
 
-
-  /**
-   * Update user request status.
-   *
-   * @param userRequestId the user request id
-   * @param type the type
-   *
-   * @throws EEAException the EEA exception
-   */
-  void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
-
-
   /**
    * Adds the contributor to dataflow.
    *
@@ -196,4 +184,17 @@ public interface DataflowService {
    * @return the user roles
    */
   List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList);
+
+  /**
+   * Gets the public dataflows.
+   *
+   * @param countryCode the country code
+   * @param header the header
+   * @param asc the asc
+   * @param page the page
+   * @param pageSize the page size
+   * @return the public dataflows
+   */
+  List<DataflowPublicVO> getPublicDataflowsByCountry(String countryCode, String header, boolean asc,
+      int page, int pageSize);
 }

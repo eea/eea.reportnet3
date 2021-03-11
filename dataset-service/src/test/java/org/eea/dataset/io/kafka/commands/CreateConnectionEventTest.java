@@ -8,7 +8,6 @@ import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -120,27 +119,8 @@ public class CreateConnectionEventTest {
     data.put("dataset_id", "dataset_1");
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
-    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
     createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.any());
+    Mockito.verify(datasetService, times(1)).executeInitializeDataset(Mockito.any(), Mockito.any());
   }
 
-
-  /**
-   * Execute test 5.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void executeTest5() throws EEAException {
-    eeaEventVO.setEventType(EventType.CONNECTION_CREATED_EVENT);
-    data = new HashMap<>();
-    data.put("dataset_id", "dataset_1");
-    data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
-    eeaEventVO.setData(data);
-    Mockito.doThrow(EEAException.class).when(datasetService).saveStatistics(Mockito.any());
-    createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).saveStatistics(Mockito.any());
-  }
 }

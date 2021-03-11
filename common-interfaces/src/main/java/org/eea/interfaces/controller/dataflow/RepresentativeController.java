@@ -198,4 +198,16 @@ public interface RepresentativeController {
    */
   @GetMapping("/private/dataProviderByCode/{code}")
   List<DataProviderVO> findDataProvidersByCode(@PathVariable("code") String code);
+
+  /**
+   * Find representatives by data flow id and provider id list.
+   *
+   * @param dataflowIdList the dataflow id list
+   * @param providerIdList the provider id list
+   * @return the list
+   */
+  @GetMapping(value = "/private/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<RepresentativeVO> findRepresentativesByDataFlowIdAndProviderIdList(
+      @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerIdList") List<Long> providerIdList);
 }

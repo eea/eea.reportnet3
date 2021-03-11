@@ -245,38 +245,6 @@ public class DataFlowControllerImplTest {
     assertEquals("fail", new ArrayList<>(), dataflowService.getDataflows(Mockito.any()));
   }
 
-
-  /**
-   * Update user request.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateUserRequest() throws EEAException {
-    Mockito.doNothing().when(dataflowService).updateUserRequestStatus(Mockito.any(), Mockito.any());
-
-    dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).updateUserRequestStatus(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Update user request throws.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateUserRequestThrows() throws EEAException {
-    doThrow(new EEAException()).when(dataflowService).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-    try {
-      dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
-    }
-  }
-
   /**
    * Adds the contributor.
    *

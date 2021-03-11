@@ -111,7 +111,7 @@ public class ViewHelper implements DisposableBean {
       viewExecutorService.execute(
           () -> executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL));
     }
-    // update the proesses list in every recordstore instance
+    // update the processes list in every recordstore instance
     releaseDeleteViewProccesEvent(datasetId);
   }
 

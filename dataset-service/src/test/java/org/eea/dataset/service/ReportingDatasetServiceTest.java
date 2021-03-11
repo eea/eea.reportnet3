@@ -16,6 +16,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.impl.ReportingDatasetServiceImpl;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +56,10 @@ public class ReportingDatasetServiceTest {
   /** The reporting dataset public mapper. */
   @Mock
   private ReportingDatasetPublicMapper reportingDatasetPublicMapper;
+
+  /** The representative controller zuul. */
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Inits the mocks.
