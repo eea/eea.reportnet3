@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,6 +126,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class DatasetServiceImpl.
@@ -1339,61 +1341,13 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException {
-
-    // Get the datasetSchemaId by the datasetId
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-    if (null == datasetSchemaId) {
-      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
+  public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream) {
+    try {
+      exportETLDatasetVO(datasetId, outputStream);
+      outputStream.flush();
+    } catch (IOException e) {
+      LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
-
-    // Get the datasetSchema by the datasetSchemaId
-    DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    if (null == datasetSchema) {
-      throw new EEAException(
-          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
-    }
-
-    // Construct object to be returned
-    ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
-    List<ETLTableVO> etlTableVOs = new ArrayList<>();
-    etlDatasetVO.setTables(etlTableVOs);
-
-    // Loop to fill ETLTableVOs
-    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-
-      // Match each fieldSchemaId with its headerName
-      Map<String, String> fieldMap = new HashMap<>();
-      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-        fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
-      }
-
-      ETLTableVO etlTableVO = new ETLTableVO();
-      List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
-      etlTableVO.setTableName(tableSchema.getNameTableSchema());
-      etlTableVO.setRecords(etlRecordVOs);
-      etlTableVOs.add(etlTableVO);
-
-      // Loop to fill ETLRecordVOs
-      for (RecordValue record : recordRepository
-          .findByTableValueNoOrder(tableSchema.getIdTableSchema().toString(), null)) {
-        ETLRecordVO etlRecordVO = new ETLRecordVO();
-        List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
-        etlRecordVO.setFields(etlFieldVOs);
-        etlRecordVO.setCountryCode(record.getDataProviderCode());
-        etlRecordVOs.add(etlRecordVO);
-
-        // Loop to fill ETLFieldVOs
-        for (FieldValue field : record.getFields()) {
-          ETLFieldVO etlFieldVO = new ETLFieldVO();
-          etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
-          etlFieldVO.setValue(field.getValue());
-          etlFieldVOs.add(etlFieldVO);
-        }
-      }
-    }
-    return etlDatasetVO;
   }
 
   /**
@@ -3399,6 +3353,19 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Export ETL dataset VO.
+   *
+   * @param datasetId the dataset id
+   * @param outputStream the output stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void exportETLDatasetVO(Long datasetId, OutputStream outputStream) throws IOException {
+    outputStream.write("{\"tables\":".getBytes());
+    exportETLTableVOList(datasetId, outputStream);
+    outputStream.write("}".getBytes());
+    LOG.info("Finish ETL Export proccess");
+  }
+  /**
    * Initialize dataset.
    *
    * @param datasetId the dataset id
@@ -3514,4 +3481,122 @@ public class DatasetServiceImpl implements DatasetService {
   public void executeInitializeDataset(Long datasetId, String idDatasetSchema) {
     initializeExecutorService.execute(() -> initializeDataset(datasetId, idDatasetSchema));
   }
+  /**
+   * Export ETL table VO list.
+   *
+   * @param datasetId the dataset id
+   * @param outputStream the output stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void exportETLTableVOList(Long datasetId, OutputStream outputStream) throws IOException {
+
+    // Get the datasetSchemaId by the datasetId
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+
+    outputStream.write("[".getBytes());
+    // Loop to fill ETLTableVOs
+    if (null != datasetSchema) {
+      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+      int nTables = tableSchemaList.size();
+      for (int i = 0; i < nTables; i++) {
+        exportETLTableVO(tableSchemaList.get(i), outputStream);
+        if (i + 1 < nTables) {
+          outputStream.write(",".getBytes());
+        }
+      }
+      outputStream.write("]".getBytes());
+    }
+  }
+
+
+  /**
+   * Export ETL table VO.
+   *
+   * @param tableSchema the table schema
+   * @param outputStream the output stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void exportETLTableVO(TableSchema tableSchema, OutputStream outputStream)
+      throws IOException {
+
+    // Match each fieldSchemaId with its headerName
+    Map<String, String> fieldMap = new HashMap<>();
+    for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+      fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
+    }
+
+    String json = "{\"tableName\":\"" + tableSchema.getNameTableSchema() + "\", \"records\":";
+    outputStream.write(json.getBytes());
+
+    exportETLRecordVOList(fieldMap, tableSchema, outputStream);
+    outputStream.write("}".getBytes());
+
+  }
+
+
+  /**
+   * Export ETL record VO list.
+   *
+   * @param fieldMap the field map
+   * @param tableSchemaId the table schema id
+   * @param outputStream the output stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void exportETLRecordVOList(Map<String, String> fieldMap, TableSchema tableSchema,
+      OutputStream outputStream) throws IOException {
+    Long totalRecords =
+        tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
+    LOG.info("total Records:{}", totalRecords);
+    int nPages = (int) Math.ceil(totalRecords / 1000.0);
+
+    outputStream.write("[".getBytes());
+    for (int i = 0; i < nPages; i++) {
+      LOG.info("etlExport: page={}, total={}", i, nPages);
+
+      List<RecordValue> recordlist = recordRepository.findByTableValueNoOrder(
+          tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 1000));
+      int nRecords = recordlist.size();
+
+      for (int j = 0; j < nRecords; j++) {
+        exportETLRecordVO(recordlist.get(j), fieldMap, outputStream);
+        if (i + 1 < nPages || j + 1 < nRecords) {
+          outputStream.write(",".getBytes());
+        }
+      }
+      outputStream.flush();
+    }
+    outputStream.write("]".getBytes());
+  }
+
+  /**
+   * Export ETL record VO.
+   *
+   * @param record the record
+   * @param fieldMap the field map
+   * @param outputStream the output stream
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void exportETLRecordVO(RecordValue record, Map<String, String> fieldMap,
+      OutputStream outputStream) throws IOException {
+
+    ETLRecordVO etlRecordVO = new ETLRecordVO();
+    List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
+    etlRecordVO.setFields(etlFieldVOs);
+    etlRecordVO.setCountryCode(record.getDataProviderCode());
+
+    // Loop to fill ETLFieldVOs
+    for (FieldValue field : record.getFields()) {
+      ETLFieldVO etlFieldVO = new ETLFieldVO();
+      etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
+      etlFieldVO.setValue(field.getValue());
+      etlFieldVOs.add(etlFieldVO);
+    }
+
+    ObjectMapper mapper = new ObjectMapper();
+    outputStream.write(mapper.writeValueAsBytes(etlRecordVO));
+  }
+
 }
