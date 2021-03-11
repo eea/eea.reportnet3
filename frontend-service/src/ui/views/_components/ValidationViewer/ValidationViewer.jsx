@@ -368,9 +368,14 @@ const ValidationViewer = React.memo(
 
     const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
       setIsLoading(true);
-      const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
-      setIsLoading(false);
-      return errorPosition;
+      try {
+        const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
+        return errorPosition.data;
+      } catch (error) {
+        console.error('error', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     const onSort = event => {

@@ -381,7 +381,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      return await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      return statistics.data;
     } catch (error) {
       console.error(error);
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');

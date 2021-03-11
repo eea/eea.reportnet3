@@ -135,7 +135,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       if (!isEmpty(datasetSchema.data)) {
         if (isCustodian) {
           const datasetMetaData = await DatasetService.getMetaData(datasetId);
-          datasetSchema.data.datasetSchemaName = datasetMetaData.datasetSchemaName;
+          datasetSchema.data.datasetSchemaName = datasetMetaData.data.datasetSchemaName;
         }
         return datasetSchema.data;
       }

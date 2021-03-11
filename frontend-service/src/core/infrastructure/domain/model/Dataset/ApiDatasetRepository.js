@@ -153,12 +153,14 @@ const errorsById = async (
 const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
   const datasetErrorDTO = await apiDataset.errorPositionByObjectId(objectId, datasetId, entityType);
 
-  return new DatasetError({
-    position: datasetErrorDTO.position,
-    recordId: datasetErrorDTO.idRecord,
-    tableSchemaId: datasetErrorDTO.idTableSchema,
-    tableSchemaName: datasetErrorDTO.nameTableSchema
+  datasetErrorDTO.data = new DatasetError({
+    position: datasetErrorDTO.data.position,
+    recordId: datasetErrorDTO.data.idRecord,
+    tableSchemaId: datasetErrorDTO.data.idTableSchema,
+    tableSchemaName: datasetErrorDTO.data.nameTableSchema
   });
+
+  return datasetErrorDTO;
 };
 
 const errorStatisticsById = async (datasetId, tableSchemaNames) => {
@@ -170,18 +172,18 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
 
   //Sort by schema order
-  datasetTablesDTO.tables = datasetTablesDTO.tables.sort((a, b) => {
+  datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort((a, b) => {
     return tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema);
   });
 
   const dataset = new Dataset({});
-  dataset.datasetSchemaName = datasetTablesDTO.nameDataSetSchema;
-  dataset.datasetErrors = datasetTablesDTO.datasetErrors;
+  dataset.datasetSchemaName = datasetTablesDTO.data.nameDataSetSchema;
+  dataset.datasetErrors = datasetTablesDTO.data.datasetErrors;
   const tableStatisticValues = [];
   let levelErrors = [];
   const allDatasetLevelErrors = [];
-  const datasetTables = datasetTablesDTO.tables.map(datasetTableDTO => {
-    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO));
+  const datasetTables = datasetTablesDTO.data.tables.map(datasetTableDTO => {
+    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO.data));
     tableStatisticValues.push([
       datasetTableDTO.totalRecords -
         (datasetTableDTO.totalRecordsWithBlockers +
@@ -215,7 +217,8 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   dataset.tableStatisticPercentages = !isEmpty(tableStatisticValues) ? CoreUtils.getPercentage(transposedValues) : [];
 
   dataset.tables = datasetTables;
-  return dataset;
+  datasetTablesDTO.data = dataset;
+  return datasetTablesDTO;
 };
 
 const tableStatisticValuesWithErrors = tableStatisticValues => {
@@ -245,13 +248,14 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
-  const dataset = new Dataset({
-    datasetSchemaName: datasetTableDataDTO.dataSetName,
-    datasetSchemaId: datasetTableDataDTO.datasetSchema,
+  datasetTableDataDTO.data = new Dataset({
     datasetFeedbackStatus:
-      !isNil(datasetTableDataDTO.status) && capitalize(datasetTableDataDTO.status.split('_').join(' '))
+      !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),
+    datasetSchemaId: datasetTableDataDTO.data.datasetSchema,
+    datasetSchemaName: datasetTableDataDTO.data.dataSetName
   });
-  return dataset;
+
+  return datasetTableDataDTO;
 };
 
 const getReferencedFieldValues = async (
@@ -694,9 +698,9 @@ export const ApiDatasetRepository = {
   deleteSchemaById,
   deleteTableDataById,
   deleteTableDesign,
+  downloadDatasetFileData,
   downloadExportFile,
   downloadFileData,
-  downloadDatasetFileData,
   errorPositionByObjectId,
   errorsById,
   errorStatisticsById,
@@ -710,8 +714,8 @@ export const ApiDatasetRepository = {
   orderTableSchema,
   schemaById,
   tableDataById,
-  updateDatasetSchemaDesign,
   updateDatasetFeedbackStatus,
+  updateDatasetSchemaDesign,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,

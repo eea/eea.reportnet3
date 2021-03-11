@@ -551,7 +551,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
       const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return datasetStatistics;
+      return datasetStatistics.data;
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }

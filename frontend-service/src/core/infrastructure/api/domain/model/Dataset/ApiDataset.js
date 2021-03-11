@@ -74,10 +74,9 @@ export const apiDataset = {
   },
 
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {
-    const response = await HTTPRequester.get({
-      url: getUrl(DatasetConfig.validationViewer, { objectId: objectId, datasetId: datasetId, entityType: entityType })
+    return await HTTPRequester.get({
+      url: getUrl(DatasetConfig.validationViewer, { datasetId, entityType, objectId })
     });
-    return response.data;
   },
 
   errorsById: async (
@@ -131,8 +130,7 @@ export const apiDataset = {
   },
 
   getMetaData: async datasetId => {
-    const response = await HTTPRequester.get({ url: getUrl(DatasetConfig.datasetMetaData, { datasetId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DatasetConfig.datasetMetaData, { datasetId }) });
   },
 
   getReferencedFieldValues: async (
@@ -201,8 +199,7 @@ export const apiDataset = {
   schemaById: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.dataSchema, { datasetId }) }),
 
   statisticsById: async datasetId => {
-    const response = await HTTPRequester.get({ url: getUrl(DatasetConfig.loadStatistics, { datasetId: datasetId }) });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(DatasetConfig.loadStatistics, { datasetId }) });
   },
 
   tableDataById: async (
