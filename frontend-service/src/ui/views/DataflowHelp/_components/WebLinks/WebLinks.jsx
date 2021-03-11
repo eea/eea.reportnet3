@@ -321,30 +321,6 @@ export const WebLinks = ({
               style={{ float: 'left' }}
             />
           </div>
-
-          <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
-                webLinksState.isLoading ? 'p-button-animated-spin' : ''
-              }`}
-              disabled={false}
-              icon={'refresh'}
-              label={resources.messages['refresh']}
-              onClick={async () => {
-                webLinksDispatch({
-                  type: 'SET_IS_LOADING',
-                  payload: { isLoading: true }
-                });
-
-                await onLoadWebLinks();
-
-                webLinksDispatch({
-                  type: 'SET_IS_LOADING',
-                  payload: { isLoading: false }
-                });
-              }}
-            />
-          </div>
         </Toolbar>
       ) : (
         <></>
