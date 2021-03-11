@@ -273,7 +273,10 @@ export const WebLinks = ({
           }
           icon={getEditButtonIcon()}
           onClick={() => {
-            webLinksDispatch({ type: 'SET_WEB_LINK', payload: { webLink } });
+            webLinksDispatch({
+              type: 'SET_WEB_LINK',
+              payload: { webLink: { description: webLink.description, id: webLink.id, url: webLink.url } }
+            });
             setIsAddOrEditWeblinkDialogVisible(true);
           }}
           type="button"
@@ -287,7 +290,10 @@ export const WebLinks = ({
           }
           icon={getDeleteButtonIcon()}
           onClick={() => {
-            webLinksDispatch({ type: 'SET_WEB_LINK', payload: { webLink } });
+            webLinksDispatch({
+              type: 'SET_WEB_LINK',
+              payload: { webLink: { description: webLink.description, id: webLink.id, url: webLink.url } }
+            });
             setIsConfirmDeleteVisible(true);
           }}
           type="button"
@@ -387,7 +393,9 @@ export const WebLinks = ({
                   }}
                   onBlur={() => checkIsCorrectInputValue('description')}
                   onKeyPress={e => {
-                    if (e.key === 'Enter' && !checkIsCorrectInputValue('description')) onSaveRecord();
+                    if (e.key === 'Enter' && !checkIsCorrectInputValue('description')) {
+                      onSaveRecord();
+                    }
                   }}
                   name="description"
                   placeholder={resources.messages['description']}
@@ -408,6 +416,11 @@ export const WebLinks = ({
                   name="url"
                   onChange={e => onWeblinkUrlChange(e.target.value)}
                   onBlur={() => checkIsCorrectInputValue('url')}
+                  onKeyPress={e => {
+                    if (e.key === 'Enter' && !checkIsCorrectInputValue('url')) {
+                      onSaveRecord();
+                    }
+                  }}
                   placeholder={resources.messages['url']}
                   type="text"
                   value={webLinksState.webLink.url}
