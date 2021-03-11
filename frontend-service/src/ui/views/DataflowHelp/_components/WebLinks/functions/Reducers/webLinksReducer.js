@@ -45,7 +45,7 @@ export const webLinksReducer = (state, { type, payload }) => {
           description: { message: '', hasErrors: false },
           url: { message: '', hasErrors: false }
         },
-        isAddOrEditWeblinkDialogVisible: false,
+        isAddOrEditWebLinkDialogVisible: false,
         webLink: emptyWebLink
       };
 
@@ -78,7 +78,7 @@ export const webLinksReducer = (state, { type, payload }) => {
     case 'SET_IS_ADD_OR_EDIT_WEB_LINK_DIALOG_VISIBLE':
       return {
         ...state,
-        isAddOrEditWeblinkDialogVisible: payload
+        isAddOrEditWebLinkDialogVisible: payload
       };
 
     case 'SET_IS_CONFIRM_DELETE_VISIBLE':

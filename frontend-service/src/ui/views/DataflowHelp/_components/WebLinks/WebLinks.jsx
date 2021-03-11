@@ -25,10 +25,10 @@ export const WebLinks = ({
   dataflowId,
   isToolbarVisible,
   onLoadWebLinks,
-  setSortFieldWeblinks,
-  setSortOrderWeblinks,
-  sortFieldWeblinks,
-  sortOrderWeblinks,
+  setSortFieldWebLinks,
+  setSortOrderWebLinks,
+  sortFieldWebLinks,
+  sortOrderWebLinks,
   webLinks
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -40,7 +40,7 @@ export const WebLinks = ({
     deletingId: null,
     editingId: null,
     errors: { description: { message: '', hasErrors: false }, url: { message: '', hasErrors: false } },
-    isAddOrEditWeblinkDialogVisible: false,
+    isAddOrEditWebLinkDialogVisible: false,
     isConfirmDeleteVisible: false,
     isDeleting: false,
     isLoading: false,
@@ -51,7 +51,7 @@ export const WebLinks = ({
 
   useEffect(() => {
     if (!isNil(inputRef.current)) inputRef.current.focus();
-  }, [inputRef, webLinksState.isAddOrEditWeblinkDialogVisible]);
+  }, [inputRef, webLinksState.isAddOrEditWebLinkDialogVisible]);
 
   useEffect(() => {
     let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
@@ -148,7 +148,7 @@ export const WebLinks = ({
     }
   };
 
-  const setIsAddOrEditWeblinkDialogVisible = isVisible => {
+  const setIsAddOrEditWebLinkDialogVisible = isVisible => {
     webLinksDispatch({ type: 'SET_IS_ADD_OR_EDIT_WEB_LINK_DIALOG_VISIBLE', payload: isVisible });
   };
 
@@ -160,7 +160,7 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'ON_DESCRIPTION_CHANGE', payload: { description: inputValue } });
   };
 
-  const onWeblinkUrlChange = inputValue => {
+  const onWebLinkUrlChange = inputValue => {
     webLinksDispatch({ type: 'ON_URL_CHANGE', payload: { url: inputValue } });
   };
 
@@ -191,15 +191,15 @@ export const WebLinks = ({
 
           onHideAddEditDialog();
         } catch (error) {
-          console.error('Error on save new Weblink: ', error);
+          console.error('Error on save new WebLink: ', error);
 
           if (error.response.status === 400) {
             notificationContext.add({
-              type: 'WRONG_WEBLINK_ERROR'
+              type: 'WRONG_WEB_LINK_ERROR'
             });
           } else if (error.response.status === 409) {
             notificationContext.add({
-              type: 'DUPLICATED_WEBLINK_ERROR'
+              type: 'DUPLICATED_WEB_LINK_ERROR'
             });
           }
         } finally {
@@ -216,15 +216,15 @@ export const WebLinks = ({
 
           onHideAddEditDialog();
         } catch (error) {
-          console.error('Error on update new Weblink: ', error);
+          console.error('Error on update new WebLink: ', error);
 
           if (error.response.status === 400) {
             notificationContext.add({
-              type: 'WRONG_WEBLINK_ERROR'
+              type: 'WRONG_WEB_LINK_ERROR'
             });
           } else if (error.response.status === 409) {
             notificationContext.add({
-              type: 'DUPLICATED_WEBLINK_ERROR'
+              type: 'DUPLICATED_WEB_LINK_ERROR'
             });
           }
         } finally {
@@ -277,7 +277,7 @@ export const WebLinks = ({
               type: 'SET_WEB_LINK',
               payload: { webLink: { description: webLink.description, id: webLink.id, url: webLink.url } }
             });
-            setIsAddOrEditWeblinkDialogVisible(true);
+            setIsAddOrEditWebLinkDialogVisible(true);
           }}
           type="button"
         />
@@ -316,7 +316,7 @@ export const WebLinks = ({
               icon="add"
               label={resources.messages['add']}
               onClick={() => {
-                setIsAddOrEditWeblinkDialogVisible(true);
+                setIsAddOrEditWebLinkDialogVisible(true);
               }}
               style={{ float: 'left' }}
             />
@@ -329,13 +329,13 @@ export const WebLinks = ({
         autoLayout={true}
         loading={webLinksState.isLoading}
         onSort={e => {
-          setSortFieldWeblinks(e.sortField);
-          setSortOrderWeblinks(e.sortOrder);
+          setSortFieldWebLinks(e.sortField);
+          setSortOrderWebLinks(e.sortOrder);
         }}
         paginator={false}
         selectionMode="single"
-        sortField={sortFieldWeblinks}
-        sortOrder={sortOrderWeblinks}
+        sortField={sortFieldWebLinks}
+        sortOrder={sortOrderWebLinks}
         value={webLinks}>
         {!isEmpty(webLinks) ? webLinksState.webLinksColumns : emptyWebLinkColumns}
       </DataTable>
@@ -345,7 +345,7 @@ export const WebLinks = ({
         </div>
       )}
 
-      {webLinksState.isAddOrEditWeblinkDialogVisible && (
+      {webLinksState.isAddOrEditWebLinkDialogVisible && (
         <Dialog
           blockScroll={false}
           className={styles.dialog}
@@ -356,7 +356,7 @@ export const WebLinks = ({
           modal={true}
           onHide={() => onHideAddEditDialog()}
           style={{ width: '50%', height: '80%' }}
-          visible={webLinksState.isAddOrEditWeblinkDialogVisible}>
+          visible={webLinksState.isAddOrEditWebLinkDialogVisible}>
           <form>
             <fieldset>
               <div className={`formField${webLinksState.errors.description.hasErrors ? ' error' : ''}`}>
@@ -390,7 +390,7 @@ export const WebLinks = ({
                 <input
                   id={`urlWebLinks`}
                   name="url"
-                  onChange={e => onWeblinkUrlChange(e.target.value)}
+                  onChange={e => onWebLinkUrlChange(e.target.value)}
                   onBlur={() => checkIsCorrectInputValue('url')}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('url')) {

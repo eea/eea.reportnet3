@@ -56,9 +56,9 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
-  const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
+  const [sortFieldWebLinks, setSortFieldWebLinks] = useState();
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
-  const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
+  const [sortOrderWebLinks, setSortOrderWebLinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
@@ -261,10 +261,10 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               dataflowId={dataflowId}
               isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
-              setSortFieldWeblinks={setSortFieldWeblinks}
-              setSortOrderWeblinks={setSortOrderWeblinks}
-              sortFieldWeblinks={sortFieldWeblinks}
-              sortOrderWeblinks={sortOrderWeblinks}
+              setSortFieldWebLinks={setSortFieldWebLinks}
+              setSortOrderWebLinks={setSortOrderWebLinks}
+              sortFieldWebLinks={sortFieldWebLinks}
+              sortOrderWebLinks={sortOrderWebLinks}
               webLinks={webLinks}
             />
           </TabPanel>
