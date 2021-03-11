@@ -166,11 +166,9 @@ export const Feedback = withRouter(({ match, history }) => {
     if (data.unreadMessages.length > 0) {
       const unreadMessages = data.unreadMessages
         .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
-        .map(unreadMessage => {
-          return { id: unreadMessage.id, read: true };
-        });
+        .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
       if (!isEmpty(unreadMessages)) {
-        const marked = await FeedbackService.markAsRead(dataflowId, unreadMessages);
+        await FeedbackService.markAsRead(dataflowId, unreadMessages);
       }
     }
 
@@ -189,8 +187,12 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadMessages = async (dataProviderId, page) => {
-    const data = await FeedbackService.loadMessages(dataflowId, page, dataProviderId);
-    return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
+    try {
+      const { data } = await FeedbackService.loadMessages(dataflowId, page, dataProviderId);
+      return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
+    } catch (error) {
+      console.error('error', error);
+    }
   };
 
   const onLoadDataProviders = async () => {
@@ -217,13 +219,8 @@ export const Feedback = withRouter(({ match, history }) => {
             ? selectedDataProvider.dataProviderId
             : parseInt(representativeId)
         );
-        if (messageCreated) {
-          dispatchFeedback({
-            type: 'ON_SEND_MESSAGE',
-            payload: {
-              value: { ...messageCreated }
-            }
-          });
+        if (messageCreated.data) {
+          dispatchFeedback({ type: 'ON_SEND_MESSAGE', payload: { value: { ...messageCreated.data } } });
         }
       } catch (error) {
         console.error(error);
