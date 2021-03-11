@@ -3,30 +3,14 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 const all = async dataflowId => {
   const webLinksDTO = await apiWebLink.all(dataflowId);
-  return webLinksDTO.map(webLinkDTO => new WebLink(webLinkDTO));
+  webLinksDTO.data.weblinks = webLinksDTO.data.weblinks.map(webLinkDTO => new WebLink(webLinkDTO));
+  return webLinksDTO;
 };
 
-const create = async (dataflowId, weblinkToCreate) => {
-  const isCreated = await apiWebLink.create(dataflowId, weblinkToCreate);
-  weblinkToCreate.isCreated = isCreated;
-  return weblinkToCreate;
-};
+const create = async (dataflowId, weblinkToCreate) => await apiWebLink.create(dataflowId, weblinkToCreate);
 
-const deleteWeblink = async weblinkToDelete => {
-  const isDeleted = await apiWebLink.deleteWeblink(weblinkToDelete);
-  weblinkToDelete.isDeleted = isDeleted;
-  return weblinkToDelete;
-};
+const deleteWebLink = async weblinkToDelete => await apiWebLink.deleteWebLink(weblinkToDelete);
 
-const update = async (dataflowId, weblinkToUpdate) => {
-  const isUpdated = await apiWebLink.update(dataflowId, weblinkToUpdate);
-  weblinkToUpdate.isUpdated = isUpdated;
-  return weblinkToUpdate;
-};
+const update = async (dataflowId, weblinkToUpdate) => await apiWebLink.update(dataflowId, weblinkToUpdate);
 
-export const ApiWebLinkRepository = {
-  all,
-  create,
-  deleteWeblink,
-  update
-};
+export const ApiWebLinkRepository = { all, create, deleteWebLink, update };
