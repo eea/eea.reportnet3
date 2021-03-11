@@ -132,11 +132,11 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'SET_ERRORS', payload: { inputName, error } });
   };
 
-  const onDeleteWeblink = async () => {
+  const onDeleteWebLink = async () => {
     webLinksDispatch({ type: 'ON_DELETE_START', payload: { deletingId: webLinksState.webLink.id } });
 
     try {
-      const { status } = await WebLinkService.deleteWeblink(webLinksState.webLink);
+      const { status } = await WebLinkService.deleteWebLink(webLinksState.webLink);
 
       if (status >= 200 && status <= 299) {
         onLoadWebLinks();
@@ -435,7 +435,7 @@ export const WebLinks = ({
           iconConfirm={webLinksState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={e => onDeleteWeblink(e)}
+          onConfirm={onDeleteWebLink}
           onHide={onHideDeleteDialog}
           visible={webLinksState.isConfirmDeleteVisible}>
           {resources.messages['deleteWebLink']}
