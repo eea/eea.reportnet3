@@ -410,6 +410,13 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
     return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
   }
 
+  /**
+   * Find reporting data set public by dataflow id and provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/reportingPublic/dataflow/{id}/provider/{providerId}",
