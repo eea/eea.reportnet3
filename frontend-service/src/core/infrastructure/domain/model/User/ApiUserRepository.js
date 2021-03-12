@@ -214,13 +214,13 @@ const getToken = () => {
 };
 
 export const ApiUserRepository = {
-  login,
   getConfiguration,
-  updateAttributes,
+  getToken,
+  login,
   logout,
   oldLogin,
   refreshToken,
-  getToken,
-  userRole,
-  userInfo
+  updateAttributes,
+  userInfo,
+  userRole
 };
