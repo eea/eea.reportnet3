@@ -1485,8 +1485,6 @@ public class DatasetServiceImpl implements DatasetService {
       final PartitionDataSetMetabase partition, Map<String, TableSchema> tableMap,
       Map<String, FieldSchema> fieldMap, DatasetValue dataset, List<TableValue> tables,
       List<String> readOnlyTables, List<String> fixedNumberTables, DatasetTypeEnum datasetType) {
-    // we check if the dataset is desing and use the value to ignore fixed number of records
-    boolean isDesing = designDatasetRepository.existDatasetDesing(dataset.getId());
     for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
       etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable,
           datasetType);
@@ -1495,7 +1493,8 @@ public class DatasetServiceImpl implements DatasetService {
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         readOnlyTables.add(tableSchema.getIdTableSchema().toString());
       }
-      if (!isDesing && tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchema != null
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
         fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
       }
     }
