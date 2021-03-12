@@ -143,6 +143,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv  "
           + "WHERE tv.idTableSchema = :idTableSchema";
 
+  /** The Constant QUERY_UNSORTERED_FIELDS: {@value}. */
+  private static final String QUERY_UNSORTERED_FIELDS =
+      "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields  "
+          + "WHERE tv.idTableSchema = :idTableSchema";
+
   /** The Constant ID_TABLE_SCHEMA: {@value}. */
   private static final String ID_TABLE_SCHEMA = "idTableSchema";
 
@@ -411,6 +416,25 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     Query query = entityManager.createQuery(QUERY_UNSORTERED);
     query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
     return query.getResultList();
+  }
+
+  /**
+   * Find by table value no order optimized.
+   *
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @return the list
+   */
+  @Override
+  public List<RecordValue> findByTableValueNoOrderOptimized(String idTableSchema,
+      Pageable pageable) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED_FIELDS);
+    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+    }
+    return sanitizeRecords(query.getResultList());
   }
 
   /**
