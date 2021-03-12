@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -192,7 +193,7 @@ public interface DataFlowController {
    * @return the public dataflows by country
    */
   @GetMapping("/public/country/{countryCode}")
-  public List<DataflowPublicVO> getPublicDataflowsByCountry(
+  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
       @PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
