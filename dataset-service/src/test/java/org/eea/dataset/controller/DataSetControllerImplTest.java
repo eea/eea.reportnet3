@@ -614,12 +614,12 @@ public class DataSetControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
-  public void etlExportDatasetTest() throws EEAException {
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
-    Mockito.verify(datasetService, times(1)).etlExportDataset(Mockito.anyLong());
-  }
+  // @Test
+  // public void etlExportDatasetTest() throws EEAException {
+  // Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+  // dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
+  // Mockito.verify(datasetService, times(1)).etlExportDataset(Mockito.anyLong());
+  // }
 
   /**
    * Etl export dataset dataflow exception test.
@@ -642,17 +642,17 @@ public class DataSetControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = ResponseStatusException.class)
-  public void etlExportDatasetExceptionTest() throws EEAException {
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
-    doThrow(new EEAException()).when(datasetService).etlExportDataset(Mockito.any());
-    try {
-      dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
-    } catch (ResponseStatusException e) {
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      throw e;
-    }
-  }
+  // @Test(expected = ResponseStatusException.class)
+  // public void etlExportDatasetExceptionTest() throws EEAException {
+  // Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+  // doThrow(new EEAException()).when(datasetService).etlExportDataset(Mockito.any());
+  // try {
+  // dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
+  // } catch (ResponseStatusException e) {
+  // assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+  // throw e;
+  // }
+  // }
 
 
   /**
