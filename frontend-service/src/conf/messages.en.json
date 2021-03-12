@@ -1033,6 +1033,8 @@
     "noPushNotifications": "No push notifications",
     "pushNotifications": "Push notifications",
     "togglePushNotificationOff": "Switch off push notifications",
-    "togglePushNotificationOn": "Switch on push notifications"
+    "togglePushNotificationOn": "Switch on push notifications",
+    "closed": "Closed",
+    "open": "Open"
   }
 }

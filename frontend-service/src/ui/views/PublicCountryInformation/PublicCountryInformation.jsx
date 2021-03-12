@@ -44,8 +44,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
   const [firstRow, setFirstRow] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [numberRows, setNumberRows] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
 
@@ -90,16 +91,16 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'legalInstrument':
         header = resources.messages['legalInstrument'];
         break;
-      case 'expirationDate':
-        header = resources.messages['dueDate'];
+      case 'deadline':
+        header = resources.messages['deadline'];
         break;
-      case 'status':
+      case 'isReleasable':
         header = resources.messages['status'];
         break;
       case 'isReleased':
         header = resources.messages['delivered'];
         break;
-      case 'releasedDate':
+      case 'releaseDate':
         header = resources.messages['releasedDate'];
         break;
       case 'publicFilesNames':
@@ -143,6 +144,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   };
 
   const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows, isChangedPage) => {
+    setIsLoading(true);
     try {
       if (sortOrder === -1) {
         sortOrder = 0;
@@ -155,7 +157,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         numberRows,
         sortField
       );
-      parseDataflows(data);
+      setTotalRecords(data.totalRecords);
+      parseDataflows(data.publicDataflows);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
     } finally {
@@ -184,10 +187,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         name: dataflow.name,
         obligation: dataflow.obligation,
         legalInstrument: dataflow.obligation.legalInstruments,
-        status: capitalize(dataflow.status),
-        expirationDate: dataflow.expirationDate,
+        deadline: dataflow.expirationDate,
         isReleased: isReleased,
-        releasedDate: isReleased && dataflow.datasets[0].releaseDate,
+        isReleasable: dataflow.isReleasable,
+        releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
         restrictFromPublic: dataflow.datasets[0].restrictFromPublic,
         publicFilesNames: publicFilesNames
       };
@@ -202,10 +205,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'name', index: 1 },
       { id: 'obligation', index: 2 },
       { id: 'legalInstrument', index: 3 },
-      { id: 'expirationDate', index: 4 },
-      { id: 'status', index: 5 },
+      { id: 'deadline', index: 4 },
+      { id: 'isReleasable', index: 5 },
       { id: 'isReleased', index: 6 },
-      { id: 'releasedDate', index: 7 },
+      { id: 'releaseDate', index: 7 },
       { id: 'publicFilesNames', index: 8 }
     ];
 
@@ -221,6 +224,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       .filter(key => !key.includes('id'))
       .map(field => {
         let template = null;
+        if (field === 'isReleasable') template = renderIsReleasableBodyColumn;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
@@ -277,9 +281,13 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     }
   };
 
+  const renderIsReleasableBodyColumn = rowData => (
+    <div>{rowData.isReleasable ? resources.messages['open'] : resources.messages['closed']}</div>
+  );
+
   const renderIsReleasedBodyColumn = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      {rowData.isReleased && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
     </div>
   );
 
@@ -325,7 +333,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                   onSort={onSort}
                   paginator={true}
                   paginatorRight={
-                    <span>{`${resources.messages['totalRecords']} ${dataflows.length} ${resources.messages[
+                    <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
                       'records'
                     ].toLowerCase()}`}</span>
                   }

@@ -367,8 +367,10 @@ const getPublicDataflowsByCountryCode = async (countryCode, sortOrder, pageNum, 
     sortField
   );
 
-  const publicDataflowsByCountryCodeData = parseDataflowListDTO(publicDataflowsByCountryCodeResponse.data);
-  publicDataflowsByCountryCodeResponse.data = publicDataflowsByCountryCodeData;
+  const publicDataflowsByCountryCodeData = parseDataflowListDTO(
+    publicDataflowsByCountryCodeResponse.data.publicDataflows
+  );
+  publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
 
   return publicDataflowsByCountryCodeResponse;
 };
