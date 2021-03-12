@@ -28,53 +28,32 @@ export const apiSnapshot = {
   },
 
   allReporter: async datasetId => {
-    const response = await HTTPRequester.get({
-      url: getUrl(SnapshotConfig.loadSnapshotsListReporter, {
-        datasetId: datasetId
-      })
-    });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(SnapshotConfig.loadSnapshotsListReporter, { datasetId }) });
   },
 
   createByIdReporter: async (datasetId, description, isReleased) => {
-    const response = await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.createSnapshotReporter, {
-        datasetId
-      }),
-      data: {
-        description,
-        released: isReleased
-      }
+    return await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.createSnapshotReporter, { datasetId }),
+      data: { description, released: isReleased }
     });
-    return response.data;
   },
 
   deleteByIdReporter: async (datasetId, snapshotId) => {
-    const response = await HTTPRequester.delete({
-      url: getUrl(SnapshotConfig.deleteSnapshotByIdReporter, {
-        datasetId,
-        snapshotId: snapshotId
-      })
+    return await HTTPRequester.delete({
+      url: getUrl(SnapshotConfig.deleteSnapshotByIdReporter, { datasetId, snapshotId })
     });
-    return response.data;
   },
 
   restoreByIdReporter: async (dataflowId, datasetId, snapshotId) => {
-    const response = await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.restoreSnapshotReporter, {
-        dataflowId,
-        datasetId,
-        snapshotId
-      }),
+    return await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.restoreSnapshotReporter, { dataflowId, datasetId, snapshotId }),
       data: { snapshotId }
     });
-    return response.data;
   },
 
   releaseDataflow: async (dataflowId, dataProviderId, restrictFromPublic) => {
-    const response = await HTTPRequester.post({
+    return await HTTPRequester.post({
       url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId, restrictFromPublic })
     });
-    return response.data;
   }
 };
