@@ -14,6 +14,8 @@ const userSettingsDefaultState = {
     basemapLayer: { label: 'Topographic', value: 'Topographic' },
     dateFormat: 'YYYY-MM-DD',
     listView: true,
+    notificationSound: false,
+    pushNotifications: false,
     pinnedDataflows: [],
     rowsPerPage: 10,
     showLogoutConfirmation: true,
@@ -32,16 +34,11 @@ export const UserProvider = ({ children }) => {
       value={{
         ...userState,
         hasPermission: (permissions, entity) => {
-          let allow = false;
           if (isUndefined(entity)) {
-            allow = permissions.some(permission => userState.accessRole.includes(permission));
+            return permissions.some(permission => userState.accessRole.includes(permission));
           } else {
-            permissions.forEach(permission => {
-              const role = `${entity}-${permission}`;
-              allow = userState.contextRoles.includes(role);
-            });
+            return permissions.some(permission => userState.contextRoles.includes(`${entity}-${permission}`));
           }
-          return allow;
         },
 
         hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
@@ -52,8 +49,7 @@ export const UserProvider = ({ children }) => {
             if (isNil(entityID)) {
               return userState.contextRoles.some(role => role.startsWith(entity) && role.endsWith(allowedPermission));
             } else {
-              const permission = `${entity}${entityID}-${allowedPermission}`;
-              return userState.contextRoles.includes(permission);
+              return userState.contextRoles.includes(`${entity}${entityID}-${allowedPermission}`);
             }
           });
         },
@@ -80,6 +76,14 @@ export const UserProvider = ({ children }) => {
 
         onToggleAmPm24hFormat: hoursFormat => {
           userDispatcher({ type: 'TOGGLE_DATE_FORMAT_AM_PM_24H', payload: hoursFormat });
+        },
+
+        onToggleNotificationSound: notificationSound => {
+          userDispatcher({ type: 'TOGGLE_NOTIFICATION_SOUND', payload: notificationSound });
+        },
+
+        onTogglePushNotifications: pushNotifications => {
+          userDispatcher({ type: 'TOGGLE_PUSH_NOTIFICATIONS', payload: pushNotifications });
         },
 
         onToggleLogoutConfirm: logoutConfirmation => {

@@ -475,7 +475,7 @@
     "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
     "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
     "importDesignCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "importDesignFailedEvent": "Failed loading <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importDesignFailedEvent": "Failed loading schema",
     "importFromFile": "Import from file",
     "importFromOtherSystemOperationManageIntegration": "Import from other system",
     "importLeadReporters": "Import lead reporters",
@@ -959,7 +959,7 @@
     "validateDataInit": "Validating <strong title='{:datasetName}'>{:shortDatasetName} ({:countryName})</strong>",
     "validateDataset": "Validate dataset",
     "validateDatasetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
-    "validatedQcRuleEvent": "QC validated succesfully",
+    "validatedQcRuleEvent": "QC validated successfully",
     "validateEuDatasetHeader": "Validate EU dataset",
     "validateRulesBtnTootip": "Revalidates all the QC rules: QCs with SQL sentences need to be re-validated after changing table or field names",
     "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
@@ -1012,6 +1012,19 @@
     "loginFormError": "Incorrect username or password",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
     "releaseStartEvent": "Releasing data to data collection.",
-    "dataflowNameValidationMax":"Dataflow name is too long"
+    "dataflowNameValidationMax":"Dataflow name is too long",
+    "userNotificationSound": "Notification sound",
+    "userSettingsNotificationSoundSubtitle": "Configure if you want to play a sound on each notification.",
+    "noSound": "No sound",
+    "sound": "Sound",
+    "toggleNotificationSoundOff": "Switch off notification sound",
+    "toggleNotificationSoundOn": "Switch on notification sound",
+    "userPushNotifications": "Push notifications",
+    "userSettingsPushNotificationsSubtitle": "Configure if you want to receive push notifications in your desktop when you are not in R3 window.",
+    "userPushNotificationsTooltipInfo": "Configure your push notifications",
+    "noPushNotifications": "No push notifications",
+    "pushNotifications": "Push notifications",
+    "togglePushNotificationOff": "Switch off push notifications",
+    "togglePushNotificationOn": "Switch on push notifications"
   }
 }
