@@ -237,7 +237,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-    configurer.setDefaultTimeout(3600000).setTaskExecutor(streamTaskExecutor());
+    configurer.setDefaultTimeout(7200000).setTaskExecutor(streamTaskExecutor());
     configurer.registerCallableInterceptors(callableProcessingInterceptor());
   }
 
