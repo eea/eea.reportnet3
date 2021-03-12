@@ -3,19 +3,18 @@ import { Snapshot } from 'core/domain/model/Snapshot/Snapshot';
 
 const allDesigner = async datasetSchemaId => {
   const snapshotsDTO = await apiSnapshot.allDesigner(datasetSchemaId);
+  snapshotsDTO.data = snapshotsDTO.data.map(
+    snapshotDTO =>
+      new Snapshot({
+        creationDate: snapshotDTO.creationDate,
+        description: snapshotDTO.description,
+        id: snapshotDTO.id,
+        isAutomatic: snapshotDTO.automatic,
+        isReleased: snapshotDTO.release
+      })
+  );
 
-  return snapshotsDTO
-    ? snapshotsDTO.map(
-        snapshotDTO =>
-          new Snapshot({
-            creationDate: snapshotDTO.creationDate,
-            description: snapshotDTO.description,
-            id: snapshotDTO.id,
-            isAutomatic: snapshotDTO.automatic,
-            isReleased: snapshotDTO.release
-          })
-      )
-    : [];
+  return snapshotsDTO;
 };
 
 const createByIdDesigner = async (datasetId, datasetSchemaId, description) => {

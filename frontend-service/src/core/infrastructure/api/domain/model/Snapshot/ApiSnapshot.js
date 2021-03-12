@@ -4,47 +4,27 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiSnapshot = {
   allDesigner: async datasetSchemaId => {
-    const response = await HTTPRequester.get({
-      url: getUrl(SnapshotConfig.loadSnapshotsListDesigner, {
-        datasetSchemaId: datasetSchemaId
-      })
-    });
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(SnapshotConfig.loadSnapshotsListDesigner, { datasetSchemaId }) });
   },
 
   createByIdDesigner: async (datasetId, datasetSchemaId, description) => {
-    const response = await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.createSnapshotDesigner, {
-        datasetId: datasetId,
-        datasetSchemaId: datasetSchemaId,
-        description: description
-      }),
-      data: { description: description }
+    return await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.createSnapshotDesigner, { datasetId, datasetSchemaId, description }),
+      data: { description }
     });
-    return response;
   },
 
   deleteByIdDesigner: async (datasetSchemaId, snapshotId) => {
-    const response = await HTTPRequester.delete({
-      url: getUrl(SnapshotConfig.deleteSnapshotByIdDesigner, {
-        datasetSchemaId: datasetSchemaId,
-        snapshotId: snapshotId
-      })
+    return await HTTPRequester.delete({
+      url: getUrl(SnapshotConfig.deleteSnapshotByIdDesigner, { datasetSchemaId, snapshotId })
     });
-
-    return response;
   },
 
   restoreByIdDesigner: async (datasetSchemaId, snapshotId) => {
-    const response = await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.restoreSnapshotDesigner, {
-        datasetSchemaId: datasetSchemaId,
-        snapshotId: snapshotId
-      }),
+    return await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.restoreSnapshotDesigner, { datasetSchemaId, snapshotId }),
       data: { snapshotId }
     });
-
-    return response.data;
   },
 
   allReporter: async datasetId => {
