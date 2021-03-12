@@ -101,25 +101,29 @@ const useBigButtonList = ({
     visibility: buttonsVisibility.help
   };
 
-  const testDatasetsModels = dataflowState.data.testDatasets?.map(testDataset => {
-    return {
-      layout: 'defaultBigButton',
-      buttonClass: 'dataset',
-      buttonIcon: 'dataset',
-      caption: testDataset.datasetSchemaName,
-      infoStatus: testDataset.isReleased,
-      infoStatusIcon: testDataset.isReleased,
-      handleRedirect: () => {
-        handleRedirect(
-          getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true)
-        );
-      },
-      helpClassName: 'dataflow-dataset-container-help-step',
-      model: [],
-      onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true),
-      visibility: true
-    };
-  });
+  let testDatasetsModels = [];
+
+  if (match.params.representativeId === 'XX') {
+    testDatasetsModels = dataflowState.data.testDatasets?.map(testDataset => {
+      return {
+        layout: 'defaultBigButton',
+        buttonClass: 'dataset',
+        buttonIcon: 'dataset',
+        caption: testDataset.datasetSchemaName,
+        infoStatus: testDataset.isReleased,
+        infoStatusIcon: testDataset.isReleased,
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true)
+          );
+        },
+        helpClassName: 'dataflow-dataset-container-help-step',
+        model: [],
+        onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true),
+        visibility: true
+      };
+    });
+  }
 
   const groupByRepresentativeModels = dataflowState.data.datasets
     .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
