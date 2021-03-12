@@ -140,19 +140,13 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         return datasetSchema.data;
       }
     } catch (error) {
-      notificationContext.add({
-        type: 'IMPORT_DESIGN_FAILED_EVENT',
-        content: {
-          datasetId
-        }
-      });
+      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' });
     }
   };
 
   const onLoadDatasetsSchemas = async () => {
     try {
       const { data } = await DataflowService.reporting(dataflowId);
-
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
           const uniqueDatasetSchemas = data.datasets.filter((dataset, pos, arr) => {

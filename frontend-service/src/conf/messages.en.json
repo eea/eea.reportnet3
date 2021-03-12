@@ -475,7 +475,7 @@
     "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
     "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
     "importDesignCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "importDesignFailedEvent": "Failed loading <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importDesignFailedEvent": "Failed loading schema",
     "importFromFile": "Import from file",
     "importFromOtherSystemOperationManageIntegration": "Import from other system",
     "importLeadReporters": "Import lead reporters",
