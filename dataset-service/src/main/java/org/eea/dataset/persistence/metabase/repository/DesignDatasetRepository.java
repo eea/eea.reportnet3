@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.List;
@@ -38,4 +41,12 @@ public interface DesignDatasetRepository extends CrudRepository<DesignDataset, L
   @Query(value = "select d from DesignDataset d where d.datasetSchema IN :datasetSchemas")
   List<DesignDataset> findbyDatasetSchemaList(@Param("datasetSchemas") List<String> datasetSchemas);
 
+  /**
+   * Exist dataset desing.
+   *
+   * @param datasetId the dataset id
+   * @return true, if successful
+   */
+  @Query(value = "select count(d) > 0 from DesignDataset d where d.id IN :datasetId")
+  boolean existDatasetDesing(Long datasetId);
 }
