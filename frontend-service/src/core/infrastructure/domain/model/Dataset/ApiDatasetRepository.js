@@ -436,7 +436,8 @@ const schemaById = async datasetId => {
     datasetSchemaDescription: datasetSchemaDTO.data.description,
     datasetSchemaId: datasetSchemaDTO.data.idDataSetSchema,
     datasetSchemaName: datasetSchemaDTO.data.nameDatasetSchema,
-    levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : [],
+    levelErrorTypes:
+      !isUndefined(rulesDTO.data) && rulesDTO.data !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO.data) : [],
     webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform.name : null
   });
 
