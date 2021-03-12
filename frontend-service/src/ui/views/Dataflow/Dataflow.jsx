@@ -124,6 +124,12 @@ const Dataflow = withRouter(({ history, match }) => {
     config.permissions.LEAD_REPORTER
   ]);
 
+  const isNationalCoordinator = userContext.hasContextAccessPermission(
+    config.permissions.NATIONAL_COORDINATOR_PREFIX,
+    null,
+    [config.permissions.NATIONAL_COORDINATOR]
+  );
+
   const country =
     uniqDataProviders.length === 1
       ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
@@ -141,6 +147,8 @@ const Dataflow = withRouter(({ history, match }) => {
     isInsideACountry &&
     ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
+
+  const isNationalCoordinatorOfCountry = isNationalCoordinator && isInsideACountry;
 
   const dataProviderId = isInsideACountry
     ? !isNil(representativeId)
@@ -243,10 +251,7 @@ const Dataflow = withRouter(({ history, match }) => {
       const userListBtn = {
         className: 'dataflow-properties-help-step',
         icon: 'users',
-        isVisible:
-          (dataflowState.hasUserListRights && !isNil(representativeId)) ||
-          isLeadReporterOfCountry ||
-          dataflowState.isNationalCoordinator,
+        isVisible: buttonsVisibility.usersListBtn,
         label: 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title: 'dataflowUsersList'
@@ -326,7 +331,8 @@ const Dataflow = withRouter(({ history, match }) => {
         releaseableBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
-        propertiesBtn: false
+        propertiesBtn: false,
+        usersListBtn: false
       };
     }
 
@@ -337,7 +343,11 @@ const Dataflow = withRouter(({ history, match }) => {
       releaseableBtn: !isDesign && isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
-      propertiesBtn: true
+      propertiesBtn: true,
+      usersListBtn:
+        isLeadReporterOfCountry ||
+        isNationalCoordinatorOfCountry ||
+        (dataflowState.isCustodian && !isNil(representativeId))
     };
   };
 
