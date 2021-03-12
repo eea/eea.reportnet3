@@ -34,16 +34,14 @@ export const UserProvider = ({ children }) => {
       value={{
         ...userState,
         hasPermission: (permissions, entity) => {
-          let allow = false;
           if (isUndefined(entity)) {
-            allow = permissions.some(permission => userState.accessRole.includes(permission));
+            return permissions.some(permission => userState.accessRole.includes(permission));
           } else {
-            permissions.forEach(permission => {
+            return permissions.some(permission => {
               const role = `${entity}-${permission}`;
-              allow = userState.contextRoles.includes(role);
+              return userState.contextRoles.includes(role);
             });
           }
-          return allow;
         },
 
         hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
