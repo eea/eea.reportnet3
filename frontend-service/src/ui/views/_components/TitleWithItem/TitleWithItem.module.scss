@@ -10,12 +10,35 @@
   align-content: center;
 }
 
+.infoTooltipWrapper {
+  display: flex;
+  flex-direction: column;
+}
+.infoTooltipWrapper span {
+  margin-bottom: 1rem;
+}
+
+.infoButton {
+  background-color: var(--white) !important;
+  border-radius: 50% !important;
+  color: var(--datatable-header-info-button-color) !important;
+  font-size: 12pt !important;
+  margin-left: 0.4rem !important;
+  cursor: pointer;
+}
+
 .title {
   display: table-cell;
   font-size: 1.1rem;
   color: var(--title-color);
   margin: 0px;
   font-weight: bold;
+}
+
+.tooltip {
+  opacity: 1 !important;
+  width: fit-content;
+  z-index: 3004;
 }
 
 .subtitle {
