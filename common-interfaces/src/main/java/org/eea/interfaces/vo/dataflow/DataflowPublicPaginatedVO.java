@@ -3,6 +3,9 @@ package org.eea.interfaces.vo.dataflow;
 import java.util.List;
 import lombok.Data;
 
+/**
+ * The Class DataflowPublicPaginatedVO.
+ */
 @Data
 public class DataflowPublicPaginatedVO {
 
