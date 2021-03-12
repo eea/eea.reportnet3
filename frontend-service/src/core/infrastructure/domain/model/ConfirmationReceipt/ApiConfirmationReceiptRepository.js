@@ -4,6 +4,4 @@ const download = async (dataflowId, dataProviderId) => {
   return await apiConfirmationReceipt.download(dataflowId, dataProviderId);
 };
 
-export const ApiConfirmationReceiptRepository = {
-  download
-};
+export const ApiConfirmationReceiptRepository = { download };

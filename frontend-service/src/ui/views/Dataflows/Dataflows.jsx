@@ -138,9 +138,7 @@ const Dataflows = withRouter(({ history, match }) => {
   };
 
   const onLoadPermissions = () => {
-    const isCustodian =
-      userContext.hasPermission([config.permissions.DATA_CUSTODIAN]) ||
-      userContext.hasPermission([config.permissions.DATA_STEWARD]);
+    const isCustodian = userContext.hasPermission([config.permissions.DATA_CUSTODIAN, config.permissions.DATA_STEWARD]);
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
       config.permissions.NATIONAL_COORDINATOR_PREFIX,

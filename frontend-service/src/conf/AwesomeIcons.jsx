@@ -90,7 +90,9 @@ import {
   faGripLines,
   faBraille,
   faTable,
-  faDownload
+  faDownload,
+  faVolumeUp,
+  faFlagCheckered
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -397,6 +399,10 @@ export const AwesomeIcons = icon => {
       return faTable;
     case 'download':
       return faDownload;
+    case 'sound':
+      return faVolumeUp;
+    case 'flag':
+      return faFlagCheckered;
     default:
       return faFileAlt;
   }

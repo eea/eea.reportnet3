@@ -1020,6 +1020,19 @@
     "restrictFromPublicField": "Restricted from public view by country",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
     "releaseStartEvent": "Releasing data to data collection.",
-    "noDataflows": "There are no dataflows yet"
+    "noDataflows": "There are no dataflows yet",
+    "userNotificationSound": "Notification sound",
+    "userSettingsNotificationSoundSubtitle": "Configure if you want to play a sound on each notification.",
+    "noSound": "No sound",
+    "sound": "Sound",
+    "toggleNotificationSoundOff": "Switch off notification sound",
+    "toggleNotificationSoundOn": "Switch on notification sound",
+    "userPushNotifications": "Push notifications",
+    "userSettingsPushNotificationsSubtitle": "Configure if you want to receive push notifications in your desktop when you are not in R3 window.",
+    "userPushNotificationsTooltipInfo": "Configure your push notifications",
+    "noPushNotifications": "No push notifications",
+    "pushNotifications": "Push notifications",
+    "togglePushNotificationOff": "Switch off push notifications",
+    "togglePushNotificationOn": "Switch on push notifications"
   }
 }

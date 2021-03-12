@@ -41,33 +41,20 @@ const parseUserImage = data => {
 };
 
 export const apiUser = {
-  login: async code => {
-    const tokens = await HTTPRequester.post({
+  login: async code =>
+    await HTTPRequester.post({
       url: getUrl(UserConfig.login, {
         code
       })
-    });
-    return tokens.data;
-  },
+    }),
 
-  uploadImg: async (userId, imgData) => {
-    const response = await HTTPRequester.postWithFiles({
-      url: getUrl(UserConfig.uploadImg, {
-        userId
-      }),
-      data: imgData
-    });
-    return response;
-  },
-  oldLogin: async (userName, password) => {
-    const tokens = await HTTPRequester.post({
+  oldLogin: async (userName, password) =>
+    await HTTPRequester.post({
       url: getUrl(UserConfig.oldLogin, {
         userName,
         password
       })
-    });
-    return tokens.data;
-  },
+    }),
 
   configuration: async () => {
     const response = await HTTPRequester.get({
@@ -76,40 +63,32 @@ export const apiUser = {
     return parseUserImage(response.data);
   },
 
-  updateAttributes: async userConfiguration => {
-    const response = await HTTPRequester.update({
+  updateAttributes: async userConfiguration =>
+    await HTTPRequester.update({
       url: getUrl(UserConfig.updateConfiguration),
       headers: {
         'Content-Type': 'application/json'
       },
       data: parseUserConfiguration(userConfiguration)
-    });
-    return response;
-  },
-  logout: async refreshToken => {
-    const response = await HTTPRequester.post({
+    }),
+  logout: async refreshToken =>
+    await HTTPRequester.post({
       url: getUrl(UserConfig.logout, {
         refreshToken
       })
-    });
-    return response;
-  },
+    }),
 
-  refreshToken: async refreshToken => {
-    const tokens = await HTTPRequester.post({
+  refreshToken: async refreshToken =>
+    await HTTPRequester.post({
       url: getUrl(UserConfig.refreshToken, {
         refreshToken
       })
-    });
-    return tokens.data;
-  },
+    }),
 
-  userInfo: async userId => {
-    const response = await HTTPRequester.get({
+  userInfo: async userId =>
+    await HTTPRequester.get({
       url: getUrl(UserConfig.userInfo, {
         userId
       })
-    });
-    return response;
-  }
+    })
 };
