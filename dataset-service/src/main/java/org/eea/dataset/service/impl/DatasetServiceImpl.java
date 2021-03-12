@@ -3496,7 +3496,7 @@ public class DatasetServiceImpl implements DatasetService {
     for (int i = 0; i < nPages; i++) {
       LOG.info("etlExport: page={}, total={}", i, nPages);
 
-      List<RecordValue> recordlist = recordRepository.findByTableValueNoOrder(
+      List<RecordValue> recordlist = recordRepository.findByTableValueNoOrderOptimized(
           tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 1000));
       int nRecords = recordlist.size();
 
