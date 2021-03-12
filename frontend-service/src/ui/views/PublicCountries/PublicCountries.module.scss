@@ -42,6 +42,7 @@
         text-align: center;
         cursor: pointer;
         text-decoration: none;
+        color: var(--hyperlink-color);
 
         &:hover {
           box-shadow: var(--card-item-box-shadow-hover);

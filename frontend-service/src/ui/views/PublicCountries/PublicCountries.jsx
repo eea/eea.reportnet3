@@ -43,16 +43,15 @@ export const PublicCountries = withRouter(({ history }) => {
             {config.countriesByGroup.eeaCountries.map(country => {
               const countryCode = country.code;
               return (
-                <div key={country.code}>
-                  <a
-                    className={styles.country}
-                    href={getUrl(routes.COUNTRY)}
-                    onClick={e => {
-                      e.preventDefault();
-                      history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-                    }}>
-                    <h3>{country.name}</h3>
-                  </a>
+                <div
+                  key={country.code}
+                  className={styles.country}
+                  href={getUrl(routes.COUNTRY)}
+                  onClick={e => {
+                    e.preventDefault();
+                    history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+                  }}>
+                  <h3>{country.name}</h3>
                 </div>
               );
             })}
@@ -69,9 +68,7 @@ export const PublicCountries = withRouter(({ history }) => {
                     e.preventDefault();
                     history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
                   }}>
-                  <a className={styles.country}>
-                    <h3>{country.name}</h3>
-                  </a>
+                  <h3>{country.name}</h3>
                 </div>
               );
             })}
