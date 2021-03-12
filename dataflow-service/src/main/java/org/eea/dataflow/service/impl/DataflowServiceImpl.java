@@ -38,6 +38,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
@@ -144,6 +145,7 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset Test controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDataSetControllerZuul;
+
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
@@ -568,13 +570,19 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the public dataflows.
+   * Gets the public dataflows by country.
    *
-   * @return the public dataflows
+   * @param countryCode the country code
+   * @param header the header
+   * @param asc the asc
+   * @param page the page
+   * @param pageSize the page size
+   * @return the public dataflows by country
    */
   @Override
-  public List<DataflowPublicVO> getPublicDataflowsByCountry(String countryCode, String header,
+  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
       boolean asc, int page, int pageSize) {
+    DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
     // get the entity
     List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
         .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
@@ -584,7 +592,9 @@ public class DataflowServiceImpl implements DataflowService {
 
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
-    return getPage(dataflowPublicList, page, pageSize);
+    dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
+    dataflowPublicPaginated.setTotalRecords(Long.valueOf(dataflowPublicList.size()));
+    return dataflowPublicPaginated;
   }
 
 
@@ -698,7 +708,7 @@ public class DataflowServiceImpl implements DataflowService {
           compare = Comparator.comparing(DataflowPublicVO::isReleasable)
               .thenComparing(DataflowPublicVO::isReleasable);
           break;
-        case "expirationDate":
+        case "deadline":
           compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate)
               .thenComparing(DataflowPublicVO::getDeadlineDate);
           break;
@@ -732,11 +742,11 @@ public class DataflowServiceImpl implements DataflowService {
    * @return the page
    */
   private static <T> List<T> getPage(List<T> sourceList, int page, int pageSize) {
-    if (pageSize <= 0 || page <= 0) {
+    if (pageSize <= 0 || page < 0) {
       throw new IllegalArgumentException("invalid page size or PageNum: " + pageSize + "-" + page);
     }
 
-    int fromIndex = (page - 1) * pageSize;
+    int fromIndex = (page) * pageSize;
     if (sourceList == null || sourceList.size() <= fromIndex) {
       return Collections.emptyList();
     }
