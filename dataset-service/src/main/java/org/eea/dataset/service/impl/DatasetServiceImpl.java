@@ -1493,7 +1493,8 @@ public class DatasetServiceImpl implements DatasetService {
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         readOnlyTables.add(tableSchema.getIdTableSchema().toString());
       }
-      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchema != null
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
         fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
       }
     }
