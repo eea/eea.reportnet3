@@ -6,7 +6,6 @@ import { OldLogin } from './OldLogin';
 import { RefreshToken } from './RefreshToken';
 import { userRepository } from 'core/domain/model/User/UserRepository';
 import { UserRole } from './UserRole';
-import { UploadImg } from './UploadImg';
 import { updateAttributes } from './updateAttributes';
 
 export const UserService = {
@@ -17,6 +16,5 @@ export const UserService = {
   getConfiguration: GetConfiguration({ userRepository }),
   getToken: GetToken({ userRepository }),
   userRole: UserRole({ userRepository }),
-  uploadImg: UploadImg({ userRepository }),
   updateAttributes: updateAttributes({ userRepository })
 };
