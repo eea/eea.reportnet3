@@ -164,7 +164,8 @@ const Documents = ({
     try {
       setDownloadingId(rowData.id);
       setFileName(createFileName(rowData.title));
-      setFileToDownload(await DocumentService.downloadDocumentById(rowData.id));
+      const { data } = await DocumentService.downloadDocumentById(rowData.id);
+      setFileToDownload(data);
     } catch (error) {
       console.error(error.response);
     } finally {
