@@ -81,24 +81,22 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
   return await apiValidation.create(datasetSchemaId, validation);
 };
 
-const deleteById = async (datasetSchemaId, ruleId) => {
-  return await apiValidation.deleteById(datasetSchemaId, ruleId);
-};
+const deleteById = async (datasetSchemaId, ruleId) => await apiValidation.deleteById(datasetSchemaId, ruleId);
 
 const getAll = async (datasetSchemaId, reporting = false) => {
   const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
-  if (isUndefined(validationsListDTO) || isEmpty(validationsListDTO.rules)) {
+  if (isUndefined(validationsListDTO.data) || isEmpty(validationsListDTO.data.rules)) {
     return;
   }
 
   const validationsList = {};
-  validationsList.datasetSchemaId = validationsListDTO.idDatasetSchema;
-  validationsList.rulesSchemaId = validationsListDTO.rulesSchemaId;
+  validationsList.datasetSchemaId = validationsListDTO.data.idDatasetSchema;
+  validationsList.rulesSchemaId = validationsListDTO.data.rulesSchemaId;
 
   if (reporting) {
-    validationsListDTO.rules = validationsListDTO.rules.filter(rule => rule.enabled === true);
+    validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled === true);
   }
-  const validationsData = parseDataValidationRulesDTO(validationsListDTO.rules);
+  const validationsData = parseDataValidationRulesDTO(validationsListDTO.data.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
 
