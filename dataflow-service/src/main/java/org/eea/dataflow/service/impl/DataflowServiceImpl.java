@@ -25,7 +25,6 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -145,10 +144,6 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset Test controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDataSetControllerZuul;
-
-  /** The representative controller zuul. */
-  @Autowired
-  private RepresentativeControllerZuul representativeControllerZuul;
 
 
   /**
@@ -586,8 +581,7 @@ public class DataflowServiceImpl implements DataflowService {
     // get the entity
     List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
         .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
-    List<DataProviderVO> providerId =
-        representativeControllerZuul.findDataProvidersByCode(countryCode);
+    List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
 
     // sort and paging
@@ -726,7 +720,7 @@ public class DataflowServiceImpl implements DataflowService {
       // order by
       if (null != compare && asc) {
         Collections.sort(dataflowPublicList, compare);
-      } else if (null != compare && asc) {
+      } else if (null != compare && !asc) {
         Collections.sort(dataflowPublicList, compare.reversed());
       }
     }
