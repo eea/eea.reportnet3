@@ -33,14 +33,17 @@ const useBigButtonList = ({
 
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
+    const isTestDataset = match.params.representativeId === 'XX';
     const isReleased =
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
 
     return {
       feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
+      help: !isTestDataset,
       receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry
+      release: isLeadReporterOfCountry,
+      testDatasets: isTestDataset
     };
   };
 
@@ -95,15 +98,34 @@ const useBigButtonList = ({
       },
       true
     ),
-    visibility: true
+    visibility: buttonsVisibility.help
   };
+
+  const testDatasetsModels = dataflowState.data.testDatasets?.map(testDataset => {
+    return {
+      layout: 'defaultBigButton',
+      buttonClass: 'dataset',
+      buttonIcon: 'dataset',
+      caption: testDataset.datasetSchemaName,
+      infoStatus: testDataset.isReleased,
+      infoStatusIcon: testDataset.isReleased,
+      handleRedirect: () => {
+        handleRedirect(
+          getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true)
+        );
+      },
+      helpClassName: 'dataflow-dataset-container-help-step',
+      model: [],
+      onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true),
+      visibility: true
+    };
+  });
 
   const groupByRepresentativeModels = dataflowState.data.datasets
     .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
     .map(dataset => {
       const datasetName = dataset.name;
       const datasetId = dataset.datasetId;
-      const dataProviderId = dataset.dataProviderId;
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
@@ -171,7 +193,14 @@ const useBigButtonList = ({
 
   const releaseBigButton = onBuildReleaseButton();
 
-  return [helpButton, feedbackButton, ...groupByRepresentativeModels, ...receiptBigButton, ...releaseBigButton];
+  return [
+    helpButton,
+    feedbackButton,
+    ...groupByRepresentativeModels,
+    ...receiptBigButton,
+    ...releaseBigButton,
+    ...testDatasetsModels
+  ];
 };
 
 export { useBigButtonList };

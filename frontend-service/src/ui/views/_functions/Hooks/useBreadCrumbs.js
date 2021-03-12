@@ -102,7 +102,7 @@ export const useBreadCrumbs = ({
       };
     }
 
-    representativeId = parseInt(breadCrumbContext.prevModel[3].href.split('/').slice(-1)[0]);
+    representativeId = breadCrumbContext.prevModel[3].href.split('/').slice(-1)[0];
     return {
       command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
       href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),

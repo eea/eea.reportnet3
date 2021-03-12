@@ -101,6 +101,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
+  const [isTestDataset, setIsTestDataset] = useState(undefined);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
   const [replaceData, setReplaceData] = useState(false);
@@ -144,7 +145,20 @@ export const Dataset = withRouter(({ match, history }) => {
       if (!isUndefined(userContext.contextRoles)) {
         setHasWritePermissions(
           userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
-            userContext.hasPermission([config.permissions.REPORTER_WRITE], `${config.permissions.DATASET}${datasetId}`)
+            userContext.hasPermission(
+              [config.permissions.REPORTER_WRITE],
+              `${config.permissions.DATASET}${datasetId}`
+            ) ||
+            userContext.hasPermission(
+              [config.permissions.DATA_CUSTODIAN],
+              `${config.permissions.TESTDATASET}${datasetId}`
+            )
+        );
+        setIsTestDataset(
+          userContext.hasPermission(
+            [config.permissions.DATA_CUSTODIAN],
+            `${config.permissions.TESTDATASET}${datasetId}`
+          )
         );
       }
     }
@@ -199,8 +213,13 @@ export const Dataset = withRouter(({ match, history }) => {
     callSetMetaData();
     getDataflowName();
     getDatasetData();
-    onLoadDataflow();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(isTestDataset)) {
+      onLoadDataflow();
+    }
+  }, [isTestDataset]);
 
   useEffect(() => {
     if (datasetSchemaId) getFileExtensions();
@@ -508,7 +527,13 @@ export const Dataset = withRouter(({ match, history }) => {
   const onLoadDataflow = async () => {
     try {
       const { data } = await DataflowService.reporting(match.params.dataflowId);
-      const dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      let dataset = [];
+
+      if (isTestDataset) {
+        dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      } else {
+        dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      }
       setIsDatasetReleased(dataset[0].isReleased);
 
       setDataset(dataset[0]);
