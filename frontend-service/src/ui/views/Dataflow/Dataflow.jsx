@@ -483,8 +483,6 @@ const Dataflow = withRouter(({ history, match }) => {
       userContext.hasPermission([config.permissions.DATA_CUSTODIAN], `${config.permissions.DATAFLOW}${dataflowId}`) ||
       userContext.hasPermission([config.permissions.DATA_STEWARD], `${config.permissions.DATAFLOW}${dataflowId}`);
 
-    console.log('hasUserListRights', hasUserListRights);
-
     const isNationalCoordinator = userContext.hasContextAccessPermission(
       config.permissions.NATIONAL_COORDINATOR_PREFIX,
       null,
