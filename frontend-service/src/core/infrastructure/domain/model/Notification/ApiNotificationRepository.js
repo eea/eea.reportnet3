@@ -53,7 +53,6 @@ const parse = ({ config, content = {}, message, onClick, routes, type }) => {
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
           navigateTo: notificationDTO.redirectionUrl
         });
-        console.log(notificationDTO.redirectionUrl);
       }
       contentKeys.forEach(key => {
         if (isUndefined(navigateTo) || !navigateTo.parameters.includes(key)) {

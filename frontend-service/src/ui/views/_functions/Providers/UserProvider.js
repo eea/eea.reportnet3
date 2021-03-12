@@ -37,10 +37,7 @@ export const UserProvider = ({ children }) => {
           if (isUndefined(entity)) {
             return permissions.some(permission => userState.accessRole.includes(permission));
           } else {
-            return permissions.some(permission => {
-              const role = `${entity}-${permission}`;
-              return userState.contextRoles.includes(role);
-            });
+            return permissions.some(permission => userState.contextRoles.includes(`${entity}-${permission}`));
           }
         },
 
@@ -52,8 +49,7 @@ export const UserProvider = ({ children }) => {
             if (isNil(entityID)) {
               return userState.contextRoles.some(role => role.startsWith(entity) && role.endsWith(allowedPermission));
             } else {
-              const permission = `${entity}${entityID}-${allowedPermission}`;
-              return userState.contextRoles.includes(permission);
+              return userState.contextRoles.includes(`${entity}${entityID}-${allowedPermission}`);
             }
           });
         },
