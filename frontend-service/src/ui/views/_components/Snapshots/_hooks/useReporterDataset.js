@@ -39,14 +39,9 @@ const useReporterDataset = (datasetId, dataflowId) => {
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        notificationContext.add({
-          type: 'CREATE_BY_ID_REPORTER_ERROR',
-          content: {}
-        });
+        notificationContext.add({ type: 'CREATE_BY_ID_REPORTER_ERROR', content: {} });
       }
     } finally {
       setIsSnapshotDialogVisible(false);
@@ -59,14 +54,9 @@ const useReporterDataset = (datasetId, dataflowId) => {
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        notificationContext.add({
-          type: 'DELETED_BY_ID_REPORTER_ERROR',
-          content: {}
-        });
+        notificationContext.add({ type: 'DELETED_BY_ID_REPORTER_ERROR', content: {} });
       }
     } finally {
       setIsSnapshotDialogVisible(false);
@@ -81,35 +71,25 @@ const useReporterDataset = (datasetId, dataflowId) => {
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.allReporter(datasetId);
 
-        setSnapshotListData(snapshotsData);
+        setSnapshotListData(snapshotsData.data);
 
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
-      notificationContext.add({
-        type: 'ALL_REPORTER_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'ALL_REPORTER_ERROR', content: {} });
       setIsLoadingSnapshotListData(false);
     }
   };
 
   const onRestoreSnapshot = async () => {
     try {
-      notificationContext.add({
-        type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO'
-      });
+      notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO' });
       await SnapshotService.restoreByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        notificationContext.add({
-          type: 'RESTORE_DATASET_SNAPSHOT_FAILED_EVENT',
-          content: {}
-        });
+        notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_FAILED_EVENT', content: {} });
       }
     } finally {
       setIsSnapshotDialogVisible(false);
