@@ -1343,8 +1343,13 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream) {
     try {
+      long startTime = System.currentTimeMillis();
+      LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
       exportETLDatasetVO(datasetId, outputStream);
       outputStream.flush();
+      long endTime = System.currentTimeMillis() - startTime;
+      LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
+          endTime / 1000);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
@@ -3505,7 +3510,7 @@ public class DatasetServiceImpl implements DatasetService {
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
       int nTables = tableSchemaList.size();
       for (int i = 0; i < nTables; i++) {
-        exportETLTableVO(tableSchemaList.get(i), outputStream);
+        exportETLTableVO(datasetId, tableSchemaList.get(i), outputStream);
         if (i + 1 < nTables) {
           outputStream.write(",".getBytes());
         }
@@ -3522,7 +3527,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param outputStream the output stream
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void exportETLTableVO(TableSchema tableSchema, OutputStream outputStream)
+  private void exportETLTableVO(Long datasetId, TableSchema tableSchema, OutputStream outputStream)
       throws IOException {
 
     // Match each fieldSchemaId with its headerName
@@ -3534,7 +3539,7 @@ public class DatasetServiceImpl implements DatasetService {
     String json = "{\"tableName\":\"" + tableSchema.getNameTableSchema() + "\", \"records\":";
     outputStream.write(json.getBytes());
 
-    exportETLRecordVOList(fieldMap, tableSchema, outputStream);
+    exportETLRecordVOList(datasetId, fieldMap, tableSchema, outputStream);
     outputStream.write("}".getBytes());
 
   }
@@ -3548,19 +3553,19 @@ public class DatasetServiceImpl implements DatasetService {
    * @param outputStream the output stream
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void exportETLRecordVOList(Map<String, String> fieldMap, TableSchema tableSchema,
-      OutputStream outputStream) throws IOException {
+  private void exportETLRecordVOList(Long datasetId, Map<String, String> fieldMap,
+      TableSchema tableSchema, OutputStream outputStream) throws IOException {
     Long totalRecords =
         tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
     LOG.info("total Records:{}", totalRecords);
-    int nPages = (int) Math.ceil(totalRecords / 1000.0);
+    int nPages = (int) Math.ceil(totalRecords / 10000.0);
 
     outputStream.write("[".getBytes());
     for (int i = 0; i < nPages; i++) {
-      LOG.info("etlExport: page={}, total={}", i, nPages);
+      LOG.info("DatasetId: {} ,etlExport: page={}, total={}", datasetId, i, nPages);
 
       List<RecordValue> recordlist = recordRepository.findByTableValueNoOrderOptimized(
-          tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 1000));
+          tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 10000));
       int nRecords = recordlist.size();
 
       for (int j = 0; j < nRecords; j++) {
