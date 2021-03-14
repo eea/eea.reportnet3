@@ -225,6 +225,12 @@ const Documents = ({
               icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
+                setDocumentInitialValues({
+                  description: '',
+                  lang: '',
+                  uploadFile: {},
+                  isPublic: false
+                });
                 setIsEditForm(false);
                 setIsUploadDialogVisible(true);
               }}
