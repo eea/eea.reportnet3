@@ -3558,7 +3558,7 @@ public class DatasetServiceImpl implements DatasetService {
       TableSchema tableSchema, OutputStream outputStream) throws IOException {
     Long totalRecords =
         tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
-    LOG.info("total Records:{}", totalRecords);
+    LOG.info("DatasetId: {}, total Records:{}", datasetId, totalRecords);
     int nPages = (int) Math.ceil(totalRecords / 10000.0);
 
     outputStream.write("[".getBytes());
