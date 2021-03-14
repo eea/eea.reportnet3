@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -3564,15 +3565,15 @@ public class DatasetServiceImpl implements DatasetService {
     for (int i = 0; i < nPages; i++) {
       LOG.info("DatasetId: {} ,etlExport: page={}, total={}", datasetId, i, nPages);
 
-      List<RecordValue> recordlist = recordRepository.findByTableValueNoOrderOptimized(
-          tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 10000));
-      int nRecords = recordlist.size();
-
-      for (int j = 0; j < nRecords; j++) {
-        exportETLRecordVO(recordlist.get(j), fieldMap, outputStream);
-        if (i + 1 < nPages || j + 1 < nRecords) {
+      for (Iterator<RecordValue> iter = recordRepository.findByTableValueNoOrderOptimized(
+          tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 10000)).iterator(); iter
+              .hasNext();) {
+        RecordValue record = iter.next();
+        exportETLRecordVO(record, fieldMap, outputStream);
+        if (i + 1 < nPages || iter.hasNext()) {
           outputStream.write(",".getBytes());
         }
+        iter.remove();
       }
       outputStream.flush();
     }
