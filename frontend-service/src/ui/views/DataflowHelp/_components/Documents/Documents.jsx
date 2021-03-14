@@ -46,7 +46,12 @@ const Documents = ({
 
   const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [documentInitialValues, setDocumentInitialValues] = useState({});
+  const [documentInitialValues, setDocumentInitialValues] = useState({
+    description: '',
+    lang: '',
+    uploadFile: {},
+    isPublic: false
+  });
   const [downloadingId, setDownloadingId] = useState('');
   const [fileDeletingId, setFileDeletingId] = useState(null);
   const [fileName, setFileName] = useState('');
