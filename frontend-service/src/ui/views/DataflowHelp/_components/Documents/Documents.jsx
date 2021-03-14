@@ -8,6 +8,7 @@ import isNil from 'lodash/isNil';
 import styles from './Documents.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
@@ -69,20 +70,32 @@ const Documents = ({
   const dateColumnTemplate = rowData => <span>{dayjs(rowData.date).format(userContext.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => (
-    <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
-      <ActionsColumn
-        isDeletingDocument={isDeletingDocument}
-        onDeleteClick={() => {
-          setDeleteDialogVisible(true);
-          setRowDataState(rowData);
-        }}
-        onEditClick={() => onEditDocument()}
-        rowDataId={rowData.id}
-        rowDeletingId={fileDeletingId}
-        rowUpdatingId={fileUpdatingId}
-        isUpdating={isUpdating}
-      />
-    </div>
+    <>
+      <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
+        <ActionsColumn
+          isDeletingDocument={isDeletingDocument}
+          onDeleteClick={() => {
+            setDocumentInitialValues(rowData);
+            setDeleteDialogVisible(true);
+            setRowDataState(rowData);
+          }}
+          onEditClick={() => {
+            const langField = {
+              lang: config.languages.filter(language => language.name == rowData.language).map(country => country.code)
+            };
+            rowData = Object.assign({}, rowData, langField);
+            rowData.uploadFile = {};
+
+            setDocumentInitialValues(rowData);
+            onEditDocument();
+          }}
+          rowDataId={rowData.id}
+          rowDeletingId={fileDeletingId}
+          rowUpdatingId={fileUpdatingId}
+          isUpdating={isUpdating}
+        />
+      </div>
+    </>
   );
 
   const downloadColumnTemplate = rowData => (
@@ -214,14 +227,11 @@ const Documents = ({
           </div>
         </Toolbar>
       ) : (
-        <Fragment></Fragment>
+        <Fragment />
       )}
 
       <DataTable
         autoLayout={true}
-        onRowSelect={e => {
-          setDocumentInitialValues(Object.assign({}, e.data));
-        }}
         onSort={e => {
           setSortFieldDocuments(e.sortField);
           setSortOrderDocuments(e.sortOrder);

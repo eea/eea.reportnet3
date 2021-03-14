@@ -72,22 +72,6 @@ const DocumentFileUpload = ({
           })
   });
 
-  const buildInitialValue = documentInitialValues => {
-    let initialValues = { description: '', lang: '', uploadFile: {}, isPublic: false };
-    if (isEditForm) {
-      const langField = {
-        lang: config.languages
-          .filter(language => language.name == documentInitialValues.language)
-          .map(country => country.code)
-      };
-      initialValues = Object.assign({}, documentInitialValues, langField);
-      initialValues.uploadFile = {};
-    }
-    return initialValues;
-  };
-
-  const initialValuesWithLangField = buildInitialValue(documentInitialValues);
-
   const IsPublicCheckbox = ({ checked, field, type }) => (
     <Fragment>
       <input id="isPublic" {...field} type={type} checked={checked} />
@@ -101,10 +85,10 @@ const DocumentFileUpload = ({
     <Formik
       ref={form}
       enableReinitialize={true}
-      initialValues={initialValuesWithLangField}
+      initialValues={documentInitialValues}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        if (!isEqual(initialValuesWithLangField, values)) {
+        if (!isEqual(documentInitialValues, values)) {
           setIsUploading(true);
           setSubmitting(true);
           setFileUpdatingId(values.id);
