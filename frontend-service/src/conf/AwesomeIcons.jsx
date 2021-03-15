@@ -31,6 +31,7 @@ import {
   faDiceFour,
   faDraftingCompass,
   faDrawPolygon,
+  faExclamationCircle,
   faExternalLinkAlt,
   faEye,
   faFileAlt,
@@ -202,6 +203,8 @@ export const AwesomeIcons = icon => {
       return faEnvelope;
     case 'euDataset':
       return faCube;
+    case 'exclamationCircle':
+      return faExclamationCircle;
     case 'expanded':
       return faCaretDown;
     case 'externalLink':

@@ -17,6 +17,8 @@ export const DataflowRepository = {
   getAllDataflowsUserList: () => Promise.reject('[DataflowRepository#getAllDataflowsUserList] must be implement'),
   getUserList: () => Promise.reject('[DataflowRepository#getUserlist] must be implement'),
   getPublicDataflowData: () => Promise.reject('[DataflowRepository#getPublicDataflowData] must be implemented'),
+  getPublicDataflowsByCountryCode: () =>
+    Promise.reject('[DataflowRepository#getPublicDataflowsByCountryCode] must be implemented'),
   metadata: () => Promise.reject('[DataflowRepository#metadata] must be implemented'),
   newEmptyDatasetSchema: () => Promise.reject('[DataflowRepository#newEmptyDatasetSchema] must be implemented'),
   reporting: () => Promise.reject('[DataflowRepository#reporting] must be implemented'),

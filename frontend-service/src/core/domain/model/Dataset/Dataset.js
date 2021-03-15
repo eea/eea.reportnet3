@@ -16,6 +16,7 @@ export class Dataset {
     name,
     publicFileName,
     releaseDate,
+    restrictFromPublic,
     tables,
     tableStatisticPercentages,
     tableStatisticValues,
@@ -40,6 +41,7 @@ export class Dataset {
     this.name = name;
     this.publicFileName = publicFileName;
     this.releaseDate = releaseDate;
+    this.restrictFromPublic = restrictFromPublic;
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;
