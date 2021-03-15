@@ -1036,6 +1036,7 @@
     "togglePushNotificationOn": "Switch on push notifications",
     "closed": "Closed",
     "open": "Open",
-    "loadDataflowInfoError": "Error loading dataflow info"
+    "loadDataflowInfoError": "Error loading dataflow info",
+    "cooperatingCountries": "EEA Cooperating Countries"
   }
 }
