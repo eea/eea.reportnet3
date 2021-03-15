@@ -7,6 +7,7 @@ import { routes } from 'ui/routes';
 import styles from './PublicCountries.module.scss';
 
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
+import ReactCountryFlag from 'react-country-flag';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
@@ -45,13 +46,21 @@ export const PublicCountries = withRouter(({ history }) => {
               return (
                 <div
                   key={country.code}
-                  className={styles.country}
+                  className={`${styles.country}`}
                   href={getUrl(routes.COUNTRY)}
                   onClick={e => {
                     e.preventDefault();
                     history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
                   }}>
-                  <h3>{country.name}</h3>
+                  <>
+                    <h3>{country.name}</h3>
+                    <ReactCountryFlag
+                      aria-label={country.name}
+                      className={styles.flag}
+                      countryCode={country.code}
+                      svg
+                    />
+                  </>
                 </div>
               );
             })}
@@ -68,7 +77,15 @@ export const PublicCountries = withRouter(({ history }) => {
                     e.preventDefault();
                     history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
                   }}>
-                  <h3>{country.name}</h3>
+                  <>
+                    <h3>{country.name}</h3>
+                    <ReactCountryFlag
+                      aria-label={country.name}
+                      className={styles.flag}
+                      countryCode={country.code}
+                      svg
+                    />
+                  </>
                 </div>
               );
             })}
