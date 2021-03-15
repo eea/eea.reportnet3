@@ -673,6 +673,25 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return isAuthorized;
   }
 
+
+  /**
+   * Gets the provider ids.
+   *
+   * @return the provider ids
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Long> getProviderIds() throws EEAException {
+    List<DataProviderVO> dataProviders = null;
+    String countryCode = getCountryCodeNC();
+    if (null != countryCode) {
+      dataProviders = findDataProvidersByCode(countryCode);
+    } else {
+      throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
+    }
+    return dataProviders.stream().map(provider -> provider.getId()).collect(Collectors.toList());
+  }
+
   /**
    * Modify lead reporter permissions.
    *
@@ -722,26 +741,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     return resource;
   }
-
-  /**
-   * Gets the provider ids.
-   *
-   * @return the provider ids
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<Long> getProviderIds() throws EEAException {
-    List<DataProviderVO> dataProviders = null;
-    String countryCode = getCountryCodeNC();
-    if (null != countryCode) {
-      dataProviders = findDataProvidersByCode(countryCode);
-    } else {
-      throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
-    }
-    return dataProviders.stream().map(provider -> provider.getId()).collect(Collectors.toList());
-  }
-
-
 
   /**
    * Gets the country code NC.

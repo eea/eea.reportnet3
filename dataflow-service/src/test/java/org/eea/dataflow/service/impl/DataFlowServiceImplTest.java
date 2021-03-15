@@ -40,6 +40,7 @@ import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -929,4 +930,53 @@ public class DataFlowServiceImplTest {
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     assertNotNull("is null", dataflowServiceImpl.getUserRoles(1L, Arrays.asList(dataflowVO)));
   }
+
+  @Test
+  public void getPublicDataflowsByCountrySortName() {
+    DataflowPublicVO dataflowPublicVO = new DataflowPublicVO();
+    DataProviderVO dataprovider = new DataProviderVO();
+    Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
+        .thenReturn(Arrays.asList(dataflowPublicVO));
+    Mockito.when(representativeService.findDataProvidersByCode("FR"))
+        .thenReturn(Arrays.asList(dataprovider));
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "name", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortObligation() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "obligation", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortLegalInstrument() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "legalInstrument", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortStatus() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "status", true, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortDeadline() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "deadline", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortIsReleased() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "isReleased", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortReleaseDate() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "releaseDate", false, 0, 12));
+  }
+
 }

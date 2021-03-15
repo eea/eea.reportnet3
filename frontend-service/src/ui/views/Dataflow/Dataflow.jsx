@@ -29,7 +29,6 @@ import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
@@ -828,28 +827,6 @@ const Dataflow = withRouter(({ history, match }) => {
                 setRepresentativeImport={isImport =>
                   dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: isImport })
                 }
-              />
-            </div>
-          </Dialog>
-        )}
-
-        {dataflowState.isManageRightsDialogVisible && (
-          <Dialog
-            contentStyle={{ maxHeight: '60vh' }}
-            footer={manageRightsDialogFooter}
-            header={
-              dataflowState.isCustodian
-                ? resources.messages['manageEditorsRights']
-                : resources.messages['manageReportersRights']
-            }
-            onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
-            visible={dataflowState.isManageRightsDialogVisible}>
-            <div className={styles.dialog}>
-              <ManageRights
-                dataflowId={dataflowId}
-                dataflowState={dataflowState}
-                dataProviderId={dataProviderId}
-                isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
               />
             </div>
           </Dialog>
