@@ -328,6 +328,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                 <DataTable
                   autoLayout={true}
                   first={firstRow}
+                  lazy={true}
                   onPage={onChangePage}
                   onSort={onSort}
                   paginator={true}
@@ -336,11 +337,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                       'records'
                     ].toLowerCase()}`}</span>
                   }
-                  rows={10}
+                  rows={numberRows}
                   rowsPerPageOptions={[5, 10, 15]}
+                  sortable={true}
                   sortField={sortField}
                   sortOrder={sortOrder}
-                  totalRecords={dataflows.length}
+                  totalRecords={totalRecords}
                   value={dataflows}>
                   {renderColumns(dataflows)}
                 </DataTable>
