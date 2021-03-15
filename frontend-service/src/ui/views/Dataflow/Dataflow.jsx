@@ -29,7 +29,6 @@ import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
@@ -124,6 +123,12 @@ const Dataflow = withRouter(({ history, match }) => {
     config.permissions.LEAD_REPORTER
   ]);
 
+  const isNationalCoordinator = userContext.hasContextAccessPermission(
+    config.permissions.NATIONAL_COORDINATOR_PREFIX,
+    null,
+    [config.permissions.NATIONAL_COORDINATOR]
+  );
+
   const country =
     uniqDataProviders.length === 1
       ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
@@ -141,6 +146,8 @@ const Dataflow = withRouter(({ history, match }) => {
     isInsideACountry &&
     ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
+
+  const isNationalCoordinatorOfCountry = isNationalCoordinator && isInsideACountry;
 
   const dataProviderId = isInsideACountry
     ? !isNil(representativeId)
@@ -243,10 +250,7 @@ const Dataflow = withRouter(({ history, match }) => {
       const userListBtn = {
         className: 'dataflow-properties-help-step',
         icon: 'users',
-        isVisible:
-          (dataflowState.hasUserListRights && !isNil(representativeId)) ||
-          isLeadReporterOfCountry ||
-          dataflowState.isNationalCoordinator,
+        isVisible: buttonsVisibility.usersListBtn,
         label: 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title: 'dataflowUsersList'
@@ -326,7 +330,8 @@ const Dataflow = withRouter(({ history, match }) => {
         releaseableBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
-        propertiesBtn: false
+        propertiesBtn: false,
+        usersListBtn: false
       };
     }
 
@@ -337,7 +342,11 @@ const Dataflow = withRouter(({ history, match }) => {
       releaseableBtn: !isDesign && isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
-      propertiesBtn: true
+      propertiesBtn: true,
+      usersListBtn:
+        isLeadReporterOfCountry ||
+        isNationalCoordinatorOfCountry ||
+        (dataflowState.isCustodian && !isNil(representativeId))
     };
   };
 
@@ -818,28 +827,6 @@ const Dataflow = withRouter(({ history, match }) => {
                 setRepresentativeImport={isImport =>
                   dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: isImport })
                 }
-              />
-            </div>
-          </Dialog>
-        )}
-
-        {dataflowState.isManageRightsDialogVisible && (
-          <Dialog
-            contentStyle={{ maxHeight: '60vh' }}
-            footer={manageRightsDialogFooter}
-            header={
-              dataflowState.isCustodian
-                ? resources.messages['manageEditorsRights']
-                : resources.messages['manageReportersRights']
-            }
-            onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
-            visible={dataflowState.isManageRightsDialogVisible}>
-            <div className={styles.dialog}>
-              <ManageRights
-                dataflowId={dataflowId}
-                dataflowState={dataflowState}
-                dataProviderId={dataProviderId}
-                isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
               />
             </div>
           </Dialog>
