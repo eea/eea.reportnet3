@@ -37,17 +37,9 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        notificationContext.add({
-          type: 'CREATE_BY_ID_REPORTER_ERROR',
-          content: {
-            dataflowId,
-            datasetId
-          }
-        });
+        notificationContext.add({ type: 'CREATE_BY_ID_REPORTER_ERROR', content: { dataflowId, datasetId } });
       }
     } finally {
       setIsSnapshotDialogVisible(false);
@@ -60,17 +52,9 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        notificationContext.add({
-          type: 'SNAPSHOT_DELETE_ERROR',
-          content: {
-            dataflowId,
-            datasetId
-          }
-        });
+        notificationContext.add({ type: 'SNAPSHOT_DELETE_ERROR', content: { dataflowId, datasetId } });
       }
     } finally {
       setIsSnapshotDialogVisible(false);
@@ -83,38 +67,25 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       setTimeout(async () => {
         const snapshotsData = await SnapshotService.allDesigner(datasetId);
 
-        setSnapshotListData(snapshotsData);
+        setSnapshotListData(snapshotsData.data);
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
-      notificationContext.add({
-        type: 'SNAPSHOT_ALL_DESIGNER_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
+      notificationContext.add({ type: 'SNAPSHOT_ALL_DESIGNER_ERROR', content: { dataflowId, datasetId } });
     }
   };
 
   const onRestoreSnapshot = async () => {
     try {
-      notificationContext.add({
-        type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO'
-      });
+      notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO' });
       await SnapshotService.restoreByIdDesigner(datasetId, snapshotState.snapShotId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
         notificationContext.add({
           type: 'RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT',
-          content: {
-            dataflowId,
-            datasetId
-          }
+          content: { dataflowId, datasetId }
         });
       }
     } finally {

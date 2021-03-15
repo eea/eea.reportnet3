@@ -4,23 +4,15 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiHistoricRelease = {
   allHistoricReleases: async datasetId => {
-    const response = await HTTPRequester.get({
-      url: getUrl(HistoricReleaseConfig.loadAllHistoricReleases, {
-        datasetId
-      })
-    });
-
-    return response.data;
+    return await HTTPRequester.get({ url: getUrl(HistoricReleaseConfig.loadAllHistoricReleases, { datasetId }) });
   },
 
   allRepresentativeHistoricReleases: async (dataflowId, dataProviderId) => {
-    const response = await HTTPRequester.get({
+    return await HTTPRequester.get({
       url: getUrl(HistoricReleaseConfig.loadAllRepresentativeHistoricReleases, {
         dataflowId,
         representativeId: dataProviderId
       })
     });
-
-    return response.data;
   }
 };

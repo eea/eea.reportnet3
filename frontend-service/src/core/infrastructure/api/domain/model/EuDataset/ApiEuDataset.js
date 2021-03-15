@@ -4,17 +4,12 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const apiEuDataset = {
   copyDataCollection: async dataflowId => {
-    const response = await HTTPRequester.post({
-      url: getUrl(EuDatasetConfig.copyDataCollection, { dataflowId })
-    });
-    return response;
+    return await HTTPRequester.post({ url: getUrl(EuDatasetConfig.copyDataCollection, { dataflowId }) });
   },
 
   exportEuDataset: async dataflowId => {
-    const response = await HTTPRequester.post({
-      url: getUrl(EuDatasetConfig.export, { dataflowId })
-    });
-    return response;
+    return await HTTPRequester.post({ url: getUrl(EuDatasetConfig.export, { dataflowId }) });
   }
 };
+
 export { apiEuDataset };

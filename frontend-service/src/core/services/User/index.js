@@ -1,22 +1,20 @@
-import { GetToken } from './GetToken';
 import { GetConfiguration } from './GetConfiguration';
+import { GetToken } from './GetToken';
 import { Login } from './Login';
 import { Logout } from './Logout';
 import { OldLogin } from './OldLogin';
 import { RefreshToken } from './RefreshToken';
+import { updateAttributes } from './updateAttributes';
 import { userRepository } from 'core/domain/model/User/UserRepository';
 import { UserRole } from './UserRole';
-import { UploadImg } from './UploadImg';
-import { updateAttributes } from './updateAttributes';
 
 export const UserService = {
+  getConfiguration: GetConfiguration({ userRepository }),
+  getToken: GetToken({ userRepository }),
   login: Login({ userRepository }),
   logout: Logout({ userRepository }),
   oldLogin: OldLogin({ userRepository }),
   refreshToken: RefreshToken({ userRepository }),
-  getConfiguration: GetConfiguration({ userRepository }),
-  getToken: GetToken({ userRepository }),
-  userRole: UserRole({ userRepository }),
-  uploadImg: UploadImg({ userRepository }),
-  updateAttributes: updateAttributes({ userRepository })
+  updateAttributes: updateAttributes({ userRepository }),
+  userRole: UserRole({ userRepository })
 };

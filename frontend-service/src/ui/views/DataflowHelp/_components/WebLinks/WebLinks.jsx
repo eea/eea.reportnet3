@@ -123,9 +123,9 @@ export const WebLinks = ({
     setDeletingId(weblinkItem.id);
 
     try {
-      const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
+      const { status } = await WebLinkService.deleteWebLink(weblinkItem);
 
-      if (weblinkToDelete.isDeleted) {
+      if (status >= 200 && status <= 299) {
         onLoadWebLinks();
       }
     } catch (error) {
@@ -154,7 +154,7 @@ export const WebLinks = ({
       try {
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
-        if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
+        if (newWeblink.status >= 200 && newWeblink.status <= 299) {
           onLoadWebLinks();
         }
 
@@ -180,7 +180,7 @@ export const WebLinks = ({
       try {
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
-        if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
+        if (weblinkToEdit.status >= 200 && weblinkToEdit.status <= 299) {
           onLoadWebLinks();
         }
 

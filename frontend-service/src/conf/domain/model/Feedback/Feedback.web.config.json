@@ -1,6 +1,5 @@
 {
   "create": "/collaboration/createMessage/dataflow/{:dataflowId}",
-  "loadMessagesByFlag": "/collaboration/findMessages/dataflow/{:dataflowId}?page={:page}&read={:read}&providerId={:providerId}",
   "loadMessages": "/collaboration/findMessages/dataflow/{:dataflowId}?page={:page}&providerId={:providerId}",
   "markAsRead": "/collaboration/updateMessageReadStatus/dataflow/{:dataflowId}"
 }
