@@ -40,7 +40,7 @@ const useBigButtonList = ({
 
     return {
       feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
-      help: !isTestDataset,
+      help: true,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
       testDatasets: isTestDataset
