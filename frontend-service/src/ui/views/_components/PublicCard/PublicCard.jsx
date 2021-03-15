@@ -14,10 +14,12 @@ export const PublicCard = ({
   animation,
   dataflowId,
   dueDate,
+  frequency,
   instrument,
   obligation,
   onCardClick,
   isReleasable,
+  pilotScenarioAmbition,
   subtitle,
   title,
   externalCard
@@ -91,16 +93,33 @@ export const PublicCard = ({
             </p>
           </div>
         )}
-
+        {pilotScenarioAmbition && (
+          <div className={styles.legalInstrumentAndObligation} onMouseDown={() => window.open('blablab.com')}>
+            <p>
+              <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
+            </p>
+          </div>
+        )}
         <div className={`${styles.footer}`}>
-          <span>
-            {
-              <Fragment>
-                <strong>Status: </strong>
-                {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
-              </Fragment>
-            }
-          </span>
+          {frequency ? (
+            <span>
+              {
+                <Fragment>
+                  <strong>Frequency: </strong>
+                  {frequency}
+                </Fragment>
+              }
+            </span>
+          ) : (
+            <span>
+              {
+                <Fragment>
+                  <strong>Status: </strong>
+                  {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
+                </Fragment>
+              }
+            </span>
+          )}
           <span>
             <strong>Delivery date:</strong> {dueDate}
           </span>

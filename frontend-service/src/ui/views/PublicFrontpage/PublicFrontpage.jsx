@@ -9,7 +9,6 @@ import { routes } from 'ui/routes';
 import styles from './PublicFrontpage.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { Card } from './_components/Card';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 import Illustration from 'assets/images/logos/public_illustration.png';
 import logo from 'assets/images/logos/logo.png';
