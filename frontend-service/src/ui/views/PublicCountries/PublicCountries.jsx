@@ -45,9 +45,8 @@ export const PublicCountries = withRouter(({ history }) => {
               const countryCode = country.code;
               return (
                 <div
-                  key={country.code}
-                  className={`${styles.country}`}
                   href={getUrl(routes.COUNTRY)}
+                  key={country.code}
                   onClick={e => {
                     e.preventDefault();
                     history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
