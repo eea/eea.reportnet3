@@ -94,14 +94,11 @@ const DocumentFileUpload = ({
     return hasErrors;
   };
 
-  const onConfirm = async e => {
-    e.preventDefault();
-
+  const onConfirm = async () => {
     checkInputForErrors('description');
     checkInputForErrors('lang');
     checkInputForErrors('uploadFile');
 
-    // if (!isEqual(documentInitialValues, inputs)) {
     if (!errors.description.hasErrors && !errors.lang.hasErrors && !errors.uploadFile.hasErrors) {
       setIsUploading(true);
       setSubmitting(true);
@@ -156,7 +153,7 @@ const DocumentFileUpload = ({
   };
 
   return (
-    <form>
+    <>
       <fieldset>
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
@@ -175,7 +172,7 @@ const DocumentFileUpload = ({
               });
             }}
             onKeyPress={e => {
-              if (e.key === 'Enter' && checkInputForErrors('description')) onConfirm(e);
+              if (e.key === 'Enter' && !checkInputForErrors('description')) onConfirm();
             }}
           />
           <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
@@ -199,7 +196,7 @@ const DocumentFileUpload = ({
               });
             }}
             onKeyPress={e => {
-              if (e.key === 'Enter' && !checkInputForErrors('lang')) onConfirm(e);
+              if (e.key === 'Enter' && !checkInputForErrors('lang')) onConfirm();
             }}>
             <option value="">{resources.messages['selectLang']}</option>
             {sortBy(config.languages, ['name']).map(language => (
@@ -222,7 +219,7 @@ const DocumentFileUpload = ({
               id="uploadFile"
               name="uploadFile"
               onKeyPress={e => {
-                if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm(e);
+                if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm();
               }}
               onBlur={() => checkInputForErrors('uploadFile')}
               onChange={e => {
@@ -266,7 +263,7 @@ const DocumentFileUpload = ({
             disabled={isSubmitting || isUploading}
             icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
             label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
-            onClick={e => onConfirm(e)}
+            onClick={() => onConfirm()}
           />
           <Button
             className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
@@ -276,7 +273,7 @@ const DocumentFileUpload = ({
           />
         </div>
       </fieldset>
-    </form>
+    </>
   );
 };
 
