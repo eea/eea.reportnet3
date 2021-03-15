@@ -79,26 +79,25 @@ export const useBreadCrumbs = ({
 
   const getRepresentativeCrumb = () => {
     if (representativeId) {
-      if (representativeId === 'XX') {
-        return {
-          command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
-          href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
-          label: resources.messages['testDatasetBreadcrumbs'],
-          icon: 'clone'
-        };
-      }
-      const representatives = dataflowStateData.datasets.map(dataset => {
-        return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
-      });
+      let representativeCrumbLabel;
 
-      const currentRepresentative = representatives
-        .filter(representative => representative.dataProviderId === parseInt(representativeId))
-        .map(representative => representative.name);
+      if (representativeId === 'XX') {
+        representativeCrumbLabel = resources.messages['testDatasetBreadcrumbs'];
+      } else {
+        const representatives = dataflowStateData.datasets.map(dataset => {
+          return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
+        });
+
+        const currentRepresentative = representatives
+          .filter(representative => representative.dataProviderId === parseInt(representativeId))
+          .map(representative => representative.name);
+        representativeCrumbLabel = currentRepresentative[0];
+      }
 
       return {
         command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
         href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
-        label: currentRepresentative[0],
+        label: representativeCrumbLabel,
         icon: 'clone'
       };
     }
