@@ -1,1 +1,0 @@
-export { BigButtonListTest } from './BigButtonListTest';

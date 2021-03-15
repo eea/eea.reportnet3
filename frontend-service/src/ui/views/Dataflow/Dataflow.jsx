@@ -778,21 +778,6 @@ const Dataflow = withRouter(({ history, match }) => {
         />
       );
     } else {
-      if (representativeId === 'XX') {
-        return (
-          <BigButtonListRepresentative
-            dataflowState={dataflowState}
-            dataProviderId={dataProviderId}
-            handleRedirect={handleRedirect}
-            isLeadReporterOfCountry={isLeadReporterOfCountry}
-            match={match}
-            onCleanUpReceipt={onCleanUpReceipt}
-            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
-            setIsReceiptLoading={setIsReceiptLoading}
-          />
-        );
-      }
-
       return (
         <BigButtonListRepresentative
           dataflowState={dataflowState}
