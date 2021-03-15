@@ -532,8 +532,8 @@ export const Dataset = withRouter(({ match, history }) => {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       } else {
         dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+        setIsDatasetReleased(dataset[0].isReleased);
       }
-      setIsDatasetReleased(dataset[0].isReleased);
 
       setDataset(dataset[0]);
     } catch (error) {
