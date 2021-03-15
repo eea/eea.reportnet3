@@ -32,7 +32,7 @@ const DataflowManagementForm = forwardRef(
 
     useEffect(() => {
       if (!isNil(inputRef) && refresh) inputRef.current.focus();
-    }, [inputRef.current, refresh]);
+    }, [refresh]);
 
     useImperativeHandle(ref, () => ({
       handleSubmit: onConfirm
