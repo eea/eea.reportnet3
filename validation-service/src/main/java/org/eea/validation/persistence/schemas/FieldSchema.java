@@ -1,6 +1,5 @@
 package org.eea.validation.persistence.schemas;
 
-import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -19,7 +18,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class FieldSchema implements Serializable {
+public class FieldSchema {
 
   /** The id field schema. */
   @Id

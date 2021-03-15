@@ -123,6 +123,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -400,6 +402,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    */
   @Override
+  @CacheEvict(value = "dataFlowId", key = "datasetId")
   public void deleteDataSchema(final String datasetId) {
     schemasRepository.deleteById(new ObjectId(datasetId));
   }
@@ -596,6 +599,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the data flow id by id
    */
   @Override
+  @Cacheable(value = "dataFlowId", key = "datasetId")
   public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }

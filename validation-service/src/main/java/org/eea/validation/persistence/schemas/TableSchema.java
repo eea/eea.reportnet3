@@ -1,6 +1,5 @@
 package org.eea.validation.persistence.schemas;
 
-import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
@@ -15,7 +14,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class TableSchema implements Serializable {
+public class TableSchema {
   /** The id table schema. */
   @Id
   @Field(value = "_id")
