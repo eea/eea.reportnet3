@@ -2873,6 +2873,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the dataset type
    */
   @Override
+  @Cacheable(value = "datasetType", key = "datasetId")
   public DatasetTypeEnum getDatasetType(Long datasetId) {
     DatasetTypeEnum type = null;
     if (reportingDatasetRepository.existsById(datasetId)) {

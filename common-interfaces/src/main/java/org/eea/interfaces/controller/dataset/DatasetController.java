@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
@@ -267,6 +268,7 @@ public interface DatasetController {
    * @return the dataset type
    */
   @GetMapping("/private/datasetType/{datasetId}")
+  @Cacheable(value = "datasetType", key = "datasetId")
   DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId);
 
   /**
