@@ -1,10 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-// import * as Yup from 'yup';
-import isEqual from 'lodash/isEqual';
-import isNull from 'lodash/isNull';
-import isPlainObject from 'lodash/isPlainObject';
-import isUndefined from 'lodash/isUndefined';
 import sortBy from 'lodash/sortBy';
 
 import styles from './DocumentFileUpload.module.scss';
@@ -41,67 +36,76 @@ const DocumentFileUpload = ({
   });
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [values, setValues] = useState(documentInitialValues);
+  const [inputs, setInputs] = useState(documentInitialValues);
 
   useEffect(() => {
     if (isUploadDialogVisible) inputRef.current.focus();
   }, [isUploadDialogVisible]);
 
-  // const validationSchema = Yup.object().shape({
-  //   description: Yup.string().required(' ').max(255, resources.messages['documentDescriptionValidationMax']),
-  //   lang: Yup.string().required(),
-  //   uploadFile: isEditForm
-  //     ? Yup.mixed()
-  //         .test('checkSizeWhenNotEmpty', resources.messages['tooLargeFileValidationError'], value => {
-  //           if (isUndefined(value) || isPlainObject(value) || isNull(value)) {
-  //             return true;
-  //           } else {
-  //             return value.size <= config.MAX_FILE_SIZE;
-  //           }
-  //         })
-  //         .nullable()
-  //     : Yup.mixed()
-  //         .test('fileEmpty', ' ', value => {
-  //           return !isPlainObject(value);
-  //         })
-  //         .test('fileSize', resources.messages['tooLargeFileValidationError'], value => {
-  //           return value.size <= config.MAX_FILE_SIZE;
-  //         })
-  // });
+  const checkIsEmptyInput = inputValue => {
+    return inputValue.trim() === '';
+  };
 
-  const checkIsEmptyInput = inputValue => inputValue.trim() === '';
-
-  //description message resources.messages['documentDescriptionValidationMax'])
   const checkIsCorrectLength = inputValue => inputValue.length <= 255;
 
-  //---------------------------------------------------------------------
-  const checkIsCorrectFileSizeWhenNotEmpty = value => {
-    //TODO uploadFile isEditForm = true => nullable()?
-    if (isUndefined(value) || isPlainObject(value) || isNull(value)) {
-      return true;
-    } else {
-      return value.size <= config.MAX_FILE_SIZE;
+  const checkIsEmptyFile = file => {
+    //checks if file object do not have size property
+    return !file?.size;
+  };
+
+  const checkExсeedsMaxFileSize = file => {
+    if (!file?.size) {
+      return false;
     }
+    return file.size > config.MAX_FILE_SIZE;
   };
 
-  const checkIsEmptyFile = value => {
-    //uploadFile isEditForm = false
-    //message: '';
-    return !isPlainObject(value);
-  };
-  const checkIsCorrectFileSize = value => {
-    //uploadFile isEditForm = false
-    //message:resources.messages['tooLargeFileValidationError']
-    return value.size <= config.MAX_FILE_SIZE;
+  const checkInputForErrors = inputName => {
+    let hasErrors = false;
+    let message = '';
+    const inputValue = inputs[inputName];
+
+    if (inputName !== 'uploadFile' && checkIsEmptyInput(inputValue)) {
+      message = '';
+      hasErrors = true;
+    } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
+      message = resources.messages['documentDescriptionValidationMax'];
+      hasErrors = true;
+    } else if (inputName === 'uploadFile') {
+      if (isEditForm && checkExсeedsMaxFileSize(inputValue)) {
+        message = resources.messages['tooLargeFileValidationError'];
+        hasErrors = true;
+      }
+      if (!isEditForm) {
+        if (checkIsEmptyFile(inputValue)) {
+          message = '';
+          hasErrors = true;
+        } else if (checkExсeedsMaxFileSize(inputValue)) {
+          message = resources.messages['tooLargeFileValidationError'];
+          hasErrors = true;
+        }
+      }
+    }
+
+    setErrors(previousErrors => {
+      return { ...previousErrors, [inputName]: { message, hasErrors } };
+    });
+
+    return hasErrors;
   };
 
-  //---------------------------------------------------------------------
+  const onConfirm = async e => {
+    e.preventDefault();
 
-  const onSubmit = async () => {
-    if (!isEqual(documentInitialValues, values)) {
+    checkInputForErrors('description');
+    checkInputForErrors('lang');
+    checkInputForErrors('uploadFile');
+
+    // if (!isEqual(documentInitialValues, inputs)) {
+    if (!errors.description.hasErrors && !errors.lang.hasErrors && !errors.uploadFile.hasErrors) {
       setIsUploading(true);
       setSubmitting(true);
-      setFileUpdatingId(values.id);
+      setFileUpdatingId(inputs.id);
       notificationContext.add({
         type: 'DOCUMENT_UPLOADING_INIT_INFO',
         content: {}
@@ -111,20 +115,20 @@ const DocumentFileUpload = ({
           setIsUpdating(true);
           await DocumentService.editDocument(
             dataflowId,
-            values.description,
-            values.lang,
-            values.uploadFile,
-            values.isPublic,
-            values.id
+            inputs.description,
+            inputs.lang,
+            inputs.uploadFile,
+            inputs.isPublic,
+            inputs.id
           );
           onUpload();
         } else {
           await DocumentService.uploadDocument(
             dataflowId,
-            values.description,
-            values.lang,
-            values.uploadFile,
-            values.isPublic
+            inputs.description,
+            inputs.lang,
+            inputs.uploadFile,
+            inputs.isPublic
           );
           onUpload();
         }
@@ -162,12 +166,16 @@ const DocumentFileUpload = ({
             name="description"
             placeholder={resources.messages['fileDescription']}
             type="text"
-            value={values.description}
+            value={inputs.description}
+            onBlur={() => checkInputForErrors('description')}
             onChange={e => {
               e.persist();
-              setValues(previousValues => {
+              setInputs(previousValues => {
                 return { ...previousValues, description: e.target.value };
               });
+            }}
+            onKeyPress={e => {
+              if (e.key === 'Enter' && checkInputForErrors('description')) onConfirm(e);
             }}
           />
           <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
@@ -181,12 +189,17 @@ const DocumentFileUpload = ({
             id="selectLanguage"
             name="lang"
             component="select"
-            value={values.lang}
+            multiple={false}
+            value={inputs.lang}
+            onBlur={() => checkInputForErrors('lang')}
             onChange={e => {
               e.persist();
-              setValues(previousValues => {
+              setInputs(previousValues => {
                 return { ...previousValues, lang: e.target.value };
               });
+            }}
+            onKeyPress={e => {
+              if (e.key === 'Enter' && !checkInputForErrors('lang')) onConfirm(e);
             }}>
             <option value="">{resources.messages['selectLang']}</option>
             {sortBy(config.languages, ['name']).map(language => (
@@ -208,10 +221,14 @@ const DocumentFileUpload = ({
               className="uploadFile"
               id="uploadFile"
               name="uploadFile"
+              onKeyPress={e => {
+                if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm(e);
+              }}
+              onBlur={() => checkInputForErrors('uploadFile')}
               onChange={e => {
-                const value = e.currentTarget;
-                setValues(previousValues => {
-                  return { ...previousValues, uploadFile: value.files[0] };
+                const eventTarget = e.currentTarget;
+                setInputs(previousValues => {
+                  return { ...previousValues, uploadFile: eventTarget.files[0] };
                 });
               }}
               placeholder="file upload"
@@ -230,11 +247,10 @@ const DocumentFileUpload = ({
           <input
             id="isPublic"
             type="checkbox"
-            checked={values.isPublic}
-            onChange={e => {
-              e.persist();
-              setValues(previousValues => {
-                return { ...previousValues, isPublic: e.target.value };
+            checked={inputs.isPublic}
+            onChange={() => {
+              setInputs(previousValues => {
+                return { ...previousValues, isPublic: !previousValues.isPublic };
               });
             }}
           />
@@ -250,7 +266,7 @@ const DocumentFileUpload = ({
             disabled={isSubmitting || isUploading}
             icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
             label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
-            onClick={onSubmit}
+            onClick={e => onConfirm(e)}
           />
           <Button
             className={`${styles.cancelButton} p-button-secondary button-right-aligned`}

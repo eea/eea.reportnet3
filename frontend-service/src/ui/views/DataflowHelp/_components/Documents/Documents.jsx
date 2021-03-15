@@ -75,32 +75,30 @@ const Documents = ({
   const dateColumnTemplate = rowData => <span>{dayjs(rowData.date).format(userContext.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => (
-    <>
-      <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
-        <ActionsColumn
-          isDeletingDocument={isDeletingDocument}
-          onDeleteClick={() => {
-            setDocumentInitialValues(rowData);
-            setDeleteDialogVisible(true);
-            setRowDataState(rowData);
-          }}
-          onEditClick={() => {
-            const langField = {
-              lang: config.languages.filter(language => language.name == rowData.language).map(country => country.code)
-            };
-            rowData = Object.assign({}, rowData, langField);
-            rowData.uploadFile = {};
+    <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
+      <ActionsColumn
+        isDeletingDocument={isDeletingDocument}
+        onDeleteClick={() => {
+          setDocumentInitialValues(rowData);
+          setDeleteDialogVisible(true);
+          setRowDataState(rowData);
+        }}
+        onEditClick={() => {
+          const langField = config.languages
+            .filter(language => language.name === rowData.language[0])
+            .map(country => country.code)[0];
 
-            setDocumentInitialValues(rowData);
-            onEditDocument();
-          }}
-          rowDataId={rowData.id}
-          rowDeletingId={fileDeletingId}
-          rowUpdatingId={fileUpdatingId}
-          isUpdating={isUpdating}
-        />
-      </div>
-    </>
+          rowData = { ...rowData, lang: langField };
+
+          setDocumentInitialValues(rowData);
+          onEditDocument();
+        }}
+        rowDataId={rowData.id}
+        rowDeletingId={fileDeletingId}
+        rowUpdatingId={fileUpdatingId}
+        isUpdating={isUpdating}
+      />
+    </div>
   );
 
   const downloadColumnTemplate = rowData => (
