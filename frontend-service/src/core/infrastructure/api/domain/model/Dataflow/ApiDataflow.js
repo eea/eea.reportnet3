@@ -68,6 +68,18 @@ export const apiDataflow = {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) });
   },
 
+  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
+    return await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getPublicDataflowsByCountryCode, {
+        country: countryCode,
+        pageNum,
+        pageSize: numberRows,
+        sortField,
+        asc: sortOrder
+      })
+    });
+  },
+
   getUserList: async (dataflowId, representativeId) => {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.getUserList, { dataflowId, representativeId }) });
   },

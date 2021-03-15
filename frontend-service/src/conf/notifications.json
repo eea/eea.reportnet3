@@ -575,7 +575,13 @@
           "key": "DUPLICATED_WEB_LINK_ERROR"
         },
         {
+          "key": "LOAD_DATAFLOWS_BY_COUNTRY_ERROR"
+        },
+        {
           "key": "LOAD_USERS_LIST_ERROR"
+        },
+        {
+          "key": "LOAD_DATAFLOW_INFO_ERROR"
         }
       ]
     },

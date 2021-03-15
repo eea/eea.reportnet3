@@ -18,7 +18,7 @@ window.env = {
   REACT_APP_EULOGIN: false,
   EULOGIN_URL:
     'http://rn3dev-api.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3dev.altia.es%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
-  WEBSOCKET_URL: 'ws://rn3sandbox.altia.es/communication/reportnet-websocket'
+  WEBSOCKET_URL: 'ws://rn3sandbox.altia.es/communication/reportnet-websocket',
 
   /**
    * Beta
@@ -29,14 +29,14 @@ window.env = {
   //   'http://rn3dev-api.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3dev.altia.es%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
   // WEBSOCKET_URL: 'ws://rn3dev-api.altia.es/communication/reportnet-websocket',
 
-  // /**
-  //  * Test EEA
-  //  */
+  /**
+   * Test EEA
+   */
   // REACT_APP_EULOGIN: false,
   // REACT_APP_BACKEND: 'https://rn3api.eionet.europa.eu',
   // EULOGIN_URL:
   //   'https://rn3api.eionet.europa.eu/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3dev.altia.es%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
   // WEBSOCKET_URL: 'ws://rn3api.eionet.europa.eu/communication/reportnet-websocket',
 
-  // DOCUMENTATION_FOLDER: 'test'
+  DOCUMENTATION_FOLDER: 'test'
 };
