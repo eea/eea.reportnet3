@@ -60,6 +60,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -414,6 +416,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataflowVO", key = "#dataflowVO.id")
   public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
 
     Optional<Dataflow> dataflow = dataflowRepository.findByNameIgnoreCase(dataflowVO.getName());
@@ -465,6 +468,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
+  @Cacheable(value = "dataflowVO", key = "#id")
   public DataFlowVO getMetabaseById(Long id) throws EEAException {
 
     if (id == null) {
@@ -485,6 +489,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws Exception the exception
    */
   @Override
+  @CacheEvict(value = "dataflowVO", key = "#idDataflow")
   @Transactional
   public void deleteDataFlow(Long idDataflow) throws Exception {
     // take the jpa entity
@@ -539,6 +544,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataflowVO", key = "#id")
   @Transactional
   public void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadlineDate)
       throws EEAException {
@@ -562,9 +568,7 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataflowPublicVO> getPublicDataflows() {
     List<DataflowPublicVO> dataflowPublicList =
         dataflowPublicMapper.entityListToClass(dataflowRepository.findByShowPublicInfoTrue());
-    dataflowPublicList.stream().forEach(dataflow -> {
-      findObligationPublicDataflow(dataflow);
-    });
+    dataflowPublicList.stream().forEach(dataflow -> findObligationPublicDataflow(dataflow));
     return dataflowPublicList;
   }
 

@@ -1,6 +1,7 @@
 package org.eea.validation.persistence.schemas;
 
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
@@ -20,7 +21,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Document(collection = "DataSetSchema")
-public class DataSetSchema {
+public class DataSetSchema implements Serializable {
 
 
   /** The id. */

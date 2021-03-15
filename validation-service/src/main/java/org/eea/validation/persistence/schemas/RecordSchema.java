@@ -1,8 +1,9 @@
 /**
- * 
+ *
  */
 package org.eea.validation.persistence.schemas;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
@@ -20,7 +21,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class RecordSchema {
+public class RecordSchema implements Serializable {
 
   /** The id record schema. */
   @Id
