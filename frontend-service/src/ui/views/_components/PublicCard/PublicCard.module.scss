@@ -44,7 +44,6 @@
         display: -webkit-box;
         overflow: hidden;
         margin: 0px;
-        margin-bottom: 1rem;
         text-overflow: ellipsis;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
@@ -65,13 +64,12 @@
       h4 {
         display: flex;
         margin: 0px;
-        margin-bottom: 0.5rem;
         overflow: hidden;
         color: var(--main-font-color);
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
         font-weight: bold;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem !important;
         a {
           right: 1rem;
           cursor: pointer;
@@ -91,10 +89,9 @@
         }
       }
       .subtitle {
-        margin: 0.5rem 0;
+        margin: 0;
         overflow: hidden;
         -webkit-box-orient: vertical;
-        width: fit-content;
       }
     }
     .legalInstrumentAndObligation {
