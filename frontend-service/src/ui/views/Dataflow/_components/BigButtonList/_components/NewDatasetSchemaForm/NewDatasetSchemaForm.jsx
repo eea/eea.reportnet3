@@ -44,7 +44,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
     return isDuplicatedName;
   };
 
-  const checkIsEmptyInput = () => datasetSchemaName === '';
+  const checkIsEmptyInput = () => datasetSchemaName.trim() === '';
 
   const checkInput = () => {
     setHasErrors(checkIsDuplicateSchemaName() || checkIsEmptyInput());

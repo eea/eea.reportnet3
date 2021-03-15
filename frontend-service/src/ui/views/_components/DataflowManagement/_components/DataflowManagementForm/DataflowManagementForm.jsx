@@ -68,6 +68,7 @@ const DataflowManagementForm = forwardRef(
       checkIsCorrectInputValue(data.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
+
       if (!errors.obligation.hasErrors && !errors.name.hasErrors && !errors.description.hasErrors) {
         onSubmit(true);
 
