@@ -1035,6 +1035,7 @@
     "togglePushNotificationOff": "Switch off push notifications",
     "togglePushNotificationOn": "Switch on push notifications",
     "closed": "Closed",
-    "open": "Open"
+    "open": "Open",
+    "loadDataflowInfoError": "Error loading dataflow info"
   }
 }

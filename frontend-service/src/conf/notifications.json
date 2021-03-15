@@ -583,6 +583,9 @@
         },
         {
           "key": "LOAD_USERS_LIST_ERROR"
+        },
+        {
+          "key": "LOAD_DATAFLOW_INFO_ERROR"
         }
       ]
     },

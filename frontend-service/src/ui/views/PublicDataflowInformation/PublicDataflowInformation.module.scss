@@ -10,6 +10,26 @@
   }
 }
 
+.filesContainer {
+  display: flex;
+  align-items: center;
+
+  .filesIcon {
+    font-size: 1.4rem;
+    color: var(--documenticon-color);
+
+    .cursorPointer {
+      cursor: pointer;
+    }
+  }
+
+  .restrictFromPublicIcon {
+    font-size: 1.3rem;
+    color: var(--gray-75);
+    cursor: pointer;
+  }
+}
+
 .checkedValueColumn {
   text-align: center;
 }
@@ -28,4 +48,28 @@
   margin-top: 2rem;
   font-size: 1.2rem;
   font-weight: bold;
+}
+
+.tableLegendContainer {
+  margin-top: 0.4rem !important;
+  margin-right: 0.4rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--gray-75);
+
+  > span {
+    margin-right: -0.4rem !important;
+  }
+
+  .tableLegendIcon {
+    margin-right: -0.4rem !important;
+    color: var(--button-secondary-bg-active);
+    font-size: 0.8rem;
+  }
+
+  .tableLegendText {
+    font-style: italic;
+  }
 }
