@@ -701,6 +701,10 @@ const Dataflow = withRouter(({ history, match }) => {
       const userObject = await UserService.refreshToken();
       userContext.onTokenRefresh(userObject);
     } catch (error) {
+      notificationContext.add({
+        key: 'TOKEN_REFRESH_ERROR',
+        content: {}
+      });
       await UserService.logout();
       userContext.onLogout();
     }
