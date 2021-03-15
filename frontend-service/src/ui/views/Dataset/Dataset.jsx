@@ -144,11 +144,10 @@ export const Dataset = withRouter(({ match, history }) => {
     } else {
       if (!isUndefined(userContext.contextRoles)) {
         setHasWritePermissions(
-          userContext.hasPermission([config.permissions.LEAD_REPORTER], `${config.permissions.DATASET}${datasetId}`) ||
-            userContext.hasPermission(
-              [config.permissions.REPORTER_WRITE],
-              `${config.permissions.DATASET}${datasetId}`
-            ) ||
+          userContext.hasPermission(
+            [config.permissions.LEAD_REPORTER, config.permissions.REPORTER_WRITE],
+            `${config.permissions.DATASET}${datasetId}`
+          ) ||
             userContext.hasPermission(
               [config.permissions.DATA_CUSTODIAN],
               `${config.permissions.TESTDATASET}${datasetId}`

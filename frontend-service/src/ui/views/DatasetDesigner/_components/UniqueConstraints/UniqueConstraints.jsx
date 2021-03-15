@@ -121,11 +121,8 @@ export const UniqueConstraints = ({
         isLoading(false);
       }
       const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
-      const uniques = UniqueConstraintsUtils.parseConstraintsList(response, datasetSchemaAllTables);
-      constraintsDispatch({
-        type: 'INITIAL_LOAD',
-        payload: { data: uniques, filteredData: uniques }
-      });
+      const uniques = UniqueConstraintsUtils.parseConstraintsList(response.data, datasetSchemaAllTables);
+      constraintsDispatch({ type: 'INITIAL_LOAD', payload: { data: uniques, filteredData: uniques } });
       setIsDuplicatedToManageUnique(false);
       refreshList(false);
     } catch (error) {

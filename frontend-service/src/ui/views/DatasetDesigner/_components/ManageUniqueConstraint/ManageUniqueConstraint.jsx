@@ -154,7 +154,8 @@ export const ManageUniqueConstraint = ({
 
   const onLoadUniquesList = async () => {
     try {
-      setDuplicatedList(await UniqueConstraintsService.all(dataflowId, datasetSchemaId));
+      const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
+      setDuplicatedList(response.data);
     } catch (error) {
       console.error('error', error);
     }

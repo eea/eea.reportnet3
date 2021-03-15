@@ -358,6 +358,23 @@ const getAllSchemas = async dataflowId => {
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
+const getPublicDataflowsByCountryCode = async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
+  const publicDataflowsByCountryCodeResponse = await apiDataflow.getPublicDataflowsByCountryCode(
+    countryCode,
+    sortOrder,
+    pageNum,
+    numberRows,
+    sortField
+  );
+
+  const publicDataflowsByCountryCodeData = parseDataflowListDTO(
+    publicDataflowsByCountryCodeResponse.data.publicDataflows
+  );
+  publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
+
+  return publicDataflowsByCountryCodeResponse;
+};
+
 const getPublicDataflowData = async dataflowId => {
   const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
   const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
@@ -386,6 +403,17 @@ const getUserList = async (dataflowId, representativeId) => {
 
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   return await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
+};
+
+const parseDataflowListDTO = dataflowsDTO => {
+  if (!isNull(dataflowsDTO) && !isUndefined(dataflowsDTO)) {
+    const dataflows = [];
+    dataflowsDTO.forEach(dataflowDTO => {
+      dataflows.push(parseDataflowDTO(dataflowDTO));
+    });
+    return dataflows;
+  }
+  return;
 };
 
 const parseDataflowDTOs = dataflowDTOs => {
@@ -501,6 +529,7 @@ const parseDatasetDTO = datasetDTO =>
     isReleasing: datasetDTO.releasing,
     publicFileName: datasetDTO.publicFileName,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
+    restrictFromPublic: datasetDTO.restrictFromPublic,
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });
@@ -701,8 +730,9 @@ export const ApiDataflowRepository = {
   getAllSchemas,
   getApiKey,
   getAllDataflowsUserList,
-  getUserList,
   getPublicDataflowData,
+  getPublicDataflowsByCountryCode,
+  getUserList,
   newEmptyDatasetSchema,
   publicData,
   reporting,

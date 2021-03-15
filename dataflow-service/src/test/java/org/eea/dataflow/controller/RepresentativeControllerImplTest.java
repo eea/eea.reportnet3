@@ -559,4 +559,10 @@ public class RepresentativeControllerImplTest {
   public void findDataProvidersByCodeTest() {
     assertNotNull("is null", representativeControllerImpl.findDataProvidersByCode("ES"));
   }
+
+  @Test
+  public void findRepresentativesByDataFlowIdAndProviderIdListTest() {
+    assertNotNull("is null", representativeControllerImpl
+        .findRepresentativesByDataFlowIdAndProviderIdList(0L, new ArrayList<>()));
+  }
 }

@@ -6,7 +6,7 @@ import sortBy from 'lodash/sortBy';
 const all = async (dataflowId, dataProviderId) => {
   const contributorsDTO = await apiContributor.all(dataflowId, dataProviderId);
 
-  const contributors = contributorsDTO.map((contributorDTO, i) => {
+  const contributors = contributorsDTO.data.map((contributorDTO, i) => {
     contributorDTO.id = i + 1;
     return new Contributor(contributorDTO);
   });

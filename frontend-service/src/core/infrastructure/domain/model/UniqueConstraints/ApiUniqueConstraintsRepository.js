@@ -5,8 +5,11 @@ import { apiUniqueConstraints } from 'core/infrastructure/api/domain/model/Uniqu
 
 import { UniqueConstraint } from 'core/domain/model/UniqueConstraints/UniqueConstraint';
 
-const all = async (dataflowId, datasetSchemaId) =>
-  parseConstraintsList(await apiUniqueConstraints.all(dataflowId, datasetSchemaId));
+const all = async (dataflowId, datasetSchemaId) => {
+  const uniqueConstraints = await apiUniqueConstraints.all(dataflowId, datasetSchemaId);
+  uniqueConstraints.data = parseConstraintsList(uniqueConstraints.data);
+  return uniqueConstraints;
+};
 
 const create = async (dataflowId, datasetSchemaId, fieldSchemaIds, tableSchemaId) =>
   await apiUniqueConstraints.create(dataflowId, datasetSchemaId, fieldSchemaIds, tableSchemaId);
