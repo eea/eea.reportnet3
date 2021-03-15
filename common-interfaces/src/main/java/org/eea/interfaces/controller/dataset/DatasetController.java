@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
  * The Interface DatasetController.
@@ -277,7 +278,7 @@ public interface DatasetController {
    * @return the ETL dataset VO
    */
   @GetMapping("/{datasetId}/etlExport")
-  ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
+  ResponseEntity<StreamingResponseBody> etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 

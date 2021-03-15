@@ -2,6 +2,7 @@ package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -702,5 +703,11 @@ public class DataFlowControllerImplTest {
   @Test
   public void getUserRolesAllDataflowsTest() {
     assertNotNull("is null", dataFlowControllerImpl.getUserRolesAllDataflows());
+  }
+
+  @Test
+  public void getPublicDataflowsByCountry() {
+    assertNull("assertion error",
+        dataFlowControllerImpl.getPublicDataflowsByCountry("FR", 0, 10, "name", true));
   }
 }
