@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import europeanFlag from 'assets/images/logos/europeanFlag.png';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
@@ -45,8 +46,33 @@ export const PublicCountries = withRouter(({ history }) => {
               const countryCode = country.code;
               return (
                 <div
+                  href={getUrl(routes.COUNTRY)}
                   key={country.code}
-                  className={`${styles.country}`}
+                  onClick={e => {
+                    e.preventDefault();
+                    history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+                  }}>
+                  <>
+                    <img alt={country.name} className={styles.country} src={europeanFlag}></img>
+                    <h3>{country.name}</h3>
+                    <ReactCountryFlag
+                      aria-label={country.name}
+                      className={styles.flag}
+                      countryCode={country.code}
+                      svg
+                    />
+                  </>
+                </div>
+              );
+            })}
+          </div>
+          <h2>{resources.messages['cooperatingCountries']}</h2>
+          <div className={styles.countriesWrapper}>
+            {config.countriesByGroup.cooperatingCountries.map(country => {
+              const countryCode = country.code;
+              return (
+                <div
+                  key={country.code}
                   href={getUrl(routes.COUNTRY)}
                   onClick={e => {
                     e.preventDefault();
