@@ -40,6 +40,7 @@ import { UserList } from 'ui/views/_components/UserList';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { RepresentativeService } from 'core/services/Representative';
+import { UserService } from 'core/services/User';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -686,14 +687,27 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onRefreshToken = async () => {
+    try {
+      const userObject = await UserService.refreshToken();
+      userContext.onTokenRefresh(userObject);
+    } catch (error) {
+      await UserService.logout();
+      userContext.onLogout();
+    }
+  };
+
+  const onDataCollectionIsCompleted = () => {
+    onRefreshToken();
+    setIsDataUpdated();
+  };
+
   useCheckNotifications(
-    [
-      'ADD_DATACOLLECTION_COMPLETED_EVENT',
-      'COPY_DATASET_SCHEMA_COMPLETED_EVENT',
-      'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'
-    ],
+    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'],
     setIsDataUpdated
   );
+
+  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
   useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
 
