@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.impl.ReportingDatasetServiceImpl;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -198,4 +201,18 @@ public class ReportingDatasetServiceTest {
         .getDataSetIdByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.any()));
   }
 
+  @Test
+  public void getDataSetPublicByDataflowAndProviderIdTest() {
+    ReportingDatasetPublicVO reporting = new ReportingDatasetPublicVO();
+    RepresentativeVO representative = new RepresentativeVO();
+    reporting.setDataProviderId(0L);
+    representative.setDataProviderId(0L);
+    when(reportingDatasetPublicMapper.entityListToClass(Mockito.any()))
+        .thenReturn(Arrays.asList(reporting));
+    when(representativeControllerZuul
+        .findRepresentativesByDataFlowIdAndProviderIdList(Mockito.any(), Mockito.any()))
+            .thenReturn(Arrays.asList(representative));
+    assertNotNull("is null",
+        reportingDatasetService.getDataSetPublicByDataflowAndProviderId(0L, 0L));
+  }
 }

@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
@@ -363,9 +364,8 @@ public interface DatasetService {
    *
    * @return the ETL dataset VO
    *
-   * @throws EEAException the EEA exception
    */
-  ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException;
+  void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream);
 
 
   /**

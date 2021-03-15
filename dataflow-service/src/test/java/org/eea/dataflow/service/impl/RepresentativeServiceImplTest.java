@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +29,14 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
+import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +44,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -91,8 +98,23 @@ public class RepresentativeServiceImplTest {
 
   private List<LeadReporter> leadReporters;
 
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
+
+
   @Before
   public void initMocks() {
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    ThreadPropertiesManager.setVariable("user", "user");
+
     Dataflow dataflow = new Dataflow();
     dataflow.setId(1L);
     representative = new Representative();
@@ -604,6 +626,54 @@ public class RepresentativeServiceImplTest {
   @Test
   public void findDataProvidersByCodeTest() {
     assertNotNull("is null", representativeServiceImpl.findDataProvidersByCode("ES"));
+  }
+
+  @Test
+  public void importFile() throws EEAException, IOException {
+    String csv = "Representing|Email\r\n" + "AL|provider1@reportnet.net\r\n"
+        + "AL|provider2@reportnet.net\r\n";
+    MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
+    UserRepresentationVO user = new UserRepresentationVO();
+    user.setEmail("provider1@reportnet.net");
+
+    DataProvider dataProvider = new DataProvider();
+    dataProvider.setId(1L);
+    dataProvider.setCode("AL");
+    List<DataProvider> dataProviderList = new ArrayList<>();
+    dataProviderList.add(dataProvider);
+
+    Mockito.when(dataProviderRepository.findAllByGroupId(Mockito.any()))
+        .thenReturn(dataProviderList);
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(user);
+
+
+    representativeServiceImpl.importFile(1L, 2L, file);
+  }
+
+  @Test
+  public void getProviderIdsTest() throws EEAException {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_PROVIDER-AL-NATIONAL_COORDINATOR"));
+
+    DataProvider dataProvider = new DataProvider();
+    dataProvider.setId(1L);
+    dataProvider.setCode("AL");
+    List<DataProvider> dataProviderList = new ArrayList<>();
+    dataProviderList.add(dataProvider);
+
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProvider.setId(1L);
+    dataProvider.setCode("AL");
+    List<DataProviderVO> dataProviderListVO = new ArrayList<>();
+    dataProviderListVO.add(dataProviderVO);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(dataProviderRepository.findByCode(Mockito.any())).thenReturn(dataProviderList);
+    Mockito.when(dataProviderMapper.entityListToClass(Mockito.any()))
+        .thenReturn(dataProviderListVO);
+    representativeServiceImpl.getProviderIds();
   }
 
 }

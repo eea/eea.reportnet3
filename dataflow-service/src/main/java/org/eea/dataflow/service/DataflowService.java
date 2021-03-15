@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -186,15 +187,15 @@ public interface DataflowService {
   List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList);
 
   /**
-   * Gets the public dataflows.
+   * Gets the public dataflows by country.
    *
    * @param countryCode the country code
    * @param header the header
    * @param asc the asc
    * @param page the page
    * @param pageSize the page size
-   * @return the public dataflows
+   * @return the public dataflows by country
    */
-  List<DataflowPublicVO> getPublicDataflowsByCountry(String countryCode, String header, boolean asc,
-      int page, int pageSize);
+  DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
+      boolean asc, int page, int pageSize);
 }

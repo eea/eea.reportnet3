@@ -13,6 +13,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -486,10 +487,10 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @GetMapping("/public/country/{countryCode}")
-  public List<DataflowPublicVO> getPublicDataflowsByCountry(
+  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
       @ApiParam(value = "Country Code",
           example = "AL") @PathVariable("countryCode") String countryCode,
-      @RequestParam(value = "pageNum", defaultValue = "1", required = false) Integer pageNum,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
       @RequestParam(value = "sortField", required = false) String sortField,
       @RequestParam(value = "asc", defaultValue = "true") boolean asc) {

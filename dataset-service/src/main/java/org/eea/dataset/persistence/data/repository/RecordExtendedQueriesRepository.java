@@ -58,4 +58,15 @@ public interface RecordExtendedQueriesRepository {
    * @return the record value
    */
   RecordValue findLastRecord();
+
+
+
+  /**
+   * Find by table value no order optimized.
+   *
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @return the list
+   */
+  List<RecordValue> findByTableValueNoOrderOptimized(String idTableSchema, Pageable pageable);
 }
