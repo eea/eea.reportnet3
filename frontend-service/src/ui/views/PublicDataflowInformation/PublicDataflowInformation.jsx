@@ -69,7 +69,6 @@ export const PublicDataflowInformation = withRouter(
     };
 
     const downloadFileBodyColumn = rowData => {
-      console.log('rowData', rowData);
       if (!rowData.restrictFromPublic) {
         return (
           <div className={styles.filesContainer}>
@@ -223,6 +222,7 @@ export const PublicDataflowInformation = withRouter(
           return (
             <Column
               body={template}
+              className={field === 'publicsFileName' && styles.downloadFile}
               field={field}
               header={getHeader(field)}
               key={field}

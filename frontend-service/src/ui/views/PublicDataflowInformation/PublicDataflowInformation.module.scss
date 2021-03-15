@@ -8,6 +8,14 @@
     justify-content: center;
     align-items: center;
   }
+
+  td {
+    height: 45px;
+  }
+}
+
+.downloadFile {
+  max-width: 35rem;
 }
 
 .filesContainer {
