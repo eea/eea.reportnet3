@@ -687,24 +687,20 @@ const publicData = async () => {
   return publicDataflows;
 };
 
+const orderDatasetType = datasetType => {
+  datasetType.sort((a, b) => {
+    let datasetName_A = a.datasetSchemaName;
+    let datasetName_B = b.datasetSchemaName;
+    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+  });
+};
+
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
   const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
-  dataflow.testDatasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
-  dataflow.datasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
-  dataflow.designDatasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
+  orderDatasetType(dataflow.testDatasets);
+  orderDatasetType(dataflow.datasets);
+  orderDatasetType(dataflow.designDatasets);
   reportingDataflowDTO.data = dataflow;
 
   return reportingDataflowDTO;
