@@ -228,15 +228,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const isDataflowOpen =
-        (userContext.hasPermission(
-          [config.permissions.DATA_CUSTODIAN],
+        userContext.hasPermission(
+          [config.permissions.DATA_CUSTODIAN, config.permissions.DATA_STEWARD],
           `${config.permissions.DATAFLOW}${dataflowId}`
-        ) ||
-          userContext.hasPermission(
-            [config.permissions.DATA_STEWARD],
-            `${config.permissions.DATAFLOW}${dataflowId}`
-          )) &&
-        designerState?.metaData?.dataflow?.status === 'DRAFT';
+        ) && designerState?.metaData?.dataflow?.status === 'DRAFT';
       designerDispatch({
         type: 'IS_DATAFLOW_OPEN',
         payload: { isDataflowOpen }

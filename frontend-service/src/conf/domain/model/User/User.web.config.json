@@ -1,10 +1,9 @@
 {
   "configuration": "/user/getAttributes",
-  "userInfo": "/user/getUserByUserId?userId={:userId}",
   "login": "/user/generateTokenByCode?code={:code}",
   "logout": "/user/logout?refreshToken={:refreshToken}",
   "oldLogin": "/user/generateToken?password={:password}&username={:userName}",
   "refreshToken": "/user/refreshToken?refreshToken={:refreshToken}",
   "updateConfiguration": "/user/updateAttributes",
-  "uploadImg": "user/upload/?userId={:userId}"
+  "userInfo": "/user/getUserByUserId?userId={:userId}"
 }

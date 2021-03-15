@@ -140,19 +140,13 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         return datasetSchema.data;
       }
     } catch (error) {
-      notificationContext.add({
-        type: 'IMPORT_DESIGN_FAILED_EVENT',
-        content: {
-          datasetId
-        }
-      });
+      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' });
     }
   };
 
   const onLoadDatasetsSchemas = async () => {
     try {
       const { data } = await DataflowService.reporting(dataflowId);
-
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
           const uniqueDatasetSchemas = data.datasets.filter((dataset, pos, arr) => {
@@ -190,16 +184,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadDocuments = async () => {
     try {
-      let loadedDocuments = await DocumentService.all(`${dataflowId}`);
-
-      loadedDocuments = loadedDocuments.sort(sortByProperty('description'));
-
+      const { data } = await DocumentService.all(`${dataflowId}`);
+      const loadedDocuments = data.documents.sort(sortByProperty('description'));
       setDocuments(loadedDocuments);
     } catch (error) {
-      notificationContext.add({
-        type: 'LOAD_DOCUMENTS_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'LOAD_DOCUMENTS_ERROR', content: {} });
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
@@ -210,33 +199,28 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   const onLoadWebLinks = async () => {
     try {
-      let loadedWebLinks = await WebLinkService.all(dataflowId);
-      loadedWebLinks = loadedWebLinks.sort(sortByProperty('description'));
+      const { data } = await WebLinkService.all(dataflowId);
+      const loadedWebLinks = data.weblinks.sort(sortByProperty('description'));
       setWebLinks(loadedWebLinks);
     } catch (error) {
-      notificationContext.add({
-        type: 'LOAD_WEB_LINKS_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'LOAD_WEB_LINKS_ERROR', content: {} });
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         console.error('error', error.response);
       }
     }
   };
-  const layout = children => {
-    return (
-      <MainLayout>
-        <div className="rep-container">{children}</div>
-      </MainLayout>
-    );
-  };
+  const renderLayout = children => (
+    <MainLayout>
+      <div className="rep-container">{children}</div>
+    </MainLayout>
+  );
 
   if (isLoading) {
-    return layout(<Spinner />);
+    return renderLayout(<Spinner />);
   }
 
   if (documents) {
-    return layout(
+    return renderLayout(
       <Fragment>
         <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
         <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setSelectedIndex(e)}>

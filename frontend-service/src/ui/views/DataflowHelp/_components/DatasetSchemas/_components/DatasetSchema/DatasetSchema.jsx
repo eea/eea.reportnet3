@@ -164,6 +164,7 @@ const DatasetSchema = ({
   const parseDesignDataset = (design, extensionsOperationsList, uniqueList, validationList) => {
     const parsedDataset = {};
     parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
+    parsedDataset.availableInPublic = design.availableInPublic;
     parsedDataset.levelErrorTypes = design.levelErrorTypes;
     parsedDataset.extensionsOperations = extensionsOperationsList;
     parsedDataset.uniques = uniqueList;
