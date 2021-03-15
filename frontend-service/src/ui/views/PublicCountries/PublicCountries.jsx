@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import europeanFlag from 'assets/images/logos/europeanFlag.png';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
@@ -52,6 +53,7 @@ export const PublicCountries = withRouter(({ history }) => {
                     history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
                   }}>
                   <>
+                    <img alt={country.name} className={styles.country} src={europeanFlag}></img>
                     <h3>{country.name}</h3>
                     <ReactCountryFlag
                       aria-label={country.name}
