@@ -66,6 +66,31 @@ export const PublicCountries = withRouter(({ history }) => {
               );
             })}
           </div>
+          <h2>{resources.messages['cooperatingCountries']}</h2>
+          <div className={styles.countriesWrapper}>
+            {config.countriesByGroup.cooperatingCountries.map(country => {
+              const countryCode = country.code;
+              return (
+                <div
+                  key={country.code}
+                  href={getUrl(routes.COUNTRY)}
+                  onClick={e => {
+                    e.preventDefault();
+                    history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+                  }}>
+                  <>
+                    <h3>{country.name}</h3>
+                    <ReactCountryFlag
+                      aria-label={country.name}
+                      className={styles.flag}
+                      countryCode={country.code}
+                      svg
+                    />
+                  </>
+                </div>
+              );
+            })}
+          </div>
           <h2>{resources.messages['otherCountries']}</h2>
           <div className={styles.countriesWrapper}>
             {config.countriesByGroup.otherCountries.map(country => {
