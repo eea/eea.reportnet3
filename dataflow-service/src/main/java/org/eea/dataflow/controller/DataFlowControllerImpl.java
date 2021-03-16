@@ -535,13 +535,9 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
 
-    try {
-      dataflows = dataflowService.getDataflows(userId);
-      dataProviderIds.stream().forEach(
-          dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
+    dataflows = dataflowService.getDataflowsByDataProviderIds(dataProviderIds);
+    dataProviderIds.stream().forEach(
+        dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
 
     return result;
   }
