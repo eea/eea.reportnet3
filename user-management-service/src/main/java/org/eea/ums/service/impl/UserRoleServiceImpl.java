@@ -49,24 +49,22 @@ public class UserRoleServiceImpl implements UserRoleService {
     if (null != datasetIds && !datasetIds.isEmpty()) {
       getGroupInfoMap(groupInfoMap, datasetIds.get(0));
 
-      Map<String, UserRoleVO> usersMap = new HashMap<>();
       // CUSTODIAN
-      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_CUSTODIAN.toString());
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_CUSTODIAN.toString());
       // LEAD REPORTER
-      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.LEAD_REPORTER.toString());
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.LEAD_REPORTER.toString());
       // NATIONAL COORDINATOR
-      getUsersRolesByGroup(groupInfoMap, usersMap,
+      getUsersRolesByGroup(groupInfoMap, finalList,
           SecurityRoleEnum.NATIONAL_COORDINATOR.toString());
       // REPORTER READ
-      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.REPORTER_READ.toString());
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.REPORTER_READ.toString());
       // REPORTER WRITE
-      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.REPORTER_WRITE.toString());
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.REPORTER_WRITE.toString());
       // REQUESTER
-      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_REQUESTER.toString());
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_REQUESTER.toString());
       // STEWARD
-      getUsersRolesByGroup(groupInfoMap, usersMap, SecurityRoleEnum.DATA_STEWARD.toString());
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_STEWARD.toString());
 
-      usersMap.forEach((k, v) -> finalList.add(v));
     }
     return finalList;
   }
@@ -129,28 +127,23 @@ public class UserRoleServiceImpl implements UserRoleService {
    * Gets the users roles by group.
    *
    * @param groupInfoMap the group info map
-   * @param usersMap the users map
+   * @param usersList the users list
    * @param group the group
    * @return the users roles by group
    */
   private void getUsersRolesByGroup(Map<String, List<GroupInfo>> groupInfoMap,
-      Map<String, UserRoleVO> usersMap, String group) {
+      List<UserRoleVO> usersList, String group) {
     if (null != groupInfoMap.get(group) && !groupInfoMap.get(group).isEmpty()) {
       for (GroupInfo groupInfo : groupInfoMap.get(group)) {
         groupInfo.getId();
         UserRepresentation[] users = keycloakConnectorService.getUsersByGroupId(groupInfo.getId());
         for (int i = 0; i < users.length; i++) {
           UserRoleVO userRol = new UserRoleVO();
-          if (null != users[i] && null == usersMap.get(users[i].getEmail())) {
-            List<String> roles = new ArrayList<>();
-            roles.add(group);
-            userRol.setEmail(users[i].getEmail());
-            userRol.setRoles(roles);
-            usersMap.put(userRol.getEmail(), userRol);
-          } else if (null != users[i]
-              && !usersMap.get(users[i].getEmail()).getRoles().contains(group)) {
-            usersMap.get(users[i].getEmail()).getRoles().add(group);
-          }
+          List<String> roles = new ArrayList<>();
+          roles.add(group);
+          userRol.setEmail(users[i].getEmail());
+          userRol.setRoles(roles);
+          usersList.add(userRol);
         }
       }
     }
