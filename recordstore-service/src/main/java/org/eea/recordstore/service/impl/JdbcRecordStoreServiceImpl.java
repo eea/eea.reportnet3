@@ -246,7 +246,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
-      LOG.info("{} Schemas created as part of DataCollection creation",
+      LOG.info("{} Schemas created as part of DataCollection creation.",
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
       // creation of all datasets

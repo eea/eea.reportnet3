@@ -222,7 +222,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   @Transactional
-  @CacheEvict(value = "dataFlowId", key = "datasetId")
+  @CacheEvict(value = "dataFlowId", key = "#datasetId")
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteNativeDataset(datasetId);
   }

@@ -3012,7 +3012,7 @@ public class DatasetServiceTest {
   public void executeinitializeProcessTest() throws EEAException, InterruptedException {
     ReflectionTestUtils.setField(datasetService, "initializeExecutorService",
         initializeExecutorService);
-    datasetService.executeInitializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
     Thread.sleep(1000);
     Mockito.verify(schemasRepository, Mockito.times(1)).findByIdDataSetSchema(Mockito.any());
   }
