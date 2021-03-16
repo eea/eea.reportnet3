@@ -40,6 +40,8 @@ export const PublicCountries = withRouter(({ history }) => {
   const renderCountryCard = isEurope => country => {
     const countryCode = country.code;
 
+    const isAssociate = associatesCountriesCodes.includes(countryCode);
+
     return (
       <div
         href={getUrl(routes.COUNTRY)}
@@ -56,7 +58,7 @@ export const PublicCountries = withRouter(({ history }) => {
         </div>
 
         <div className={isEurope ? styles.euFlagWrapper : ''}>
-          {isEurope && !associatesCountriesCodes.includes(countryCode) && <EuroFlag className={styles.euFlag} />}
+          {isEurope && !isAssociate ? <EuroFlag className={styles.euFlag} /> : ''}
         </div>
       </div>
     );
