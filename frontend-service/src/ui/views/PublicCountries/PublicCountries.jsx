@@ -35,87 +35,39 @@ export const PublicCountries = withRouter(({ history }) => {
     }
   }, [themeContext.headerCollapse]);
 
+  const renderCountryCard = countries => {
+    const countryCard = countries.map(country => {
+      const countryCode = country.code;
+      return (
+        <div
+          href={getUrl(routes.COUNTRY)}
+          key={country.code}
+          onClick={e => {
+            e.preventDefault();
+            history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
+          }}>
+          <img alt={country.name} className={styles.country} src={europeanFlag}></img>
+          <h3>{country.name}</h3>
+          <ReactCountryFlag aria-label={country.name} className={styles.flag} countryCode={country.code} svg />
+        </div>
+      );
+    });
+    return countryCard;
+  };
+
   return (
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resources.messages['countriesPageTitle']}</h1>
           <h2>{resources.messages['eeaCountries']}</h2>
-          <div className={styles.countriesWrapper}>
-            {config.countriesByGroup.eeaCountries.map(country => {
-              const countryCode = country.code;
-              return (
-                <div
-                  href={getUrl(routes.COUNTRY)}
-                  key={country.code}
-                  onClick={e => {
-                    e.preventDefault();
-                    history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-                  }}>
-                  <>
-                    <img alt={country.name} className={styles.country} src={europeanFlag}></img>
-                    <h3>{country.name}</h3>
-                    <ReactCountryFlag
-                      aria-label={country.name}
-                      className={styles.flag}
-                      countryCode={country.code}
-                      svg
-                    />
-                  </>
-                </div>
-              );
-            })}
-          </div>
+          <div className={styles.countriesWrapper}>{renderCountryCard(config.countriesByGroup.eeaCountries)}</div>
           <h2>{resources.messages['cooperatingCountries']}</h2>
           <div className={styles.countriesWrapper}>
-            {config.countriesByGroup.cooperatingCountries.map(country => {
-              const countryCode = country.code;
-              return (
-                <div
-                  key={country.code}
-                  href={getUrl(routes.COUNTRY)}
-                  onClick={e => {
-                    e.preventDefault();
-                    history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-                  }}>
-                  <>
-                    <h3>{country.name}</h3>
-                    <ReactCountryFlag
-                      aria-label={country.name}
-                      className={styles.flag}
-                      countryCode={country.code}
-                      svg
-                    />
-                  </>
-                </div>
-              );
-            })}
+            {renderCountryCard(config.countriesByGroup.cooperatingCountries)}
           </div>
           <h2>{resources.messages['otherCountries']}</h2>
-          <div className={styles.countriesWrapper}>
-            {config.countriesByGroup.otherCountries.map(country => {
-              const countryCode = country.code;
-              return (
-                <div
-                  key={country.code}
-                  href={getUrl(routes.COUNTRY)}
-                  onClick={e => {
-                    e.preventDefault();
-                    history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-                  }}>
-                  <>
-                    <h3>{country.name}</h3>
-                    <ReactCountryFlag
-                      aria-label={country.name}
-                      className={styles.flag}
-                      countryCode={country.code}
-                      svg
-                    />
-                  </>
-                </div>
-              );
-            })}
-          </div>
+          <div className={styles.countriesWrapper}>{renderCountryCard(config.countriesByGroup.otherCountries)}</div>
         </div>
       </div>
     </PublicLayout>
