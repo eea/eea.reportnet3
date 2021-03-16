@@ -198,4 +198,13 @@ public interface DataflowService {
    */
   DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
       boolean asc, int page, int pageSize);
+
+
+  /**
+   * Gets the dataflows by data provider ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the dataflows by data provider ids
+   */
+  List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds);
 }

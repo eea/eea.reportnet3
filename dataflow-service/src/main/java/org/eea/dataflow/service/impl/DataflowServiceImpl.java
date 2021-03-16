@@ -655,6 +655,23 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
   }
 
+  /**
+   * Gets the dataflows by data provider ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the dataflows by data provider ids
+   */
+  @Override
+  public List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds) {
+    return dataflowMapper
+        .entityListToClass(
+            dataflowRepository
+                .findDataflowsByDataproviderIdsAndDataflowIds(
+                    userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
+                        .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()),
+                    dataProviderIds));
+  }
+
 
   /**
    * Sets the reportings.

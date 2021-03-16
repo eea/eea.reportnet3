@@ -9,7 +9,6 @@ import { routes } from 'ui/routes';
 import styles from './PublicFrontpage.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { Card } from './_components/Card';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 import Illustration from 'assets/images/logos/public_illustration.png';
 import logo from 'assets/images/logos/logo.png';
@@ -141,14 +140,27 @@ export const PublicFrontpage = ({ history }) => {
         </div>
         <div className={`rep-container`}>
           <div className={`${styles.pageContent} rep-row`}>
-            <div className={styles.showPublicDataflows}>
-              <Button
-                icon="eye"
-                label="View dataflows status and explore reported data"
-                onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}></Button>
+            <div className={styles.showPublicBox}>
+              <div className={styles.title}>
+                <h3>Public information</h3>
+              </div>
+              <div className={styles.showPublicData}>
+                <a
+                  className={styles.showPublicDataButton}
+                  onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
+                  <p>
+                    <strong>View by obligation dataflows' status and download reported data</strong>
+                  </p>
+                </a>
+                <a
+                  className={styles.showPublicDataButton}
+                  onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
+                  <p>
+                    <strong>View by country dataflows' status and download reported data</strong>
+                  </p>
+                </a>
+              </div>
             </div>
-          </div>
-          <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.currentDataflows}>
               <h3>Dataflows in scope of Reportnet 3.0:</h3>
               <div className={styles.dataflowsList}>
@@ -162,6 +174,7 @@ export const PublicFrontpage = ({ history }) => {
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
+                    externalCard={true}
                   />
                 ))}
               </div>

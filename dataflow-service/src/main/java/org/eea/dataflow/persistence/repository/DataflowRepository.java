@@ -105,6 +105,18 @@ public interface DataflowRepository
   List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
 
   /**
+   * Find dataflows by dataprovider ids and dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @param dataProviderIds the data provider ids
+   * @return the list
+   */
+  @Query("select r.dataflow from Representative r where r.dataflow.id IN (:dataflowIds) and r.dataProvider.id IN(:dataProviderIds) ")
+  List<Dataflow> findDataflowsByDataproviderIdsAndDataflowIds(
+      @Param("dataflowIds") List<Long> dataflowIds,
+      @Param("dataProviderIds") List<Long> dataProviderIds);
+
+  /**
    * Find by id and available true.
    *
    * @return the dataflow
