@@ -17,7 +17,7 @@ import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { EuroFlag } from './components/EuroFlag';
+import { EuroFlag } from './_components/EuroFlag';
 
 export const PublicCountries = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
