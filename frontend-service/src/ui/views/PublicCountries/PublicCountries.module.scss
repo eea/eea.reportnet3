@@ -39,10 +39,6 @@
       display: flex;
       flex-wrap: wrap;
       margin-bottom: 4rem;
-   
-      @media (max-width: 1349px) {
-        justify-content: space-between;
-      }
       .euFlag{
         width: 32px;
         opacity: 60%;
@@ -50,7 +46,7 @@
       }
       > div {
         box-sizing: border-box;        
-        width: 300px;
+        width: 295px;
         margin-bottom: 1rem;
         margin-right: 1rem;       
         transition: all 0.2s ease;
