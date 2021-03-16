@@ -392,13 +392,16 @@ const getPercentageOfValue = (val, total) => (total === 0 ? '0.00' : ((val / tot
 
 const getAllDataflowsUserList = async () => {
   const usersListDTO = await apiDataflow.getAllDataflowsUserList();
-  return parseAllDataflowsUserList(usersListDTO.data);
+  const usersList = parseAllDataflowsUserList(usersListDTO.data);
+  usersListDTO.data = sortBy(usersList, ['dataflowName', 'role']);
+  return usersListDTO;
 };
 
 const getUserList = async (dataflowId, representativeId) => {
   const response = await apiDataflow.getUserList(dataflowId, representativeId);
   const usersList = parseUsersList(response.data);
-  return sortBy(usersList, 'email');
+  response.data = sortBy(usersList, 'role');
+  return response;
 };
 
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
