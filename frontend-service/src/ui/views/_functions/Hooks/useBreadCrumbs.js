@@ -78,10 +78,11 @@ export const useBreadCrumbs = ({
   };
 
   const getRepresentativeCrumb = () => {
-    if (representativeId) {
+    const intRepresentativeId = parseInt(representativeId);
+    if (representativeId || intRepresentativeId === 0) {
       let representativeCrumbLabel;
 
-      if (representativeId === 'XX') {
+      if (intRepresentativeId === 0) {
         representativeCrumbLabel = resources.messages['testDatasetBreadcrumbs'];
       } else {
         const representatives = dataflowStateData.datasets.map(dataset => {
@@ -89,8 +90,9 @@ export const useBreadCrumbs = ({
         });
 
         const currentRepresentative = representatives
-          .filter(representative => representative.dataProviderId === parseInt(representativeId))
+          .filter(representative => representative.dataProviderId === intRepresentativeId)
           .map(representative => representative.name);
+
         representativeCrumbLabel = currentRepresentative[0];
       }
 
@@ -102,7 +104,7 @@ export const useBreadCrumbs = ({
       };
     }
 
-    representativeId = breadCrumbContext.prevModel[3].href.split('/').slice(-1)[0];
+    representativeId = parseInt(breadCrumbContext.prevModel[3].href.split('/').slice(-1)[0]);
     return {
       command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
       href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),

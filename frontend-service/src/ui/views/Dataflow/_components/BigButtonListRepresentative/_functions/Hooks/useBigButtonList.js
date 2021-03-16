@@ -33,7 +33,7 @@ const useBigButtonList = ({
 
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
-    const isTestDataset = match.params.representativeId === 'XX';
+    const isTestDataset = parseInt(match.params.representativeId) === 0;
     const isReleased =
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
@@ -101,29 +101,25 @@ const useBigButtonList = ({
     visibility: buttonsVisibility.help
   };
 
-  let testDatasetsModels = [];
-
-  if (match.params.representativeId === 'XX') {
-    testDatasetsModels = dataflowState.data.testDatasets?.map(testDataset => {
-      return {
-        layout: 'defaultBigButton',
-        buttonClass: 'dataset',
-        buttonIcon: 'dataset',
-        caption: testDataset.datasetSchemaName,
-        infoStatus: testDataset.isReleased,
-        infoStatusIcon: testDataset.isReleased,
-        handleRedirect: () => {
-          handleRedirect(
-            getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true)
-          );
-        },
-        helpClassName: 'dataflow-dataset-container-help-step',
-        model: [],
-        onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true),
-        visibility: true
-      };
-    });
-  }
+  const testDatasetsModels = dataflowState.data.testDatasets?.map(testDataset => {
+    return {
+      layout: 'defaultBigButton',
+      buttonClass: 'dataset',
+      buttonIcon: 'dataset',
+      caption: testDataset.datasetSchemaName,
+      infoStatus: testDataset.isReleased,
+      infoStatusIcon: testDataset.isReleased,
+      handleRedirect: () => {
+        handleRedirect(
+          getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true)
+        );
+      },
+      helpClassName: 'dataflow-dataset-container-help-step',
+      model: [],
+      onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: testDataset.datasetId }, true),
+      visibility: buttonsVisibility.testDatasets
+    };
+  });
 
   const groupByRepresentativeModels = dataflowState.data.datasets
     .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
