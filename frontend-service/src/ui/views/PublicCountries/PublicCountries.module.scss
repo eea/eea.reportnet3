@@ -1,20 +1,18 @@
-.wrapper{
-  display: flex ; 
+.wrapper {
+  display: flex;
   justify-content: space-between;
   overflow: hidden;
- 
 }
-.titleWrap{
+.titleWrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  h3{
+  h3 {
     padding: 0;
     margin: 0;
   }
-  
 }
-.euFlagWrapper{
+.euFlagWrapper {
   min-width: 32px;
 }
 .content {
@@ -38,16 +36,15 @@
       display: flex;
       flex-wrap: wrap;
       margin-bottom: 4rem;
-      .euFlag{
+      .euFlag {
         width: 32px;
         opacity: 60%;
-       
       }
       > div {
-        box-sizing: border-box;        
+        box-sizing: border-box;
         width: 295px;
         margin-bottom: 1rem;
-        margin-right: 1rem;       
+        margin-right: 1rem;
         transition: all 0.2s ease;
         border-radius: 15px;
         box-shadow: var(--card-item-box-shadow);
@@ -78,12 +75,12 @@
           width: 1em;
         }
       }
-      > div:hover .flag  {
+      > div:hover .flag {
         opacity: 1;
       }
-      > div:hover .euFlag  {
+      > div:hover .euFlag {
         opacity: 1;
-      }     
+      }
       > div:hover .country {
         opacity: 1;
       }
