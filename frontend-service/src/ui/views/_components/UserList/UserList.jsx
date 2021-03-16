@@ -37,16 +37,16 @@ export const UserList = ({ dataflowId, representativeId }) => {
 
   const fetchData = async () => {
     try {
-      let users;
+      let response;
       setIsLoading(true);
       if (isNil(representativeId)) {
-        users = await DataflowService.getAllDataflowsUserList();
+        response = await DataflowService.getAllDataflowsUserList();
       } else {
-        users = await DataflowService.getUserList(dataflowId, representativeId);
+        response = await DataflowService.getUserList(dataflowId, representativeId);
       }
 
-      setUserListData(users);
-      setFilteredData(users);
+      setUserListData(response.data);
+      setFilteredData(response.data);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' });
     } finally {
@@ -107,8 +107,8 @@ export const UserList = ({ dataflowId, representativeId }) => {
               {isNil(representativeId) && (
                 <Column field="dataflowName" header={resources.messages['dataflowName']} sortable={true} />
               )}
-              <Column field="email" header={resources.messages['user']} sortable={true} />
               <Column field="role" header={resources.messages['role']} sortable={true} />
+              <Column field="email" header={resources.messages['user']} sortable={true} />
             </DataTable>
           ) : (
             <div className={styles.emptyFilteredData}>{resources.messages['noUsersWithSelectedParameters']}</div>
