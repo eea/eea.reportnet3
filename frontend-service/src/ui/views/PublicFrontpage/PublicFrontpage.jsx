@@ -148,12 +148,6 @@ export const PublicFrontpage = ({ history }) => {
                 <a
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
-                  <img
-                    className={styles.showPublicDataButtonImg}
-                    height="50px"
-                    src={logo}
-                    alt="View by obligation dataflows' status and download reported data"
-                  />
                   <p>
                     <strong>View by obligation dataflows' status and download reported data</strong>
                   </p>
@@ -161,12 +155,6 @@ export const PublicFrontpage = ({ history }) => {
                 <a
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
-                  <img
-                    className={styles.showPublicDataButtonImg}
-                    height="50px"
-                    src={logo}
-                    alt="View by country dataflows' status and download reported data"
-                  />
                   <p>
                     <strong>View by country dataflows' status and download reported data</strong>
                   </p>
