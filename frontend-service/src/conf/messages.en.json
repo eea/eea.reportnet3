@@ -997,6 +997,8 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
+    "testDatasetBigButton": "Test",
+    "testDatasetBreadcrumbs": "Test Datasets",
     "publicCountriesBreadcrumbs": "Public countries",
     "publicCountryBreadcrumbs": "Country",
     "eeaCountries": "EEA Member countries",
