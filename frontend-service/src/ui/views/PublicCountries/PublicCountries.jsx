@@ -55,7 +55,7 @@ export const PublicCountries = withRouter(({ history }) => {
           <h3>{country.name}</h3>
         </div>
 
-        <div className={styles.euFlagWrapper}>
+        <div className={isEurope ? styles.euFlagWrapper : ''}>
           {isEurope && !associatesCountriesCodes.includes(countryCode) && <EuroFlag className={styles.euFlag} />}
         </div>
       </div>
