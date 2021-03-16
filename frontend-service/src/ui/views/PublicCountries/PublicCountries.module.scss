@@ -43,6 +43,7 @@
         text-align: center;
         cursor: pointer;
         text-decoration: none;
+        position: relative;
         color: var(--hyperlink-color);
 
         &:hover {
@@ -68,6 +69,16 @@
       }
       > div:hover .flag {
         opacity: 1;
+      }
+      > div:hover .country {
+        opacity: 1;
+      }
+      .country {
+        opacity: 0.5;
+        float: right;
+        position: absolute;
+        right: 10px;
+        top: 0;
       }
     }
   }

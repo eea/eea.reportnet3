@@ -78,19 +78,28 @@ export const useBreadCrumbs = ({
   };
 
   const getRepresentativeCrumb = () => {
-    if (representativeId) {
-      const representatives = dataflowStateData.datasets.map(dataset => {
-        return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
-      });
+    const intRepresentativeId = parseInt(representativeId);
+    if (representativeId || intRepresentativeId === 0) {
+      let representativeCrumbLabel;
 
-      const currentRepresentative = representatives
-        .filter(representative => representative.dataProviderId === parseInt(representativeId))
-        .map(representative => representative.name);
+      if (intRepresentativeId === 0) {
+        representativeCrumbLabel = resources.messages['testDatasetBreadcrumbs'];
+      } else {
+        const representatives = dataflowStateData.datasets.map(dataset => {
+          return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
+        });
+
+        const currentRepresentative = representatives
+          .filter(representative => representative.dataProviderId === intRepresentativeId)
+          .map(representative => representative.name);
+
+        representativeCrumbLabel = currentRepresentative[0];
+      }
 
       return {
         command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
         href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
-        label: currentRepresentative[0],
+        label: representativeCrumbLabel,
         icon: 'clone'
       };
     }
@@ -144,6 +153,15 @@ export const useBreadCrumbs = ({
       href: getUrl(routes.SETTINGS),
       icon: 'user-profile',
       label: resources.messages['userSettingsBreadcrumbs']
+    };
+  };
+
+  const getTestDatasetsCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
+      href: getUrl(getUrl(routes.DATAFLOW, { dataflowId }, true)),
+      icon: 'dataset',
+      label: resources.messages['testDatasetBreadcrumbs']
     };
   };
 
@@ -222,8 +240,12 @@ export const useBreadCrumbs = ({
       breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb()]);
     }
 
-    if (currentPage == CurrentPage.PUBLIC_INDEX) {
+    if (currentPage === CurrentPage.PUBLIC_INDEX) {
       breadCrumbContext.add([]);
+    }
+
+    if (currentPage === CurrentPage.TEST_DATASETS) {
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getTestDatasetsCrumb()]);
     }
   };
 

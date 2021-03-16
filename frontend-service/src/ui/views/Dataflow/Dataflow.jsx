@@ -39,6 +39,7 @@ import { UserList } from 'ui/views/_components/UserList';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { RepresentativeService } from 'core/services/Representative';
+import { UserService } from 'core/services/User';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -695,14 +696,31 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onRefreshToken = async () => {
+    try {
+      const userObject = await UserService.refreshToken();
+      userContext.onTokenRefresh(userObject);
+    } catch (error) {
+      notificationContext.add({
+        key: 'TOKEN_REFRESH_ERROR',
+        content: {}
+      });
+      await UserService.logout();
+      userContext.onLogout();
+    }
+  };
+
+  const onDataCollectionIsCompleted = () => {
+    onRefreshToken();
+    setIsDataUpdated();
+  };
+
   useCheckNotifications(
-    [
-      'ADD_DATACOLLECTION_COMPLETED_EVENT',
-      'COPY_DATASET_SCHEMA_COMPLETED_EVENT',
-      'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'
-    ],
+    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'],
     setIsDataUpdated
   );
+
+  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
   useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
 
@@ -743,6 +761,42 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const getBigButtonList = () => {
+    if (isNil(representativeId)) {
+      return (
+        <BigButtonList
+          className="dataflow-big-buttons-help-step"
+          dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
+          handleRedirect={handleRedirect}
+          isLeadReporterOfCountry={isLeadReporterOfCountry}
+          onCleanUpReceipt={onCleanUpReceipt}
+          onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          onSaveName={onSaveName}
+          onShowManageReportersDialog={onShowManageReportersDialog}
+          onUpdateData={setIsDataUpdated}
+          setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
+          setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
+          setIsReceiptLoading={setIsReceiptLoading}
+          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+        />
+      );
+    } else {
+      return (
+        <BigButtonListRepresentative
+          dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
+          handleRedirect={handleRedirect}
+          isLeadReporterOfCountry={isLeadReporterOfCountry}
+          match={match}
+          onCleanUpReceipt={onCleanUpReceipt}
+          onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          setIsReceiptLoading={setIsReceiptLoading}
+        />
+      );
+    }
+  };
+
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
       <div className="rep-container">{children}</div>
@@ -761,35 +815,7 @@ const Dataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
 
-        {isNil(representativeId) ? (
-          <BigButtonList
-            className="dataflow-big-buttons-help-step"
-            dataflowState={dataflowState}
-            dataProviderId={dataProviderId}
-            handleRedirect={handleRedirect}
-            isLeadReporterOfCountry={isLeadReporterOfCountry}
-            onCleanUpReceipt={onCleanUpReceipt}
-            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
-            onSaveName={onSaveName}
-            onShowManageReportersDialog={onShowManageReportersDialog}
-            onUpdateData={setIsDataUpdated}
-            setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
-            setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
-            setIsReceiptLoading={setIsReceiptLoading}
-            setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-          />
-        ) : (
-          <BigButtonListRepresentative
-            dataflowState={dataflowState}
-            dataProviderId={dataProviderId}
-            handleRedirect={handleRedirect}
-            isLeadReporterOfCountry={isLeadReporterOfCountry}
-            match={match}
-            onCleanUpReceipt={onCleanUpReceipt}
-            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
-            setIsReceiptLoading={setIsReceiptLoading}
-          />
-        )}
+        {getBigButtonList()}
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog

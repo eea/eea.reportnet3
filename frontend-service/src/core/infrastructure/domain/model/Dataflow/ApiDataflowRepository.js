@@ -431,6 +431,7 @@ const parseDataflowDTO = dataflowDTO =>
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
+    testDatasets: parseTestDatasetListDTO(dataflowDTO.testDatasets),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
@@ -501,6 +502,16 @@ const parseDatasetListDTO = datasetsDTO => {
   if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
     const datasets = [];
     datasetsDTO.forEach(datasetDTO => {
+      datasets.push(parseDatasetDTO(datasetDTO));
+    });
+    return datasets;
+  }
+  return;
+};
+const parseTestDatasetListDTO = testDatasetsDTO => {
+  if (!isNull(testDatasetsDTO) && !isUndefined(testDatasetsDTO)) {
+    const datasets = [];
+    testDatasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
@@ -676,19 +687,18 @@ const publicData = async () => {
   return publicDataflows;
 };
 
+const sortDatasetTypeByName = (a, b) => {
+  let datasetName_A = a.datasetSchemaName;
+  let datasetName_B = b.datasetSchemaName;
+  return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+};
+
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
   const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
-  dataflow.datasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
-  dataflow.designDatasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
+  dataflow.testDatasets.sort(sortDatasetTypeByName);
+  dataflow.datasets.sort(sortDatasetTypeByName);
+  dataflow.designDatasets.sort(sortDatasetTypeByName);
   reportingDataflowDTO.data = dataflow;
 
   return reportingDataflowDTO;
