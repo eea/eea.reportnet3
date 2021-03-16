@@ -107,8 +107,8 @@ export const UserList = ({ dataflowId, representativeId }) => {
               {isNil(representativeId) && (
                 <Column field="dataflowName" header={resources.messages['dataflowName']} sortable={true} />
               )}
-              <Column field="email" header={resources.messages['user']} sortable={true} />
               <Column field="role" header={resources.messages['role']} sortable={true} />
+              <Column field="email" header={resources.messages['user']} sortable={true} />
             </DataTable>
           ) : (
             <div className={styles.emptyFilteredData}>{resources.messages['noUsersWithSelectedParameters']}</div>
