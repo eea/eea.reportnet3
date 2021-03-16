@@ -140,20 +140,27 @@ export const PublicFrontpage = ({ history }) => {
         </div>
         <div className={`rep-container`}>
           <div className={`${styles.pageContent} rep-row`}>
-            <div className={styles.showPublicData}>
-              <Button
-                icon="eye"
-                label="View by obligation dataflows' status and download reported data"
-                onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}></Button>
+            <div className={styles.showPublicBox}>
+              <div className={styles.title}>
+                <h3>Public information</h3>
+              </div>
+              <div className={styles.showPublicData}>
+                <a
+                  className={styles.showPublicDataButton}
+                  onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
+                  <p>
+                    <strong>View by obligation dataflows' status and download reported data</strong>
+                  </p>
+                </a>
+                <a
+                  className={styles.showPublicDataButton}
+                  onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
+                  <p>
+                    <strong>View by country dataflows' status and download reported data</strong>
+                  </p>
+                </a>
+              </div>
             </div>
-            <div className={`${styles.showPublicData}`}>
-              <Button
-                icon="eye"
-                label="View by country dataflows' status and download reported data"
-                onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}></Button>
-            </div>
-          </div>
-          <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.currentDataflows}>
               <h3>Dataflows in scope of Reportnet 3.0:</h3>
               <div className={styles.dataflowsList}>
