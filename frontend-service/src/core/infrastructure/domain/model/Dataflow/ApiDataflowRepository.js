@@ -687,20 +687,18 @@ const publicData = async () => {
   return publicDataflows;
 };
 
-const orderDatasetType = datasetType => {
-  datasetType.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
+const sortDatasetTypeByName = (a, b) => {
+  let datasetName_A = a.datasetSchemaName;
+  let datasetName_B = b.datasetSchemaName;
+  return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
 };
 
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
   const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
-  orderDatasetType(dataflow.testDatasets);
-  orderDatasetType(dataflow.datasets);
-  orderDatasetType(dataflow.designDatasets);
+  dataflow.testDatasets.sort(sortDatasetTypeByName);
+  dataflow.datasets.sort(sortDatasetTypeByName);
+  dataflow.designDatasets.sort(sortDatasetTypeByName);
   reportingDataflowDTO.data = dataflow;
 
   return reportingDataflowDTO;
