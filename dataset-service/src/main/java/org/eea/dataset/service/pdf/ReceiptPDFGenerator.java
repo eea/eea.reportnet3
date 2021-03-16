@@ -88,7 +88,7 @@ public class ReceiptPDFGenerator {
     float spaceBetweenLines;
     float fontSize;
     String text;
-    ZoneId timeZone = ZoneId.of("UTC");
+    ZoneId timeZone = ZoneId.of("CET");
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
     PDPageContentStream contentStream = new PDPageContentStream(document, page);
@@ -184,8 +184,7 @@ public class ReceiptPDFGenerator {
     fontSize = 40f;
     x = 133f;
     y -= spaceBetweenLines * 4 - fontSize;
-    text = "The above-mentioned files were submitted by user: " + receipt.getUserName() + " ("
-        + receipt.getFullUserName() + ")";
+    text = "Submitted by user: " + receipt.getEmail();
     printLinePDF(contentStream, text, font, fontSize, x, y);
     contentStream.close();
   }

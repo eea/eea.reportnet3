@@ -548,13 +548,13 @@ public class FileTreatmentHelper implements DisposableBean {
           .build();
 
       EventType eventType;
-
+      DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
       if (null != error) {
-        eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_FAILED_EVENT
             : EventType.IMPORT_DESIGN_FAILED_EVENT;
       } else {
-        eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
         kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);

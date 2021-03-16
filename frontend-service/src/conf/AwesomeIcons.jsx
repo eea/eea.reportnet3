@@ -31,6 +31,7 @@ import {
   faDiceFour,
   faDraftingCompass,
   faDrawPolygon,
+  faExclamationCircle,
   faExternalLinkAlt,
   faEye,
   faFileAlt,
@@ -81,6 +82,7 @@ import {
   faToggleOff,
   faTrashAlt,
   faUserCircle,
+  faUsers,
   faUserCog,
   faUsersCog,
   faUserShield,
@@ -88,7 +90,9 @@ import {
   faGripLines,
   faBraille,
   faTable,
-  faDownload
+  faDownload,
+  faVolumeUp,
+  faFlagCheckered
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -199,6 +203,8 @@ export const AwesomeIcons = icon => {
       return faEnvelope;
     case 'euDataset':
       return faCube;
+    case 'exclamationCircle':
+      return faExclamationCircle;
     case 'expanded':
       return faCaretDown;
     case 'externalLink':
@@ -365,6 +371,8 @@ export const AwesomeIcons = icon => {
       return faFileImage;
     case 'url':
       return faGlobeEurope;
+    case 'users':
+      return faUsers;
     case 'user-profile':
       return faUserCircle;
     case 'userConfig':
@@ -391,6 +399,10 @@ export const AwesomeIcons = icon => {
       return faTable;
     case 'download':
       return faDownload;
+    case 'sound':
+      return faVolumeUp;
+    case 'flag':
+      return faFlagCheckered;
     default:
       return faFileAlt;
   }

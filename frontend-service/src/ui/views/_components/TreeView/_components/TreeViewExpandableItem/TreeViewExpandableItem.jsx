@@ -117,27 +117,15 @@ const TreeViewExpandableItem = ({
         className={!isUndefined(className) ? className : styles.defaultExpandable}
         onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}>
         {!isUndefined(items) & (items.length > 0) ? (
-          isOpen ? (
-            <FontAwesomeIcon
-              icon={AwesomeIcons('angleDown')}
-              style={{
-                cursor: 'pointer',
-                color: blockExpand ? 'var(--errors)' : 'inherit',
-                opacity: blockExpand ? '0.7' : '1'
-              }}
-              onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
-            />
-          ) : (
-            <FontAwesomeIcon
-              icon={AwesomeIcons('angleRight')}
-              style={{
-                cursor: 'pointer',
-                color: blockExpand ? 'var(--errors)' : 'inherit',
-                opacity: blockExpand ? '0.7' : '1'
-              }}
-              onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
-            />
-          )
+          <FontAwesomeIcon
+            icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
+            style={{
+              cursor: 'pointer',
+              color: blockExpand ? 'var(--errors)' : 'inherit',
+              opacity: blockExpand ? '0.7' : '1'
+            }}
+            onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
+          />
         ) : (
           ''
         )}

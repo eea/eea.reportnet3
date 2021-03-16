@@ -216,26 +216,23 @@ export const TabsDesigner = withRouter(
 
     const addTable = async (header, tabIndex) => {
       try {
-        const response = await DatasetService.addTableDesign(datasetId, header);
+        const { data, status } = await DatasetService.addTableDesign(datasetId, header);
 
-        if (response.status < 200 || response.status > 299) {
-          console.error('Error during table Add');
-        } else {
+        if (status >= 200 && status <= 299) {
           const inmTabs = [...tabs];
-          inmTabs[tabIndex].tableSchemaId = response.data.idTableSchema;
-          inmTabs[tabIndex].recordId = response.data.recordSchema.idRecordSchema;
-          inmTabs[tabIndex].recordSchemaId = response.data.recordSchema.idRecordSchema;
+          inmTabs[tabIndex].tableSchemaId = data.idTableSchema;
+          inmTabs[tabIndex].recordId = data.recordSchema.idRecordSchema;
+          inmTabs[tabIndex].recordSchemaId = data.recordSchema.idRecordSchema;
           inmTabs[tabIndex].header = header;
           inmTabs[tabIndex].tableSchemaName = header;
           inmTabs[tabIndex].newTab = false;
           inmTabs[tabIndex].showContextMenu = false;
-          setActiveTableSchemaId(response.data.idTableSchema);
+          setActiveTableSchemaId(data.idTableSchema);
           setTabs(inmTabs);
           getIsTableCreated(true);
         }
       } catch (error) {
         console.error('Error during field Add: ', error);
-      } finally {
       }
     };
 
@@ -277,36 +274,32 @@ export const TabsDesigner = withRouter(
     };
 
     const deleteTable = async deletedTableSchemaId => {
-      const tableDeleted = await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
-      if (tableDeleted) {
-        const inmTabs = [...tabs];
-        const deletedTabIndx = TabsUtils.getIndexByTableProperty(deletedTableSchemaId, inmTabs, 'tableSchemaId');
-        inmTabs.splice(deletedTabIndx, 1);
-        inmTabs.forEach(tab => {
-          if (tab.addTab) {
-            tab.index = -1;
-            tab.tableSchemaId = '';
+      try {
+        const response = await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
+        if (response.status >= 200 && response.status <= 299) {
+          const inmTabs = [...tabs];
+          const deletedTabIndx = TabsUtils.getIndexByTableProperty(deletedTableSchemaId, inmTabs, 'tableSchemaId');
+          inmTabs.splice(deletedTabIndx, 1);
+          inmTabs.forEach(tab => {
+            if (tab.addTab) {
+              tab.index = -1;
+              tab.tableSchemaId = '';
+            }
+          });
+          if (tableSchemaId === deletedTableSchemaId) {
+            setActiveTableSchemaId(inmTabs[0].tableSchemaId);
           }
-        });
-        if (tableSchemaId === deletedTableSchemaId) {
-          setActiveTableSchemaId(inmTabs[0].tableSchemaId);
+          onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
+          setTabs(inmTabs);
         }
-        onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
-        setTabs(inmTabs);
-      } else {
-        console.error('There has been an error while deleting the tab');
+      } catch (error) {
+        console.error('error', error);
       }
     };
 
     const errorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button
-          label={resources.messages['ok']}
-          icon="check"
-          onClick={() => {
-            setIsErrorDialogVisible(false);
-          }}
-        />
+        <Button label={resources.messages['ok']} icon="check" onClick={() => setIsErrorDialogVisible(false)} />
       </div>
     );
 
@@ -430,7 +423,7 @@ export const TabsDesigner = withRouter(
           draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
           tabs[draggedTabIdx].tableSchemaId
         );
-        if (tableOrdered) {
+        if (tableOrdered.status >= 200 && tableOrdered.status <= 299) {
           const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
 
           shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
@@ -445,14 +438,18 @@ export const TabsDesigner = withRouter(
     };
 
     const updateTableName = async (tableSchemaId, tableSchemaName) => {
-      const tableUpdated = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
-      if (tableUpdated) {
-        const inmTabs = [...tabs];
-        inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-        inmTabs[
-          TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
-        ].tableSchemaName = tableSchemaName;
-        setTabs(inmTabs);
+      try {
+        const { status } = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
+        if (status >= 200 && status <= 299) {
+          const inmTabs = [...tabs];
+          inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
+          inmTabs[
+            TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
+          ].tableSchemaName = tableSchemaName;
+          setTabs(inmTabs);
+        }
+      } catch (error) {
+        console.error('error', error);
       }
     };
 

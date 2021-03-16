@@ -13,6 +13,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -209,31 +210,6 @@ public class DataFlowControllerImpl implements DataFlowController {
       LOG_ERROR.error(e.getMessage());
     }
     return dataflows;
-  }
-
-  /**
-   * Update user request.
-   *
-   * @param idUserRequest the id user request
-   * @param type the type
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
-  @PutMapping("/updateStatusRequest/{idUserRequest}")
-  @ApiOperation(value = "Update a Join Request's Status for a User")
-  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
-  public void updateUserRequest(
-      @ApiParam(value = "User request Id",
-          example = "0") @PathVariable("idUserRequest") Long idUserRequest,
-      @ApiParam(type = "Object",
-          value = "Join Request Status") @RequestParam("type") TypeRequestEnum type) {
-    try {
-      dataflowService.updateUserRequestStatus(idUserRequest, type);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    }
   }
 
   /**
@@ -499,6 +475,28 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflowService.getPublicDataflows();
   }
 
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param sortField the sort field
+   * @param asc the asc
+   * @return the public dataflows by country
+   */
+  @Override
+  @GetMapping("/public/country/{countryCode}")
+  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
+      @ApiParam(value = "Country Code",
+          example = "AL") @PathVariable("countryCode") String countryCode,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+      @RequestParam(value = "sortField", required = false) String sortField,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
+    return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
+        pageSize);
+  }
 
   /**
    * Update data flow public status.
@@ -547,6 +545,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     return result;
   }
+
 
 
   /**

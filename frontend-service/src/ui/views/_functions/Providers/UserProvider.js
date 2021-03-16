@@ -14,6 +14,8 @@ const userSettingsDefaultState = {
     basemapLayer: { label: 'Topographic', value: 'Topographic' },
     dateFormat: 'YYYY-MM-DD',
     listView: true,
+    notificationSound: false,
+    pushNotifications: false,
     pinnedDataflows: [],
     rowsPerPage: 10,
     showLogoutConfirmation: true,
@@ -32,30 +34,24 @@ export const UserProvider = ({ children }) => {
       value={{
         ...userState,
         hasPermission: (permissions, entity) => {
-          let allow = false;
           if (isUndefined(entity)) {
-            if (permissions.filter(permission => userState.accessRole.includes(permission)).length > 0) allow = true;
+            return permissions.some(permission => userState.accessRole.includes(permission));
           } else {
-            permissions.forEach(permission => {
-              const role = `${entity}-${permission}`;
-              if (userState.contextRoles.includes(role)) allow = true;
-            });
+            return permissions.some(permission => userState.contextRoles.includes(`${entity}-${permission}`));
           }
-          return allow;
         },
 
         hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
           if (isNil(userState.contextRoles)) {
             return false;
           }
-          let hasPermissions = false;
-          allowedPermissions.forEach(allowedPermission => {
-            const permission = `${entity}${entityID}-${allowedPermission}`;
-            if (userState.contextRoles.includes(permission)) {
-              hasPermissions = true;
+          return allowedPermissions.some(allowedPermission => {
+            if (isNil(entityID)) {
+              return userState.contextRoles.some(role => role.startsWith(entity) && role.endsWith(allowedPermission));
+            } else {
+              return userState.contextRoles.includes(`${entity}${entityID}-${allowedPermission}`);
             }
           });
-          return hasPermissions;
         },
 
         getUserRole: entity => {
@@ -80,6 +76,14 @@ export const UserProvider = ({ children }) => {
 
         onToggleAmPm24hFormat: hoursFormat => {
           userDispatcher({ type: 'TOGGLE_DATE_FORMAT_AM_PM_24H', payload: hoursFormat });
+        },
+
+        onToggleNotificationSound: notificationSound => {
+          userDispatcher({ type: 'TOGGLE_NOTIFICATION_SOUND', payload: notificationSound });
+        },
+
+        onTogglePushNotifications: pushNotifications => {
+          userDispatcher({ type: 'TOGGLE_PUSH_NOTIFICATIONS', payload: pushNotifications });
         },
 
         onToggleLogoutConfirm: logoutConfirmation => {

@@ -23,7 +23,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
         ...state,
         hasWritePermissions: payload.hasWritePermissions,
         isCustodian: payload.isCustodian,
-        userRoles: payload.userRoles
+        userRoles: payload.userRoles,
+        hasUserListRights: payload.hasUserListRights,
+        isNationalCoordinator: payload.isNationalCoordinator
       };
 
     case 'MANAGE_DIALOGS':

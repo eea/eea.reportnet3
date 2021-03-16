@@ -20,14 +20,12 @@ import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
-import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
-import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -36,19 +34,21 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -88,10 +88,6 @@ public class DataFlowServiceImplTest {
   /** The dataflow repository. */
   @Mock
   private DataflowRepository dataflowRepository;
-
-  /** The user request repository. */
-  @Mock
-  private UserRequestRepository userRequestRepository;
 
   /** The contributor repository. */
   @Mock
@@ -161,6 +157,10 @@ public class DataFlowServiceImplTest {
   @Mock
   private DataSetControllerZuul dataSetControllerZuul;
 
+  /** The test data set controller zuul. */
+  @Mock
+  private TestDatasetControllerZuul testDataSetControllerZuul;
+
   /** The dataflows. */
   private List<Dataflow> dataflows;
 
@@ -229,6 +229,7 @@ public class DataFlowServiceImplTest {
     weblinkVO2.setDescription("aaa");
     weblinks.add(weblinkVO);
     weblinks.add(weblinkVO2);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
 
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
@@ -279,7 +280,6 @@ public class DataFlowServiceImplTest {
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
     dfVO.setObligation(obligation);
-    dfVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
     List<DataFlowVO> dataflowsVO = new ArrayList<>();
     dataflowsVO.add(dfVO);
 
@@ -325,21 +325,6 @@ public class DataFlowServiceImplTest {
     assertEquals("fail", dataflowsVO, dataflowServiceImpl.getDataflows(Mockito.any()));
   }
 
-  /**
-   * Gets the pending by user.
-   *
-   * @return the pending by user
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void getPendingByUser() throws EEAException {
-    when(dataflowRepository.findByStatusAndUserRequester(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<>());
-    dataflowServiceImpl.getPendingByUser(Mockito.any(), Mockito.any());
-    assertEquals("fail", new ArrayList<>(),
-        dataflowServiceImpl.getPendingByUser(Mockito.any(), Mockito.any()));
-  }
 
   /**
    * Gets the completed empty.
@@ -373,46 +358,6 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted("1L", pageable);
     assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
-  }
-
-
-  /**
-   * Update user request status.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateUserRequestStatus() throws EEAException {
-    Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-    Optional<UserRequest> ur = Optional.of(new UserRequest());
-    Set<Dataflow> dfs = new HashSet<>();
-    Dataflow df = new Dataflow();
-    df.setId(1L);
-    dfs.add(df);
-    ur.get().setDataflows(dfs);
-
-    when(userRequestRepository.findById(Mockito.anyLong())).thenReturn(ur);
-    Mockito.doNothing().when(userManagementControllerZull).addUserToResource(Mockito.any(),
-        Mockito.any());
-
-    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.ACCEPTED);
-    Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Update user request status 2.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateUserRequestStatus2() throws EEAException {
-    Mockito.doNothing().when(userRequestRepository).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-    dataflowServiceImpl.updateUserRequestStatus(1L, TypeRequestEnum.REJECTED);
-    Mockito.verify(userRequestRepository, times(1)).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
   }
 
 
@@ -606,6 +551,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -633,6 +579,7 @@ public class DataFlowServiceImplTest {
   @Test
   public void deleteDataFlowEmpty() throws Exception {
     DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -677,6 +624,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
 
     doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(1L, Boolean.TRUE);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -717,6 +665,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -762,6 +711,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -773,6 +723,10 @@ public class DataFlowServiceImplTest {
     euDatasetVO.setId(3L);
     List<EUDatasetVO> euDatasetVOs = new ArrayList<>();
     euDatasetVOs.add(euDatasetVO);
+    List<TestDatasetVO> testDatasetVOs = new ArrayList<>();
+    TestDatasetVO testDatasetVO = new TestDatasetVO();
+    testDatasetVO.setId(1L);
+    testDatasetVOs.add(testDatasetVO);
 
     Dataflow dataflowEntity = new Dataflow();
     Set<Representative> representatives = new HashSet<>();
@@ -790,6 +744,8 @@ public class DataFlowServiceImplTest {
     when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(1L))
         .thenReturn(Arrays.asList(dcVO));
     when(euDatasetControllerZuul.findEUDatasetByDataflowId(1L)).thenReturn(euDatasetVOs);
+    when(testDataSetControllerZuul.findTestDatasetByDataflowId(1L)).thenReturn(testDatasetVOs);
+
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflowEntity));
     dataflowServiceImpl.deleteDataFlow(1L);
     doThrow(MockitoException.class).when(dataflowRepository).deleteNativeDataflow(Mockito.any());
@@ -809,6 +765,7 @@ public class DataFlowServiceImplTest {
   @Test(expected = EEAException.class)
   public void deleteDataFlowThrowsDeleteRepresentative() throws Exception {
     DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     List<RepresentativeVO> representatives = new ArrayList<>();
     RepresentativeVO representative = new RepresentativeVO();
     representatives.add(representative);
@@ -858,6 +815,7 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setDocuments(listDocument);
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     List<ResourceAccessVO> resourceList = new ArrayList<>();
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -972,4 +930,53 @@ public class DataFlowServiceImplTest {
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     assertNotNull("is null", dataflowServiceImpl.getUserRoles(1L, Arrays.asList(dataflowVO)));
   }
+
+  @Test
+  public void getPublicDataflowsByCountrySortName() {
+    DataflowPublicVO dataflowPublicVO = new DataflowPublicVO();
+    DataProviderVO dataprovider = new DataProviderVO();
+    Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
+        .thenReturn(Arrays.asList(dataflowPublicVO));
+    Mockito.when(representativeService.findDataProvidersByCode("FR"))
+        .thenReturn(Arrays.asList(dataprovider));
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "name", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortObligation() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "obligation", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortLegalInstrument() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "legalInstrument", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortStatus() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "status", true, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortDeadline() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "deadline", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortIsReleased() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "isReleased", false, 0, 12));
+  }
+
+  @Test
+  public void getPublicDataflowsByCountrySortReleaseDate() {
+    assertNotNull("assertion error",
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "releaseDate", false, 0, 12));
+  }
+
 }

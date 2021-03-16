@@ -2,6 +2,7 @@ package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -243,38 +244,6 @@ public class DataFlowControllerImplTest {
         .thenReturn(new ArrayList<>());
     dataFlowControllerImpl.findUserDataflowsByStatus(TypeRequestEnum.PENDING);
     assertEquals("fail", new ArrayList<>(), dataflowService.getDataflows(Mockito.any()));
-  }
-
-
-  /**
-   * Update user request.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void updateUserRequest() throws EEAException {
-    Mockito.doNothing().when(dataflowService).updateUserRequestStatus(Mockito.any(), Mockito.any());
-
-    dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).updateUserRequestStatus(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Update user request throws.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void updateUserRequestThrows() throws EEAException {
-    doThrow(new EEAException()).when(dataflowService).updateUserRequestStatus(Mockito.any(),
-        Mockito.any());
-    try {
-      dataFlowControllerImpl.updateUserRequest(Mockito.any(), Mockito.any());
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
-    }
   }
 
   /**
@@ -734,5 +703,11 @@ public class DataFlowControllerImplTest {
   @Test
   public void getUserRolesAllDataflowsTest() {
     assertNotNull("is null", dataFlowControllerImpl.getUserRolesAllDataflows());
+  }
+
+  @Test
+  public void getPublicDataflowsByCountry() {
+    assertNull("assertion error",
+        dataFlowControllerImpl.getPublicDataflowsByCountry("FR", 0, 10, "name", true));
   }
 }

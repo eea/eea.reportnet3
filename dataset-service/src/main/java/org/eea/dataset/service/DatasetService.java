@@ -3,12 +3,12 @@ package org.eea.dataset.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -364,9 +364,8 @@ public interface DatasetService {
    *
    * @return the ETL dataset VO
    *
-   * @throws EEAException the EEA exception
    */
-  ETLDatasetVO etlExportDataset(@DatasetId Long datasetId) throws EEAException;
+  void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream);
 
 
   /**
@@ -529,14 +528,6 @@ public interface DatasetService {
   String findFieldSchemaIdById(@DatasetId Long datasetId, String idField);
 
   /**
-   * Spread data Prefill.
-   *
-   * @param designs the designs
-   * @param datasetId the dataset id
-   */
-  void spreadDataPrefill(DesignDataset designs, Long datasetId);
-
-  /**
    * Gets the dataset type, if it's a design, reporting, datacollection or eudataset .
    *
    * @param datasetId the dataset id
@@ -600,5 +591,22 @@ public interface DatasetService {
    */
   boolean checkAnySchemaAvailableInPublic(Long dataflowId);
 
+
+  /**
+   * Initialize dataset.
+   *
+   * @param datasetId the id dataset
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
+   */
+  void initializeDataset(Long datasetId, String idDatasetSchema);
+
+  /**
+   * Execute initialize dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idDatasetSchema the id dataset schema
+   */
+  void executeInitializeDataset(Long datasetId, String idDatasetSchema);
 
 }

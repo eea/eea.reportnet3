@@ -5,8 +5,8 @@ import styles from './Footer.module.scss';
 
 import { routes } from 'ui/routes';
 
-import eeaLogo from 'assets/images/reportnet-3.0-logo.png';
-import logo from 'assets/images/logo.png';
+import eeaLogo from 'assets/images/logos/reportnet-3.0-logo.png';
+import logo from 'assets/images/logos/logo.png';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 

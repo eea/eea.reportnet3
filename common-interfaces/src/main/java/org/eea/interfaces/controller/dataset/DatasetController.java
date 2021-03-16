@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
  * The Interface DatasetController.
@@ -105,14 +106,6 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace);
 
   /**
-   * Delete import data.
-   *
-   * @param datasetId the dataset id
-   */
-  @DeleteMapping("{id}/deleteImportData")
-  void deleteImportData(@PathVariable("id") Long datasetId);
-
-  /**
    * Gets the position from any object id.
    *
    * @param id the id
@@ -176,12 +169,20 @@ public interface DatasetController {
       @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK);
 
   /**
+   * Delete import data.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping("/{datasetId}/deleteImportData")
+  void deleteImportData(@PathVariable("datasetId") Long datasetId);
+
+  /**
    * Delete import table.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    */
-  @DeleteMapping("{datasetId}/deleteImportTable/{tableSchemaId}")
+  @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
   void deleteImportTable(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId);
 
@@ -277,7 +278,7 @@ public interface DatasetController {
    * @return the ETL dataset VO
    */
   @GetMapping("/{datasetId}/etlExport")
-  ETLDatasetVO etlExportDataset(@PathVariable("datasetId") Long datasetId,
+  ResponseEntity<StreamingResponseBody> etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 

@@ -85,8 +85,8 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataflowName = async () => {
     try {
-      const dataflowData = await DataflowService.dataflowDetails(match.params.dataflowId);
-      euDatasetDispatch({ type: 'GET_DATAFLOW_NAME', payload: { name: dataflowData.name } });
+      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
+      euDatasetDispatch({ type: 'GET_DATAFLOW_NAME', payload: { name: data.name } });
     } catch (error) {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
@@ -98,13 +98,13 @@ export const EUDataset = withRouter(({ history, match }) => {
       euDatasetDispatch({
         type: 'GET_DATA_SCHEMA',
         payload: {
-          allTables: datasetSchema.tables,
-          errorTypes: datasetSchema.levelErrorTypes,
-          schemaId: datasetSchema.datasetSchemaId,
-          schemaName: datasetSchema.datasetSchemaName
+          allTables: datasetSchema.data.tables,
+          errorTypes: datasetSchema.data.levelErrorTypes,
+          schemaId: datasetSchema.data.datasetSchemaId,
+          schemaName: datasetSchema.data.datasetSchemaName
         }
       });
-      return datasetSchema;
+      return datasetSchema.data;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
@@ -120,7 +120,8 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      return await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      return statistics.data;
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }

@@ -5,12 +5,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.contributor.ContributorVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -45,6 +45,9 @@ public class DataFlowVO implements Serializable {
   /** The eu datasets. */
   private List<EUDatasetVO> euDatasets;
 
+  /** The test dataset. */
+  private List<TestDatasetVO> testDatasets;
+
   /** The description. */
   private String description;
 
@@ -66,8 +69,6 @@ public class DataFlowVO implements Serializable {
   /** The weblinks. */
   private List<WeblinkVO> weblinks;
 
-  /** The user request status. */
-  private TypeRequestEnum userRequestStatus;
 
   /** The request id. */
   private Long requestId;

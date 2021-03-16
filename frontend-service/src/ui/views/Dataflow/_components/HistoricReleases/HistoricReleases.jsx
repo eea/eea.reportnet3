@@ -23,6 +23,7 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { HistoricReleaseService } from 'core/services/HistoricRelease';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
+import { uniqBy } from 'lodash';
 
 export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
@@ -68,17 +69,29 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
   const onLoadHistoricReleases = async () => {
     try {
       isLoading(true);
-      let response = null;
-      isNil(datasetId)
-        ? (response = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId))
-        : (response = await HistoricReleaseService.allHistoricReleases(datasetId));
+      let historicReleases = null;
+      if (isNil(datasetId)) {
+        const { data } = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
+        historicReleases = uniqBy(
+          data.map(historic => {
+            return {
+              releasedDate: historic.releasedDate,
+              countryCode: historic.countryCode
+            };
+          }),
+          'releasedDate'
+        );
+      } else {
+        const { data } = await HistoricReleaseService.allHistoricReleases(datasetId);
+        historicReleases = data;
+      }
 
-      response.sort((a, b) => b.releasedDate - a.releasedDate);
+      historicReleases.sort((a, b) => b.releasedDate - a.releasedDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: response, filteredData: response, filtered: false }
+        payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
       });
-      getCountryCode(response);
+      getCountryCode(historicReleases);
     } catch (error) {
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
     } finally {

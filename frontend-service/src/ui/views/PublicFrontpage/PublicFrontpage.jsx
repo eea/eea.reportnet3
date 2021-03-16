@@ -9,10 +9,9 @@ import { routes } from 'ui/routes';
 import styles from './PublicFrontpage.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { Card } from './_components/Card';
 import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
-import Illustration from 'assets/images/public_illustration.png';
-import logo from 'assets/images/logo.png';
+import Illustration from 'assets/images/logos/public_illustration.png';
+import logo from 'assets/images/logos/logo.png';
 
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
@@ -141,11 +140,17 @@ export const PublicFrontpage = ({ history }) => {
         </div>
         <div className={`rep-container`}>
           <div className={`${styles.pageContent} rep-row`}>
-            <div className={styles.showPublicDataflows}>
+            <div className={styles.showPublicData}>
               <Button
                 icon="eye"
-                label="View dataflows status and explore reported data"
+                label="View by obligation dataflows' status and download reported data"
                 onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}></Button>
+            </div>
+            <div className={`${styles.showPublicData}`}>
+              <Button
+                icon="eye"
+                label="View by country dataflows' status and download reported data"
+                onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}></Button>
             </div>
           </div>
           <div className={`${styles.pageContent} rep-row`}>
@@ -162,6 +167,7 @@ export const PublicFrontpage = ({ history }) => {
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
+                    externalCard={true}
                   />
                 ))}
               </div>

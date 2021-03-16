@@ -20,7 +20,7 @@ import { Map as MapComponent, FeatureGroup, GeoJSON, Marker, Popup } from 'react
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import newMarkerIcon from 'assets/images/newMarker.png';
+import newMarkerIcon from 'assets/images/logos/newMarker.png';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -342,15 +342,6 @@ export const Map = ({
     );
   };
 
-  // const onFeatureGroupReady = reactFGref => {
-  //   reactFGref.leafletElement.eachLayer(layer => {
-  //     console.log('eachLayer ', layer.options.someRandomParameter);
-  //     // if (layer.options.someRandomParameter) {
-  //     //   featureLayerObject[layer.options.someRandomParameter.id] = layer;
-  //     // }
-  //   });
-  // };
-
   return (
     <>
       {hasLegend && (
@@ -453,36 +444,6 @@ export const Map = ({
                 }
               : null
           }>
-          {/* <LayersControl position="topright">
-          <BaseLayer checked name="EEA Countries">
-            <TileLayer
-              // attribution="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
-              url="https://land.discomap.eea.europa.eu/arcgis/rest/services/Background/Background_Cashed_WGS84/MapServer/tile/{z}/{y}/{x}"
-              opacity={0.35}
-            />
-          </BaseLayer>
-          <BaseLayer name="None">
-            <TileLayer url="" />
-          </BaseLayer>
-        </LayersControl> */}
-          {/* {Object.values(enabledDrawElements).filter(enabledDrawElement => enabledDrawElement).length > 0 && (
-            <FeatureGroup>              
-              <EditControl
-                position="topright"
-                onEdited={e => console.log(e)}
-                onCreated={e => {
-                  setMapGeoJson(JSON.stringify(e.layer.toGeoJSON()));
-                }}
-                onDeleted={e => console.log(e)}
-                onMounted={e => console.log(e)}
-                onEditStart={e => console.log(e)}
-                onEditStop={e => console.log(e)}
-                onDeleteStart={e => console.log(e)}
-                onDeleteStop={e => console.log(e)}
-                draw={enabledDrawElements}
-              />
-            </FeatureGroup>
-          )} */}
           {getGeoJson()}
           {isNewPositionMarkerVisible && (
             <Marker

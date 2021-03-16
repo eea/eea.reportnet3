@@ -1,5 +1,5 @@
 {
-  "STRING_LENGTH_MAX": 22,
+  "STRING_LENGTH_MAX": 42,
   "notificationSchema": [
     {
       "key": "error",
@@ -42,11 +42,7 @@
           }
         },
         {
-          "key": "IMPORT_DESIGN_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
+          "key": "IMPORT_DESIGN_FAILED_EVENT"
         },
         {
           "key": "EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT",
@@ -514,7 +510,7 @@
           "key": "UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR"
         },
         {
-          "key": "WRONG_WEB_LINK_ERROR"
+          "key": "WRONG_WEBLINK_ERROR"
         },
         {
           "key": "IMPORT_DESIGN_BAD_REQUEST_ERROR",
@@ -574,6 +570,18 @@
         },
         {
           "key": "IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
+        },
+        {
+          "key": "DUPLICATED_WEBLINK_ERROR"
+        },
+        {
+          "key": "LOAD_DATAFLOWS_BY_COUNTRY_ERROR"
+        },
+        {
+          "key": "LOAD_USERS_LIST_ERROR"
+        },
+        {
+          "key": "LOAD_DATAFLOW_INFO_ERROR"
         }
       ]
     },
@@ -635,7 +643,7 @@
           "key": "RELEASE_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
+            "parameters": ["dataflowId", "dataProvider"]
           }
         },
         {
@@ -786,6 +794,13 @@
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
           }
+        },
+        {
+          "key": "RELEASE_PROVIDER_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW_REPRESENTATIVE",
+            "parameters": ["dataflowId", "dataProvider", "representativeId"]
+          }
         }
       ]
     },
@@ -852,6 +867,9 @@
         },
         {
           "key": "DELETE_TABLE_DATA_INIT"
+        },
+        {
+          "key": "RELEASE_START_EVENT"
         }
       ]
     }
