@@ -1,0 +1,1 @@
+export { EuroFlag } from './EuroFlag';
