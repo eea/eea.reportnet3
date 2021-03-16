@@ -1,0 +1,85 @@
+.content {
+  display: flex;
+  flex: auto;
+  margin-bottom: 3rem;
+
+  .repContainer {
+    display: flex;
+    flex-direction: column;
+    h1 {
+      margin-top: 2.5rem;
+      font-size: 2.25rem;
+    }
+
+    h2 {
+      margin-top: -0.2rem !important;
+    }
+
+    .countriesWrapper {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      align-items: center !important;
+
+      &::after {
+        content: '';
+        flex: auto;
+      }
+
+      @media (max-width: 1349px) {
+        justify-content: space-between;
+      }
+
+      > div {
+        box-sizing: border-box;
+        flex-basis: 15%;
+        margin-bottom: 1rem;
+        margin-right: 1rem;
+        padding-top: 0.3rem;
+        padding-bottom: 0.3rem;
+        transition: all 0.2s ease;
+        border-radius: 15px;
+        box-shadow: var(--card-item-box-shadow);
+        text-align: center;
+        cursor: pointer;
+        text-decoration: none;
+        position: relative;
+        color: var(--hyperlink-color);
+
+        &:hover {
+          box-shadow: var(--card-item-box-shadow-hover);
+          transform: scale(1.02, 1.02);
+          transition: transform 0.2s ease;
+        }
+
+        > a:hover {
+          color: var(--c-corporate-blue) !important;
+        }
+        .flag {
+          box-shadow: var(--card-item-box-shadow);
+          outline: none;
+          font-size: 5em;
+          height: 0.75em !important;
+          line-height: 1.5em;
+          margin-bottom: 0.5rem;
+          opacity: 0.5;
+          top: 0;
+          width: 1em;
+        }
+      }
+      > div:hover .flag {
+        opacity: 1;
+      }
+      > div:hover .country {
+        opacity: 1;
+      }
+      .country {
+        opacity: 0.5;
+        float: right;
+        position: absolute;
+        right: 10px;
+        top: 0;
+      }
+    }
+  }
+}

@@ -358,6 +358,23 @@ const getAllSchemas = async dataflowId => {
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
   await apiDataflow.getApiKey(dataflowId, dataProviderId, isCustodian);
 
+const getPublicDataflowsByCountryCode = async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
+  const publicDataflowsByCountryCodeResponse = await apiDataflow.getPublicDataflowsByCountryCode(
+    countryCode,
+    sortOrder,
+    pageNum,
+    numberRows,
+    sortField
+  );
+
+  const publicDataflowsByCountryCodeData = parseDataflowListDTO(
+    publicDataflowsByCountryCodeResponse.data.publicDataflows
+  );
+  publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
+
+  return publicDataflowsByCountryCodeResponse;
+};
+
 const getPublicDataflowData = async dataflowId => {
   const publicDataflowDataDTO = await apiDataflow.getPublicDataflowData(dataflowId);
   const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
@@ -388,6 +405,17 @@ const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
   return await apiDataflow.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
 };
 
+const parseDataflowListDTO = dataflowsDTO => {
+  if (!isNull(dataflowsDTO) && !isUndefined(dataflowsDTO)) {
+    const dataflows = [];
+    dataflowsDTO.forEach(dataflowDTO => {
+      dataflows.push(parseDataflowDTO(dataflowDTO));
+    });
+    return dataflows;
+  }
+  return;
+};
+
 const parseDataflowDTOs = dataflowDTOs => {
   const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
   dataflows.sort((a, b) => {
@@ -403,6 +431,7 @@ const parseDataflowDTO = dataflowDTO =>
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
+    testDatasets: parseTestDatasetListDTO(dataflowDTO.testDatasets),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
@@ -479,6 +508,16 @@ const parseDatasetListDTO = datasetsDTO => {
   }
   return;
 };
+const parseTestDatasetListDTO = testDatasetsDTO => {
+  if (!isNull(testDatasetsDTO) && !isUndefined(testDatasetsDTO)) {
+    const datasets = [];
+    testDatasetsDTO.forEach(datasetDTO => {
+      datasets.push(parseDatasetDTO(datasetDTO));
+    });
+    return datasets;
+  }
+  return;
+};
 
 const parseDatasetDTO = datasetDTO =>
   new Dataset({
@@ -490,6 +529,7 @@ const parseDatasetDTO = datasetDTO =>
     isReleasing: datasetDTO.releasing,
     publicFileName: datasetDTO.publicFileName,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
+    restrictFromPublic: datasetDTO.restrictFromPublic,
     name: datasetDTO.nameDatasetSchema,
     dataProviderId: datasetDTO.dataProviderId
   });
@@ -647,19 +687,18 @@ const publicData = async () => {
   return publicDataflows;
 };
 
+const sortDatasetTypeByName = (a, b) => {
+  let datasetName_A = a.datasetSchemaName;
+  let datasetName_B = b.datasetSchemaName;
+  return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+};
+
 const reporting = async dataflowId => {
   const reportingDataflowDTO = await apiDataflow.reporting(dataflowId);
   const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
-  dataflow.datasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
-  dataflow.designDatasets.sort((a, b) => {
-    let datasetName_A = a.datasetSchemaName;
-    let datasetName_B = b.datasetSchemaName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
+  dataflow.testDatasets.sort(sortDatasetTypeByName);
+  dataflow.datasets.sort(sortDatasetTypeByName);
+  dataflow.designDatasets.sort(sortDatasetTypeByName);
   reportingDataflowDTO.data = dataflow;
 
   return reportingDataflowDTO;
@@ -685,8 +724,9 @@ export const ApiDataflowRepository = {
   getAllSchemas,
   getApiKey,
   getAllDataflowsUserList,
-  getUserList,
   getPublicDataflowData,
+  getPublicDataflowsByCountryCode,
+  getUserList,
   newEmptyDatasetSchema,
   publicData,
   reporting,
