@@ -19,6 +19,7 @@ export class Dataflow {
     requestId,
     showPublicInfo,
     status,
+    testDatasets,
     userRole,
     weblinks
   } = {}) {
@@ -41,6 +42,7 @@ export class Dataflow {
     this.requestId = requestId;
     this.showPublicInfo = showPublicInfo;
     this.status = status;
+    this.testDatasets = testDatasets;
     this.userRole = userRole;
     this.weblinks = weblinks;
   }
