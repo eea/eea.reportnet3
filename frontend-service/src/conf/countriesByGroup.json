@@ -151,12 +151,33 @@
     "code": "TR"
   }
 ],
-
-  "otherCountries": [
+  "cooperatingCountries": [
     {
       "name": "Albania",
       "code": "AL"
     },
+    {
+      "name": "Bosnia and Herzegovina",
+      "code": "BA"
+    },
+    {
+      "name": "Kosovo (UNSCR 1244/99)",
+      "code": "XK"
+    },
+    {
+      "name": "Montenegro",
+      "code": "ME"
+    },
+    {
+      "name": "North Macedonia",
+      "code": "MK"
+    },
+    {
+      "name": "Serbia",
+      "code": "RS"
+    }
+  ],
+  "otherCountries": [
     {
       "name": "Andorra",
       "code": "AD"
@@ -174,10 +195,6 @@
       "code": "BY"
     },
     {
-      "name": "Bosnia and Herzegovina",
-      "code": "BA"
-    },
-    {
       "name": "Georgia",
       "code": "GE"
     },
@@ -188,10 +205,6 @@
     {
       "name": "Kazakhstan",
       "code": "KZ"
-    },
-    {
-      "name": "Kosovo (UNSCR 1244/99)",
-      "code": "XK"
     },
     {
       "name": "Kyrgyzstan",
@@ -206,20 +219,8 @@
       "code": "MC"
     },
     {
-      "name": "Montenegro",
-      "code": "ME"
-    },
-    {
-      "name": "North Macedonia",
-      "code": "MK"
-    },
-    {
       "name": "Russia",
       "code": "RU"
-    },
-    {
-      "name": "Serbia",
-      "code": "RS"
     },
     {
       "name": "Tajikistan",

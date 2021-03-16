@@ -37,7 +37,7 @@ export const PublicCountries = withRouter(({ history }) => {
 
   const associatesCountriesCodes = config.countriesByGroup.associates.map(country => country.code);
 
-  const renderCard = isEurope => country => {
+  const renderCountryCard = isEurope => country => {
     const countryCode = country.code;
 
     return (
@@ -68,9 +68,19 @@ export const PublicCountries = withRouter(({ history }) => {
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resources.messages['countriesPageTitle']}</h1>
           <h2>{resources.messages['eeaCountries']}</h2>
-          <div className={styles.countriesWrapper}>{config.countriesByGroup.eeaCountries.map(renderCard(true))}</div>
+          <div className={styles.countriesWrapper}>
+            {config.countriesByGroup.eeaCountries.map(renderCountryCard(true))}
+          </div>
+
+          <h2>{resources.messages['cooperatingCountries']}</h2>
+          <div className={styles.countriesWrapper}>
+            {config.countriesByGroup.cooperatingCountries.map(renderCountryCard(false))}
+          </div>
+
           <h2>{resources.messages['otherCountries']}</h2>
-          <div className={styles.countriesWrapper}>{config.countriesByGroup.otherCountries.map(renderCard(false))}</div>
+          <div className={styles.countriesWrapper}>
+            {config.countriesByGroup.otherCountries.map(renderCountryCard(false))}
+          </div>
         </div>
       </div>
     </PublicLayout>

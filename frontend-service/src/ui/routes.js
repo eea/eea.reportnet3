@@ -20,5 +20,6 @@ export const routes = {
   PUBLIC_COUNTRY_INFORMATION: '/public/country/:countryCode',
   PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId',
   PUBLIC_DATAFLOWS: '/public/dataflows',
-  SETTINGS: '/settings'
+  SETTINGS: '/settings',
+  TEST_DATASETS: '/dataflow/:dataflowId/testDatasets'
 };
