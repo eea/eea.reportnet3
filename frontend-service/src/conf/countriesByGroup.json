@@ -129,6 +129,29 @@
       "code": "TR"
     }
   ],
+  "associates":[  
+  {
+    "name": "Iceland",
+    "code": "IS"
+  },
+  {
+    "name": "Liechtenstein",
+    "code": "LI"
+  },
+  {
+    "name": "Norway",
+    "code": "NO"
+  },
+  {
+    "name": "Switzerland",
+    "code": "CH"
+  },
+  {
+    "name": "Turkey",
+    "code": "TR"
+  }
+],
+
   "otherCountries": [
     {
       "name": "Albania",
