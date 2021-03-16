@@ -760,7 +760,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
 
   @Override
-  @Cacheable(value = "datasetType", key = "datasetId")
+  @Cacheable(value = "datasetType", key = "#datasetId")
   public DatasetTypeEnum getDatasetType(Long datasetId) {
     DatasetTypeEnum type = null;
 
