@@ -139,7 +139,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN')")
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @LockCriteria(name = "released",
@@ -161,7 +161,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','TESTDATASET_CUSTODIAN')")
   public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -189,7 +189,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN')")
   public void restoreSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {

@@ -3063,11 +3063,13 @@ public class DatasetServiceImpl implements DatasetService {
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       }
-    }
-
-    // Dataset: REPORTING
-    else {
-      dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+    } else {
+      // Dataset: TEST
+      dataset = testDatasetRepository.findById(datasetId).orElse(null);
+      if (null == dataset) {
+        // Dataset: REPORTING
+        dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+      }
       if (null != dataset && TypeStatusEnum.DRAFT
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
@@ -3082,7 +3084,6 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     }
-
     return schema;
   }
 
@@ -3284,7 +3285,6 @@ public class DatasetServiceImpl implements DatasetService {
             }
           }
         }
-
       }
     }
 
