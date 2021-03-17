@@ -200,7 +200,7 @@ const datasetsValidationStatistics = async datasetSchemaId => {
           getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
         );
 
-        tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
+
         tableById.tableStatisticValues[0].push(
           table.totalRecords -
             (table.totalRecordsWithBlockers +
