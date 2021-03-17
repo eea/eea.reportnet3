@@ -3066,23 +3066,10 @@ public class DatasetServiceImpl implements DatasetService {
     } else {
       // Dataset: TEST
       dataset = testDatasetRepository.findById(datasetId).orElse(null);
-
-      if (null != dataset && TypeStatusEnum.DRAFT
-          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
-        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-        if (null != tableSchemaId) {
-          TableSchema tableSchema = schema.getTableSchemas().stream()
-              .filter(t -> tableSchemaId.equals(t.getIdTableSchema().toString())).findFirst()
-              .orElse(null);
-          if (null == tableSchema || Boolean.TRUE.equals(tableSchema.getReadOnly())
-              || Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
-            schema = null;
-          }
-        }
+      if (null == dataset) {
+        // Dataset: REPORTING
+        dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
       }
-      // Dataset: REPORTING
-      dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
-
       if (null != dataset && TypeStatusEnum.DRAFT
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
