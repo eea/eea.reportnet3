@@ -1,26 +1,23 @@
 import { CreateDesigner } from './CreateDesigner';
-import { DeleteDesigner } from './DeleteDesigner';
-import { GetAllDesigner } from './GetAllDesigner';
-import { RestoreDesigner } from './RestoreDesigner';
-
 import { CreateReporter } from './CreateReporter';
+import { DeleteDesigner } from './DeleteDesigner';
 import { DeleteReporter } from './DeleteReporter';
+import { GetAllDesigner } from './GetAllDesigner';
 import { GetAllReporter } from './GetAllReporter';
+import { ReleaseDataflow } from './ReleaseDataflow';
+import { RestoreDesigner } from './RestoreDesigner';
 import { RestoreReporter } from './RestoreReporter';
 
-import { ReleaseDataflow } from './ReleaseDataflow';
 import { snapshotRepository } from 'core/domain/model/Snapshot/SnapshotRepository';
 
 export const SnapshotService = {
   allDesigner: GetAllDesigner({ snapshotRepository }),
-  createByIdDesigner: CreateDesigner({ snapshotRepository }),
-  deleteByIdDesigner: DeleteDesigner({ snapshotRepository }),
-  restoreByIdDesigner: RestoreDesigner({ snapshotRepository }),
-
   allReporter: GetAllReporter({ snapshotRepository }),
+  createByIdDesigner: CreateDesigner({ snapshotRepository }),
   createByIdReporter: CreateReporter({ snapshotRepository }),
+  deleteByIdDesigner: DeleteDesigner({ snapshotRepository }),
   deleteByIdReporter: DeleteReporter({ snapshotRepository }),
-  restoreByIdReporter: RestoreReporter({ snapshotRepository }),
-  
-  releaseDataflow: ReleaseDataflow({ snapshotRepository })
+  releaseDataflow: ReleaseDataflow({ snapshotRepository }),
+  restoreByIdDesigner: RestoreDesigner({ snapshotRepository }),
+  restoreByIdReporter: RestoreReporter({ snapshotRepository })
 };
