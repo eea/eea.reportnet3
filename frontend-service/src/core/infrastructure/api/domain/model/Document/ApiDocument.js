@@ -5,77 +5,53 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiDocument = {
   all: async dataflowId => {
-    const response = await HTTPRequester.get({
-      url: getUrl(DataflowConfig.loadDatasetsByDataflowId, {
-        dataflowId: dataflowId
-      })
-    });
-    return response.data.documents;
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
   },
+
+  deleteDocument: async documentId => {
+    return await HTTPRequester.delete({ url: getUrl(DocumentConfig.deleteDocument, { documentId }) });
+  },
+
   downloadById: async documentId => {
-    const response = await HTTPRequester.download({
-      url: getUrl(DocumentConfig.downloadDocumentById, {
-        documentId: documentId
-      }),
-      headers: {
-        'Content-Type': 'application/octet-stream'
-      }
+    return await HTTPRequester.download({
+      url: getUrl(DocumentConfig.downloadDocumentById, { documentId }),
+      headers: { 'Content-Type': 'application/octet-stream' }
     });
-    return response.data;
   },
+
+  editDocument: async (dataflowId, description, language, file, isPublic, documentId) => {
+    const formData = new FormData();
+    if (file?.name) {
+      formData.append('file', file, file.name);
+    } else {
+      formData.append('file', null);
+    }
+    return await HTTPRequester.putWithFiles({
+      url: getUrl(DocumentConfig.editDocument, {
+        dataflowId,
+        description: encodeURIComponent(description),
+        documentId,
+        isPublic,
+        language
+      }),
+      data: formData,
+      headers: { 'Content-Type': undefined }
+    });
+  },
+
   upload: async (dataflowId, description, language, file, isPublic) => {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    const response = await HTTPRequester.postWithFiles({
+
+    return await HTTPRequester.postWithFiles({
       url: getUrl(DocumentConfig.uploadDocument, {
-        dataflowId: dataflowId,
+        dataflowId,
         description: encodeURIComponent(description),
-        language: language,
-        isPublic: isPublic
+        isPublic,
+        language
       }),
       data: formData,
-      headers: {
-        'Content-Type': undefined
-      }
+      headers: { 'Content-Type': undefined }
     });
-    return response.status;
-  },
-  editDocument: async (dataflowId, description, language, file, isPublic, documentId) => {
-    const formData = new FormData();
-    const isEmpty = arg => {
-      for (var item in arg) {
-        return false;
-      }
-      return true;
-    };
-
-    if (isEmpty(file)) {
-      formData.append('file', null);
-    } else {
-      formData.append('file', file, file.name);
-    }
-
-    const response = await HTTPRequester.putWithFiles({
-      url: getUrl(DocumentConfig.editDocument, {
-        dataflowId: dataflowId,
-        description: encodeURIComponent(description),
-        language: language,
-        isPublic: isPublic,
-        documentId: documentId
-      }),
-      data: formData,
-      headers: {
-        'Content-Type': undefined
-      }
-    });
-    return response.status;
-  },
-  deleteDocument: async documentId => {
-    const response = await HTTPRequester.delete({
-      url: getUrl(DocumentConfig.deleteDocument, {
-        documentId
-      })
-    });
-    return response.status;
   }
 };

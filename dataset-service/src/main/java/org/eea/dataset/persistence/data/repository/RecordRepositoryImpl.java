@@ -405,6 +405,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return query.getResultList();
   }
 
+
+
   /**
    * Find by table value all records.
    *
@@ -490,6 +492,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.info("no result, ignore message");
     }
     return result;
+  }
+
+  /**
+   * Find and generate ETL json.
+   *
+   * @param stringQuery the string query
+   * @return the string
+   */
+  @Override
+  public String findAndGenerateETLJson(String stringQuery) {
+    Query query = entityManager.createNativeQuery(stringQuery);
+    return query.getSingleResult().toString();
   }
 
 }

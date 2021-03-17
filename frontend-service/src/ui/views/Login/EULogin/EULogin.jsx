@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import isNil from 'lodash/isNil';
 
 import styles from './EULogin.module.css';
-import logo from 'assets/images/logo-spinner.gif';
+import logo from 'assets/images/logos/logo-spinner.gif';
 
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';

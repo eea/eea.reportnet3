@@ -8,6 +8,7 @@
   display: block;
   width: calc(100% / 3.12);
   height: auto;
+  cursor: pointer;
   &:first-of-type {
     margin-left: 0;
   }
@@ -16,7 +17,7 @@
   }
   &::after {
     content: '';
-    background-image: url('/assets/img/logo.png') !important;
+    background-image: url('/assets/images/logos/logo.png') !important;
     background-color: var(--card-item-bg);
     background-size: 50%;
     background-repeat: no-repeat;
@@ -43,7 +44,6 @@
         display: -webkit-box;
         overflow: hidden;
         margin: 0px;
-        margin-bottom: 1rem;
         text-overflow: ellipsis;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
@@ -62,17 +62,16 @@
         }
       }
       h4 {
+        display: flex;
         margin: 0px;
-        margin-bottom: 0.5rem;
-        display: -webkit-box;
         overflow: hidden;
-        text-overflow: ellipsis;
+        color: var(--main-font-color);
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
         font-weight: bold;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem !important;
         a {
-          color: var(--main-font-color);
+          right: 1rem;
           cursor: pointer;
           svg {
             height: 0.8rem;
@@ -80,15 +79,19 @@
             margin-top: -3px;
           }
         }
+        span {
+          display: inline-block;
+          width: 89%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          -webkit-line-clamp: 1;
+          white-space: nowrap;
+        }
       }
       .subtitle {
-        display: -webkit-box;
-        margin: 0.5rem 0;
+        margin: 0;
         overflow: hidden;
-        text-overflow: ellipsis;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 1;
-        width: fit-content;
       }
     }
     .legalInstrumentAndObligation {
@@ -109,6 +112,7 @@
     .tooltip {
       max-width: 300px;
       word-break: break-all;
+      color: var(--white);
     }
     .footer {
       display: flex;

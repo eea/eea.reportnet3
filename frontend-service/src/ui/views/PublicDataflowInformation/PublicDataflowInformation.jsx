@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 
@@ -48,17 +49,11 @@ export const PublicDataflowInformation = withRouter(
 
     const notificationContext = useContext(NotificationContext);
 
-    const { datasets } = dataflowData;
-
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
     useEffect(() => {
       onLoadDataflowData();
     }, []);
-
-    useEffect(() => {
-      parseDataflowData();
-    }, [datasets]);
 
     useEffect(() => {
       if (!themeContext.headerCollapse) {
@@ -74,19 +69,33 @@ export const PublicDataflowInformation = withRouter(
     };
 
     const downloadFileBodyColumn = rowData => {
-      if (rowData.publicsFileName != 0) {
+      if (!rowData.restrictFromPublic) {
         return (
           <div className={styles.filesContainer}>
             {rowData.publicsFileName.map(publicFileName => (
               <span
                 className={styles.downloadIcon}
                 onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
-                <FontAwesomeIcon icon={AwesomeIcons('xlsx')} data-tip data-for={publicFileName} />
+                <FontAwesomeIcon icon={AwesomeIcons('7z')} data-tip data-for={publicFileName} />
                 <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
                   <span>{getPublicFileName(publicFileName)}</span>
                 </ReactTooltip>
               </span>
             ))}
+          </div>
+        );
+      } else {
+        return (
+          <div className={styles.filesContainer}>
+            <FontAwesomeIcon
+              className={styles.restrictFromPublicIcon}
+              icon={AwesomeIcons('lock')}
+              data-tip
+              data-for={'restrictFromPublicField'}
+            />
+            <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
+              <span>{resources.messages['restrictFromPublicField']}</span>
+            </ReactTooltip>
           </div>
         );
       }
@@ -102,7 +111,7 @@ export const PublicDataflowInformation = withRouter(
           header = resources.messages['releaseDate'];
           break;
         case 'isReleased':
-          header = resources.messages['isReleased'];
+          header = resources.messages['delivered'];
           break;
         case 'publicsFileName':
           header = resources.messages['files'];
@@ -139,7 +148,7 @@ export const PublicDataflowInformation = withRouter(
       try {
         const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
 
-        DownloadFile(fileContent, fileName);
+        DownloadFile(fileContent.data, fileName);
       } catch (error) {
         if (error.response.status === 404) {
           notificationContext.add({
@@ -155,15 +164,18 @@ export const PublicDataflowInformation = withRouter(
 
     const onLoadDataflowData = async () => {
       try {
-        setDataflowData(await DataflowService.getPublicDataflowData(dataflowId));
+        const { data } = await DataflowService.getPublicDataflowData(dataflowId);
+        setDataflowData(data);
+        parseDataflowData(data.datasets);
       } catch (error) {
         console.error('error', error);
+        notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
       } finally {
         setIsLoading(false);
       }
     };
 
-    const parseDataflowData = () => {
+    const parseDataflowData = datasets => {
       const parsedDatasets = [];
 
       const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
@@ -181,6 +193,7 @@ export const PublicDataflowInformation = withRouter(
                 dataProviderId: dataset.dataProviderId,
                 isReleased: dataset.isReleased,
                 releaseDate: dataset.releaseDate,
+                restrictFromPublic: dataset.restrictFromPublic,
                 publicsFileName: publicsFileName
               };
               parsedDatasets.push(parsedDataset);
@@ -188,8 +201,7 @@ export const PublicDataflowInformation = withRouter(
           });
         });
 
-      let set = new Set(parsedDatasets.map(JSON.stringify));
-      let uniqParsedDatasets = Array.from(set).map(JSON.parse);
+      const uniqParsedDatasets = uniqBy(parsedDatasets, 'datasetSchemaName');
 
       setRepresentatives(uniqParsedDatasets);
     };
@@ -207,7 +219,16 @@ export const PublicDataflowInformation = withRouter(
           let template = null;
           if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
-          return <Column body={template} field={field} header={getHeader(field)} key={field} sortable={true} />;
+          return (
+            <Column
+              body={template}
+              className={field === 'publicsFileName' && styles.downloadFile}
+              field={field}
+              header={getHeader(field)}
+              key={field}
+              sortable={field === 'publicsFileName' ? false : true}
+            />
+          );
         });
 
       return fieldColumns;
@@ -223,6 +244,11 @@ export const PublicDataflowInformation = withRouter(
                 <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
                   {renderColumns(representatives)}
                 </DataTable>
+                <div className={styles.tableLegendContainer}>
+                  <span>*</span>
+                  <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
+                  <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
+                </div>
               </Fragment>
             ) : (
               <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>

@@ -168,4 +168,30 @@ public interface RepresentativeService {
    * @return true, if successful
    */
   boolean authorizeByRepresentativeId(Long representativeId);
+
+  /**
+   * Find data providers by code.
+   *
+   * @param code the code
+   * @return the list
+   */
+  List<DataProviderVO> findDataProvidersByCode(String code);
+
+  /**
+   * Gets the provider ids.
+   *
+   * @return the provider ids
+   * @throws EEAException the EEA exception
+   */
+  List<Long> getProviderIds() throws EEAException;
+
+  /**
+   * Find representatives by dataflow id and dataprovider list.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderIdList the data provider id list
+   * @return the list
+   */
+  List<RepresentativeVO> findRepresentativesByDataflowIdAndDataproviderList(Long dataflowId,
+      List<Long> dataProviderIdList);
 }

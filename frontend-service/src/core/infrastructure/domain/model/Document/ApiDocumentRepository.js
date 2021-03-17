@@ -4,9 +4,8 @@ import { Document } from 'core/domain/model/Document/Document';
 import { config } from 'conf/index';
 
 const all = async dataflowId => {
-  const documentsDTO = await apiDocument.all(dataflowId);
-
-  return documentsDTO.map(
+  const response = await apiDocument.all(dataflowId);
+  response.data.documents = response.data.documents.map(
     documentDTO =>
       new Document({
         category: documentDTO.category,
@@ -20,36 +19,24 @@ const all = async dataflowId => {
         url: documentDTO.url
       })
   );
+
+  return response;
 };
 
-const downloadDocumentById = async documentId => {
-  const fileData = await apiDocument.downloadById(documentId);
-  return fileData;
-};
+const downloadDocumentById = async documentId => await apiDocument.downloadById(documentId);
 
 const uploadDocument = async (dataflowId, description, language, file, isPublic) => {
-  const responseData = await apiDocument.upload(dataflowId, description, language, file, isPublic);
-  return responseData;
+  return await apiDocument.upload(dataflowId, description, language, file, isPublic);
 };
 
 const editDocument = async (dataflowId, description, language, file, isPublic, documentId) => {
-  const responseData = await apiDocument.editDocument(dataflowId, description, language, file, isPublic, documentId);
-  return responseData;
+  return await apiDocument.editDocument(dataflowId, description, language, file, isPublic, documentId);
 };
 
-const deleteDocument = async documentId => {
-  const responseData = await apiDocument.deleteDocument(documentId);
-  return responseData;
-};
+const deleteDocument = async documentId => await apiDocument.deleteDocument(documentId);
 
 const getCountryName = countryCode => {
   return config.languages.filter(language => language.code === countryCode).map(name => name.name);
 };
 
-export const ApiDocumentRepository = {
-  all,
-  deleteDocument,
-  downloadDocumentById,
-  editDocument,
-  uploadDocument
-};
+export const ApiDocumentRepository = { all, deleteDocument, downloadDocumentById, editDocument, uploadDocument };

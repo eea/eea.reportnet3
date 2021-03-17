@@ -1,6 +1,7 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,12 +17,10 @@ import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
-import org.eea.dataflow.persistence.domain.UserRequest;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
-import org.eea.dataflow.persistence.repository.UserRequestRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -31,19 +30,24 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -56,6 +60,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -113,10 +119,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowRepository dataflowRepository;
 
-  /** The user request repository. */
-  @Autowired
-  private UserRequestRepository userRequestRepository;
-
   /** The contributor repository. */
   @Autowired
   private ContributorRepository contributorRepository;
@@ -140,6 +142,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
+
+  /** The dataset Test controller zuul. */
+  @Autowired
+  private TestDatasetControllerZuul testDataSetControllerZuul;
 
 
   /**
@@ -202,7 +208,6 @@ public class DataflowServiceImpl implements DataflowService {
             .map(ResourceAccessVO::getId).collect(Collectors.toList()))
         .forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-          dataflowVO.setUserRequestStatus(TypeRequestEnum.ACCEPTED);
           List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
           if (!map.isEmpty() && null != datasetsStatusList) {
             setReportingDatasetStatus(datasetsStatusList, dataflowVO);
@@ -327,38 +332,9 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type)
       throws EEAException {
-    List<Dataflow> dataflows = dataflowRepository.findByStatusAndUserRequester(type, userId);
+    List<Dataflow> dataflows = new ArrayList();
     LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
     return dataflowNoContentMapper.entityListToClass(dataflows);
-  }
-
-  /**
-   * Update user request status.
-   *
-   * @param userRequestId the user request id
-   * @param type the type
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type)
-      throws EEAException {
-
-    userRequestRepository.updateUserRequestStatus(userRequestId, type.name());
-    LOG.info("Update the Metabase request status of the requestId: {}. New status: {}",
-        userRequestId, type);
-    if (TypeRequestEnum.ACCEPTED.equals(type)) {
-      // add the resource to the user id in keycloak
-      Long dataflowId = 0L;
-      UserRequest ur = userRequestRepository.findById(userRequestId).orElse(new UserRequest());
-      if (ur.getDataflows() != null) {
-        for (Dataflow df : ur.getDataflows()) {
-          dataflowId = df.getId();
-        }
-        userManagementControllerZull.addUserToResource(dataflowId,
-            ResourceGroupEnum.DATAFLOW_LEAD_REPORTER);
-        LOG.info("The dataflow {} has been added into keycloak", dataflowId);
-      }
-    }
   }
 
   /**
@@ -436,6 +412,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataflowVO", key = "#dataflowVO.id")
   public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
 
     Optional<Dataflow> dataflow = dataflowRepository.findByNameIgnoreCase(dataflowVO.getName());
@@ -487,6 +464,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
+  @Cacheable(value = "dataflowVO", key = "#id")
   public DataFlowVO getMetabaseById(Long id) throws EEAException {
 
     if (id == null) {
@@ -561,6 +539,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataflowVO", key = "#id")
   @Transactional
   public void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadlineDate)
       throws EEAException {
@@ -584,11 +563,63 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataflowPublicVO> getPublicDataflows() {
     List<DataflowPublicVO> dataflowPublicList =
         dataflowPublicMapper.entityListToClass(dataflowRepository.findByShowPublicInfoTrue());
-    dataflowPublicList.stream().forEach(dataflow -> {
-      findObligationPublicDataflow(dataflow);
-    });
+    dataflowPublicList.stream().forEach(dataflow -> findObligationPublicDataflow(dataflow));
     return dataflowPublicList;
   }
+
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param header the header
+   * @param asc the asc
+   * @param page the page
+   * @param pageSize the page size
+   * @return the public dataflows by country
+   */
+  @Override
+  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
+      boolean asc, int page, int pageSize) {
+    DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
+    // get the entity
+    List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
+        .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
+    List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
+    setReportings(dataflowPublicList, providerId);
+
+    // sort and paging
+    sortPublicDataflows(dataflowPublicList, header, asc);
+    dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
+    dataflowPublicPaginated.setTotalRecords(Long.valueOf(dataflowPublicList.size()));
+    return dataflowPublicPaginated;
+  }
+
+
+  /**
+   * Gets the user roles.
+   *
+   * @param dataProviderId the data provider id
+   * @return the user roles
+   */
+  @Override
+  public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList) {
+    List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
+    for (DataFlowVO dataflowVO : dataflowList) {
+      if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+        DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
+        dataflowUserRoleVO.setDataflowId(dataflowVO.getId());
+        dataflowUserRoleVO.setDataflowName(dataflowVO.getName());
+        dataflowUserRoleVO.setUsers(userManagementControllerZull
+            .getUserRolesByDataflowAndCountry(dataflowVO.getId(), dataProviderId));
+        if (!dataflowUserRoleVO.getUsers().isEmpty()) {
+          dataflowUserRoleVOList.add(dataflowUserRoleVO);
+        }
+      }
+    }
+    return dataflowUserRoleVOList;
+
+  }
+
 
   /**
    * Gets the public dataflow by id.
@@ -609,6 +640,144 @@ public class DataflowServiceImpl implements DataflowService {
 
     findObligationPublicDataflow(dataflowPublicVO);
     return dataflowPublicVO;
+  }
+
+
+  /**
+   * Update data flow public status.
+   *
+   * @param dataflowId the dataflow id
+   * @param showPublicInfo the show public info
+   */
+  @Override
+  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
+    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
+  }
+
+  /**
+   * Gets the dataflows by data provider ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the dataflows by data provider ids
+   */
+  @Override
+  public List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds) {
+    return dataflowMapper
+        .entityListToClass(
+            dataflowRepository
+                .findDataflowsByDataproviderIdsAndDataflowIds(
+                    userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
+                        .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()),
+                    dataProviderIds));
+  }
+
+
+  /**
+   * Sets the reportings.
+   *
+   * @param dataflowPublicList the dataflow public list
+   * @param providerId the provider id
+   */
+  private void setReportings(List<DataflowPublicVO> dataflowPublicList,
+      List<DataProviderVO> providerId) {
+    dataflowPublicList.stream().forEach(dataflow -> {
+      findObligationPublicDataflow(dataflow);
+      for (DataProviderVO dataProviderVO : providerId) {
+        List<ReportingDatasetPublicVO> reportings =
+            datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowIdAndProviderId(
+                dataflow.getId(), dataProviderVO.getId());
+        if (!reportings.isEmpty()) {
+          dataflow.setReportingDatasets(reportings);
+        }
+      }
+    });
+  }
+
+  /**
+   * Sort public dataflows.
+   *
+   * @param dataflowPublicList the dataflow public list
+   * @param header the header
+   * @param asc the asc
+   */
+  private void sortPublicDataflows(List<DataflowPublicVO> dataflowPublicList, String header,
+      boolean asc) {
+    Comparator<DataflowPublicVO> compare = null;
+    // get compare
+    if (null != header) {
+      switch (header) {
+        case "name":
+          compare = Comparator.comparing(DataflowPublicVO::getName,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
+          break;
+        case "obligation":
+          compare =
+              (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle() != null
+                  ? o1.getObligation().getOblTitle().compareTo(o2.getObligation().getOblTitle())
+                  : -1;
+          break;
+        case "legalInstrument":
+          compare = (DataflowPublicVO o1,
+              DataflowPublicVO o2) -> o1.getObligation().getLegalInstrument()
+                  .getSourceAlias() != null
+                      ? o1.getObligation().getLegalInstrument().getSourceAlias().compareTo(
+                          o2.getObligation().getLegalInstrument().getSourceAlias())
+                      : -1;
+          break;
+        case "status":
+          compare = Comparator.comparing(DataflowPublicVO::isReleasable,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
+          break;
+        case "deadline":
+          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
+          break;
+        case "isReleased":
+          compare = (DataflowPublicVO o1,
+              DataflowPublicVO o2) -> o1.getReportingDatasets().get(0).getIsReleased() != null
+                  ? o1.getReportingDatasets().get(0).getIsReleased().compareTo(
+                      o2.getReportingDatasets().get(0).getIsReleased())
+                  : -1;
+          break;
+        case "releaseDate":
+          compare = (DataflowPublicVO o1,
+              DataflowPublicVO o2) -> o1.getReportingDatasets().get(0).getDateReleased() != null
+                  ? o1.getReportingDatasets().get(0).getDateReleased().compareTo(
+                      o2.getReportingDatasets().get(0).getDateReleased())
+                  : -1;
+          break;
+
+      }
+      // order by
+      if (null != compare && asc) {
+        Collections.sort(dataflowPublicList, compare);
+      } else if (null != compare && !asc) {
+        Collections.sort(dataflowPublicList, compare.reversed());
+      }
+    }
+  }
+
+  /**
+   * Gets the page.
+   *
+   * @param <T> the generic type
+   * @param sourceList the source list
+   * @param page the page
+   * @param pageSize the page size
+   * @return the page
+   */
+  private static <T> List<T> getPage(List<T> sourceList, int page, int pageSize) {
+    if (pageSize <= 0 || page < 0) {
+      throw new IllegalArgumentException("invalid page size or PageNum: " + pageSize + "-" + page);
+    }
+
+    int fromIndex = (page) * pageSize;
+    if (sourceList == null || sourceList.size() <= fromIndex) {
+      return Collections.emptyList();
+    }
+
+    // toIndex exclusive
+    return sourceList.subList(fromIndex, Math.min(fromIndex + pageSize, sourceList.size()));
   }
 
   /**
@@ -740,12 +909,18 @@ public class DataflowServiceImpl implements DataflowService {
         .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
     // and the eu datasets
     datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
+    // add the test datasets
+    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
-    dataflowVO.setReportingDatasets(
-        datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+      dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
+          .findReportingDataSetIdByDataflowId(id).stream()
+          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+    } else {
+      dataflowVO.setReportingDatasets(new ArrayList<>());
+    }
     // Add the design datasets
     dataflowVO.setDesignDatasets(
         datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id).stream()
@@ -758,6 +933,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Add the EU datasets
     dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+    // Add the Test datasets
+    dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
         .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives
@@ -815,14 +994,4 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
-  /**
-   * Update data flow public status.
-   *
-   * @param dataflowId the dataflow id
-   * @param showPublicInfo the show public info
-   */
-  @Override
-  public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
-    dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
-  }
 }

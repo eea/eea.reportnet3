@@ -10,50 +10,70 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
 
 export const PublicCard = ({
+  card,
   animation,
   dataflowId,
   dueDate,
+  frequency,
   instrument,
   obligation,
   onCardClick,
   isReleasable,
+  pilotScenarioAmbition,
   subtitle,
-  title
+  title,
+  externalCard
 }) => {
   const idTooltip = uuid.v4();
 
+  const onOpenTab = (e, url) => {
+    e.preventDefault();
+    window.open(url, '_blank');
+    e.stopPropagation();
+  };
+
   const renderRedirectText = (text, url) => (
-    <a href={url} target="_blank" title={text}>
-      <span>
-        {text} <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
-      </span>
-    </a>
+    <Fragment>
+      <span>{text} </span>
+      <a href={url} target="_blank" rel="noreferrer" title={text} onClick={e => onOpenTab(e, url)}>
+        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
+      </a>
+    </Fragment>
   );
 
-  return (
-    <div
-      className={`${styles.card} ${animation ? styles.clickable : undefined}`}
-      onClick={() => onCardClick(dataflowId)}>
+  const externalCardLayout = children => {
+    return (
+      <div className={styles.card} onClick={e => onOpenTab(e, card.dataFlowUrl)}>
+        {children}
+      </div>
+    );
+  };
+
+  const internalCardLayout = children => {
+    return (
+      <div className={`${styles.card} ${animation ? styles.clickable : ''}`} onClick={() => onCardClick(dataflowId)}>
+        {children}
+      </div>
+    );
+  };
+
+  const getCardBody = () => {
+    return (
       <div className={styles.content}>
         <div className={styles.text}>
-          <h3 className={styles.title} className={styles.link} title={title.text}>
+          <h3 className={`${styles.title} ${styles.link}`} title={title.text}>
             {title.text}
-            <FontAwesomeIcon
-              aria-hidden={false}
-              className={`${styles.link} p-breadcrumb-home`}
-              icon={AwesomeIcons('externalLink')}
-            />
           </h3>
           <h4 className={styles.subtitle} data-tip data-for={idTooltip}>
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>
           <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">
-            {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
+            {subtitle.text}
           </ReactTooltip>
         </div>
         {obligation && (
           <div className={styles.legalInstrumentAndObligation}>
-            <p onClick={e => e.stopPropagation()}>
+            <p>
               <strong>Obligation: </strong>
               {renderRedirectText(
                 obligation.title,
@@ -64,7 +84,7 @@ export const PublicCard = ({
         )}
         {instrument && (
           <div className={styles.legalInstrumentAndObligation}>
-            <p onClick={e => e.stopPropagation()}>
+            <p>
               <strong>Instrument: </strong>
               {renderRedirectText(
                 obligation.legalInstruments.alias,
@@ -73,23 +93,45 @@ export const PublicCard = ({
             </p>
           </div>
         )}
-
+        {pilotScenarioAmbition && (
+          <div className={styles.legalInstrumentAndObligation} onMouseDown={() => window.open('blablab.com')}>
+            <p>
+              <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
+            </p>
+          </div>
+        )}
         <div className={`${styles.footer}`}>
-          <span>
-            {
-              <Fragment>
-                <strong>Status: </strong>
-                {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
-              </Fragment>
-            }
-          </span>
+          {frequency ? (
+            <span>
+              {
+                <Fragment>
+                  <strong>Frequency: </strong>
+                  {frequency}
+                </Fragment>
+              }
+            </span>
+          ) : (
+            <span>
+              {
+                <Fragment>
+                  <strong>Status: </strong>
+                  {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
+                </Fragment>
+              }
+            </span>
+          )}
           <span>
             <strong>Delivery date:</strong> {dueDate}
           </span>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  if (externalCard) {
+    return externalCardLayout(getCardBody());
+  }
+  return internalCardLayout(getCardBody());
 };
 
 PublicCard.propTypes = {

@@ -16,6 +16,8 @@ import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
+import { TextUtils } from 'ui/views/_functions/Utils';
+
 import { WebLinkService } from 'core/services/WebLink';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -121,9 +123,9 @@ export const WebLinks = ({
     setDeletingId(weblinkItem.id);
 
     try {
-      const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
+      const { status } = await WebLinkService.deleteWebLink(weblinkItem);
 
-      if (weblinkToDelete.isDeleted) {
+      if (status >= 200 && status <= 299) {
         onLoadWebLinks();
       }
     } catch (error) {
@@ -148,12 +150,11 @@ export const WebLinks = ({
   const onSaveRecord = async (e, setSubmitting) => {
     setWeblinkItem(e);
     setSubmitting(true);
-
     if (isNil(weblinkItem.id)) {
       try {
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
-        if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
+        if (newWeblink.status >= 200 && newWeblink.status <= 299) {
           onLoadWebLinks();
         }
 
@@ -163,7 +164,11 @@ export const WebLinks = ({
 
         if (error.response.status === 400) {
           notificationContext.add({
-            type: 'WRONG_WEB_LINK_ERROR'
+            type: 'WRONG_WEBLINK_ERROR'
+          });
+        } else if (error.response.status === 409) {
+          notificationContext.add({
+            type: 'DUPLICATED_WEBLINK_ERROR'
           });
         }
       } finally {
@@ -175,7 +180,7 @@ export const WebLinks = ({
       try {
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
-        if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
+        if (weblinkToEdit.status >= 200 && weblinkToEdit.status <= 299) {
           onLoadWebLinks();
         }
 
@@ -185,7 +190,11 @@ export const WebLinks = ({
 
         if (error.response.status === 400) {
           notificationContext.add({
-            type: 'WRONG_WEB_LINK_ERROR'
+            type: 'WRONG_WEBLINK_ERROR'
+          });
+        } else if (error.response.status === 409) {
+          notificationContext.add({
+            type: 'DUPLICATED_WEBLINK_ERROR'
           });
         }
       } finally {
@@ -227,7 +236,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           disabled={(editingId === weblink.id && isEditing) || (deletingId === weblink.id && isDeleting)}
           icon={getEditButtonIcon()}
-          onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsAddOrEditWeblinkDialogVisible(true);
+          }}
           type="button"
         />
 
@@ -235,7 +247,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           disabled={(deletingId === weblink.id && isDeleting) || (editingId === weblink.id && isEditing)}
           icon={getDeleteButtonIcon()}
-          onClick={() => setIsConfirmDeleteVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsConfirmDeleteVisible(true);
+          }}
           type="button"
         />
       </div>
@@ -284,7 +299,6 @@ export const WebLinks = ({
       <DataTable
         autoLayout={true}
         loading={isLoading}
-        onRowSelect={e => setWeblinkItem(Object.assign({}, e.data))}
         onSort={e => {
           setSortFieldWeblinks(e.sortField);
           setSortOrderWeblinks(e.sortOrder);

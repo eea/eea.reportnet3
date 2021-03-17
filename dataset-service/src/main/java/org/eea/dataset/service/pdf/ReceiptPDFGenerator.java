@@ -1,6 +1,7 @@
 package org.eea.dataset.service.pdf;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -11,7 +12,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.util.IOUtils;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -35,6 +36,12 @@ public class ReceiptPDFGenerator {
   /** The Constant BACKGROUND. */
   private static final String BACKGROUND = "pdf/receipt_background.png";
 
+  /** The Constant HELVETICA: {@value}. */
+  private static final String HELVETICA = "pdf/Helvetica.ttf";
+
+  /** The Constant HELVETICA_BOLD: {@value}. */
+  private static final String HELVETICA_BOLD = "pdf/Helvetica-Bold.ttf";
+
   /** The Constant POINTS_PER_INCH. */
   private static final float POINTS_PER_INCH = 300;
 
@@ -55,7 +62,7 @@ public class ReceiptPDFGenerator {
    */
   public void generatePDF(ReleaseReceiptVO receipt, OutputStream out) {
     if (out != null) {
-      try (PDDocument document = new PDDocument()) {
+      try (PDDocument document = new PDDocument();) {
         // Create and add an A4 page
         PDPage page = new PDPage(A4);
         document.addPage(page);
@@ -88,16 +95,23 @@ public class ReceiptPDFGenerator {
     float spaceBetweenLines;
     float fontSize;
     String text;
-    ZoneId timeZone = ZoneId.of("UTC");
+    ZoneId timeZone = ZoneId.of("CET");
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
     PDPageContentStream contentStream = new PDPageContentStream(document, page);
-    PDType1Font font = PDType1Font.HELVETICA;
-    PDType1Font fontBold = PDType1Font.HELVETICA_BOLD;
+    PDType0Font font;
+    PDType0Font fontBold;
+    PDImageXObject pdImage;
+
+    try (InputStream helvetica = getClass().getClassLoader().getResourceAsStream(HELVETICA);
+        InputStream helveticaBold = getClass().getClassLoader().getResourceAsStream(HELVETICA_BOLD);
+        InputStream bg = getClass().getClassLoader().getResourceAsStream(BACKGROUND)) {
+      font = PDType0Font.load(document, helvetica);
+      fontBold = PDType0Font.load(document, helveticaBold);
+      pdImage = PDImageXObject.createFromByteArray(document, IOUtils.toByteArray(bg), BACKGROUND);
+    }
 
     // Print background
-    byte[] file = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(BACKGROUND));
-    PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, file, BACKGROUND);
     contentStream.drawImage(pdImage, 0, 0);
 
     // Print receipt left headers
@@ -184,8 +198,7 @@ public class ReceiptPDFGenerator {
     fontSize = 40f;
     x = 133f;
     y -= spaceBetweenLines * 4 - fontSize;
-    text = "The above-mentioned files were submitted by user: " + receipt.getUserName() + " ("
-        + receipt.getFullUserName() + ")";
+    text = "Submitted by user: " + receipt.getEmail();
     printLinePDF(contentStream, text, font, fontSize, x, y);
     contentStream.close();
   }
@@ -201,7 +214,7 @@ public class ReceiptPDFGenerator {
    * @param y the y
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void printLinePDF(PDPageContentStream contentStream, String text, PDType1Font font,
+  private void printLinePDF(PDPageContentStream contentStream, String text, PDType0Font font,
       float fontSize, float x, float y) throws IOException {
     contentStream.beginText();
     contentStream.newLineAtOffset(x, y);
@@ -220,7 +233,7 @@ public class ReceiptPDFGenerator {
    * @return the string[]
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private String[] splitInDifferentLines(String text, float maxLineWidth, PDType1Font font,
+  private String[] splitInDifferentLines(String text, float maxLineWidth, PDType0Font font,
       float fontSize) throws IOException {
 
     List<String> lines = new ArrayList<>();
@@ -268,7 +281,7 @@ public class ReceiptPDFGenerator {
    * @return the int
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private int cutWordToFitInLine(String word, String line, float maxLineWidth, PDType1Font font,
+  private int cutWordToFitInLine(String word, String line, float maxLineWidth, PDType0Font font,
       float fontSize) throws IOException {
 
     float wordWidth = font.getStringWidth(word) / 1000 * fontSize;

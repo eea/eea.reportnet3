@@ -19,7 +19,7 @@ const apiContributor = {
           })
     });
 
-    return response.data;
+    return response;
   },
 
   delete: async (account, dataflowId, dataProviderId) => {

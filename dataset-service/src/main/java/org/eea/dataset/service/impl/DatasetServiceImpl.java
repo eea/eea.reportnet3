@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +47,7 @@ import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
+import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -62,6 +61,7 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -96,7 +96,6 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
-import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -119,11 +118,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class DatasetServiceImpl.
@@ -148,6 +148,7 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
   private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
+
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -276,6 +277,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private PkCatalogueRepository pkCatalogueRepository;
 
+  /** The Test dataset repository. */
+  @Autowired
+  private TestDatasetRepository testDatasetRepository;
+
   /**
    * Process file.
    *
@@ -378,6 +383,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    */
   @Override
+  @CacheEvict(value = "dataFlowId", key = "#datasetId")
   public void deleteDataSchema(final String datasetId) {
     schemasRepository.deleteById(new ObjectId(datasetId));
   }
@@ -574,6 +580,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the data flow id by id
    */
   @Override
+  @Cacheable(value = "dataFlowId", key = "#datasetId")
   public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
@@ -647,11 +654,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveStatistics(final Long datasetId) throws EEAException {
-
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
 
     if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
-      List<Statistics> statsList = new ArrayList<>();
+      List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
       List<TableValue> allTableValues = dataset.getTableValues();
 
       DataSetMetabase datasetMb =
@@ -667,9 +673,8 @@ public class DatasetServiceImpl implements DatasetService {
             tableSchema.getNameTableSchema());
       }
 
-      for (TableValue tableValue : allTableValues) {
-        statsList.addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema));
-      }
+      allTableValues.parallelStream().forEach(tableValue -> statsList
+          .addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema)));
 
       // Check dataset validations
       Boolean datasetErrors = false;
@@ -684,23 +689,15 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
 
-      Statistics statsIdDatasetSchema =
-          fillStat(datasetId, null, "idDataSetSchema", dataset.getIdDatasetSchema());
-      statsList.add(statsIdDatasetSchema);
+      statsList.add(fillStat(datasetId, null, "idDataSetSchema", dataset.getIdDatasetSchema()));
+      statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
+      statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
-      Statistics statsNameDatasetSchema =
-          fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName());
-      statsList.add(statsNameDatasetSchema);
-
-      Statistics statsDatasetErrors =
-          fillStat(datasetId, null, "datasetErrors", datasetErrors.toString());
-      statsList.add(statsDatasetErrors);
 
       statisticsRepository.deleteStatsByIdDataset(datasetId);
       statisticsRepository.flush();
       statisticsRepository.saveAll(statsList);
-
-      LOG.info("Statistics save to datasetId {}.", datasetId);
+      LOG.info("Statistics saved to datasetId {}.", datasetId);
     } else {
       LOG_ERROR.error("No dataset found to save statistics. DatasetId:{}", datasetId);
     }
@@ -1332,8 +1329,13 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream) {
     try {
-      exportETLDatasetVO(datasetId, outputStream);
+      long startTime = System.currentTimeMillis();
+      LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
+      exportDatasetETLSQL(datasetId, outputStream);
       outputStream.flush();
+      long endTime = System.currentTimeMillis() - startTime;
+      LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
+          endTime / 1000);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
@@ -1482,7 +1484,8 @@ public class DatasetServiceImpl implements DatasetService {
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         readOnlyTables.add(tableSchema.getIdTableSchema().toString());
       }
-      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchema != null
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
         fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
       }
     }
@@ -1784,38 +1787,35 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Spread data prefill.
    *
-   * @param originDatasetDesign the designs
-   * @param targetDatasetId the dataset id
+   * @param datasetSchema the dataset schema
+   * @param originId the origin id
+   * @param targetDataset the target dataset
    */
-  @Override
-  public void spreadDataPrefill(DesignDataset originDatasetDesign, Long targetDatasetId) {
+  private void spreadDataPrefill(DataSetSchema datasetSchema, Long originId,
+      DataSetMetabase targetDataset) {
     // get tables from schema
-    List<TableSchema> listOfTablesFiltered =
-        getTablesFromSchema(originDatasetDesign.getDatasetSchema());
+    List<TableSchema> listOfTablesFiltered = getTablesFromSchema(datasetSchema);
     // get the data from designs datasets
     if (!listOfTablesFiltered.isEmpty()) {
-
-      TenantResolver
-          .setTenantName(String.format(DATASET_ID, originDatasetDesign.getId().toString()));
-
+      TenantResolver.setTenantName(String.format(DATASET_ID, originId));
       List<RecordValue> targetRecords = new ArrayList<>();
 
       // fill the data
       DatasetValue ds = new DatasetValue();
-      ds.setId(targetDatasetId);
+      ds.setId(targetDataset.getId());
 
       Optional<PartitionDataSetMetabase> datasetPartition =
-          partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDatasetId);
+          partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset.getId());
       Long datasetPartitionId = datasetPartition.orElse(new PartitionDataSetMetabase()).getId();
       // attachment values
       List<AttachmentValue> attachments = new ArrayList<>();
       Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
       iterableAttachments.forEach(attachments::add);
-      recordDesingAssignation(targetDatasetId, originDatasetDesign, targetRecords,
-          datasetPartitionId, attachments, listOfTablesFiltered);
+      recordDesingAssignation(targetDataset, originId, targetRecords, datasetPartitionId,
+          attachments, listOfTablesFiltered);
       if (!targetRecords.isEmpty()) {
         // save values
-        TenantResolver.setTenantName(String.format(DATASET_ID, targetDatasetId));
+        TenantResolver.setTenantName(String.format(DATASET_ID, targetDataset.getId()));
         recordRepository.saveAll(targetRecords);
         // copy attachments too
         if (!attachments.isEmpty()) {
@@ -1849,14 +1849,14 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Record desing assignation.
    *
-   * @param targetDatasetId the target dataset id
-   * @param originDatasetDesign the origin dataset design
+   * @param targetDataset the target dataset
+   * @param originId the origin id
    * @param targetRecords the record design values list
    * @param datasetPartitionId the dataset partition id
    * @param attachments the attachments
    * @param listOfTablesFiltered the list of tables filtered
    */
-  private void recordDesingAssignation(Long targetDatasetId, DesignDataset originDatasetDesign,
+  private void recordDesingAssignation(DataSetMetabase targetDataset, Long originId,
       List<RecordValue> targetRecords, Long datasetPartitionId, List<AttachmentValue> attachments,
       List<TableSchema> listOfTablesFiltered) {
 
@@ -1867,8 +1867,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     });
 
-    Long dataProviderId =
-        datasetMetabaseService.findDatasetMetabase(targetDatasetId).getDataProviderId();
+    Long dataProviderId = targetDataset.getDataProviderId();
     final DataProviderVO dataproviderVO =
         null != dataProviderId ? representativeControllerZuul.findDataProviderById(dataProviderId)
             : new DataProviderVO();
@@ -1880,11 +1879,12 @@ public class DatasetServiceImpl implements DatasetService {
 
       List<FieldValue> pagedFieldValues;
       Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
+      TenantResolver.setTenantName(String.format(DATASET_ID, originId));
       TableValue targetTable =
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-      while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+      while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
+              .isEmpty()) {
 
         processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
             dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
@@ -1892,12 +1892,9 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValuePage = fieldValuePage.next();
       }
 
-
     });
 
   }
-
-  // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
 
   /**
    * Process record page.
@@ -1912,6 +1909,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetPartitionId the dataset partition id
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    */
+  // Method invoked from recordDesingAssignation and replaceData methods, reducing duplicated code
   // and Cognitive Complexity
   private void processRecordPage(List<FieldValue> pagedFieldValues, List<RecordValue> targetRecords,
       Map<String, RecordValue> mapTargetRecordValues,
@@ -1956,11 +1954,10 @@ public class DatasetServiceImpl implements DatasetService {
 
       auxField.setRecord(mapTargetRecordValues.get(originRecordId));
 
-      if (DataType.ATTACHMENT.equals(field.getType())) {
-        if (dictionaryIdFieldAttachment.containsKey(field.getId())) {
-          dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
-          dictionaryIdFieldAttachment.get(field.getId()).setId(null);
-        }
+      if (DataType.ATTACHMENT.equals(field.getType())
+          && dictionaryIdFieldAttachment.containsKey(field.getId())) {
+        dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(auxField);
+        dictionaryIdFieldAttachment.get(field.getId()).setId(null);
 
       }
       auxField.setGeometry(field.getGeometry());
@@ -1976,12 +1973,10 @@ public class DatasetServiceImpl implements DatasetService {
   /**
    * Gets the tables from schema.
    *
-   * @param idDatasetSchema the id dataset schema
-   *
+   * @param schema the schema
    * @return the tables from schema
    */
-  private List<TableSchema> getTablesFromSchema(String idDatasetSchema) {
-    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+  private List<TableSchema> getTablesFromSchema(DataSetSchema schema) {
     List<TableSchema> listOfTables = schema.getTableSchemas();
     List<TableSchema> listOfTablesFiltered = new ArrayList<>();
     for (TableSchema desingTableToPrefill : listOfTables) {
@@ -2006,34 +2001,6 @@ public class DatasetServiceImpl implements DatasetService {
     return dataflowControllerZuul.getMetabaseById(dataflowId);
   }
 
-  /**
-   * Creates field values for a given record.
-   *
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param attachments the attachments
-   * @param recordAux the record aux
-   * @param fieldValues the field values
-   * @param fieldValuesOnlyValues the field values only values
-   */
-  private void createFieldValueForRecord(Map<String, String> dictionaryOriginTargetObjectId,
-      Map<String, AttachmentValue> attachments, RecordValue recordAux, List<FieldValue> fieldValues,
-      List<FieldValue> fieldValuesOnlyValues) {
-    for (FieldValue field : fieldValues) {
-      FieldValue auxField = new FieldValue();
-      auxField.setValue(field.getValue());
-      auxField.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
-      auxField.setType(field.getType());
-      auxField.setRecord(recordAux);
-      fieldValuesOnlyValues.add(auxField);
-      if (DataType.ATTACHMENT.equals(field.getType())) {
-        if (attachments.containsKey(field.getId())) {
-          attachments.get(field.getId()).setFieldValue(auxField);
-          attachments.get(field.getId()).setId(null);
-        }
-
-      }
-    }
-  }
 
   /**
    * Obtain partition.
@@ -2279,54 +2246,24 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
-
-    Set<Long> recordIdsFromRecordWithValidationBlocker =
+    // Find record ids with errors
+    List<IDError> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
+            tableValue.getIdTableSchema());
+    List<IDError> recordIdsFromFieldWithValidationBlocker = recordValidationRepository
+        .findRecordIdFromFieldWithValidationsByLevelError(datasetId, tableValue.getIdTableSchema());
 
-    Set<Long> recordIdsFromFieldWithValidationBlocker =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.BLOCKER);
-
-    Set<Long> recordIdsFromRecordWithValidationError =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
-
-    Set<Long> recordIdsFromFieldWithValidationError =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.ERROR);
-
-    Set<Long> recordIdsFromRecordWithValidationWarning =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
-
-    Set<Long> recordIdsFromFieldWithValidationWarning =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.WARNING);
-
-    Set<Long> recordIdsFromRecordWithValidationInfo =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
-
-    Set<Long> recordIdsFromFieldWithValidationInfo =
-        recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema(), ErrorTypeEnum.INFO);
-
-    Set<Long> idsBlockers = new HashSet<>();
-    idsBlockers.addAll(recordIdsFromRecordWithValidationBlocker);
-    idsBlockers.addAll(recordIdsFromFieldWithValidationBlocker);
-
-    Set<Long> idsErrors = new HashSet<>();
-    idsErrors.addAll(recordIdsFromRecordWithValidationError);
-    idsErrors.addAll(recordIdsFromFieldWithValidationError);
-
-    Set<Long> idsWarnings = new HashSet<>();
-    idsWarnings.addAll(recordIdsFromRecordWithValidationWarning);
-    idsWarnings.addAll(recordIdsFromFieldWithValidationWarning);
-
-    Set<Long> idsInfos = new HashSet<>();
-    idsInfos.addAll(recordIdsFromRecordWithValidationInfo);
-    idsInfos.addAll(recordIdsFromFieldWithValidationInfo);
+    Set<String> idsBlockers = new HashSet<>();
+    Set<String> idsErrors = new HashSet<>();
+    Set<String> idsWarnings = new HashSet<>();
+    Set<String> idsInfos = new HashSet<>();
+    // Sort errors by criticality
+    recordIdsFromRecordWithValidationBlocker.stream().forEach(keyset -> {
+      filterErrors(idsBlockers, idsErrors, idsWarnings, idsInfos, keyset);
+    });
+    recordIdsFromFieldWithValidationBlocker.stream().forEach(keyset -> {
+      filterErrors(idsBlockers, idsErrors, idsWarnings, idsInfos, keyset);
+    });
 
     idsErrors.removeAll(idsBlockers);
     idsWarnings.removeAll(idsBlockers);
@@ -2340,52 +2277,30 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecordsWithWarnings = Long.valueOf(idsWarnings.size());
     Long totalRecordsWithInfos = Long.valueOf(idsInfos.size());
 
-    TableStatisticsVO tableStats = new TableStatisticsVO();
-    tableStats.setIdTableSchema(tableValue.getIdTableSchema());
-    Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
-    tableStats.setTotalRecords(countRecords);
-
-    Long totalTableErrors = totalRecordsWithBlockers + totalRecordsWithErrors
-        + totalRecordsWithWarnings + totalRecordsWithInfos;
-
-    totalTableErrors = totalTableErrors + tableValue.getTableValidations().size();
-
-    tableStats.setNameTableSchema(mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
-    tableStats.setTotalErrors(totalTableErrors);
-    tableStats.setTotalRecordsWithBlockers(totalRecordsWithBlockers);
-    tableStats.setTotalRecordsWithErrors(totalRecordsWithErrors);
-    tableStats.setTotalRecordsWithWarnings(totalRecordsWithWarnings);
-    tableStats.setTotalRecordsWithInfos(totalRecordsWithInfos);
-    tableStats.setTableErrors(totalTableErrors > 0);
-
     List<Statistics> stats = new ArrayList<>();
+    Long countRecords = tableRepository.countRecordsByIdTableSchema(tableValue.getIdTableSchema());
 
-    Statistics statsIdTable = fillStat(datasetId, tableValue.getIdTableSchema(), "idTableSchema",
-        tableValue.getIdTableSchema());
-
-    Statistics statsNameTable = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "nameTableSchema", mapIdNameDatasetSchema.get(tableValue.getIdTableSchema()));
-
-    Statistics statsTotalTableError = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalErrors", totalTableErrors.toString());
-
-    Statistics statsTotalRecords =
-        fillStat(datasetId, tableValue.getIdTableSchema(), "totalRecords", countRecords.toString());
-
-    Statistics statsTotalRecordsWithBlockers = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithBlockers", totalRecordsWithBlockers.toString());
-
-    Statistics statsTotalRecordsWithErrors = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithErrors", totalRecordsWithErrors.toString());
-
-    Statistics statsTotalRecordsWithWarnings = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithWarnings", totalRecordsWithWarnings.toString());
-
-    Statistics statsTotalRecordsWithInfos = fillStat(datasetId, tableValue.getIdTableSchema(),
-        "totalRecordsWithInfos", totalRecordsWithInfos.toString());
+    Long totalTableErrors =
+        totalRecordsWithBlockers + totalRecordsWithErrors + totalRecordsWithWarnings
+            + totalRecordsWithInfos + tableValue.getTableValidations().size();
+    // Fill different stats
+    String tableSchemaId = tableValue.getIdTableSchema();
+    stats.add(fillStat(datasetId, tableSchemaId, "idTableSchema", tableValue.getIdTableSchema()));
+    stats.add(fillStat(datasetId, tableSchemaId, "nameTableSchema",
+        mapIdNameDatasetSchema.get(tableSchemaId)));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalErrors", totalTableErrors.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecords", countRecords.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithBlockers",
+        totalRecordsWithBlockers.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithErrors",
+        totalRecordsWithErrors.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithWarnings",
+        totalRecordsWithWarnings.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithInfos",
+        totalRecordsWithInfos.toString()));
 
     Statistics statsTableErrors = new Statistics();
-    statsTableErrors.setIdTableSchema(tableValue.getIdTableSchema());
+    statsTableErrors.setIdTableSchema(tableSchemaId);
     statsTableErrors.setStatName("tableErrors");
     ReportingDataset reporting = new ReportingDataset();
     reporting.setId(datasetId);
@@ -2393,20 +2308,40 @@ public class DatasetServiceImpl implements DatasetService {
     if (tableValue.getTableValidations() != null && !tableValue.getTableValidations().isEmpty()) {
       statsTableErrors.setValue("true");
     } else {
-      statsTableErrors.setValue(totalTableErrors > 0 ? "true" : "false");
+      statsTableErrors.setValue(String.valueOf(totalTableErrors > 0));
     }
 
-    stats.add(statsIdTable);
-    stats.add(statsNameTable);
-    stats.add(statsTotalTableError);
-    stats.add(statsTotalRecords);
-    stats.add(statsTotalRecordsWithBlockers);
-    stats.add(statsTotalRecordsWithErrors);
-    stats.add(statsTotalRecordsWithWarnings);
-    stats.add(statsTotalRecordsWithInfos);
     stats.add(statsTableErrors);
 
     return stats;
+  }
+
+  /**
+   * Filter errors.
+   *
+   * @param idsBlockers the ids blockers
+   * @param idsErrors the ids errors
+   * @param idsWarnings the ids warnings
+   * @param idsInfos the ids infos
+   * @param keyset the keyset
+   */
+  private void filterErrors(Set<String> idsBlockers, Set<String> idsErrors, Set<String> idsWarnings,
+      Set<String> idsInfos, IDError keyset) {
+    switch (keyset.getLevelError()) {
+      case "BLOCKER":
+        idsBlockers.add(keyset.getId());
+        break;
+      case "ERROR":
+        idsErrors.add(keyset.getId());
+        break;
+      case "WARNING":
+        idsWarnings.add(keyset.getId());
+        break;
+      case "INFO":
+        idsInfos.add(keyset.getId());
+        break;
+      default:
+    }
   }
 
   /**
@@ -2780,9 +2715,9 @@ public class DatasetServiceImpl implements DatasetService {
 
       // run through the origin table, getting its records and fields and translating them into the
       // new schema
-      while ((pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+      while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
           desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .size() > 0) {
+              .isEmpty()) {
         LOG.info(
             "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
             fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
@@ -2919,17 +2854,21 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the dataset type
    */
   @Override
+  @Cacheable(value = "datasetType", key = "#datasetId")
   public DatasetTypeEnum getDatasetType(Long datasetId) {
     DatasetTypeEnum type = null;
     if (reportingDatasetRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.REPORTING;
     } else if (designDatasetRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.DESIGN;
+    } else if (testDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.TEST;
     } else if (dataCollectionRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.COLLECTION;
     } else if (dataSetMetabaseRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.EUDATASET;
     }
+
     return type;
   }
 
@@ -3110,11 +3049,13 @@ public class DatasetServiceImpl implements DatasetService {
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       }
-    }
-
-    // Dataset: REPORTING
-    else {
-      dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+    } else {
+      // Dataset: TEST
+      dataset = testDatasetRepository.findById(datasetId).orElse(null);
+      if (null == dataset) {
+        // Dataset: REPORTING
+        dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+      }
       if (null != dataset && TypeStatusEnum.DRAFT
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
@@ -3129,7 +3070,6 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     }
-
     return schema;
   }
 
@@ -3274,7 +3214,6 @@ public class DatasetServiceImpl implements DatasetService {
    * @param file the file
    * @param nameFileUnique the name file unique
    * @param nameFileScape the name file scape
-   * @throws FileNotFoundException the file not found exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void createFilesAndZip(Long dataflowId, Long dataProviderId,
@@ -3332,7 +3271,6 @@ public class DatasetServiceImpl implements DatasetService {
             }
           }
         }
-
       }
     }
 
@@ -3408,137 +3346,156 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Export ETL dataset VO.
+   * Initialize dataset.
    *
    * @param datasetId the dataset id
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @param idDatasetSchema the id dataset schema
+   * @throws EEAException the EEA exception
    */
-  private void exportETLDatasetVO(Long datasetId, OutputStream outputStream) throws IOException {
-    outputStream.write("{\"tables\":".getBytes());
-    exportETLTableVOList(datasetId, outputStream);
-    outputStream.write("}".getBytes());
-    LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
-  }
+  @Override
+  public void initializeDataset(Long datasetId, String idDatasetSchema) {
+    try {
+      // 1.Insert the dataset schema into DatasetValue
+      DatasetValue dataset = new DatasetValue();
+      dataset.setIdDatasetSchema(idDatasetSchema);
+      dataset.setId(datasetId);
 
-
-  /**
-   * Export ETL table VO list.
-   *
-   * @param datasetId the dataset id
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void exportETLTableVOList(Long datasetId, OutputStream outputStream) throws IOException {
-
-    // Get the datasetSchemaId by the datasetId
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-    // Get the datasetSchema by the datasetSchemaId
-    DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-
-    outputStream.write("[".getBytes());
-    // Loop to fill ETLTableVOs
-    if (null != datasetSchema) {
-      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-      int nTables = tableSchemaList.size();
-      for (int i = 0; i < nTables; i++) {
-        exportETLTableVO(datasetId, tableSchemaList.get(i), outputStream);
-        if (i + 1 < nTables) {
-          outputStream.write(",".getBytes());
-        }
-        System.gc();
+      // 2.Search the table schemas of the dataset and then insert it into TableValue
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+      List<TableValue> tableValues = new ArrayList<>();
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        TableValue tv = new TableValue();
+        tv.setIdTableSchema(tableSchema.getIdTableSchema().toString());
+        tv.setDatasetId(dataset);
+        tableValues.add(tv);
       }
-      outputStream.write("]".getBytes());
+      dataset.setTableValues(tableValues);
+      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+      datasetRepository.save(dataset);
+
+
+      List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
+
+      DataSetMetabase datasetMb =
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+
+      Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+            tableSchema.getNameTableSchema());
+      }
+
+      tableValues.parallelStream().forEach(tableValue -> statsList.addAll(
+          initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema)));
+
+      statsList.add(fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema));
+
+      statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
+
+      statsList.add(fillStat(datasetId, null, "datasetErrors", "false"));
+
+      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+      statisticsRepository.saveAll(statsList);
+
+      LOG.info("Statistics save to datasetId {}.", datasetId);
+      DatasetTypeEnum type = getDatasetType(datasetId);
+      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)) {
+        DesignDataset originDatasetDesign =
+            designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
+        if (null != originDatasetDesign) {
+          // and we have found the design dataset
+          // with data to be copied into the
+          // target dataset
+          spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
+        }
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error executing the processes after creating a new empty dataset. Error message: {}",
+          e.getMessage(), e);
     }
   }
 
-
   /**
-   * Export ETL table VO.
+   * Initialize table stats.
    *
-   * @param tableSchema the table schema
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void exportETLTableVO(Long datasetId, TableSchema tableSchema, OutputStream outputStream)
-      throws IOException {
-
-    // Match each fieldSchemaId with its headerName
-    Map<String, String> fieldMap = new HashMap<>();
-    for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-      fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
-    }
-
-    String json = "{\"tableName\":\"" + tableSchema.getNameTableSchema() + "\", \"records\":";
-    outputStream.write(json.getBytes());
-
-    exportETLRecordVOList(datasetId, fieldMap, tableSchema, outputStream);
-    outputStream.write("}".getBytes());
-
-  }
-
-
-  /**
-   * Export ETL record VO list.
-   *
-   * @param fieldMap the field map
    * @param tableSchemaId the table schema id
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @param datasetId the dataset id
+   * @param mapIdNameDatasetSchema the map id name dataset schema
+   * @return the list
    */
-  private void exportETLRecordVOList(Long datasetId, Map<String, String> fieldMap,
-      TableSchema tableSchema, OutputStream outputStream) throws IOException {
-    Long totalRecords =
-        tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
-    LOG.info("DatasetId: {}, total Records:{}", datasetId, totalRecords);
-    int nPages = (int) Math.ceil(totalRecords / 10000.0);
+  private List<Statistics> initializeTableStats(final String tableSchemaId, final Long datasetId,
+      final Map<String, String> mapIdNameDatasetSchema) {
+    List<Statistics> stats = new ArrayList<>();
 
-    outputStream.write("[".getBytes());
-    for (int i = 0; i < nPages; i++) {
-      LOG.info("DatasetId: {} ,etlExport: page={}, total={}", datasetId, i, nPages);
+    stats.add(fillStat(datasetId, tableSchemaId, "idTableSchema", tableSchemaId));
+    stats.add(fillStat(datasetId, tableSchemaId, "nameTableSchema",
+        mapIdNameDatasetSchema.get(tableSchemaId)));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalErrors", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecords", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithBlockers", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithErrors", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithWarnings", "0"));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithInfos", "0"));
 
-      for (Iterator<RecordValue> iter = recordRepository.findByTableValueNoOrderOptimized(
-          tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 10000)).iterator(); iter
-              .hasNext();) {
-        RecordValue record = iter.next();
-        exportETLRecordVO(record, fieldMap, outputStream);
-        if (i + 1 < nPages || iter.hasNext()) {
-          outputStream.write(",".getBytes());
-        }
-        iter.remove();
-      }
-      outputStream.flush();
-    }
-    outputStream.write("]".getBytes());
+    Statistics statsTableErrors = new Statistics();
+    statsTableErrors.setIdTableSchema(tableSchemaId);
+    statsTableErrors.setStatName("tableErrors");
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(datasetId);
+    statsTableErrors.setDataset(reporting);
+    statsTableErrors.setValue("false");
+
+    stats.add(statsTableErrors);
+
+    return stats;
   }
 
   /**
-   * Export ETL record VO.
+   * 
+   * Export dataset ETLSQL.
    *
-   * @param record the record
-   * @param fieldMap the field map
+   * @param datasetId the dataset id
    * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void exportETLRecordVO(RecordValue record, Map<String, String> fieldMap,
-      OutputStream outputStream) throws IOException {
+  private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream) {
+    try {
+      String queryFirstPart =
+          "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
 
-    ETLRecordVO etlRecordVO = new ETLRecordVO();
-    List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
-    etlRecordVO.setFields(etlFieldVOs);
-    etlRecordVO.setCountryCode(record.getDataProviderCode());
+      String queryMiddlePart =
+          " end as \"tableName\",( select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\",(select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
 
-    // Loop to fill ETLFieldVOs
-    for (FieldValue field : record.getFields()) {
-      ETLFieldVO etlFieldVO = new ETLFieldVO();
-      etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
-      etlFieldVO.setValue(field.getValue());
-      etlFieldVOs.add(etlFieldVO);
+      String queryFinalPart =
+          " end as \"fieldName\",fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) from dataset_%s.record_value rv where tv.id = rv.id_table ) as record) from dataset_%s.table_value tv ) as tableAux ) as tablesAux ";
+
+      String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
+
+      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
+      String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+      // Get the datasetSchema by the datasetSchemaId
+      DataSetSchema datasetSchema =
+          schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+      StringBuilder query = new StringBuilder(queryFirstPart);
+      for (TableSchema table : tableSchemaList) {
+        query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema(),
+            table.getNameTableSchema()));
+      }
+      query.append(queryMiddlePart);
+      for (TableSchema table : tableSchemaList) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          query.append(
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+        }
+      }
+      query.append(String.format(queryFinalPart, datasetId, datasetId, datasetId));
+      LOG.info("Query: " + query.toString());
+      outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+      LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
+    } catch (IOException e) {
+      LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
-
-    ObjectMapper mapper = new ObjectMapper();
-    outputStream.write(mapper.writeValueAsBytes(etlRecordVO));
   }
-
 }

@@ -403,11 +403,27 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/private/getReportingPublic/dataflow/{id}",
+  @GetMapping(value = "/private/reportingPublic/dataflow/{id}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(
       @PathVariable("id") Long dataflowId) {
     return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
+  }
+
+  /**
+   * Find reporting data set public by dataflow id and provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/reportingPublic/dataflow/{id}/provider/{providerId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowIdAndProviderId(
+      @PathVariable("id") Long dataflowId, @PathVariable("providerId") Long providerId) {
+    return reportingDatasetService.getDataSetPublicByDataflowAndProviderId(dataflowId, providerId);
   }
 
 

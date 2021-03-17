@@ -4,9 +4,11 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -78,18 +80,6 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
-
-
-  /**
-   * Update user request status.
-   *
-   * @param userRequestId the user request id
-   * @param type the type
-   *
-   * @throws EEAException the EEA exception
-   */
-  void updateUserRequestStatus(Long userRequestId, TypeRequestEnum type) throws EEAException;
-
 
   /**
    * Adds the contributor to dataflow.
@@ -187,4 +177,34 @@ public interface DataflowService {
    * @param showPublicInfo the show public info
    */
   void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo);
+
+  /**
+   * Gets the user roles.
+   *
+   * @param dataProviderId the data provider id
+   * @return the user roles
+   */
+  List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList);
+
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param header the header
+   * @param asc the asc
+   * @param page the page
+   * @param pageSize the page size
+   * @return the public dataflows by country
+   */
+  DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
+      boolean asc, int page, int pageSize);
+
+
+  /**
+   * Gets the dataflows by data provider ids.
+   *
+   * @param dataProviderIds the data provider ids
+   * @return the dataflows by data provider ids
+   */
+  List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds);
 }

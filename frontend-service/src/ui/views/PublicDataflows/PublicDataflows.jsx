@@ -14,12 +14,15 @@ import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const PublicDataflows = withRouter(({ history, match }) => {
+  const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
@@ -43,7 +46,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
   const onLoadPublicDataflows = async () => {
     try {
       const publicData = await DataflowService.publicData();
-      setPublicDataflows(publicData);
+      setPublicDataflows(publicData.data);
     } catch (error) {
       console.error('error', error);
     } finally {
@@ -62,20 +65,24 @@ export const PublicDataflows = withRouter(({ history, match }) => {
           <h1 className={styles.title}>Dataflows</h1>
           <div className={styles.dataflowsList}>
             {!isLoading ? (
-              publicDataflows.map(dataflow => (
-                <PublicCard
-                  animation
-                  card={dataflow}
-                  dueDate={dataflow.expirationDate}
-                  instrument={dataflow.obligation.legalInstruments}
-                  isReleasable={dataflow.isReleasable}
-                  key={dataflow.id}
-                  obligation={dataflow.obligation}
-                  onCardClick={() => onOpenDataflow(dataflow.id)}
-                  subtitle={{ text: dataflow.description, url: '' }}
-                  title={{ text: dataflow.name, url: '' }}
-                />
-              ))
+              publicDataflows.length != 0 ? (
+                publicDataflows.map(dataflow => (
+                  <PublicCard
+                    animation
+                    card={dataflow}
+                    dueDate={dataflow.expirationDate}
+                    instrument={dataflow.obligation.legalInstruments}
+                    isReleasable={dataflow.isReleasable}
+                    key={dataflow.id}
+                    obligation={dataflow.obligation}
+                    onCardClick={() => onOpenDataflow(dataflow.id)}
+                    subtitle={{ text: dataflow.description, url: '' }}
+                    title={{ text: dataflow.name, url: '' }}
+                  />
+                ))
+              ) : (
+                <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
+              )
             ) : (
               <Spinner style={{ top: 0, left: 0 }} />
             )}

@@ -8,13 +8,16 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -61,6 +64,10 @@ public class DataFlowControllerImpl implements DataFlowController {
   /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
+
+  /** The representative service. */
+  @Autowired
+  private RepresentativeService representativeService;
 
   /**
    * Find by id.
@@ -203,31 +210,6 @@ public class DataFlowControllerImpl implements DataFlowController {
       LOG_ERROR.error(e.getMessage());
     }
     return dataflows;
-  }
-
-  /**
-   * Update user request.
-   *
-   * @param idUserRequest the id user request
-   * @param type the type
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
-  @PutMapping("/updateStatusRequest/{idUserRequest}")
-  @ApiOperation(value = "Update a Join Request's Status for a User")
-  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
-  public void updateUserRequest(
-      @ApiParam(value = "User request Id",
-          example = "0") @PathVariable("idUserRequest") Long idUserRequest,
-      @ApiParam(type = "Object",
-          value = "Join Request Status") @RequestParam("type") TypeRequestEnum type) {
-    try {
-      dataflowService.updateUserRequestStatus(idUserRequest, type);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    }
   }
 
   /**
@@ -493,6 +475,28 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflowService.getPublicDataflows();
   }
 
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param sortField the sort field
+   * @param asc the asc
+   * @return the public dataflows by country
+   */
+  @Override
+  @GetMapping("/public/country/{countryCode}")
+  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
+      @ApiParam(value = "Country Code",
+          example = "AL") @PathVariable("countryCode") String countryCode,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+      @RequestParam(value = "sortField", required = false) String sortField,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
+    return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
+        pageSize);
+  }
 
   /**
    * Update data flow public status.
@@ -506,6 +510,39 @@ public class DataFlowControllerImpl implements DataFlowController {
       @RequestParam("showPublicInfo") boolean showPublicInfo) {
     dataflowService.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
   }
+
+
+  /**
+   * Gets the user roles all dataflows.
+   *
+   * @return the user roles all dataflows
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getUserRolesAllDataflows")
+  public List<DataflowUserRoleVO> getUserRolesAllDataflows() {
+    List<Long> dataProviderIds = new ArrayList<>();
+    List<DataflowUserRoleVO> result = new ArrayList<>();
+    List<DataFlowVO> dataflows;
+    try {
+      // get providerId and check if user is National coordinator
+      dataProviderIds = representativeService.getProviderIds();
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
+    }
+
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+
+    dataflows = dataflowService.getDataflowsByDataProviderIds(dataProviderIds);
+    dataProviderIds.stream().forEach(
+        dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
+
+    return result;
+  }
+
+
 
   /**
    * Checks if is user data custodian.

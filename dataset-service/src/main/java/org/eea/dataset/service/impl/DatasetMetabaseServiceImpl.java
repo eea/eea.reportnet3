@@ -24,6 +24,7 @@ import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
+import org.eea.dataset.persistence.metabase.domain.TestDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -31,6 +32,7 @@ import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -61,6 +63,8 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -138,6 +142,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private EUDatasetRepository euDatasetRepository;
 
+  /** The test dataset repository. */
+  @Autowired
+  private TestDatasetRepository testDatasetRepository;
+
 
   /**
    * The Constant LOG.
@@ -214,6 +222,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   @Transactional
+  @CacheEvict(value = "dataFlowId", key = "#datasetId")
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteNativeDataset(datasetId);
   }
@@ -580,6 +589,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
                 dataflowId, dataset.getId(), datasetName);
             this.createGroupDcAndAddUser(dataset.getId());
             break;
+          case TEST:
+            dataset = new TestDataset();
+            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+            testDatasetRepository.save((TestDataset) dataset);
+            recordStoreControllerZuul.createEmptyDataset(
+                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
+            LOG.info("New Test Dataset created into the dataflow {}. DatasetId {} with name {}",
+                dataflowId, dataset.getId(), datasetName);
+            this.createGroupDcAndAddUser(dataset.getId());
+            break;
           default:
             throw new EEAException("Unsupported datasetType: " + datasetType);
         }
@@ -741,6 +760,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
 
   @Override
+  @Cacheable(value = "datasetType", key = "#datasetId")
   public DatasetTypeEnum getDatasetType(Long datasetId) {
     DatasetTypeEnum type = null;
 
@@ -752,6 +772,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       type = DatasetTypeEnum.COLLECTION;
     } else if (euDatasetRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.EUDATASET;
+    } else if (testDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.TEST;
     }
 
     return type;

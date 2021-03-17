@@ -110,7 +110,7 @@ export const BigButtonList = ({
 
   const [providerId, setProviderId] = useState(null);
   const [showPublicInfo, setShowPublicInfo] = useState(true);
-  const hasExpirationDate = new Date(dataflowState.obligations.expirationDate) > new Date();
+  const hasExpirationDate = new Date(dataflowState.obligations?.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 
   const dataflowId = dataflowState.id;
@@ -152,7 +152,7 @@ export const BigButtonList = ({
 
   useEffect(() => {
     getExpirationDate();
-  }, [dataflowState.obligations.expirationDate]);
+  }, [dataflowState.obligations?.expirationDate]);
 
   const checkShowPublicInfo = (
     <div style={{ float: 'left' }}>
@@ -230,7 +230,7 @@ export const BigButtonList = ({
 
   const getExpirationDate = () => {
     setDataCollectionDueDate(
-      !isNil(dataflowState.obligations.expirationDate) &&
+      !isNil(dataflowState.obligations?.expirationDate) &&
         new Date(dataflowState.obligations.expirationDate) > new Date()
         ? new Date(dataflowState.obligations.expirationDate)
         : null
@@ -327,7 +327,6 @@ export const BigButtonList = ({
   const onLoadEuDatasetIntegration = async datasetSchemaId => {
     try {
       const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
-
       setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
@@ -351,8 +350,8 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      const response = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
-      if (response >= 200 && response <= 299) {
+      const { status } = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
+      if (status >= 200 && status <= 299) {
         onUpdateData();
         setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
       }
@@ -415,7 +414,7 @@ export const BigButtonList = ({
       setIsReceiptLoading(true);
       const response = await ConfirmationReceiptService.download(dataflowId, dataProviderId);
 
-      downloadPdf(response);
+      downloadPdf(response.data);
       onCleanUpReceipt();
     } catch (error) {
       console.error(error);

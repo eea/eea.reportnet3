@@ -9,9 +9,9 @@ import isUndefined from 'lodash/isUndefined';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
-import logo from 'assets/images/logo.png';
+import logo from 'assets/images/logos/logo.png';
 import styles from './Header.module.scss';
-import ReportnetPublicLogo from 'assets/images/reportnet_public_logo.svg';
+import ReportnetPublicLogo from 'assets/images/logos/reportnet_public_logo.svg';
 
 import { AccessPointWebConfig } from 'conf/domain/model/AccessPoint/AccessPoint.web.config';
 
@@ -191,7 +191,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         });
       }
     }
-    userContext.socket.disconnect(() => {});
+    userContext.socket.deactivate();
     try {
       await UserService.logout();
     } catch (error) {

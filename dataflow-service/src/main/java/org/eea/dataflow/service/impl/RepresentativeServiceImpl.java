@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +53,11 @@ import io.jsonwebtoken.lang.Collections;
 @Service("dataflowRepresentativeService")
 public class RepresentativeServiceImpl implements RepresentativeService {
 
+  /** The Constant REGEX: {@value}. */
+  private static final String REGEX = "-";
+
+  /** The Constant ROLE_PROVIDER: {@value}. */
+  private static final String ROLE_PROVIDER = "ROLE_PROVIDER-";
 
   /** The representative repository. */
   @Autowired
@@ -265,6 +272,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
+   * Find data providers by ids.
+   *
+   * @param code the code
+   * @return the list
+   */
+  @Override
+  public List<DataProviderVO> findDataProvidersByCode(String code) {
+    List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
+    return dataProviderMapper.entityListToClass(dataProviders);
+  }
+
+  /**
    * Gets the represetatives by dataflow id and email.
    *
    * @param dataflowId the dataflow id
@@ -278,6 +297,19 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         .entityListToClass(representativeRepository.findByDataflowIdAndEmail(dataflowId, email));
   }
 
+  /**
+   * Find representatives by dataflow and dataprovider list.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderIdList the data provider id list
+   * @return the list
+   */
+  @Override
+  public List<RepresentativeVO> findRepresentativesByDataflowIdAndDataproviderList(Long dataflowId,
+      List<Long> dataProviderIdList) {
+    return representativeMapper.entityListToClass(representativeRepository
+        .findByDataflowIdAndDataProviderIdIn(dataflowId, dataProviderIdList));
+  }
 
   /**
    * Export file.
@@ -641,6 +673,25 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return isAuthorized;
   }
 
+
+  /**
+   * Gets the provider ids.
+   *
+   * @return the provider ids
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Long> getProviderIds() throws EEAException {
+    List<DataProviderVO> dataProviders = null;
+    String countryCode = getCountryCodeNC();
+    if (null != countryCode) {
+      dataProviders = findDataProvidersByCode(countryCode);
+    } else {
+      throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
+    }
+    return dataProviders.stream().map(provider -> provider.getId()).collect(Collectors.toList());
+  }
+
   /**
    * Modify lead reporter permissions.
    *
@@ -689,5 +740,25 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     resource.setResourceGroup(group);
 
     return resource;
+  }
+
+  /**
+   * Gets the country code NC.
+   *
+   * @return the country code NC
+   */
+  private String getCountryCodeNC() {
+    Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
+        .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
+        .collect(Collectors.toList());
+    String countryCode = null;
+    for (String auth : authorities) {
+      if (null != auth && auth.contains(ROLE_PROVIDER)) {
+        String[] roleSplit = auth.split(REGEX);
+        countryCode = roleSplit[1];
+        break;
+      }
+    }
+    return countryCode;
   }
 }

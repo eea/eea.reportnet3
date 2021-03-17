@@ -3,9 +3,11 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -77,16 +79,6 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findDataflows();
-
-  /**
-   * Update user request.
-   *
-   * @param idUserRequest the id user request
-   * @param type the type
-   */
-  @PutMapping("/updateStatusRequest/{idUserRequest}")
-  void updateUserRequest(@PathVariable("idUserRequest") Long idUserRequest,
-      @RequestParam("type") TypeRequestEnum type);
 
   /**
    * Adds the contributor.
@@ -171,6 +163,7 @@ public interface DataFlowController {
 
   @GetMapping("/getPublicDataflow/{dataflowId}")
   DataflowPublicVO getPublicDataflow(@PathVariable("dataflowId") Long dataflowId);
+
   /**
    * Update data flow public status.
    *
@@ -181,5 +174,29 @@ public interface DataFlowController {
   void updateDataFlowPublicStatus(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("showPublicInfo") boolean showPublicInfo);
 
+  /**
+   * Gets the user roles all dataflows.
+   *
+   * @return the user roles all dataflows
+   */
+  @GetMapping("/getUserRolesAllDataflows")
+  List<DataflowUserRoleVO> getUserRolesAllDataflows();
 
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param sortField the sort field
+   * @param asc the asc
+   * @return the public dataflows by country
+   */
+  @GetMapping("/public/country/{countryCode}")
+  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
+      @PathVariable("countryCode") String countryCode,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+      @RequestParam(value = "sortField", required = false) String sortField,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc);
 }

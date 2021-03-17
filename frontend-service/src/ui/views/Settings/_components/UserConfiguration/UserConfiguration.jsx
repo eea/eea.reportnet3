@@ -1,6 +1,17 @@
 import React, { Fragment, useContext } from 'react';
 import styles from './userConfiguration.module.scss';
 
+import DarkGray from 'assets/images/layers/DarkGray.png';
+import Gray from 'assets/images/layers/Gray.png';
+import Imagery from 'assets/images/layers/Imagery.png';
+import ImageryClarity from 'assets/images/layers/ImageryClarity.png';
+import ImageryFirefly from 'assets/images/layers/ImageryFirefly.png';
+import NationalGeographic from 'assets/images/layers/NationalGeographic.png';
+import Oceans from 'assets/images/layers/Oceans.png';
+import ShadedRelief from 'assets/images/layers/ShadedRelief.png';
+import Streets from 'assets/images/layers/Streets.png';
+import Topographic from 'assets/images/layers/Topographic.png';
+
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { TitleWithItem } from 'ui/views/_components/TitleWithItem';
@@ -18,6 +29,33 @@ const UserConfiguration = () => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
+  const loadImage = layer => {
+    switch (layer) {
+      case 'Topographic':
+        return Topographic;
+      case 'Streets':
+        return Streets;
+      case 'National Geographic':
+        return NationalGeographic;
+      case 'Oceans':
+        return Oceans;
+      case 'Gray':
+        return Gray;
+      case 'Dark Gray':
+        return DarkGray;
+      case 'Imagery':
+        return Imagery;
+      case 'Imagery (Clarity)':
+        return ImageryClarity;
+      case 'Imagery (Firefly)':
+        return ImageryFirefly;
+      case 'Shaded Relief':
+        return ShadedRelief;
+      default:
+        return '';
+    }
+  };
+
   const basemapTemplate = option => {
     if (!option.value) {
       return option.label;
@@ -25,7 +63,7 @@ const UserConfiguration = () => {
       return (
         <div className={`p-clearfix ${styles.basemapItem}`}>
           <span style={{ margin: '.5em .25em 0 0.5em' }}>{option.label}</span>
-          <img alt={option.label} src={`assets/img/layers/${option.value}.png`} />
+          <img alt={option.label} src={loadImage(option.label)} />
         </div>
       );
     }
@@ -142,6 +180,54 @@ const UserConfiguration = () => {
     </Fragment>
   );
 
+  const notificationSoundSwitch = (
+    <Fragment>
+      <span className={styles.switchTextInput}>{resources.messages['noSound']}</span>
+      <InputSwitch
+        checked={userContext.userProps.notificationSound}
+        onChange={async e => {
+          userContext.onToggleNotificationSound(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.notificationSound = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onToggleNotificationSound(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.notificationSound === true
+            ? resources.messages['toggleNotificationSoundOff']
+            : resources.messages['toggleNotificationSoundOn']
+        }
+      />
+      <span className={styles.switchTextInput}>{resources.messages['sound']}</span>
+    </Fragment>
+  );
+
+  const pushNotificationsSwitch = (
+    <Fragment>
+      <span className={styles.switchTextInput}>{resources.messages['noPushNotifications']}</span>
+      <InputSwitch
+        checked={userContext.userProps.pushNotifications}
+        onChange={async e => {
+          userContext.onTogglePushNotifications(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.pushNotifications = e.value;
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onTogglePushNotifications(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.notificationSound === true
+            ? resources.messages['togglePushNotificationOff']
+            : resources.messages['togglePushNotificationOn']
+        }
+      />
+      <span className={styles.switchTextInput}>{resources.messages['pushNotifications']}</span>
+    </Fragment>
+  );
+
   const chooseTypeViewSwitch = (
     <Fragment>
       <span className={styles.switchTextInput}>{`${resources.messages['magazineView']}`}</span>
@@ -210,51 +296,73 @@ const UserConfiguration = () => {
 
   const basemapLayerConfiguration = (
     <TitleWithItem
-      title={resources.messages['basemapLayer']}
       icon="map"
       iconSize="2rem"
-      subtitle={resources.messages['userSettingsBasemapLayerSubtitle']}
       items={[basemapLayerDropdown]}
+      subtitle={resources.messages['userSettingsBasemapLayerSubtitle']}
+      title={resources.messages['basemapLayer']}
     />
   );
 
   const themeConfiguration = (
     <TitleWithItem
-      title={resources.messages['theme']}
       icon="palette"
       iconSize="2rem"
-      subtitle={resources.messages['userSettingsThemeSubtitle']}
       items={[themeSwitch]}
+      subtitle={resources.messages['userSettingsThemeSubtitle']}
+      title={resources.messages['theme']}
     />
   );
 
   const logoutConfiguration = (
     <TitleWithItem
-      title={resources.messages['userConfirmationLogout']}
       icon="power-off"
       iconSize="2rem"
-      subtitle={resources.messages['userSettingsConfirmSubtitle']}
       items={[confirmationLogoutSwitch]}
+      subtitle={resources.messages['userSettingsConfirmSubtitle']}
+      title={resources.messages['userConfirmationLogout']}
+    />
+  );
+  const pushNotificationsConfiguration = (
+    <TitleWithItem
+      hasInfoTooltip={true}
+      icon="flag"
+      iconSize="2rem"
+      imgClassName={styles.pushNotificationsImgInfo}
+      items={[pushNotificationsSwitch]}
+      subtitle={resources.messages['userSettingsPushNotificationsSubtitle']}
+      title={resources.messages['userPushNotifications']}
+      tooltipInfo={resources.messages['userPushNotificationsTooltipInfo']}
+    />
+  );
+
+  const soundConfiguration = (
+    <TitleWithItem
+      icon="sound"
+      iconSize="2rem"
+      items={[notificationSoundSwitch]}
+      subtitle={resources.messages['userSettingsNotificationSoundSubtitle']}
+      title={resources.messages['userNotificationSound']}
     />
   );
 
   const rowsInPaginationConfiguration = (
     <TitleWithItem
-      title={resources.messages['userRowsInPagination']}
       icon="list-ol"
       iconSize="2rem"
-      subtitle={resources.messages['userSettingsRowsPerPageSubtitle']}
       items={[rowsInPaginationDropdown]}
+      subtitle={resources.messages['userSettingsRowsPerPageSubtitle']}
+      title={resources.messages['userRowsInPagination']}
     />
   );
 
   const viewConfiguration = (
     <TitleWithItem
-      title={resources.messages['userTypeOfView']}
       icon="eye"
       iconSize="2rem"
-      subtitle={resources.messages['userTypeOfViewSubtitle']}
       items={[chooseTypeViewSwitch]}
+      subtitle={resources.messages['userTypeOfViewSubtitle']}
+      title={resources.messages['userTypeOfView']}
     />
   );
 
@@ -267,11 +375,11 @@ const UserConfiguration = () => {
 
   const dateFormatConfiguration = (
     <TitleWithItem
-      title={resources.messages['dateFormat']}
       icon="calendar"
       iconSize="2rem"
-      subtitle={dateFormatSubtitle}
       items={[dateFormatDropdown, amPmSwitch]}
+      subtitle={dateFormatSubtitle}
+      title={resources.messages['dateFormat']}
     />
   );
 
@@ -283,6 +391,8 @@ const UserConfiguration = () => {
         {themeConfiguration}
         {viewConfiguration}
         {logoutConfiguration}
+        {soundConfiguration}
+        {pushNotificationsConfiguration}
         {basemapLayerConfiguration}
       </div>
     </React.Fragment>

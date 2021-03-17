@@ -55,16 +55,13 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
 
   const onLoadDashboard = async () => {
     try {
-      const datasetsValidationStatistics = await DataflowService.datasetsValidationStatistics(datasetSchemaId);
+      const { data } = await DataflowService.datasetsValidationStatistics(datasetSchemaId);
+      setLevelErrorTypes(data.levelErrors);
 
-      setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
+      if (!isUndefined(data.datasetId) && !isNull(data.datasetId)) {
+        setLevelErrorTypes(data.levelErrors);
 
-      if (!isUndefined(datasetsValidationStatistics.datasetId) && !isNull(datasetsValidationStatistics.datasetId)) {
-        setLevelErrorTypes(datasetsValidationStatistics.levelErrors);
-
-        setValidationDashboardData(
-          buildDatasetDashboardObject(datasetsValidationStatistics, datasetsValidationStatistics.levelErrors)
-        );
+        setValidationDashboardData(buildDatasetDashboardObject(data, data.levelErrors));
       }
     } catch (error) {
       onErrorLoadingDashboard(error);

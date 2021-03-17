@@ -3,7 +3,8 @@ import { DatasetService } from 'core/services/Dataset';
 
 const getDataflowMetadata = async dataflowId => {
   try {
-    return await DataflowService.dataflowDetails(dataflowId);
+    const dataflowDetails = await DataflowService.dataflowDetails(dataflowId);
+    return dataflowDetails.data;
   } catch (error) {
     console.error('dataflowDetails error', error);
     return {};
@@ -11,7 +12,8 @@ const getDataflowMetadata = async dataflowId => {
 };
 const getDatasetMetadata = async datasetId => {
   try {
-    return await DatasetService.getMetaData(datasetId);
+    const datasetDetails = await DatasetService.getMetaData(datasetId);
+    return datasetDetails.data;
   } catch (error) {
     console.error('DatasetService.getMetaData', error);
     return {};
@@ -40,8 +42,4 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
   }
   return metadata;
 };
-export const MetadataUtils = {
-  getDataflowMetadata,
-  getDatasetMetadata,
-  getMetadata
-};
+export const MetadataUtils = { getDataflowMetadata, getDatasetMetadata, getMetadata };

@@ -37,5 +37,8 @@ public class ReportingDatasetPublicVO implements Serializable {
   /** The public file name. */
   private String publicFileName;
 
+  /** The restrict from public. */
+  private boolean restrictFromPublic;
+
 
 }

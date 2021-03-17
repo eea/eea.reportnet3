@@ -40,16 +40,20 @@ const GlobalNotifications = () => {
       let datasetData;
 
       if (notification) {
-        notification.content.providerId
-          ? (datasetData = await DatasetService.downloadExportFile(
-              notification.content.datasetId,
-              notification.content.fileName,
-              notification.content.providerId
-            ))
-          : (datasetData = await DatasetService.downloadExportFile(
-              notification.content.datasetId,
-              notification.content.fileName
-            ));
+        if (notification.content.providerId) {
+          const { data } = await DatasetService.downloadExportFile(
+            notification.content.datasetId,
+            notification.content.fileName,
+            notification.content.providerId
+          );
+          datasetData = data;
+        } else {
+          const { data } = await DatasetService.downloadExportFile(
+            notification.content.datasetId,
+            notification.content.fileName
+          );
+          datasetData = data;
+        }
 
         notificationContext.add({
           type: 'EXTERNAL_INTEGRATION_DOWNLOAD',

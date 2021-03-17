@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -125,7 +126,7 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.createSnapshot(1L, new CreateSnapshotVO());
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -236,8 +237,9 @@ public class DataSetSnapshotControllerImplTest {
   public void testReleaseSnapshot() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
-    Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any());
+    dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L, new Date().toString());
+    Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -250,7 +252,7 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      dataSetSnapshotControllerImpl.releaseSnapshot(null, 1L);
+      dataSetSnapshotControllerImpl.releaseSnapshot(null, 1L, new Date().toString());
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
@@ -268,9 +270,9 @@ public class DataSetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.EXECUTION_ERROR)).when(datasetSnapshotService)
-        .releaseSnapshot(Mockito.any(), Mockito.any());
+        .releaseSnapshot(Mockito.any(), Mockito.any(), Mockito.any());
     try {
-      dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L);
+      dataSetSnapshotControllerImpl.releaseSnapshot(1L, 1L, new Date().toString());
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
