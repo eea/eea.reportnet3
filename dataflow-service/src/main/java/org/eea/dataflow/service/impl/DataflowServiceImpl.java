@@ -707,36 +707,47 @@ public class DataflowServiceImpl implements DataflowService {
     if (null != header) {
       switch (header) {
         case "name":
-          compare = Comparator.comparing(DataflowPublicVO::getName)
-              .thenComparing(DataflowPublicVO::getName);
+          compare = Comparator.comparing(DataflowPublicVO::getName,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "obligation":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle()
-              .compareTo(o2.getObligation().getOblTitle());
+          compare =
+              (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle() != null
+                  ? o1.getObligation().getOblTitle().compareTo(o2.getObligation().getOblTitle())
+                  : -1;
           break;
         case "legalInstrument":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle()
-              .compareTo(o2.getObligation().getOblTitle());
+          compare = (DataflowPublicVO o1,
+              DataflowPublicVO o2) -> o1.getObligation().getLegalInstrument()
+                  .getSourceAlias() != null
+                      ? o1.getObligation().getLegalInstrument().getSourceAlias().compareTo(
+                          o2.getObligation().getLegalInstrument().getSourceAlias())
+                      : -1;
           break;
         case "status":
-          compare = Comparator.comparing(DataflowPublicVO::isReleasable)
-              .thenComparing(DataflowPublicVO::isReleasable);
+          compare = Comparator.comparing(DataflowPublicVO::isReleasable,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "deadline":
-          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate)
-              .thenComparing(DataflowPublicVO::getDeadlineDate);
+          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "isReleased":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getReportingDatasets().get(0)
-              .getIsReleased().compareTo(o2.getReportingDatasets().get(0).getIsReleased());
+          compare = (DataflowPublicVO o1,
+              DataflowPublicVO o2) -> o1.getReportingDatasets().get(0).getIsReleased() != null
+                  ? o1.getReportingDatasets().get(0).getIsReleased().compareTo(
+                      o2.getReportingDatasets().get(0).getIsReleased())
+                  : -1;
           break;
         case "releaseDate":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getReportingDatasets().get(0)
-              .getDateReleased().compareTo(o2.getReportingDatasets().get(0).getDateReleased());
+          compare = (DataflowPublicVO o1,
+              DataflowPublicVO o2) -> o1.getReportingDatasets().get(0).getDateReleased() != null
+                  ? o1.getReportingDatasets().get(0).getDateReleased().compareTo(
+                      o2.getReportingDatasets().get(0).getDateReleased())
+                  : -1;
           break;
 
       }
-
       // order by
       if (null != compare && asc) {
         Collections.sort(dataflowPublicList, compare);
