@@ -149,14 +149,14 @@ export const PublicFrontpage = ({ history }) => {
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
                   <p>
-                    <strong>View by obligation dataflows' status and download reported data</strong>
+                    <strong>View by obligation dataflow status and download reported data</strong>
                   </p>
                 </a>
                 <a
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
                   <p>
-                    <strong>View by country dataflows' status and download reported data</strong>
+                    <strong>View by country dataflow status and download reported data</strong>
                   </p>
                 </a>
               </div>
