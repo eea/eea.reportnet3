@@ -50,14 +50,12 @@ const parseSnapshotList = response => {
 
 export const ApiSnapshotRepository = {
   allDesigner,
-  createByIdDesigner,
-  deleteByIdDesigner,
-  restoreByIdDesigner,
-
   allReporter,
+  createByIdDesigner,
   createByIdReporter,
+  deleteByIdDesigner,
   deleteByIdReporter,
-  restoreByIdReporter,
-
-  releaseDataflow
+  releaseDataflow,
+  restoreByIdDesigner,
+  restoreByIdReporter
 };
