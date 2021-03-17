@@ -486,4 +486,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return result;
   }
 
+  /**
+   * Find and generate ETL json.
+   *
+   * @param stringQuery the string query
+   * @return the string
+   */
+  @Override
+  public String findAndGenerateETLJson(String stringQuery) {
+    Query query = entityManager.createNativeQuery(stringQuery);
+    return query.getSingleResult().toString();
+  }
+
 }
