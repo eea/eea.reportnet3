@@ -55,7 +55,7 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
       Long idDataset = Long.valueOf(aux[aux.length - 1]);
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
       // Dataset data and statistics initialization.
-      datasetService.executeInitializeDataset(idDataset, idDatasetSchema);
+      datasetService.initializeDataset(idDataset, idDatasetSchema);
 
     } else {
       LOG_ERROR.error(

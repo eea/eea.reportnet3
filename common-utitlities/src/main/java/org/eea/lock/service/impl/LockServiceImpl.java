@@ -2,6 +2,7 @@ package org.eea.lock.service.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -148,7 +149,12 @@ public class LockServiceImpl implements LockService {
     for (Entry<String, Object> entry : criteria.entrySet()) {
       treeSet.add(entry.getKey() + "-" + entry.getValue());
     }
-    return treeSet.hashCode();
+    int hashCode = 7;
+    Iterator<String> iterator = treeSet.iterator();
+    while (iterator.hasNext()) {
+      hashCode = hashCode * 31 + iterator.next().hashCode();
+    }
+    return hashCode;
   }
 
   /**

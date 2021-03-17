@@ -42,11 +42,7 @@
           }
         },
         {
-          "key": "IMPORT_DESIGN_FAILED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
+          "key": "IMPORT_DESIGN_FAILED_EVENT"
         },
         {
           "key": "EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT",
@@ -579,7 +575,13 @@
           "key": "DUPLICATED_WEBLINK_ERROR"
         },
         {
+          "key": "LOAD_DATAFLOWS_BY_COUNTRY_ERROR"
+        },
+        {
           "key": "LOAD_USERS_LIST_ERROR"
+        },
+        {
+          "key": "LOAD_DATAFLOW_INFO_ERROR"
         }
       ]
     },

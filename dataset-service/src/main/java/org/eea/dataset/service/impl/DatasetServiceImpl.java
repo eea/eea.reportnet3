@@ -15,13 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -116,17 +113,17 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class DatasetServiceImpl.
@@ -284,19 +281,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TestDatasetRepository testDatasetRepository;
 
-  /** The view executor service. */
-  private ExecutorService initializeExecutorService;
-
-  /** The max running tasks. */
-  @Value("${dataset.task.parallelism}")
-  private int maxRunningTasks;
-
-  @PostConstruct
-  private void init() {
-    initializeExecutorService = new EEADelegatingSecurityContextExecutorService(
-        Executors.newFixedThreadPool(maxRunningTasks));
-  }
-
   /**
    * Process file.
    *
@@ -399,6 +383,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    */
   @Override
+  @CacheEvict(value = "dataFlowId", key = "#datasetId")
   public void deleteDataSchema(final String datasetId) {
     schemasRepository.deleteById(new ObjectId(datasetId));
   }
@@ -595,6 +580,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the data flow id by id
    */
   @Override
+  @Cacheable(value = "dataFlowId", key = "#datasetId")
   public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
@@ -1343,8 +1329,13 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream) {
     try {
-      exportETLDatasetVO(datasetId, outputStream);
+      long startTime = System.currentTimeMillis();
+      LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
+      exportDatasetETLSQL(datasetId, outputStream);
       outputStream.flush();
+      long endTime = System.currentTimeMillis() - startTime;
+      LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
+          endTime / 1000);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
@@ -1493,7 +1484,8 @@ public class DatasetServiceImpl implements DatasetService {
       if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
         readOnlyTables.add(tableSchema.getIdTableSchema().toString());
       }
-      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchema != null
+          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
         fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
       }
     }
@@ -2862,6 +2854,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the dataset type
    */
   @Override
+  @Cacheable(value = "datasetType", key = "#datasetId")
   public DatasetTypeEnum getDatasetType(Long datasetId) {
     DatasetTypeEnum type = null;
     if (reportingDatasetRepository.existsById(datasetId)) {
@@ -3056,11 +3049,13 @@ public class DatasetServiceImpl implements DatasetService {
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       }
-    }
-
-    // Dataset: REPORTING
-    else {
-      dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+    } else {
+      // Dataset: TEST
+      dataset = testDatasetRepository.findById(datasetId).orElse(null);
+      if (null == dataset) {
+        // Dataset: REPORTING
+        dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+      }
       if (null != dataset && TypeStatusEnum.DRAFT
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
         schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
@@ -3075,7 +3070,6 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     }
-
     return schema;
   }
 
@@ -3277,7 +3271,6 @@ public class DatasetServiceImpl implements DatasetService {
             }
           }
         }
-
       }
     }
 
@@ -3350,20 +3343,6 @@ public class DatasetServiceImpl implements DatasetService {
   private void deleteRecordsFromIdTableSchema(Long datasetId, String tableSchemaId) {
     recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
     LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
-  }
-
-  /**
-   * Export ETL dataset VO.
-   *
-   * @param datasetId the dataset id
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void exportETLDatasetVO(Long datasetId, OutputStream outputStream) throws IOException {
-    outputStream.write("{\"tables\":".getBytes());
-    exportETLTableVOList(datasetId, outputStream);
-    outputStream.write("}".getBytes());
-    LOG.info("Finish ETL Export proccess");
   }
 
   /**
@@ -3473,131 +3452,50 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Execute initialize dataset.
-   *
-   * @param datasetId the dataset id
-   * @param idDatasetSchema the id dataset schema
-   */
-  @Override
-  public void executeInitializeDataset(Long datasetId, String idDatasetSchema) {
-    initializeExecutorService.execute(() -> initializeDataset(datasetId, idDatasetSchema));
-  }
-
-  /**
-   * Export ETL table VO list.
+   * 
+   * Export dataset ETLSQL.
    *
    * @param datasetId the dataset id
    * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void exportETLTableVOList(Long datasetId, OutputStream outputStream) throws IOException {
+  private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream) {
+    try {
+      String queryFirstPart =
+          "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
 
-    // Get the datasetSchemaId by the datasetId
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-    // Get the datasetSchema by the datasetSchemaId
-    DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+      String queryMiddlePart =
+          " end as \"tableName\",( select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\",(select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
 
-    outputStream.write("[".getBytes());
-    // Loop to fill ETLTableVOs
-    if (null != datasetSchema) {
+      String queryFinalPart =
+          " end as \"fieldName\",fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) from dataset_%s.record_value rv where tv.id = rv.id_table ) as record) from dataset_%s.table_value tv ) as tableAux ) as tablesAux ";
+
+      String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
+
+      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
+      String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+      // Get the datasetSchema by the datasetSchemaId
+      DataSetSchema datasetSchema =
+          schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-      int nTables = tableSchemaList.size();
-      for (int i = 0; i < nTables; i++) {
-        exportETLTableVO(tableSchemaList.get(i), outputStream);
-        if (i + 1 < nTables) {
-          outputStream.write(",".getBytes());
+      StringBuilder query = new StringBuilder(queryFirstPart);
+      for (TableSchema table : tableSchemaList) {
+        query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema(),
+            table.getNameTableSchema()));
+      }
+      query.append(queryMiddlePart);
+      for (TableSchema table : tableSchemaList) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          query.append(
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
         }
       }
-      outputStream.write("]".getBytes());
+      query.append(String.format(queryFinalPart, datasetId, datasetId, datasetId));
+      LOG.info("Query: " + query.toString());
+      outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+      LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
+    } catch (IOException e) {
+      LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
-  }
-
-
-  /**
-   * Export ETL table VO.
-   *
-   * @param tableSchema the table schema
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void exportETLTableVO(TableSchema tableSchema, OutputStream outputStream)
-      throws IOException {
-
-    // Match each fieldSchemaId with its headerName
-    Map<String, String> fieldMap = new HashMap<>();
-    for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-      fieldMap.put(field.getIdFieldSchema().toString(), field.getHeaderName());
-    }
-
-    String json = "{\"tableName\":\"" + tableSchema.getNameTableSchema() + "\", \"records\":";
-    outputStream.write(json.getBytes());
-
-    exportETLRecordVOList(fieldMap, tableSchema, outputStream);
-    outputStream.write("}".getBytes());
-
-  }
-
-
-  /**
-   * Export ETL record VO list.
-   *
-   * @param fieldMap the field map
-   * @param tableSchemaId the table schema id
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void exportETLRecordVOList(Map<String, String> fieldMap, TableSchema tableSchema,
-      OutputStream outputStream) throws IOException {
-    Long totalRecords =
-        tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
-    LOG.info("total Records:{}", totalRecords);
-    int nPages = (int) Math.ceil(totalRecords / 1000.0);
-
-    outputStream.write("[".getBytes());
-    for (int i = 0; i < nPages; i++) {
-      LOG.info("etlExport: page={}, total={}", i, nPages);
-
-      List<RecordValue> recordlist = recordRepository.findByTableValueNoOrderOptimized(
-          tableSchema.getIdTableSchema().toString(), PageRequest.of(i, 1000));
-      int nRecords = recordlist.size();
-
-      for (int j = 0; j < nRecords; j++) {
-        exportETLRecordVO(recordlist.get(j), fieldMap, outputStream);
-        if (i + 1 < nPages || j + 1 < nRecords) {
-          outputStream.write(",".getBytes());
-        }
-      }
-      outputStream.flush();
-    }
-    outputStream.write("]".getBytes());
-  }
-
-  /**
-   * Export ETL record VO.
-   *
-   * @param record the record
-   * @param fieldMap the field map
-   * @param outputStream the output stream
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void exportETLRecordVO(RecordValue record, Map<String, String> fieldMap,
-      OutputStream outputStream) throws IOException {
-
-    ETLRecordVO etlRecordVO = new ETLRecordVO();
-    List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
-    etlRecordVO.setFields(etlFieldVOs);
-    etlRecordVO.setCountryCode(record.getDataProviderCode());
-
-    // Loop to fill ETLFieldVOs
-    for (FieldValue field : record.getFields()) {
-      ETLFieldVO etlFieldVO = new ETLFieldVO();
-      etlFieldVO.setFieldName(fieldMap.get(field.getIdFieldSchema()));
-      etlFieldVO.setValue(field.getValue());
-      etlFieldVOs.add(etlFieldVO);
-    }
-
-    ObjectMapper mapper = new ObjectMapper();
-    outputStream.write(mapper.writeValueAsBytes(etlRecordVO));
   }
 }
