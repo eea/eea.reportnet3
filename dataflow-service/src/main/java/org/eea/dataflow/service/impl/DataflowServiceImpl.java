@@ -485,7 +485,6 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws Exception the exception
    */
   @Override
-  @CacheEvict(value = "dataflowVO", key = "#idDataflow")
   @Transactional
   public void deleteDataFlow(Long idDataflow) throws Exception {
     // take the jpa entity
