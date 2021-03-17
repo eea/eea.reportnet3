@@ -15,13 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -116,12 +113,13 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -283,19 +281,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TestDatasetRepository testDatasetRepository;
 
-  /** The view executor service. */
-  private ExecutorService initializeExecutorService;
-
-  /** The max running tasks. */
-  @Value("${dataset.task.parallelism}")
-  private int maxRunningTasks;
-
-  @PostConstruct
-  private void init() {
-    initializeExecutorService = new EEADelegatingSecurityContextExecutorService(
-        Executors.newFixedThreadPool(maxRunningTasks));
-  }
-
   /**
    * Process file.
    *
@@ -398,6 +383,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    */
   @Override
+  @CacheEvict(value = "dataFlowId", key = "#datasetId")
   public void deleteDataSchema(final String datasetId) {
     schemasRepository.deleteById(new ObjectId(datasetId));
   }
@@ -594,6 +580,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the data flow id by id
    */
   @Override
+  @Cacheable(value = "dataFlowId", key = "#datasetId")
   public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
   }
@@ -2867,6 +2854,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the dataset type
    */
   @Override
+  @Cacheable(value = "datasetType", key = "datasetId")
   public DatasetTypeEnum getDatasetType(Long datasetId) {
     DatasetTypeEnum type = null;
     if (reportingDatasetRepository.existsById(datasetId)) {
@@ -3464,18 +3452,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Execute initialize dataset.
-   *
-   * @param datasetId the dataset id
-   * @param idDatasetSchema the id dataset schema
-   */
-  @Override
-  public void executeInitializeDataset(Long datasetId, String idDatasetSchema) {
-    initializeExecutorService.execute(() -> initializeDataset(datasetId, idDatasetSchema));
-  }
 
-
-  /**
    * Export dataset ETLSQL.
    *
    * @param datasetId the dataset id
