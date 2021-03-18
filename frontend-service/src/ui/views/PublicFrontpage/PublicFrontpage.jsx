@@ -49,20 +49,20 @@ export const PublicFrontpage = ({ history }) => {
                   <div className={styles.columnsWrapper}>
                     <div className={styles.column}>
                       <p>
-                        Reportnet 3.0 is the new e-Reporting platform for reporting environmental and climate data to
-                        the European Environment Agency (EEA). The platform embraces the strategic goals of the European
+                        Reportnet 3 is the new e-Reporting platform for reporting environmental and climate data to the
+                        European Environment Agency (EEA). The platform embraces the strategic goals of the European
                         Commission’s Green Deal and Digital Strategy and will host reporting tasks on behalf of EEA and
                         the Commission.
                       </p>
                     </div>
                     <div className={styles.column}>
                       <p>
-                        The transition of reporting obligations from Reportnet 2.0 to Reportnet 3.0 will take a number
-                        of years. Therefore, Reportnet 2.0 will remain operational until all data flows are migrated and
-                        will then become an archive.
+                        The transition of reporting obligations from Reportnet 2 to Reportnet 3 will take a number of
+                        years. Therefore, Reportnet 2 will remain operational until all data flows are migrated and will
+                        then become an archive.
                       </p>
                       <p>
-                        Reportnet 2.0 can be accessed here: &nbsp;
+                        Reportnet 2 can be accessed here: &nbsp;
                         <a href="http://cdr.eionet.europa.eu/" target="_blank" rel="noopener noreferrer">
                           http://cdr.eionet.europa.eu/
                         </a>
@@ -142,7 +142,7 @@ export const PublicFrontpage = ({ history }) => {
           <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.showPublicBox}>
               <div className={styles.title}>
-                <h3>Public information</h3>
+                <h3>Dataflow status</h3>
               </div>
               <div className={styles.showPublicData}>
                 <a
@@ -162,7 +162,7 @@ export const PublicFrontpage = ({ history }) => {
               </div>
             </div>
             <div className={styles.currentDataflows}>
-              <h3>Dataflows in scope of Reportnet 3.0:</h3>
+              <h3>Dataflows in scope of Reportnet 3:</h3>
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.dataflows.map(dataflow => (
                   <PublicCard
@@ -204,7 +204,7 @@ export const PublicFrontpage = ({ history }) => {
                   href="http://cdr.eionet.europa.eu/"
                   target="_blank"
                   rel="noopener noreferrer">
-                  <img height="50px" src={logo} alt="Reportnet 2.0 Portal" />
+                  <img height="50px" src={logo} alt="Reportnet 2 Portal" />
                   <h4>Reportnet 2</h4>
                   <p>Reportnet is Eionet’s infrastructure for supporting and improving data and information flows.</p>
                 </a>

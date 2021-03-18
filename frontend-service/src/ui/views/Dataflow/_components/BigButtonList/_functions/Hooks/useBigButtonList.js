@@ -529,7 +529,7 @@ const useBigButtonList = ({
 
   const testDatasetBigButton = [
     {
-      buttonClass: 'schemaDataset',
+      buttonClass: 'dataCollection',
       buttonIcon: 'representative',
       caption: resources.messages['testDatasetBigButton'],
       handleRedirect: () => {
@@ -547,10 +547,10 @@ const useBigButtonList = ({
   return [
     ...manageReportersBigButton,
     ...helpBigButton,
-    ...testDatasetBigButton,
     ...designDatasetModels,
     ...feedbackBigButton,
     ...dashboardBigButton,
+    ...testDatasetBigButton,
     ...dataCollectionModels,
     ...manualTechnicalAcceptanceBigButton,
     ...copyDataCollectionToEuDatasetBigButton,
