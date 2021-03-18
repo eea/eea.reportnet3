@@ -306,6 +306,8 @@
       justify-content: flex-start;
 
       .showPublicDataButton {
+        background-color: var(--public-custom-header-bg);
+        color: var(--white);
         position: relative;
         display: flex;
         flex-direction: column;
