@@ -357,7 +357,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             </div>
           </>
         ) : (
-          <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
+          <div className={styles.noDataflowsWrapper}>
+            <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
+          </div>
         )}
       </div>
     </PublicLayout>
