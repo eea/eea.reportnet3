@@ -345,9 +345,9 @@ const Dataflow = withRouter(({ history, match }) => {
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true,
       usersListBtn:
-        isLeadReporterOfCountry ||
-        isNationalCoordinatorOfCountry ||
-        (dataflowState.isCustodian && !isNil(representativeId))
+        // isLeadReporterOfCountry ||
+        // isNationalCoordinatorOfCountry ||
+        dataflowState.isCustodian && !isNil(representativeId)
     };
   };
 
