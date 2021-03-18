@@ -65,6 +65,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import io.jsonwebtoken.lang.Objects;
 
 /**
  * The Class DataflowServiceImpl.
@@ -711,18 +712,15 @@ public class DataflowServiceImpl implements DataflowService {
               Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "obligation":
-          compare =
-              (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle() != null
-                  ? o1.getObligation().getOblTitle().compareTo(o2.getObligation().getOblTitle())
-                  : -1;
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getObligation().getOblTitle(), o2.getObligation().getOblTitle());
+          };
           break;
         case "legalInstrument":
-          compare = (DataflowPublicVO o1,
-              DataflowPublicVO o2) -> o1.getObligation().getLegalInstrument()
-                  .getSourceAlias() != null
-                      ? o1.getObligation().getLegalInstrument().getSourceAlias().compareTo(
-                          o2.getObligation().getLegalInstrument().getSourceAlias())
-                      : -1;
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getObligation().getLegalInstrument().getSourceAlias(),
+                o2.getObligation().getLegalInstrument().getSourceAlias());
+          };
           break;
         case "status":
           compare = Comparator.comparing(DataflowPublicVO::isReleasable,
@@ -733,18 +731,16 @@ public class DataflowServiceImpl implements DataflowService {
               Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "isReleased":
-          compare = (DataflowPublicVO o1,
-              DataflowPublicVO o2) -> o1.getReportingDatasets().get(0).getIsReleased() != null
-                  ? o1.getReportingDatasets().get(0).getIsReleased().compareTo(
-                      o2.getReportingDatasets().get(0).getIsReleased())
-                  : -1;
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getReportingDatasets().get(0).getIsReleased(),
+                o2.getReportingDatasets().get(0).getIsReleased());
+          };
           break;
         case "releaseDate":
-          compare = (DataflowPublicVO o1,
-              DataflowPublicVO o2) -> o1.getReportingDatasets().get(0).getDateReleased() != null
-                  ? o1.getReportingDatasets().get(0).getDateReleased().compareTo(
-                      o2.getReportingDatasets().get(0).getDateReleased())
-                  : -1;
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getReportingDatasets().get(0).getDateReleased(),
+                o2.getReportingDatasets().get(0).getDateReleased());
+          };
           break;
 
       }
@@ -754,6 +750,24 @@ public class DataflowServiceImpl implements DataflowService {
       } else if (null != compare && !asc) {
         Collections.sort(dataflowPublicList, compare.reversed());
       }
+    }
+  }
+
+  /**
+   * Comparator.
+   *
+   * @param <T> the generic type
+   * @param o1 the o 1
+   * @param o2 the o 2
+   * @return the int
+   */
+  private <T> int comparator(T o1, T o2) {
+    if (Objects.nullSafeHashCode(o1) > Objects.nullSafeHashCode(o2)) {
+      return 1;
+    } else if (Objects.nullSafeHashCode(o1) == Objects.nullSafeHashCode(o2)) {
+      return 0;
+    } else {
+      return -1;
     }
   }
 
