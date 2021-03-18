@@ -263,6 +263,7 @@ const useBigButtonList = ({
         datasetId: dataset.datasetId,
         datasetName: dataset.name,
         dataProviderId: dataset.dataProviderId,
+        isReleased: dataset.isReleased,
         name: dataset.datasetSchemaName
       };
     });
@@ -308,6 +309,8 @@ const useBigButtonList = ({
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
+        infoStatus: dataset.isReleased,
+        infoStatusIcon: true,
         layout: 'defaultBigButton',
         model: [
           {
