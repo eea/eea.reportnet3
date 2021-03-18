@@ -321,45 +321,43 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   return (
     <PublicLayout>
-      <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`} style={contentStyles}>
-        {!isLoading ? (
-          !isEmpty(dataflows) ? (
-            <>
-              <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
-              <div className={styles.countriesList}>
-                <DataTable
-                  autoLayout={true}
-                  first={firstRow}
-                  lazy={true}
-                  onPage={onChangePage}
-                  onSort={onSort}
-                  paginator={true}
-                  paginatorRight={
-                    <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
-                      'records'
-                    ].toLowerCase()}`}</span>
-                  }
-                  rows={numberRows}
-                  rowsPerPageOptions={[5, 10, 15]}
-                  sortable={true}
-                  sortField={sortField}
-                  sortOrder={sortOrder}
-                  totalRecords={totalRecords}
-                  value={dataflows}>
-                  {renderColumns(dataflows)}
-                </DataTable>
-                <div className={styles.tableLegendContainer}>
-                  <span>*</span>
-                  <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-                  <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-                </div>
+      <div className={`${styles.container} rep-container`} style={contentStyles}>
+        <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
+        {isLoading ? (
+          <Spinner className={styles.isLoading} />
+        ) : !isEmpty(dataflows) ? (
+          <>
+            <div className={styles.countriesList}>
+              <DataTable
+                autoLayout={true}
+                first={firstRow}
+                lazy={true}
+                onPage={onChangePage}
+                onSort={onSort}
+                paginator={true}
+                paginatorRight={
+                  <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
+                    'records'
+                  ].toLowerCase()}`}</span>
+                }
+                rows={numberRows}
+                rowsPerPageOptions={[5, 10, 15]}
+                sortable={true}
+                sortField={sortField}
+                sortOrder={sortOrder}
+                totalRecords={totalRecords}
+                value={dataflows}>
+                {renderColumns(dataflows)}
+              </DataTable>
+              <div className={styles.tableLegendContainer}>
+                <span>*</span>
+                <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
+                <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
               </div>
-            </>
-          ) : (
-            <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
-          )
+            </div>
+          </>
         ) : (
-          <Spinner style={{ top: 0, left: 0 }} />
+          <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
         )}
       </div>
     </PublicLayout>
