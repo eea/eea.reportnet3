@@ -402,7 +402,7 @@ export const BigButtonList = ({
       setIsExportEuDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+        notificationContext.add({ type: 'EU_DATASET_LOCKED_ERROR' });
       } else {
         notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
       }

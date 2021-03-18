@@ -1039,6 +1039,7 @@
     "closed": "Closed",
     "open": "Open",
     "loadDataflowInfoError": "Error loading dataflow info",
-    "cooperatingCountries": "EEA Cooperating Countries"
+    "cooperatingCountries": "EEA Cooperating Countries",
+    "euDatasetLockedError": "The process is locked because EU Datasets are opened in exclusive use"
   }
 }
