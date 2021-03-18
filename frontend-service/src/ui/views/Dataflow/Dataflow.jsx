@@ -619,7 +619,8 @@ const Dataflow = withRouter(({ history, match }) => {
       notification =>
         notification.key === 'RELEASE_FAILED_EVENT' ||
         notification.key === 'RELEASE_BLOCKED_EVENT' ||
-        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
+        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT' ||
+        notification.key === 'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
     );
 
     dataflowState.data.datasets.forEach(dataset => {
