@@ -76,3 +76,7 @@
 .validationCol {
   width: 15px;
 }
+
+:global .p-datatable-scrollable-body::-webkit-scrollbar-thumb {
+  background: var(--c-corporate-yellow);
+}
