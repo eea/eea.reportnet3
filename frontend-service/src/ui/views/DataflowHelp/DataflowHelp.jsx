@@ -92,7 +92,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
 
   useEffect(() => {
-    setIsLoading(true);
     fetchDocumentsData();
   }, [isDataUpdated]);
 
@@ -174,8 +173,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -209,7 +206,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         console.error('error', error.response);
       }
     } finally {
-      setIsLoading(false);
       setIsLoadingWeblinks(false);
     }
   };
