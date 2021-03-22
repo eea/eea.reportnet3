@@ -3,6 +3,5 @@ VOLUME /tmp
 ARG JAR_FILE
 ARG MS_PORT
 COPY ${JAR_FILE} app.jar
-ENV TLS_PROTOCOL="TLSv1.2"
-ENTRYPOINT ["java","-Djdk.tls.client.protocols=${TLS_PROTOCOL}","-jar","/app.jar"]
+ENTRYPOINT ["java","-Djdk.tls.client.protocols=TLSv1.2","-jar","/app.jar"]
 EXPOSE ${MS_PORT}
