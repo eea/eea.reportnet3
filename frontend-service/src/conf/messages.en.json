@@ -338,7 +338,6 @@
     "duplicatedTabHeader": "Duplicated table name",
     "duplicatedTabHeaderError": "The table name already exists in the schema, please select another one.",
     "duplicatedUniqueConstraint": "The unique constraint already exists",
-    "duplicatedWeblinkError": "Description and URL are duplicated. Please check it",
     "duplicatedWebLinkError": "Description and URL are duplicated. Please check it",
     "duplicateSchemaError": "The schema name already exists, Please choose another one.",
     "edit": "Edit",
@@ -1041,7 +1040,6 @@
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "wrongWeblinkError": "Invalid URL. Please check it.",
     "yes": "Yes"
   }
 }
