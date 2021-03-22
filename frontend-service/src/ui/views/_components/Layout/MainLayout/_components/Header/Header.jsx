@@ -139,9 +139,9 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         history.push(getUrl(routes.DATAFLOWS));
       }}>
       {isPublic ? (
-        <img height="50px" src={ReportnetPublicLogo} alt="Reportnet 3.0" className={styles.appLogo} />
+        <img height="50px" src={ReportnetPublicLogo} alt="Reportnet 3" className={styles.appLogo} />
       ) : (
-        <img height="50px" src={logo} alt="Reportnet 3.0" className={styles.appLogo} />
+        <img height="50px" src={logo} alt="Reportnet 3" className={styles.appLogo} />
       )}
     </a>
   );
