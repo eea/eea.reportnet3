@@ -94,7 +94,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   useEffect(() => {
     setIsLoading(true);
     fetchDocumentsData();
-    setIsLoading(false);
   }, [isDataUpdated]);
 
   useEffect(() => {
@@ -215,10 +214,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
     </MainLayout>
   );
 
-  if (isLoading) {
-    return renderLayout(<Spinner />);
-  }
-
   if (documents) {
     return renderLayout(
       <Fragment>
@@ -231,6 +226,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               dataflowId={dataflowId}
               documents={documents}
               isDeletingDocument={isDeletingDocument}
+              isLoading={isLoading}
               isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}

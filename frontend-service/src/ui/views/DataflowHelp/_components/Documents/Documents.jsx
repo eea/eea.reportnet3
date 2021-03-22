@@ -19,6 +19,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Icon } from 'ui/views/_components/Icon';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
@@ -33,6 +34,7 @@ const Documents = ({
   dataflowId,
   documents,
   isDeletingDocument,
+  isLoading,
   isToolbarVisible,
   setIsDeletingDocument,
   setSortFieldDocuments,
@@ -324,7 +326,16 @@ const Documents = ({
           <Column className={styles.emptyTableHeader} header={resources.messages['documentsActionColumns']} />
         )}
       </DataTable>
-      {documents.length === 0 && (
+
+      {isLoading && documents.length === 0 && (
+        <div className={styles.dashboardWithoutData}>
+          <div className={styles.spinner}>
+            <Spinner style={{ top: 0 }} />
+          </div>
+        </div>
+      )}
+
+      {!isLoading && documents.length === 0 && (
         <div className={styles.noDataWrapper}>
           <h4>{resources.messages['noDocuments']}</h4>
         </div>
