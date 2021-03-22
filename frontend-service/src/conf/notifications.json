@@ -324,6 +324,9 @@
           "key": "DATA_COLLECTION_LOCKED_ERROR"
         },
         {
+          "key": "EU_DATASET_LOCKED_ERROR"
+        },
+        {
           "key": "VALIDATION_SERVICE_GET_ALL_ERROR"
         },
         {
