@@ -44,15 +44,15 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
   const [dataflowName, setDataflowName] = useState();
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
+  const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
   const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
@@ -182,6 +182,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const sortByProperty = propertyName => (a, b) => a[propertyName].localeCompare(b[propertyName]);
 
   const onLoadDocuments = async () => {
+    setIsLoadingDocuments(true);
     try {
       const { data } = await DocumentService.all(`${dataflowId}`);
       const loadedDocuments = data.documents.sort(sortByProperty('description'));
@@ -192,7 +193,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
-      setIsLoading(false);
+      setIsLoadingDocuments(false);
     }
   };
 
@@ -231,7 +232,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               dataflowId={dataflowId}
               documents={documents}
               isDeletingDocument={isDeletingDocument}
-              isLoading={isLoading}
+              isLoading={isLoadingDocuments}
               isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}
