@@ -345,9 +345,9 @@ const Dataflow = withRouter(({ history, match }) => {
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true,
       usersListBtn:
-        isLeadReporterOfCountry ||
-        isNationalCoordinatorOfCountry ||
-        (dataflowState.isCustodian && !isNil(representativeId))
+        // isLeadReporterOfCountry ||
+        // isNationalCoordinatorOfCountry ||
+        dataflowState.isCustodian && !isNil(representativeId)
     };
   };
 
@@ -619,7 +619,8 @@ const Dataflow = withRouter(({ history, match }) => {
       notification =>
         notification.key === 'RELEASE_FAILED_EVENT' ||
         notification.key === 'RELEASE_BLOCKED_EVENT' ||
-        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
+        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT' ||
+        notification.key === 'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
     );
 
     dataflowState.data.datasets.forEach(dataset => {
@@ -632,7 +633,12 @@ const Dataflow = withRouter(({ history, match }) => {
   useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   useCheckNotifications(
-    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    [
+      'RELEASE_FAILED_EVENT',
+      'RELEASE_BLOCKED_EVENT',
+      'RELEASE_BLOCKERS_FAILED_EVENT',
+      'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
+    ],
     setIsReleasingDatasetsProviderId,
     false
   );
