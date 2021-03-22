@@ -178,6 +178,7 @@
     "dataflowLoadingLeadReportersInit": "Importing lead reporters to <strong>{:dataflowName}</strong>",
     "dataflowName": "Dataflow",
     "dataflowNameExists": "Dataflow name already exists, please choose another one",
+    "dataflowNameValidationMax": "Dataflow name is too long",
     "dataflowObligationEmpty": "Obligation is a required field",
     "dataflowPinnedInit": "You have pinned the dataflow",
     "dataflowReporterHelp": "Here you can see information of your dataset, enter to it and release the data to the data collection",
@@ -337,7 +338,7 @@
     "duplicatedTabHeader": "Duplicated table name",
     "duplicatedTabHeaderError": "The table name already exists in the schema, please select another one.",
     "duplicatedUniqueConstraint": "The unique constraint already exists",
-    "duplicatedWeblinkError": "Description and URL are duplicated. Please check it",
+    "duplicatedWebLinkError": "Description and URL are duplicated. Please check it",
     "duplicateSchemaError": "The schema name already exists, Please choose another one.",
     "edit": "Edit",
     "editDocument": "Edit document",
@@ -659,7 +660,6 @@
     "noValidationDashboardData": "There is no validation data to show",
     "noValidationsWithSelectedParameters": "There are no validations with the selected parameters",
     "noWebLinks": "No weblinks added",
-    "noWeblinks": "There is no web link to show",
     "numberOfRecords": "Number of records",
     "objectives": "Objectives",
     "obligationDataflowItem": "Obligation",
@@ -1004,7 +1004,7 @@
     "validateDataInit": "Validating <strong title='{:datasetName}'>{:shortDatasetName} ({:countryName})</strong>",
     "validateDataset": "Validate dataset",
     "validateDatasetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
-    "validatedQcRuleEvent": "QC validated succesfully",
+    "validatedQcRuleEvent": "QC validated successfully",
     "validateEuDatasetHeader": "Validate EU dataset",
     "validateRulesBtnTootip": "Revalidates all the QC rules: QCs with SQL sentences need to be re-validated after changing table or field names",
     "validateRulesCompletedEvent": "All SQL QCs validated in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
@@ -1039,7 +1039,7 @@
     "writeMessagePlaceholder": "Write your message",
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
-    "wrongWeblinkError": "Invalid URL. Please check it.",
+    "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes"
   }
 }

@@ -1,5 +1,5 @@
 import { DataflowConfig } from 'conf/domain/model/Dataflow';
-import { WebLinkConfig } from 'conf/domain/model/Weblink';
+import { WebLinkConfig } from 'conf/domain/model/WebLink';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
