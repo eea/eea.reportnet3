@@ -327,13 +327,7 @@ const Documents = ({
         )}
       </DataTable>
 
-      {isLoading && documents.length === 0 && (
-        <div className={styles.dashboardWithoutData}>
-          <div className={styles.spinner}>
-            <Spinner style={{ top: 0 }} />
-          </div>
-        </div>
-      )}
+      {isLoading && documents.length === 0 && <Spinner style={{ top: 0 }} />}
 
       {!isLoading && documents.length === 0 && (
         <div className={styles.noDataWrapper}>
