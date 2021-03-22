@@ -74,7 +74,7 @@ export const CoreUtils = (() => {
       let isDuplicated = false,
         testObject = {};
 
-      array.map(item => {
+      array.forEach(item => {
         const itemPropertyName = item[property];
         if (itemPropertyName in testObject) {
           testObject[itemPropertyName].duplicatedRoles = true;
@@ -118,7 +118,7 @@ export const CoreUtils = (() => {
           return subError;
         });
       });
-      valuesWithValidations.map(item => {
+      valuesWithValidations.forEach(item => {
         if (item != null && item != undefined && !item.every(value => value === 0)) {
           tableStatisticValuesWithSomeError.push(item);
         }
