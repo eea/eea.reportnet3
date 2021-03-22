@@ -57,6 +57,9 @@ public enum ObjectAccessRoleEnum {
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("ROLE_DATACOLLECTION-%s-DATA_CUSTODIAN"),
 
+  /** The datacollection steward. */
+  DATACOLLECTION_STEWARD("ROLE_DATACOLLECTION-%s-DATA_STEWARD"),
+
   /** The datacollection lead reporter. */
   DATACOLLECTION_LEAD_REPORTER("ROLE_DATACOLLECTION-%s-LEAD_REPORTER"),
 
