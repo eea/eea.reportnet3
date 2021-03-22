@@ -13,7 +13,6 @@ import { routes } from 'ui/routes';
 import { DatasetSchemas } from './_components/DatasetSchemas';
 import { Documents } from './_components/Documents';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Spinner } from 'ui/views/_components/Spinner';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 import { TabView } from 'ui/views/_components/TabView';
 import { Title } from 'ui/views/_components/Title';
