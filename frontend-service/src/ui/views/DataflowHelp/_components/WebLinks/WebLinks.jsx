@@ -12,6 +12,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
@@ -23,6 +24,7 @@ import { webLinksReducer } from './functions/Reducers/webLinksReducer';
 
 export const WebLinks = ({
   dataflowId,
+  isLoading,
   isToolbarVisible,
   onLoadWebLinks,
   setSortFieldWebLinks,
@@ -339,7 +341,10 @@ export const WebLinks = ({
         value={webLinks}>
         {!isEmpty(webLinks) ? webLinksState.webLinksColumns : emptyWebLinkColumns}
       </DataTable>
-      {webLinks.length === 0 && (
+
+      {isLoading && webLinks.length === 0 && <Spinner style={{ top: 0 }} />}
+
+      {!isLoading && webLinks.length === 0 && (
         <div className={styles.noDataWrapper}>
           <h4>{resources.messages['noWebLinks']}</h4>
         </div>

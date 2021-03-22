@@ -44,6 +44,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
   const [dataflowName, setDataflowName] = useState();
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
@@ -196,6 +197,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   };
 
   const onLoadWebLinks = async () => {
+    setIsLoadingWeblinks(true);
     try {
       const { data } = await WebLinkService.all(dataflowId);
       const loadedWebLinks = data.weblinks.sort(sortByProperty('description'));
@@ -205,8 +207,12 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         console.error('error', error.response);
       }
+    } finally {
+      setIsLoading(false);
+      setIsLoadingWeblinks(false);
     }
   };
+
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -238,6 +244,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           <TabPanel headerClassName="dataflowHelp-weblinks-help-step" header={resources.messages['webLinks']}>
             <WebLinks
               dataflowId={dataflowId}
+              isLoading={isLoadingWebLinks}
               isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWebLinks={setSortFieldWebLinks}
