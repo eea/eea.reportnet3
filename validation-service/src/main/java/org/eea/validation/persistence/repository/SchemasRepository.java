@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.eea.validation.persistence.repository;
 
@@ -14,8 +14,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface SchemasRepository
     extends MongoRepository<DataSetSchema, ObjectId>, ExtendedSchemaRepository {
 
-
-
   /**
    * Find by id data set schema.
    *
@@ -23,6 +21,5 @@ public interface SchemasRepository
    * @return the data set schema
    */
   DataSetSchema findByIdDataSetSchema(ObjectId idDatasetSchema);
-
 
 }

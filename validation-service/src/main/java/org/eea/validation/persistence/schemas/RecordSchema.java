@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.eea.validation.persistence.schemas;
 
