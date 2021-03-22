@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
@@ -102,9 +100,7 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
-import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -304,11 +300,6 @@ public class DatasetServiceTest {
   @Mock
   private TestDatasetRepository testDatasetRepository;
 
-  /**
-   * The view executor service.
-   */
-  private ExecutorService initializeExecutorService;
-
   /** The field value. */
   private FieldValue fieldValue;
 
@@ -391,18 +382,7 @@ public class DatasetServiceTest {
     sortedList.add(field);
     fieldList.add(field);
 
-    initializeExecutorService =
-        new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2));
-
     MockitoAnnotations.initMocks(this);
-  }
-
-  /**
-   * Finish tasks.
-   */
-  @After
-  public void finishTasks() {
-    initializeExecutorService.shutdown();
   }
 
   /**
@@ -3002,18 +2982,4 @@ public class DatasetServiceTest {
     Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
   }
 
-  /**
-   * Executeinitialize process test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws InterruptedException the interrupted exception
-   */
-  @Test
-  public void executeinitializeProcessTest() throws EEAException, InterruptedException {
-    ReflectionTestUtils.setField(datasetService, "initializeExecutorService",
-        initializeExecutorService);
-    datasetService.executeInitializeDataset(1L, "5cf0e9b3b793310e9ceca190");
-    Thread.sleep(1000);
-    Mockito.verify(schemasRepository, Mockito.times(1)).findByIdDataSetSchema(Mockito.any());
-  }
 }

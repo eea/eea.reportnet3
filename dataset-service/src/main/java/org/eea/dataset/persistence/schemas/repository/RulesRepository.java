@@ -8,7 +8,7 @@ import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
- * The Interface SchemasRepository.
+ * The Interface RulesRepository.
  */
 public interface RulesRepository extends MongoRepository<RulesSchema, ObjectId> {
 

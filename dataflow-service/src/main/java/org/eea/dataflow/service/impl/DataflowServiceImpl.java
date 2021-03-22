@@ -60,9 +60,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import io.jsonwebtoken.lang.Objects;
 
 /**
  * The Class DataflowServiceImpl.
@@ -410,6 +413,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataflowVO", key = "#dataflowVO.id")
   public void updateDataFlow(DataFlowVO dataflowVO) throws EEAException {
 
     Optional<Dataflow> dataflow = dataflowRepository.findByNameIgnoreCase(dataflowVO.getName());
@@ -461,6 +465,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
+  @Cacheable(value = "dataflowVO", key = "#id")
   public DataFlowVO getMetabaseById(Long id) throws EEAException {
 
     if (id == null) {
@@ -535,6 +540,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataflowVO", key = "#id")
   @Transactional
   public void updateDataFlowStatus(Long id, TypeStatusEnum status, Date deadlineDate)
       throws EEAException {
@@ -558,9 +564,7 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataflowPublicVO> getPublicDataflows() {
     List<DataflowPublicVO> dataflowPublicList =
         dataflowPublicMapper.entityListToClass(dataflowRepository.findByShowPublicInfoTrue());
-    dataflowPublicList.stream().forEach(dataflow -> {
-      findObligationPublicDataflow(dataflow);
-    });
+    dataflowPublicList.stream().forEach(dataflow -> findObligationPublicDataflow(dataflow));
     return dataflowPublicList;
   }
 
@@ -704,42 +708,66 @@ public class DataflowServiceImpl implements DataflowService {
     if (null != header) {
       switch (header) {
         case "name":
-          compare = Comparator.comparing(DataflowPublicVO::getName)
-              .thenComparing(DataflowPublicVO::getName);
+          compare = Comparator.comparing(DataflowPublicVO::getName,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "obligation":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle()
-              .compareTo(o2.getObligation().getOblTitle());
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getObligation().getOblTitle(), o2.getObligation().getOblTitle());
+          };
           break;
         case "legalInstrument":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getObligation().getOblTitle()
-              .compareTo(o2.getObligation().getOblTitle());
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getObligation().getLegalInstrument().getSourceAlias(),
+                o2.getObligation().getLegalInstrument().getSourceAlias());
+          };
           break;
         case "status":
-          compare = Comparator.comparing(DataflowPublicVO::isReleasable)
-              .thenComparing(DataflowPublicVO::isReleasable);
+          compare = Comparator.comparing(DataflowPublicVO::isReleasable,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "deadline":
-          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate)
-              .thenComparing(DataflowPublicVO::getDeadlineDate);
+          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate,
+              Comparator.nullsFirst(Comparator.naturalOrder()));
           break;
         case "isReleased":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getReportingDatasets().get(0)
-              .getIsReleased().compareTo(o2.getReportingDatasets().get(0).getIsReleased());
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getReportingDatasets().get(0).getIsReleased(),
+                o2.getReportingDatasets().get(0).getIsReleased());
+          };
           break;
         case "releaseDate":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> o1.getReportingDatasets().get(0)
-              .getDateReleased().compareTo(o2.getReportingDatasets().get(0).getDateReleased());
+          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
+            return comparator(o1.getReportingDatasets().get(0).getDateReleased(),
+                o2.getReportingDatasets().get(0).getDateReleased());
+          };
           break;
 
       }
-
       // order by
       if (null != compare && asc) {
         Collections.sort(dataflowPublicList, compare);
       } else if (null != compare && !asc) {
         Collections.sort(dataflowPublicList, compare.reversed());
       }
+    }
+  }
+
+  /**
+   * Comparator.
+   *
+   * @param <T> the generic type
+   * @param o1 the o 1
+   * @param o2 the o 2
+   * @return the int
+   */
+  private <T> int comparator(T o1, T o2) {
+    if (Objects.nullSafeHashCode(o1) > Objects.nullSafeHashCode(o2)) {
+      return 1;
+    } else if (Objects.nullSafeHashCode(o1) == Objects.nullSafeHashCode(o2)) {
+      return 0;
+    } else {
+      return -1;
     }
   }
 

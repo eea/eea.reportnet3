@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -51,6 +52,7 @@ public interface DataflowRepository
    */
   @Transactional
   @Modifying
+  @CacheEvict(value = "dataflowVO", key = "#idDataflow")
   @Query(nativeQuery = true, value = "delete from  dataflow  where id = :idDataflow ")
   void deleteNativeDataflow(@Param("idDataflow") Long idDataflow);
 
@@ -62,6 +64,7 @@ public interface DataflowRepository
   @Override
   @Transactional
   @Modifying
+  @CacheEvict(value = "dataflowVO", key = "#idDataflow")
   @Query("DELETE FROM Dataflow d where d.id = :idDataflow")
   void deleteById(@Param("idDataflow") Long idDataflow);
 
@@ -128,6 +131,7 @@ public interface DataflowRepository
    */
   @Modifying
   @Transactional
+  @CacheEvict(value = "dataflowVO", key = "#dataflowId")
   @Query(nativeQuery = true,
       value = "update dataflow set show_public_info = :showPublicInfo where id = :dataflowId")
   void updatePublicStatus(@Param("dataflowId") Long dataflowId,
