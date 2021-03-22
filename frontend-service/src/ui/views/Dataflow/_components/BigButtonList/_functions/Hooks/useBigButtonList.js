@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -54,13 +54,10 @@ const useBigButtonList = ({
     config.permissions.DATA_CUSTODIAN
   ]);
 
-  useEffect(() => {
-    if (!isNil(userContext.contextRoles)) {
-      setButtonsVisibility(getButtonsVisibility());
-    }
-  }, [userContext, dataflowState.data.datasets]);
-
-  const getButtonsVisibility = () => {
+  const getButtonsVisibility = useCallback(() => {
+    const isCustodian = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
+      config.permissions.DATA_CUSTODIAN
+    ]);
     const isDesigner =
       isLeadDesigner ||
       userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
@@ -95,9 +92,24 @@ const useBigButtonList = ({
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry
+      release: isLeadReporterOfCountry,
+      testDatasetVisibility: isDraftStatus && isCustodian
     };
-  };
+  }, [
+    dataflowId,
+    dataflowState.data.datasets,
+    dataflowState.data.manualAcceptance,
+    dataflowState.status,
+    isLeadDesigner,
+    isLeadReporterOfCountry,
+    userContext
+  ]);
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      setButtonsVisibility(getButtonsVisibility());
+    }
+  }, [userContext, dataflowState.data.datasets, getButtonsVisibility]);
 
   const manageReportersBigButton = [
     {
@@ -251,6 +263,7 @@ const useBigButtonList = ({
         datasetId: dataset.datasetId,
         datasetName: dataset.name,
         dataProviderId: dataset.dataProviderId,
+        isReleased: dataset.isReleased,
         name: dataset.datasetSchemaName
       };
     });
@@ -296,6 +309,8 @@ const useBigButtonList = ({
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
+        infoStatus: dataset.isReleased,
+        infoStatusIcon: true,
         layout: 'defaultBigButton',
         model: [
           {
@@ -512,6 +527,19 @@ const useBigButtonList = ({
     }
   ];
 
+  const testDatasetBigButton = [
+    {
+      buttonClass: 'dataCollection',
+      buttonIcon: 'representative',
+      caption: resources.messages['testDatasetBigButton'],
+      handleRedirect: () => {
+        handleRedirect(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: 0 }, true));
+      },
+      layout: 'defaultBigButton',
+      visibility: buttonsVisibility.testDatasetVisibility
+    }
+  ];
+
   const receiptBigButton = onBuildReceiptButton();
 
   const releaseBigButton = onBuildReleaseButton();
@@ -522,6 +550,7 @@ const useBigButtonList = ({
     ...designDatasetModels,
     ...feedbackBigButton,
     ...dashboardBigButton,
+    ...testDatasetBigButton,
     ...dataCollectionModels,
     ...manualTechnicalAcceptanceBigButton,
     ...copyDataCollectionToEuDatasetBigButton,

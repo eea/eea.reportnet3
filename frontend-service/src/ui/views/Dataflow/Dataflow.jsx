@@ -29,7 +29,6 @@ import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { ManageRights } from './_components/ManageRights';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from './_components/ShareRights';
@@ -40,6 +39,7 @@ import { UserList } from 'ui/views/_components/UserList';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { RepresentativeService } from 'core/services/Representative';
+import { UserService } from 'core/services/User';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -124,6 +124,12 @@ const Dataflow = withRouter(({ history, match }) => {
     config.permissions.LEAD_REPORTER
   ]);
 
+  const isNationalCoordinator = userContext.hasContextAccessPermission(
+    config.permissions.NATIONAL_COORDINATOR_PREFIX,
+    null,
+    [config.permissions.NATIONAL_COORDINATOR]
+  );
+
   const country =
     uniqDataProviders.length === 1
       ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
@@ -141,6 +147,8 @@ const Dataflow = withRouter(({ history, match }) => {
     isInsideACountry &&
     ((!isNil(representativeId) && uniqRepresentatives.includes(parseInt(representativeId))) ||
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
+
+  const isNationalCoordinatorOfCountry = isNationalCoordinator && isInsideACountry;
 
   const dataProviderId = isInsideACountry
     ? !isNil(representativeId)
@@ -243,10 +251,7 @@ const Dataflow = withRouter(({ history, match }) => {
       const userListBtn = {
         className: 'dataflow-properties-help-step',
         icon: 'users',
-        isVisible:
-          (dataflowState.hasUserListRights && !isNil(representativeId)) ||
-          isLeadReporterOfCountry ||
-          dataflowState.isNationalCoordinator,
+        isVisible: buttonsVisibility.usersListBtn,
         label: 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title: 'dataflowUsersList'
@@ -326,7 +331,8 @@ const Dataflow = withRouter(({ history, match }) => {
         releaseableBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
-        propertiesBtn: false
+        propertiesBtn: false,
+        usersListBtn: false
       };
     }
 
@@ -337,7 +343,11 @@ const Dataflow = withRouter(({ history, match }) => {
       releaseableBtn: !isDesign && isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
-      propertiesBtn: true
+      propertiesBtn: true,
+      usersListBtn:
+        // isLeadReporterOfCountry ||
+        // isNationalCoordinatorOfCountry ||
+        dataflowState.isCustodian && !isNil(representativeId)
     };
   };
 
@@ -411,10 +421,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onExportLeadReporters = async () => {
     try {
-      const response = await RepresentativeService.downloadById(dataflowId);
-      if (!isNil(response)) {
+      const { data } = await RepresentativeService.downloadById(dataflowId);
+      if (!isNil(data)) {
         DownloadFile(
-          response,
+          data,
           `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Lead_Reporters.csv`
         );
       }
@@ -609,7 +619,8 @@ const Dataflow = withRouter(({ history, match }) => {
       notification =>
         notification.key === 'RELEASE_FAILED_EVENT' ||
         notification.key === 'RELEASE_BLOCKED_EVENT' ||
-        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT'
+        notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT' ||
+        notification.key === 'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
     );
 
     dataflowState.data.datasets.forEach(dataset => {
@@ -619,10 +630,15 @@ const Dataflow = withRouter(({ history, match }) => {
     });
   };
 
-  useCheckNotifications(['RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
 
   useCheckNotifications(
-    ['RELEASE_FAILED_EVENT', 'RELEASE_BLOCKED_EVENT', 'RELEASE_BLOCKERS_FAILED_EVENT'],
+    [
+      'RELEASE_FAILED_EVENT',
+      'RELEASE_BLOCKED_EVENT',
+      'RELEASE_BLOCKERS_FAILED_EVENT',
+      'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
+    ],
     setIsReleasingDatasetsProviderId,
     false
   );
@@ -669,6 +685,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmRelease = async () => {
     try {
+      notificationContext.add({ type: 'RELEASE_START_EVENT' });
       await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
@@ -685,14 +702,31 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onRefreshToken = async () => {
+    try {
+      const userObject = await UserService.refreshToken();
+      userContext.onTokenRefresh(userObject);
+    } catch (error) {
+      notificationContext.add({
+        key: 'TOKEN_REFRESH_ERROR',
+        content: {}
+      });
+      await UserService.logout();
+      userContext.onLogout();
+    }
+  };
+
+  const onDataCollectionIsCompleted = () => {
+    onRefreshToken();
+    setIsDataUpdated();
+  };
+
   useCheckNotifications(
-    [
-      'ADD_DATACOLLECTION_COMPLETED_EVENT',
-      'COPY_DATASET_SCHEMA_COMPLETED_EVENT',
-      'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'
-    ],
+    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'],
     setIsDataUpdated
   );
+
+  useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
   useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
 
@@ -733,6 +767,42 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const getBigButtonList = () => {
+    if (isNil(representativeId)) {
+      return (
+        <BigButtonList
+          className="dataflow-big-buttons-help-step"
+          dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
+          handleRedirect={handleRedirect}
+          isLeadReporterOfCountry={isLeadReporterOfCountry}
+          onCleanUpReceipt={onCleanUpReceipt}
+          onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          onSaveName={onSaveName}
+          onShowManageReportersDialog={onShowManageReportersDialog}
+          onUpdateData={setIsDataUpdated}
+          setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
+          setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
+          setIsReceiptLoading={setIsReceiptLoading}
+          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+        />
+      );
+    } else {
+      return (
+        <BigButtonListRepresentative
+          dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
+          handleRedirect={handleRedirect}
+          isLeadReporterOfCountry={isLeadReporterOfCountry}
+          match={match}
+          onCleanUpReceipt={onCleanUpReceipt}
+          onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          setIsReceiptLoading={setIsReceiptLoading}
+        />
+      );
+    }
+  };
+
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
       <div className="rep-container">{children}</div>
@@ -751,35 +821,7 @@ const Dataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
 
-        {isNil(representativeId) ? (
-          <BigButtonList
-            className="dataflow-big-buttons-help-step"
-            dataflowState={dataflowState}
-            dataProviderId={dataProviderId}
-            handleRedirect={handleRedirect}
-            isLeadReporterOfCountry={isLeadReporterOfCountry}
-            onCleanUpReceipt={onCleanUpReceipt}
-            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
-            onSaveName={onSaveName}
-            onShowManageReportersDialog={onShowManageReportersDialog}
-            onUpdateData={setIsDataUpdated}
-            setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
-            setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
-            setIsReceiptLoading={setIsReceiptLoading}
-            setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-          />
-        ) : (
-          <BigButtonListRepresentative
-            dataflowState={dataflowState}
-            dataProviderId={dataProviderId}
-            handleRedirect={handleRedirect}
-            isLeadReporterOfCountry={isLeadReporterOfCountry}
-            match={match}
-            onCleanUpReceipt={onCleanUpReceipt}
-            onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
-            setIsReceiptLoading={setIsReceiptLoading}
-          />
-        )}
+        {getBigButtonList()}
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
@@ -787,7 +829,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            onConfirm={() => onConfirmRelease()}
+            onConfirm={onConfirmRelease}
             onHide={() => {
               manageDialogs('isReleaseDialogVisible', false);
               if (dataflowState.restrictFromPublic) {
@@ -817,28 +859,6 @@ const Dataflow = withRouter(({ history, match }) => {
                 setRepresentativeImport={isImport =>
                   dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: isImport })
                 }
-              />
-            </div>
-          </Dialog>
-        )}
-
-        {dataflowState.isManageRightsDialogVisible && (
-          <Dialog
-            contentStyle={{ maxHeight: '60vh' }}
-            footer={manageRightsDialogFooter}
-            header={
-              dataflowState.isCustodian
-                ? resources.messages['manageEditorsRights']
-                : resources.messages['manageReportersRights']
-            }
-            onHide={() => manageDialogs('isManageRightsDialogVisible', false)}
-            visible={dataflowState.isManageRightsDialogVisible}>
-            <div className={styles.dialog}>
-              <ManageRights
-                dataflowId={dataflowId}
-                dataflowState={dataflowState}
-                dataProviderId={dataProviderId}
-                isActiveManageRightsDialog={dataflowState.isManageRightsDialogVisible}
               />
             </div>
           </Dialog>

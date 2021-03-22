@@ -16,6 +16,7 @@
   "getAllDataflowsUserList": "/dataflow/getUserRolesAllDataflows",
   "getUserList": "/user/getUserRolesByDataflow/{:dataflowId}/dataProviderId/{:representativeId}",
   "getPublicDataflowData": "/dataflow/getPublicDataflow/{:dataflowId}",
+  "getPublicDataflowsByCountryCode": "/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}",
   "globalStatistics": "/datasetmetabase/globalStatistics/{:datasetSchemaId}",
   "importSchema": "/dataschema/import?dataflowId={:dataflowId}",
   "loadDatasetsByDataflowId": "/dataflow/{:dataflowId}",

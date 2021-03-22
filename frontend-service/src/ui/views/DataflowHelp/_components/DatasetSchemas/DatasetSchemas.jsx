@@ -184,7 +184,8 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const getUniqueList = async datasetsSchemas => {
     try {
       const datasetUniques = datasetsSchemas.map(async datasetSchema => {
-        return await UniqueConstraintsService.all(dataflowId, datasetSchema.datasetSchemaId);
+        const response = await UniqueConstraintsService.all(dataflowId, datasetSchema.datasetSchemaId);
+        return response.data;
       });
 
       Promise.all(datasetUniques).then(allUniques => {

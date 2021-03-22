@@ -242,7 +242,8 @@ const DataFormFieldEditor = ({
         datasetSchemaId,
         100
       );
-      const linkItems = referencedFieldValues
+
+      const linkItems = referencedFieldValues.data
         .map(referencedField => {
           return {
             itemType: `${referencedField.value}${
@@ -263,7 +264,7 @@ const DataFormFieldEditor = ({
           value: ''
         });
       }
-      if (referencedFieldValues.length > 99) {
+      if (referencedFieldValues.data.length > 99) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
           itemType: resources.messages['moreElements'],

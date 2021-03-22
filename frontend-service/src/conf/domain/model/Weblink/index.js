@@ -1,2 +1,2 @@
-import WeblinkConfig from './Weblink.web.config';
-export { WeblinkConfig };
+import WebLinkConfig from './Weblink.web.config';
+export { WebLinkConfig };

@@ -118,8 +118,8 @@ const PrivacyStatement = withRouter(() => {
                 Data Protection Supervisor.
               </p>
               <p>
-                Reportnet 3.0 requires you to login via your ‘EU Login’. ‘EU Login’ requires certain personal data such
-                as the name, surname and e-mail address of the registrant. For further information, please refer to the{' '}
+                Reportnet 3 requires you to login via your ‘EU Login’. ‘EU Login’ requires certain personal data such as
+                the name, surname and e-mail address of the registrant. For further information, please refer to the{' '}
                 <a
                   href="https://webgate.ec.europa.eu/cas/privacyStatementPopup.html"
                   target="_blank"
@@ -132,16 +132,14 @@ const PrivacyStatement = withRouter(() => {
             <section id="gdprDataCollectedTitle">
               <h3>What personal data do we collect and for what purpose</h3>
               <p>
-                When you visit the Reportnet 3.0 public page, we do not link or correlate your authenticated session to
+                When you visit the Reportnet 3 public page, we do not link or correlate your authenticated session to
                 the collected website usage statistics. The collected statistics are fully anonymized.
               </p>
               <p>
                 We collect personal information only when your EU Login account is added to the platform. This is needed
                 in order to grant a user access to specific functionalities of the website that require authentication.{' '}
               </p>
-              <p>
-                Below the most common use cases for which a user needs to authenticate on the Reportnet 3.0 platform:
-              </p>
+              <p>Below the most common use cases for which a user needs to authenticate on the Reportnet 3 platform:</p>
               <p>
                 <ul>
                   <li>
@@ -195,7 +193,7 @@ const PrivacyStatement = withRouter(() => {
                 personal data.
               </p>
               <p>
-                You can receive a copy of your personal data that has been submitted to the Reportnet 3.0 platform by
+                You can receive a copy of your personal data that has been submitted to the Reportnet 3 platform by
                 sending an email to the Reportnet Helpdesk (
                 <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>).
               </p>
@@ -226,12 +224,12 @@ const PrivacyStatement = withRouter(() => {
             <section id="gdprHowLongStore">
               <h3>How long do we store your personal data</h3>
               <p>
-                For authenticated users: The personal data you provide in Reportnet 3.0 will be kept up to seven (7)
-                years. After seven (7) years from the date that you have registered to Reportnet 3.0, your personal data
+                For authenticated users: The personal data you provide in Reportnet 3 will be kept up to seven (7)
+                years. After seven (7) years from the date that you have registered to Reportnet 3, your personal data
                 will be anonymised and the link to your EU login account will be removed.
               </p>
               <p>
-                Additionally, you always have the right to get your account deleted from the Reportnet 3.0 Directory by
+                Additionally, you always have the right to get your account deleted from the Reportnet 3 Directory by
                 sending an email to the Reportnet Helpdesk (
                 <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>).
               </p>

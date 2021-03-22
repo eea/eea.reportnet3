@@ -58,4 +58,23 @@ public interface RecordExtendedQueriesRepository {
    * @return the record value
    */
   RecordValue findLastRecord();
+
+
+
+  /**
+   * Find by table value no order optimized.
+   *
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @return the list
+   */
+  List<RecordValue> findByTableValueNoOrderOptimized(String idTableSchema, Pageable pageable);
+
+  /**
+   * Find and generate ETL json.
+   *
+   * @param stringQuery the string query
+   * @return the stream
+   */
+  String findAndGenerateETLJson(String stringQuery);
 }

@@ -461,30 +461,28 @@ public class FileTreatmentHelper implements DisposableBean {
 
         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
 
-        DataSetVO datasetVO =
-            datasetService.processFile(datasetId, fileName, inputStream, tableSchemaId);
-        datasetVO.setId(datasetId);
-        DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+        DatasetValue dataset = parseFile(inputStream, datasetId, tableSchemaId, fileName);
+
         if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
           throw new EEAException("Error processing file " + fileName);
         }
 
-        // Save empty table
-        List<RecordValue> allRecords = dataset.getTableValues().get(0).getRecords();
+        // The only reference to the list of records to make them eligible for GC in next steps
+        List<List<RecordValue>> recordLists =
+            getListOfRecords(dataset.getTableValues().get(0).getRecords());
+        int totalRecords = dataset.getTableValues().get(0).getRecords().size();
         dataset.getTableValues().get(0).setRecords(new ArrayList<>());
 
         // Check if the table with idTableSchema has been populated already
         Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
         fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
 
+        // Save empty table
         if (null == oldTableId) {
           datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
         }
 
-        LOG.info("Inserting {} records into database for dataset {} coming from file {}",
-            allRecords.size(), datasetId, fileName);
-        getListOfRecords(allRecords).parallelStream()
-            .forEach(recordValues -> datasetService.saveAllRecords(datasetId, recordValues));
+        saveRecords(recordLists, datasetId, originalFileName, totalRecords);
 
         LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
       } catch (IOException | EEAException e) {
@@ -501,6 +499,8 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
   }
+
+
 
   /**
    * Gets the table schema id from file name.
@@ -548,13 +548,13 @@ public class FileTreatmentHelper implements DisposableBean {
           .build();
 
       EventType eventType;
-
+      DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
       if (null != error) {
-        eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_FAILED_EVENT
             : EventType.IMPORT_DESIGN_FAILED_EVENT;
       } else {
-        eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
         kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);
@@ -695,6 +695,7 @@ public class FileTreatmentHelper implements DisposableBean {
   /**
    * Schema contains fixed records.
    *
+   * @param datasetId the dataset id
    * @param schema the schema
    * @param tableSchemaId the table schema id
    * @return true, if successful
@@ -724,5 +725,52 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     return rtn;
+  }
+
+  /**
+   * Parses the file.
+   *
+   * @param inputStream the input stream
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param fileName the file name
+   * @return the dataset value
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private DatasetValue parseFile(InputStream inputStream, Long datasetId, String tableSchemaId,
+      String fileName) throws EEAException, IOException {
+    DataSetVO datasetVO =
+        datasetService.processFile(datasetId, fileName, inputStream, tableSchemaId);
+    datasetVO.setId(datasetId);
+    DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
+    LOG.info("RN3-Import DataSetVO mapping completed: datasetId={}, tableSchemaId={}, fileName={}",
+        datasetId, tableSchemaId, fileName);
+    return dataset;
+  }
+
+  /**
+   * Save records.
+   *
+   * @param recordLists the record lists
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param totalRecords the total records
+   */
+  private void saveRecords(List<List<RecordValue>> recordLists, Long datasetId, String fileName,
+      int totalRecords) {
+    int recordListsSize = recordLists.size();
+    int tenPercent = recordListsSize / 10;
+    tenPercent = tenPercent == 0 ? 1 : tenPercent;
+    for (int i = 0; i < recordListsSize; i++) {
+      List<RecordValue> recordList = recordLists.get(i);
+      totalRecords -= recordList.size();
+      if (i % tenPercent == 0) { // Reduce the number of logs.
+        LOG.info("RN3-Import Saving records: datasetId={}, fileName={}, recordsLeft={}", datasetId,
+            fileName, totalRecords);
+      }
+      datasetService.saveAllRecords(datasetId, recordList);
+      recordLists.set(i, null); // Make the list of records eligible for GC
+    }
   }
 }

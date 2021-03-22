@@ -143,6 +143,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv  "
           + "WHERE tv.idTableSchema = :idTableSchema";
 
+  /** The Constant QUERY_UNSORTERED_FIELDS: {@value}. */
+  private static final String QUERY_UNSORTERED_FIELDS =
+      "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields  "
+          + "WHERE tv.idTableSchema = :idTableSchema";
+
   /** The Constant ID_TABLE_SCHEMA: {@value}. */
   private static final String ID_TABLE_SCHEMA = "idTableSchema";
 
@@ -400,6 +405,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return query.getResultList();
   }
 
+
+  @Override
+  public List<RecordValue> findByTableValueNoOrderOptimized(String idTableSchema,
+      Pageable pageable) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED_FIELDS);
+    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+    }
+    return sanitizeRecords(query.getResultList());
+  }
+
   /**
    * Find by table value all records.
    *
@@ -466,6 +484,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.info("no result, ignore message");
     }
     return result;
+  }
+
+  /**
+   * Find and generate ETL json.
+   *
+   * @param stringQuery the string query
+   * @return the string
+   */
+  @Override
+  public String findAndGenerateETLJson(String stringQuery) {
+    Query query = entityManager.createNativeQuery(stringQuery);
+    return query.getSingleResult().toString();
   }
 
 }

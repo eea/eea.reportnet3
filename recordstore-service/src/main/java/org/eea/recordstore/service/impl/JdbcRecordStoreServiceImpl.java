@@ -29,10 +29,12 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -195,6 +197,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private EUDatasetControllerZuul euDatasetControllerZuul;
 
+  /** The test dataset controller zuul. */
+  @Autowired
+  private TestDatasetControllerZuul testDatasetControllerZuul;
+
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
    * <p>
@@ -240,7 +246,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
-      LOG.info("{} Schemas created as part of DataCollection creation",
+      LOG.info("{} Schemas created as part of DataCollection creation.",
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
       // creation of all datasets
@@ -1077,6 +1083,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   dataflowId, datasetMetabaseVO.getDataProviderId());
 
           for (ReportingDatasetVO dataset : reportingDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case TEST:
+          List<TestDatasetVO> testDatasets =
+              testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId);
+          for (TestDatasetVO dataset : testDatasets) {
             launchUpdateMaterializedQueryView(dataset.getId());
           }
           break;

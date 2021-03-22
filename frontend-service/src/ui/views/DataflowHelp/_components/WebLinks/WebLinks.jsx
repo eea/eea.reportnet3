@@ -80,17 +80,7 @@ export const WebLinks = ({
   }, [webLinks, weblinkItem]);
 
   const addWeblinkSchema = Yup.object().shape({
-    description: Yup.string()
-      .required(' ')
-      .max(255, resources.messages['webLinkDescriptionValidationMax'])
-      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
-        return isNil(
-          webLinks.find(
-            weblink =>
-              TextUtils.areEquals(weblink.description, value) && TextUtils.areEquals(weblink.url, this.parent.url)
-          )
-        );
-      }),
+    description: Yup.string().required(' ').max(255, resources.messages['webLinkDescriptionValidationMax']),
     url: Yup.string()
       .lowercase()
       .matches(
@@ -98,15 +88,6 @@ export const WebLinks = ({
         resources.messages['urlError']
       )
       .required(' ')
-      .test('Unique', resources.messages['duplicatedWeblinkError'], function (value) {
-        return isNil(
-          webLinks.find(
-            weblink =>
-              TextUtils.areEquals(weblink.description, this.parent.description) &&
-              TextUtils.areEquals(weblink.url, value)
-          )
-        );
-      })
   });
 
   const fieldsArray = [
@@ -142,9 +123,9 @@ export const WebLinks = ({
     setDeletingId(weblinkItem.id);
 
     try {
-      const weblinkToDelete = await WebLinkService.deleteWeblink(weblinkItem);
+      const { status } = await WebLinkService.deleteWebLink(weblinkItem);
 
-      if (weblinkToDelete.isDeleted) {
+      if (status >= 200 && status <= 299) {
         onLoadWebLinks();
       }
     } catch (error) {
@@ -173,7 +154,7 @@ export const WebLinks = ({
       try {
         const newWeblink = await WebLinkService.create(dataflowId, e);
 
-        if (newWeblink.isCreated.status >= 200 && newWeblink.isCreated.status <= 299) {
+        if (newWeblink.status >= 200 && newWeblink.status <= 299) {
           onLoadWebLinks();
         }
 
@@ -199,7 +180,7 @@ export const WebLinks = ({
       try {
         const weblinkToEdit = await WebLinkService.update(dataflowId, e);
 
-        if (weblinkToEdit.isUpdated.status >= 200 && weblinkToEdit.isUpdated.status <= 299) {
+        if (weblinkToEdit.status >= 200 && weblinkToEdit.status <= 299) {
           onLoadWebLinks();
         }
 
@@ -255,7 +236,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
           disabled={(editingId === weblink.id && isEditing) || (deletingId === weblink.id && isDeleting)}
           icon={getEditButtonIcon()}
-          onClick={() => setIsAddOrEditWeblinkDialogVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsAddOrEditWeblinkDialogVisible(true);
+          }}
           type="button"
         />
 
@@ -263,7 +247,10 @@ export const WebLinks = ({
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
           disabled={(deletingId === weblink.id && isDeleting) || (editingId === weblink.id && isEditing)}
           icon={getDeleteButtonIcon()}
-          onClick={() => setIsConfirmDeleteVisible(true)}
+          onClick={() => {
+            setWeblinkItem(weblink);
+            setIsConfirmDeleteVisible(true);
+          }}
           type="button"
         />
       </div>
@@ -312,7 +299,6 @@ export const WebLinks = ({
       <DataTable
         autoLayout={true}
         loading={isLoading}
-        onRowSelect={e => setWeblinkItem(Object.assign({}, e.data))}
         onSort={e => {
           setSortFieldWeblinks(e.sortField);
           setSortOrderWeblinks(e.sortOrder);

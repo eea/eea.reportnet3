@@ -228,15 +228,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const isDataflowOpen =
-        (userContext.hasPermission(
-          [config.permissions.DATA_CUSTODIAN],
+        userContext.hasPermission(
+          [config.permissions.DATA_CUSTODIAN, config.permissions.DATA_STEWARD],
           `${config.permissions.DATAFLOW}${dataflowId}`
-        ) ||
-          userContext.hasPermission(
-            [config.permissions.DATA_STEWARD],
-            `${config.permissions.DATAFLOW}${dataflowId}`
-          )) &&
-        designerState?.metaData?.dataflow?.status === 'DRAFT';
+        ) && designerState?.metaData?.dataflow?.status === 'DRAFT';
       designerDispatch({
         type: 'IS_DATAFLOW_OPEN',
         payload: { isDataflowOpen }
@@ -381,7 +376,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      return await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
+      return statistics.data;
     } catch (error) {
       console.error(error);
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
@@ -534,7 +530,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       const datasetData = await DatasetService.exportDataById(datasetId, fileType);
 
-      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData, name: datasetName } });
+      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData.data, name: datasetName } });
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {
@@ -594,27 +590,29 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const getDatasetSchemaId = async () => {
         const dataset = await DatasetService.schemaById(datasetId);
         const tableSchemaList = [];
-        dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
+        dataset.data.tables.forEach(table =>
+          tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId })
+        );
 
         const datasetStatisticsDTO = await getStatisticsById(
           datasetId,
-          dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
+          dataset.data.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
 
         setIsLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
-            availableInPublic: dataset.availableInPublic,
-            datasetSchema: dataset,
+            availableInPublic: dataset.data.availableInPublic,
+            datasetSchema: dataset.data,
             datasetStatistics: datasetStatisticsDTO,
-            description: dataset.datasetSchemaDescription,
-            levelErrorTypes: dataset.levelErrorTypes,
-            previousWebform: WebformsConfig.filter(item => item.value === dataset.webform)[0],
-            schemaId: dataset.datasetSchemaId,
-            tables: dataset.tables,
+            description: dataset.data.datasetSchemaDescription,
+            levelErrorTypes: dataset.data.levelErrorTypes,
+            previousWebform: WebformsConfig.filter(item => item.value === dataset.data.webform)[0],
+            schemaId: dataset.data.datasetSchemaId,
+            tables: dataset.data.tables,
             schemaTables: tableSchemaList,
-            webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
+            webform: WebformsConfig.filter(item => item.value === dataset.data.webform)[0]
           }
         });
       };
@@ -713,7 +711,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       const webformObject = { webform: { name: designerState.selectedWebform.value } };
       const response = await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
-      if (response) {
+      if (response.status >= 200 && response.status <= 299) {
         onLoadSchema();
       }
     } catch (error) {

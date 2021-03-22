@@ -345,8 +345,8 @@ const Tab = ({
               maxLength={60}
               onBlur={e => {
                 //Check for empty table name
-                if (titleHeader !== '') {
-                  onInputBlur(e.target.value, index, initialTitleHeader);
+                if (titleHeader.trim() !== '') {
+                  onInputBlur(e.target.value.trim(), index, initialTitleHeader);
                 } else {
                   if (!isUndefined(onTabNameError)) {
                     if (!newTab) {

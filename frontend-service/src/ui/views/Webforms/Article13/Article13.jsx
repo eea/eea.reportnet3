@@ -106,7 +106,7 @@ export const Article13 = ({ dataflowId, datasetId, isReleasing, isReporting, sta
 
   const getPamsTableRecords = async tableSchemaId => {
     if (!isNil(tableSchemaId[0])) {
-      const pamsTable = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
+      const { data } = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
         'CORRECT',
         'INFO',
         'WARNING',
@@ -114,7 +114,7 @@ export const Article13 = ({ dataflowId, datasetId, isReleasing, isReporting, sta
         'BLOCKER'
       ]);
 
-      return onParseWebformRecords(pamsTable.records, article13State.data[0], {}, pamsTable.totalRecords) || [];
+      return onParseWebformRecords(data.records, article13State.data[0], {}, data.totalRecords) || [];
     }
 
     return [];
@@ -213,22 +213,18 @@ export const Article13 = ({ dataflowId, datasetId, isReleasing, isReporting, sta
     const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
       if (!isNil(tableSchemaId[0])) {
-        const parentTableData = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
+        const { data } = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
           'CORRECT',
           'INFO',
           'WARNING',
           'ERROR',
           'BLOCKER'
         ]);
-        if (!isNil(parentTableData.records)) {
+
+        if (!isNil(data.records)) {
           const tableData = {};
 
-          const records = onParseWebformRecords(
-            parentTableData.records,
-            article13State.data[0],
-            tableData,
-            parentTableData.totalRecords
-          );
+          const records = onParseWebformRecords(data.records, article13State.data[0], tableData, data.totalRecords);
           const list = getTypeList(records);
 
           article13Dispatch({

@@ -16,22 +16,22 @@ const timeOut = time => {
 
 const login = async code => {
   const userDTO = await apiUser.login(code);
-  const { accessToken, refreshToken } = userDTO;
+  const { accessToken, refreshToken } = userDTO.data;
   const user = new User({
-    accessRole: userDTO.roles,
-    contextRoles: userDTO.groups,
-    id: userDTO.userId,
-    name: userDTO.preferredUsername,
-    preferredUsername: userDTO.preferredUsername,
-    tokenExpireTime: userDTO.accessTokenExpiration
+    accessRole: userDTO.data.roles,
+    contextRoles: userDTO.data.groups,
+    id: userDTO.data.userId,
+    name: userDTO.data.preferredUsername,
+    preferredUsername: userDTO.data.preferredUsername,
+    tokenExpireTime: userDTO.data.accessTokenExpiration
   });
   userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
-  const userInfoDTO = await apiUser.userInfo(userDTO.userId);
+  const userInfoDTO = await apiUser.userInfo(userDTO.data.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
-  const remain = userDTO.accessTokenExpiration - dayjs().unix();
+  const remain = userDTO.data.accessTokenExpiration - dayjs().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
@@ -44,11 +44,6 @@ const logout = async () => {
     return response;
   }
   return;
-};
-
-const uploadImg = async (userId, imgData) => {
-  const response = await apiUser.uploadImg(userId, imgData);
-  return response;
 };
 
 const userInfo = async userId => {
@@ -71,19 +66,23 @@ const parseConfigurationDTO = userConfigurationDTO => {
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
+    amPm24h: true,
     basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
+    listView: true,
+    notificationSound: false,
     pinnedDataflows: [],
-    showLogoutConfirmation: true,
+    pushNotifications: true,
     rowsPerPage: 10,
-    visualTheme: 'light',
+    showLogoutConfirmation: true,
     userImage: [],
-    amPm24h: true,
-    listView: true
+    visualTheme: 'light'
   };
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
     userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
+    userConfiguration.notificationSound = userDefaultConfiguration.notificationSound;
+    userConfiguration.pushNotifications = userDefaultConfiguration.pushNotifications;
     userConfiguration.showLogoutConfirmation = userDefaultConfiguration.showLogoutConfirmation;
     userConfiguration.rowsPerPage = userDefaultConfiguration.rowsPerPage;
     userConfiguration.visualTheme = userDefaultConfiguration.visualTheme;
@@ -103,6 +102,18 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;
+
+    userConfiguration.notificationSound = isNil(userConfigurationDTO.notificationSound)
+      ? userDefaultConfiguration.notificationSound
+      : userConfigurationDTO.notificationSound[0] === 'false'
+      ? (userConfiguration.notificationSound = false)
+      : (userConfiguration.notificationSound = true);
+
+    userConfiguration.pushNotifications = isNil(userConfigurationDTO.pushNotifications)
+      ? userDefaultConfiguration.pushNotifications
+      : userConfigurationDTO.pushNotifications[0] === 'false'
+      ? (userConfiguration.pushNotifications = false)
+      : (userConfiguration.pushNotifications = true);
 
     userConfiguration.showLogoutConfirmation = isNil(userConfigurationDTO.showLogoutConfirmation)
       ? userDefaultConfiguration.showLogoutConfirmation
@@ -142,22 +153,22 @@ const updateAttributes = async attributes => await apiUser.updateAttributes(attr
 const oldLogin = async (userName, password) => {
   const userDTO = await apiUser.oldLogin(userName, password);
 
-  const { accessToken, refreshToken } = userDTO;
+  const { accessToken, refreshToken } = userDTO.data;
   const user = new User({
-    accessRole: userDTO.roles,
-    contextRoles: userDTO.groups,
-    id: userDTO.userId,
-    name: userDTO.preferredUsername,
-    preferredUsername: userDTO.preferredUsername,
-    tokenExpireTime: userDTO.accessTokenExpiration
+    accessRole: userDTO.data.roles,
+    contextRoles: userDTO.data.groups,
+    id: userDTO.data.userId,
+    name: userDTO.data.preferredUsername,
+    preferredUsername: userDTO.data.preferredUsername,
+    tokenExpireTime: userDTO.data.accessTokenExpiration
   });
   userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
-  const userInfoDTO = await apiUser.userInfo(userDTO.userId);
+  const userInfoDTO = await apiUser.userInfo(userDTO.data.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
   //calculate difference between now and expiration
-  const remain = userDTO.accessTokenExpiration - dayjs().unix();
+  const remain = userDTO.data.accessTokenExpiration - dayjs().unix();
   timeOut((remain - 10) * 1000);
   return user;
 };
@@ -166,22 +177,22 @@ const refreshToken = async () => {
   try {
     const currentTokens = userStorage.getTokens();
     const userDTO = await apiUser.refreshToken(currentTokens.refreshToken);
-    const { accessToken, refreshToken } = userDTO;
+    const { accessToken, refreshToken } = userDTO.data;
     const user = new User({
-      accessRole: userDTO.roles,
-      contextRoles: userDTO.groups,
-      id: userDTO.userId,
-      name: userDTO.preferredUsername,
-      preferredUsername: userDTO.preferredUsername,
-      tokenExpireTime: userDTO.accessTokenExpiration
+      accessRole: userDTO.data.roles,
+      contextRoles: userDTO.data.groups,
+      id: userDTO.data.userId,
+      name: userDTO.data.preferredUsername,
+      preferredUsername: userDTO.data.preferredUsername,
+      tokenExpireTime: userDTO.data.accessTokenExpiration
     });
     userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
-    const userInfoDTO = await apiUser.userInfo(userDTO.userId);
+    const userInfoDTO = await apiUser.userInfo(userDTO.data.userId);
     user.email = userInfoDTO.data.email;
     user.firstName = userInfoDTO.data.firstName;
     user.lastName = userInfoDTO.data.lastName;
     //calculate difference between now and expiration
-    const remain = userDTO.accessTokenExpiration - dayjs().unix();
+    const remain = userDTO.data.accessTokenExpiration - dayjs().unix();
     timeOut((remain - 10) * 1000);
     return user;
   } catch (error) {
@@ -203,14 +214,13 @@ const getToken = () => {
 };
 
 export const ApiUserRepository = {
-  login,
   getConfiguration,
-  updateAttributes,
+  getToken,
+  login,
   logout,
   oldLogin,
   refreshToken,
-  getToken,
-  userRole,
-  uploadImg,
-  userInfo
+  updateAttributes,
+  userInfo,
+  userRole
 };
