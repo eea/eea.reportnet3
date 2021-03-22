@@ -81,9 +81,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
                   />
                 ))
               ) : (
-                <div className={styles.noDataflows}>
-                  <div>{resources.messages['noDataflows']}</div>
-                </div>
+                <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
               )
             ) : (
               <Spinner style={{ left: 0 }} />
