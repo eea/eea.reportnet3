@@ -327,9 +327,9 @@ const Documents = ({
         )}
       </DataTable>
 
-      {isLoading && documents.length === 0 && <Spinner style={{ top: 0 }} />}
+      {isLoading && isEmpty(documents) && <Spinner style={{ top: 0 }} />}
 
-      {!isLoading && documents.length === 0 && (
+      {!isLoading && isEmpty(documents) && (
         <div className={styles.noDataWrapper}>
           <h4>{resources.messages['noDocuments']}</h4>
         </div>

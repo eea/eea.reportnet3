@@ -342,9 +342,9 @@ export const WebLinks = ({
         {!isEmpty(webLinks) ? webLinksState.webLinksColumns : emptyWebLinkColumns}
       </DataTable>
 
-      {isLoading && webLinks.length === 0 && <Spinner style={{ top: 0 }} />}
+      {isLoading && isEmpty(webLinks) && <Spinner style={{ top: 0 }} />}
 
-      {!isLoading && webLinks.length === 0 && (
+      {!isLoading && isEmpty(webLinks) && (
         <div className={styles.noDataWrapper}>
           <h4>{resources.messages['noWebLinks']}</h4>
         </div>
