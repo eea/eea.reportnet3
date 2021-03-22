@@ -110,7 +110,7 @@ const Dataflow = withRouter(({ history, match }) => {
     representativesImport: false,
     restrictFromPublic: false,
     status: '',
-    updatedDatasetSchema: undefined,
+    updatedDatasetSchema: [],
     userRoles: []
   };
 

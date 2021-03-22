@@ -247,7 +247,7 @@ export const AwesomeIcons = icon => {
       return faVectorSquare;
     case 'list':
       return faList;
-    case 'list':
+    case 'thList':
       return faThList;
     case 'listClipboard':
       return faClipboardList;
