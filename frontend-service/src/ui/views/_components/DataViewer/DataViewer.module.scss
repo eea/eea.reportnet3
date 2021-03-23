@@ -77,6 +77,14 @@
   width: 15px;
 }
 
+:global .p-datatable-scrollable-body::-webkit-scrollbar {
+  height: 12px;
+}
+
 :global .p-datatable-scrollable-body::-webkit-scrollbar-thumb {
-  background: var(--c-corporate-yellow);
+  border-radius: 4px;
+}
+
+:global .p-datatable-scrollable-body::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
