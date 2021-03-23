@@ -43,6 +43,7 @@ export const BigButton = ({
   tooltip
 }) => {
   const resources = useContext(ResourcesContext);
+  const regex = new RegExp(/[a-zA-Z0-9_-\s]/);
 
   const [buttonsTitle, setButtonsTitle] = useState('');
   const [initialValue, setInitialValue] = useState();
@@ -177,9 +178,9 @@ export const BigButton = ({
       </div>
       {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText
-          key={index}
           autoFocus={true}
           className={`${styles.inputText}`}
+          key={index}
           onBlur={e => {
             onInputSave(e.target.value, index);
           }}
@@ -188,7 +189,14 @@ export const BigButton = ({
             e.preventDefault();
             onEditorValueFocus(e.target.value);
           }}
-          onKeyDown={e => onEditorKeyChange(e, index)}
+          onKeyDown={e => {
+            if (!regex.test(e.key) || e.key === 'Dead') {
+              e.preventDefault();
+              return false;
+            } else {
+              onEditorKeyChange(e, index);
+            }
+          }}
           placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />

@@ -987,6 +987,7 @@ export const FieldDesigner = ({
         }`}
         disabled={isDataflowOpen}
         id={fieldName}
+        keyfilter="schemaTableFields"
         maxLength={60}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
