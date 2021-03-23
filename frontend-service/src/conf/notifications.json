@@ -513,7 +513,7 @@
           "key": "UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR"
         },
         {
-          "key": "WRONG_WEBLINK_ERROR"
+          "key": "WRONG_WEB_LINK_ERROR"
         },
         {
           "key": "IMPORT_DESIGN_BAD_REQUEST_ERROR",
@@ -575,7 +575,7 @@
           "key": "IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
         },
         {
-          "key": "DUPLICATED_WEBLINK_ERROR"
+          "key": "DUPLICATED_WEB_LINK_ERROR"
         },
         {
           "key": "LOAD_DATAFLOWS_BY_COUNTRY_ERROR"
