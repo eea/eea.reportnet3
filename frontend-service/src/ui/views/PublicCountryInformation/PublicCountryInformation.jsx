@@ -69,7 +69,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
-      const allCountries = config.countriesByGroup['eeaCountries'].concat(config.countriesByGroup['cooperatingCountries']).concat(config.countriesByGroup['otherCountries']);
+      const allCountries = config.countriesByGroup['eeaCountries']
+        .concat(config.countriesByGroup['cooperatingCountries'])
+        .concat(config.countriesByGroup['otherCountries']);
       allCountries.forEach(country => {
         if (countryCode === country.code) {
           setCountryName(country.name);
@@ -128,7 +130,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     try {
       const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
 
-      DownloadFile(fileContent, fileName);
+      DownloadFile(fileContent.data, fileName);
     } catch (error) {
       if (error.response.status === 404) {
         notificationContext.add({

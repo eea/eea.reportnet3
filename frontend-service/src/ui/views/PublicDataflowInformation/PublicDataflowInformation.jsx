@@ -76,7 +76,7 @@ export const PublicDataflowInformation = withRouter(
               <span
                 className={styles.downloadIcon}
                 onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
-                <FontAwesomeIcon icon={AwesomeIcons('xlsx')} data-tip data-for={publicFileName} />
+                <FontAwesomeIcon icon={AwesomeIcons('7z')} data-tip data-for={publicFileName} />
                 <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
                   <span>{getPublicFileName(publicFileName)}</span>
                 </ReactTooltip>
