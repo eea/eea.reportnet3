@@ -305,7 +305,6 @@ const DataFormFieldEditor = ({
   const renderMultiselectCodelist = (field, fieldValue) => {
     return (
       <MultiSelect
-        addSpaceCommaSeparator={true}
         appendTo={document.body}
         disabled={(column.readOnly && reporting) || isSaving}
         maxSelectedLabels={10}
@@ -319,6 +318,7 @@ const DataFormFieldEditor = ({
         ref={multiDropdownRef}
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        valuesSeparator=";"
       />
     );
   };
@@ -422,7 +422,6 @@ const DataFormFieldEditor = ({
     if (column.pkHasMultipleValues) {
       return (
         <MultiSelect
-          addSpaceCommaSeparator={true}
           appendTo={document.body}
           clearButton={false}
           disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
@@ -442,8 +441,9 @@ const DataFormFieldEditor = ({
           ref={linkDropdownRef}
           value={RecordUtils.getMultiselectValues(
             columnWithLinks.linkItems,
-            !Array.isArray(fieldValue) ? fieldValue.split(', ').join(',') : fieldValue
+            !Array.isArray(fieldValue) ? fieldValue.split('; ').join(';') : fieldValue
           )}
+          valuesSeparator=";"
         />
       );
     } else {

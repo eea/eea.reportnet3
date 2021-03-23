@@ -198,7 +198,7 @@ export const WebformField = ({
     webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
-        ? value.join(',')
+        ? value.join(';')
         : value;
 
     try {
@@ -305,7 +305,6 @@ export const WebformField = ({
         if (field.pkHasMultipleValues) {
           return (
             <MultiSelect
-              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -323,6 +322,7 @@ export const WebformField = ({
               options={linkItemsOptions}
               optionLabel="itemType"
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
+              valuesSeparator=";"
             />
           );
         } else {
@@ -361,7 +361,6 @@ export const WebformField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
@@ -387,6 +386,7 @@ export const WebformField = ({
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
             )}
+            valuesSeparator=";"
           />
         );
 

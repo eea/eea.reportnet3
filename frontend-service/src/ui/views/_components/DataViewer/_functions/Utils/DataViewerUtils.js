@@ -42,7 +42,7 @@ const getFieldValues = (columns, header, filterColumns) => {
           : filteredValues[key] === 'MULTISELECT_CODELIST'
           ? 'MULTIPLE SELECT'
           : Array.isArray(filteredValues[key])
-          ? filteredValues[key].join(', ')
+          ? filteredValues[key].join(key === 'codelistItems' ? '; ' : ', ')
           : filteredValues[key]
     };
   });

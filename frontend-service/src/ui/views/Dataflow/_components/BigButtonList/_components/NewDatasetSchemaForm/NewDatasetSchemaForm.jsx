@@ -72,7 +72,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           dataflow: { name: dataflowName }
         } = metadata;
 
-        if (error.response?.data?.message.includes('duplicated')) {
+        if (error.response?.data?.message?.includes('duplicated')) {
           notificationContext.add({
             type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
             content: { schemaName: datasetSchemaName }

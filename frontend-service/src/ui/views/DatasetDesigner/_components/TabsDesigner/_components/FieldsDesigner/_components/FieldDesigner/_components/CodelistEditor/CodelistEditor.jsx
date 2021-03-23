@@ -21,7 +21,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
       const clipboardData = event.clipboardData;
       const pastedData = clipboardData.getData('Text');
       const inmCodelistItems = [...codelistItems];
-      inmCodelistItems.push(...pastedData.split(',').filter(value => value.trim() !== ''));
+      inmCodelistItems.push(...pastedData.split(';').filter(value => value.trim() !== ''));
       setCodelistItems([...new Set(inmCodelistItems.map(value => value.trim()))]);
     }
   };
@@ -75,9 +75,10 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
           clearOnPaste={true}
           deleteWhiteSpaces={true}
           errorMessage={resources.messages['duplicatedItem']}
-          forbiddenCommas={true}
+          forbiddenChar={true}
           inputClassName={styles.codelistChips}
           onChange={e => setCodelistItems(e.value)}
+          pasteSeparator=";"
           showErrorMessage={true}
           tooltip={
             TextUtils.areEquals(type, 'SINGLE SELECT')

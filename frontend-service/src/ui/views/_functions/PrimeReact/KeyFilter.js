@@ -14,6 +14,7 @@ export default class KeyFilter {
     int: /[\d\-]/,
     money: /[\d\.\s,]/,
     noComma: /[^,]+/,
+    noSemicolon: /[^;]+/,
     num: /[\d\-\.]/,
     phone: /^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$/,
     pint: /[\d]/,

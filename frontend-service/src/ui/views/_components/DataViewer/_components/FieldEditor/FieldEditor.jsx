@@ -633,9 +633,7 @@ const FieldEditor = ({
         const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
         if (hasMultipleValues) {
           return (
-            <MultiSelect
-              // onChange={e => onChangeForm(field, e.value)}
-              addSpaceCommaSeparator={true}
+            <MultiSelect              
               appendTo={document.body}
               clearButton={false}
               disabled={isLoadingData}
@@ -666,6 +664,7 @@ const FieldEditor = ({
               options={linkItemsOptions}
               optionLabel="itemType"
               value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
+              valuesSeparator=";"
             />
           );
         } else {
@@ -714,8 +713,7 @@ const FieldEditor = ({
         );
       case 'MULTISELECT_CODELIST':
         return (
-          <MultiSelect
-            addSpaceCommaSeparator={true}
+          <MultiSelect            
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {
@@ -740,6 +738,7 @@ const FieldEditor = ({
             options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             optionLabel="itemType"
             value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
+            valuesSeparator=";"
           />
         );
       default:
