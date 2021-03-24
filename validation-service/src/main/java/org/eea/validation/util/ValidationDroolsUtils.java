@@ -39,8 +39,9 @@ public class ValidationDroolsUtils {
   public static Boolean codelistValidate(final String value, String codelistItems,
       final boolean sensitive) {
     Boolean validationResult = false;
-    // we delete the first character and the last one because we receive a string surrounded by [] symbols
-    final String[] arrayItems = codelistItems.substring(1, codelistItems.length() - 1).split(",");
+    // we delete the first character and the last one because we receive a string surrounded by []
+    // symbols
+    final String[] arrayItems = codelistItems.split(";");
     for (int i = 0; i < arrayItems.length; i++) {
       if (arrayItems[i].trim().equalsIgnoreCase(value)) {
         validationResult = Boolean.TRUE;
@@ -64,11 +65,10 @@ public class ValidationDroolsUtils {
     // position(that is really dificult to happend but we put it just in case)
     if (',' != value.charAt(value.length() - 1)) {
       // we delete the first character and the last one because we receive a string with [] values
-      final List<String> arrayValue = Arrays.asList(value.split(","));
+      final List<String> arrayValue = Arrays.asList(value.split(";"));
       // we trim the codelistValues to clean blank spaces
       arrayValue.replaceAll(String::trim);
-      final List<String> arrayItems =
-          Arrays.asList(codelistItems.substring(1, codelistItems.length() - 1).split(","));
+      final List<String> arrayItems = Arrays.asList(codelistItems.split(";"));
       // we trim the values of database to clean blank spaces
       arrayItems.replaceAll(String::trim);
       if (!arrayValue.isEmpty() && arrayItems.containsAll(arrayValue)) {

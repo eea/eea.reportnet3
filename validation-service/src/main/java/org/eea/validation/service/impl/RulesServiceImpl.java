@@ -477,17 +477,19 @@ public class RulesServiceImpl implements RulesService {
           // we find values available to create this validation for a codelist, same value with
           // capital letter and without capital letters
           document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+          List<String> singleCodeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, document.get("codelistItems").toString(), "FT" + shortcode,
+              FIELD_TYPE + typeData, singleCodeListItems, "FT" + shortcode,
               FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
           break;
         case MULTISELECT_CODELIST:
           // we find values available to create this validation for a codelist, same value with
           // capital letter and without capital letters
           document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+          List<String> codeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createMultiSelectCodelistAutomaticRule(referenceId,
-              typeEntityEnum, FIELD_TYPE + typeData, document.get("codelistItems").toString(),
-              "FT" + shortcode, FT_DESCRIPTION + typeData));
+              typeEntityEnum, FIELD_TYPE + typeData, codeListItems, "FT" + shortcode,
+              FT_DESCRIPTION + typeData));
           break;
         case URL:
           ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,
