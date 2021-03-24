@@ -144,7 +144,11 @@ export const WebLinks = ({
         onLoadWebLinks();
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('Error on delete WebLink', error);
+
+      notificationContext.add({
+        type: 'DELETE_WEB_LINK_ERROR'
+      });
     } finally {
       webLinksDispatch({ type: 'ON_DELETE_END' });
     }
@@ -203,6 +207,10 @@ export const WebLinks = ({
             notificationContext.add({
               type: 'DUPLICATED_WEB_LINK_ERROR'
             });
+          } else {
+            notificationContext.add({
+              type: 'ADD_WEB_LINK_ERROR'
+            });
           }
         } finally {
           webLinksDispatch({ type: 'SET_IS_SUBMITTING', payload: { isSubmitting: false } });
@@ -227,6 +235,10 @@ export const WebLinks = ({
           } else if (error.response.status === 409) {
             notificationContext.add({
               type: 'DUPLICATED_WEB_LINK_ERROR'
+            });
+          } else {
+            notificationContext.add({
+              type: 'EDIT_WEB_LINK_ERROR'
             });
           }
         } finally {
