@@ -322,6 +322,7 @@ export const WebLinks = ({
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
+              id="addWebLinkButton"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-weblink-upload-help-step`}
               icon="add"
               label={resources.messages['add']}
@@ -420,6 +421,7 @@ export const WebLinks = ({
             <fieldset>
               <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
                 <Button
+                  id="submitButton"
                   onClick={() => onSaveRecord()}
                   label={isNil(webLinksState.webLink.id) ? resources.messages['add'] : resources.messages['edit']}
                   disabled={webLinksState.isSubmitting}
