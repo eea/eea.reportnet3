@@ -288,7 +288,7 @@ export const WebLinks = ({
           onClick={() => {
             webLinksDispatch({
               type: 'SET_WEB_LINK',
-              payload: { webLink: { description: webLink.description, id: webLink.id, url: webLink.url } }
+              payload: { webLink }
             });
             setIsAddOrEditWebLinkDialogVisible(true);
           }}
@@ -302,7 +302,7 @@ export const WebLinks = ({
           onClick={() => {
             webLinksDispatch({
               type: 'SET_WEB_LINK',
-              payload: { webLink: { description: webLink.description, id: webLink.id, url: webLink.url } }
+              payload: { webLink }
             });
             setIsConfirmDeleteVisible(true);
           }}
@@ -325,9 +325,7 @@ export const WebLinks = ({
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-weblink-upload-help-step`}
               icon="add"
               label={resources.messages['add']}
-              onClick={() => {
-                setIsAddOrEditWebLinkDialogVisible(true);
-              }}
+              onClick={() => setIsAddOrEditWebLinkDialogVisible(true)}
               style={{ float: 'left' }}
             />
           </div>
