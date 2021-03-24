@@ -3402,24 +3402,7 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-50);
-}
-::-webkit-scrollbar-button:single-button {
-  background-color: transparent;
-  display: block;
-  border-style: solid;
-  height: 13px;
-  width: 16px;
-}
-
-::-webkit-scrollbar-button:single-button:vertical:increment {
-  background-color: var(--bg);
-  border-width: 8px 8px 0 8px;
-  border-color: var(--gray-75) transparent transparent transparent;
-}
-::-webkit-scrollbar-button:single-button:vertical:decrement {
-  background-color: var(--bg);
-  border-width: 0 8px 8px 8px;
-  border-color: transparent transparent var(--gray-75) transparent;
+  cursor: pointer;
 }
 
 /* Accessibility */
