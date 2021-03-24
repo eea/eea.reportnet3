@@ -65,6 +65,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import feign.FeignException;
 import io.jsonwebtoken.lang.Objects;
 
 /**
@@ -148,6 +149,8 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private TestDatasetControllerZuul testDataSetControllerZuul;
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Gets the by id.
@@ -215,9 +218,11 @@ public class DataflowServiceImpl implements DataflowService {
           }
           dataflowVOs.add(dataflowVO);
         });
-
-    getOpenedObligations(dataflowVOs);
-
+    try {
+      getOpenedObligations(dataflowVOs);
+    } catch (FeignException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
     return dataflowVOs;
   }
 
@@ -800,10 +805,14 @@ public class DataflowServiceImpl implements DataflowService {
    * @param dataflowPublicVO the dataflow public VO
    */
   private void findObligationPublicDataflow(DataflowPublicVO dataflowPublicVO) {
-    if (dataflowPublicVO.getObligation() != null
-        && dataflowPublicVO.getObligation().getObligationId() != null) {
-      dataflowPublicVO.setObligation(obligationController
-          .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
+    try {
+      if (dataflowPublicVO.getObligation() != null
+          && dataflowPublicVO.getObligation().getObligationId() != null) {
+        dataflowPublicVO.setObligation(obligationController
+            .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
+      }
+    } catch (FeignException e) {
+      LOG_ERROR.error(e.getMessage());
     }
   }
 
@@ -963,9 +972,11 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVO.setRepresentatives(
           representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
     }
-
-    getObligation(dataflowVO);
-
+    try {
+      getObligation(dataflowVO);
+    } catch (FeignException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
     // we sort the weblinks and documents
     if (!CollectionUtils.isEmpty(dataflowVO.getWeblinks())) {
       dataflowVO.getWeblinks()
