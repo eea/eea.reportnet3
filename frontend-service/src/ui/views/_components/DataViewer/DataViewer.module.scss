@@ -84,13 +84,13 @@
   background-clip: content-box;
   border-color: transparent;
   border-style: solid;
-  border-width: 0 2px;
+  border-width: 1px 2px;
 }
 :global .p-datatable-scrollable-body::-webkit-scrollbar-thumb:hover {
   background-clip: content-box;
   border-color: transparent;
   border-style: solid;
-  border-width: 0 2px;
+  border-width: 1px 2px;
 }
 
 :global .p-datatable-scrollable-body::-webkit-scrollbar-track {
