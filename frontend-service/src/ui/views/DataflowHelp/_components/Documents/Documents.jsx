@@ -8,6 +8,7 @@ import isNil from 'lodash/isNil';
 import styles from './Documents.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Button } from 'ui/views/_components/Button';
@@ -18,6 +19,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DocumentFileUpload } from './_components/DocumentFileUpload';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Icon } from 'ui/views/_components/Icon';
+import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DocumentService } from 'core/services/Document';
@@ -32,6 +34,7 @@ const Documents = ({
   dataflowId,
   documents,
   isDeletingDocument,
+  isLoading,
   isToolbarVisible,
   setIsDeletingDocument,
   setSortFieldDocuments,
@@ -45,7 +48,12 @@ const Documents = ({
 
   const [allDocuments, setAllDocuments] = useState(documents);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [documentInitialValues, setDocumentInitialValues] = useState({});
+  const [documentInitialValues, setDocumentInitialValues] = useState({
+    description: '',
+    lang: '',
+    uploadFile: {},
+    isPublic: false
+  });
   const [downloadingId, setDownloadingId] = useState('');
   const [fileDeletingId, setFileDeletingId] = useState(null);
   const [fileName, setFileName] = useState('');
@@ -73,10 +81,20 @@ const Documents = ({
       <ActionsColumn
         isDeletingDocument={isDeletingDocument}
         onDeleteClick={() => {
+          setDocumentInitialValues(rowData);
           setDeleteDialogVisible(true);
           setRowDataState(rowData);
         }}
-        onEditClick={() => onEditDocument()}
+        onEditClick={() => {
+          const langField = config.languages
+            .filter(language => language.name === rowData.language[0])
+            .map(country => country.code)[0];
+
+          rowData = { ...rowData, lang: langField };
+
+          setDocumentInitialValues(rowData);
+          onEditDocument();
+        }}
         rowDataId={rowData.id}
         rowDeletingId={fileDeletingId}
         rowUpdatingId={fileUpdatingId}
@@ -207,6 +225,12 @@ const Documents = ({
               icon={'upload'}
               label={resources.messages['upload']}
               onClick={() => {
+                setDocumentInitialValues({
+                  description: '',
+                  lang: '',
+                  uploadFile: {},
+                  isPublic: false
+                });
                 setIsEditForm(false);
                 setIsUploadDialogVisible(true);
               }}
@@ -214,14 +238,11 @@ const Documents = ({
           </div>
         </Toolbar>
       ) : (
-        <Fragment></Fragment>
+        <Fragment />
       )}
 
       <DataTable
         autoLayout={true}
-        onRowSelect={e => {
-          setDocumentInitialValues(Object.assign({}, e.data));
-        }}
         onSort={e => {
           setSortFieldDocuments(e.sortField);
           setSortOrderDocuments(e.sortOrder);
@@ -305,7 +326,10 @@ const Documents = ({
           <Column className={styles.emptyTableHeader} header={resources.messages['documentsActionColumns']} />
         )}
       </DataTable>
-      {documents.length === 0 && (
+
+      {isLoading && isEmpty(documents) && <Spinner style={{ top: 0 }} />}
+
+      {!isLoading && isEmpty(documents) && (
         <div className={styles.noDataWrapper}>
           <h4>{resources.messages['noDocuments']}</h4>
         </div>
