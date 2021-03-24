@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
@@ -39,7 +39,6 @@ export const WebLinks = ({
   const inputRef = useRef(null);
 
   const [webLinksState, webLinksDispatch] = useReducer(webLinksReducer, {
-    deletingId: null,
     editingId: null,
     errors: { description: { message: '', hasErrors: false }, url: { message: '', hasErrors: false } },
     isAddOrEditWebLinkDialogVisible: false,
@@ -50,6 +49,8 @@ export const WebLinks = ({
     webLink: { id: undefined, description: '', url: '' },
     webLinksColumns: []
   });
+
+  const [deletingId, setDeletingId] = useState('');
 
   useEffect(() => {
     if (!isNil(inputRef.current)) inputRef.current.focus();
@@ -75,7 +76,7 @@ export const WebLinks = ({
     if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
 
     webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns: webLinkColArray } });
-  }, [webLinks, webLinksState.webLink, isToolbarVisible]);
+  }, [webLinks, webLinksState.webLink, isToolbarVisible, isLoading]);
 
   const checkIsValidUrl = url => RegularExpressions['url'].test(url);
 
@@ -134,8 +135,9 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'SET_ERRORS', payload: { inputName, error } });
   };
 
-  const onDeleteWebLink = async () => {
-    webLinksDispatch({ type: 'ON_DELETE_START', payload: { deletingId: webLinksState.webLink.id } });
+  const onDeleteWebLink = async id => {
+    webLinksDispatch({ type: 'ON_DELETE_START' });
+    setDeletingId(id);
 
     try {
       const { status } = await WebLinkService.deleteWebLink(webLinksState.webLink);
@@ -151,6 +153,7 @@ export const WebLinks = ({
       });
     } finally {
       webLinksDispatch({ type: 'ON_DELETE_END' });
+      setDeletingId('');
     }
   };
 
@@ -264,7 +267,7 @@ export const WebLinks = ({
 
   const webLinkEditButtons = webLink => {
     const getDeleteButtonIcon = () => {
-      if (webLinksState.deletingId === webLink.id && webLinksState.isDeleting) {
+      if (deletingId === webLink.id) {
         return 'spinnerAnimate';
       }
       return 'trash';
@@ -281,10 +284,7 @@ export const WebLinks = ({
       <div className={styles.webLinkEditButtons}>
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-          disabled={
-            (webLinksState.editingId === webLink.id && webLinksState.isEditing) ||
-            (webLinksState.deletingId === webLink.id && webLinksState.isDeleting)
-          }
+          disabled={(webLinksState.editingId === webLink.id && webLinksState.isEditing) || deletingId === webLink.id}
           icon={getEditButtonIcon()}
           onClick={() => {
             webLinksDispatch({
@@ -298,10 +298,7 @@ export const WebLinks = ({
 
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
-          disabled={
-            (webLinksState.deletingId === webLink.id && webLinksState.isDeleting) ||
-            (webLinksState.editingId === webLink.id && webLinksState.isEditing)
-          }
+          disabled={deletingId !== '' || (webLinksState.editingId === webLink.id && webLinksState.isEditing)}
           icon={getDeleteButtonIcon()}
           onClick={() => {
             webLinksDispatch({
@@ -452,7 +449,7 @@ export const WebLinks = ({
           iconConfirm={webLinksState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={onDeleteWebLink}
+          onConfirm={() => onDeleteWebLink(webLinksState.webLink.id)}
           onHide={onHideDeleteDialog}
           visible={webLinksState.isConfirmDeleteVisible}>
           {resources.messages['deleteWebLink']}
