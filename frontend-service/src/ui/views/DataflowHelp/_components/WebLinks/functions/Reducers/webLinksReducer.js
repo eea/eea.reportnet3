@@ -85,12 +85,6 @@ export const webLinksReducer = (state, { type, payload }) => {
         isConfirmDeleteVisible: payload.isConfirmDeleteVisible
       };
 
-    case 'SET_IS_LOADING':
-      return {
-        ...state,
-        isLoading: payload.isLoading
-      };
-
     case 'SET_IS_SUBMITTING':
       return {
         ...state,

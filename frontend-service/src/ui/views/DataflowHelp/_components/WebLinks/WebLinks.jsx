@@ -44,7 +44,6 @@ export const WebLinks = ({
     isAddOrEditWebLinkDialogVisible: false,
     isConfirmDeleteVisible: false,
     isDeleting: false,
-    isLoading: false,
     isSubmitting: false,
     webLink: { id: undefined, description: '', url: '' },
     webLinksColumns: []
@@ -338,7 +337,6 @@ export const WebLinks = ({
       )}
       <DataTable
         autoLayout={true}
-        loading={webLinksState.isLoading}
         onSort={e => {
           setSortFieldWebLinks(e.sortField);
           setSortOrderWebLinks(e.sortOrder);
