@@ -516,6 +516,15 @@
           "key": "WRONG_WEB_LINK_ERROR"
         },
         {
+          "key": "DELETE_WEB_LINK_ERROR"
+        },
+        {
+          "key": "ADD_WEB_LINK_ERROR"
+        },
+        {
+          "key": "EDIT_WEB_LINK_ERROR"
+        },
+        {
           "key": "IMPORT_DESIGN_BAD_REQUEST_ERROR",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
