@@ -221,7 +221,8 @@ public class DataflowServiceImpl implements DataflowService {
     try {
       getOpenedObligations(dataflowVOs);
     } catch (FeignException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error retrieving obligations for dataflows from user id {} due to reason {}",
+          userId, e.getMessage(), e);
     }
     return dataflowVOs;
   }
@@ -519,7 +520,7 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowRepository.deleteNativeDataflow(idDataflow);
       LOG.info("Delete full dataflow with id: {}", idDataflow);
     } catch (Exception e) {
-      LOG.error("Error deleting dataflow: {}", idDataflow, e);
+      LOG_ERROR.error("Error deleting dataflow: {}", idDataflow, e);
       throw new EEAException("Error Deleting dataflow ", e);
     }
 
@@ -812,7 +813,8 @@ public class DataflowServiceImpl implements DataflowService {
             .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
       }
     } catch (FeignException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}",
+          dataflowPublicVO.getId(), e.getMessage(), e);
     }
   }
 
@@ -975,7 +977,8 @@ public class DataflowServiceImpl implements DataflowService {
     try {
       getObligation(dataflowVO);
     } catch (FeignException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}", id,
+          e.getMessage(), e);
     }
     // we sort the weblinks and documents
     if (!CollectionUtils.isEmpty(dataflowVO.getWeblinks())) {
