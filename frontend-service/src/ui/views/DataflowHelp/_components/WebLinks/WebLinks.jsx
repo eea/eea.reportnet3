@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
@@ -39,17 +39,17 @@ export const WebLinks = ({
   const inputRef = useRef(null);
 
   const [webLinksState, webLinksDispatch] = useReducer(webLinksReducer, {
-    deletingId: null,
     editingId: null,
     errors: { description: { message: '', hasErrors: false }, url: { message: '', hasErrors: false } },
     isAddOrEditWebLinkDialogVisible: false,
     isConfirmDeleteVisible: false,
     isDeleting: false,
-    isLoading: false,
     isSubmitting: false,
     webLink: { id: undefined, description: '', url: '' },
     webLinksColumns: []
   });
+
+  const [deletingId, setDeletingId] = useState('');
 
   useEffect(() => {
     if (!isNil(inputRef.current)) inputRef.current.focus();
@@ -75,7 +75,7 @@ export const WebLinks = ({
     if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
 
     webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns: webLinkColArray } });
-  }, [webLinks, webLinksState.webLink, isToolbarVisible]);
+  }, [webLinks, webLinksState.webLink, isToolbarVisible, isLoading]);
 
   const checkIsValidUrl = url => RegularExpressions['url'].test(url);
 
@@ -134,8 +134,9 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'SET_ERRORS', payload: { inputName, error } });
   };
 
-  const onDeleteWebLink = async () => {
-    webLinksDispatch({ type: 'ON_DELETE_START', payload: { deletingId: webLinksState.webLink.id } });
+  const onDeleteWebLink = async id => {
+    webLinksDispatch({ type: 'ON_DELETE_START' });
+    setDeletingId(id);
 
     try {
       const { status } = await WebLinkService.deleteWebLink(webLinksState.webLink);
@@ -144,9 +145,14 @@ export const WebLinks = ({
         onLoadWebLinks();
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('Error on delete WebLink', error);
+
+      notificationContext.add({
+        type: 'DELETE_WEB_LINK_ERROR'
+      });
     } finally {
       webLinksDispatch({ type: 'ON_DELETE_END' });
+      setDeletingId('');
     }
   };
 
@@ -203,6 +209,10 @@ export const WebLinks = ({
             notificationContext.add({
               type: 'DUPLICATED_WEB_LINK_ERROR'
             });
+          } else {
+            notificationContext.add({
+              type: 'ADD_WEB_LINK_ERROR'
+            });
           }
         } finally {
           webLinksDispatch({ type: 'SET_IS_SUBMITTING', payload: { isSubmitting: false } });
@@ -228,6 +238,10 @@ export const WebLinks = ({
             notificationContext.add({
               type: 'DUPLICATED_WEB_LINK_ERROR'
             });
+          } else {
+            notificationContext.add({
+              type: 'EDIT_WEB_LINK_ERROR'
+            });
           }
         } finally {
           webLinksDispatch({
@@ -252,7 +266,7 @@ export const WebLinks = ({
 
   const webLinkEditButtons = webLink => {
     const getDeleteButtonIcon = () => {
-      if (webLinksState.deletingId === webLink.id && webLinksState.isDeleting) {
+      if (deletingId === webLink.id) {
         return 'spinnerAnimate';
       }
       return 'trash';
@@ -269,15 +283,12 @@ export const WebLinks = ({
       <div className={styles.webLinkEditButtons}>
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-          disabled={
-            (webLinksState.editingId === webLink.id && webLinksState.isEditing) ||
-            (webLinksState.deletingId === webLink.id && webLinksState.isDeleting)
-          }
+          disabled={(webLinksState.editingId === webLink.id && webLinksState.isEditing) || deletingId === webLink.id}
           icon={getEditButtonIcon()}
           onClick={() => {
             webLinksDispatch({
               type: 'SET_WEB_LINK',
-              payload: { webLink: { description: webLink.description, id: webLink.id, url: webLink.url } }
+              payload: { webLink }
             });
             setIsAddOrEditWebLinkDialogVisible(true);
           }}
@@ -286,15 +297,12 @@ export const WebLinks = ({
 
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
-          disabled={
-            (webLinksState.deletingId === webLink.id && webLinksState.isDeleting) ||
-            (webLinksState.editingId === webLink.id && webLinksState.isEditing)
-          }
+          disabled={deletingId !== '' || (webLinksState.editingId === webLink.id && webLinksState.isEditing)}
           icon={getDeleteButtonIcon()}
           onClick={() => {
             webLinksDispatch({
               type: 'SET_WEB_LINK',
-              payload: { webLink: { description: webLink.description, id: webLink.id, url: webLink.url } }
+              payload: { webLink }
             });
             setIsConfirmDeleteVisible(true);
           }}
@@ -314,12 +322,11 @@ export const WebLinks = ({
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
+              id="addWebLinkButton"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-weblink-upload-help-step`}
               icon="add"
               label={resources.messages['add']}
-              onClick={() => {
-                setIsAddOrEditWebLinkDialogVisible(true);
-              }}
+              onClick={() => setIsAddOrEditWebLinkDialogVisible(true)}
               style={{ float: 'left' }}
             />
           </div>
@@ -329,7 +336,6 @@ export const WebLinks = ({
       )}
       <DataTable
         autoLayout={true}
-        loading={webLinksState.isLoading}
         onSort={e => {
           setSortFieldWebLinks(e.sortField);
           setSortOrderWebLinks(e.sortOrder);
@@ -415,6 +421,7 @@ export const WebLinks = ({
             <fieldset>
               <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
                 <Button
+                  id="submitButton"
                   onClick={() => onSaveRecord()}
                   label={isNil(webLinksState.webLink.id) ? resources.messages['add'] : resources.messages['edit']}
                   disabled={webLinksState.isSubmitting}
@@ -440,7 +447,7 @@ export const WebLinks = ({
           iconConfirm={webLinksState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={onDeleteWebLink}
+          onConfirm={() => onDeleteWebLink(webLinksState.webLink.id)}
           onHide={onHideDeleteDialog}
           visible={webLinksState.isConfirmDeleteVisible}>
           {resources.messages['deleteWebLink']}
