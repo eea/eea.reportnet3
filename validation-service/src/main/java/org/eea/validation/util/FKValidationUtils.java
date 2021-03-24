@@ -595,7 +595,7 @@ public class FKValidationUtils {
       Boolean pkHasMultipleValues) {
     Boolean returnChecked = Boolean.TRUE;
     if (Boolean.TRUE.equals(pkHasMultipleValues)) {
-      final List<String> arrayValue = Arrays.asList(value.getValue().split(","));
+      final List<String> arrayValue = Arrays.asList(value.getValue().split(";"));
 
       for (String valueArray : arrayValue) {
         if (!pkValues.contains(valueArray.trim())) {

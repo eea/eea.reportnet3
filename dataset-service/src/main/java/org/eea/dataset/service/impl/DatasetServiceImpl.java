@@ -1025,10 +1025,18 @@ public class DatasetServiceImpl implements DatasetService {
     if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
         && null != field.getValue()) {
       List<String> values = new ArrayList<>();
-      Arrays.asList(field.getValue().split(",")).stream()
+      Arrays.asList(field.getValue().split(";")).stream()
           .forEach(value -> values.add(value.trim()));
       Collections.sort(values);
-      field.setValue(values.toString().substring(1, values.toString().length() - 1));
+      String codelist = "";
+      for (int i = 0; i < values.size(); i++) {
+        if (i == 0) {
+          codelist = values.get(0);
+        } else {
+          codelist = codelist + "; " + values.get(i);
+        }
+      }
+      field.setValue(codelist);
     }
     if (updateCascadePK) {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
@@ -2834,9 +2842,9 @@ public class DatasetServiceImpl implements DatasetService {
           // Sort values if there are multiple
           if (DataType.MULTISELECT_CODELIST.equals(dataType) || (DataType.LINK.equals(dataType)
               && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
-            String[] values = value.trim().split("\\s*,\\s*");
+            String[] values = value.trim().split("\\s*;\\s*");
             Arrays.sort(values);
-            value = Arrays.stream(values).collect(Collectors.joining(", "));
+            value = Arrays.stream(values).collect(Collectors.joining("; "));
           }
         }
         fieldVOs.remove(fieldVO);
