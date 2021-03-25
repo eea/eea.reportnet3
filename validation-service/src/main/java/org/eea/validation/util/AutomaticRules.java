@@ -157,12 +157,22 @@ public class AutomaticRules {
    * @return the list
    */
   public static List<Rule> createCodelistAutomaticRule(String referenceId,
-      EntityTypeEnum typeEntityEnum, String nameRule, String codelistItems, String shortCode,
-      String description) {
+      EntityTypeEnum typeEntityEnum, String nameRule, List<String> singleCodeListItems,
+      String shortCode, String description) {
     List<Rule> ruleList = new ArrayList<>();
     // PART INSENSITIVE
+    // we create the new list to send with ;
+    String codelist = "";
+    for (int i = 0; i < singleCodeListItems.size(); i++) {
+      if (i == 0) {
+        codelist = singleCodeListItems.get(0);
+      } else {
+        codelist =
+            new StringBuilder(codelist).append("; ").append(singleCodeListItems.get(i)).toString();
+      }
+    }
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
-        "isCodelistInsensitive(value,'" + codelistItems + "')",
+        "isCodelistInsensitive(value,'" + codelist + "')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
@@ -181,12 +191,22 @@ public class AutomaticRules {
    * @return the list
    */
   public static List<Rule> createMultiSelectCodelistAutomaticRule(String referenceId,
-      EntityTypeEnum typeEntityEnum, String nameRule, String codelistItems, String shortCode,
+      EntityTypeEnum typeEntityEnum, String nameRule, List<String> codelistItems, String shortCode,
       String description) {
+
     List<Rule> ruleList = new ArrayList<>();
     // PART INSENSITIVE
+    // we create the new list to send with ;
+    String codelist = "";
+    for (int i = 0; i < codelistItems.size(); i++) {
+      if (i == 0) {
+        codelist = codelistItems.get(0);
+      } else {
+        codelist = new StringBuilder(codelist).append("; ").append(codelistItems.get(i)).toString();
+      }
+    }
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
-        "isMultiSelectCodelistValidate(value,'" + codelistItems + "')",
+        "isMultiSelectCodelistValidate(value,'" + codelist + "')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;

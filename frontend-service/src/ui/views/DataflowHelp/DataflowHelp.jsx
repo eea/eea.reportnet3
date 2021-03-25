@@ -13,7 +13,6 @@ import { routes } from 'ui/routes';
 import { DatasetSchemas } from './_components/DatasetSchemas';
 import { Documents } from './_components/Documents';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Spinner } from 'ui/views/_components/Spinner';
 import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 import { TabView } from 'ui/views/_components/TabView';
 import { Title } from 'ui/views/_components/Title';
@@ -51,14 +50,15 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
+  const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
   const [isToolbarVisible, setIsToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
-  const [sortFieldWeblinks, setSortFieldWeblinks] = useState();
+  const [sortFieldWebLinks, setSortFieldWebLinks] = useState();
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
-  const [sortOrderWeblinks, setSortOrderWeblinks] = useState();
+  const [sortOrderWebLinks, setSortOrderWebLinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
 
   useEffect(() => {
@@ -92,9 +92,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
 
   useEffect(() => {
-    setIsLoading(true);
     fetchDocumentsData();
-    setIsLoading(false);
   }, [isDataUpdated]);
 
   useEffect(() => {
@@ -175,14 +173,13 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const sortByProperty = propertyName => (a, b) => a[propertyName].localeCompare(b[propertyName]);
 
   const onLoadDocuments = async () => {
+    setIsLoadingDocuments(true);
     try {
       const { data } = await DocumentService.all(`${dataflowId}`);
       const loadedDocuments = data.documents.sort(sortByProperty('description'));
@@ -193,11 +190,12 @@ export const DataflowHelp = withRouter(({ match, history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       }
     } finally {
-      setIsLoading(false);
+      setIsLoadingDocuments(false);
     }
   };
 
   const onLoadWebLinks = async () => {
+    setIsLoadingWeblinks(true);
     try {
       const { data } = await WebLinkService.all(dataflowId);
       const loadedWebLinks = data.weblinks.sort(sortByProperty('description'));
@@ -207,17 +205,16 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         console.error('error', error.response);
       }
+    } finally {
+      setIsLoadingWeblinks(false);
     }
   };
+
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
-
-  if (isLoading) {
-    return renderLayout(<Spinner />);
-  }
 
   if (documents) {
     return renderLayout(
@@ -231,6 +228,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               dataflowId={dataflowId}
               documents={documents}
               isDeletingDocument={isDeletingDocument}
+              isLoading={isLoadingDocuments}
               isToolbarVisible={isToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}
@@ -243,12 +241,13 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           <TabPanel headerClassName="dataflowHelp-weblinks-help-step" header={resources.messages['webLinks']}>
             <WebLinks
               dataflowId={dataflowId}
+              isLoading={isLoadingWebLinks}
               isToolbarVisible={isToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
-              setSortFieldWeblinks={setSortFieldWeblinks}
-              setSortOrderWeblinks={setSortOrderWeblinks}
-              sortFieldWeblinks={sortFieldWeblinks}
-              sortOrderWeblinks={sortOrderWeblinks}
+              setSortFieldWebLinks={setSortFieldWebLinks}
+              setSortOrderWebLinks={setSortOrderWebLinks}
+              sortFieldWebLinks={sortFieldWebLinks}
+              sortOrderWebLinks={sortOrderWebLinks}
               webLinks={webLinks}
             />
           </TabPanel>
