@@ -11,11 +11,11 @@ import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.RepresentativeController;
-import org.eea.interfaces.controller.dataset.DataCollectionController;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
-import org.eea.interfaces.controller.dataset.EUDatasetController;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
@@ -66,7 +66,7 @@ public class SqlRulesServiceImplTest {
 
   /** The dataset schema controller. */
   @Mock
-  private DatasetSchemaController datasetSchemaController;
+  private DatasetSchemaControllerZuul datasetSchemaController;
 
   /** The kafka sender utils. */
   @Mock
@@ -82,19 +82,19 @@ public class SqlRulesServiceImplTest {
 
   /** The dataset metabase controller. */
   @Mock
-  private DatasetMetabaseController datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   /** The data collection controller. */
   @Mock
-  private DataCollectionController dataCollectionController;
+  private DataCollectionControllerZuul dataCollectionController;
 
   /** The representative controller. */
   @Mock
-  private RepresentativeController representativeController;
+  private RepresentativeControllerZuul representativeController;
 
   /** The eu dataset controller. */
   @Mock
-  private EUDatasetController euDatasetController;
+  private EUDatasetControllerZuul euDatasetController;
 
   /** The sql rules service impl. */
   @InjectMocks
