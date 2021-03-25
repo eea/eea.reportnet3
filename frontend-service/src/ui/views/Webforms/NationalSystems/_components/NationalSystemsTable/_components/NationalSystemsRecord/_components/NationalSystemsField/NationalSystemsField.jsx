@@ -55,21 +55,12 @@ export const NationalSystemsField = ({
   const { field, isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
 
   useEffect(() => {
-    if (!isNil(field.validExtensions)) {
-      nationalSystemsFieldDispatch({
-        type: 'LOAD_SELECTED_VALID_EXTENSIONS',
-        payload: { data: field.validExtensions }
-      });
-    }
-  }, [field]);
-
-  useEffect(() => {
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
   }, []);
 
   const getAttachExtensions =
-    selectedValidExtensions.length !== 0
-      ? selectedValidExtensions
+    field.validExtensions.length !== 0
+      ? field.validExtensions
           .map(extension => `.${extension}`)
           .join(', ')
           .toLowerCase()
