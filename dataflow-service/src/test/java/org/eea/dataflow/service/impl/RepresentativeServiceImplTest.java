@@ -26,7 +26,7 @@ import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -82,7 +82,7 @@ public class RepresentativeServiceImplTest {
   private DataProviderMapper dataProviderMapper;
 
   @Mock
-  private DatasetMetabaseController datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   private Representative representative;
 
