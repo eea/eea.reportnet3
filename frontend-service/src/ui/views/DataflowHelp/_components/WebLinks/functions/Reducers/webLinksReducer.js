@@ -4,7 +4,6 @@ export const webLinksReducer = (state, { type, payload }) => {
     case 'ON_DELETE_END':
       return {
         ...state,
-        deletingId: null,
         isConfirmDeleteVisible: false,
         isDeleting: false,
         webLink: emptyWebLink
@@ -13,7 +12,6 @@ export const webLinksReducer = (state, { type, payload }) => {
     case 'ON_DELETE_START':
       return {
         ...state,
-        deletingId: payload.deletingId,
         isDeleting: true
       };
 
@@ -85,12 +83,6 @@ export const webLinksReducer = (state, { type, payload }) => {
       return {
         ...state,
         isConfirmDeleteVisible: payload.isConfirmDeleteVisible
-      };
-
-    case 'SET_IS_LOADING':
-      return {
-        ...state,
-        isLoading: payload.isLoading
       };
 
     case 'SET_IS_SUBMITTING':
