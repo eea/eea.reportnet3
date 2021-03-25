@@ -4,7 +4,6 @@ import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
@@ -58,17 +57,13 @@ export const NationalSystemsField = ({
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
   }, []);
 
-  const getAttachExtensions =
-    field.validExtensions.length !== 0
-      ? field.validExtensions
-          .map(extension => `.${extension}`)
-          .join(', ')
-          .toLowerCase()
-      : '*';
+  const getAttachExtensions = field.validExtensions
+    .map(extension => `.${extension}`)
+    .join(', ')
+    .toLowerCase();
 
-  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
-    getAttachExtensions.split(', ')
-  ).join(', ')} - ${resources.messages['maxFileSize']} ${
+  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
+  ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
     !isNil(field.maxSize) && field.maxSize.toString() !== '0'
       ? `${field.maxSize} ${resources.messages['MB']}`
       : resources.messages['maxSizeNotDefined']
@@ -358,7 +353,7 @@ export const NationalSystemsField = ({
           dialogOnHide={() => handleDialogs('uploadFile', false)}
           dialogVisible={isDialogVisible.uploadFile}
           fileLimit={1}
-          infoTooltip={infoExtensionsTooltip}
+          infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
