@@ -13,12 +13,12 @@ public class ValidationDroolsUtilsTest {
 
   @Test
   public void testCodelistValidate() {
-    assertTrue(ValidationDroolsUtils.codelistValidate("", "a,b,c", Boolean.TRUE));
+    assertFalse(ValidationDroolsUtils.codelistValidate("", "a;b;c", Boolean.TRUE));
   }
 
   @Test
   public void testMultiSelectCodelistValidate() {
-    assertFalse(ValidationDroolsUtils.multiSelectCodelistValidate("a,b,c", "a,b,c"));
+    assertTrue(ValidationDroolsUtils.multiSelectCodelistValidate("a;b;c", "a;b;c"));
   }
 
   @Test

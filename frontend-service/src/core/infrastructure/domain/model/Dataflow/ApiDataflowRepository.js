@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import capitalize from 'lodash/capitalize';
-import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -201,7 +200,6 @@ const datasetsValidationStatistics = async datasetSchemaId => {
           getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
         );
 
-        tableById.tableStatisticPercentages = tableById.tableStatisticPercentages;
         tableById.tableStatisticValues[0].push(
           table.totalRecords -
             (table.totalRecordsWithBlockers +

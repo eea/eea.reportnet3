@@ -1,14 +1,11 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import * as Yup from 'yup';
-import { ErrorMessage, Field, Form, Formik } from 'formik';
-
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import styles from './NewDatasetSchemaForm.module.css';
+import styles from './NewDatasetSchemaForm.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
 
 import { DataflowService } from 'core/services/Dataflow';
 
@@ -19,121 +16,127 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdateData, setNewDatasetDialog }) => {
-  const { showLoading, hideLoading } = useContext(LoadingContext);
+  const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const form = useRef(null);
+  const [datasetSchemaName, setDatasetSchemaName] = useState('');
+  const [errorMessage, setErrorMessage] = useState({ datasetSchemaName: '' });
+  const [hasErrors, setHasErrors] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (!isNil(form.current)) form.current.resetForm();
-  }, [form.current]);
-
-  useEffect(() => {
     if (!isNil(inputRef.current)) inputRef.current.focus();
-  }, [inputRef.current]);
+  }, []);
 
-  const initialValues = { datasetSchemaName: '' };
-  const newDatasetValidationSchema = Yup.object().shape({
-    datasetSchemaName: Yup.string()
-      .required(' ')
-      .test('', resources.messages['duplicateSchemaError'], value => {
-        if (!isNil(value) && !isEmpty(datasetSchemaInfo)) {
-          const schemas = [...datasetSchemaInfo];
-          const isRepeat = schemas.filter(title => !TextUtils.areEquals(title.schemaName, value));
-          return isRepeat.length === schemas.length;
+  const checkIsDuplicateSchemaName = () => {
+    const isDuplicatedName = datasetSchemaInfo.some(schema =>
+      TextUtils.areEquals(schema.schemaName, datasetSchemaName)
+    );
+
+    if (isDuplicatedName) {
+      setErrorMessage({ datasetSchemaName: resources.messages['duplicateSchemaError'] });
+    } else {
+      setErrorMessage({ datasetSchemaName: '' });
+    }
+    return isDuplicatedName;
+  };
+
+  const checkIsEmptyInput = () => datasetSchemaName.trim() === '';
+
+  const checkInput = () => {
+    setHasErrors(checkIsDuplicateSchemaName() || checkIsEmptyInput());
+    return !checkIsDuplicateSchemaName() && !checkIsEmptyInput();
+  };
+
+  const onConfirm = async event => {
+    event.preventDefault();
+
+    if (checkInput()) {
+      setIsSubmitting(true);
+      showLoading();
+      try {
+        const response = await DataflowService.newEmptyDatasetSchema(dataflowId, encodeURIComponent(datasetSchemaName));
+        if (response.status >= 200 && response.status <= 299) {
+          onUpdateData();
+          setIsSubmitting(false);
         } else {
-          return true;
+          throw new Error('Schema creation error');
         }
-      })
-  });
+        onCreate();
+      } catch (error) {
+        const metadata = await MetadataUtils.getMetadata({ dataflowId });
+        const {
+          dataflow: { name: dataflowName }
+        } = metadata;
+
+        if (error.response?.data?.message.includes('duplicated')) {
+          notificationContext.add({
+            type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
+            content: { schemaName: datasetSchemaName }
+          });
+        } else {
+          notificationContext.add({
+            type: 'DATASET_SCHEMA_CREATION_ERROR',
+            content: {
+              dataflowId,
+              dataflowName
+            }
+          });
+          onCreate();
+        }
+      } finally {
+        setIsSubmitting(false);
+        hideLoading();
+      }
+    }
+  };
 
   return (
-    <Formik
-      ref={form}
-      initialValues={initialValues}
-      validationSchema={newDatasetValidationSchema}
-      onSubmit={async (values, { setSubmitting }) => {
-        setSubmitting(true);
-        showLoading();
-        try {
-          const response = await DataflowService.newEmptyDatasetSchema(
-            dataflowId,
-            encodeURIComponent(values.datasetSchemaName)
-          );
-          if (response.status >= 200 && response.status <= 299) {
-            onUpdateData();
-            setSubmitting(false);
-          } else {
-            throw new Error('Schema creation error');
-          }
-          onCreate();
-        } catch (error) {
-          const metadata = await MetadataUtils.getMetadata({ dataflowId });
-          const {
-            dataflow: { name: dataflowName }
-          } = metadata;
+    <form>
+      <fieldset>
+        <input
+          className={`formField ${hasErrors ? styles.hasErrors : ''}`}
+          id={'datasetSchemaName'}
+          maxLength={250}
+          name="datasetSchemaName"
+          onBlur={() => checkInput(datasetSchemaName)}
+          onChange={e => setDatasetSchemaName(e.target.value)}
+          onKeyPress={e => {
+            if (e.key === 'Enter') onConfirm(e);
+          }}
+          placeholder={resources.messages['createDatasetSchemaName']}
+          ref={inputRef}
+          type="text"
+          value={datasetSchemaName}
+        />
+        <label htmlFor="datasetSchemaName" className="srOnly">
+          {resources.messages['createDatasetSchemaName']}
+        </label>
+        {errorMessage['datasetSchemaName'] !== '' && <ErrorMessage message={errorMessage['datasetSchemaName']} />}
+      </fieldset>
 
-          if (error.response.data.message.includes('duplicated')) {
-            notificationContext.add({
-              type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
-              content: { schemaName: values.datasetSchemaName }
-            });
-          } else {
-            notificationContext.add({
-              type: 'DATASET_SCHEMA_CREATION_ERROR',
-              content: {
-                dataflowId,
-                dataflowName
-              }
-            });
-            onCreate();
-          }
-        } finally {
-          setSubmitting(false);
-          hideLoading();
-        }
-      }}>
-      {({ errors, isSubmitting, touched }) => (
-        <Form>
-          <fieldset>
-            <div
-              className={`formField${!isEmpty(errors.datasetSchemaName) && touched.datasetSchemaName ? ' error' : ''}`}>
-              <Field
-                id={'datasetSchemaName'}
-                innerRef={inputRef}
-                maxLength={250}
-                name="datasetSchemaName"
-                placeholder={resources.messages['createDatasetSchemaName']}
-                type="text"
-              />
-              <label htmlFor="datasetSchemaName" className="srOnly">
-                {resources.messages['createDatasetSchemaName']}
-              </label>
-              <ErrorMessage className="error" name="datasetSchemaName" component="div" />
-            </div>
-          </fieldset>
-          <fieldset>
-            <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-              <Button
-                className="p-button-primary"
-                disabled={isSubmitting}
-                label={resources.messages['create']}
-                icon="add"
-                type="submit"
-              />
-              <Button
-                className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-                icon="cancel"
-                label={resources.messages['cancel']}
-                onClick={() => setNewDatasetDialog(false)}
-              />
-            </div>
-          </fieldset>
-        </Form>
-      )}
-    </Formik>
+      <fieldset>
+        <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+          <Button
+            className="p-button-primary"
+            disabled={isSubmitting}
+            icon="add"
+            label={resources.messages['create']}
+            onClick={e => onConfirm(e)}
+            type="subscribe"
+          />
+          <Button
+            className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
+            icon="cancel"
+            label={resources.messages['cancel']}
+            onClick={() => setNewDatasetDialog(false)}
+          />
+        </div>
+      </fieldset>
+    </form>
   );
 };
 

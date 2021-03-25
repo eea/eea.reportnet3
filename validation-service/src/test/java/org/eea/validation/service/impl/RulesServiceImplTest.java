@@ -365,7 +365,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("codelistItems", "[2, 2]");
+    doc.put("codelistItems", new ArrayList());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
@@ -385,7 +385,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesMultiCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("codelistItems", "[2, 2]");
+    doc.put("codelistItems", new ArrayList());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);

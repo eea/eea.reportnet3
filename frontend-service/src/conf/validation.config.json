@@ -11,13 +11,14 @@
     "PHONE": ["LEN", "string"],
     "TEXT": ["LEN", "string"],
     "TEXTAREA": ["LEN", "string"],
-    "URL": ["LEN", "string"]
+    "URL": ["LEN", "string"],
+    "ATTACHMENT": ["LEN", "string"]
   },
 
   "fieldByOperatorType": {
     "number": ["NUMBER_INTEGER", "NUMBER_DECIMAL"],
     "LEN": ["NUMBER_INTEGER"],
-    "string": ["EMAIL", "TEXT", "TEXTAREA", "PHONE", "URL", "CODELIST", "LINK"],
+    "string": ["EMAIL", "TEXT", "TEXTAREA", "PHONE", "URL", "CODELIST", "LINK", "ATTACHMENT"],
     "stringMatch": ["TEXT", "TEXTAREA"],
     "numberMatch": ["TEXT", "TEXTAREA"],
     "date": ["DATE"],
@@ -865,11 +866,11 @@
   "logicalOperatorFromDTO": ["FIELD_AND", "FIELD_OR"],
   "logicalRowOperatorFromDTO": ["RECORD_AND", "RECORD_OR"],
   "bannedFieldsNames": {
-    "nonSql": ["attachment", "point", "multiple points", "polygon", "multiple lines", "line", "multiple polygons"],
-    "sqlFields": ["attachment"]
+    "nonSql": ["point", "multiple points", "polygon", "multiple lines", "line", "multiple polygons"],
+    "sqlFields": []
   },
   "bannedTypes": {
-    "sqlFields": ["attachment"],
-    "nonSql": ["attachment", "point", "multipoint", "polygon", "multilinestring", "linestring", "multipolygon"]
+    "sqlFields": [],
+    "nonSql": ["point", "multipoint", "polygon", "multilinestring", "linestring", "multipolygon"]
   }
 }

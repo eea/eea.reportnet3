@@ -638,6 +638,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById() throws Exception {
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -778,7 +779,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById5() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -818,7 +819,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById6() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -863,7 +864,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById7() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -903,7 +904,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById8() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -943,7 +944,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById9() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);

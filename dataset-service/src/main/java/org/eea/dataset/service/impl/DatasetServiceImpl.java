@@ -495,34 +495,40 @@ public class DatasetServiceImpl implements DatasetService {
     SortField[] newFields = null;
     TableVO result = new TableVO();
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
-
-    // Check if we need to put all the records without pagination
-    pageable = calculatePageable(pageable, totalRecords);
-
-    result = calculatedErrorsAndRecordsToSee(datasetId, idTableSchema, pageable, fields, levelError,
-        commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules, fieldSchema,
-        fieldValue);
-
-    // Table with out values
-    if (null == result.getRecords() || result.getRecords().isEmpty()) {
+    if (totalRecords == 0) {
+      result.setTotalFilteredRecords(0L);
+      result.setTableValidations(new ArrayList<>());
+      result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
-
     } else {
-      List<RecordVO> recordVOs = result.getRecords();
+      // Check if we need to put all the records without pagination
+      pageable = calculatePageable(pageable, totalRecords);
 
-      LOG.info(
-          "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
-          datasetId, idTableSchema, recordVOs.size(),
-          pageable != null ? pageable.getPageNumber() : null,
-          pageable != null ? pageable.getPageSize() : null);
-      if (null != fields) {
-        LOG.info("Ordered by idFieldSchema {}", commonShortFields);
+      result = calculatedErrorsAndRecordsToSee(datasetId, idTableSchema, pageable, fields,
+          levelError, commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules,
+          fieldSchema, fieldValue);
+
+      // Table with out values
+      if (null == result.getRecords() || result.getRecords().isEmpty()) {
+        result.setRecords(new ArrayList<>());
+        LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
+
+      } else {
+        List<RecordVO> recordVOs = result.getRecords();
+
+        LOG.info(
+            "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
+            datasetId, idTableSchema, recordVOs.size(),
+            pageable != null ? pageable.getPageNumber() : null,
+            pageable != null ? pageable.getPageSize() : null);
+        if (null != fields) {
+          LOG.info("Ordered by idFieldSchema {}", commonShortFields);
+        }
+
+        // Retrieve validations to set them into the final result
+        retrieveValidations(recordVOs);
+
       }
-
-      // 5Âº retrieve validations to set them into the final result
-      retrieveValidations(recordVOs);
-
     }
     result.setTotalRecords(totalRecords);
     return result;
@@ -1019,10 +1025,18 @@ public class DatasetServiceImpl implements DatasetService {
     if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
         && null != field.getValue()) {
       List<String> values = new ArrayList<>();
-      Arrays.asList(field.getValue().split(",")).stream()
+      Arrays.asList(field.getValue().split(";")).stream()
           .forEach(value -> values.add(value.trim()));
       Collections.sort(values);
-      field.setValue(values.toString().substring(1, values.toString().length() - 1));
+      String codelist = "";
+      for (int i = 0; i < values.size(); i++) {
+        if (i == 0) {
+          codelist = values.get(0);
+        } else {
+          codelist = codelist + "; " + values.get(i);
+        }
+      }
+      field.setValue(codelist);
     }
     if (updateCascadePK) {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
@@ -2828,9 +2842,9 @@ public class DatasetServiceImpl implements DatasetService {
           // Sort values if there are multiple
           if (DataType.MULTISELECT_CODELIST.equals(dataType) || (DataType.LINK.equals(dataType)
               && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
-            String[] values = value.trim().split("\\s*,\\s*");
+            String[] values = value.trim().split("\\s*;\\s*");
             Arrays.sort(values);
-            value = Arrays.stream(values).collect(Collectors.joining(", "));
+            value = Arrays.stream(values).collect(Collectors.joining("; "));
           }
         }
         fieldVOs.remove(fieldVO);
@@ -3452,7 +3466,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * 
+   *
    * Export dataset ETLSQL.
    *
    * @param datasetId the dataset id

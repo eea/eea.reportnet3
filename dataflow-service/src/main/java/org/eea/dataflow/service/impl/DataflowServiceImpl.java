@@ -65,6 +65,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import feign.FeignException;
 import io.jsonwebtoken.lang.Objects;
 
 /**
@@ -148,6 +149,8 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private TestDatasetControllerZuul testDataSetControllerZuul;
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Gets the by id.
@@ -215,9 +218,12 @@ public class DataflowServiceImpl implements DataflowService {
           }
           dataflowVOs.add(dataflowVO);
         });
-
-    getOpenedObligations(dataflowVOs);
-
+    try {
+      getOpenedObligations(dataflowVOs);
+    } catch (FeignException e) {
+      LOG_ERROR.error("Error retrieving obligations for dataflows from user id {} due to reason {}",
+          userId, e.getMessage(), e);
+    }
     return dataflowVOs;
   }
 
@@ -514,7 +520,7 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowRepository.deleteNativeDataflow(idDataflow);
       LOG.info("Delete full dataflow with id: {}", idDataflow);
     } catch (Exception e) {
-      LOG.error("Error deleting dataflow: {}", idDataflow, e);
+      LOG_ERROR.error("Error deleting dataflow: {}", idDataflow, e);
       throw new EEAException("Error Deleting dataflow ", e);
     }
 
@@ -800,10 +806,15 @@ public class DataflowServiceImpl implements DataflowService {
    * @param dataflowPublicVO the dataflow public VO
    */
   private void findObligationPublicDataflow(DataflowPublicVO dataflowPublicVO) {
-    if (dataflowPublicVO.getObligation() != null
-        && dataflowPublicVO.getObligation().getObligationId() != null) {
-      dataflowPublicVO.setObligation(obligationController
-          .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
+    try {
+      if (dataflowPublicVO.getObligation() != null
+          && dataflowPublicVO.getObligation().getObligationId() != null) {
+        dataflowPublicVO.setObligation(obligationController
+            .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
+      }
+    } catch (FeignException e) {
+      LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}",
+          dataflowPublicVO.getId(), e.getMessage(), e);
     }
   }
 
@@ -963,9 +974,12 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVO.setRepresentatives(
           representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
     }
-
-    getObligation(dataflowVO);
-
+    try {
+      getObligation(dataflowVO);
+    } catch (FeignException e) {
+      LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}", id,
+          e.getMessage(), e);
+    }
     // we sort the weblinks and documents
     if (!CollectionUtils.isEmpty(dataflowVO.getWeblinks())) {
       dataflowVO.getWeblinks()
