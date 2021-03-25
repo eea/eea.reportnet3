@@ -1,7 +1,9 @@
 .content {
-  background: var(--gray-10);
+  background: var(--webform-table-bg);
+  border: var(--webform-table-border);
   padding: 2rem 2rem 2rem 2rem;
   position: relative;
+  color: var(--general-text-color);
 
   .actionButtons {
     padding: 1rem;
@@ -103,6 +105,7 @@
         margin-right: 0;
       }
       .template {
+        color: var(--general-text-color);
         width: 100%;
       }
       label {
@@ -113,6 +116,7 @@
 
   .field {
     margin-bottom: 2rem;
+    color: var(--general-text-color);
     :global .p-multiselect {
       width: 100%;
       padding: 0.2rem 0;
@@ -209,8 +213,8 @@
     }
   }
   .infoCircle {
-    background-color: var(--white);
-    border-radius: 50%;
+    background-color: var(--white) !important;
+    border-radius: 50% !important;
     color: var(--datatable-header-info-button-color) !important;
     font-size: 12pt;
     height: 0.7em;
@@ -246,6 +250,7 @@
   padding: 1rem;
   margin: 2rem 0 2rem 0;
   border: 1px solid var(--gray-25);
+  color: var(--general-text-color);
   .content {
     border: 1px solid var(--gray-25);
   }
@@ -257,8 +262,11 @@
   }
 }
 
-.showInsideParentTable .content {
-  padding: 0;
+.showInsideParentTable {
+  .content {
+    border: none;
+    padding: 0;
+  }
 }
 .showInsideParentTable {
   .title {
