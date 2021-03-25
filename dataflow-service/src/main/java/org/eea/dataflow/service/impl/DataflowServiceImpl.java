@@ -32,7 +32,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
-import org.eea.interfaces.controller.rod.ObligationController;
+import org.eea.interfaces.controller.rod.ObligationController.ObligationControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -107,7 +107,7 @@ public class DataflowServiceImpl implements DataflowService {
 
   /** The obligation controller. */
   @Autowired
-  private ObligationController obligationController;
+  private ObligationControllerZull obligationController;
 
   /** The eu dataset controller zuul. */
   @Autowired

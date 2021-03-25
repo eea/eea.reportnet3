@@ -13,7 +13,7 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -142,7 +142,7 @@ public class ValidationServiceImpl implements ValidationService {
    * The dataset schema controller.
    */
   @Autowired
-  private DatasetSchemaController datasetSchemaController;
+  private DatasetSchemaControllerZuul datasetSchemaController;
 
   /** The rules error utils. */
   @Autowired
