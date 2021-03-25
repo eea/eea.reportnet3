@@ -52,22 +52,36 @@ export const NationalSystemsField = ({
     selectedValidExtensions: []
   });
 
-  console.log('nationalSystemsFieldState', nationalSystemsFieldState);
-
   const { field, isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
+
+  useEffect(() => {
+    if (!isNil(field.validExtensions)) {
+      nationalSystemsFieldDispatch({
+        type: 'LOAD_SELECTED_VALID_EXTENSIONS',
+        payload: { data: field.validExtensions }
+      });
+    }
+  }, [field]);
 
   useEffect(() => {
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
   }, []);
 
-  const getAttachExtensions = selectedValidExtensions
-    .map(extension => `.${extension}`)
-    .join(', ')
-    .toLowerCase();
+  const getAttachExtensions =
+    selectedValidExtensions.length !== 0
+      ? selectedValidExtensions
+          .map(extension => `.${extension}`)
+          .join(', ')
+          .toLowerCase()
+      : '*';
 
   const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
     getAttachExtensions.split(', ')
-  ).join(', ')}`;
+  ).join(', ')} - ${resources.messages['maxFileSize']} ${
+    !isNil(field.maxSize) && field.maxSize.toString() !== '0'
+      ? `${field.maxSize} ${resources.messages['MB']}`
+      : resources.messages['maxSizeNotDefined']
+  }`;
 
   const getMultiselectValues = (multiselectItemsOptions, value) => {
     if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
@@ -317,8 +331,6 @@ export const NationalSystemsField = ({
         message={validation.message}
       />
     ));
-
-  console.log('getAttachExtensions', getAttachExtensions);
 
   return (
     <div className={styles.content}>
