@@ -4,6 +4,7 @@ import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
@@ -51,16 +52,22 @@ export const NationalSystemsField = ({
     selectedValidExtensions: []
   });
 
+  console.log('nationalSystemsFieldState', nationalSystemsFieldState);
+
   const { field, isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
 
   useEffect(() => {
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
   }, []);
 
-  const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
-    .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
-    .flat()
-    .join(', ');
+  const getAttachExtensions = selectedValidExtensions
+    .map(extension => `.${extension}`)
+    .join(', ')
+    .toLowerCase();
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
+    getAttachExtensions.split(', ')
+  ).join(', ')}`;
 
   const getMultiselectValues = (multiselectItemsOptions, value) => {
     if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
@@ -143,6 +150,19 @@ export const NationalSystemsField = ({
     if (day.length < 2) day = '0' + day;
 
     return [year, month, day].join('-');
+  };
+
+  const onUploadFileError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'UPLOAD_FILE_ERROR'
+      });
+    }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'GENERIC_BLOCKED_ERROR'
+      });
+    }
   };
 
   const renderTemplate = () => {
@@ -298,6 +318,8 @@ export const NationalSystemsField = ({
       />
     ));
 
+  console.log('getAttachExtensions', getAttachExtensions);
+
   return (
     <div className={styles.content}>
       <div className={styles.titleWrapper}>
@@ -333,6 +355,7 @@ export const NationalSystemsField = ({
           dialogOnHide={() => handleDialogs('uploadFile', false)}
           dialogVisible={isDialogVisible.uploadFile}
           fileLimit={1}
+          infoTooltip={infoExtensionsTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
@@ -343,6 +366,7 @@ export const NationalSystemsField = ({
           mode={'advanced'}
           multiple={false}
           name={'file'}
+          onError={onUploadFileError}
           onUpload={onAttachFile}
           operation={'PUT'}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {

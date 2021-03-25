@@ -256,6 +256,19 @@ export const WebformField = ({
     .flat()
     .join(', ');
 
+  const onUploadFileError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'UPLOAD_FILE_ERROR'
+      });
+    }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'GENERIC_BLOCKED_ERROR'
+      });
+    }
+  };
+
   const renderSinglePamsTemplate = option => {
     const pams = pamsRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
 
@@ -569,6 +582,7 @@ export const WebformField = ({
           mode="advanced"
           multiple={false}
           name="file"
+          onError={onUploadFileError}
           onUpload={onAttach}
           operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
