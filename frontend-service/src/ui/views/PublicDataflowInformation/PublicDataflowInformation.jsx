@@ -236,25 +236,27 @@ export const PublicDataflowInformation = withRouter(
 
     return (
       <PublicLayout>
-        <div className={`${styles.container} ${isLoading ? styles.isLoading : ''} rep-container`} style={contentStyles}>
+        <div className={`${styles.container} rep-container`} style={contentStyles}>
           {!isLoading ? (
-            !isEmpty(representatives) ? (
-              <Fragment>
-                <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-                <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                  {renderColumns(representatives)}
-                </DataTable>
-                <div className={styles.tableLegendContainer}>
-                  <span>*</span>
-                  <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-                  <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-                </div>
-              </Fragment>
-            ) : (
-              <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
-            )
+            <Fragment>
+              <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+              {!isEmpty(representatives) ? (
+                <Fragment>
+                  <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
+                    {renderColumns(representatives)}
+                  </DataTable>
+                  <div className={styles.tableLegendContainer}>
+                    <span>*</span>
+                    <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
+                    <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
+                  </div>
+                </Fragment>
+              ) : (
+                <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+              )}
+            </Fragment>
           ) : (
-            <Spinner style={{ top: 0, left: 0 }} />
+            <Spinner className={styles.isLoading} />
           )}
         </div>
       </PublicLayout>

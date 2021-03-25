@@ -52,7 +52,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       datasetsSchemas.forEach(dataset => {
         if (!isUndefined(dataset.tables)) {
           dataset.tables.forEach(table => {
-            table.records.filter(record => {
+            table.records.forEach(record => {
               record.fields.forEach(field => {
                 if (field.fieldId === referenceField.idPk) {
                   fieldObj.tableName = table.tableSchemaName;
@@ -167,7 +167,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     if (dataset.length > 0) {
       if (!isUndefined(dataset[0].tables)) {
         dataset[0].tables.forEach(table => {
-          table.records.filter(record => {
+          table.records.forEach(record => {
             record.fields.forEach(field => {
               if (field.fieldId === referenceId) {
                 fieldObj.tableName = table.tableSchemaName;

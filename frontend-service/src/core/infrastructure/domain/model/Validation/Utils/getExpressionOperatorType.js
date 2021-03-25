@@ -8,6 +8,7 @@ export const getExpressionOperatorType = (operator, type = 'field') => {
     if (operatorTypeObject.operators.includes(operator)) {
       return operatorTypeObject;
     }
+    return false;
   });
 
   const [selectedOperator] = selectedOperators;

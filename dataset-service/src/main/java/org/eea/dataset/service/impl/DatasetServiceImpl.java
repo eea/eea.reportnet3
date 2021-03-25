@@ -495,34 +495,40 @@ public class DatasetServiceImpl implements DatasetService {
     SortField[] newFields = null;
     TableVO result = new TableVO();
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
-
-    // Check if we need to put all the records without pagination
-    pageable = calculatePageable(pageable, totalRecords);
-
-    result = calculatedErrorsAndRecordsToSee(datasetId, idTableSchema, pageable, fields, levelError,
-        commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules, fieldSchema,
-        fieldValue);
-
-    // Table with out values
-    if (null == result.getRecords() || result.getRecords().isEmpty()) {
+    if (totalRecords == 0) {
+      result.setTotalFilteredRecords(0L);
+      result.setTableValidations(new ArrayList<>());
+      result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
-
     } else {
-      List<RecordVO> recordVOs = result.getRecords();
+      // Check if we need to put all the records without pagination
+      pageable = calculatePageable(pageable, totalRecords);
 
-      LOG.info(
-          "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
-          datasetId, idTableSchema, recordVOs.size(),
-          pageable != null ? pageable.getPageNumber() : null,
-          pageable != null ? pageable.getPageSize() : null);
-      if (null != fields) {
-        LOG.info("Ordered by idFieldSchema {}", commonShortFields);
+      result = calculatedErrorsAndRecordsToSee(datasetId, idTableSchema, pageable, fields,
+          levelError, commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules,
+          fieldSchema, fieldValue);
+
+      // Table with out values
+      if (null == result.getRecords() || result.getRecords().isEmpty()) {
+        result.setRecords(new ArrayList<>());
+        LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
+
+      } else {
+        List<RecordVO> recordVOs = result.getRecords();
+
+        LOG.info(
+            "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
+            datasetId, idTableSchema, recordVOs.size(),
+            pageable != null ? pageable.getPageNumber() : null,
+            pageable != null ? pageable.getPageSize() : null);
+        if (null != fields) {
+          LOG.info("Ordered by idFieldSchema {}", commonShortFields);
+        }
+
+        // Retrieve validations to set them into the final result
+        retrieveValidations(recordVOs);
+
       }
-
-      // 5Âº retrieve validations to set them into the final result
-      retrieveValidations(recordVOs);
-
     }
     result.setTotalRecords(totalRecords);
     return result;
@@ -3460,7 +3466,7 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * 
+   *
    * Export dataset ETLSQL.
    *
    * @param datasetId the dataset id
