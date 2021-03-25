@@ -43,7 +43,7 @@ export const BigButton = ({
   tooltip
 }) => {
   const resources = useContext(ResourcesContext);
-  const regex = new RegExp(/[a-zA-Z0-9_-\s]/);
+  const regex = new RegExp(/[a-zA-Z0-9_-\s()]/);
 
   const [buttonsTitle, setButtonsTitle] = useState('');
   const [initialValue, setInitialValue] = useState();
