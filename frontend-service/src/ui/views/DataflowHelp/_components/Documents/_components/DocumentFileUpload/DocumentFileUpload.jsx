@@ -153,7 +153,7 @@ const DocumentFileUpload = ({
   };
 
   return (
-    <>
+    <form onSubmit={e => e.preventDefault()}>
       <fieldset>
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
