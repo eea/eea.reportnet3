@@ -88,8 +88,16 @@ const FieldEditor = ({
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
-    setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
-    setLinkItemsValue(RecordUtils.getCellValue(cells, cells.field).toString());
+    setCodelistItemValue(
+      Array.isArray(RecordUtils.getCellValue(cells, cells.field))
+        ? RecordUtils.getCellValue(cells, cells.field).join(';')
+        : RecordUtils.getCellValue(cells, cells.field).toString()
+    );
+    setLinkItemsValue(
+      Array.isArray(RecordUtils.getCellValue(cells, cells.field))
+        ? RecordUtils.getCellValue(cells, cells.field).join(';')
+        : RecordUtils.getCellValue(cells, cells.field).toString()
+    );
   }, []);
 
   useEffect(() => {
@@ -633,7 +641,7 @@ const FieldEditor = ({
         const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
         if (hasMultipleValues) {
           return (
-            <MultiSelect              
+            <MultiSelect
               appendTo={document.body}
               clearButton={false}
               disabled={isLoadingData}
@@ -713,7 +721,7 @@ const FieldEditor = ({
         );
       case 'MULTISELECT_CODELIST':
         return (
-          <MultiSelect            
+          <MultiSelect
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {

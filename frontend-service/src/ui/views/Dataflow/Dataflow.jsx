@@ -972,7 +972,7 @@ const Dataflow = withRouter(({ history, match }) => {
             </label>
           </ConfirmDialog>
         )}
-        {console.log(dataflowState.data)}
+
         {dataflowState.isShowPublicInfoDialogVisible && (
           <ConfirmDialog
             disabledConfirm={
