@@ -57,10 +57,10 @@ export const NationalSystemsField = ({
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
   }, []);
 
-  const getAttachExtensions = field.validExtensions
-    .map(extension => `.${extension}`)
-    .join(', ')
-    .toLowerCase();
+  const getAttachExtensions = [{ fileExtension: field.validExtensions || [] }]
+    .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
+    .flat()
+    .join(', ');
 
   const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
   ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
