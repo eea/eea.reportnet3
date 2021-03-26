@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 /**
  * The type String to enum converter factory.
  */
-@Component
 public class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
 
