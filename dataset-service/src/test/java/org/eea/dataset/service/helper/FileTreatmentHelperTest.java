@@ -19,6 +19,8 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
+import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
@@ -28,6 +30,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -36,10 +39,13 @@ import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,7 +95,16 @@ public class FileTreatmentHelperTest {
   private DataFlowControllerZuul dataflowControllerZuul;
 
   @Mock
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
+  @Mock
   private LockService lockService;
+
+  @Mock
+  private RecordValueIdGenerator recordValueIdGenerator;
+
+  @Mock
+  private FieldValueIdGenerator fieldValueIdGenerator;
 
   /**
    * Inits the mocks.
@@ -104,7 +119,6 @@ public class FileTreatmentHelperTest {
         this.getClass().getClassLoader().getResource("").getPath());
     ReflectionTestUtils.setField(fileTreatmentHelper, "importExecutorService",
         new CurrentThreadExecutor());
-    ReflectionTestUtils.setField(fileTreatmentHelper, "batchSize", 1);
   }
 
   @Test
@@ -112,6 +126,7 @@ public class FileTreatmentHelperTest {
 
     FieldValue fieldValue = new FieldValue();
     fieldValue.setValue("value");
+    fieldValue.setType(DataType.TEXT);
     List<FieldValue> fieldValues = new ArrayList<>();
     fieldValues.add(fieldValue);
 
@@ -122,6 +137,7 @@ public class FileTreatmentHelperTest {
     recordValues.add(recordValue);
 
     TableValue tableValue = new TableValue();
+    recordValue.setTableValue(tableValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
     tableValue.setRecords(recordValues);
     List<TableValue> tableValues = new ArrayList<>();
@@ -164,21 +180,30 @@ public class FileTreatmentHelperTest {
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
     Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
-    Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.anyLong(), Mockito.any());
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -186,6 +211,7 @@ public class FileTreatmentHelperTest {
 
     FieldValue fieldValue = new FieldValue();
     fieldValue.setValue("value");
+    fieldValue.setType(DataType.TEXT);
     List<FieldValue> fieldValues = new ArrayList<>();
     fieldValues.add(fieldValue);
 
@@ -196,6 +222,7 @@ public class FileTreatmentHelperTest {
     recordValues.add(recordValue);
 
     TableValue tableValue = new TableValue();
+    recordValue.setTableValue(tableValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
     tableValue.setRecords(recordValues);
     List<TableValue> tableValues = new ArrayList<>();
@@ -244,8 +271,6 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
         .thenReturn("csv").thenReturn("txt").thenReturn("csv");
-    // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-    // .thenReturn(integrationVOs);
     Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong());
     Mockito.when(
         datasetService.processFile(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -253,21 +278,30 @@ public class FileTreatmentHelperTest {
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
     Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
         .thenReturn(1L);
-    Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.anyLong(), Mockito.any());
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test
