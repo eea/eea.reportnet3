@@ -159,7 +159,6 @@ public class FMEIntegrationManager extends AbstractCrudManager {
     }
 
     operationParametersRepository.deleteByIntegration(integration);
-    integrationRepository.delete(integration);
     integration = integrationMapper.classToEntity(integrationVO);
     checkName(integration, integrationVO);
     integrationRepository.save(integration);
