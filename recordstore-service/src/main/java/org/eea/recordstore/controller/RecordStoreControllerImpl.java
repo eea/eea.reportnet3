@@ -108,7 +108,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @GetMapping("/private/getConnectionToDataset")
+  @GetMapping("/private/connection")
   public ConnectionDataVO getConnectionToDataset(@RequestParam String datasetName) {
     ConnectionDataVO vo = null;
     try {
