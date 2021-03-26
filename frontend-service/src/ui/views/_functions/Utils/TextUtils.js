@@ -30,7 +30,7 @@ const ellipsis = (rawText, limit) => {
 
 const removeCommaSeparatedWhiteSpaces = str => str.replace(/^[,\s]+|[,\s]+$/g, '').replace(/\s*,\s*/g, ',');
 
-const removeSemicolonSeparatedWhiteSpaces = str => str.replace(/^[;\s]+|[;\s]+$/g, '').replace(/\s*,\s*/g, ',');
+const removeSemicolonSeparatedWhiteSpaces = str => str.replace(/^[;\s]+|[;\s]+$/g, '').replace(/\s*,\s*/g, ';');
 
 const splitByChar = (str, char = ',') => {
   return char === ','
