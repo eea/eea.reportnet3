@@ -100,10 +100,17 @@ export const apiDataflow = {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.dataSchemasValidation, { dataflowId }) });
   },
 
-  update: async (dataflowId, name, description, obligationId, isReleasable) => {
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) => {
     return await HTTPRequester.update({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { id: dataflowId, name, description, obligation: { obligationId }, releasable: isReleasable }
+      data: {
+        id: dataflowId,
+        name,
+        description,
+        obligation: { obligationId },
+        releasable: isReleasable,
+        showPublicInfo
+      }
     });
   }
 };

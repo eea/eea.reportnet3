@@ -1043,6 +1043,10 @@
     "yes": "Yes",
     "deleteWebLinkError": "Error deleting web link",
     "addWebLinkError": "Error adding web link",
-    "editWebLinkError": "Error editing web link"
+    "editWebLinkError": "Error editing web link",
+    "uploadFileError": "Error uploading file",
+    "publicStatusLeftSideBarButton": "Public status",
+    "showPublicInfoDataflowDialogHeader": "Show/hide public dataflow data",
+    "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available"
   }
 }
