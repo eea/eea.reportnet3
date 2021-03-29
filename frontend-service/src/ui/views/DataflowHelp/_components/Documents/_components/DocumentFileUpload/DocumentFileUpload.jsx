@@ -13,8 +13,6 @@ import { DocumentService } from 'core/services/Document';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import isEmpty from 'lodash/isEmpty';
-import { query } from 'esri-leaflet';
 
 const DocumentFileUpload = ({
   dataflowId,
@@ -56,15 +54,15 @@ const DocumentFileUpload = ({
 
   const checkIsCorrectLength = inputValue => inputValue.length <= 255;
 
-  const checkIsEmptyFile = uploadedDocument => {
-    return uploadedDocument.files.length === 0;
+  const checkIsEmptyFile = inputUpload => {
+    return inputUpload.files.length === 0;
   };
 
-  const checkExсeedsMaxFileSize = uploadedDocument => {
-    if (uploadedDocument.files.length === 0) {
+  const checkExсeedsMaxFileSize = inputUpload => {
+    if (inputUpload.files.length === 0) {
       return false;
     }
-    return uploadedDocument.files[0].size > config.MAX_FILE_SIZE;
+    return inputUpload.files[0].size > config.MAX_FILE_SIZE;
   };
 
   const checkInputForErrors = inputName => {
@@ -72,7 +70,7 @@ const DocumentFileUpload = ({
     let message = '';
     const inputValue = inputs[inputName];
 
-    const uploadedDocument = document.querySelector('#uploadFile');
+    const inputUpload = document.querySelector('#uploadFile');
 
     if (inputName !== 'uploadFile' && checkIsEmptyInput(inputValue)) {
       message = '';
@@ -81,15 +79,15 @@ const DocumentFileUpload = ({
       message = resources.messages['documentDescriptionValidationMax'];
       hasErrors = true;
     } else if (inputName === 'uploadFile') {
-      if (isEditForm && checkExсeedsMaxFileSize(uploadedDocument)) {
+      if (isEditForm && checkExсeedsMaxFileSize(inputUpload)) {
         message = resources.messages['tooLargeFileValidationError'];
         hasErrors = true;
       }
       if (!isEditForm) {
-        if (checkIsEmptyFile(uploadedDocument)) {
+        if (checkIsEmptyFile(inputUpload)) {
           message = '';
           hasErrors = true;
-        } else if (checkExсeedsMaxFileSize(uploadedDocument)) {
+        } else if (checkExсeedsMaxFileSize(inputUpload)) {
           message = resources.messages['tooLargeFileValidationError'];
           hasErrors = true;
         }
@@ -181,9 +179,7 @@ const DocumentFileUpload = ({
               });
             }}
             onKeyPress={e => {
-              if (e.key === 'Enter' && !checkInputForErrors('description')) {
-                onConfirm();
-              }
+              if (e.key === 'Enter' && !checkInputForErrors('description')) onConfirm();
             }}
           />
           <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
