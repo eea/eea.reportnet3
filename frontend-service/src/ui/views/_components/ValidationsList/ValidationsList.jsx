@@ -443,13 +443,6 @@ const ValidationsList = withRouter(
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
-    // const filterOptions = {
-    //   multiselect: {
-    //     properties: ['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect'],
-    //     showFilterInput: true
-    //   }
-    // };
-
     const filterOptions = [
       {
         type: 'multiselect',

@@ -32,18 +32,14 @@ export const Filters = ({
   checkboxOptions,
   className,
   data = [],
-  dateOptions,
   dropDownList,
-  dropdownOptions,
   filterByList,
   getFilteredData,
   getFilteredSearched = () => {},
-  inputOptions,
   matchMode,
   searchAll,
   searchBy = [],
   selectList,
-  selectOptions = [],
   sendData,
   sortable,
   sortCategory,
@@ -112,7 +108,7 @@ export const Filters = ({
       filterDispatch({ type: 'SET_CLEARED_FILTERS', payload: false });
     }
   }, [filterState.clearedFilters]);
-  useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
+  useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[date]) && onAnimateLabel([date], false));
 
   const getCheckboxFilterState = property => {
     const [checkBox] = filterState.checkboxes.filter(checkbox => checkbox.property === property);
@@ -123,6 +119,8 @@ export const Filters = ({
     const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
     filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
   };
+
+  const { input, multiselect, date, dropdown } = FiltersUtils.getOptionsNames(options);
 
   const getFilteredState = () => {
     let filteredStateValue = false;
@@ -149,10 +147,10 @@ export const Filters = ({
 
     const initialFilterBy = FiltersUtils.getFilterInitialState(
       data,
-      inputOptions,
-      selectOptions,
-      dateOptions,
-      dropdownOptions,
+      input,
+      multiselect,
+      date,
+      dropdown,
       checkboxOptions,
       filterByList
     );
@@ -160,21 +158,16 @@ export const Filters = ({
     const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
 
     const initialLabelAnimations = FiltersUtils.getLabelInitialState(
-      inputOptions,
-      selectOptions,
-      dateOptions,
-      dropdownOptions,
+      input,
+      multiselect,
+      date,
+      dropdown,
       checkboxOptions,
       filterState.filterBy
     );
 
-    const initialOrderBy = SortUtils.getOrderInitialState(
-      inputOptions,
-      selectOptions,
-      dateOptions,
-      dropdownOptions,
-      checkboxOptions
-    );
+    const initialOrderBy = SortUtils.getOrderInitialState(input, multiselect, date, dropdown, checkboxOptions);
+
     const initialCheckboxes = FiltersUtils.getCheckboxFilterInitialState(checkboxOptions);
 
     filterDispatch({
@@ -212,29 +205,10 @@ export const Filters = ({
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FiltersUtils.getFilterInitialState(
-          data,
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          checkboxOptions
-        ),
+        filterBy: FiltersUtils.getFilterInitialState(data, input, multiselect, date, dropdown, checkboxOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: ApplyFilterUtils.onClearLabelState(
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          checkboxOptions
-        ),
-        orderBy: SortUtils.getOrderInitialState(
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          checkboxOptions
-        ),
+        labelAnimations: ApplyFilterUtils.onClearLabelState(input, multiselect, date, dropdown, checkboxOptions),
+        orderBy: SortUtils.getOrderInitialState(input, multiselect, date, dropdown, checkboxOptions),
         searchBy: '',
         checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
         filtered: false,
@@ -245,9 +219,12 @@ export const Filters = ({
   };
 
   const onFilterData = (filter, value, actualFilterBy) => {
-    const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, input);
+
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
-    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
+
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, multiselect);
+
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
 
     const filteredData = ApplyFilterUtils.onApplyFilters({
@@ -255,13 +232,13 @@ export const Filters = ({
       checkboxOptions,
       checkedKeys,
       data,
-      dateOptions,
-      dropdownOptions,
+      date,
+      dropdown,
       filter,
       filteredKeys: inputKeys,
       searchedKeys,
       selectedKeys,
-      selectOptions,
+      multiselect,
       state: filterState,
       value
     });
@@ -270,17 +247,20 @@ export const Filters = ({
   };
 
   const onOrderData = (order, property) => {
+    const { input, multiselect, date } = FiltersUtils.getOptionsNames(options);
+
     const sortedData = SortUtils.onSortData([...filterState.data], order, property, sortCategory);
     const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property, sortCategory);
     const orderBy = order === 0 ? -1 : order;
-    const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions, checkboxOptions);
+    const resetOrder = SortUtils.onResetOrderData(input, multiselect, date, checkboxOptions);
 
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
   };
 
   const onSearchData = value => {
-    const inputKeys = FiltersUtils.getFilterKeys(filterState, '', inputOptions);
-    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', selectOptions);
+    const { input, multiselect } = FiltersUtils.getOptionsNames(options);
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, '', input);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', multiselect);
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, '', checkboxOptions);
     const searchedValues = ApplyFilterUtils.onApplySearch(
       filterState.data,
@@ -311,7 +291,7 @@ export const Filters = ({
       const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
 
       initialFilteredData.forEach(item =>
-        selectOptions.forEach(filterKey => {
+        multiselect.forEach(filterKey => {
           let currentValue = possibleOptions.get(filterKey);
           currentValue.add(item[filterKey]);
         })
@@ -321,7 +301,7 @@ export const Filters = ({
 
       const removeInexistentFilters = () => {
         return filterByAsKeyValueArray.map(keyValue => {
-          selectOptions.forEach(key => {
+          multiselect.forEach(key => {
             // key [0], value [1]
             if (key === keyValue[0]) {
               keyValue[1] = keyValue[1].filter(value => {
@@ -515,7 +495,7 @@ export const Filters = ({
       <Fragment />
     );
 
-  const renderMultiselectSelectFilter = (property, showInput = false) => (
+  const renderMultiselectSelectFilter = (property, showInput) => (
     <span key={property} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
@@ -631,10 +611,6 @@ export const Filters = ({
     <div className={className ? styles[className] : styles.header}>
       {searchAll && renderSearchAll()}
       {filtersRenderer()}
-      {/* {inputOptions && inputOptions.map(option => renderInputFilter(option))} */}
-      {/* {selectOptions && selectOptions.map(option => renderMultiselectSelectFilter(option))} */}
-      {/* {dropdownOptions && dropdownOptions.map(option => renderDropdown(option))} */}
-      {/* {dateOptions && dateOptions.map(option => renderCalendarFilter(option))}  */}
       {matchMode && renderCheckbox()}
 
       {checkboxOptions && checkboxOptions.map((option, i) => renderCheckboxFilter(option, i))}
@@ -650,7 +626,7 @@ export const Filters = ({
           <Fragment />
         )}
 
-        {(inputOptions || selectOptions || dateOptions || checkboxOptions) && (
+        {(input || multiselect || date || checkboxOptions) && (
           <Button
             className={`${
               sendData ? 'p-button-secondary' : 'p-button-secondary'
