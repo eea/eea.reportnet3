@@ -515,7 +515,7 @@ export const Filters = ({
       <Fragment />
     );
 
-  const renderMultiselectSelectFilter = (property, showFilterInput = false) => (
+  const renderMultiselectSelectFilter = (property, showInput = false) => (
     <span key={property} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
@@ -527,7 +527,7 @@ export const Filters = ({
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
         isFilter
-        filter={showFilterInput}
+        filter={showInput}
         itemTemplate={selectTemplate}
         label={resources.messages[property]}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
@@ -571,21 +571,24 @@ export const Filters = ({
   );
 
   const filtersRenderer = () => {
-    const filterTypes = Object.keys(options);
-
-    return filterTypes.map(type => {
-      switch (type) {
+    return options.map(filterOption => {
+      console.log(`filterOption.properties`, filterOption.properties);
+      switch (filterOption.type) {
+        //TODO RENAME properties => property not to have this situation property['property']
         case 'input':
-          return options[type].properties.map(property => renderInputFilter(property));
+          return filterOption.properties.map(property => renderInputFilter(property['property']));
 
         case 'multiselect':
-          return options[type].properties.map(property => renderMultiselectSelectFilter(property)); //todo options[type].showFilterInput
+          return filterOption.properties.map(property =>
+            renderMultiselectSelectFilter(property['property'], property.showInput)
+          );
 
         case 'dropdown':
-          return options[type].properties.map(property => renderDropdown(property));
+          return filterOption.properties.map(property => renderDropdown(property['property']));
 
         case 'date':
-          return options[type].properties.map(property => renderCalendarFilter(property));
+          return filterOption.properties.map(property => renderCalendarFilter(property['property']));
+
         default:
           return '';
       }
