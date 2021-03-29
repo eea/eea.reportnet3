@@ -28,7 +28,7 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
-  options,
+  options = [],
   checkboxOptions,
   className,
   data = [],
