@@ -500,10 +500,10 @@ const ValidationViewer = React.memo(
       {
         type: 'multiselect',
         properties: [
-          { property: 'entityType' },
-          { property: 'tableSchemaName' },
-          { property: 'fieldSchemaName' },
-          { property: 'levelError' }
+          { name: 'entityType' },
+          { name: 'tableSchemaName' },
+          { name: 'fieldSchemaName' },
+          { name: 'levelError' }
         ]
       }
     ];

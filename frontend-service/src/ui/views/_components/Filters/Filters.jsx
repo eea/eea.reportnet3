@@ -574,20 +574,19 @@ export const Filters = ({
     return options.map(filterOption => {
       console.log(`filterOption.properties`, filterOption.properties);
       switch (filterOption.type) {
-        //TODO RENAME properties => property not to have this situation property['property']
         case 'input':
-          return filterOption.properties.map(property => renderInputFilter(property['property']));
+          return filterOption.properties.map(property => renderInputFilter(property.name));
 
         case 'multiselect':
           return filterOption.properties.map(property =>
-            renderMultiselectSelectFilter(property['property'], property.showInput)
+            renderMultiselectSelectFilter(property.name, property.showInput)
           );
 
         case 'dropdown':
-          return filterOption.properties.map(property => renderDropdown(property['property']));
+          return filterOption.properties.map(property => renderDropdown(property.name));
 
         case 'date':
-          return filterOption.properties.map(property => renderCalendarFilter(property['property']));
+          return filterOption.properties.map(property => renderCalendarFilter(property.name));
 
         default:
           return '';

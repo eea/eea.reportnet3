@@ -180,15 +180,15 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
   // };
 
   const filterOptionsDataCollection = [
-    { type: 'checkbox', properties: [{ property: 'dataProviderName' }, { property: 'feedbackStatus' }] },
-    { type: 'multiselect', properties: [{ property: 'countryCode' }] }
+    { type: 'checkbox', properties: [{ name: 'dataProviderName' }, { name: 'feedbackStatus' }] },
+    { type: 'multiselect', properties: [{ name: 'countryCode' }] }
   ];
 
   // const filterOptionsEUDataset = {
   //   multiselect: { properties: ['countryCode'] }
   // };
 
-  const filterOptionsEUDataset = [{ type: 'multiselect', properties: [{ property: 'countryCode' }] }];
+  const filterOptionsEUDataset = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
 
   const renderReportingDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])

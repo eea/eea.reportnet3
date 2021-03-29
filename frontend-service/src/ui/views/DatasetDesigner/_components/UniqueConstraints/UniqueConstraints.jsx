@@ -172,9 +172,7 @@ export const UniqueConstraints = ({
   //   multiselect: { properties: ['tableSchemaName', 'fieldData'] }
   // };
 
-  const filterOptions = [
-    { type: 'multiselect', properties: [{ property: 'tableSchemaName' }, { property: 'fieldData' }] }
-  ];
+  const filterOptions = [{ type: 'multiselect', properties: [{ name: 'tableSchemaName' }, { name: 'fieldData' }] }];
 
   if (constraintsState.isLoading)
     return (

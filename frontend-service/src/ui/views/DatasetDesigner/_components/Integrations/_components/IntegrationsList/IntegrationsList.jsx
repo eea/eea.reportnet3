@@ -166,8 +166,8 @@ export const IntegrationsList = ({
   // };
 
   const filterOptions = [
-    { type: 'input', properties: [{ property: 'integrationName' }] },
-    { type: 'multiselect', properties: [{ property: 'operationName' }] }
+    { type: 'input', properties: [{ name: 'integrationName' }] },
+    { type: 'multiselect', properties: [{ name: 'operationName' }] }
   ];
 
   if (integrationListState.isLoading) {

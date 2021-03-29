@@ -132,15 +132,10 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
   const filterOptions = [
     {
       type: 'input',
-      properties: [
-        { property: 'name' },
-        { property: 'description' },
-        { property: 'legalInstrument' },
-        { property: 'obligationTitle' }
-      ]
+      properties: [{ name: 'name' }, { name: 'description' }, { name: 'legalInstrument' }, { name: 'obligationTitle' }]
     },
-    { type: 'multiselect', properties: [{ property: 'status' }, { property: 'userRole' }, { property: 'pinned' }] },
-    { type: 'date', properties: [{ property: 'expirationDate' }] }
+    { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
+    { type: 'date', properties: [{ name: 'expirationDate' }] }
   ];
 
   return (

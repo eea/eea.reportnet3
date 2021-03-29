@@ -76,8 +76,8 @@ export const UserList = ({ dataflowId, representativeId }) => {
   // };
 
   const filterOptionsNoRepresentative = [
-    { type: 'input', properties: [{ property: 'dataflowName' }, { property: 'email' }] },
-    { type: 'multiselect', properties: [{ property: 'role' }] }
+    { type: 'input', properties: [{ name: 'dataflowName' }, { name: 'email' }] },
+    { type: 'multiselect', properties: [{ name: 'role' }] }
   ];
 
   // const filterOptionsHasRepresentativeId = {
@@ -86,8 +86,8 @@ export const UserList = ({ dataflowId, representativeId }) => {
   // };
 
   const filterOptionsHasRepresentativeId = [
-    { type: 'input', properties: [{ property: 'email' }] },
-    { type: 'multiselect', properties: [{ property: 'role' }] }
+    { type: 'input', properties: [{ name: 'email' }] },
+    { type: 'multiselect', properties: [{ name: 'role' }] }
   ];
 
   return (

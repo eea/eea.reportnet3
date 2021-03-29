@@ -117,15 +117,10 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const filterOptions = [
     {
       type: 'input',
-      properties: [
-        { property: 'name' },
-        { property: 'description' },
-        { property: 'obligationTitle' },
-        { property: 'legalInstruments' }
-      ]
+      properties: [{ name: 'name' }, { name: 'description' }, { name: 'obligationTitle' }, { name: 'legalInstruments' }]
     },
-    { type: 'multiselect', properties: [{ property: 'status' }] },
-    { type: 'date', properties: [{ property: 'expirationDate' }] }
+    { type: 'multiselect', properties: [{ name: 'status' }] },
+    { type: 'date', properties: [{ name: 'expirationDate' }] }
   ];
 
   const renderData = () =>

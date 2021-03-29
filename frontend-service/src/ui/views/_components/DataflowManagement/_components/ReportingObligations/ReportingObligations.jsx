@@ -172,10 +172,10 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const filterOptions = [
     {
       type: 'dropdown',
-      properties: [{ property: 'countries' }, { property: 'issues' }, { property: 'organizations' }]
+      properties: [{ name: 'countries' }, { name: 'issues' }, { name: 'organizations' }]
     },
 
-    { type: 'date', properties: [{ property: 'expirationDate' }] }
+    { type: 'date', properties: [{ name: 'expirationDate' }] }
   ];
 
   const parsedFilterList = {

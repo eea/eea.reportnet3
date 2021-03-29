@@ -123,9 +123,9 @@ export const ManualAcceptanceDatasets = ({
   // };
 
   const filterOptions = [
-    { type: 'input', properties: [{ property: 'datasetName' }, { property: 'description' }] },
-    { type: 'multiselect', properties: [{ property: 'dataProviderName' }, { property: 'feedbackStatus' }] },
-    { type: 'checkbox', properties: [{ property: 'isReleased' }] }
+    { type: 'input', properties: [{ name: 'datasetName' }, { name: 'description' }] },
+    { type: 'multiselect', properties: [{ name: 'dataProviderName' }, { name: 'feedbackStatus' }] },
+    { type: 'checkbox', properties: [{ name: 'isReleased' }] }
   ];
 
   const renderColumns = datasets => {
