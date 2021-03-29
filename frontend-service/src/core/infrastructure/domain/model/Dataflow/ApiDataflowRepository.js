@@ -707,8 +707,8 @@ const reporting = async dataflowId => {
 
 const schemasValidation = async dataflowId => await apiDataflow.schemasValidation(dataflowId);
 
-const update = async (dataflowId, name, description, obligationId, isReleasable) => {
-  return await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable);
+const update = async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) => {
+  return await apiDataflow.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo);
 };
 
 export const ApiDataflowRepository = {

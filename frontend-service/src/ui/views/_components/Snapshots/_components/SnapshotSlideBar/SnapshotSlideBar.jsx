@@ -26,6 +26,9 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
 
   useEffect(() => {
     resetSlideBarPositionAndSize();
+    if (!isVisible) {
+      setHasError(false);
+    }
   }, [isVisible, isSnapshotDialogVisible]);
 
   useEffect(() => {

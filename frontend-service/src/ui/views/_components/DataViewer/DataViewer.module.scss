@@ -84,13 +84,13 @@
   background-clip: content-box;
   border-color: transparent;
   border-style: solid;
-  border-width: 1px 2px;
+  border-width: 2px;
 }
 :global .p-datatable-scrollable-body::-webkit-scrollbar-thumb:hover {
   background-clip: content-box;
   border-color: transparent;
   border-style: solid;
-  border-width: 1px 2px;
+  border-width: 2px;
 }
 
 :global .p-datatable-scrollable-body::-webkit-scrollbar-track {
@@ -103,6 +103,17 @@
   border-style: solid;
   height: 16px;
   width: 8px;
+}
+
+:global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:vertical:increment {
+  background-color: var(--bg);
+  border-width: 8px 8px 0 8px;
+  border-color: var(--gray-75) transparent transparent transparent;
+}
+:global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:vertical:decrement {
+  background-color: var(--bg);
+  border-width: 0px 8px 8px 8px;
+  border-color: transparent transparent var(--gray-75) transparent;
 }
 
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:horizontal:increment {
