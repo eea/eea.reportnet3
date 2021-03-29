@@ -106,7 +106,7 @@ public class DataflowServiceImpl implements DataflowService {
 
   /** The obligation controller. */
   @Autowired
-  private ObligationControllerZull obligationController;
+  private ObligationControllerZull obligationControllerZull;
 
   /** The eu dataset controller zuul. */
   @Autowired
@@ -802,7 +802,7 @@ public class DataflowServiceImpl implements DataflowService {
   private void findObligationPublicDataflow(DataflowPublicVO dataflowPublicVO) {
     if (dataflowPublicVO.getObligation() != null
         && dataflowPublicVO.getObligation().getObligationId() != null) {
-      dataflowPublicVO.setObligation(obligationController
+        dataflowPublicVO.setObligation(obligationControllerZull
           .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
     }
   }
@@ -894,7 +894,7 @@ public class DataflowServiceImpl implements DataflowService {
     // compatibility concerns
     if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
       dataflow.setObligation(
-          obligationController.findObligationById(dataflow.getObligation().getObligationId()));
+          obligationControllerZull.findObligationById(dataflow.getObligation().getObligationId()));
     }
   }
 
@@ -995,7 +995,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Get all opened obligations from ROD
     List<ObligationVO> obligations =
-        obligationController.findOpenedObligations(null, null, null, null, null);
+        obligationControllerZull.findOpenedObligations(null, null, null, null, null);
 
     Map<Integer, ObligationVO> obligationMap = obligations.stream()
         .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
