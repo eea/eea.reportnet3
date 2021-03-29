@@ -79,6 +79,7 @@
 
 :global .p-datatable-scrollable-body::-webkit-scrollbar {
   height: 16px;
+  width: 16px;
 }
 :global .p-datatable-scrollable-body::-webkit-scrollbar-thumb {
   background-clip: content-box;
