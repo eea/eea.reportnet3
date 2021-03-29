@@ -20,7 +20,7 @@ const { images } = avatarImages;
 const { languages } = languageCode;
 
 config.MAX_FILE_EXTENSION_LENGTH = 10;
-config.MAX_FILE_SIZE = 100000000;
+config.MAX_FILE_SIZE = 10;
 config.MAX_INTEGRATION_NAME_LENGTH = 50;
 
 config.MAX_ATTACHMENT_SIZE = 20 * 1000 * 1024;

@@ -443,6 +443,28 @@ const ValidationsList = withRouter(
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
+    // const filterOptions = {
+    //   multiselect: {
+    //     properties: ['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect'],
+    //     showFilterInput: true
+    //   }
+    // };
+
+    const filterOptions = [
+      {
+        type: 'multiselect',
+        properties: [
+          { property: 'table', showInput: true },
+          { property: 'field', showInput: true },
+          { property: 'entityType', showInput: true },
+          { property: 'levelError', showInput: true },
+          { property: 'automatic', showInput: true },
+          { property: 'enabled', showInput: true },
+          { property: 'isCorrect', showInput: true }
+        ]
+      }
+    ];
+
     const validationList = () => {
       if (tabsValidationsState.isLoading) {
         return (
@@ -466,13 +488,14 @@ const ValidationsList = withRouter(
         <div className={styles.validations}>
           <div className={styles.searchInput}>
             <Filters
+              options={filterOptions}
               className="filter-lines"
               data={tabsValidationsState.validationList.validations}
               getFilteredData={onLoadFilteredData}
               getFilteredSearched={getFilteredState}
               searchAll
               searchBy={['name', 'description', 'message']}
-              selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
+              // selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
             />
           </div>
 

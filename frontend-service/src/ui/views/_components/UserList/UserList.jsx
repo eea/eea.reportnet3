@@ -70,6 +70,26 @@ export const UserList = ({ dataflowId, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
+  // const filterOptionsNoRepresentative = {
+  //   input: { properties: ['dataflowName', 'email'] },
+  //   multiselect: { properties: ['role'] }
+  // };
+
+  const filterOptionsNoRepresentative = [
+    { type: 'input', properties: [{ property: 'dataflowName' }, { property: 'email' }] },
+    { type: 'multiselect', properties: [{ property: 'role' }] }
+  ];
+
+  // const filterOptionsHasRepresentativeId = {
+  //   input: { properties: ['email'] },
+  //   multiselect: { properties: ['role'] }
+  // };
+
+  const filterOptionsHasRepresentativeId = [
+    { type: 'input', properties: [{ property: 'email' }] },
+    { type: 'multiselect', properties: [{ property: 'role' }] }
+  ];
+
   return (
     <div className={styles.container}>
       {isLoading ? (
@@ -80,19 +100,21 @@ export const UserList = ({ dataflowId, representativeId }) => {
         <div className={styles.users}>
           {isNil(representativeId) ? (
             <Filters
+              options={filterOptionsNoRepresentative}
               data={userListData}
               getFilteredData={onLoadFilteredData}
               getFilteredSearched={getFilteredState}
-              inputOptions={['dataflowName', 'email']}
-              selectOptions={['role']}
+              // inputOptions={['dataflowName', 'email']}
+              // selectOptions={['role']}
             />
           ) : (
             <Filters
+              options={filterOptionsHasRepresentativeId}
               data={userListData}
               getFilteredData={onLoadFilteredData}
               getFilteredSearched={getFilteredState}
-              inputOptions={['email']}
-              selectOptions={['role']}
+              // inputOptions={['email']}
+              // selectOptions={['role']}
             />
           )}
 

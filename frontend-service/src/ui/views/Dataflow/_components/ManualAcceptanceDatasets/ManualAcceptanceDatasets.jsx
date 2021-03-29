@@ -116,6 +116,18 @@ export const ManualAcceptanceDatasets = ({
     />
   );
 
+  // const filterOptions = {
+  //   input: { properties: ['datasetName'] },
+  //   multiselect: { properties: ['dataProviderName', 'feedbackStatus'] },
+  //   checkbox: { properties: ['isReleased'] }
+  // };
+
+  const filterOptions = [
+    { type: 'input', properties: [{ property: 'datasetName' }, { property: 'description' }] },
+    { type: 'multiselect', properties: [{ property: 'dataProviderName' }, { property: 'feedbackStatus' }] },
+    { type: 'checkbox', properties: [{ property: 'isReleased' }] }
+  ];
+
   const renderColumns = datasets => {
     const fieldColumns = getOrderedValidations(Object.keys(datasets[0])).map(field => {
       let template = null;
@@ -151,12 +163,13 @@ export const ManualAcceptanceDatasets = ({
   ) : (
     <div className={styles.manualAcceptanceDatasets}>
       <Filters
-        checkboxOptions={['isReleased']}
+        options={filterOptions}
+        // checkboxOptions={['isReleased']}
         data={manualAcceptanceDatasetsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
-        inputOptions={['datasetName']}
-        selectOptions={['dataProviderName', 'feedbackStatus']}
+        // inputOptions={['datasetName']}
+        // selectOptions={['dataProviderName', 'feedbackStatus']}
       />
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
         <DataTable
