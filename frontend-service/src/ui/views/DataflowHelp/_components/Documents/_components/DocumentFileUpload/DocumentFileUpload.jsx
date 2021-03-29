@@ -42,28 +42,35 @@ const DocumentFileUpload = ({
     if (isUploadDialogVisible) inputRef.current.focus();
   }, [isUploadDialogVisible]);
 
+  useEffect(() => {
+    if (inputs?.isTouchedFileUpload) {
+      checkInputForErrors('uploadFile');
+    }
+  }, [inputs]);
+
   const checkIsEmptyInput = inputValue => {
     return inputValue.trim() === '';
   };
 
   const checkIsCorrectLength = inputValue => inputValue.length <= 255;
 
-  const checkIsEmptyFile = file => {
-    //checks if file object do not have size property
-    return !file?.size;
+  const checkIsEmptyFile = inputUpload => {
+    return inputUpload.files.length === 0;
   };
 
-  const checkExсeedsMaxFileSize = file => {
-    if (!file?.size) {
+  const checkExсeedsMaxFileSize = inputUpload => {
+    if (inputUpload.files.length === 0) {
       return false;
     }
-    return file.size > config.MAX_FILE_SIZE;
+    return inputUpload.files[0].size > config.MAX_FILE_SIZE;
   };
 
   const checkInputForErrors = inputName => {
     let hasErrors = false;
     let message = '';
     const inputValue = inputs[inputName];
+
+    const inputUpload = document.querySelector('#uploadFile');
 
     if (inputName !== 'uploadFile' && checkIsEmptyInput(inputValue)) {
       message = '';
@@ -72,15 +79,15 @@ const DocumentFileUpload = ({
       message = resources.messages['documentDescriptionValidationMax'];
       hasErrors = true;
     } else if (inputName === 'uploadFile') {
-      if (isEditForm && checkExсeedsMaxFileSize(inputValue)) {
+      if (isEditForm && checkExсeedsMaxFileSize(inputUpload)) {
         message = resources.messages['tooLargeFileValidationError'];
         hasErrors = true;
       }
       if (!isEditForm) {
-        if (checkIsEmptyFile(inputValue)) {
+        if (checkIsEmptyFile(inputUpload)) {
           message = '';
           hasErrors = true;
-        } else if (checkExсeedsMaxFileSize(inputValue)) {
+        } else if (checkExсeedsMaxFileSize(inputUpload)) {
           message = resources.messages['tooLargeFileValidationError'];
           hasErrors = true;
         }
@@ -153,7 +160,7 @@ const DocumentFileUpload = ({
   };
 
   return (
-    <>
+    <form onSubmit={e => e.preventDefault()}>
       <fieldset>
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
@@ -225,7 +232,7 @@ const DocumentFileUpload = ({
               onChange={e => {
                 const eventTarget = e.currentTarget;
                 setInputs(previousValues => {
-                  return { ...previousValues, uploadFile: eventTarget.files[0] };
+                  return { ...previousValues, uploadFile: eventTarget.files[0], isTouchedFileUpload: true };
                 });
               }}
               placeholder="file upload"
@@ -273,7 +280,7 @@ const DocumentFileUpload = ({
           />
         </div>
       </fieldset>
-    </>
+    </form>
   );
 };
 
