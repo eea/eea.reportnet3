@@ -96,6 +96,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
     isPageLoading: true,
+    isShowPublicInfoDialogVisible: false,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
@@ -109,6 +110,7 @@ const Dataflow = withRouter(({ history, match }) => {
     obligations: {},
     representativesImport: false,
     restrictFromPublic: false,
+    showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
     userRoles: []
@@ -248,6 +250,15 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'releasingLeftSideBarButton'
       };
 
+      const showPublicInfoBtn = {
+        className: 'dataflow-showPublicInfo-help-step',
+        icon: 'lock',
+        isVisible: buttonsVisibility.showPublicInfoBtn,
+        label: 'publicStatusLeftSideBarButton',
+        onClick: () => manageDialogs('isShowPublicInfoDialogVisible', true),
+        title: 'publicStatusLeftSideBarButton'
+      };
+
       const userListBtn = {
         className: 'dataflow-properties-help-step',
         icon: 'users',
@@ -261,6 +272,7 @@ const Dataflow = withRouter(({ history, match }) => {
         propertiesBtn,
         editBtn,
         releaseableBtn,
+        showPublicInfoBtn,
         exportSchemaBtn,
         apiKeyBtn,
         manageReportersBtn,
@@ -344,6 +356,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
       propertiesBtn: true,
+      showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
@@ -540,6 +553,7 @@ const Dataflow = withRouter(({ history, match }) => {
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
+          showPublicInfo: dataflow.showPublicInfo,
           status: dataflow.status
         }
       });
@@ -748,7 +762,8 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowState.data.name,
         dataflowState.data.description,
         dataflowState.obligations.obligationId,
-        dataflowState.isReleasable
+        dataflowState.isReleasable,
+        dataflowState.showPublicInfo
       );
       onLoadReportingDataflow();
     } catch (error) {
@@ -760,10 +775,45 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onConfirmUpdateShowPublicInfo = async () => {
+    manageDialogs('isShowPublicInfoDialogVisible', false);
+    try {
+      dataflowDispatch({
+        type: 'SET_IS_FETCHING_DATA',
+        payload: { isFetchingData: true }
+      });
+      await DataflowService.update(
+        dataflowId,
+        dataflowState.data.name,
+        dataflowState.data.description,
+        dataflowState.obligations.obligationId,
+        dataflowState.isReleasable,
+        dataflowState.showPublicInfo
+      );
+      onLoadReportingDataflow();
+    } catch (error) {
+      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
+      dataflowDispatch({
+        type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
+        payload: { showPublicInfo: dataflowState.data.showPublicInfo, isFetchingData: false }
+      });
+    }
+  };
+
   const onCloseIsReleaseableDialog = () => {
     manageDialogs('isReleaseableDialogVisible', false);
     if (dataflowState.data.isReleasable !== dataflowState.isReleasable) {
       dataflowDispatch({ type: 'SET_IS_RELEASABLE', payload: { isReleasable: dataflowState.data.isReleasable } });
+    }
+  };
+
+  const onCloseIsShowPublicInfoDialog = () => {
+    manageDialogs('isShowPublicInfoDialogVisible', false);
+    if (dataflowState.data.showPublicInfo !== dataflowState.showPublicInfo) {
+      dataflowDispatch({
+        type: 'SET_SHOW_PUBLIC_INFO',
+        payload: { showPublicInfo: dataflowState.data.showPublicInfo }
+      });
     }
   };
 
@@ -918,6 +968,44 @@ const Dataflow = withRouter(({ history, match }) => {
             <label htmlFor="isReleasableCheckbox" className={styles.isReleasableLabel}>
               <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
                 {resources.messages['isReleasableDataflowCheckboxLabel']}
+              </a>
+            </label>
+          </ConfirmDialog>
+        )}
+        {console.log(dataflowState.data)}
+        {dataflowState.isShowPublicInfoDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={
+              dataflowState.data.showPublicInfo === dataflowState.showPublicInfo || dataflowState.isFetchingData
+            }
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
+            header={resources.messages['showPublicInfoDataflowDialogHeader']}
+            labelCancel={resources.messages['cancel']}
+            labelConfirm={resources.messages['save']}
+            onConfirm={onConfirmUpdateShowPublicInfo}
+            onHide={() => onCloseIsShowPublicInfoDialog()}
+            visible={dataflowState.isShowPublicInfoDialogVisible}>
+            <Checkbox
+              id="showPublicInfoCheckbox"
+              inputId="showPublicInfoCheckbox"
+              isChecked={dataflowState.showPublicInfo}
+              onChange={() =>
+                dataflowDispatch({
+                  type: 'SET_SHOW_PUBLIC_INFO',
+                  payload: { showPublicInfo: !dataflowState.showPublicInfo }
+                })
+              }
+              role="checkbox"
+            />
+            <label htmlFor="isReleasableCheckbox" className={styles.showPublicInfo}>
+              <a
+                onClick={() =>
+                  dataflowDispatch({
+                    type: 'SET_SHOW_PUBLIC_INFO',
+                    payload: { showPublicInfo: !dataflowState.showPublicInfo }
+                  })
+                }>
+                {resources.messages['showPublicInfoDataflowCheckboxLabel']}
               </a>
             </label>
           </ConfirmDialog>
