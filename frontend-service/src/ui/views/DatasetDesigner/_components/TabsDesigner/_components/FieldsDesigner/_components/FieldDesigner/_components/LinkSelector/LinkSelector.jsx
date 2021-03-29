@@ -167,7 +167,7 @@ const LinkSelector = withRouter(
         .find(datasetSchema => datasetSchema.datasetSchemaId === field.referencedField.datasetSchemaId)
         .tables.find(table => table.tableSchemaId === field.referencedField.tableSchemaId);
 
-      linkedFields = linkedTable.records[0]?.fields
+      linkedFields = linkedTable?.records[0]?.fields
         .filter(
           field =>
             !field.pk &&
@@ -178,8 +178,7 @@ const LinkSelector = withRouter(
         .map(field => {
           return { fieldSchemaId: field.fieldId, name: field.name };
         });
-
-      linkedFields.unshift({
+      linkedFields?.unshift({
         name: resources.messages['noneCodelist'],
         fieldSchemaId: ''
       });
@@ -187,7 +186,7 @@ const LinkSelector = withRouter(
       const masterTable = datasetSchemas
         .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
         .tables.find(table => table.tableSchemaId === tableSchemaId);
-      masterFields = masterTable.records[0].fields
+      masterFields = masterTable?.records[0].fields
         .filter(
           field =>
             !field.pk &&
@@ -199,7 +198,7 @@ const LinkSelector = withRouter(
           return { fieldSchemaId: field.fieldId, name: field.name };
         });
 
-      masterFields.unshift({
+      masterFields?.unshift({
         name: resources.messages['noneCodelist'],
         fieldSchemaId: ''
       });
