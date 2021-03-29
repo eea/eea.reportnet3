@@ -123,18 +123,39 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
     }
   };
 
+  // const filterOptions = {
+  //   input: { properties: ['name', 'description', 'legalInstrument', 'obligationTitle'] },
+  //   multiselect: { properties: ['status', 'userRole', 'pinned'] },
+  //   date: { properties: ['expirationDate'] }
+  // };
+
+  const filterOptions = [
+    {
+      type: 'input',
+      properties: [
+        { property: 'name' },
+        { property: 'description' },
+        { property: 'legalInstrument' },
+        { property: 'obligationTitle' }
+      ]
+    },
+    { type: 'multiselect', properties: [{ property: 'status' }, { property: 'userRole' }, { property: 'pinned' }] },
+    { type: 'date', properties: [{ property: 'expirationDate' }] }
+  ];
+
   return (
     <div className={`${styles.wrap} ${className}`}>
       {title && <h2>{title}</h2>}
       <p>{description}</p>
       <div className="dataflowList-filters-help-step">
         <Filters
+          options={filterOptions}
           data={dataToFilter}
-          dateOptions={DataflowConf.filterItems['date']}
+          // dateOptions={DataflowConf.filterItems['date']}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredSearched}
-          inputOptions={DataflowConf.filterItems['input']}
-          selectOptions={DataflowConf.filterItems['select']}
+          // inputOptions={DataflowConf.filterItems['input']}
+          // selectOptions={DataflowConf.filterItems['select']}
           sortable={true}
           sortCategory={'pinned'}
         />

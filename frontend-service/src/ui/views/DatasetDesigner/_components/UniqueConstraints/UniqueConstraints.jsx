@@ -168,6 +168,14 @@ export const UniqueConstraints = ({
 
   const renderFieldBody = rowData => rowData.fieldData.map(field => field.name).join(', ');
 
+  // const filterOptions = {
+  //   multiselect: { properties: ['tableSchemaName', 'fieldData'] }
+  // };
+
+  const filterOptions = [
+    { type: 'multiselect', properties: [{ property: 'tableSchemaName' }, { property: 'fieldData' }] }
+  ];
+
   if (constraintsState.isLoading)
     return (
       <div className={styles.constraintsWithoutTable}>
@@ -184,13 +192,14 @@ export const UniqueConstraints = ({
   ) : (
     <div className={styles.constraints}>
       <Filters
+        options={filterOptions}
         className={'uniqueConstraints'}
         data={constraintsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFilteredState}
         matchMode={true}
         selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
-        selectOptions={['tableSchemaName', 'fieldData']}
+        // selectOptions={['tableSchemaName', 'fieldData']}
       />
 
       {!isEmpty(constraintsState.filteredData) ? (

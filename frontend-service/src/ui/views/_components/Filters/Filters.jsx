@@ -28,6 +28,7 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
+  options,
   checkboxOptions,
   className,
   data = [],
@@ -355,10 +356,10 @@ export const Filters = ({
     }
   };
 
-  const renderCalendarFilter = (property, i) => {
+  const renderCalendarFilter = property => {
     const inputId = uuid.v4();
     return (
-      <span key={i} className={styles.dataflowInput} ref={dateRef}>
+      <span key={property} className={styles.dataflowInput} ref={dateRef}>
         {renderOrderFilter(property)}
         <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
           <Calendar
@@ -447,8 +448,8 @@ export const Filters = ({
     );
   };
 
-  const renderDropdown = (property, i) => (
-    <span key={i} className={`${styles.dataflowInput}`}>
+  const renderDropdown = property => (
+    <span key={property} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
         ariaLabel={property}
@@ -473,13 +474,13 @@ export const Filters = ({
     </span>
   );
 
-  const renderInputFilter = (property, i) => (
-    <span key={i} className={styles.dataflowInput}>
+  const renderInputFilter = property => (
+    <span key={property} className={styles.dataflowInput}>
       {renderOrderFilter(property)}
       <span className={`p-float-label ${styles.label}`}>
         <InputText
           className={styles.inputFilter}
-          id={property}
+          id={`${property}_input`}
           onChange={event => onFilterData(property, event.target.value)}
           value={filterState.filterBy[property] ? filterState.filterBy[property] : ''}
         />
@@ -514,8 +515,8 @@ export const Filters = ({
       <Fragment />
     );
 
-  const renderSelectFilter = (property, i) => (
-    <span key={i} className={`${styles.dataflowInput}`}>
+  const renderMultiselectSelectFilter = (property, showFilterInput = false) => (
+    <span key={property} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
         ariaLabelledBy={property}
@@ -526,7 +527,7 @@ export const Filters = ({
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
         isFilter
-        filter
+        filter={showFilterInput}
         itemTemplate={selectTemplate}
         label={resources.messages[property]}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
@@ -569,6 +570,51 @@ export const Filters = ({
     </span>
   );
 
+  const filtersRenderer = () => {
+    const filterTypes = Object.keys(options);
+
+    return filterTypes.map(type => {
+      switch (type) {
+        case 'input':
+          return options[type].properties.map(property => renderInputFilter(property));
+
+        case 'multiselect':
+          return options[type].properties.map(property => renderMultiselectSelectFilter(property)); //todo options[type].showFilterInput
+
+        case 'dropdown':
+          return options[type].properties.map(property => renderDropdown(property));
+
+        case 'date':
+          return options[type].properties.map(property => renderCalendarFilter(property));
+        default:
+          return '';
+      }
+    });
+  };
+  // const filtersRenderer = () => {
+  //   const filterTypes = Object.keys(options);
+
+  //   return filterTypes.map(type => {
+  //     if (type === 'input') {
+  //       return options[type].properties.map(property => renderInputFilter(property));
+  //     }
+
+  //     if (type === 'multiselect') {
+  //       return options[type].properties.map(property => renderMultiselectSelectFilter(property)); //todo options[type].showFilterInput
+  //     }
+
+  //     if (type === 'dropdown') {
+  //       return options[type].properties.map(property => renderDropdown(property));
+  //     }
+
+  //     if (type === 'date') {
+  //       return options[type].properties.map(property => renderCalendarFilter(property));
+  //     }
+
+  //     return '';
+  //   });
+  // };
+
   const selectTemplate = option => {
     if (!isNil(option.type)) {
       return (
@@ -582,11 +628,13 @@ export const Filters = ({
   return (
     <div className={className ? styles[className] : styles.header}>
       {searchAll && renderSearchAll()}
-      {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
-      {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
-      {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
-      {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
+      {filtersRenderer()}
+      {/* {inputOptions && inputOptions.map(option => renderInputFilter(option))} */}
+      {/* {selectOptions && selectOptions.map(option => renderMultiselectSelectFilter(option))} */}
+      {/* {dropdownOptions && dropdownOptions.map(option => renderDropdown(option))} */}
+      {/* {dateOptions && dateOptions.map(option => renderCalendarFilter(option))}  */}
       {matchMode && renderCheckbox()}
+
       {checkboxOptions && checkboxOptions.map((option, i) => renderCheckboxFilter(option, i))}
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (
