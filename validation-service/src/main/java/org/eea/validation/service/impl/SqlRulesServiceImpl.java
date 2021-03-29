@@ -10,11 +10,11 @@ import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.RepresentativeController;
-import org.eea.interfaces.controller.dataset.DataCollectionController;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
-import org.eea.interfaces.controller.dataset.EUDatasetController;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
@@ -78,23 +78,23 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   /** The dataset schema controller. */
   @Autowired
-  private DatasetSchemaController datasetSchemaController;
+  private DatasetSchemaControllerZuul datasetSchemaController;
 
   /** The dataset metabase controller. */
   @Autowired
-  private DatasetMetabaseController datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   /** The eu dataset controller. */
   @Autowired
-  private EUDatasetController euDatasetController;
+  private EUDatasetControllerZuul euDatasetController;
 
   /** The data collection controller. */
   @Autowired
-  private DataCollectionController dataCollectionController;
+  private DataCollectionControllerZuul dataCollectionController;
 
   /** The representative controller. */
   @Autowired
-  private RepresentativeController representativeController;
+  private RepresentativeControllerZuul representativeController;
 
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;

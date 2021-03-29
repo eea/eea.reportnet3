@@ -26,7 +26,7 @@ import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -93,7 +93,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   /** The dataset metabase controller. */
   @Autowired
-  private DatasetMetabaseController datasetMetabaseController;
+  private DataSetMetabaseControllerZuul datasetMetabaseController;
 
   /**
    * The delimiter.
