@@ -212,7 +212,7 @@ public enum DataType {
    * @param value the value
    * @return the data type
    */
-  @JsonCreator
+  @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
   public static DataType fromValue(String value) {
     return Arrays.stream(DataType.values()).filter(e -> e.value.equals(value)).findFirst()
         .orElse(DataType.TEXT);
