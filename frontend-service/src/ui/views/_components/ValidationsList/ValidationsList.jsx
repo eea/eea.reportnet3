@@ -481,14 +481,13 @@ const ValidationsList = withRouter(
         <div className={styles.validations}>
           <div className={styles.searchInput}>
             <Filters
-              options={filterOptions}
               className="filter-lines"
               data={tabsValidationsState.validationList.validations}
               getFilteredData={onLoadFilteredData}
               getFilteredSearched={getFilteredState}
+              options={filterOptions}
               searchAll
               searchBy={['name', 'description', 'message']}
-              // selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
             />
           </div>
 

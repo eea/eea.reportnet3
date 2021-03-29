@@ -108,12 +108,6 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     return dataflowsToFilter;
   };
 
-  // const filterOptions = {
-  //   input: { properties: ['name', 'description', 'obligationTitle', 'legalInstruments'] },
-  //   multiselect: { properties: ['status'] },
-  //   date: { properties: ['expirationDate'] }
-  // };
-
   const filterOptions = [
     {
       type: 'input',
@@ -166,13 +160,10 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       </div>
       <div className={styles.filters}>
         <Filters
-          options={filterOptions}
           data={cloneSchemasState.allDataflows}
-          // dateOptions={['expirationDate']}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredState}
-          // inputOptions={['name', 'description', 'obligationTitle', 'legalInstruments']}
-          // selectOptions={['status']}
+          options={filterOptions}
         />
       </div>
       {renderData()}

@@ -123,12 +123,6 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
     }
   };
 
-  // const filterOptions = {
-  //   input: { properties: ['name', 'description', 'legalInstrument', 'obligationTitle'] },
-  //   multiselect: { properties: ['status', 'userRole', 'pinned'] },
-  //   date: { properties: ['expirationDate'] }
-  // };
-
   const filterOptions = [
     {
       type: 'input',
@@ -146,11 +140,8 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
         <Filters
           options={filterOptions}
           data={dataToFilter}
-          // dateOptions={DataflowConf.filterItems['date']}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredSearched}
-          // inputOptions={DataflowConf.filterItems['input']}
-          // selectOptions={DataflowConf.filterItems['select']}
           sortable={true}
           sortCategory={'pinned'}
         />
