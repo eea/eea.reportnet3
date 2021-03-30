@@ -1341,8 +1341,16 @@ public class DatasetServiceImpl implements DatasetService {
             .datasetId(datasetIdOrigin).datasetSchemaId(datasetSchemaId)
             .tableSchemaId(tableSchemaId).tableSchemaName(tableSchemaName)
             .fieldSchemaId(fvPk.getIdFieldSchema()).fieldSchemaName(fieldSchemaName).build();
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SORT_FIELD_FAILED_EVENT, null,
-            notificationVO);
+
+
+        // we send 2 diferents notification if th
+        DatasetTypeEnum type = getDatasetType(datasetIdOrigin);
+        EventType eventType =
+            DatasetTypeEnum.DESIGN.equals(type) ? EventType.SORT_FIELD_DESIGN_FAILED_EVENT
+                : EventType.SORT_FIELD_FAILED_EVENT;
+
+
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
       }
     }
     return fieldsVO;
