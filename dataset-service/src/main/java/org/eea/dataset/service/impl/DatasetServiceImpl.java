@@ -1343,7 +1343,7 @@ public class DatasetServiceImpl implements DatasetService {
             .fieldSchemaId(fvPk.getIdFieldSchema()).fieldSchemaName(fieldSchemaName).build();
 
 
-        // we send 2 diferents notification if th
+        // we send 2 dif notification depends on type
         DatasetTypeEnum type = getDatasetType(datasetIdOrigin);
         EventType eventType =
             DatasetTypeEnum.DESIGN.equals(type) ? EventType.SORT_FIELD_DESIGN_FAILED_EVENT
