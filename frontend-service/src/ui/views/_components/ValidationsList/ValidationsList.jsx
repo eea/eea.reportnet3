@@ -447,13 +447,13 @@ const ValidationsList = withRouter(
       {
         type: 'multiselect',
         properties: [
-          { property: 'table', showInput: true },
-          { property: 'field', showInput: true },
-          { property: 'entityType', showInput: true },
-          { property: 'levelError', showInput: true },
-          { property: 'automatic', showInput: true },
-          { property: 'enabled', showInput: true },
-          { property: 'isCorrect', showInput: true }
+          { name: 'table', showInput: true },
+          { name: 'field', showInput: true },
+          { name: 'entityType', showInput: true },
+          { name: 'levelError', showInput: true },
+          { name: 'automatic', showInput: true },
+          { name: 'enabled', showInput: true },
+          { name: 'isCorrect', showInput: true }
         ]
       }
     ];

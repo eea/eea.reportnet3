@@ -24,7 +24,11 @@ export const tabsValidationsReducer = (state, { type, payload }) => {
     case 'SET_DELETED_RULE_ID':
       return { ...state, deletedRuleId: payload.deletedRuleId };
 
-    case 'IS_DELETING_RULE':
-      return { ...state, isDeletingRule: payload.isDeletingRule };
+    case 'SET_FILTER_OPTIONS':
+      return { ...state, filterOptions: payload.filterOptions };
+
+    default: {
+      return state;
+    }
   }
 };

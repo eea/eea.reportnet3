@@ -573,29 +573,6 @@ export const Filters = ({
       }
     });
   };
-  // const filtersRenderer = () => {
-  //   const filterTypes = Object.keys(options);
-
-  //   return filterTypes.map(type => {
-  //     if (type === 'input') {
-  //       return options[type].properties.map(property => renderInputFilter(property));
-  //     }
-
-  //     if (type === 'multiselect') {
-  //       return options[type].properties.map(property => renderMultiselectSelectFilter(property)); //todo options[type].showFilterInput
-  //     }
-
-  //     if (type === 'dropdown') {
-  //       return options[type].properties.map(property => renderDropdown(property));
-  //     }
-
-  //     if (type === 'date') {
-  //       return options[type].properties.map(property => renderCalendarFilter(property));
-  //     }
-
-  //     return '';
-  //   });
-  // };
 
   const selectTemplate = option => {
     if (!isNil(option.type)) {
