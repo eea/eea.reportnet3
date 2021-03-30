@@ -109,6 +109,12 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   }
 
 
+  /**
+   * Removes the lock delete field schema.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaId the field schema id
+   */
   private void removeLockDeleteFieldSchema(Long datasetId, String fieldSchemaId) {
     Map<String, Object> deleteFieldSchema = new HashMap<>();
     deleteFieldSchema.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_FIELD_SCHEMA.getValue());
