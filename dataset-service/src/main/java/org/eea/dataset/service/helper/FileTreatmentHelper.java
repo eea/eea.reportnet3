@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -19,8 +20,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
+import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -28,6 +32,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -37,6 +42,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -70,9 +76,6 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The import executor service. */
   private ExecutorService importExecutorService;
 
-  /** The batch size. */
-  private int batchSize = 1000;
-
   /** The max running tasks. */
   @Value("${dataset.task.parallelism}")
   private int maxRunningTasks;
@@ -94,6 +97,10 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
+  /** The record store controller. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
@@ -109,6 +116,13 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  @Autowired
+  private RecordValueIdGenerator recordValueIdGenerator;
+
+  /** The field value id generator. */
+  @Autowired
+  private FieldValueIdGenerator fieldValueIdGenerator;
 
   /**
    * Inits the.
@@ -438,11 +452,11 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
-   * @param schema the schema
+   * @param datasetSchema the schema
    * @param files the files
    * @param originalFileName the original file name
    */
-  private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
       List<File> files, String originalFileName) {
 
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
@@ -456,7 +470,7 @@ public class FileTreatmentHelper implements DisposableBean {
       try (InputStream inputStream = new FileInputStream(file)) {
 
         if (guessTableName) {
-          tableSchemaId = getTableSchemaIdFromFileName(schema, fileName);
+          tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName);
         }
 
         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
@@ -467,12 +481,6 @@ public class FileTreatmentHelper implements DisposableBean {
           throw new EEAException("Error processing file " + fileName);
         }
 
-        // The only reference to the list of records to make them eligible for GC in next steps
-        List<List<RecordValue>> recordLists =
-            getListOfRecords(dataset.getTableValues().get(0).getRecords());
-        int totalRecords = dataset.getTableValues().get(0).getRecords().size();
-        dataset.getTableValues().get(0).setRecords(new ArrayList<>());
-
         // Check if the table with idTableSchema has been populated already
         Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
         fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
@@ -482,10 +490,10 @@ public class FileTreatmentHelper implements DisposableBean {
           datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
         }
 
-        saveRecords(recordLists, datasetId, originalFileName, totalRecords);
+        storeRecords(datasetId, dataset.getTableValues().get(0).getRecords());
 
         LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
-      } catch (IOException | EEAException e) {
+      } catch (IOException | SQLException | EEAException e) {
         LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
             tableSchemaId, e);
         error = e.getMessage();
@@ -499,8 +507,6 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
   }
-
-
 
   /**
    * Gets the table schema id from file name.
@@ -649,34 +655,6 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
-   * Gets the list of records.
-   *
-   * @param allRecords the all records
-   *
-   * @return the list of records
-   */
-  private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
-    List<List<RecordValue>> generalList = new ArrayList<>();
-
-    if (allRecords.isEmpty()) {
-      generalList.add(new ArrayList<>());
-    } else {
-      // dividing the number of records in different lists
-      int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
-      if (nLists > 1) {
-        for (int i = 0; i < (nLists - 1); i++) {
-          generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
-        }
-      }
-      generalList
-          .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
-
-    }
-
-    return generalList;
-  }
-
-  /**
    * Fill table id.
    *
    * @param idTableSchema the id table schema
@@ -750,27 +728,43 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
-   * Save records.
+   * Store records.
    *
-   * @param recordLists the record lists
    * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param totalRecords the total records
+   * @param recordList the record list
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
    */
-  private void saveRecords(List<List<RecordValue>> recordLists, Long datasetId, String fileName,
-      int totalRecords) {
-    int recordListsSize = recordLists.size();
-    int tenPercent = recordListsSize / 10;
-    tenPercent = tenPercent == 0 ? 1 : tenPercent;
-    for (int i = 0; i < recordListsSize; i++) {
-      List<RecordValue> recordList = recordLists.get(i);
-      totalRecords -= recordList.size();
-      if (i % tenPercent == 0) { // Reduce the number of logs.
-        LOG.info("RN3-Import Saving records: datasetId={}, fileName={}, recordsLeft={}", datasetId,
-            fileName, totalRecords);
+  private void storeRecords(Long datasetId, List<RecordValue> recordList)
+      throws IOException, SQLException {
+
+    String schema = LiteralConstants.DATASET_PREFIX + datasetId;
+    ConnectionDataVO connectionDataVO = recordStoreControllerZuul.getConnectionToDataset(schema);
+
+    try (
+        PostgresBulkImporter recordsImporter =
+            new PostgresBulkImporter(connectionDataVO, schema, "record_value", importPath);
+        PostgresBulkImporter fieldsImporter =
+            new PostgresBulkImporter(connectionDataVO, schema, "field_value", importPath)) {
+
+      for (RecordValue recordValue : recordList) {
+
+        String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
+        recordsImporter.addTuple(new Object[] {recordId, recordValue.getIdRecordSchema(),
+            recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
+            recordValue.getDataProviderCode()});
+
+        for (FieldValue fieldValue : recordValue.getFields()) {
+          String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
+          fieldsImporter.addTuple(new Object[] {fieldId, fieldValue.getType().getValue(),
+              fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
+        }
       }
-      datasetService.saveAllRecords(datasetId, recordList);
-      recordLists.set(i, null); // Make the list of records eligible for GC
+
+      LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
+      recordsImporter.copy();
+      fieldsImporter.copy();
+      LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
     }
   }
 }

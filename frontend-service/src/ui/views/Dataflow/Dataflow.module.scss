@@ -22,7 +22,8 @@
   max-height: 50vh !important;
 }
 
-.isReleasableLabel {
+.isReleasableLabel,
+.showPublicInfo {
   padding-left: 0.5rem;
   a {
     color: var(--main-font-color);

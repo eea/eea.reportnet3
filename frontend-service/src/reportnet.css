@@ -514,6 +514,11 @@
 
   /* Feedback chat */
   --feedback-separator-color: var(--c-corporate-blue);
+
+  /* Webforms */
+  --webform-table-bg: var(--gray-10);
+  --webform-table-border: 1px solid var(--gray-10);
+  --general-text-color: var(--grey-110);
 }
 body {
   margin: 0px;

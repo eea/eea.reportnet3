@@ -251,10 +251,30 @@ export const WebformField = ({
 
   const onToggleDialogVisible = value => webformFieldDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
-  const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
+  const getAttachExtensions = [{ fileExtension: element.validExtensions || [] }]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
     .join(', ');
+
+  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
+  ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+    !isNil(element.maxSize) && element.maxSize.toString() !== '0'
+      ? `${element.maxSize} ${resources.messages['MB']}`
+      : resources.messages['maxSizeNotDefined']
+  }`;
+
+  const onUploadFileError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'UPLOAD_FILE_ERROR'
+      });
+    }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'GENERIC_BLOCKED_ERROR'
+      });
+    }
+  };
 
   const renderSinglePamsTemplate = option => {
     const pams = pamsRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
@@ -559,6 +579,7 @@ export const WebformField = ({
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
           fileLimit={1}
+          infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
@@ -569,6 +590,7 @@ export const WebformField = ({
           mode="advanced"
           multiple={false}
           name="file"
+          onError={onUploadFileError}
           onUpload={onAttach}
           operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
