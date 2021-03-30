@@ -109,6 +109,7 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
@@ -120,8 +121,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -1267,10 +1270,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param resultsNumber the results number
    *
    * @return the field values referenced
+   * @throws EEAException
    */
   @Override
   public List<FieldVO> getFieldValuesReferenced(Long datasetIdOrigin, String datasetSchemaId,
-      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) {
+      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber)
+      throws EEAException {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
     Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
@@ -1313,9 +1318,28 @@ public class DatasetServiceImpl implements DatasetService {
         fvPk = new FieldValue();
         fvPk.setType(DataType.TEXT);
       }
-      fieldsVO = fieldRepository.findByIdFieldSchemaWithTagOrdered(idPk, labelSchemaId, searchValue,
-          conditionalSchemaId, conditionalValue, fvPk.getType(), resultsNumber);
+      // we catch if the query have error pk data and sned notification
+      try {
+        fieldsVO = fieldRepository.findByIdFieldSchemaWithTagOrdered(idPk, labelSchemaId,
+            searchValue, conditionalSchemaId, conditionalValue, fvPk.getType(), resultsNumber);
+      } catch (DataIntegrityViolationException e) {
+        // we find table and field to send in notification
+        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
+            fvPk.getRecord().getTableValue().getIdTableSchema());
+        Document fieldSchemaDocument =
+            schemasRepository.findFieldSchema(datasetSchemaId, fvPk.getIdFieldSchema());
+        String tableSchemaName = (String) tableSchema.get("nameTableSchema");
+        String tableSchemaId = (String) tableSchema.get("_id").toString();
+        String fieldSchemaName = (String) fieldSchemaDocument.get("headerName");
 
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetIdOrigin).datasetSchemaId(datasetSchemaId)
+            .tableSchemaId(tableSchemaId).tableSchemaName(tableSchemaName)
+            .fieldSchemaId(fvPk.getIdFieldSchema()).fieldSchemaName(fieldSchemaName).build();
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SORT_FIELD_FAILED_EVENT, null,
+            notificationVO);
+      }
     }
     return fieldsVO;
   }

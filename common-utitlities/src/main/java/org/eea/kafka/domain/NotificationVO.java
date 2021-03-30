@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-/** The class that works as interface to fulfill notifiable events */
+/**
+ * The class that works as interface to fulfill notifiable events.
+ */
 @Getter
 @Setter
 @ToString
@@ -71,4 +73,10 @@ public class NotificationVO implements Serializable {
 
   /** The dataset status. */
   private DatasetStatusEnum datasetStatus;
+
+  /** The field schema id. */
+  private String fieldSchemaId;
+
+  /** The field schema name. */
+  private String fieldSchemaName;
 }
