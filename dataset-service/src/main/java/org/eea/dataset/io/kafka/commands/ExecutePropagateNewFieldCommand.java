@@ -1,15 +1,17 @@
 package org.eea.dataset.io.kafka.commands;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
@@ -37,13 +39,14 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   @Autowired
   private DatasetService datasetService;
 
-  /** The update record helper. */
-  @Autowired
-  private UpdateRecordHelper updateRecordHelper;
 
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The field batch size. */
   @Value("${dataset.propagation.fieldBatchSize}")
@@ -67,41 +70,50 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
   @Override
   public void execute(EEAEventVO eeaEventVO) {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
+    String tableSchemaId = (String) eeaEventVO.getData().get("idTableSchema");
     Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
     String fieldSchemaId = (String) eeaEventVO.getData().get("idFieldSchema");
     DataType typeField = DataType.fromValue(eeaEventVO.getData().get("typeField").toString());
     final String uuid = (String) eeaEventVO.getData().get("uuId");
-
+    Set<Integer> pages = new HashSet<>((ArrayList<Integer>) eeaEventVO.getData().get("pages"));
     try {
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-      datasetService.saveNewFieldPropagation(datasetId, idTableSchema, pageable, fieldSchemaId,
+      datasetService.saveNewFieldPropagation(datasetId, tableSchemaId, pageable, fieldSchemaId,
           typeField);
-      LOG.info("field {} propagated", fieldSchemaId);
+      LOG.info("field {} from datasetId {} propagated", fieldSchemaId, datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Error processing propagations for new field column in dataset {}", datasetId,
           e);
       eeaEventVO.getData().put("error", e);
+      removeLockDeleteFieldSchema(datasetId, fieldSchemaId);
     } finally {
-      // if this is the coordinator propagation instance, then no need to send message, just updates
-      // expected propagations
-      ConcurrentHashMap<String, Integer> processMap = updateRecordHelper.getProcessesMap();
-      synchronized (processMap) {
-        if (processMap.containsKey(uuid)) {
-          processMap.merge(uuid, -1, Integer::sum);
-          // Release the delete field schema lock
-          if (processMap.get(uuid) == 0) {
-            Map<String, Object> deleteFieldSchema = new HashMap<>();
-            deleteFieldSchema.put(LiteralConstants.SIGNATURE,
-                LockSignature.DELETE_FIELD_SCHEMA.getValue());
-            deleteFieldSchema.put(LiteralConstants.DATASETID, datasetId);
-            deleteFieldSchema.put(LiteralConstants.FIELDSCHEMAID, fieldSchemaId);
-            lockService.removeLockByCriteria(deleteFieldSchema);
-          }
-
-        }
+      pages.remove(numPag);
+      numPag++;
+      if (pages.isEmpty()) {
+        removeLockDeleteFieldSchema(datasetId, fieldSchemaId);
+      } else {
+        Map<String, Object> value = new HashMap<>();
+        value.put("dataset_id", datasetId);
+        value.put("idTableSchema", tableSchemaId);
+        value.put("pages", pages);
+        value.put("idFieldSchema", fieldSchemaId);
+        value.put("typeField", typeField);
+        value.put("uuId", uuid);
+        value.put("numPag", numPag);
+        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION,
+            value);
       }
+
     }
+  }
+
+
+  private void removeLockDeleteFieldSchema(Long datasetId, String fieldSchemaId) {
+    Map<String, Object> deleteFieldSchema = new HashMap<>();
+    deleteFieldSchema.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_FIELD_SCHEMA.getValue());
+    deleteFieldSchema.put(LiteralConstants.DATASETID, datasetId);
+    deleteFieldSchema.put(LiteralConstants.FIELDSCHEMAID, fieldSchemaId);
+    lockService.removeLockByCriteria(deleteFieldSchema);
   }
 }
