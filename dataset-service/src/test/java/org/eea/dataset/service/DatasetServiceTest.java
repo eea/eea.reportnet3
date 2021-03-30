@@ -114,6 +114,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.postgresql.util.PSQLException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
@@ -1616,11 +1617,13 @@ public class DatasetServiceTest {
    * Gets the field values referenced test number.
    *
    * @return the field values referenced test number
+   * @throws PSQLException
+   * @throws EEAException
    *
    * @throws SecurityException the security exception
    */
   @Test
-  public void getFieldValuesReferencedTest() {
+  public void getFieldValuesReferencedTest() throws PSQLException, EEAException {
 
     Document doc = new Document();
     doc.put("typeData", DataType.LINK.getValue());
@@ -1650,9 +1653,11 @@ public class DatasetServiceTest {
    * Gets the field values referenced label test.
    *
    * @return the field values referenced label test
+   * @throws PSQLException
+   * @throws EEAException
    */
   @Test
-  public void getFieldValuesReferencedLabelTest() {
+  public void getFieldValuesReferencedLabelTest() throws PSQLException, EEAException {
 
     Document doc = new Document();
     doc.put("typeData", DataType.LINK.getValue());

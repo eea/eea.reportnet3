@@ -368,7 +368,10 @@ public enum EventType {
 
   /** The import dataset schema failed event. */
   IMPORT_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "import_dataset_schema_completed_event", true);
+      "import_dataset_schema_completed_event", true),
+
+  /** The sort field failed event. */
+  SORT_FIELD_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "sort_field_failed_event", true);
 
   /** The topic. */
   private String topic;

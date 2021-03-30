@@ -628,8 +628,14 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
       @RequestParam(value = "searchValue", required = false) String searchValue,
       @RequestParam(value = "resultsNumber", required = false) Integer resultsNumber) {
-    return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId, fieldSchemaId,
-        conditionalValue, searchValue, resultsNumber);
+
+    try {
+      return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId,
+          fieldSchemaId, conditionalValue, searchValue, resultsNumber);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error with dataset id {}  caused {}", datasetIdOrigin, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
   }
 
   /**
