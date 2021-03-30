@@ -370,6 +370,11 @@ public enum EventType {
   IMPORT_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_dataset_schema_completed_event", true),
 
+
+  /** The sort field desing failed event. */
+  SORT_FIELD_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "sort_field_design_failed_event", true),
+
   /** The sort field failed event. */
   SORT_FIELD_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "sort_field_failed_event", true);
 
