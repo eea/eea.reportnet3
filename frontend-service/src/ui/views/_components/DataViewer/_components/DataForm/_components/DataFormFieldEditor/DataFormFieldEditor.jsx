@@ -228,7 +228,9 @@ const DataFormFieldEditor = ({
           r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
         );
     const conditionalFieldValue = !isNil(conditionalField)
-      ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
+      ? conditionalField.fieldData?.type === 'MULTISELECT_CODELIST'
+        ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.join(';')
+        : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
       : '';
 
     try {
