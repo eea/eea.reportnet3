@@ -1323,13 +1323,17 @@ public class DatasetServiceImpl implements DatasetService {
         fieldsVO = fieldRepository.findByIdFieldSchemaWithTagOrdered(idPk, labelSchemaId,
             searchValue, conditionalSchemaId, conditionalValue, fvPk.getType(), resultsNumber);
       } catch (DataIntegrityViolationException e) {
+
+        LOG_ERROR.error(
+            "Error with dataset id {}  field  with id {} because data has not correct format {}",
+            datasetIdOrigin, idPk, fvPk.getType().toString());
         // we find table and field to send in notification
         Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
             fvPk.getRecord().getTableValue().getIdTableSchema());
         Document fieldSchemaDocument =
             schemasRepository.findFieldSchema(datasetSchemaId, fvPk.getIdFieldSchema());
         String tableSchemaName = (String) tableSchema.get("nameTableSchema");
-        String tableSchemaId = (String) tableSchema.get("_id").toString();
+        String tableSchemaId = tableSchema.get("_id").toString();
         String fieldSchemaName = (String) fieldSchemaDocument.get("headerName");
 
         NotificationVO notificationVO = NotificationVO.builder()

@@ -633,7 +633,7 @@ public class DataSetControllerImpl implements DatasetController {
       return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId,
           fieldSchemaId, conditionalValue, searchValue, resultsNumber);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error with dataset id {}  caused {}", datasetIdOrigin, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
