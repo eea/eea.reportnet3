@@ -1341,11 +1341,12 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream) {
+  public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
+      String tableSchemaId, Integer limit, Integer offset) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
-      exportDatasetETLSQL(datasetId, outputStream);
+      exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
@@ -2969,7 +2970,6 @@ public class DatasetServiceImpl implements DatasetService {
             fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
             fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
                 fieldValuePkOtherTable.getValue());
-
           }
         });
       }
@@ -3472,38 +3472,50 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param outputStream the output stream
    */
-  private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream) {
+  private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
+      Integer limit, Integer offset) {
     try {
       String queryFirstPart =
           "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
 
-      String queryMiddlePart =
+      String queryMiddlePartOne =
           " end as \"tableName\",( select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\",(select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
 
+      String queryMiddlePartTwo =
+          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) "
+              + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
+
       String queryFinalPart =
-          " end as \"fieldName\",fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) from dataset_%s.record_value rv where tv.id = rv.id_table ) as record) from dataset_%s.table_value tv ) as tableAux ) as tablesAux ";
+          " ) as record) from dataset_%s.table_value tv ) as tableAux ) as tablesAux ";
+
+      String paginationPart = " offset %s limit %s ";
 
       String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
 
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
 
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-      // Get the datasetSchema by the datasetSchemaId
+
       DataSetSchema datasetSchema =
           schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+
       StringBuilder query = new StringBuilder(queryFirstPart);
+
       for (TableSchema table : tableSchemaList) {
         query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema(),
             table.getNameTableSchema()));
       }
-      query.append(queryMiddlePart);
+      query.append(queryMiddlePartOne);
+      query.append(queryMiddlePartTwo);
       for (TableSchema table : tableSchemaList) {
         for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
           query.append(
               String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
         }
       }
+      query.append(String.format(paginationPart, offset, limit));
       query.append(String.format(queryFinalPart, datasetId, datasetId, datasetId));
       LOG.info("Query: " + query.toString());
       outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());

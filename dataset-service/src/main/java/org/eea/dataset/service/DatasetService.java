@@ -365,7 +365,8 @@ public interface DatasetService {
    * @return the ETL dataset VO
    *
    */
-  void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream);
+  void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream, String tableSchemaId,
+      Integer limit, Integer offset);
 
 
   /**
