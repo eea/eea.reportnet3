@@ -32,7 +32,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
-import org.eea.interfaces.controller.rod.ObligationController;
+import org.eea.interfaces.controller.rod.ObligationController.ObligationControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -107,7 +107,7 @@ public class DataflowServiceImpl implements DataflowService {
 
   /** The obligation controller. */
   @Autowired
-  private ObligationController obligationController;
+  private ObligationControllerZull obligationControllerZull;
 
   /** The eu dataset controller zuul. */
   @Autowired
@@ -434,6 +434,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowSave.get().setDescription(dataflowVO.getDescription());
         dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
         dataflowSave.get().setReleasable(dataflowVO.isReleasable());
+        dataflowSave.get().setShowPublicInfo(dataflowVO.isShowPublicInfo());
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
@@ -809,7 +810,7 @@ public class DataflowServiceImpl implements DataflowService {
     try {
       if (dataflowPublicVO.getObligation() != null
           && dataflowPublicVO.getObligation().getObligationId() != null) {
-        dataflowPublicVO.setObligation(obligationController
+        dataflowPublicVO.setObligation(obligationControllerZull
             .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
       }
     } catch (FeignException e) {
@@ -905,7 +906,7 @@ public class DataflowServiceImpl implements DataflowService {
     // compatibility concerns
     if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
       dataflow.setObligation(
-          obligationController.findObligationById(dataflow.getObligation().getObligationId()));
+          obligationControllerZull.findObligationById(dataflow.getObligation().getObligationId()));
     }
   }
 
@@ -1009,7 +1010,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Get all opened obligations from ROD
     List<ObligationVO> obligations =
-        obligationController.findOpenedObligations(null, null, null, null, null);
+        obligationControllerZull.findOpenedObligations(null, null, null, null, null);
 
     Map<Integer, ObligationVO> obligationMap = obligations.stream()
         .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));

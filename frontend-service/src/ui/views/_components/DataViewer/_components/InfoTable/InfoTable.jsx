@@ -134,7 +134,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         .map(codelistItem =>
           !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
         )
-        .join(', ')}`
+        .join('; ')}`
       : `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
     <span style="font-weight:bold">Description:</span> ${
       !isNil(column.description) && column.description !== '' && column.description.length > 35

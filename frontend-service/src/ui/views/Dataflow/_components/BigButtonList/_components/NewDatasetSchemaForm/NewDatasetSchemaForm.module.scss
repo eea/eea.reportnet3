@@ -17,8 +17,7 @@
   border-radius: 3px 0 0 3px;
 }
 .hasErrors {
-  border: 2px solid var(--errors) !important;
-  &:focus {
-    box-shadow: none !important;
-  }
+  border-color: var(--errors);
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  outline: none;
 }

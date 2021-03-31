@@ -53,8 +53,8 @@ public interface RecordStoreController {
    *
    * @return connection to dataset
    */
-  @GetMapping(value = "/connections/{datasetName}")
-  ConnectionDataVO getConnectionToDataset(@PathVariable("datasetName") String datasetName);
+  @GetMapping("/private/connection")
+  ConnectionDataVO getConnectionToDataset(@RequestParam String datasetName);
 
   /**
    * Gets connection to dataset.
