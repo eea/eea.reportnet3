@@ -47,7 +47,7 @@ const getIndexById = (datasetSchemaId, datasetSchemasArray) => {
   return datasetSchemasArray.map(datasetSchema => datasetSchema.datasetSchemaId).indexOf(datasetSchemaId);
 };
 
-const getTabs = ({ datasetSchema, datasetStatistics, editable }) => {
+const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, isDesignDataflowEditorRead }) => {
   const inmDatasetSchema = cloneDeep(datasetSchema);
   inmDatasetSchema.tables.forEach((table, idx) => {
     table.addTab = false;
@@ -73,8 +73,9 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable }) => {
   inmDatasetSchema.tables = inmDatasetSchema.tables.filter(
     table => table.tableSchemaId !== undefined && table.addTab === false && table.tableSchemaId !== ''
   );
-  inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
-
+  if (!isDataflowOpen && !isDesignDataflowEditorRead) {
+    inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
+  }
   return inmDatasetSchema.tables;
 };
 

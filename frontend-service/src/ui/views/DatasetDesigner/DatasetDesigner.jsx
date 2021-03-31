@@ -153,6 +153,16 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     selectedWebform: undefined
   });
 
+  const {
+    datasetSchemaAllTables,
+    datasetDescription,
+    dataViewerOptions,
+    isDataflowOpen,
+    isDesignDataflowEditorRead,
+    isImportOtherSystemsDialogVisible,
+    validateDialogVisible
+  } = designerState;
+
   const exportMenuRef = useRef();
   const importMenuRef = useRef();
 
@@ -178,7 +188,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
-        if (designerState.datasetSchemaAllTables.length > 1) {
+        if (datasetSchemaAllTables.length > 1) {
           leftSideBarContext.addHelpSteps(
             DatasetSchemaRequesterWithTabsHelpConfig,
             'datasetSchemaRequesterWithTabsHelpConfig'
@@ -200,12 +210,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.validationListDialogVisible]);
 
   useEffect(() => {
-    if (window.location.search !== '' && !isNil(designerState.dataViewerOptions.tableSchemaId)) {
+    if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) {
       changeUrl();
     } else {
       changeUrl(true);
     }
-  }, [designerState.viewType, designerState.dataViewerOptions.tableSchemaId]);
+  }, [designerState.viewType, dataViewerOptions.tableSchemaId]);
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
@@ -232,9 +242,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           [config.permissions.DATA_CUSTODIAN, config.permissions.DATA_STEWARD],
           `${config.permissions.DATAFLOW}${dataflowId}`
         ) && designerState?.metaData?.dataflow?.status === 'DRAFT';
+      const isDesignDataflowEditorRead =
+        userContext.hasPermission([config.permissions.EDITOR_READ], `${config.permissions.DATAFLOW}${dataflowId}`) &&
+        designerState?.metaData?.dataflow?.status === 'DESIGN';
+
       designerDispatch({
-        type: 'IS_DATAFLOW_OPEN',
-        payload: { isDataflowOpen }
+        type: 'IS_DATAFLOW_EDITABLE',
+        payload: { isDataflowOpen, isDesignDataflowEditorRead }
       });
     }
   }, [userContext, designerState?.metaData?.dataflow?.status]);
@@ -263,7 +277,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         ? `?tab=${
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')
-              : designerState.dataViewerOptions.tableSchemaId
+              : dataViewerOptions.tableSchemaId
           }${`&view=${Object.keys(designerState.viewType).filter(view => designerState.viewType[view] === true)}`}`
         : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
             view => designerState.viewType[view] === true
@@ -634,7 +648,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({
       type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
       payload: {
-        ...designerState.dataViewerOptions,
+        ...dataViewerOptions,
         isGroupedValidationDeleted: true,
         isGroupedValidationSelected: false,
         selectedRuleId: '',
@@ -656,7 +670,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       designerDispatch({
         type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
         payload: {
-          ...designerState.dataViewerOptions,
+          ...dataViewerOptions,
           isGroupedValidationDeleted: false,
           isGroupedValidationSelected: true,
           recordPositionId: -1,
@@ -670,7 +684,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       designerDispatch({
         type: 'SET_DATAVIEWER_OPTIONS',
         payload: {
-          ...designerState.dataViewerOptions,
+          ...dataViewerOptions,
           isGroupedValidationDeleted: false,
           isGroupedValidationSelected: false,
           isValidationSelected: true,
@@ -689,7 +703,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     designerDispatch({
       type: 'SET_DATAVIEWER_OPTIONS',
       payload: {
-        ...designerState.dataViewerOptions,
+        ...dataViewerOptions,
         tableSchemaId: table.tableSchemaId
       }
     });
@@ -956,7 +970,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) && !isNil(designerState.webform.value) && !designerState.isDataflowOpen
+          {!isNil(designerState.webform) &&
+          !isNil(designerState.webform.value) &&
+          !isDataflowOpen &&
+          !isDesignDataflowEditorRead
             ? renderRadioButtons()
             : switchView}
         </div>
@@ -1062,7 +1079,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           visible={designerState.validationListDialogVisible}>
           <ValidationsList
             dataset={designerState.metaData.dataset}
-            datasetSchemaAllTables={designerState.datasetSchemaAllTables}
+            datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
           />
         </Dialog>
@@ -1099,7 +1116,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <InputTextarea
               className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
               collapsedHeight={55}
-              disabled={designerState.isDataflowOpen}
+              disabled={isDataflowOpen || isDesignDataflowEditorRead}
               expandableOnClick={true}
               id="datasetDescription"
               key="datasetDescription"
@@ -1110,12 +1127,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               }
               onKeyDown={e => onKeyChange(e)}
               placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
-              value={designerState.datasetDescription || ''}
+              value={datasetDescription || ''}
             />
 
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
+                  disabled={isDesignDataflowEditorRead}
                   id={`available_in_public_view_checkbox`}
                   inputId={`available_in_public_view_checkbox`}
                   isChecked={designerState.availableInPublic}
@@ -1124,27 +1142,30 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 />
                 <label
                   onClick={() => {
-                    designerDispatch({
-                      type: 'SET_AVAILABLE_PUBLIC_VIEW',
-                      payload: !designerState.availableInPublic
-                    });
-                    onChangeAvailableInPublicView(!designerState.availableInPublic);
+                    if (!isDesignDataflowEditorRead) {
+                      designerDispatch({
+                        type: 'SET_AVAILABLE_PUBLIC_VIEW',
+                        payload: !designerState.availableInPublic
+                      });
+                      onChangeAvailableInPublicView(!designerState.availableInPublic);
+                    }
                   }}
                   style={{
-                    cursor: 'pointer',
+                    cursor: isDesignDataflowEditorRead ? 'default' : 'pointer',
                     fontSize: '11pt',
                     fontWeight: 'bold',
                     marginLeft: '6px',
-                    marginRight: '6px'
+                    marginRight: '6px',
+                    opacity: isDesignDataflowEditorRead ? 0.5 : 1
                   }}>
                   {resources.messages['availableInPublicView']}
                 </label>
               </div>
               <Button
                 className={`p-button-secondary ${
-                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                  !isDataflowOpen && !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null
                 } datasetSchema-uniques-help-step`}
-                disabled={designerState.isDataflowOpen}
+                disabled={isDataflowOpen || isDesignDataflowEditorRead}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
@@ -1156,9 +1177,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Fragment>
                 <Button
                   className={`p-button-rounded p-button-secondary ${
-                    !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                    !isDataflowOpen && !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null
                   }`}
-                  disabled={designerState.isDataflowOpen}
+                  disabled={isDataflowOpen || isDesignDataflowEditorRead}
                   icon={'import'}
                   label={resources.messages['importDataset']}
                   onClick={
@@ -1179,9 +1200,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               </Fragment>
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                  !isDataflowOpen && !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={designerState.isDataflowOpen}
+                disabled={isDataflowOpen || isDesignDataflowEditorRead}
                 icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
                 id="buttonExportDataset"
                 label={resources.messages['exportDataset']}
@@ -1199,11 +1220,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && designerState.viewType['tabularData'] && !designerState.isDataflowOpen
+                  designerState.datasetHasData &&
+                  designerState.viewType['tabularData'] &&
+                  !isDataflowOpen &&
+                  !isDesignDataflowEditorRead
                     ? ' p-button-animated-blink'
                     : null
                 }`}
-                disabled={designerState.isDataflowOpen}
+                disabled={isDataflowOpen || isDesignDataflowEditorRead}
                 icon={'validate'}
                 iconClasses={null}
                 label={resources.messages['validate']}
@@ -1215,11 +1239,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   designerState.datasetStatistics.datasetErrors &&
                   designerState.viewType['tabularData'] &&
-                  !designerState.isDataflowOpen
+                  !isDataflowOpen &&
+                  !isDesignDataflowEditorRead
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors || designerState.isDataflowOpen}
+                disabled={
+                  !designerState.datasetStatistics.datasetErrors || isDataflowOpen || isDesignDataflowEditorRead
+                }
                 icon={'warning'}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
@@ -1228,8 +1255,10 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step`}
-                disabled={false}
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null
+                } datasetSchema-qcRules-help-step`}
+                disabled={isDesignDataflowEditorRead}
                 icon={'horizontalSliders'}
                 iconClasses={null}
                 label={resources.messages['qcRules']}
@@ -1239,16 +1268,19 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                  !isDataflowOpen && !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={designerState.isDataflowOpen}
+                disabled={isDataflowOpen || isDesignDataflowEditorRead}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent ${styles.integrationsButton}`}
+                className={`p-button-rounded p-button-secondary-transparent ${
+                  !isDesignDataflowEditorRead ? styles.integrationsButton : null
+                }`}
+                disabled={isDesignDataflowEditorRead}
                 icon={'export'}
                 iconClasses={styles.integrationsButtonIcon}
                 label={resources.messages['externalIntegrations']}
@@ -1257,18 +1289,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData && !designerState.isDataflowOpen && 'p-button-animated-blink'
+                  designerState.datasetHasData &&
+                  !isDataflowOpen &&
+                  !isDesignDataflowEditorRead &&
+                  'p-button-animated-blink'
                 }`}
-                disabled={!designerState.datasetHasData || designerState.isDataflowOpen}
+                disabled={!designerState.datasetHasData || isDataflowOpen || isDesignDataflowEditorRead}
                 icon={'dashboard'}
                 label={resources.messages['dashboards']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
-                  !designerState.hasWritePermissions && !designerState.isDataflowOpen ? 'p-button-animated-blink' : null
+                  !designerState.hasWritePermissions && !isDataflowOpen && !isDesignDataflowEditorRead
+                    ? 'p-button-animated-blink'
+                    : null
                 }`}
-                disabled={designerState.hasWritePermissions || designerState.isDataflowOpen}
+                disabled={designerState.hasWritePermissions || isDataflowOpen || isDesignDataflowEditorRead}
                 icon={'camera'}
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
@@ -1277,8 +1314,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <Button
                 className={`p-button-rounded p-button-${
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                }  ${!designerState.isDataflowOpen ? 'p-button-animated-blink' : null}`}
-                disabled={designerState.isDataflowOpen}
+                }  ${!isDataflowOpen && !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null}`}
+                disabled={isDataflowOpen || isDesignDataflowEditorRead}
                 icon={'refresh'}
                 label={resources.messages['refresh']}
                 onClick={() => onLoadSchema()}
@@ -1300,13 +1337,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
-            editable={true}
+            editable={!isDataflowOpen && !isDesignDataflowEditorRead}
             getIsTableCreated={setIsTableCreated}
             history={history}
-            isDataflowOpen={designerState.isDataflowOpen}
-            isGroupedValidationDeleted={designerState.dataViewerOptions.isGroupedValidationDeleted}
-            isGroupedValidationSelected={designerState.dataViewerOptions.isGroupedValidationSelected}
-            isValidationSelected={designerState.dataViewerOptions.isValidationSelected}
+            isDataflowOpen={isDataflowOpen}
+            isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+            isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+            isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+            isValidationSelected={dataViewerOptions.isValidationSelected}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
             onChangeIsValidationSelected={onChangeIsValidationSelected}
@@ -1317,18 +1355,18 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             onUpdateTable={onUpdateTable}
             onUpdateSchema={onUpdateSchema}
             getUpdatedTabs={onUpdateTabs}
-            recordPositionId={designerState.dataViewerOptions.recordPositionId}
-            selectedRecordErrorId={designerState.dataViewerOptions.selectedRecordErrorId}
-            selectedRuleId={designerState.dataViewerOptions.selectedRuleId}
-            selectedRuleLevelError={designerState.dataViewerOptions.selectedRuleLevelError}
-            selectedRuleMessage={designerState.dataViewerOptions.selectedRuleMessage}
+            recordPositionId={dataViewerOptions.recordPositionId}
+            selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
+            selectedRuleId={dataViewerOptions.selectedRuleId}
+            selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+            selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
             setActiveTableSchemaId={tabSchemaId =>
               designerDispatch({
                 type: 'SET_DATAVIEWER_OPTIONS',
-                payload: { ...designerState.dataViewerOptions, tableSchemaId: tabSchemaId, selectedRecordErrorId: -1 }
+                payload: { ...dataViewerOptions, tableSchemaId: tabSchemaId, selectedRecordErrorId: -1 }
               })
             }
-            tableSchemaId={designerState.dataViewerOptions.tableSchemaId}
+            tableSchemaId={dataViewerOptions.tableSchemaId}
             viewType={designerState.viewType}
           />
         )}
@@ -1372,14 +1410,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
 
-        {designerState.validateDialogVisible && (
+        {validateDialogVisible && (
           <ConfirmDialog
             header={resources.messages['validateDataset']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             onConfirm={onConfirmValidate}
             onHide={() => manageDialogs('validateDialogVisible', false)}
-            visible={designerState.validateDialogVisible}>
+            visible={validateDialogVisible}>
             {resources.messages['validateDatasetConfirm']}
           </ConfirmDialog>
         )}
@@ -1471,13 +1509,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           />
         )}
 
-        {designerState.isImportOtherSystemsDialogVisible && (
+        {isImportOtherSystemsDialogVisible && (
           <Dialog
             className={styles.Dialog}
             footer={renderImportOtherSystemsFooter}
             header={resources.messages['importPreviousDataHeader']}
             onHide={cleanImportOtherSystemsDialog}
-            visible={designerState.isImportOtherSystemsDialogVisible}>
+            visible={isImportOtherSystemsDialogVisible}>
             <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
             <div className={styles.checkboxWrapper}>
               <Checkbox
