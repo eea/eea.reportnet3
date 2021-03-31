@@ -343,6 +343,7 @@ const Tab = ({
               autoFocus={true}
               key={index}
               className={`${styles.p_tabview_input_design} tabInput`}
+              keyfilter="schemaTableFields"
               maxLength={60}
               onBlur={e => {
                 //Check for empty table name

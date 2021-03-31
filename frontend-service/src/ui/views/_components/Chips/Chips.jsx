@@ -20,7 +20,7 @@ const Chips = ({
   disabled = null,
   deleteWhiteSpaces = false,
   errorMessage = 'Error',
-  forbiddenCommas = false,
+  forbiddenChar = false,
   id = null,
   inputClassName = null,
   itemTemplate = null,
@@ -31,6 +31,7 @@ const Chips = ({
   onChange = null,
   onFocus = null,
   onRemove = null,
+  pasteSeparator = ',',
   placeholder = null,
   showErrorMessage = false,
   style = null,
@@ -121,8 +122,8 @@ const Chips = ({
     DomHandler.removeClass(listElement.current, 'p-focus');
 
     const inputValue = deleteWhiteSpaces
-      ? forbiddenCommas
-        ? event.target.value.trim().split(',').join('')
+      ? forbiddenChar
+        ? event.target.value.trim().split(pasteSeparator).join('')
         : event.target.value.trim()
       : event.target.value;
 
@@ -218,7 +219,7 @@ const Chips = ({
           className={hasErrors ? styles.chipsTokenError : ''}
           disabled={disabled || isMaxedOut()}
           id={name}
-          keyfilter={forbiddenCommas ? 'noComma' : ''}
+          keyfilter={forbiddenChar ? (pasteSeparator === ',' ? 'noComma' : 'noSemicolon') : ''}
           name={name}
           onBlur={onBlurChips}
           onFocus={onFocusChips}
@@ -317,6 +318,7 @@ Chips.propTypes = {
   onChange: PropTypes.func,
   onFocus: PropTypes.func,
   onRemove: PropTypes.func,
+  pasteSeparator: PropTypes.string,
   placeholder: PropTypes.string,
   showErrorMessage: PropTypes.bool,
   style: PropTypes.object,

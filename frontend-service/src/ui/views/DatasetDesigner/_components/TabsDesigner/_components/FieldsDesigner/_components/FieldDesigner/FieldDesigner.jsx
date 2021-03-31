@@ -890,7 +890,7 @@ export const FieldDesigner = ({
         disabled={isDataflowOpen || isDesignDataflowEditorRead}
         label={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
-            ? `${fieldDesignerState.codelistItems.join(', ')}`
+            ? `${fieldDesignerState.codelistItems.join('; ')}`
             : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
             ? resources.messages['codelistSelection']
             : resources.messages['multiselectCodelistSelection']
@@ -899,7 +899,7 @@ export const FieldDesigner = ({
         style={{ pointerEvents: 'auto' }}
         tooltip={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
-            ? `${fieldDesignerState.codelistItems.join(', ')}`
+            ? `${fieldDesignerState.codelistItems.join('; ')}`
             : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
             ? resources.messages['codelistSelection']
             : resources.messages['multiselectCodelistSelection']
@@ -992,6 +992,7 @@ export const FieldDesigner = ({
         }`}
         disabled={isDataflowOpen || isDesignDataflowEditorRead}
         id={fieldName}
+        keyfilter="schemaTableFields"
         maxLength={60}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {

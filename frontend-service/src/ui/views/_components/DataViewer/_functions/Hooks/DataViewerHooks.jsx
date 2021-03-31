@@ -106,7 +106,7 @@ export const useSetColumns = (
   const [originalColumns, setOriginalColumns] = useState([]);
   const [selectedHeader, setSelectedHeader] = useState();
 
-  const { areEquals, splitByComma } = TextUtils;
+  const { areEquals, splitByChar } = TextUtils;
 
   const onShowFieldInfo = (header, visible) => {
     setSelectedHeader(header);
@@ -206,7 +206,7 @@ export const useSetColumns = (
           .map(codelistItem =>
             !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
           )
-          .join(', ')}`
+          .join('; ')}`
       : `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
       <span style="font-weight:bold">Description:</span> ${
         !isNil(column.description) && column.description !== '' && column.description.length > 35
@@ -249,7 +249,7 @@ export const useSetColumns = (
               !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
                 field.fieldData.type
               )
-              ? field.fieldData[column.field].sort().join(', ')
+              ? field.fieldData[column.field].sort().join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
               : // : Array.isArray(field.fieldData[column.field])
               // ? field.fieldData[column.field].join(', ')
               (!isNil(field.fieldData[column.field]) &&
@@ -257,12 +257,12 @@ export const useSetColumns = (
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
                 (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
               ? !Array.isArray(field.fieldData[column.field])
-                ? splitByComma(field.fieldData[column.field])
+                ? splitByChar(field.fieldData[column.field], ';')
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join(', ')
+                    .join('; ')
                 : field.fieldData[column.field]
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join(', ')
+                    .join('; ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
@@ -293,18 +293,18 @@ export const useSetColumns = (
               )
               ? // ? field.fieldData[column.field].sort().join(', ')
                 // : Array.isArray(field.fieldData[column.field])
-                field.fieldData[column.field].join(', ')
+                field.fieldData[column.field].join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
                 (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
               ? !Array.isArray(field.fieldData[column.field])
-                ? splitByComma(field.fieldData[column.field])
+                ? splitByChar(field.fieldData[column.field], ';')
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join(', ')
+                    .join('; ')
                 : field.fieldData[column.field]
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join(', ')
+                    .join('; ')
               : field.fieldData.type === 'ATTACHMENT'
               ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
               : field.fieldData.type === 'POINT'
