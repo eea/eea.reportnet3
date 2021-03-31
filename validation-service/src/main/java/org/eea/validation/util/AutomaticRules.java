@@ -8,10 +8,13 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
+
 /**
- * The Class ValidationRuleDrools.
+ * The Class AutomaticRules.
  */
 public class AutomaticRules {
+
+
 
   // we use that class to create a specifies rule for any of diferent automatic validation
 
@@ -336,6 +339,8 @@ public class AutomaticRules {
       String uniqueId) {
     StringBuilder ruleString =
         new StringBuilder("isUniqueConstraint('").append(uniqueId).append("',");
+
+
 
     Rule rule = composeRule(referenceId, typeEntityEnum, nameRule, ruleString.toString(),
         "Uniqueness and multiplicity constraints - either one field or combination of fields are unique within table",
