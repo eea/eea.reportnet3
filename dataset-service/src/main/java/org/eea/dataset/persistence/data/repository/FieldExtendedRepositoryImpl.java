@@ -25,6 +25,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
 
@@ -129,7 +130,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Override
   public List<FieldVO> findByIdFieldSchemaWithTagOrdered(String idPk, String labelSchemaId,
       String searchValue, String conditionalSchemaId, String conditionalValue, DataType dataTypePk,
-      Integer resultsNumber) {
+      Integer resultsNumber) throws DataIntegrityViolationException {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
     List<FieldValueWithLabel> fields = new ArrayList<>();
@@ -162,7 +163,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     query.setMaxResults(resultsNumber);
 
     List<Object[]> sqlResults = query.getResultList();
-
     // Map the results of the query
     for (Object[] row : sqlResults) {
       FieldValueWithLabel fv = new FieldValueWithLabel();
