@@ -37,7 +37,7 @@ export const TabsDesigner = withRouter(
     getUpdatedTabs,
     history,
     isDataflowOpen,
-    isDesignDataflowEditorRead,
+    isDesignDatasetEditorRead,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isValidationSelected,
@@ -143,7 +143,7 @@ export const TabsDesigner = withRouter(
             datasetStatistics,
             editable,
             isDataflowOpen,
-            isDesignDataflowEditorRead
+            isDesignDatasetEditorRead
           })
         );
       } catch (error) {
@@ -356,7 +356,7 @@ export const TabsDesigner = withRouter(
           initialTabIndexDrag={initialTabIndexDrag}
           isErrorDialogVisible={isErrorDialogVisible}
           isDataflowOpen={isDataflowOpen}
-          isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           onTabAdd={onTabAdd}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTableAdd}
@@ -384,7 +384,7 @@ export const TabsDesigner = withRouter(
                     newTab={tab.newTab}
                     rightIcon={tab.hasErrors ? config.icons['warning'] : null}
                     tableSchemaId={tab.tableSchemaId}>
-                    {(tabs.length > 0 && (isDataflowOpen || isDesignDataflowEditorRead)) || tabs.length > 1 ? (
+                    {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead)) || tabs.length > 1 ? (
                       <FieldsDesigner
                         autoFocus={false}
                         dataflowId={dataflowId}
@@ -392,7 +392,7 @@ export const TabsDesigner = withRouter(
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
                         isDataflowOpen={isDataflowOpen}
-                        isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+                        isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}

@@ -55,7 +55,7 @@ export const FieldDesigner = ({
   initialFieldIndexDragged,
   isCodelistOrLink,
   isDataflowOpen,
-  isDesignDataflowEditorRead,
+  isDesignDatasetEditorRead,
   onCodelistAndLinkShow,
   onFieldDelete,
   onFieldDragAndDrop,
@@ -811,7 +811,7 @@ export const FieldDesigner = ({
       {!addField ? (
         <FontAwesomeIcon
           icon={AwesomeIcons('move')}
-          style={{ width: '32px', opacity: isDataflowOpen || isDesignDataflowEditorRead ? 0.5 : 1 }}
+          style={{ width: '32px', opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
         />
       ) : (
         <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
@@ -820,7 +820,7 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldPKValue}
         className={`${styles.checkPK} datasetSchema-pk-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        } ${isDataflowOpen && isDesignDataflowEditorRead && styles.checkboxDisabled}`}
+        } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
         disabled={
           (!isNil(fieldDesignerState.fieldTypeValue) &&
             !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
@@ -829,7 +829,7 @@ export const FieldDesigner = ({
             )) ||
           (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)) ||
           isDataflowOpen ||
-          isDesignDataflowEditorRead
+          isDesignDatasetEditorRead
         }
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
@@ -848,8 +848,8 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldRequiredValue}
         className={`${styles.checkRequired} datasetSchema-required-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        } ${isDataflowOpen && isDesignDataflowEditorRead && styles.checkboxDisabled}`}
-        disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDataflowEditorRead}
+        } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
+        disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
         label="Default"
@@ -865,8 +865,8 @@ export const FieldDesigner = ({
         checked={fieldDesignerState.fieldReadOnlyValue}
         className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        } ${isDataflowOpen && isDesignDataflowEditorRead && styles.checkboxDisabled}`}
-        disabled={isDataflowOpen || isDesignDataflowEditorRead}
+        } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
         id={`${fieldId}_check_readOnly`}
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
@@ -887,7 +887,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDataflowEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
         label={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join('; ')}`
@@ -911,7 +911,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDataflowEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
         label={
           !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
             ? `${fieldDesignerState.fieldLinkValue.name}`
@@ -932,7 +932,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDataflowEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
         label={`${resources.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
@@ -968,7 +968,7 @@ export const FieldDesigner = ({
         draggable={true}
         className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        } ${isDataflowOpen || isDesignDataflowEditorRead ? styles.linkDisabled : ''}`}
+        } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
         href="#"
         onClick={e => {
           e.preventDefault();
@@ -990,7 +990,7 @@ export const FieldDesigner = ({
         className={`${styles.inputField} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDataflowEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
         id={fieldName}
         keyfilter="schemaTableFields"
         maxLength={60}
@@ -1016,7 +1016,7 @@ export const FieldDesigner = ({
       <InputTextarea
         autoFocus={false}
         collapsedHeight={33}
-        disabled={isDataflowOpen || isDesignDataflowEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
         expandableOnClick={true}
         className={`${styles.inputFieldDescription} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -1046,7 +1046,7 @@ export const FieldDesigner = ({
         className={`${styles.dropdownFieldType} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDataflowEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
         inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
         name={resources.messages['newFieldTypePlaceHolder']}
@@ -1073,7 +1073,7 @@ export const FieldDesigner = ({
   return (
     <React.Fragment>
       <div
-        draggable={isDataflowOpen || isDesignDataflowEditorRead ? false : !addField}
+        draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
         onDragEnd={e => {
           onFieldDragEnd(e);
@@ -1089,7 +1089,7 @@ export const FieldDesigner = ({
         onDrop={e => {
           onFieldDragDrop(e);
         }}
-        style={{ cursor: isDataflowOpen || isDesignDataflowEditorRead ? 'default' : 'grab' }}>
+        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
         <div
           className={`${styles.fieldSeparator} ${
             fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
@@ -1108,7 +1108,7 @@ export const FieldDesigner = ({
                 config.validations.bannedFieldsNames.sqlFields.includes(
                   fieldDesignerState.fieldTypeValue.value.toLowerCase()
                 )) ||
-              isDesignDataflowEditorRead
+              isDesignDatasetEditorRead
             }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}

@@ -54,7 +54,7 @@ export const designerReducer = (state, { type, payload }) => {
       return {
         ...state,
         isDataflowOpen: payload.isDataflowOpen,
-        isDesignDataflowEditorRead: payload.isDesignDataflowEditorRead
+        isDesignDatasetEditorRead: payload.isDesignDatasetEditorRead
       };
 
     case 'UPDATED_IS_DUPLICATED':

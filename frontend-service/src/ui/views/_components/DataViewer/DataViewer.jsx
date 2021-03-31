@@ -62,7 +62,7 @@ const DataViewer = withRouter(
     hasCountryCode,
     hasWritePermissions,
     isDataflowOpen,
-    isDesignDataflowEditorRead,
+    isDesignDatasetEditorRead,
     isExportable,
     isFilterable,
     isGroupedValidationDeleted,
@@ -207,7 +207,7 @@ const DataViewer = withRouter(
 
     const actionTemplate = () => (
       <ActionsColumn
-        disabledButtons={isDataflowOpen || isDesignDataflowEditorRead}
+        disabledButtons={isDataflowOpen || isDesignDatasetEditorRead}
         hideDeletion={tableFixedNumber}
         hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
@@ -261,7 +261,7 @@ const DataViewer = withRouter(
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataflowOpen,
-      isDesignDataflowEditorRead,
+      isDesignDatasetEditorRead,
       onFileDeleteVisible,
       onFileDownload,
       onFileUploadVisible,
@@ -1111,7 +1111,7 @@ const DataViewer = withRouter(
           hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
           hideValidationFilter={hideValidationFilter}
           isDataflowOpen={isDataflowOpen}
-          isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={isExportable}
           isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
@@ -1151,7 +1151,7 @@ const DataViewer = withRouter(
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   isDataflowOpen={isDataflowOpen}
-                  isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+                  isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                   onAddClick={() => {
                     setIsNewRecord(true);
                     setAddDialogVisible(true);
@@ -1168,7 +1168,7 @@ const DataViewer = withRouter(
               !tableReadOnly &&
               !isEditing &&
               !isDataflowOpen &&
-              !isDesignDataflowEditorRead
+              !isDesignDatasetEditorRead
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);

@@ -31,7 +31,7 @@ export const FieldsDesigner = ({
   datasetSchemaId,
   datasetSchemas,
   isDataflowOpen,
-  isDesignDataflowEditorRead,
+  isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isValidationSelected,
@@ -331,7 +331,7 @@ export const FieldsDesigner = ({
         <DataViewer
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
-          isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
@@ -412,7 +412,7 @@ export const FieldsDesigner = ({
           datasetId={datasetId}
           datasetSchemaId={datasetSchemaId}
           isDataflowOpen={isDataflowOpen}
-          isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           fieldFileProperties={{}}
           fieldId="-1"
           fieldName=""
@@ -475,7 +475,7 @@ export const FieldsDesigner = ({
                 initialFieldIndexDragged={initialFieldIndexDragged}
                 isCodelistOrLink={isCodelistOrLink}
                 isDataflowOpen={isDataflowOpen}
-                isDesignDataflowEditorRead={isDesignDataflowEditorRead}
+                isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                 key={field.fieldId}
                 onCodelistAndLinkShow={onCodelistAndLinkShow}
                 onFieldDelete={onFieldDelete}
@@ -550,7 +550,7 @@ export const FieldsDesigner = ({
         <InputTextarea
           className={styles.tableDescriptionInput}
           collapsedHeight={55}
-          disabled={isDataflowOpen || isDesignDataflowEditorRead}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead}
           expandableOnClick={true}
           id="tableDescription"
           key="tableDescription"
@@ -566,9 +566,9 @@ export const FieldsDesigner = ({
         <div className={styles.constraintsButtons}>
           <Button
             className={`p-button-secondary ${
-              !isDataflowOpen && !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null
+              !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             } datasetSchema-uniques-help-step`}
-            disabled={isDataflowOpen || isDesignDataflowEditorRead}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
@@ -583,9 +583,9 @@ export const FieldsDesigner = ({
 
           <Button
             className={`p-button-secondary ${
-              !isDesignDataflowEditorRead ? 'p-button-animated-blink' : null
+              !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             } datasetSchema-rowConstraint-help-step`}
-            disabled={isDesignDataflowEditorRead}
+            disabled={isDesignDatasetEditorRead}
             icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
@@ -595,13 +595,13 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
-              style={{ opacity: isDesignDataflowEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['readOnlyTable']}
             </span>
             <Checkbox
               checked={isReadOnlyTable}
               className={styles.fieldDesignerItem}
-              disabled={isDataflowOpen || isDesignDataflowEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead}
               id={`${table.tableSchemaId}_check_readOnly`}
               inputId={`${table.tableSchemaId}_check_readOnly`}
               label="Default"
@@ -614,12 +614,12 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
-              style={{ opacity: isDesignDataflowEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['prefilled']}
             </span>
             <Checkbox
               checked={toPrefill || fixedNumber}
-              disabled={isReadOnlyTable || fixedNumber || isDataflowOpen || isDesignDataflowEditorRead}
+              disabled={isReadOnlyTable || fixedNumber || isDataflowOpen || isDesignDatasetEditorRead}
               className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_to_prefill`}
               inputId={`${table.tableSchemaId}_check_to_prefill`}
@@ -633,13 +633,13 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
-              style={{ opacity: isDesignDataflowEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['fixedNumber']}
             </span>
             <Checkbox
               checked={fixedNumber}
               className={styles.fieldDesignerItem}
-              disabled={isDataflowOpen || isDesignDataflowEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead}
               id={`${table.tableSchemaId}_check_fixed_number`}
               inputId={`${table.tableSchemaId}_check_fixed_number`}
               label="Default"
@@ -652,13 +652,13 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
-              style={{ opacity: isDesignDataflowEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['notEmpty']}
             </span>
             <Checkbox
               checked={notEmpty}
               className={styles.fieldDesignerItem}
-              disabled={isDataflowOpen || isDesignDataflowEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead}
               id={`${table.tableSchemaId}_check_not_empty`}
               inputId={`${table.tableSchemaId}_check_not_empty`}
               label="Default"

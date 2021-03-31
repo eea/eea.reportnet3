@@ -91,7 +91,7 @@ export const useSetColumns = (
   hasWritePermissions,
   initialCellValue,
   isDataflowOpen,
-  isDesignDataflowEditorRead,
+  isDesignDatasetEditorRead,
   onFileDeleteVisible,
   onFileDownload,
   onFileUploadVisible,
@@ -352,14 +352,14 @@ export const useSetColumns = (
         <Column
           body={dataTemplate}
           className={`${invisibleColumn} ${readOnlyColumn} ${
-            isDataflowOpen && isDesignDataflowEditorRead && styles.fieldDisabled
+            isDataflowOpen && isDesignDatasetEditorRead && styles.fieldDisabled
           }`}
           editor={
             hasWebformWritePermissions &&
             hasWritePermissions &&
             column.type !== 'ATTACHMENT' &&
             !isDataflowOpen &&
-            !isDesignDataflowEditorRead
+            !isDesignDatasetEditorRead
               ? row => cellDataEditor(row, records.selectedRecord)
               : null
           }
@@ -414,7 +414,7 @@ export const useSetColumns = (
     let editCol = (
       <Column
         body={row => actionTemplate(row)}
-        className={`${isDataflowOpen && isDesignDataflowEditorRead && styles.fieldDisabled}`}
+        className={`${isDataflowOpen && isDesignDatasetEditorRead && styles.fieldDisabled}`}
         header={resources.messages['actions']}
         key="actions"
         sortable={false}
@@ -425,7 +425,7 @@ export const useSetColumns = (
     let validationCol = (
       <Column
         body={validationsTemplate}
-        className={`${isDataflowOpen && isDesignDataflowEditorRead && styles.fieldDisabled}`}
+        className={`${isDataflowOpen && isDesignDatasetEditorRead && styles.fieldDisabled}`}
         header={resources.messages['validationsDataColumn']}
         field="validations"
         key="recordValidation"

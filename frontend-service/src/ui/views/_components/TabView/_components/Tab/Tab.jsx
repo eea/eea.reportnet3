@@ -30,7 +30,7 @@ const Tab = ({
   headerStyle,
   id,
   isDataflowOpen,
-  isDesignDataflowEditorRead,
+  isDesignDatasetEditorRead,
   index,
   initialTabIndexDrag,
   isNavigationHidden,
@@ -271,7 +271,7 @@ const Tab = ({
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
         onContextMenu={e => {
-          if (designMode && !isDataflowOpen && !isDesignDataflowEditorRead && !addTab) {
+          if (designMode && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
@@ -284,7 +284,7 @@ const Tab = ({
         ref={tabRef}
         tabIndex={index}>
         <a
-          draggable={designMode && !isDataflowOpen && !isDesignDataflowEditorRead ? (!addTab ? true : false) : false}
+          draggable={designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (!addTab ? true : false) : false}
           aria-controls={ariaControls}
           aria-selected={selected}
           className={
@@ -370,7 +370,7 @@ const Tab = ({
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
           {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
-          {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDataflowEditorRead ? (
+          {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
             <div
               onClick={e => {
                 e.preventDefault();
@@ -402,7 +402,7 @@ const Tab = ({
           ) : null}
         </a>
       </li>
-      {designMode && !isDataflowOpen && !isDesignDataflowEditorRead ? (
+      {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
         <ContextMenu model={menu} ref={contextMenuRef} />
       ) : null}
     </React.Fragment>
