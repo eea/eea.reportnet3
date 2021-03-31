@@ -30,6 +30,7 @@ const Tab = ({
   headerStyle,
   id,
   isDataflowOpen,
+  isDesignDatasetEditorRead,
   index,
   initialTabIndexDrag,
   isNavigationHidden,
@@ -270,7 +271,7 @@ const Tab = ({
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
         onContextMenu={e => {
-          if (designMode && !addTab) {
+          if (designMode && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
@@ -283,7 +284,7 @@ const Tab = ({
         ref={tabRef}
         tabIndex={index}>
         <a
-          draggable={designMode ? (!addTab ? true : false) : false}
+          draggable={designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (!addTab ? true : false) : false}
           aria-controls={ariaControls}
           aria-selected={selected}
           className={
@@ -342,6 +343,7 @@ const Tab = ({
               autoFocus={true}
               key={index}
               className={`${styles.p_tabview_input_design} tabInput`}
+              keyfilter="schemaTableFields"
               maxLength={60}
               onBlur={e => {
                 //Check for empty table name
@@ -368,7 +370,7 @@ const Tab = ({
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
           {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
-          {designMode && !hasPKReferenced && !isDataflowOpen ? (
+          {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
             <div
               onClick={e => {
                 e.preventDefault();
@@ -400,7 +402,9 @@ const Tab = ({
           ) : null}
         </a>
       </li>
-      {designMode ? <ContextMenu model={menu} ref={contextMenuRef} /> : null}
+      {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
+        <ContextMenu model={menu} ref={contextMenuRef} />
+      ) : null}
     </React.Fragment>
   );
 };
