@@ -71,7 +71,7 @@ export const NationalSystemsField = ({
 
   const getMultiselectValues = (multiselectItemsOptions, value) => {
     if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-      const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
+      const splittedValue = !Array.isArray(value) ? TextUtils.splitByChar(value, ';') : value;
       return intersection(
         splittedValue,
         multiselectItemsOptions.map(item => item.value)
@@ -110,7 +110,7 @@ export const NationalSystemsField = ({
   const onEditorSubmitValue = async (field, option, value) => {
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
-        ? value.join(',')
+        ? value.join(';')
         : value;
 
     try {
@@ -240,7 +240,6 @@ export const NationalSystemsField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            addSpaceCommaSeparator={true}
             appendTo={document.body}
             id={field.fieldId}
             maxSelectedLabels={10}
@@ -253,6 +252,7 @@ export const NationalSystemsField = ({
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
             )}
+            valuesSeparator=";"
           />
         );
 

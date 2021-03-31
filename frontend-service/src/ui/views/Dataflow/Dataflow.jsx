@@ -980,6 +980,7 @@ const Dataflow = withRouter(({ history, match }) => {
             </label>
           </ConfirmDialog>
         )}
+
         {dataflowState.isShowPublicInfoDialogVisible && (
           <ConfirmDialog
             disabledConfirm={

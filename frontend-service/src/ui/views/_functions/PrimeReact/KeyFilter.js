@@ -14,10 +14,12 @@ export default class KeyFilter {
     int: /[\d\-]/,
     money: /[\d\.\s,]/,
     noComma: /[^,]+/,
+    noSemicolon: /[^;]+/,
     num: /[\d\-\.]/,
     phone: /^(\(?\+?[0-9]*\)?)?[0-9_\- \(\)]*$/,
     pint: /[\d]/,
     pnum: /[\d\.]/,
+    schemaTableFields: /[a-zA-Z0-9_\s\-]/,
     url: /^\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
   };
   /* eslint-enable */
