@@ -11,16 +11,16 @@ export const filterReducer = (state, { type, payload }) => {
     case 'CLEAR_ALL':
       return {
         ...state,
+        checkboxes: payload.checkboxes,
+        clearedFilters: payload.clearedFilters,
         filterBy: payload.filterBy,
+        filtered: payload.filtered,
         filteredData: payload.filteredData,
+        filteredSearched: payload.filteredSearched,
         labelAnimations: payload.labelAnimations,
         orderBy: payload.orderBy,
-        searchBy: payload.searchBy,
-        checkboxes: payload.checkboxes,
-        filtered: payload.filtered,
-        filteredSearched: payload.filteredSearched,
         property: '',
-        clearedFilters: payload.clearedFilters
+        searchBy: payload.searchBy
       };
 
     case 'FILTERED':
@@ -79,7 +79,7 @@ export const filterReducer = (state, { type, payload }) => {
     case 'ON_CHECKBOX_FILTER':
       return {
         ...state,
-        checkboxes: FiltersUtils.getCheckboxState(state.checkboxes, payload.property, payload.value),
+        checkboxes: FiltersUtils.getCheckboxState(state.checkboxes, payload.property),
         property: payload.property
       };
 
