@@ -28,6 +28,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
     resetSlideBarPositionAndSize();
     if (!isVisible) {
       setHasError(false);
+      setInputValue('');
     }
   }, [isVisible, isSnapshotDialogVisible]);
 

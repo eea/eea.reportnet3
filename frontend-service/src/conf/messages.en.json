@@ -71,7 +71,7 @@
     "closeSidebar": "Close sidebar",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
-    "codelistEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste your list</strong> (separated by commas) <u><strong>to add</strong></u> new items.",
+    "codelistEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste your list</strong> (separated by semicolons) <u><strong>to add</strong></u> new items.",
     "codelistEditorMessage": "Enter your single select items",
     "codelists": "Single select items",
     "codelistSelection": "No single select item selected",

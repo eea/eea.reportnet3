@@ -89,7 +89,7 @@ const AttachmentEditor = ({
           clearOnPaste={true}
           deleteWhiteSpaces={true}
           errorMessage={resources.messages['duplicatedItem']}
-          forbiddenCommas={true}
+          forbiddenChar={true}
           inputClassName={styles.validExtensionsChips}
           onChange={e => setValidExtensionsItems(e.value)}
           showErrorMessage={true}

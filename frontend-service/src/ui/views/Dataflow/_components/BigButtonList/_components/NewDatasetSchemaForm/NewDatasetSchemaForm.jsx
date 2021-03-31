@@ -19,6 +19,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const regex = new RegExp(/[a-zA-Z0-9_-\s()]/);
 
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [errorMessage, setErrorMessage] = useState({ datasetSchemaName: '' });
@@ -72,7 +73,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           dataflow: { name: dataflowName }
         } = metadata;
 
-        if (error.response?.data?.message.includes('duplicated')) {
+        if (error.response?.data?.message?.includes('duplicated')) {
           notificationContext.add({
             type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
             content: { schemaName: datasetSchemaName }
@@ -106,6 +107,10 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           onChange={e => setDatasetSchemaName(e.target.value)}
           onKeyPress={e => {
             if (e.key === 'Enter') onConfirm(e);
+            else if (!regex.test(e.key) || e.key === 'Dead') {
+              e.preventDefault();
+              return false;
+            }
           }}
           placeholder={resources.messages['createDatasetSchemaName']}
           ref={inputRef}

@@ -93,7 +93,6 @@ const WebformDataFormFieldEditor = ({
     }));
     return (
       <MultiSelect
-        addSpaceCommaSeparator={true}
         appendTo={document.body}
         disabled={TextUtils.areEquals(field, 'listofsinglepams') && hasSingle}
         onChange={e => onChangeForm(field, e.value)}
@@ -101,6 +100,7 @@ const WebformDataFormFieldEditor = ({
         options={options}
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(options, fieldValue)}
+        valuesSeparator=";"
       />
     );
   };
