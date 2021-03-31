@@ -3389,7 +3389,7 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 /* Change all scrollbar styles for webkit-based browsers */
 
 ::-webkit-scrollbar {
-  width: 16px;
+  width: 10px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {

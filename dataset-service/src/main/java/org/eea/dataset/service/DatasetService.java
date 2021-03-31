@@ -344,7 +344,8 @@ public interface DatasetService {
    * @return the field values referenced
    */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String datasetSchemaId,
-      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber);
+      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber)
+      throws EEAException;
 
   /**
    * Gets the referenced dataset id.

@@ -57,14 +57,21 @@ export const NationalSystemsField = ({
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
   }, []);
 
-  const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
+  const getAttachExtensions = [{ fileExtension: field.validExtensions || [] }]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
     .join(', ');
 
+  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
+  ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+    !isNil(field.maxSize) && field.maxSize.toString() !== '0'
+      ? `${field.maxSize} ${resources.messages['MB']}`
+      : resources.messages['maxSizeNotDefined']
+  }`;
+
   const getMultiselectValues = (multiselectItemsOptions, value) => {
     if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-      const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
+      const splittedValue = !Array.isArray(value) ? TextUtils.splitByChar(value, ';') : value;
       return intersection(
         splittedValue,
         multiselectItemsOptions.map(item => item.value)
@@ -103,7 +110,7 @@ export const NationalSystemsField = ({
   const onEditorSubmitValue = async (field, option, value) => {
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
-        ? value.join(',')
+        ? value.join(';')
         : value;
 
     try {
@@ -143,6 +150,19 @@ export const NationalSystemsField = ({
     if (day.length < 2) day = '0' + day;
 
     return [year, month, day].join('-');
+  };
+
+  const onUploadFileError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'UPLOAD_FILE_ERROR'
+      });
+    }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'GENERIC_BLOCKED_ERROR'
+      });
+    }
   };
 
   const renderTemplate = () => {
@@ -220,7 +240,6 @@ export const NationalSystemsField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            addSpaceCommaSeparator={true}
             appendTo={document.body}
             id={field.fieldId}
             maxSelectedLabels={10}
@@ -233,6 +252,7 @@ export const NationalSystemsField = ({
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
             )}
+            valuesSeparator=";"
           />
         );
 
@@ -333,6 +353,7 @@ export const NationalSystemsField = ({
           dialogOnHide={() => handleDialogs('uploadFile', false)}
           dialogVisible={isDialogVisible.uploadFile}
           fileLimit={1}
+          infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
@@ -343,6 +364,7 @@ export const NationalSystemsField = ({
           mode={'advanced'}
           multiple={false}
           name={'file'}
+          onError={onUploadFileError}
           onUpload={onAttachFile}
           operation={'PUT'}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {

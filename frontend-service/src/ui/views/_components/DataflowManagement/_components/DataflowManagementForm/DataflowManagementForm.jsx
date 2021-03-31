@@ -74,7 +74,14 @@ const DataflowManagementForm = forwardRef(
 
         try {
           if (isEditForm) {
-            await DataflowService.update(dataflowId, name, description, data.obligation.id, data.isReleasable);
+            await DataflowService.update(
+              dataflowId,
+              name,
+              description,
+              data.obligation.id,
+              data.isReleasable,
+              data.showPublicInfo
+            );
             onEdit(name, description, data.obligation.id);
           } else {
             await DataflowService.create(name, description, data.obligation.id);

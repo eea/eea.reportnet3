@@ -88,8 +88,16 @@ const FieldEditor = ({
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
-    setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
-    setLinkItemsValue(RecordUtils.getCellValue(cells, cells.field).toString());
+    setCodelistItemValue(
+      Array.isArray(RecordUtils.getCellValue(cells, cells.field))
+        ? RecordUtils.getCellValue(cells, cells.field).join(';')
+        : RecordUtils.getCellValue(cells, cells.field).toString()
+    );
+    setLinkItemsValue(
+      Array.isArray(RecordUtils.getCellValue(cells, cells.field))
+        ? RecordUtils.getCellValue(cells, cells.field).join(';')
+        : RecordUtils.getCellValue(cells, cells.field).toString()
+    );
   }, []);
 
   useEffect(() => {
@@ -634,8 +642,6 @@ const FieldEditor = ({
         if (hasMultipleValues) {
           return (
             <MultiSelect
-              // onChange={e => onChangeForm(field, e.value)}
-              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               disabled={isLoadingData}
@@ -666,6 +672,7 @@ const FieldEditor = ({
               options={linkItemsOptions}
               optionLabel="itemType"
               value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
+              valuesSeparator=";"
             />
           );
         } else {
@@ -715,7 +722,6 @@ const FieldEditor = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {
@@ -740,6 +746,7 @@ const FieldEditor = ({
             options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             optionLabel="itemType"
             value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
+            valuesSeparator=";"
           />
         );
       default:

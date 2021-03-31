@@ -172,7 +172,7 @@ public class AutomaticRules {
       }
     }
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
-        "isCodelistInsensitive(value,'" + codelist + "')",
+        "isCodelistInsensitive(value,'[" + codelist + "]')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
@@ -206,7 +206,7 @@ public class AutomaticRules {
       }
     }
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
-        "isMultiSelectCodelistValidate(value,'" + codelist + "')",
+        "isMultiSelectCodelistValidate(value,'[" + codelist + "]')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;

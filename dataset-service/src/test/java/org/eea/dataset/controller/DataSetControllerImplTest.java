@@ -586,9 +586,10 @@ public class DataSetControllerImplTest {
    * Gets the field values referenced.
    *
    * @return the field values referenced
+   * @throws EEAException
    */
   @Test
-  public void getFieldValuesReferencedTest() {
+  public void getFieldValuesReferencedTest() throws EEAException {
     List<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
     Mockito.when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(),
