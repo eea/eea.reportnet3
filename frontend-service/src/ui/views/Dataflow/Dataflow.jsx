@@ -126,6 +126,11 @@ const Dataflow = withRouter(({ history, match }) => {
     config.permissions.LEAD_REPORTER
   ]);
 
+  const isReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
+    config.permissions.REPORTER_READ,
+    config.permissions.REPORTER_WRITE
+  ]);
+
   const isNationalCoordinator = userContext.hasContextAccessPermission(
     config.permissions.NATIONAL_COORDINATOR_PREFIX,
     null,
@@ -151,6 +156,8 @@ const Dataflow = withRouter(({ history, match }) => {
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
 
   const isNationalCoordinatorOfCountry = isNationalCoordinator && isInsideACountry;
+
+  const isReporterOfCountry = isReporter && isInsideACountry;
 
   const dataProviderId = isInsideACountry
     ? !isNil(representativeId)
@@ -360,6 +367,7 @@ const Dataflow = withRouter(({ history, match }) => {
       usersListBtn:
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
+        isReporterOfCountry ||
         (dataflowState.isCustodian && !isNil(representativeId))
     };
   };
