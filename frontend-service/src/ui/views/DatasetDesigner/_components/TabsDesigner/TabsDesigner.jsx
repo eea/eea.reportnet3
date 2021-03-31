@@ -37,6 +37,7 @@ export const TabsDesigner = withRouter(
     getUpdatedTabs,
     history,
     isDataflowOpen,
+    isDesignDatasetEditorRead,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isValidationSelected,
@@ -136,7 +137,15 @@ export const TabsDesigner = withRouter(
 
     const onLoadSchema = async () => {
       try {
-        setTabs(DatasetDesignerUtils.getTabs({ datasetSchema, datasetStatistics, editable }));
+        setTabs(
+          DatasetDesignerUtils.getTabs({
+            datasetSchema,
+            datasetStatistics,
+            editable,
+            isDataflowOpen,
+            isDesignDatasetEditorRead
+          })
+        );
       } catch (error) {
         console.error(`Error while loading schema ${error}`);
         if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
@@ -347,6 +356,7 @@ export const TabsDesigner = withRouter(
           initialTabIndexDrag={initialTabIndexDrag}
           isErrorDialogVisible={isErrorDialogVisible}
           isDataflowOpen={isDataflowOpen}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           onTabAdd={onTabAdd}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTableAdd}
@@ -374,7 +384,7 @@ export const TabsDesigner = withRouter(
                     newTab={tab.newTab}
                     rightIcon={tab.hasErrors ? config.icons['warning'] : null}
                     tableSchemaId={tab.tableSchemaId}>
-                    {tabs.length > 1 ? (
+                    {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead)) || tabs.length > 1 ? (
                       <FieldsDesigner
                         autoFocus={false}
                         dataflowId={dataflowId}
@@ -382,6 +392,7 @@ export const TabsDesigner = withRouter(
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
                         isDataflowOpen={isDataflowOpen}
+                        isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isValidationSelected={isValidationSelected}
