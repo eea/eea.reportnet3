@@ -233,7 +233,6 @@ export const Filters = ({
       checkedKeys,
       data,
       date,
-      dropdown,
       filter,
       filteredKeys: inputKeys,
       searchedKeys,
@@ -304,7 +303,7 @@ export const Filters = ({
           multiselect.forEach(key => {
             // key [0], value [1]
             if (key === keyValue[0]) {
-              keyValue[1] = keyValue[1].filter(value => {
+              keyValue[1] = keyValue[1]?.filter(value => {
                 const option = possibleOptions.get(key);
 
                 if (key === 'pinned' || key === 'table' || key === 'field') {
