@@ -806,23 +806,23 @@ public class RulesServiceImpl implements RulesService {
       int i = 0;
       StringBuilder fieldNames = new StringBuilder();
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
-      for (ObjectId fieldSchemaId : uniqueResult.get().getFieldSchemaIds()) {
-
-        for (TableSchema table : schema.getTableSchemas()) {
-          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-            if (field.getIdFieldSchema().equals(fieldSchemaId)) {
-              if (uniqueResult.get().getFieldSchemaIds().size() - 1 == i
-                  && uniqueResult.get().getFieldSchemaIds().size() > 1) {
-                fieldNames.append(" and ");
-              } else if (i < uniqueResult.get().getFieldSchemaIds().size() - 1
-                  && uniqueResult.get().getFieldSchemaIds().size() > 1 && i != 0) {
-                fieldNames.append(", ");
-              }
-              fieldNames.append(field.getHeaderName());
-              i++;
-            }
-          }
+      Map<ObjectId, String> fieldSchemaIdName = new HashMap<>();
+      for (TableSchema table : schema.getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          fieldSchemaIdName.put(field.getIdFieldSchema(), field.getHeaderName());
         }
+      }
+
+      for (ObjectId fieldSchemaId : uniqueResult.get().getFieldSchemaIds()) {
+        if (uniqueResult.get().getFieldSchemaIds().size() - 1 == i
+            && uniqueResult.get().getFieldSchemaIds().size() > 1) {
+          fieldNames.append(" and ");
+        } else if (i < uniqueResult.get().getFieldSchemaIds().size() - 1
+            && uniqueResult.get().getFieldSchemaIds().size() > 1 && i != 0) {
+          fieldNames.append(", ");
+        }
+        fieldNames.append(fieldSchemaIdName.get(fieldSchemaId));
+        i++;
       }
       if (uniqueResult.get().getFieldSchemaIds().size() > 1) {
         description.append("The fields ").append(fieldNames).append(" are uniques within table");

@@ -1358,6 +1358,21 @@ public class RulesServiceImplTest {
     UniqueConstraintSchema unique = new UniqueConstraintSchema();
     unique.setFieldSchemaIds(new ArrayList<>());
     when(uniqueRepository.findById(Mockito.any())).thenReturn(Optional.of(unique));
+    DataSetSchema datasetSchema = new DataSetSchema();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
+    TableSchema tableSchema = new TableSchema();
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema = new FieldSchema();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
+    fieldSchema.setIdFieldSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    fieldSchemaList.add(fieldSchema);
+    recordSchema.setFieldSchema(fieldSchemaList);
+    tableSchema.setRecordSchema(recordSchema);
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchemaList.add(tableSchema);
+    datasetSchema.setTableSchemas(tableSchemaList);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     rulesServiceImpl.createUniqueConstraint("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
