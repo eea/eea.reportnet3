@@ -32,10 +32,12 @@ import org.eea.validation.persistence.repository.IntegritySchemaRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.repository.UniqueConstraintRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.TableSchema;
+import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
@@ -104,6 +106,10 @@ public class RulesServiceImpl implements RulesService {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The unique repository. */
+  @Autowired
+  private UniqueConstraintRepository uniqueRepository;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -793,9 +799,40 @@ public class RulesServiceImpl implements RulesService {
   public void createUniqueConstraint(String datasetSchemaId, String tableSchemaId,
       String uniqueId) {
     Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
-    Rule rule = AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId,
-        EntityTypeEnum.TABLE, "Table type uniqueConstraint", "TU" + shortcode,
-        "Checks if either one field or combination of fields are unique within table", uniqueId);
+    StringBuilder description = new StringBuilder();
+    Optional<UniqueConstraintSchema> uniqueResult =
+        uniqueRepository.findById(new ObjectId(uniqueId));
+    if (uniqueResult.isPresent()) {
+      int i = 0;
+      StringBuilder fieldNames = new StringBuilder();
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+      Map<ObjectId, String> fieldSchemaIdName = new HashMap<>();
+      for (TableSchema table : schema.getTableSchemas()) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          fieldSchemaIdName.put(field.getIdFieldSchema(), field.getHeaderName());
+        }
+      }
+
+      for (ObjectId fieldSchemaId : uniqueResult.get().getFieldSchemaIds()) {
+        if (uniqueResult.get().getFieldSchemaIds().size() - 1 == i
+            && uniqueResult.get().getFieldSchemaIds().size() > 1) {
+          fieldNames.append(" and ");
+        } else if (i < uniqueResult.get().getFieldSchemaIds().size() - 1
+            && uniqueResult.get().getFieldSchemaIds().size() > 1 && i != 0) {
+          fieldNames.append(", ");
+        }
+        fieldNames.append(fieldSchemaIdName.get(fieldSchemaId));
+        i++;
+      }
+      if (uniqueResult.get().getFieldSchemaIds().size() > 1) {
+        description.append("The fields ").append(fieldNames).append(" are uniques within table");
+      } else {
+        description.append("The field ").append(fieldNames).append(" is unique within table");
+      }
+    }
+    Rule rule =
+        AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId, EntityTypeEnum.TABLE,
+            "Table type uniqueConstraint", "TU" + shortcode, description.toString(), uniqueId);
     rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
