@@ -146,10 +146,18 @@ public final class LiteralConstants {
   /** The Constant DATAFLOWIDDESTINATION: {@value}. */
   public static final String DATAFLOWIDDESTINATION = "dataflowIdDestination";
 
+  /** The Constant RELEASESUBJECT. */
+  public static final String RELEASESUBJECT = "%s Realeased - %s";
+
+  /** The Constant RELEASEMESSAGE. */
+  public static final String RELEASEMESSAGE =
+      "This automatic notification informs that %s has released in %s on %s at TIME (CET)";
+
   /**
    * Instantiates a new literal constants.
    */
   private LiteralConstants() {
     throw new IllegalStateException("Utility class");
   }
+
 }
