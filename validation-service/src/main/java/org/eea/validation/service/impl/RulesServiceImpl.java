@@ -805,20 +805,24 @@ public class RulesServiceImpl implements RulesService {
     if (uniqueResult.isPresent()) {
       int i = 0;
       StringBuilder fieldNames = new StringBuilder();
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
       for (ObjectId fieldSchemaId : uniqueResult.get().getFieldSchemaIds()) {
-        Document documentField =
-            schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId.toString());
-        if (documentField.get("headerName") != null) {
-          if (uniqueResult.get().getFieldSchemaIds().size() - 1 == i
-              && uniqueResult.get().getFieldSchemaIds().size() > 1) {
-            fieldNames.append(" and ");
-          } else if (i < uniqueResult.get().getFieldSchemaIds().size() - 1
-              && uniqueResult.get().getFieldSchemaIds().size() > 1 && i != 0) {
-            fieldNames.append(", ");
+
+        for (TableSchema table : schema.getTableSchemas()) {
+          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+            if (field.getIdFieldSchema().equals(fieldSchemaId)) {
+              if (uniqueResult.get().getFieldSchemaIds().size() - 1 == i
+                  && uniqueResult.get().getFieldSchemaIds().size() > 1) {
+                fieldNames.append(" and ");
+              } else if (i < uniqueResult.get().getFieldSchemaIds().size() - 1
+                  && uniqueResult.get().getFieldSchemaIds().size() > 1 && i != 0) {
+                fieldNames.append(", ");
+              }
+              fieldNames.append(field.getHeaderName());
+              i++;
+            }
           }
-          fieldNames.append(documentField.get("headerName").toString());
         }
-        i++;
       }
       if (uniqueResult.get().getFieldSchemaIds().size() > 1) {
         description.append("The fields ").append(fieldNames).append(" are uniques within table");
