@@ -147,11 +147,11 @@ public final class LiteralConstants {
   public static final String DATAFLOWIDDESTINATION = "dataflowIdDestination";
 
   /** The Constant RELEASESUBJECT. */
-  public static final String RELEASESUBJECT = "%s Realeased - %s";
+  public static final String RELEASESUBJECT = "%s released %s";
 
   /** The Constant RELEASEMESSAGE. */
   public static final String RELEASEMESSAGE =
-      "This automatic notification informs that %s has released in %s on %s at TIME (CET)";
+      "This automatic notification informs that %s has successfully released in %s on %s(CET)";
 
   /**
    * Instantiates a new literal constants.
