@@ -171,7 +171,7 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let divRef = useRef();
 
-    const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+    const { areEquals, removeSemicolonSeparatedWhiteSpaces } = TextUtils;
 
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
 
@@ -490,9 +490,9 @@ const DataViewer = withRouter(
             field.fieldData[field.fieldData.fieldSchemaId] !== ''
           ) {
             if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
-              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(';');
             } else {
-              field.fieldData[field.fieldData.fieldSchemaId] = removeCommaSeparatedWhiteSpaces(
+              field.fieldData[field.fieldData.fieldSchemaId] = removeSemicolonSeparatedWhiteSpaces(
                 field.fieldData[field.fieldData.fieldSchemaId]
               );
             }
@@ -682,7 +682,7 @@ const DataViewer = withRouter(
               field.id,
               field.type,
               field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
-                ? value.join(',')
+                ? value.join(';')
                 : value
             );
 
@@ -1046,10 +1046,10 @@ const DataViewer = withRouter(
         <div className={styles.requiredTemplateWrapper}>
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
             <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
-          ) : rowData.field === 'Single select items' ||
-            rowData.field === 'Multiple select items' ||
-            rowData.field === 'Valid extensions' ? (
-            <Chips disabled={true} value={rowData.value.split(',')} className={styles.chips}></Chips>
+          ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
+            <Chips className={styles.chips} disabled={true} pasteSeparator=";" value={rowData.value.split(';')}></Chips>
+          ) : rowData.field === 'Valid extensions' ? (
+            <Chips className={styles.chips} disabled={true} value={rowData.value.split(',')}></Chips>
           ) : rowData.field === 'Maximum file size' ? (
             `${rowData.value} ${resources.messages['MB']}`
           ) : (
