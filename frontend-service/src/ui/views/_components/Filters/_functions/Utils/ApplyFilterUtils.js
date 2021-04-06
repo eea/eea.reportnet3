@@ -110,12 +110,12 @@ const onApplyFilters = ({
             new Date(dataItem[filter]).getTime() / 1000 <= dates[1] &&
             checkFilters(filteredKeys, dataItem, state) &&
             checkSearched(state, dataItem, searchedKeys) &&
-            checkSelected(state, dataItem, selectedKeys) &&
-            checkSelected(state, dataItem, checkedKeys)
+            checkSelected(state, dataItem, selectedKeys, actualFilterBy) &&
+            checkSelected(state, dataItem, checkedKeys, actualFilterBy)
         : checkFilters(filteredKeys, dataItem, state) &&
             checkSearched(state, dataItem, searchedKeys) &&
-            checkSelected(state, dataItem, selectedKeys) &&
-            checkSelected(state, dataItem, checkedKeys);
+            checkSelected(state, dataItem, selectedKeys, actualFilterBy) &&
+            checkSelected(state, dataItem, checkedKeys, actualFilterBy);
     }
 
     return (
@@ -123,8 +123,8 @@ const onApplyFilters = ({
       dataItem[filter].toLowerCase().includes(value.toLowerCase()) &&
       checkFilters(filteredKeys, dataItem, state) &&
       checkSearched(state, dataItem, searchedKeys) &&
-      checkSelected(state, dataItem, selectedKeys) &&
-      checkSelected(state, dataItem, checkedKeys) &&
+      checkSelected(state, dataItem, selectedKeys, actualFilterBy) &&
+      checkSelected(state, dataItem, checkedKeys, actualFilterBy) &&
       checkDates(state.filterBy[date], dataItem[date])
     );
   });
