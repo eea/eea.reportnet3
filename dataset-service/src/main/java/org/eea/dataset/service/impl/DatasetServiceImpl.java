@@ -3516,50 +3516,47 @@ public class DatasetServiceImpl implements DatasetService {
       Integer limit, Integer offset) {
     try {
       String queryFirstPart =
-          "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
-
+          "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
       String queryMiddlePartOne =
-          " end as \"tableName\",( select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\",(select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
-
+          " end as \"tableName\", ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as totalRecords, (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
       String queryMiddlePartTwo =
           " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) "
               + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
-
-      String queryFinalPart =
-          " ) as record) from dataset_%s.table_value tv ) as tableAux ) as tablesAux ";
-
+      String queryFinalPart = " ) as record) from dataset_%s.table_value tv ) as tableAux ";
       String paginationPart = " offset %s limit %s ";
-
       String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
-
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-
+      String tableName = "";
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-
       DataSetSchema datasetSchema =
           schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-
+      Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+      if (tableSchema != null) {
+        tableName = (String) tableSchema.get("nameTableSchema");
+      }
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-
-      StringBuilder query = new StringBuilder(queryFirstPart);
-
-      for (TableSchema table : tableSchemaList) {
-        query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema(),
-            table.getNameTableSchema()));
-      }
-      query.append(queryMiddlePartOne);
-      query.append(queryMiddlePartTwo);
-      for (TableSchema table : tableSchemaList) {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          query.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+      if (null != tableSchemaList) {
+        StringBuilder query = new StringBuilder(queryFirstPart);
+        query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
+        query.append(String.format(queryMiddlePartOne, datasetId));
+        for (TableSchema table : tableSchemaList) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaId))
+            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+              query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                  field.getHeaderName()));
+            }
         }
+        query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
+        Integer offsetAux = (limit * offset) - limit;
+        if (offsetAux < 0) {
+          offsetAux = 0;
+        }
+        query.append(String.format(paginationPart, offsetAux, limit));
+        query.append(String.format(queryFinalPart, datasetId, datasetId, datasetId));
+        LOG.info("Query: {} ", query);
+        outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+        LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
       }
-      query.append(String.format(paginationPart, offset, limit));
-      query.append(String.format(queryFinalPart, datasetId, datasetId, datasetId));
-      LOG.info("Query: " + query.toString());
-      outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
-      LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }

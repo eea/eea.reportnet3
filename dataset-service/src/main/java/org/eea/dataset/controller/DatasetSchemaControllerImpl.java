@@ -949,6 +949,25 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+  @Override
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
+  @GetMapping(value = "/getTableSchemasIds/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<String> getTableSchemasIds(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      return dataschemaService.getTableSchemasIds(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+  }
+
+
 
   /**
    * Export schemas.
