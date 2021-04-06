@@ -227,12 +227,14 @@ const DataFormFieldEditor = ({
       : records.newRecord.dataRow.find(
           r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
         );
+
     const conditionalFieldValue = !isNil(conditionalField)
       ? conditionalField.fieldData?.type === 'MULTISELECT_CODELIST'
-        ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.join(';')
+        ? Array.isArray(conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId])
+          ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.join('; ')
+          : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId].replace('; ', ';').replace(';', '; ')
         : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
       : '';
-
     try {
       setIsLoadingData(true);
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
@@ -443,7 +445,7 @@ const DataFormFieldEditor = ({
           ref={linkDropdownRef}
           value={RecordUtils.getMultiselectValues(
             columnWithLinks.linkItems,
-            !Array.isArray(fieldValue) ? fieldValue.split('; ').join(';') : fieldValue
+            !Array.isArray(fieldValue) ? fieldValue.replace('; ', ';').split(';') : fieldValue
           )}
           valuesSeparator=";"
         />
