@@ -174,10 +174,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     return fieldColumns;
   };
 
-  const filterOptionsDataCollection = [
-    { type: 'checkbox', properties: [{ name: 'dataProviderName' }, { name: 'feedbackStatus' }] },
-    { type: 'multiselect', properties: [{ name: 'countryCode' }] }
-  ];
+  const filterOptionsDataCollection = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
 
   const filterOptionsEUDataset = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
 
@@ -219,6 +216,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     <div className={styles.historicReleases}>
       {historicReleasesView === 'dataCollection' && (
         <Filters
+          checkboxOptions={['isDataCollectionReleased', 'isEUReleased']}
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}
