@@ -32,6 +32,7 @@ const TabView = withRouter(
     initialTabIndexDrag,
     isErrorDialogVisible,
     isDataflowOpen,
+    isDesignDatasetEditorRead,
     onTabAdd,
     onTabAddCancel,
     onTabBlur,
@@ -202,7 +203,7 @@ const TabView = withRouter(
       const id = `${idx}_header_${index}`;
       const ariaControls = `${idx}_content_${index}`;
       return (
-        !(isDataflowOpen && tab.props.addTab) && (
+        !(isDataflowOpen && isDesignDatasetEditorRead && tab.props.addTab) && (
           <Tab
             addTab={tab.props.addTab}
             ariaControls={ariaControls}
@@ -220,6 +221,7 @@ const TabView = withRouter(
             index={index}
             initialTabIndexDrag={initialTabIndexDrag}
             isDataflowOpen={isDataflowOpen}
+            isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isNavigationHidden={isNavigationHidden}
             key={id}
             leftIcon={tab.props.leftIcon}
