@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -2285,13 +2286,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public List<String> getTableSchemasIds(Long datasetId) throws EEAException {
     String datasetschemaId = getDatasetSchemaId(datasetId);
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetschemaId));
-    List<String> tableSchemaIdList = new ArrayList<>();
-    if (null != schema && !schema.getTableSchemas().isEmpty()) {
-      for (TableSchema table : schema.getTableSchemas()) {
-        tableSchemaIdList.add(table.getIdTableSchema().toString());
-      }
-    }
-    return tableSchemaIdList;
+    return schema.getTableSchemas().stream()
+        .map(tableSchema -> tableSchema.getIdTableSchema().toString()).collect(Collectors.toList());
   }
 
   /**
