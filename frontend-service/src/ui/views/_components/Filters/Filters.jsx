@@ -65,7 +65,8 @@ export const Filters = ({
     orderBy: {},
     property: '',
     searchBy: '',
-    searched: false
+    searched: false,
+    isOrdering: false
   });
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export const Filters = ({
   }, [data]);
 
   useEffect(() => {
-    if (filterState.filtered) {
+    if (filterState.filtered && !filterState.isOrdering) {
       onReApplyFilters();
     }
   }, [filterState.data]);
@@ -284,7 +285,9 @@ export const Filters = ({
 
     if (!isEmpty(filterBy)) {
       filterBy = filterState.previousState.filterBy;
+
       const possibleOptions = new Map();
+
       filterKeys.forEach(key => possibleOptions.set(key, new Set()));
 
       const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
@@ -296,50 +299,24 @@ export const Filters = ({
         })
       );
 
-      const removeInexistentFilters = keyValue => {
+      const removeInexistentMultiselectFilters = keyValue => {
         multiselect.forEach(key => {
           const option = possibleOptions.get(key);
 
           // key [0], value [1]
-          if (key === keyValue[0] && Array.isArray(keyValue[1])) {
-            keyValue[1] = keyValue[1].filter(value => option.has(value));
-          } else if (key === keyValue[0] && !Array.isArray(keyValue[1])) {
-            console.log(`key`, key);
-            console.log(`option`, option);
-            console.log(`keyValue`, keyValue);
-            console.log(` keyValue[1]`, keyValue[1]);
-            // keyValue[1] = option.has(keyValue[1].toLowerCase()) ? keyValue[1] : '';
+          if (key === keyValue[0]) {
+            if (key === 'pinned' || key === 'table' || key === 'field') {
+              keyValue[1] = keyValue[1].filter(value => option.has(value.toLowerCase()));
+            } else {
+              keyValue[1] = keyValue[1].filter(value => option.has(value));
+            }
           }
         });
 
         return keyValue;
       };
 
-      const parsedResult = Object.entries(filterBy).map(removeInexistentFilters);
-
-      // const filterByAsKeyValueArray = Object.entries(filterBy);
-
-      // const removeInexistentFilters = () => {
-      //   return filterByAsKeyValueArray.map(keyValue => {
-      //     multiselect.forEach(key => {
-      //       // key [0], value [1]
-      //       if (key === keyValue[0]) {
-      //         keyValue[1] = keyValue[1]?.filter(value => {
-      //           const option = possibleOptions.get(key);
-
-      //           if (key === 'pinned' || key === 'table' || key === 'field') {
-      //             return option.has(value.toLowerCase());
-      //           }
-      //           return option.has(value);
-      //         });
-      //       }
-      //     });
-
-      //     return keyValue;
-      //   });
-      // };
-
-      // const parsedResult = removeInexistentFilters();
+      const parsedResult = Object.entries(filterBy).map(removeInexistentMultiselectFilters);
 
       filterBy = Object.fromEntries(parsedResult);
 
