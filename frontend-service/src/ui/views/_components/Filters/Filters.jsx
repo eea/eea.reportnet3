@@ -28,21 +28,18 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const Filters = ({
+  options = [],
   checkboxOptions,
   className,
   data = [],
-  dateOptions,
   dropDownList,
-  dropdownOptions,
   filterByList,
   getFilteredData,
   getFilteredSearched = () => {},
-  inputOptions,
   matchMode,
   searchAll,
   searchBy = [],
   selectList,
-  selectOptions = [],
   sendData,
   sortable,
   sortCategory,
@@ -68,7 +65,8 @@ export const Filters = ({
     orderBy: {},
     property: '',
     searchBy: '',
-    searched: false
+    searched: false,
+    isOrdering: false
   });
 
   useEffect(() => {
@@ -76,8 +74,8 @@ export const Filters = ({
   }, [data]);
 
   useEffect(() => {
-    if (filterState.filtered) {
-      onReApplyFilters();
+    if (filterState.filtered && !filterState.isOrdering) {
+      parsePrevFilters();
     }
   }, [filterState.data]);
 
@@ -86,7 +84,7 @@ export const Filters = ({
   }, [filterState.filteredData]);
 
   useEffect(() => {
-    onReApplyFilters();
+    onReApplyFilters(Object.keys(filterState.filterBy), filterState.filterBy);
   }, [filterState.matchMode]);
 
   useEffect(() => {
@@ -111,7 +109,7 @@ export const Filters = ({
       filterDispatch({ type: 'SET_CLEARED_FILTERS', payload: false });
     }
   }, [filterState.clearedFilters]);
-  useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[dateOptions]) && onAnimateLabel([dateOptions], false));
+  useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[date]) && onAnimateLabel([date], false));
 
   const getCheckboxFilterState = property => {
     const [checkBox] = filterState.checkboxes.filter(checkbox => checkbox.property === property);
@@ -122,6 +120,8 @@ export const Filters = ({
     const filteredSearchedValue = filterState.filtered || filterState.searched ? true : false;
     filterDispatch({ type: 'FILTERED_SEARCHED_STATE', payload: { filteredSearchedValue } });
   };
+
+  const { input, multiselect, date, dropdown } = FiltersUtils.getOptionsNames(options);
 
   const getFilteredState = () => {
     let filteredStateValue = false;
@@ -148,10 +148,10 @@ export const Filters = ({
 
     const initialFilterBy = FiltersUtils.getFilterInitialState(
       data,
-      inputOptions,
-      selectOptions,
-      dateOptions,
-      dropdownOptions,
+      input,
+      multiselect,
+      date,
+      dropdown,
       checkboxOptions,
       filterByList
     );
@@ -159,21 +159,16 @@ export const Filters = ({
     const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
 
     const initialLabelAnimations = FiltersUtils.getLabelInitialState(
-      inputOptions,
-      selectOptions,
-      dateOptions,
-      dropdownOptions,
+      input,
+      multiselect,
+      date,
+      dropdown,
       checkboxOptions,
       filterState.filterBy
     );
 
-    const initialOrderBy = SortUtils.getOrderInitialState(
-      inputOptions,
-      selectOptions,
-      dateOptions,
-      dropdownOptions,
-      checkboxOptions
-    );
+    const initialOrderBy = SortUtils.getOrderInitialState(input, multiselect, date, dropdown, checkboxOptions);
+
     const initialCheckboxes = FiltersUtils.getCheckboxFilterInitialState(checkboxOptions);
 
     filterDispatch({
@@ -211,29 +206,10 @@ export const Filters = ({
     filterDispatch({
       type: 'CLEAR_ALL',
       payload: {
-        filterBy: FiltersUtils.getFilterInitialState(
-          data,
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          checkboxOptions
-        ),
+        filterBy: FiltersUtils.getFilterInitialState(data, input, multiselect, date, dropdown, checkboxOptions),
         filteredData: cloneDeep(data),
-        labelAnimations: ApplyFilterUtils.onClearLabelState(
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          checkboxOptions
-        ),
-        orderBy: SortUtils.getOrderInitialState(
-          inputOptions,
-          selectOptions,
-          dateOptions,
-          dropdownOptions,
-          checkboxOptions
-        ),
+        labelAnimations: ApplyFilterUtils.onClearLabelState(input, multiselect, date, dropdown, checkboxOptions),
+        orderBy: SortUtils.getOrderInitialState(input, multiselect, date, dropdown, checkboxOptions),
         searchBy: '',
         checkboxes: FiltersUtils.getCheckboxFilterInitialState(checkboxOptions),
         filtered: false,
@@ -244,9 +220,12 @@ export const Filters = ({
   };
 
   const onFilterData = (filter, value, actualFilterBy) => {
-    const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, inputOptions);
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, filter, input);
+
     const searchedKeys = !isEmpty(searchBy) ? searchBy : ApplyFilterUtils.getSearchKeys(filterState.data);
-    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, selectOptions);
+
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, filter, multiselect);
+
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkboxOptions);
 
     const filteredData = ApplyFilterUtils.onApplyFilters({
@@ -254,13 +233,12 @@ export const Filters = ({
       checkboxOptions,
       checkedKeys,
       data,
-      dateOptions,
-      dropdownOptions,
+      date,
       filter,
       filteredKeys: inputKeys,
       searchedKeys,
       selectedKeys,
-      selectOptions,
+      multiselect,
       state: filterState,
       value
     });
@@ -269,17 +247,20 @@ export const Filters = ({
   };
 
   const onOrderData = (order, property) => {
+    const { input, multiselect, date } = FiltersUtils.getOptionsNames(options);
+
     const sortedData = SortUtils.onSortData([...filterState.data], order, property, sortCategory);
     const filteredSortedData = SortUtils.onSortData([...filterState.filteredData], order, property, sortCategory);
     const orderBy = order === 0 ? -1 : order;
-    const resetOrder = SortUtils.onResetOrderData(inputOptions, selectOptions, dateOptions, checkboxOptions);
+    const resetOrder = SortUtils.onResetOrderData(input, multiselect, date, checkboxOptions);
 
     filterDispatch({ type: 'ORDER_DATA', payload: { filteredSortedData, orderBy, property, resetOrder, sortedData } });
   };
 
   const onSearchData = value => {
-    const inputKeys = FiltersUtils.getFilterKeys(filterState, '', inputOptions);
-    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', selectOptions);
+    const { input, multiselect } = FiltersUtils.getOptionsNames(options);
+    const inputKeys = FiltersUtils.getFilterKeys(filterState, '', input);
+    const selectedKeys = FiltersUtils.getSelectedKeys(filterState, '', multiselect);
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, '', checkboxOptions);
     const searchedValues = ApplyFilterUtils.onApplySearch(
       filterState.data,
@@ -297,54 +278,55 @@ export const Filters = ({
 
   const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
 
-  const onReApplyFilters = () => {
+  const parsePrevFilters = () => {
     let filterBy = { ...filterState.filterBy };
 
     const filterKeys = Object.keys(filterBy);
 
     if (!isEmpty(filterBy)) {
       filterBy = filterState.previousState.filterBy;
+
       const possibleOptions = new Map();
+
       filterKeys.forEach(key => possibleOptions.set(key, new Set()));
 
       const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
 
       initialFilteredData.forEach(item =>
-        selectOptions.forEach(filterKey => {
+        multiselect.forEach(filterKey => {
           let currentValue = possibleOptions.get(filterKey);
-          currentValue.add(item[filterKey]);
+          currentValue?.add(item[filterKey]);
         })
       );
 
-      const filterByAsKeyValueArray = Object.entries(filterBy);
+      const removeInexistentMultiselectFilters = keyValue => {
+        multiselect.forEach(key => {
+          const option = possibleOptions.get(key);
 
-      const removeInexistentFilters = () => {
-        return filterByAsKeyValueArray.map(keyValue => {
-          selectOptions.forEach(key => {
-            // key [0], value [1]
-            if (key === keyValue[0]) {
-              keyValue[1] = keyValue[1].filter(value => {
-                const option = possibleOptions.get(key);
-
-                if (key === 'pinned' || key === 'table' || key === 'field') {
-                  return option.has(value.toLowerCase());
-                }
-                return option.has(value);
-              });
+          // key [0], value [1]
+          if (key === keyValue[0]) {
+            if (key === 'pinned' || key === 'table' || key === 'field') {
+              keyValue[1] = keyValue[1].filter(value => option.has(value.toLowerCase()));
+            } else {
+              keyValue[1] = keyValue[1].filter(value => option.has(value));
             }
-          });
-
-          return keyValue;
+          }
         });
+
+        return keyValue;
       };
 
-      const parsedResult = removeInexistentFilters();
+      const parsedResult = Object.entries(filterBy).map(removeInexistentMultiselectFilters);
 
       filterBy = Object.fromEntries(parsedResult);
 
       filterDispatch({ type: 'UPDATE_FILTER_BY', payload: { filterBy } });
     }
 
+    onReApplyFilters(filterKeys, filterBy);
+  };
+
+  const onReApplyFilters = (filterKeys, filterBy) => {
     for (let index = 0; index < filterKeys.length; index++) {
       const filter = filterKeys[index];
       const value = filterBy[filter];
@@ -355,10 +337,10 @@ export const Filters = ({
     }
   };
 
-  const renderCalendarFilter = (property, i) => {
+  const renderCalendarFilter = property => {
     const inputId = uuid.v4();
     return (
-      <span key={i} className={styles.dataflowInput} ref={dateRef}>
+      <span key={property} className={styles.dataflowInput} ref={dateRef}>
         {renderOrderFilter(property)}
         <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
           <Calendar
@@ -447,8 +429,8 @@ export const Filters = ({
     );
   };
 
-  const renderDropdown = (property, i) => (
-    <span key={i} className={`${styles.dataflowInput}`}>
+  const renderDropdown = property => (
+    <span key={property} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <Dropdown
         ariaLabel={property}
@@ -473,13 +455,13 @@ export const Filters = ({
     </span>
   );
 
-  const renderInputFilter = (property, i) => (
-    <span key={i} className={styles.dataflowInput}>
+  const renderInputFilter = property => (
+    <span key={property} className={styles.dataflowInput}>
       {renderOrderFilter(property)}
       <span className={`p-float-label ${styles.label}`}>
         <InputText
           className={styles.inputFilter}
-          id={property}
+          id={`${property}_input`}
           onChange={event => onFilterData(property, event.target.value)}
           value={filterState.filterBy[property] ? filterState.filterBy[property] : ''}
         />
@@ -514,8 +496,8 @@ export const Filters = ({
       <Fragment />
     );
 
-  const renderSelectFilter = (property, i) => (
-    <span key={i} className={`${styles.dataflowInput}`}>
+  const renderMultiselectSelectFilter = (property, showInput) => (
+    <span key={property} className={`${styles.dataflowInput}`}>
       {renderOrderFilter(property)}
       <MultiSelect
         ariaLabelledBy={property}
@@ -525,7 +507,8 @@ export const Filters = ({
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
-        isFilter={true}
+        isFilter
+        filter={showInput}
         itemTemplate={selectTemplate}
         label={resources.messages[property]}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
@@ -568,6 +551,29 @@ export const Filters = ({
     </span>
   );
 
+  const filtersRenderer = () => {
+    return options.map(filterOption => {
+      switch (filterOption.type) {
+        case 'input':
+          return filterOption.properties.map(property => renderInputFilter(property.name));
+
+        case 'multiselect':
+          return filterOption.properties.map(property =>
+            renderMultiselectSelectFilter(property.name, property.showInput)
+          );
+
+        case 'dropdown':
+          return filterOption.properties.map(property => renderDropdown(property.name));
+
+        case 'date':
+          return filterOption.properties.map(property => renderCalendarFilter(property.name));
+
+        default:
+          return '';
+      }
+    });
+  };
+
   const selectTemplate = option => {
     if (!isNil(option.type)) {
       return (
@@ -581,11 +587,9 @@ export const Filters = ({
   return (
     <div className={className ? styles[className] : styles.header}>
       {searchAll && renderSearchAll()}
-      {inputOptions && inputOptions.map((option, i) => renderInputFilter(option, i))}
-      {selectOptions && selectOptions.map((option, i) => renderSelectFilter(option, i))}
-      {dropdownOptions && dropdownOptions.map((option, i) => renderDropdown(option, i))}
-      {dateOptions && dateOptions.map((option, i) => renderCalendarFilter(option, i))}
+      {filtersRenderer()}
       {matchMode && renderCheckbox()}
+
       {checkboxOptions && checkboxOptions.map((option, i) => renderCheckboxFilter(option, i))}
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (
@@ -599,7 +603,7 @@ export const Filters = ({
           <Fragment />
         )}
 
-        {(inputOptions || selectOptions || dateOptions || checkboxOptions) && (
+        {(input || multiselect || date || checkboxOptions) && (
           <Button
             className={`${
               sendData ? 'p-button-secondary' : 'p-button-secondary'

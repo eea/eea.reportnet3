@@ -116,6 +116,11 @@ export const ManualAcceptanceDatasets = ({
     />
   );
 
+  const filterOptions = [
+    { type: 'input', properties: [{ name: 'datasetName' }] },
+    { type: 'multiselect', properties: [{ name: 'dataProviderName' }, { name: 'feedbackStatus' }] }
+  ];
+
   const renderColumns = datasets => {
     const fieldColumns = getOrderedValidations(Object.keys(datasets[0])).map(field => {
       let template = null;
@@ -155,8 +160,7 @@ export const ManualAcceptanceDatasets = ({
         data={manualAcceptanceDatasetsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
-        inputOptions={['datasetName']}
-        selectOptions={['dataProviderName', 'feedbackStatus']}
+        options={filterOptions}
       />
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
         <DataTable

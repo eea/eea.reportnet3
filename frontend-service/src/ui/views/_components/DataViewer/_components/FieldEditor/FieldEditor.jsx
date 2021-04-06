@@ -130,9 +130,13 @@ const FieldEditor = ({
       datasetSchemaId = metadata.datasetSchemaId;
     }
 
-    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    const fieldInfo = RecordUtils.getCellInfo(colsSchema, cells.field);
+    const referencedFieldInfo = RecordUtils.getCellInfo(colsSchema, colSchema.referencedField.masterConditionalFieldId);
+    const hasMultipleValues = fieldInfo.pkHasMultipleValues;
+
     try {
       setIsLoadingData(true);
+      const conditionalValue = RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId);
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
         datasetId,
         colSchema.field,
@@ -140,7 +144,11 @@ const FieldEditor = ({
         //   ? colSchema.referencedField.idPk
         //   : colSchema.referencedField.referencedField.fieldSchemaId,
         filter,
-        RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
+        referencedFieldInfo?.type === 'MULTISELECT_CODELIST'
+          ? Array.isArray(conditionalValue)
+            ? conditionalValue.join('; ')
+            : conditionalValue.replace('; ', ';').replace(';', '; ')
+          : conditionalValue,
         datasetSchemaId,
         100
       );
