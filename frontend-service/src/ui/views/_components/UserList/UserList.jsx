@@ -1,5 +1,4 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -70,6 +69,16 @@ export const UserList = ({ dataflowId, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
+  const filterOptionsNoRepresentative = [
+    { type: 'input', properties: [{ name: 'dataflowName' }, { name: 'email' }] },
+    { type: 'multiselect', properties: [{ name: 'role' }] }
+  ];
+
+  const filterOptionsHasRepresentativeId = [
+    { type: 'input', properties: [{ name: 'email' }] },
+    { type: 'multiselect', properties: [{ name: 'role' }] }
+  ];
+
   return (
     <div className={styles.container}>
       {isLoading ? (
@@ -83,16 +92,14 @@ export const UserList = ({ dataflowId, representativeId }) => {
               data={userListData}
               getFilteredData={onLoadFilteredData}
               getFilteredSearched={getFilteredState}
-              inputOptions={['dataflowName', 'email']}
-              selectOptions={['role']}
+              options={filterOptionsNoRepresentative}
             />
           ) : (
             <Filters
               data={userListData}
               getFilteredData={onLoadFilteredData}
               getFilteredSearched={getFilteredState}
-              inputOptions={['email']}
-              selectOptions={['role']}
+              options={filterOptionsHasRepresentativeId}
             />
           )}
 

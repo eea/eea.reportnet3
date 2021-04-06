@@ -108,6 +108,15 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     return dataflowsToFilter;
   };
 
+  const filterOptions = [
+    {
+      type: 'input',
+      properties: [{ name: 'name' }, { name: 'description' }, { name: 'obligationTitle' }, { name: 'legalInstruments' }]
+    },
+    { type: 'multiselect', properties: [{ name: 'status' }] },
+    { type: 'date', properties: [{ name: 'expirationDate' }] }
+  ];
+
   const renderData = () =>
     userContext.userProps.listView ? (
       <TableViewSchemas
@@ -152,11 +161,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       <div className={styles.filters}>
         <Filters
           data={cloneSchemasState.allDataflows}
-          dateOptions={['expirationDate']}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredState}
-          inputOptions={['name', 'description', 'obligationTitle', 'legalInstruments']}
-          selectOptions={['status']}
+          options={filterOptions}
         />
       </div>
       {renderData()}
