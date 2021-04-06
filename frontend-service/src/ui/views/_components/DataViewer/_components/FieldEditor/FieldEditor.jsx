@@ -144,7 +144,7 @@ const FieldEditor = ({
         //   ? colSchema.referencedField.idPk
         //   : colSchema.referencedField.referencedField.fieldSchemaId,
         filter,
-        referencedFieldInfo.type === 'MULTISELECT_CODELIST'
+        referencedFieldInfo?.type === 'MULTISELECT_CODELIST'
           ? Array.isArray(conditionalValue)
             ? conditionalValue.join('; ')
             : conditionalValue.replace('; ', ';').replace(';', '; ')
