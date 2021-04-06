@@ -75,7 +75,7 @@ export const Filters = ({
 
   useEffect(() => {
     if (filterState.filtered && !filterState.isOrdering) {
-      onReApplyFilters();
+      parsePrevFilters();
     }
   }, [filterState.data]);
 
@@ -84,7 +84,7 @@ export const Filters = ({
   }, [filterState.filteredData]);
 
   useEffect(() => {
-    onReApplyFilters();
+    onReApplyFilters(Object.keys(filterState.filterBy), filterState.filterBy);
   }, [filterState.matchMode]);
 
   useEffect(() => {
@@ -278,7 +278,7 @@ export const Filters = ({
 
   const onToggleMatchMode = () => filterDispatch({ type: 'TOGGLE_MATCH_MODE', payload: !filterState.matchMode });
 
-  const onReApplyFilters = () => {
+  const parsePrevFilters = () => {
     let filterBy = { ...filterState.filterBy };
 
     const filterKeys = Object.keys(filterBy);
@@ -295,7 +295,7 @@ export const Filters = ({
       initialFilteredData.forEach(item =>
         multiselect.forEach(filterKey => {
           let currentValue = possibleOptions.get(filterKey);
-          currentValue.add(item[filterKey]);
+          currentValue?.add(item[filterKey]);
         })
       );
 
@@ -323,6 +323,10 @@ export const Filters = ({
       filterDispatch({ type: 'UPDATE_FILTER_BY', payload: { filterBy } });
     }
 
+    onReApplyFilters(filterKeys, filterBy);
+  };
+
+  const onReApplyFilters = (filterKeys, filterBy) => {
     for (let index = 0; index < filterKeys.length; index++) {
       const filter = filterKeys[index];
       const value = filterBy[filter];

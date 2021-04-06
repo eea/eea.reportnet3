@@ -27,7 +27,7 @@ const getFilteredSelectedOptions = (filteredData, property, selectedOptions) => 
 };
 
 const getOptionsNames = options => {
-  const separateOptions = { input: [], multiselect: [], date: [], dropdown: [] };
+  const separateOptions = { checkbox: [], date: [], dropdown: [], input: [], multiselect: [] };
 
   options.forEach(option => {
     const names = option.properties.map(property => property.name);
