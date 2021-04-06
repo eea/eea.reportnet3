@@ -331,20 +331,21 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   * @param message the message
    * @param uniqueId the unique id
    * @return the rule
    */
   public static Rule createUniqueConstraintAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description,
-      String uniqueId) {
+      String message, String uniqueId) {
     StringBuilder ruleString =
         new StringBuilder("isUniqueConstraint('").append(uniqueId).append("',");
 
 
 
     Rule rule = composeRule(referenceId, typeEntityEnum, nameRule, ruleString.toString(),
-        "Uniqueness and multiplicity constraints - either one field or combination of fields are unique within table",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+        "Uniqueness and multiplicity constraints - " + message, ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
 
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");

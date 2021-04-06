@@ -800,6 +800,7 @@ public class RulesServiceImpl implements RulesService {
       String uniqueId) {
     Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
     StringBuilder description = new StringBuilder();
+    StringBuilder message = new StringBuilder();
     Optional<UniqueConstraintSchema> uniqueResult =
         uniqueRepository.findById(new ObjectId(uniqueId));
     if (uniqueResult.isPresent()) {
@@ -825,14 +826,16 @@ public class RulesServiceImpl implements RulesService {
         i++;
       }
       if (uniqueResult.get().getFieldSchemaIds().size() > 1) {
-        description.append("The fields ").append(fieldNames).append(" are uniques within table");
+        description.append("Checks if ").append(fieldNames).append(" are uniques within table");
+        message.append("The fields ").append(fieldNames).append(" are uniques within table");
       } else {
-        description.append("The field ").append(fieldNames).append(" is unique within table");
+        description.append("Checks if ").append(fieldNames).append(" is unique within table");
+        message.append("The field ").append(fieldNames).append(" is unique within table");
       }
     }
-    Rule rule =
-        AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId, EntityTypeEnum.TABLE,
-            "Table type uniqueConstraint", "TU" + shortcode, description.toString(), uniqueId);
+    Rule rule = AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId,
+        EntityTypeEnum.TABLE, "Table type uniqueConstraint", "TU" + shortcode,
+        description.toString(), message.toString(), uniqueId);
     rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
