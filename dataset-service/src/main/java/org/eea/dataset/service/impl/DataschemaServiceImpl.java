@@ -2274,6 +2274,25 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  /**
+   * Gets the table schemas ids.
+   *
+   * @param datasetId the dataset id
+   * @return the table schemas ids
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<String> getTableSchemasIds(Long datasetId) throws EEAException {
+    String datasetschemaId = getDatasetSchemaId(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetschemaId));
+    List<String> tableSchemaIdList = new ArrayList<>();
+    if (null != schema && !schema.getTableSchemas().isEmpty()) {
+      for (TableSchema table : schema.getTableSchemas()) {
+        tableSchemaIdList.add(table.getIdTableSchema().toString());
+      }
+    }
+    return tableSchemaIdList;
+  }
 
   /**
    * Fill and update design dataset imported.

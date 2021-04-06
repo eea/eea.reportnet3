@@ -311,4 +311,17 @@ public interface DatasetSchemaController {
   void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam("file") MultipartFile file);
 
+
+  /**
+   * Gets the table schemas ids.
+   *
+   * @param datasetId the dataset id
+   * @return the table schemas ids
+   */
+  @GetMapping(value = "/getTableSchemasIds/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<String> getTableSchemasIds(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
 }

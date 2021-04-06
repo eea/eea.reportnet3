@@ -653,7 +653,9 @@ public class DataSetControllerImpl implements DatasetController {
   @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
   public ResponseEntity<StreamingResponseBody> etlExportDataset(
       @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("tableSchemaId") String tableSchemaId, @RequestParam("limit") Integer limit,
+      @RequestParam("offset") Integer offset) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -663,8 +665,8 @@ public class DataSetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
-    StreamingResponseBody responsebody =
-        outputStream -> datasetService.etlExportDataset(datasetId, outputStream);
+    StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
+        outputStream, tableSchemaId, limit, offset);
 
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
   }
