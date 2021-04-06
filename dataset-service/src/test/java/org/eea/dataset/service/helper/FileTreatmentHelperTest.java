@@ -149,6 +149,7 @@ public class FileTreatmentHelperTest {
     TableSchema tableSchema = new TableSchema();
     tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     tableSchema.setNameTableSchema("tableSchemaName");
+    tableSchema.setFixedNumber(Boolean.FALSE);
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableSchema);
 

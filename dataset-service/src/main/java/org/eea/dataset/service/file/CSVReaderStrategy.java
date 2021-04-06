@@ -371,7 +371,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
         field.setType(fieldSchemaVO.getType());
         field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
 
-        if ((field.getIdFieldSchema() != null && !fieldSchemaVO.getReadOnly() && !isDesignDataset)
+        if ((field.getIdFieldSchema() != null && !isDesignDataset)
             || (field.getIdFieldSchema() != null && isDesignDataset)) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());
