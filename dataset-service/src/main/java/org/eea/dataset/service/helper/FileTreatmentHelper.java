@@ -127,6 +127,7 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The record value id generator. */
   @Autowired
   private RecordValueIdGenerator recordValueIdGenerator;
 
@@ -795,10 +796,9 @@ public class FileTreatmentHelper implements DisposableBean {
   /**
    * Update records with conditions.
    *
-   * @param recordLists the record lists
+   * @param recordList the record list
    * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param totalRecords the total records
+   * @param tableSchema the table schema
    */
   private void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
       TableSchema tableSchema) {

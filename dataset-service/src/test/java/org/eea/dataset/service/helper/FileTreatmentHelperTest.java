@@ -65,54 +65,73 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The Class FileTreatmentHelperTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class FileTreatmentHelperTest {
 
+  /** The file treatment helper. */
   @InjectMocks
   private FileTreatmentHelper fileTreatmentHelper;
 
+  /** The dataset service. */
   @Mock
   private DatasetService datasetService;
 
+  /** The data set mapper. */
   @Mock
   private DataSetMapper dataSetMapper;
 
+  /** The integration controller. */
   @Mock
   private IntegrationControllerZuul integrationController;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The rules repository. */
   @Mock
   private RulesRepository rulesRepository;
 
+  /** The unique constraint repository. */
   @Mock
   private UniqueConstraintRepository uniqueConstraintRepository;
 
+  /** The rules controller zuul. */
   @Mock
   private RulesControllerZuul rulesControllerZuul;
 
+  /** The dataflow controller zuul. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The record store controller zuul. */
   @Mock
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  /** The lock service. */
   @Mock
   private LockService lockService;
 
+  /** The record value id generator. */
   @Mock
   private RecordValueIdGenerator recordValueIdGenerator;
 
+  /** The field value id generator. */
   @Mock
   private FieldValueIdGenerator fieldValueIdGenerator;
 
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
+  /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
 
@@ -131,6 +150,12 @@ public class FileTreatmentHelperTest {
         new CurrentThreadExecutor());
   }
 
+  /**
+   * Import file data csv test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataCsvTest() throws EEAException, IOException {
 
@@ -217,6 +242,12 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Import file data zip test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataZipTest() throws EEAException, IOException {
 
@@ -315,6 +346,12 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Import file data xls FME test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataXlsFMETest() throws EEAException, IOException {
 
@@ -370,6 +407,11 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Import file data exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void importFileDataExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
@@ -386,6 +428,11 @@ public class FileTreatmentHelperTest {
     }
   }
 
+  /**
+   * Import file data folder exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void importFileDataFolderExceptionTest() throws EEAException {
     TableSchema tableSchema = new TableSchema();
@@ -419,6 +466,12 @@ public class FileTreatmentHelperTest {
     }
   }
 
+  /**
+   * Import file data IO exception test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void importFileDataIOExceptionTest() throws IOException, EEAException {
     TableSchema tableSchema = new TableSchema();
@@ -452,6 +505,12 @@ public class FileTreatmentHelperTest {
     }
   }
 
+  /**
+   * Import file data csv fixed number test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataCsvFixedNumberTest() throws EEAException, IOException {
 
@@ -536,8 +595,6 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
-        .thenReturn(new ConnectionDataVO());
     Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
     Mockito.when(recordRepository.findByTableValueNoOrderOptimized(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
@@ -549,6 +606,12 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Import file data csv fixed number no read only test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataCsvFixedNumberNoReadOnlyTest() throws EEAException, IOException {
 
@@ -633,11 +696,9 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
-        .thenReturn(new ConnectionDataVO());
-    Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
     Mockito.when(recordRepository.findByTableValueNoOrderOptimized(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
+    Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
