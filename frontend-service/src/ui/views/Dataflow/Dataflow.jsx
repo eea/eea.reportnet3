@@ -313,7 +313,6 @@ const Dataflow = withRouter(({ history, match }) => {
       const representativesNoDatasets = dataflowState.data.representatives.filter(
         representative => !representative.hasDatasets
       );
-      //set for the first load
       setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
       setFormHasRepresentatives(!isEmpty(representativesNoDatasets));
     }
