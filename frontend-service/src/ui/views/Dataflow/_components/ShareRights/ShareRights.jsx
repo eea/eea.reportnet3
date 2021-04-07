@@ -21,7 +21,16 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
-export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, representativeId }) => {
+export const ShareRights = ({
+  columnHeader,
+  dataflowId,
+  dataProviderId,
+  deleteConfirmHeader,
+  deleteConfirmMessage,
+  notificationKey,
+  placeholder,
+  representativeId
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -37,13 +46,6 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
   });
 
   const [isLoading, setIsLoading] = useState(false);
-
-  const deleteConfirmMessage =
-    resources.messages[`${isCustodian ? 'editors' : 'reporters'}RightsDialogConfirmDeleteQuestion`];
-
-  const deleteConfirmHeader = isCustodian
-    ? resources.messages['editorsRightsDialogConfirmDeleteHeader']
-    : resources.messages['reportersRightsDialogConfirmDeleteHeader'];
 
   useEffect(() => {
     getAllContributors();
@@ -101,7 +103,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
     });
 
     if (!contributor.isNew && isPermissionChanged(contributor)) {
-       onUpdateContributor(contributor);
+      onUpdateContributor(contributor);
     } else {
       if (isValidEmail(contributor.account) && !shareRightsState.accountHasError) {
         onUpdateContributor(contributor);
@@ -122,8 +124,6 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
         onDataChange();
       }
     } catch (error) {
-      const notificationKey = isCustodian ? 'DELETE_EDITOR_ERROR' : 'DELETE_REPORTER_ERROR';
-
       notificationContext.add({ type: notificationKey });
     } finally {
       onToggleDeletingContributor(false);
@@ -252,7 +252,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
-          placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
+          placeholder={placeholder}
           value={contributor.account}
         />
         <label htmlFor="emptyInput" className="srOnly">
@@ -271,14 +271,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, isCustodian, represent
           <div className={styles.table}>
             {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
             <DataTable value={shareRightsState.contributors}>
-              <Column
-                body={renderAccountTemplate}
-                header={
-                  isCustodian
-                    ? resources.messages['editorsAccountColumn']
-                    : resources.messages['reportersAccountColumn']
-                }
-              />
+              <Column body={renderAccountTemplate} header={columnHeader} />
               <Column
                 body={renderWritePermissionsColumnTemplate}
                 header={resources.messages['writePermissionsColumn']}
