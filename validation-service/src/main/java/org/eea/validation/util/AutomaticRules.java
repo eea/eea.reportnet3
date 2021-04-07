@@ -8,10 +8,13 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
+
 /**
- * The Class ValidationRuleDrools.
+ * The Class AutomaticRules.
  */
 public class AutomaticRules {
+
+
 
   // we use that class to create a specifies rule for any of diferent automatic validation
 
@@ -157,12 +160,22 @@ public class AutomaticRules {
    * @return the list
    */
   public static List<Rule> createCodelistAutomaticRule(String referenceId,
-      EntityTypeEnum typeEntityEnum, String nameRule, String codelistItems, String shortCode,
-      String description) {
+      EntityTypeEnum typeEntityEnum, String nameRule, List<String> singleCodeListItems,
+      String shortCode, String description) {
     List<Rule> ruleList = new ArrayList<>();
     // PART INSENSITIVE
+    // we create the new list to send with ;
+    String codelist = "";
+    for (int i = 0; i < singleCodeListItems.size(); i++) {
+      if (i == 0) {
+        codelist = singleCodeListItems.get(0);
+      } else {
+        codelist =
+            new StringBuilder(codelist).append("; ").append(singleCodeListItems.get(i)).toString();
+      }
+    }
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
-        "isCodelistInsensitive(value,'" + codelistItems + "')",
+        "isCodelistInsensitive(value,'[" + codelist + "]')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
@@ -181,12 +194,22 @@ public class AutomaticRules {
    * @return the list
    */
   public static List<Rule> createMultiSelectCodelistAutomaticRule(String referenceId,
-      EntityTypeEnum typeEntityEnum, String nameRule, String codelistItems, String shortCode,
+      EntityTypeEnum typeEntityEnum, String nameRule, List<String> codelistItems, String shortCode,
       String description) {
+
     List<Rule> ruleList = new ArrayList<>();
     // PART INSENSITIVE
+    // we create the new list to send with ;
+    String codelist = "";
+    for (int i = 0; i < codelistItems.size(); i++) {
+      if (i == 0) {
+        codelist = codelistItems.get(0);
+      } else {
+        codelist = new StringBuilder(codelist).append("; ").append(codelistItems.get(i)).toString();
+      }
+    }
     ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
-        "isMultiSelectCodelistValidate(value,'" + codelistItems + "')",
+        "isMultiSelectCodelistValidate(value,'[" + codelist + "]')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
         shortCode, description));
     return ruleList;
@@ -308,18 +331,21 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param shortCode the short code
    * @param description the description
+   * @param message the message
    * @param uniqueId the unique id
    * @return the rule
    */
   public static Rule createUniqueConstraintAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description,
-      String uniqueId) {
+      String message, String uniqueId) {
     StringBuilder ruleString =
         new StringBuilder("isUniqueConstraint('").append(uniqueId).append("',");
 
+
+
     Rule rule = composeRule(referenceId, typeEntityEnum, nameRule, ruleString.toString(),
-        "Uniqueness and multiplicity constraints - either one field or combination of fields are unique within table",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+        "Uniqueness and multiplicity constraints - " + message, ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
 
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");

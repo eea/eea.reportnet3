@@ -20,7 +20,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -235,7 +235,7 @@ public class ValidationServiceTest {
    * The dataset schema controller.
    */
   @Mock
-  private DatasetSchemaController datasetSchemaController;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
   /**
    * The rules error utils.
@@ -515,7 +515,7 @@ public class ValidationServiceTest {
   public void testLoadRulesKnowledgeBase() throws FileNotFoundException, EEAException {
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
-    when(datasetSchemaController.getDatasetSchemaId(Mockito.any())).thenReturn("");
+    when(datasetSchemaControllerZuul.getDatasetSchemaId(Mockito.any())).thenReturn("");
     when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any())).thenReturn(kiebase);
     assertEquals("assertion error", kiebase, validationServiceImpl.loadRulesKnowledgeBase(1L));
   }
@@ -950,7 +950,7 @@ public class ValidationServiceTest {
    */
   @Test(expected = EEAException.class)
   public void loadRulesKnowledgeBaseException() throws EEAException, FileNotFoundException {
-    doThrow(new NullPointerException()).when(datasetSchemaController)
+    doThrow(new NullPointerException()).when(datasetSchemaControllerZuul)
         .getDatasetSchemaId(Mockito.any());
     try {
       validationServiceImpl.loadRulesKnowledgeBase(1L);

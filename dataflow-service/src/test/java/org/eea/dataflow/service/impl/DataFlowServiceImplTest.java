@@ -36,7 +36,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
-import org.eea.interfaces.controller.rod.ObligationController;
+import org.eea.interfaces.controller.rod.ObligationController.ObligationControllerZull;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -143,7 +143,7 @@ public class DataFlowServiceImplTest {
 
   /** The obligation controller. */
   @Mock
-  private ObligationController obligationController;
+  private ObligationControllerZull obligationControllerZull;
 
   /** The eu dataset controller zuul. */
   @Mock

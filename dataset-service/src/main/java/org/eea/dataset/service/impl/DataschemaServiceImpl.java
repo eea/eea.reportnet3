@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -2274,6 +2275,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  /**
+   * Gets the table schemas ids.
+   *
+   * @param datasetId the dataset id
+   * @return the table schemas ids
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<String> getTableSchemasIds(Long datasetId) throws EEAException {
+    String datasetschemaId = getDatasetSchemaId(datasetId);
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetschemaId));
+    return schema.getTableSchemas().stream()
+        .map(tableSchema -> tableSchema.getIdTableSchema().toString()).collect(Collectors.toList());
+  }
 
   /**
    * Fill and update design dataset imported.
