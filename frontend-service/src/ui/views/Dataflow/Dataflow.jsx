@@ -129,8 +129,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
 
-  const isLeadDesignerInDesign = isLeadDesigner && isDesign;
-
   const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
 
   const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
@@ -944,7 +942,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <ShareRights
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
-              showEditorsHeaders={isLeadDesignerInDesign}
+              showEditorsHeaders={true}
               representativeId={representativeId}
             />
           </Dialog>
@@ -959,7 +957,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <ShareRights
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
-              showEditorsHeaders={isLeadDesignerInDesign}
+              showEditorsHeaders={false}
               representativeId={representativeId}
             />
           </Dialog>
