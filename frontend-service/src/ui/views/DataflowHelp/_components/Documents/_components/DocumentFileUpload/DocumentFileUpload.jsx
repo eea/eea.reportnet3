@@ -178,6 +178,11 @@ const DocumentFileUpload = ({
                 return { ...previousValues, description: e.target.value };
               });
             }}
+            onFocus={() =>
+              setErrors(previousErrors => {
+                return { ...previousErrors, ['description']: { message: '', hasErrors: false } };
+              })
+            }
             onKeyPress={e => {
               if (e.key === 'Enter' && !checkInputForErrors('description')) onConfirm();
             }}
@@ -202,6 +207,11 @@ const DocumentFileUpload = ({
                 return { ...previousValues, lang: e.target.value };
               });
             }}
+            onFocus={() =>
+              setErrors(previousErrors => {
+                return { ...previousErrors, ['lang']: { message: '', hasErrors: false } };
+              })
+            }
             onKeyPress={e => {
               if (e.key === 'Enter' && !checkInputForErrors('lang')) onConfirm();
             }}>
