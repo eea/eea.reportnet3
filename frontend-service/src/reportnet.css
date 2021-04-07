@@ -2304,8 +2304,8 @@ form .error {
 }
 
 .formField.error:hover input {
-  border-color: var(--dialog-content-color);
-  box-shadow: none;
+  border-color: var(--errors);
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
   outline: none;
 }
 
