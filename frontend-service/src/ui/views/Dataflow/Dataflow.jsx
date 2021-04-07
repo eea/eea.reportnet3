@@ -885,7 +885,11 @@ const Dataflow = withRouter(({ history, match }) => {
         <Title
           icon="clone"
           iconSize="4rem"
-          subtitle={!isNil(country) ? `${resources.messages['dataflow']} - ${country}` : resources.messages['dataflow']}
+          subtitle={
+            isInsideACountry && !isNil(country)
+              ? `${resources.messages['dataflow']} - ${country}`
+              : resources.messages['dataflow']
+          }
           title={dataflowState.name}
         />
 
