@@ -379,6 +379,7 @@ export const WebLinks = ({
                     onDescriptionChange(e.target.value);
                   }}
                   onBlur={() => checkIsCorrectInputValue('description')}
+                  onFocus={() => setErrors('description', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('description')) {
                       onSaveRecord();
@@ -403,6 +404,7 @@ export const WebLinks = ({
                   name="url"
                   onChange={e => onWebLinkUrlChange(e.target.value)}
                   onBlur={() => checkIsCorrectInputValue('url')}
+                  onFocus={() => setErrors('url', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('url')) {
                       onSaveRecord();
