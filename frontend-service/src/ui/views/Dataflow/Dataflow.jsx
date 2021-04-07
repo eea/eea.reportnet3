@@ -941,8 +941,8 @@ const Dataflow = withRouter(({ history, match }) => {
             <ShareRights
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
-              showEditorsHeaders={true}
               representativeId={representativeId}
+              showEditorsHeaders={true}
             />
           </Dialog>
         )}
@@ -956,8 +956,8 @@ const Dataflow = withRouter(({ history, match }) => {
             <ShareRights
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
-              showEditorsHeaders={false}
               representativeId={representativeId}
+              showReportersHeaders={true}
             />
           </Dialog>
         )}

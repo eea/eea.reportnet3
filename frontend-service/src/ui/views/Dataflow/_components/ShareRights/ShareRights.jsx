@@ -21,7 +21,13 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
-export const ShareRights = ({ dataflowId, dataProviderId, showEditorsHeaders, representativeId }) => {
+export const ShareRights = ({
+  dataflowId,
+  dataProviderId,
+  representativeId,
+  showEditorsHeaders,
+  showReportersHeaders
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -38,12 +44,55 @@ export const ShareRights = ({ dataflowId, dataProviderId, showEditorsHeaders, re
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const deleteConfirmMessage =
-    resources.messages[`${showEditorsHeaders ? 'editors' : 'reporters'}RightsDialogConfirmDeleteQuestion`];
+  const getColumnHeader = () => {
+    if (showReportersHeaders) {
+      return resources.messages['reportersAccountColumn'];
+    }
 
-  const deleteConfirmHeader = showEditorsHeaders
-    ? resources.messages['editorsRightsDialogConfirmDeleteHeader']
-    : resources.messages['reportersRightsDialogConfirmDeleteHeader'];
+    if (showEditorsHeaders) {
+      return resources.messages['editorsAccountColumn'];
+    }
+  };
+
+  const getDeleteConfirmHeader = () => {
+    if (showReportersHeaders) {
+      return resources.messages[`reportersRightsDialogConfirmDeleteHeader`];
+    }
+
+    if (showEditorsHeaders) {
+      return resources.messages[`editorsRightsDialogConfirmDeleteHeader`];
+    }
+  };
+
+  const getDeleteConfirmMessage = () => {
+    if (showReportersHeaders) {
+      return resources.messages[`reportersRightsDialogConfirmDeleteQuestion`];
+    }
+
+    if (showEditorsHeaders) {
+      return resources.messages[`editorsRightsDialogConfirmDeleteQuestion`];
+    }
+  };
+
+  const getPlaceholder = () => {
+    if (showReportersHeaders) {
+      return resources.messages['manageRolesReporterDialogInputPlaceholder'];
+    }
+
+    if (showEditorsHeaders) {
+      return resources.messages['manageRolesEditorDialogInputPlaceholder'];
+    }
+  };
+
+  const getNotificationKey = () => {
+    if (showReportersHeaders) {
+      return 'DELETE_REPORTER_ERROR';
+    }
+
+    if (showEditorsHeaders) {
+      return 'DELETE_EDITOR_ERROR';
+    }
+  };
 
   useEffect(() => {
     getAllContributors();
@@ -122,9 +171,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, showEditorsHeaders, re
         onDataChange();
       }
     } catch (error) {
-      const notificationKey = showEditorsHeaders ? 'DELETE_EDITOR_ERROR' : 'DELETE_REPORTER_ERROR';
-
-      notificationContext.add({ type: notificationKey });
+      notificationContext.add({ type: getNotificationKey() });
     } finally {
       onToggleDeletingContributor(false);
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
@@ -252,11 +299,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, showEditorsHeaders, re
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
-          placeholder={
-            showEditorsHeaders
-              ? resources.messages['manageRolesEditorDialogInputPlaceholder']
-              : resources.messages['manageRolesReporterDialogInputPlaceholder']
-          }
+          placeholder={getPlaceholder()}
           value={contributor.account}
         />
         <label htmlFor="emptyInput" className="srOnly">
@@ -275,14 +318,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, showEditorsHeaders, re
           <div className={styles.table}>
             {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
             <DataTable value={shareRightsState.contributors}>
-              <Column
-                body={renderAccountTemplate}
-                header={
-                  showEditorsHeaders
-                    ? resources.messages['editorsAccountColumn']
-                    : resources.messages['reportersAccountColumn']
-                }
-              />
+              <Column body={renderAccountTemplate} header={getColumnHeader()} />
               <Column
                 body={renderWritePermissionsColumnTemplate}
                 header={resources.messages['writePermissionsColumn']}
@@ -302,7 +338,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, showEditorsHeaders, re
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={shareRightsState.isContributorDeleting}
-          header={deleteConfirmHeader}
+          header={getDeleteConfirmHeader()}
           iconConfirm={shareRightsState.isContributorDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
@@ -314,7 +350,7 @@ export const ShareRights = ({ dataflowId, dataProviderId, showEditorsHeaders, re
             })
           }
           visible={shareRightsState.isDeleteDialogVisible}>
-          {deleteConfirmMessage}
+          {getDeleteConfirmMessage()}
         </ConfirmDialog>
       )}
     </Fragment>
