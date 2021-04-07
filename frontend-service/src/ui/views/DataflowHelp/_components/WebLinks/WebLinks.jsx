@@ -370,7 +370,7 @@ export const WebLinks = ({
           visible={webLinksState.isAddOrEditWebLinkDialogVisible}>
           <form>
             <fieldset>
-              <div className={`formField${webLinksState.errors.description.hasErrors ? ' error' : ''}`}>
+              <div className={`formField ${webLinksState.errors.description.hasErrors ? 'error' : ''}`}>
                 <input
                   id={`descriptionWebLinks`}
                   ref={inputRef}
@@ -397,7 +397,7 @@ export const WebLinks = ({
                 )}
               </div>
 
-              <div className={`formField${webLinksState.errors.url.hasErrors ? ' error' : ''}`}>
+              <div className={`formField ${webLinksState.errors.url.hasErrors ? 'error' : ''}`}>
                 <input
                   id={`urlWebLinks`}
                   name="url"
