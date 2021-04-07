@@ -1047,6 +1047,7 @@
     "uploadFileError": "Error uploading file",
     "publicStatusLeftSideBarButton": "Public status",
     "showPublicInfoDataflowDialogHeader": "Show/hide public dataflow data",
-    "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available"
+    "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available",
+    "manageRolesReporterDialogInputPlaceholder": "Reporter account..."
   }
 }
