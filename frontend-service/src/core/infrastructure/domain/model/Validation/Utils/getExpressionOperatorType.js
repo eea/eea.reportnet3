@@ -5,9 +5,7 @@ export const getExpressionOperatorType = (operator, type = 'field') => {
   const confOperators = validations[`${type}OperatorsTypesFromDTO`];
 
   const selectedOperators = confOperators.filter(operatorTypeObject => {
-    if (operatorTypeObject.operators.includes(operator)) {
-      return operatorTypeObject;
-    }
+    return operatorTypeObject.operators.includes(operator) && operatorTypeObject;
   });
 
   const [selectedOperator] = selectedOperators;

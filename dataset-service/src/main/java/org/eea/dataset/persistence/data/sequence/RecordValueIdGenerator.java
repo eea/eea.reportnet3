@@ -7,10 +7,12 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
+import org.springframework.stereotype.Component;
 
 /**
  * The Class RecordValueGenerator.
  */
+@Component
 public class RecordValueIdGenerator implements IdentifierGenerator {
 
 

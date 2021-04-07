@@ -1,6 +1,8 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
+
 const parseInsideLeadReporters = (leadReporters = []) => {
   const reporters = {};
   for (let index = 0; index < leadReporters.length; index++) {
@@ -37,7 +39,5 @@ export const isDuplicatedLeadReporter = (inputValue, dataProviderId, leadReporte
 };
 
 export const isValidEmail = email => {
-  const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-  return expression.test(email);
+  return RegularExpressions['email'].test(email);
 };

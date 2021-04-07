@@ -36,11 +36,13 @@ import org.eea.validation.persistence.repository.IntegritySchemaRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.RulesSequenceRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.repository.UniqueConstraintRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.RecordSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
+import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.util.KieBaseManager;
@@ -111,6 +113,10 @@ public class RulesServiceImplTest {
    */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The unique repository. */
+  @Mock
+  private UniqueConstraintRepository uniqueRepository;
 
   private SecurityContext securityContext;
 
@@ -365,7 +371,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("codelistItems", "[2, 2]");
+    doc.put("codelistItems", new ArrayList());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
@@ -385,7 +391,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesMultiCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("codelistItems", "[2, 2]");
+    doc.put("codelistItems", new ArrayList());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
@@ -1349,6 +1355,24 @@ public class RulesServiceImplTest {
   @Test
   public void createUniqueConstraintTest() {
     when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    UniqueConstraintSchema unique = new UniqueConstraintSchema();
+    unique.setFieldSchemaIds(new ArrayList<>());
+    when(uniqueRepository.findById(Mockito.any())).thenReturn(Optional.of(unique));
+    DataSetSchema datasetSchema = new DataSetSchema();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
+    TableSchema tableSchema = new TableSchema();
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema = new FieldSchema();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
+    fieldSchema.setIdFieldSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    fieldSchemaList.add(fieldSchema);
+    recordSchema.setFieldSchema(fieldSchemaList);
+    tableSchema.setRecordSchema(recordSchema);
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchemaList.add(tableSchema);
+    datasetSchema.setTableSchemas(tableSchemaList);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     rulesServiceImpl.createUniqueConstraint("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         "5e44110d6a9e3a270ce13fac");
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());

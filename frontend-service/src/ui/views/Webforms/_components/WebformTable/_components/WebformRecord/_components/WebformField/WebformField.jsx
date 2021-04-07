@@ -135,7 +135,11 @@ export const WebformField = ({
         datasetId,
         field.fieldSchemaId,
         filter,
-        !isNil(conditionalField) ? conditionalField.value : field.value,
+        !isNil(conditionalField)
+          ? conditionalField.type === 'MULTISELECT_CODELIST'
+            ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
+            : conditionalField.value
+          : field.value,
         datasetSchemaId,
         100
       );
@@ -198,7 +202,7 @@ export const WebformField = ({
     webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
-        ? value.join(',')
+        ? value.join(';')
         : value;
 
     try {
@@ -251,10 +255,30 @@ export const WebformField = ({
 
   const onToggleDialogVisible = value => webformFieldDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
-  const getAttachExtensions = [{ fileExtension: selectedValidExtensions || [] }]
+  const getAttachExtensions = [{ fileExtension: element.validExtensions || [] }]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
     .join(', ');
+
+  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
+  ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+    !isNil(element.maxSize) && element.maxSize.toString() !== '0'
+      ? `${element.maxSize} ${resources.messages['MB']}`
+      : resources.messages['maxSizeNotDefined']
+  }`;
+
+  const onUploadFileError = async ({ xhr }) => {
+    if (xhr.status === 400) {
+      notificationContext.add({
+        type: 'UPLOAD_FILE_ERROR'
+      });
+    }
+    if (xhr.status === 423) {
+      notificationContext.add({
+        type: 'GENERIC_BLOCKED_ERROR'
+      });
+    }
+  };
 
   const renderSinglePamsTemplate = option => {
     const pams = pamsRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
@@ -305,7 +329,6 @@ export const WebformField = ({
         if (field.pkHasMultipleValues) {
           return (
             <MultiSelect
-              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -323,6 +346,7 @@ export const WebformField = ({
               options={linkItemsOptions}
               optionLabel="itemType"
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
+              valuesSeparator=";"
             />
           );
         } else {
@@ -361,7 +385,6 @@ export const WebformField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
@@ -387,6 +410,7 @@ export const WebformField = ({
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
             )}
+            valuesSeparator=";"
           />
         );
 
@@ -559,6 +583,7 @@ export const WebformField = ({
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
           fileLimit={1}
+          infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
@@ -569,6 +594,7 @@ export const WebformField = ({
           mode="advanced"
           multiple={false}
           name="file"
+          onError={onUploadFileError}
           onUpload={onAttach}
           operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {

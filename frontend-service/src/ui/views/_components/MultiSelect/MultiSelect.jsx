@@ -16,7 +16,7 @@ import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class MultiSelect extends Component {
   static defaultProps = {
-    addSpaceCommaSeparator: false,
+    addSpaceAfterSeparator: true,
     appendTo: null,
     ariaLabelledBy: null,
     checkAllHeader: null,
@@ -55,11 +55,12 @@ export class MultiSelect extends Component {
     tabIndex: '0',
     tooltip: null,
     tooltipOptions: null,
-    value: null
+    value: null,
+    valuesSeparator: ','
   };
 
   static propTypes = {
-    addSpaceCommaSeparator: PropTypes.bool,
+    addSpaceAfterSeparator: PropTypes.bool,
     appendTo: PropTypes.object,
     ariaLabelledBy: PropTypes.string,
     checkAllHeader: PropTypes.string,
@@ -98,7 +99,8 @@ export class MultiSelect extends Component {
     tabIndex: PropTypes.string,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object,
-    value: PropTypes.any
+    value: PropTypes.any,
+    valuesSeparator: PropTypes.string
   };
 
   constructor(props) {
@@ -268,6 +270,7 @@ export class MultiSelect extends Component {
     setTimeout(() => {
       this.panel.element.style.display = 'none';
       DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+      this.clearFilter();
     }, 150);
   }
 
@@ -410,7 +413,9 @@ export class MultiSelect extends Component {
 
   filterOptions(options) {
     let filterValue = this.state.filter.trim().toLowerCase();
-    let searchFields = this.props.filterBy ? this.props.filterBy.split(',') : [this.props.optionLabel || 'label'];
+    let searchFields = this.props.filterBy
+      ? this.props.filterBy.split(this.props.valuesSeparator)
+      : [this.props.optionLabel || 'label'];
     return MultiSelectUtils.filter(options, searchFields, filterValue, this.props.filterMatchMode);
   }
 
@@ -453,7 +458,7 @@ export class MultiSelect extends Component {
       label = '';
       for (let i = 0; i < this.props.value.length; i++) {
         if (i !== 0) {
-          label += this.props.addSpaceCommaSeparator ? ', ' : ',';
+          label += this.props.addSpaceAfterSeparator ? `${this.props.valuesSeparator} ` : this.props.valuesSeparator;
         }
         label += this.findLabelByValue(this.props.value[i]);
       }

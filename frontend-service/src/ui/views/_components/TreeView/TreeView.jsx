@@ -57,6 +57,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             options={columnOptions[propertyName]['filterType']['multiselect'][field]}
             style={{ width: '100%' }}
             value={treeViewState.filters[field]}
+            valuesSeparator=";"
           />
           <label id={propertyName} className="srOnly">
             {propertyName}
@@ -238,7 +239,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
 
 const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
-const codelistTemplate = rowData => <Chips disabled={true} value={rowData.codelistItems}></Chips>;
+const codelistTemplate = rowData => <Chips disabled={true} pasteSeparator=";" value={rowData.codelistItems}></Chips>;
 
 const getFieldTypeValue = value => {
   const fieldTypes = [

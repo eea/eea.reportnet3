@@ -3402,6 +3402,7 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-50);
+  cursor: pointer;
 }
 
 /* Accessibility */

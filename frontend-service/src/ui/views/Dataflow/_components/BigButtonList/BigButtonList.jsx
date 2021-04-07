@@ -57,8 +57,7 @@ export const BigButtonList = ({
   setIsCopyDataCollectionToEuDatasetLoading,
   setIsExportEuDatasetLoading,
   setIsReceiptLoading,
-  setUpdatedDatasetSchema,
-  updatedDatasetSchema
+  setUpdatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -353,7 +352,7 @@ export const BigButtonList = ({
       const { status } = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
       if (status >= 200 && status <= 299) {
         onUpdateData();
-        setUpdatedDatasetSchema(remove(updatedDatasetSchema, event => event.schemaIndex != index));
+        setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex != index));
       }
     } catch (error) {
       console.error(error.response);
@@ -402,7 +401,7 @@ export const BigButtonList = ({
       setIsExportEuDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+        notificationContext.add({ type: 'EU_DATASET_LOCKED_ERROR' });
       } else {
         notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
       }
@@ -556,8 +555,7 @@ export const BigButtonList = ({
     onShowManualTechnicalAcceptanceDialog,
     onShowNewSchemaDialog,
     onShowUpdateDataCollectionModal,
-    setErrorDialogData,
-    updatedDatasetSchema
+    setErrorDialogData
   })
     .filter(button => button.visibility)
     .map((button, i) => <BigButton key={i} {...button} />);
@@ -591,7 +589,7 @@ export const BigButtonList = ({
           visible={newDatasetDialog}>
           <NewDatasetSchemaForm
             dataflowId={dataflowId}
-            datasetSchemaInfo={updatedDatasetSchema}
+            datasetSchemaInfo={dataflowState.updatedDatasetSchema}
             onCreate={onCreateDatasetSchema}
             onUpdateData={onUpdateData}
             setNewDatasetDialog={setNewDatasetDialog}

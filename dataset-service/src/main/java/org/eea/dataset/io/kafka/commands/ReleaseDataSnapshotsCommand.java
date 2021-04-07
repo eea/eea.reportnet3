@@ -2,6 +2,7 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -9,15 +10,21 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.communication.EmailVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +57,14 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The email controller zuul. */
+  @Autowired
+  private EmailControllerZuul emailControllerZuul;
+
+  /** The user management controller zuul. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZuul;
 
   /**
    * The Constant LOG.
@@ -108,6 +123,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         }
       }
 
+      // Send email to custodians and providers
+      sendMail(dateRelease, dataset, dataflowVO);
+
       // At this point the process of releasing all the datasets has been finished so we unlock
       // everything involved
       datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
@@ -139,5 +157,36 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
     }
 
+  }
+
+
+  /**
+   * Send mail.
+   *
+   * @param dateRelease the date release
+   * @param dataset the dataset
+   * @param dataflowVO the dataflow VO
+   */
+  private void sendMail(String dateRelease, DataSetMetabaseVO dataset, DataFlowVO dataflowVO) {
+    // get custodian and stewards emails
+    List<UserRepresentationVO> custodians = userManagementControllerZuul
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowVO.getId()));
+    List<UserRepresentationVO> stewards = userManagementControllerZuul
+        .getUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowVO.getId()));
+    List<String> emails = new ArrayList<>();
+    if (null != custodians) {
+      custodians.stream().forEach(custodian -> emails.add(custodian.getEmail()));
+    }
+    if (null != stewards) {
+      stewards.stream().forEach(steward -> emails.add(steward.getEmail()));
+    }
+
+    EmailVO emailVO = new EmailVO();
+    emailVO.setBbc(emails);
+    emailVO.setSubject(String.format(LiteralConstants.RELEASESUBJECT, dataset.getDataSetName(),
+        dataflowVO.getName()));
+    emailVO.setText(String.format(LiteralConstants.RELEASEMESSAGE, dataset.getDataSetName(),
+        dataflowVO.getName(), dateRelease));
+    emailControllerZuul.sendMessage(emailVO);
   }
 }

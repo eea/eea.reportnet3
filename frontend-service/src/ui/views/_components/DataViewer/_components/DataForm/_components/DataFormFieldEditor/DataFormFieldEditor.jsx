@@ -227,10 +227,14 @@ const DataFormFieldEditor = ({
       : records.newRecord.dataRow.find(
           r => first(Object.keys(r.fieldData)) === referencedField.masterConditionalFieldId
         );
-    const conditionalFieldValue = !isNil(conditionalField)
-      ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
-      : '';
 
+    const conditionalFieldValue = !isNil(conditionalField)
+      ? conditionalField.fieldData?.type === 'MULTISELECT_CODELIST'
+        ? Array.isArray(conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId])
+          ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.join('; ')
+          : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.replace('; ', ';').replace(';', '; ')
+        : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
+      : '';
     try {
       setIsLoadingData(true);
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
@@ -297,7 +301,10 @@ const DataFormFieldEditor = ({
         optionLabel="itemType"
         options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
         ref={dropdownRef}
-        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        value={RecordUtils.getCodelistValue(
+          RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist']),
+          fieldValue
+        )}
       />
     );
   };
@@ -305,7 +312,6 @@ const DataFormFieldEditor = ({
   const renderMultiselectCodelist = (field, fieldValue) => {
     return (
       <MultiSelect
-        addSpaceCommaSeparator={true}
         appendTo={document.body}
         disabled={(column.readOnly && reporting) || isSaving}
         maxSelectedLabels={10}
@@ -319,6 +325,7 @@ const DataFormFieldEditor = ({
         ref={multiDropdownRef}
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        valuesSeparator=";"
       />
     );
   };
@@ -422,7 +429,6 @@ const DataFormFieldEditor = ({
     if (column.pkHasMultipleValues) {
       return (
         <MultiSelect
-          addSpaceCommaSeparator={true}
           appendTo={document.body}
           clearButton={false}
           disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
@@ -442,8 +448,9 @@ const DataFormFieldEditor = ({
           ref={linkDropdownRef}
           value={RecordUtils.getMultiselectValues(
             columnWithLinks.linkItems,
-            !Array.isArray(fieldValue) ? fieldValue.split(', ').join(',') : fieldValue
+            !Array.isArray(fieldValue) ? fieldValue.replace('; ', ';').split(';') : fieldValue
           )}
+          valuesSeparator=";"
         />
       );
     } else {

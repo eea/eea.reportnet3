@@ -1,17 +1,16 @@
 package org.eea.dataset.io.kafka.commands;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,10 +37,6 @@ public class ExecutePropagateNewFieldCommandTest {
   @Mock
   private DatasetService datasetService;
 
-  /** The update record helper. */
-  @Mock
-  private UpdateRecordHelper updateRecordHelper;
-
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
@@ -51,6 +46,9 @@ public class ExecutePropagateNewFieldCommandTest {
   /** The lock service. */
   @Mock
   private LockService lockService;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Inits the mocks.
@@ -80,13 +78,15 @@ public class ExecutePropagateNewFieldCommandTest {
     data.put("uuId", "1");
     data.put("typeField", DataType.TEXT);
     data.put("numPag", 1);
+    List<Integer> pages = new ArrayList<>();
+    pages.add(0);
+    data.put("pages", pages);
     eeaEventVO.setData(data);
 
-    ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<String, Integer>();
-    processesMap.put("1", 1);
-    when(updateRecordHelper.getProcessesMap()).thenReturn(processesMap);
+
     executePropagateCommand.execute(eeaEventVO);
-    Mockito.verify(updateRecordHelper, times(1)).getProcessesMap();
+    Mockito.verify(datasetService, Mockito.times(1)).saveNewFieldPropagation(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
   }
 
@@ -102,14 +102,15 @@ public class ExecutePropagateNewFieldCommandTest {
     data.put("idFieldSchema", "5cf0e9b3b793310e9ceca190");
     data.put("typeField", DataType.TEXT);
     data.put("uuId", "1");
+    data.put("numPag", 0);
+    List<Integer> pages = new ArrayList<>();
+    pages.add(0);
+    data.put("pages", pages);
     eeaEventVO.setData(data);
 
-    ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<String, Integer>();
-    processesMap.put("1", 1);
-    when(updateRecordHelper.getProcessesMap()).thenReturn(processesMap);
     executePropagateCommand.execute(eeaEventVO);
-    Mockito.verify(updateRecordHelper, times(1)).getProcessesMap();
-
+    Mockito.verify(datasetService, Mockito.times(1)).saveNewFieldPropagation(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 

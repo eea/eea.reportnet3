@@ -344,7 +344,8 @@ public interface DatasetService {
    * @return the field values referenced
    */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String datasetSchemaId,
-      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber);
+      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber)
+      throws EEAException;
 
   /**
    * Gets the referenced dataset id.
@@ -365,7 +366,8 @@ public interface DatasetService {
    * @return the ETL dataset VO
    *
    */
-  void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream);
+  void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream, String tableSchemaId,
+      Integer limit, Integer offset);
 
 
   /**

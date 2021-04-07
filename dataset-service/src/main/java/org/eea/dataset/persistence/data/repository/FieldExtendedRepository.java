@@ -4,6 +4,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * The Interface DatasetExtendedRepository.
@@ -50,8 +51,9 @@ public interface FieldExtendedRepository {
    * @param dataTypePk the data type pk
    * @param resultsNumber the results number
    * @return the list
+   * @throws DataIntegrityViolationException the data integrity violation exception
    */
   List<FieldVO> findByIdFieldSchemaWithTagOrdered(String idPk, String labelSchemaId,
       String searchValue, String conditionalSchemaId, String conditionalValue, DataType dataTypePk,
-      Integer resultsNumber);
+      Integer resultsNumber) throws DataIntegrityViolationException;
 }

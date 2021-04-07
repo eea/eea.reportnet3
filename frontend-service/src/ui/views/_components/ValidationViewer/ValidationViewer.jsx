@@ -492,6 +492,18 @@ const ValidationViewer = React.memo(
       onLoadFilters();
     };
 
+    const filterOptions = [
+      {
+        type: 'multiselect',
+        properties: [
+          { name: 'entityType', showInput: true },
+          { name: 'tableSchemaName', showInput: true },
+          { name: 'fieldSchemaName', showInput: true },
+          { name: 'levelError', showInput: true }
+        ]
+      }
+    ];
+
     const refreshData = () => {
       onLoadErrors(
         firstRow,
@@ -523,10 +535,10 @@ const ValidationViewer = React.memo(
               data={fetchedData}
               filterByList={filterBy}
               getFilteredData={onLoadFilteredData}
+              options={filterOptions}
               sendData={onLoadFilteredValidations}
-              selectOptions={['entityType', 'tableSchemaName', 'fieldSchemaName', 'levelError']}
-              validationsAllTypesFilters={validationsAllTypesFilters}
               validations
+              validationsAllTypesFilters={validationsAllTypesFilters}
             />
 
             <div className="p-toolbar-group-right">

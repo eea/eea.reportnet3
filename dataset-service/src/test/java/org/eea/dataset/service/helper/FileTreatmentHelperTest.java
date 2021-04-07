@@ -19,7 +19,13 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
+import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -28,6 +34,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -36,10 +43,13 @@ import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,41 +65,75 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The Class FileTreatmentHelperTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class FileTreatmentHelperTest {
 
+  /** The file treatment helper. */
   @InjectMocks
   private FileTreatmentHelper fileTreatmentHelper;
 
+  /** The dataset service. */
   @Mock
   private DatasetService datasetService;
 
+  /** The data set mapper. */
   @Mock
   private DataSetMapper dataSetMapper;
 
+  /** The integration controller. */
   @Mock
   private IntegrationControllerZuul integrationController;
 
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The dataset metabase service. */
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
+  /** The rules repository. */
   @Mock
   private RulesRepository rulesRepository;
 
+  /** The unique constraint repository. */
   @Mock
   private UniqueConstraintRepository uniqueConstraintRepository;
 
+  /** The rules controller zuul. */
   @Mock
   private RulesControllerZuul rulesControllerZuul;
 
+  /** The dataflow controller zuul. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The record store controller zuul. */
+  @Mock
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
+  /** The lock service. */
   @Mock
   private LockService lockService;
+
+  /** The record value id generator. */
+  @Mock
+  private RecordValueIdGenerator recordValueIdGenerator;
+
+  /** The field value id generator. */
+  @Mock
+  private FieldValueIdGenerator fieldValueIdGenerator;
+
+  /** The table repository. */
+  @Mock
+  private TableRepository tableRepository;
+
+  /** The record repository. */
+  @Mock
+  private RecordRepository recordRepository;
 
   /**
    * Inits the mocks.
@@ -104,14 +148,20 @@ public class FileTreatmentHelperTest {
         this.getClass().getClassLoader().getResource("").getPath());
     ReflectionTestUtils.setField(fileTreatmentHelper, "importExecutorService",
         new CurrentThreadExecutor());
-    ReflectionTestUtils.setField(fileTreatmentHelper, "batchSize", 1);
   }
 
+  /**
+   * Import file data csv test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataCsvTest() throws EEAException, IOException {
 
     FieldValue fieldValue = new FieldValue();
     fieldValue.setValue("value");
+    fieldValue.setType(DataType.TEXT);
     List<FieldValue> fieldValues = new ArrayList<>();
     fieldValues.add(fieldValue);
 
@@ -122,6 +172,7 @@ public class FileTreatmentHelperTest {
     recordValues.add(recordValue);
 
     TableValue tableValue = new TableValue();
+    recordValue.setTableValue(tableValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
     tableValue.setRecords(recordValues);
     List<TableValue> tableValues = new ArrayList<>();
@@ -133,6 +184,7 @@ public class FileTreatmentHelperTest {
     TableSchema tableSchema = new TableSchema();
     tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
     tableSchema.setNameTableSchema("tableSchemaName");
+    tableSchema.setFixedNumber(Boolean.FALSE);
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableSchema);
 
@@ -164,28 +216,44 @@ public class FileTreatmentHelperTest {
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
     Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
-    Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.anyLong(), Mockito.any());
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Import file data zip test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataZipTest() throws EEAException, IOException {
 
     FieldValue fieldValue = new FieldValue();
     fieldValue.setValue("value");
+    fieldValue.setType(DataType.TEXT);
     List<FieldValue> fieldValues = new ArrayList<>();
     fieldValues.add(fieldValue);
 
@@ -196,6 +264,7 @@ public class FileTreatmentHelperTest {
     recordValues.add(recordValue);
 
     TableValue tableValue = new TableValue();
+    recordValue.setTableValue(tableValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
     tableValue.setRecords(recordValues);
     List<TableValue> tableValues = new ArrayList<>();
@@ -244,8 +313,6 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
         .thenReturn("csv").thenReturn("txt").thenReturn("csv");
-    // Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-    // .thenReturn(integrationVOs);
     Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong());
     Mockito.when(
         datasetService.processFile(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -253,23 +320,38 @@ public class FileTreatmentHelperTest {
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
     Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
         .thenReturn(1L);
-    Mockito.doNothing().when(datasetService).saveAllRecords(Mockito.anyLong(), Mockito.any());
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
 
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Import file data xls FME test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void importFileDataXlsFMETest() throws EEAException, IOException {
 
@@ -304,20 +386,18 @@ public class FileTreatmentHelperTest {
     MultipartFile multipartFile =
         new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
 
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(datasetSchema);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("xls");
+    // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    // Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
         .thenReturn(integrationVOs);
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
-
-    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
     FileUtils
@@ -327,6 +407,11 @@ public class FileTreatmentHelperTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Import file data exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void importFileDataExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
@@ -343,6 +428,11 @@ public class FileTreatmentHelperTest {
     }
   }
 
+  /**
+   * Import file data folder exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void importFileDataFolderExceptionTest() throws EEAException {
     TableSchema tableSchema = new TableSchema();
@@ -357,8 +447,8 @@ public class FileTreatmentHelperTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    // Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn(datasetSchema);
@@ -376,6 +466,12 @@ public class FileTreatmentHelperTest {
     }
   }
 
+  /**
+   * Import file data IO exception test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void importFileDataIOExceptionTest() throws IOException, EEAException {
     TableSchema tableSchema = new TableSchema();
@@ -390,8 +486,8 @@ public class FileTreatmentHelperTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    // Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn(datasetSchema);
@@ -409,7 +505,207 @@ public class FileTreatmentHelperTest {
     }
   }
 
+  /**
+   * Import file data csv fixed number test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void importFileDataCsvFixedNumberTest() throws EEAException, IOException {
 
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setValue("value");
+    fieldValue.setType(DataType.TEXT);
+    fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
+    FieldValue fieldValue1 = new FieldValue();
+    fieldValue1.setValue("value");
+    fieldValue1.setType(DataType.TEXT);
+    fieldValue1.setIdFieldSchema("606588ab41bf6a1c0c65d36e");
+    List<FieldValue> fieldValues = new ArrayList<>();
+    fieldValues.add(fieldValue);
+    fieldValues.add(fieldValue1);
+
+    RecordValue recordValue = new RecordValue();
+    recordValue.setFields(fieldValues);
+    List<RecordValue> recordValues = new ArrayList<>();
+    recordValues.add(recordValue);
+
+    TableValue tableValue = new TableValue();
+    recordValue.setTableValue(tableValue);
+    tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
+    tableValue.setRecords(recordValues);
+
+    List<TableValue> tableValues = new ArrayList<>();
+    tableValues.add(tableValue);
+
+    DatasetValue datasetValue = new DatasetValue();
+    datasetValue.setTableValues(tableValues);
+
+    FieldSchema fieldSchema = new FieldSchema();
+    fieldSchema.setReadOnly(true);
+    fieldSchema.setIdFieldSchema(new ObjectId("606588ab41bf6a1c0c65d36e"));
+    FieldSchema fieldSchema2 = new FieldSchema();
+    fieldSchema2.setReadOnly(false);
+    fieldSchema2.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId("606588ab41bf6a1c0c65d36e"));
+    recordSchema.setFieldSchema(java.util.Arrays.asList(fieldSchema, fieldSchema2));
+
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setNameTableSchema("tableSchemaName");
+    tableSchema.setFixedNumber(Boolean.TRUE);
+    tableSchema.setRecordSchema(recordSchema);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setTableSchemas(tableSchemas);
+
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    List<IntegrationVO> integrationVOs = new ArrayList<>();
+    integrationVOs.add(integrationVO);
+
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", "".getBytes());
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(datasetSchema);
+
+    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
+    Mockito.when(
+        datasetService.processFile(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new DataSetVO());
+    Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
+    Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(null);
+    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+        .thenReturn(DatasetTypeEnum.REPORTING);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
+    Mockito.when(recordRepository.findByTableValueNoOrderOptimized(Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    FileUtils
+        .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
+
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Import file data csv fixed number no read only test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void importFileDataCsvFixedNumberNoReadOnlyTest() throws EEAException, IOException {
+
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setValue("value");
+    fieldValue.setType(DataType.TEXT);
+    fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
+    FieldValue fieldValue1 = new FieldValue();
+    fieldValue1.setValue("value");
+    fieldValue1.setType(DataType.TEXT);
+    fieldValue1.setIdFieldSchema("606588ab41bf6a1c0c65d36e");
+    List<FieldValue> fieldValues = new ArrayList<>();
+    fieldValues.add(fieldValue);
+    fieldValues.add(fieldValue1);
+
+    RecordValue recordValue = new RecordValue();
+    recordValue.setFields(fieldValues);
+    List<RecordValue> recordValues = new ArrayList<>();
+    recordValues.add(recordValue);
+
+    TableValue tableValue = new TableValue();
+    recordValue.setTableValue(tableValue);
+    tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
+    tableValue.setRecords(recordValues);
+
+    List<TableValue> tableValues = new ArrayList<>();
+    tableValues.add(tableValue);
+
+    DatasetValue datasetValue = new DatasetValue();
+    datasetValue.setTableValues(tableValues);
+
+    FieldSchema fieldSchema = new FieldSchema();
+    fieldSchema.setReadOnly(false);
+    fieldSchema.setIdFieldSchema(new ObjectId("606588ab41bf6a1c0c65d36e"));
+    FieldSchema fieldSchema2 = new FieldSchema();
+    fieldSchema2.setReadOnly(false);
+    fieldSchema2.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId("606588ab41bf6a1c0c65d36e"));
+    recordSchema.setFieldSchema(java.util.Arrays.asList(fieldSchema, fieldSchema2));
+
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setNameTableSchema("tableSchemaName");
+    tableSchema.setFixedNumber(Boolean.TRUE);
+    tableSchema.setRecordSchema(recordSchema);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataSetSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setTableSchemas(tableSchemas);
+
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    List<IntegrationVO> integrationVOs = new ArrayList<>();
+    integrationVOs.add(integrationVO);
+
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", "".getBytes());
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(datasetSchema);
+
+    Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
+    Mockito.when(
+        datasetService.processFile(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new DataSetVO());
+    Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
+    Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(null);
+    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+        .thenReturn(DatasetTypeEnum.REPORTING);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(recordRepository.findByTableValueNoOrderOptimized(Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
+    Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    FileUtils
+        .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
+
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
 }
 
 

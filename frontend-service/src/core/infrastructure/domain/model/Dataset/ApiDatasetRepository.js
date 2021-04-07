@@ -228,7 +228,7 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
       return subError;
     });
   });
-  valuesWithValidations.map(item => {
+  valuesWithValidations.forEach(item => {
     if (item != null && item != undefined && !item.every(value => value === 0)) {
       tableStatisticValuesWithSomeError.push(item);
     }
