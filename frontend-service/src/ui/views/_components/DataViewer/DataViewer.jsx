@@ -62,6 +62,7 @@ const DataViewer = withRouter(
     hasCountryCode,
     hasWritePermissions,
     isDataflowOpen,
+    isDesignDatasetEditorRead,
     isExportable,
     isFilterable,
     isGroupedValidationDeleted,
@@ -206,7 +207,7 @@ const DataViewer = withRouter(
 
     const actionTemplate = () => (
       <ActionsColumn
-        disabledButtons={isDataflowOpen}
+        disabledButtons={isDataflowOpen || isDesignDatasetEditorRead}
         hideDeletion={tableFixedNumber}
         hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
@@ -260,6 +261,7 @@ const DataViewer = withRouter(
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataflowOpen,
+      isDesignDatasetEditorRead,
       onFileDeleteVisible,
       onFileDownload,
       onFileUploadVisible,
@@ -1109,6 +1111,7 @@ const DataViewer = withRouter(
           hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
           hideValidationFilter={hideValidationFilter}
           isDataflowOpen={isDataflowOpen}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={isExportable}
           isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
@@ -1148,6 +1151,7 @@ const DataViewer = withRouter(
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   isDataflowOpen={isDataflowOpen}
+                  isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                   onAddClick={() => {
                     setIsNewRecord(true);
                     setAddDialogVisible(true);
@@ -1159,7 +1163,12 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !isEditing && !isDataflowOpen
+              hasWebformWritePermissions &&
+              hasWritePermissions &&
+              !tableReadOnly &&
+              !isEditing &&
+              !isDataflowOpen &&
+              !isDesignDatasetEditorRead
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);

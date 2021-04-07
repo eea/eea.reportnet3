@@ -517,7 +517,17 @@ public interface DatasetSchemaService {
    * Update dataset schema exportable.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param isExportable the is exportable
+   * @param availableInPublic the available in public
    */
   void updateDatasetSchemaExportable(String datasetSchemaId, boolean availableInPublic);
+
+
+  /**
+   * Gets the table schemas ids.
+   *
+   * @param datasetId the dataset id
+   * @return the table schemas ids
+   * @throws EEAException the EEA exception
+   */
+  List<String> getTableSchemasIds(Long datasetId) throws EEAException;
 }
