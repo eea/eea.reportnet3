@@ -584,7 +584,7 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: dataflow.designDatasets } });
 
         const datasetSchemaInfo = [];
-        dataflow.designDatasets.map(schema => {
+        dataflow.designDatasets.forEach(schema => {
           datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
         });
 
