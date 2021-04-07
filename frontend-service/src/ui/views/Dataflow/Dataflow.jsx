@@ -939,10 +939,14 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageEditorsDialogVisible', false)}
             visible={dataflowState.isManageEditorsDialogVisible}>
             <ShareRights
+              columnHeader={resources.messages['editorsAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
+              deleteConfirmHeader={resources.messages[`editorsRightsDialogConfirmDeleteHeader`]}
+              deleteConfirmMessage={resources.messages[`editorsRightsDialogConfirmDeleteQuestion`]}
+              notificationKey={'DELETE_EDITOR_ERROR'}
+              placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
               representativeId={representativeId}
-              showEditorsHeaders={true}
             />
           </Dialog>
         )}
@@ -954,10 +958,14 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
+              columnHeader={resources.messages['reportersAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
+              deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
+              deleteConfirmMessage={resources.messages[`reportersRightsDialogConfirmDeleteQuestion`]}
+              notificationKey={'DELETE_REPORTER_ERROR'}
+              placeholder={resources.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
-              showReportersHeaders={true}
             />
           </Dialog>
         )}

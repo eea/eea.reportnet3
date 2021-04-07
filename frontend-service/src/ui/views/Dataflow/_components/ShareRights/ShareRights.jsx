@@ -22,11 +22,14 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
 export const ShareRights = ({
+  columnHeader,
   dataflowId,
   dataProviderId,
-  representativeId,
-  showEditorsHeaders,
-  showReportersHeaders
+  deleteConfirmHeader,
+  deleteConfirmMessage,
+  notificationKey,
+  placeholder,
+  representativeId
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -43,56 +46,6 @@ export const ShareRights = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-
-  const getColumnHeader = () => {
-    if (showReportersHeaders) {
-      return resources.messages['reportersAccountColumn'];
-    }
-
-    if (showEditorsHeaders) {
-      return resources.messages['editorsAccountColumn'];
-    }
-  };
-
-  const getDeleteConfirmHeader = () => {
-    if (showReportersHeaders) {
-      return resources.messages[`reportersRightsDialogConfirmDeleteHeader`];
-    }
-
-    if (showEditorsHeaders) {
-      return resources.messages[`editorsRightsDialogConfirmDeleteHeader`];
-    }
-  };
-
-  const getDeleteConfirmMessage = () => {
-    if (showReportersHeaders) {
-      return resources.messages[`reportersRightsDialogConfirmDeleteQuestion`];
-    }
-
-    if (showEditorsHeaders) {
-      return resources.messages[`editorsRightsDialogConfirmDeleteQuestion`];
-    }
-  };
-
-  const getPlaceholder = () => {
-    if (showReportersHeaders) {
-      return resources.messages['manageRolesReporterDialogInputPlaceholder'];
-    }
-
-    if (showEditorsHeaders) {
-      return resources.messages['manageRolesEditorDialogInputPlaceholder'];
-    }
-  };
-
-  const getNotificationKey = () => {
-    if (showReportersHeaders) {
-      return 'DELETE_REPORTER_ERROR';
-    }
-
-    if (showEditorsHeaders) {
-      return 'DELETE_EDITOR_ERROR';
-    }
-  };
 
   useEffect(() => {
     getAllContributors();
@@ -171,7 +124,7 @@ export const ShareRights = ({
         onDataChange();
       }
     } catch (error) {
-      notificationContext.add({ type: getNotificationKey() });
+      notificationContext.add({ type: notificationKey });
     } finally {
       onToggleDeletingContributor(false);
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
@@ -299,7 +252,7 @@ export const ShareRights = ({
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
-          placeholder={getPlaceholder()}
+          placeholder={placeholder}
           value={contributor.account}
         />
         <label htmlFor="emptyInput" className="srOnly">
@@ -318,7 +271,7 @@ export const ShareRights = ({
           <div className={styles.table}>
             {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
             <DataTable value={shareRightsState.contributors}>
-              <Column body={renderAccountTemplate} header={getColumnHeader()} />
+              <Column body={renderAccountTemplate} header={columnHeader} />
               <Column
                 body={renderWritePermissionsColumnTemplate}
                 header={resources.messages['writePermissionsColumn']}
@@ -338,7 +291,7 @@ export const ShareRights = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={shareRightsState.isContributorDeleting}
-          header={getDeleteConfirmHeader()}
+          header={deleteConfirmHeader}
           iconConfirm={shareRightsState.isContributorDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
@@ -350,7 +303,7 @@ export const ShareRights = ({
             })
           }
           visible={shareRightsState.isDeleteDialogVisible}>
-          {getDeleteConfirmMessage()}
+          {deleteConfirmMessage}
         </ConfirmDialog>
       )}
     </Fragment>
