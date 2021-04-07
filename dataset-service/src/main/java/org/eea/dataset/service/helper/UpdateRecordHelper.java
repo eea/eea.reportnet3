@@ -1,9 +1,10 @@
 package org.eea.dataset.service.helper;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -36,8 +37,6 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   @Qualifier("proxyDatasetService")
   private DatasetService datasetService;
 
-  /** The processes map. */
-  private ConcurrentHashMap<String, Integer> processesMap;
 
   /** The field batch size. */
   @Value("${dataset.propagation.fieldBatchSize}")
@@ -49,7 +48,6 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    */
   public UpdateRecordHelper() {
     super();
-    processesMap = new ConcurrentHashMap<>();
   }
 
 
@@ -135,15 +133,6 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }
 
-  /**
-   * Gets the processes map.
-   *
-   * @return the processes map
-   */
-  public ConcurrentHashMap<String, Integer> getProcessesMap() {
-    return processesMap;
-  }
-
 
 
   /**
@@ -161,19 +150,15 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   public void propagateNewFieldDesign(Long datasetId, String idTableSchema, Integer sizeRecords,
       Integer numPag, String uuId, String idFieldSchema, DataType typeField) {
 
-    synchronized (processesMap) {
-      processesMap.put(uuId, 0);
-    }
-
     if (fieldBatchSize != 0) {
+      Set<Integer> pages = new HashSet<>();
+      pages.add(0);
       for (int numPage = 0; sizeRecords >= 0; sizeRecords = sizeRecords - fieldBatchSize) {
-        releaseFieldPropagation(datasetId, uuId, numPage, idTableSchema, idFieldSchema, typeField);
         numPage++;
+        pages.add(numPage);
       }
+      releaseFieldPropagation(datasetId, uuId, pages, idTableSchema, idFieldSchema, typeField);
     }
-
-
-
   }
 
   /**
@@ -186,20 +171,21 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    * @param idFieldSchema the id field schema
    * @param typeField the type field
    */
-  public void releaseFieldPropagation(final Long datasetId, final String uuid, int numPag,
+  public void releaseFieldPropagation(final Long datasetId, final String uuid, Set<Integer> pages,
       String idTableSchema, String idFieldSchema, DataType typeField) {
 
     Map<String, Object> value = new HashMap<>();
     value.put("dataset_id", datasetId);
     value.put("idTableSchema", idTableSchema);
-    value.put("numPag", numPag);
+    value.put("pages", pages);
     value.put("idFieldSchema", idFieldSchema);
     value.put("typeField", typeField);
     value.put("uuId", uuid);
-    synchronized (processesMap) {
-      processesMap.merge(uuid, 1, Integer::sum);
-    }
+    value.put("numPag", 0);
+
     releaseKafkaEvent(EventType.COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION, value);
+
+
 
   }
 

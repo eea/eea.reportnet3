@@ -114,6 +114,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.postgresql.util.PSQLException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
@@ -638,6 +639,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById() throws Exception {
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     when(recordNoValidationMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -778,7 +780,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById5() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -818,7 +820,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById6() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -863,7 +865,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById7() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -903,7 +905,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById8() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -943,7 +945,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void testGetTableValuesById9() throws Exception {
-    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(0L);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(recordRepository.findByTableValueWithOrder(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(tableVO);
@@ -1615,11 +1617,13 @@ public class DatasetServiceTest {
    * Gets the field values referenced test number.
    *
    * @return the field values referenced test number
+   * @throws PSQLException
+   * @throws EEAException
    *
    * @throws SecurityException the security exception
    */
   @Test
-  public void getFieldValuesReferencedTest() {
+  public void getFieldValuesReferencedTest() throws PSQLException, EEAException {
 
     Document doc = new Document();
     doc.put("typeData", DataType.LINK.getValue());
@@ -1649,9 +1653,11 @@ public class DatasetServiceTest {
    * Gets the field values referenced label test.
    *
    * @return the field values referenced label test
+   * @throws PSQLException
+   * @throws EEAException
    */
   @Test
-  public void getFieldValuesReferencedLabelTest() {
+  public void getFieldValuesReferencedLabelTest() throws PSQLException, EEAException {
 
     Document doc = new Document();
     doc.put("typeData", DataType.LINK.getValue());
