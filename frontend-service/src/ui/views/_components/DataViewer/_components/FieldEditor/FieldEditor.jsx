@@ -87,7 +87,7 @@ const FieldEditor = ({
   const calendarId = uuid.v4();
 
   useEffect(() => {
-    if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
+    if (!isUndefined(colsSchema)) setCodelistItemsOptions(getCodelistItemsWithEmptyOption());
     setCodelistItemValue(
       Array.isArray(RecordUtils.getCellValue(cells, cells.field))
         ? RecordUtils.getCellValue(cells, cells.field).join(';')
