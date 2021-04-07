@@ -232,7 +232,7 @@ const DataFormFieldEditor = ({
       ? conditionalField.fieldData?.type === 'MULTISELECT_CODELIST'
         ? Array.isArray(conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId])
           ? conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.join('; ')
-          : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId].replace('; ', ';').replace(';', '; ')
+          : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.replace('; ', ';').replace(';', '; ')
         : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
       : '';
     try {
@@ -301,7 +301,10 @@ const DataFormFieldEditor = ({
         optionLabel="itemType"
         options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
         ref={dropdownRef}
-        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        value={RecordUtils.getCodelistValue(
+          RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist']),
+          fieldValue
+        )}
       />
     );
   };
