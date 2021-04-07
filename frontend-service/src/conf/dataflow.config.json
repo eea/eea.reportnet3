@@ -7,10 +7,5 @@
     "dataflowExists": "Dataflow name already exists",
     "dataflowObligationEmpty": "Dataflow Obligation empty",
     "copyWithErrors": "The snapshot contains blocker errors"
-  },
-  "filterItems": {
-    "input": ["name", "description", "legalInstrument", "obligationTitle"],
-    "select": ["status", "userRole", "pinned"],
-    "date": ["expirationDate"]
   }
 }

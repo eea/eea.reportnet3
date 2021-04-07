@@ -54,7 +54,7 @@ export class InputText extends Component {
   static defaultProps = {
     autoFocus: false,
     expandable: false,
-    id: '',
+    id: null,
     onInput: null,
     onKeyPress: null,
     keyfilter: null,

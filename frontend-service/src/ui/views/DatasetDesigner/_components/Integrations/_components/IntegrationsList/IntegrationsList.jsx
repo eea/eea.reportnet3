@@ -160,6 +160,11 @@ export const IntegrationsList = ({
     return fieldColumns;
   };
 
+  const filterOptions = [
+    { type: 'input', properties: [{ name: 'integrationName' }] },
+    { type: 'multiselect', properties: [{ name: 'operationName' }] }
+  ];
+
   if (integrationListState.isLoading) {
     return (
       <div className={styles.integrationsWithoutTable}>
@@ -180,8 +185,7 @@ export const IntegrationsList = ({
         data={integrationListState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFilteredSearched}
-        inputOptions={['integrationName']}
-        selectOptions={['operationName']}
+        options={filterOptions}
       />
 
       {!isEmpty(integrationListState.filteredData) ? (

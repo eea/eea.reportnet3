@@ -123,18 +123,25 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
     }
   };
 
+  const filterOptions = [
+    {
+      type: 'input',
+      properties: [{ name: 'name' }, { name: 'description' }, { name: 'legalInstrument' }, { name: 'obligationTitle' }]
+    },
+    { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
+    { type: 'date', properties: [{ name: 'expirationDate' }] }
+  ];
+
   return (
     <div className={`${styles.wrap} ${className}`}>
       {title && <h2>{title}</h2>}
       <p>{description}</p>
       <div className="dataflowList-filters-help-step">
         <Filters
+          options={filterOptions}
           data={dataToFilter}
-          dateOptions={DataflowConf.filterItems['date']}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredSearched}
-          inputOptions={DataflowConf.filterItems['input']}
-          selectOptions={DataflowConf.filterItems['select']}
           sortable={true}
           sortCategory={'pinned'}
         />
