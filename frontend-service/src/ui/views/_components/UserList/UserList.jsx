@@ -70,13 +70,14 @@ export const UserList = ({ dataflowId, representativeId }) => {
   const onLoadFilteredData = value => setFilteredData(value);
 
   const filterOptionsNoRepresentative = [
-    { type: 'input', properties: [{ name: 'dataflowName' }, { name: 'email' }] },
-    { type: 'multiselect', properties: [{ name: 'role' }] }
+    { type: 'input', properties: [{ name: 'dataflowName' }] },
+    { type: 'multiselect', properties: [{ name: 'role' }] },
+    { type: 'input', properties: [{ name: 'email' }] }
   ];
 
   const filterOptionsHasRepresentativeId = [
-    { type: 'input', properties: [{ name: 'email' }] },
-    { type: 'multiselect', properties: [{ name: 'role' }] }
+    { type: 'multiselect', properties: [{ name: 'role' }] },
+    { type: 'input', properties: [{ name: 'email' }] }
   ];
 
   return (
