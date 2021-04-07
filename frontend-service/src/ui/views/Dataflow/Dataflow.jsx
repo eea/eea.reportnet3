@@ -92,7 +92,6 @@ const Dataflow = withRouter(({ history, match }) => {
     isExporting: false,
     isFetchingData: false,
     isImportLeadReportersVisible: false,
-    isManageRightsDialogVisible: false,
     isManageEditorsDialogVisible: false,
     isManageReportersDialogVisible: false,
     isManageRolesDialogVisible: false,
