@@ -141,9 +141,10 @@ public class ZipUtils {
         fileUnziped.setQcRulesBytes(qcrulesBytes);
         fileUnziped.setIntegrities(integrities);
         fileUnziped.setSchemaIds(schemaIds);
+      } finally {
+        is.close();
       }
     }
-    is.close();
     LOG.info("Schemas recovered from the Zip file {} during the import process", fileName);
     return fileUnziped;
   }
