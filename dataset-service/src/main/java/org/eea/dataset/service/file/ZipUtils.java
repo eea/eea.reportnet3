@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -81,75 +80,71 @@ public class ZipUtils {
   /**
    * Un zip import schema.
    *
-   * @param multipartFile the multipart file
-   *
+   * @param is the is
+   * @param fileName the file name
    * @return the import schemas
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public ImportSchemas unZipImportSchema(MultipartFile multipartFile)
+  public ImportSchemas unZipImportSchema(InputStream is, String fileName)
       throws EEAException, IOException {
 
     ImportSchemas fileUnziped = new ImportSchemas();
-    try (InputStream input = multipartFile.getInputStream()) {
-      String fileName = multipartFile.getOriginalFilename();
-      String multipartFileMimeType = getMimetype(fileName);
+    String multipartFileMimeType = getMimetype(fileName);
 
-      List<DataSetSchema> schemas = new ArrayList<>();
-      Map<String, String> schemaNames = new HashMap<>();
-      Map<String, Long> schemaIds = new HashMap<>();
-      List<IntegrationVO> extIntegrations = new ArrayList<>();
-      List<UniqueConstraintSchema> uniques = new ArrayList<>();
-      List<IntegrityVO> integrities = new ArrayList<>();
-      List<byte[]> qcrulesBytes = new ArrayList<>();
+    List<DataSetSchema> schemas = new ArrayList<>();
+    Map<String, String> schemaNames = new HashMap<>();
+    Map<String, Long> schemaIds = new HashMap<>();
+    List<IntegrationVO> extIntegrations = new ArrayList<>();
+    List<UniqueConstraintSchema> uniques = new ArrayList<>();
+    List<IntegrityVO> integrities = new ArrayList<>();
+    List<byte[]> qcrulesBytes = new ArrayList<>();
 
-      if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
-        try (ZipInputStream zip = new ZipInputStream(input)) {
-          for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
+    if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
+      try (ZipInputStream zip = new ZipInputStream(is)) {
+        for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
 
-            String entryName = entry.getName();
-            String mimeType = getMimetype(entryName);
-            switch (mimeType.toLowerCase()) {
-              case "schema":
-                schemas = unzippingSchemaClasses(zip, schemas);
-                break;
-              case "qcrules":
-                qcrulesBytes = unzippingQcClasses(zip, qcrulesBytes);
-                break;
-              case "unique":
-                uniques = unzippingUniqueClasses(zip, uniques);
-                break;
-              case "names":
-                schemaNames = unzippingDatasetNamesClasses(zip, schemaNames);
-                break;
-              case "extintegrations":
-                extIntegrations = unzippingExtIntegrationsClasses(zip, extIntegrations);
-                break;
-              case "integrity":
-                integrities = unzippingIntegrityQcClasses(zip, integrities);
-                break;
-              case "ids":
-                schemaIds = unzippingDatasetIdsClasses(zip, schemaIds);
-                break;
-              default:
-                break;
-            }
+          String entryName = entry.getName();
+          String mimeType = getMimetype(entryName);
+          switch (mimeType.toLowerCase()) {
+            case "schema":
+              schemas = unzippingSchemaClasses(zip, schemas);
+              break;
+            case "qcrules":
+              qcrulesBytes = unzippingQcClasses(zip, qcrulesBytes);
+              break;
+            case "unique":
+              uniques = unzippingUniqueClasses(zip, uniques);
+              break;
+            case "names":
+              schemaNames = unzippingDatasetNamesClasses(zip, schemaNames);
+              break;
+            case "extintegrations":
+              extIntegrations = unzippingExtIntegrationsClasses(zip, extIntegrations);
+              break;
+            case "integrity":
+              integrities = unzippingIntegrityQcClasses(zip, integrities);
+              break;
+            case "ids":
+              schemaIds = unzippingDatasetIdsClasses(zip, schemaIds);
+              break;
+            default:
+              break;
           }
-          zip.closeEntry();
-
-          fileUnziped.setSchemaNames(schemaNames);
-          fileUnziped.setSchemas(schemas);
-          fileUnziped.setUniques(uniques);
-          fileUnziped.setExternalIntegrations(extIntegrations);
-          fileUnziped.setQcRulesBytes(qcrulesBytes);
-          fileUnziped.setIntegrities(integrities);
-          fileUnziped.setSchemaIds(schemaIds);
         }
+        zip.closeEntry();
+
+        fileUnziped.setSchemaNames(schemaNames);
+        fileUnziped.setSchemas(schemas);
+        fileUnziped.setUniques(uniques);
+        fileUnziped.setExternalIntegrations(extIntegrations);
+        fileUnziped.setQcRulesBytes(qcrulesBytes);
+        fileUnziped.setIntegrities(integrities);
+        fileUnziped.setSchemaIds(schemaIds);
       }
     }
-    LOG.info("Schemas recovered from the Zip file {} during the import process",
-        multipartFile.getOriginalFilename());
+    is.close();
+    LOG.info("Schemas recovered from the Zip file {} during the import process", fileName);
     return fileUnziped;
   }
 
