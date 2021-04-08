@@ -77,7 +77,10 @@ const WebformDataFormFieldEditor = ({
         onChange={e => onChangeForm(field, e.target.value.value)}
         optionLabel="itemType"
         options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
-        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        value={RecordUtils.getCodelistValue(
+          RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist']),
+          fieldValue
+        )}
       />
     );
   };

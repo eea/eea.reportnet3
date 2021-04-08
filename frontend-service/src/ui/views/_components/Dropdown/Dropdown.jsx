@@ -438,7 +438,6 @@ export class Dropdown extends Component {
 
   selectItem(event) {
     let currentSelectedOption = this.findOption(this.props.value);
-
     if (currentSelectedOption !== event.option) {
       this.updateEditableLabel(event.option);
       this.props.onChange({

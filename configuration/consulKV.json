@@ -1394,5 +1394,33 @@
   {
     "key": "config/recordstore/recordstore.tasks.parallelism",
     "value": "JHtSRUNPUkRTVE9SRV9UQVNLX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
+    "key": "config/communication/spring.mail.host",
+    "value": "aXJvbnBvcnQxLmVlYS5ldXJvcGEuZXU="
+  },
+  {
+    "key": "config/communication/spring.mail.port",
+    "value": "MjU="
+  },
+  {
+    "key": "config/communication/spring.mail.username",
+    "value": "bm8tcmVwbHlAcmVwb3J0bmV0LmV1cm9wYS5ldQ=="
+  },
+  {
+    "key": "config/communication/spring.mail.password",
+    "value": "IA=="
+  },
+  {
+    "key": "config/communication/spring.mail.properties.mail.smtp.auth",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/communication/spring.mail.properties.mail.smtp.starttls.enable",
+    "value": "dHJ1ZQ=="
+  },
+  {
+    "key": "config/communication/spring.mail.active",
+    "value": "ZmFsc2U="
   }
 ]

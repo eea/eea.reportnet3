@@ -137,7 +137,7 @@ export const WebformField = ({
         filter,
         !isNil(conditionalField)
           ? conditionalField.type === 'MULTISELECT_CODELIST'
-            ? conditionalField.value?.join(';')
+            ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
             : conditionalField.value
           : field.value,
         datasetSchemaId,

@@ -53,7 +53,12 @@ export const MultiSelectHeader = ({
           <span className="p-multiselect-filter-icon pi pi-search"></span>
         </div>
       );
-    } else return null;
+    } else
+      return (
+        <span id="selectAll" className={headerClassName} onClick={event => onToggleAll(event)}>
+          {allChecked ? notCheckAllHeader : checkAllHeader}
+        </span>
+      );
   };
 
   return (
@@ -65,10 +70,9 @@ export const MultiSelectHeader = ({
         onChange={event => onToggleAllEvent(event)}
         role="checkbox"
       />
-      <span id="selectAll" className={headerClassName} onClick={event => onToggleAll(event)}>
-        {allChecked ? notCheckAllHeader : checkAllHeader}
-      </span>
+
       {renderFilterElement()}
+
       {clearButton && (
         <button type="button" className="p-multiselect-close p-link" onClick={event => onClose(event)}>
           <span className="p-multiselect-close-icon pi pi-times" />

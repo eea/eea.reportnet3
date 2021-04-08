@@ -164,6 +164,15 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
   };
 
+  const filterOptions = [
+    {
+      type: 'dropdown',
+      properties: [{ name: 'countries' }, { name: 'issues' }, { name: 'organizations' }]
+    },
+
+    { type: 'date', properties: [{ name: 'expirationDate' }] }
+  ];
+
   const parsedFilterList = {
     countries: reportingObligationState.countries,
     issues: reportingObligationState.issues,
@@ -221,10 +230,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       <div className={styles.filters}>
         <Filters
           data={reportingObligationState.data}
-          dateOptions={['expirationDate']}
           dropDownList={parsedFilterList}
-          dropdownOptions={['countries', 'issues', 'organizations']}
           filterByList={reportingObligationState.filterBy}
+          options={filterOptions}
           sendData={onLoadReportingObligations}
         />
       </div>
