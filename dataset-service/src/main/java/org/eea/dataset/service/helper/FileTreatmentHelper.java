@@ -841,11 +841,13 @@ public class FileTreatmentHelper implements DisposableBean {
       List<ObjectId> readOnlyFields =
           tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
               .map(FieldSchema::getIdFieldSchema).collect(Collectors.toList());
-      Map<Integer, Integer> mapPosition = mapPositionReadOnlyFieldsForReference(readOnlyFields,
-          oldRecords.get(0), recordList.get(0));
-      for (RecordValue oldRecord : oldRecords) {
-        findByReadOnlyRecords(mapPosition, oldRecord, recordList);
-        recordsToSave.add(oldRecord);
+      if (readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
+        Map<Integer, Integer> mapPosition = mapPositionReadOnlyFieldsForReference(readOnlyFields,
+            oldRecords.get(0), recordList.get(0));
+        for (RecordValue oldRecord : oldRecords) {
+          findByReadOnlyRecords(mapPosition, oldRecord, recordList);
+          recordsToSave.add(oldRecord);
+        }
       }
     }
     LOG.info("Import dataset table {} with {} number of records", tableSchema.getNameTableSchema(),
