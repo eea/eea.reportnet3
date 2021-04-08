@@ -399,8 +399,13 @@ public class FileTreatmentHelper implements DisposableBean {
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
-      importExecutorService
-          .submit(() -> rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName));
+      importExecutorService.submit(() -> {
+        try {
+          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName);
+        } catch (Exception e) {
+          LOG_ERROR.error("RN3-Import: Unexpected error", e);
+        }
+      });
     }
   }
 
@@ -498,10 +503,13 @@ public class FileTreatmentHelper implements DisposableBean {
         // Check if the table with idTableSchema has been populated already
         Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
         fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
+        LOG.info("RN3-Import - Filled tableId: datasetId={}, fileName={}", datasetId, fileName);
 
         // Save empty table
         if (null == oldTableId) {
+          LOG.info("RN3-Import - Saving table: datasetId={}, fileName={}", datasetId, fileName);
           datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
+          LOG.info("RN3-Import - Table saved: datasetId={}, fileName={}", datasetId, fileName);
         }
 
         if (schemaContainsFixedRecords(datasetId, datasetSchema, tableSchemaId)) {
@@ -764,13 +772,17 @@ public class FileTreatmentHelper implements DisposableBean {
       throws IOException, SQLException {
 
     String schema = LiteralConstants.DATASET_PREFIX + datasetId;
+    LOG.info("RN3-Import - Getting connections: datasetId={}", datasetId);
     ConnectionDataVO connectionDataVO = recordStoreControllerZuul.getConnectionToDataset(schema);
 
+    LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
     try (
         PostgresBulkImporter recordsImporter =
             new PostgresBulkImporter(connectionDataVO, schema, "record_value", importPath);
         PostgresBulkImporter fieldsImporter =
             new PostgresBulkImporter(connectionDataVO, schema, "field_value", importPath)) {
+
+      LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
 
       for (RecordValue recordValue : recordList) {
 

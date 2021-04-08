@@ -270,6 +270,7 @@ export class MultiSelect extends Component {
     setTimeout(() => {
       this.panel.element.style.display = 'none';
       DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+      this.clearFilter();
     }, 150);
   }
 

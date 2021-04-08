@@ -3521,7 +3521,8 @@ public class DatasetServiceImpl implements DatasetService {
       String queryMiddlePartTwo =
           " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) "
               + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
-      String queryFinalPart = " ) as record) from dataset_%s.table_value tv ) as tableAux ";
+      String queryFinalPart =
+          " ) as record) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
       String paginationPart = " offset %s limit %s ";
       String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
@@ -3551,7 +3552,7 @@ public class DatasetServiceImpl implements DatasetService {
           offsetAux = 0;
         }
         query.append(String.format(paginationPart, offsetAux, limit));
-        query.append(String.format(queryFinalPart, datasetId, datasetId, datasetId));
+        query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
         LOG.info("Query: {} ", query);
         outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
         LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
