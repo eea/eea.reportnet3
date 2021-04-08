@@ -150,11 +150,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldSchemaVOS =
           fileCommon.findFieldSchemas(idTableSchema, dataSetSchema);
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
+      boolean isFixedNumberOfRecords = dataSetSchema.getTableSchemas().stream()
+          .filter(tableSchema -> tableSchema.getIdTableSchema().equals(idTableSchema)).findFirst()
+          .orElse(new TableSchemaVO()).getFixedNumber();
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, headers, idTableSchema,
-            idRecordSchema, fieldSchemaVOS, isDesignDataset);
+            idRecordSchema, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -199,11 +202,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private void sanitizeAndCreateDataSet(final Long partitionId, TableVO tableVO,
       final List<TableVO> tables, final List<String> values, List<FieldSchemaVO> headers,
       final String idTableSchema, final String idRecordSchema,
-      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
+      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset,
+      boolean isFixedNumberOfRecords) {
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
       addRecordToTable(tableVO, tables, values, partitionId, headers, idTableSchema, idRecordSchema,
-          fieldSchemaVOS, isDesignDataset);
+          fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords);
     }
   }
 
@@ -302,18 +306,18 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private void addRecordToTable(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, List<FieldSchemaVO> headers,
       final String idTableSchema, final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS,
-      boolean isDesignDataset) {
+      boolean isDesignDataset, boolean isFixedNumberOfRecords) {
     // Create object Table and set the attributes
     if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
       tableVO.setRecords(createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), headers,
-          idRecordSchema, fieldSchemaVOS, isDesignDataset));
+          idRecordSchema, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords));
       tables.add(tableVO);
 
     } else {
       tableVO.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdTableSchema(),
-          headers, idRecordSchema, fieldSchemaVOS, isDesignDataset));
+          headers, idRecordSchema, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords));
     }
   }
 
@@ -331,13 +335,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
       final String idTableSchema, List<FieldSchemaVO> headers, final String idRecordSchema,
-      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
+      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset, boolean isFixedNumberOfRecords) {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
     if (null != idTableSchema) {
       record.setIdRecordSchema(idRecordSchema);
     }
-    record.setFields(createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset));
+    record.setFields(
+        createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords));
     record.setDatasetPartitionId(partitionId);
     record.setDataProviderCode(this.providerCode);
     records.add(record);
@@ -354,7 +359,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @return the list
    */
   private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers,
-      List<FieldSchemaVO> headersSchema, boolean isDesignDataset) {
+      List<FieldSchemaVO> headersSchema, boolean isDesignDataset, boolean isFixedNumberOfRecords) {
     final List<FieldVO> fields = new ArrayList<>();
     List<String> idSchema = new ArrayList<>();
     int contAux = 0;
@@ -371,7 +376,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
         field.setType(fieldSchemaVO.getType());
         field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
 
-        if (field.getIdFieldSchema() != null) {
+        if (field.getIdFieldSchema() != null && ((!fieldSchemaVO.getReadOnly() && !isDesignDataset)
+            || isDesignDataset || isFixedNumberOfRecords)) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());
         }
