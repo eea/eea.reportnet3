@@ -287,7 +287,6 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       List<DatasetValidation> validations = runDatasetValidations(dataset, session);
 
-      validations.stream().forEach(validation -> validation.setDatasetValue(dataset));
       validationDatasetRepository.saveAll(validations);
     } finally {
       session.destroy();
@@ -313,10 +312,6 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       if (table != null) {
         List<TableValidation> validations = runTableValidations(table, session);
-        if (table.getTableValidations() != null) {
-          table.getTableValidations().stream().filter(Objects::nonNull)
-              .forEach(tableValidation -> tableValidation.setTableValue(table));
-        }
         tableValidationRepository.saveAll(validations);
       }
     } finally {
@@ -343,11 +338,6 @@ public class ValidationServiceImpl implements ValidationService {
       records.stream().filter(Objects::nonNull).forEach(row -> {
         runRecordValidations(row, session);
         List<RecordValidation> validations = row.getRecordValidations();
-        if (null != validations) {
-          validations.stream().filter(Objects::nonNull).forEach(rowValidation -> {
-            rowValidation.setRecordValue(row);
-          });
-        }
         TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         recordValidations.addAll(validations);
       });
@@ -378,10 +368,6 @@ public class ValidationServiceImpl implements ValidationService {
 
         List<FieldValidation> resultFields = runFieldValidations(field, session);
 
-        if (null != field.getFieldValidations()) {
-          field.getFieldValidations().stream().filter(Objects::nonNull)
-              .forEach(fieldVal -> fieldVal.setFieldValue(field));
-        }
         fieldValidations.addAll(resultFields);
       });
       if (!fieldValidations.isEmpty()) {

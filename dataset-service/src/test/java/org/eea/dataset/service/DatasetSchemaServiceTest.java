@@ -2172,7 +2172,7 @@ public class DatasetSchemaServiceTest {
     importSchema.setSchemaIds(schemaDatatasetId);
     importSchema.setSchemaNames(schemaNames);
     importSchema.setUniques(Arrays.asList(new UniqueConstraintSchema()));
-    Mockito.when(zipUtils.unZipImportSchema(Mockito.any())).thenReturn(importSchema);
+    Mockito.when(zipUtils.unZipImportSchema(Mockito.any(), Mockito.any())).thenReturn(importSchema);
 
     DataSetMetabase datasetMetabase = new DataSetMetabase();
     datasetMetabase.setDatasetSchema("5ce524fad31fc52540abae73");
@@ -2196,7 +2196,7 @@ public class DatasetSchemaServiceTest {
     MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
         "application/x-zip-compressed", baos.toByteArray());
 
-    dataSchemaServiceImpl.importSchemas(1L, multipartFile);
+    dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(), "file.zip");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
@@ -2205,7 +2205,7 @@ public class DatasetSchemaServiceTest {
   @Test
   public void testImportSchemasEmpty() throws EEAException, IOException {
 
-    when(zipUtils.unZipImportSchema(Mockito.any())).thenReturn(new ImportSchemas());
+    when(zipUtils.unZipImportSchema(Mockito.any(), Mockito.any())).thenReturn(new ImportSchemas());
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ZipOutputStream zip = new ZipOutputStream(baos);
     ZipEntry entry1 = new ZipEntry("Table.schema");
@@ -2217,7 +2217,7 @@ public class DatasetSchemaServiceTest {
         "application/x-zip-compressed", baos.toByteArray());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    dataSchemaServiceImpl.importSchemas(1L, multipartFile);
+    dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(), "file.zip");
     Mockito.verify(designDatasetRepository, times(1)).findByDataflowId(Mockito.anyLong());
   }
 
@@ -2234,10 +2234,12 @@ public class DatasetSchemaServiceTest {
       MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
           "application/x-zip-compressed", baos.toByteArray());
 
-      Mockito.when(zipUtils.unZipImportSchema(Mockito.any())).thenThrow(new EEAException("error"));
+      Mockito.when(zipUtils.unZipImportSchema(Mockito.any(), Mockito.any()))
+          .thenThrow(new EEAException("error"));
       Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
       Mockito.when(authentication.getName()).thenReturn("name");
-      dataSchemaServiceImpl.importSchemas(1L, multipartFile);
+      dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(),
+          multipartFile.getOriginalFilename());
     } catch (Exception e) {
       assertEquals("error", e.getMessage());
       throw e;

@@ -376,8 +376,10 @@ const RepresentativesList = ({
           }
           disabled={representative.hasDatasets}
           id={labelId}
-          onBlur={() => onAddRepresentative()}
-          onChange={event => onDataProviderIdChange(event.target.value, representative)}
+          onChange={event => {
+            onDataProviderIdChange(event.target.value, representative);
+            onAddRepresentative();
+          }}
           onKeyDown={event => {
             if (TextUtils.areEquals(event.key, 'Enter')) {
               onAddRepresentative();

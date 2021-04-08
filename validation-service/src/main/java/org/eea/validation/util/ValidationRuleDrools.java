@@ -38,7 +38,7 @@ public class ValidationRuleDrools {
     if (null == dataSetValue.getDatasetValidations()) {
       dataSetValue.setDatasetValidations(new ArrayList<>());
     }
-
+    datasetValidation.setDatasetValue(dataSetValue);
     dataSetValue.getDatasetValidations().add(datasetValidation);
   }
 
@@ -60,6 +60,7 @@ public class ValidationRuleDrools {
     if (null == tableValue.getTableValidations()) {
       tableValue.setTableValidations(new ArrayList<>());
     }
+    tableValidation.setTableValue(tableValue);
     tableValue.getTableValidations().add(tableValidation);
   }
 
@@ -83,7 +84,7 @@ public class ValidationRuleDrools {
     if (null == fieldValue.getFieldValidations()) {
       fieldValue.setFieldValidations(new ArrayList<>());
     }
-
+    fieldValidation.setFieldValue(fieldValue);
     fieldValue.getFieldValidations().add(fieldValidation);
   }
 
@@ -105,6 +106,7 @@ public class ValidationRuleDrools {
     if (null == recordValue.getRecordValidations()) {
       recordValue.setRecordValidations(new ArrayList<>());
     }
+    recordValidation.setRecordValue(recordValue);
     recordValue.getRecordValidations().add(recordValidation);
   }
 

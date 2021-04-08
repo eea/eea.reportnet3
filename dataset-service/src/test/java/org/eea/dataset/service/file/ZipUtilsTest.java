@@ -1,7 +1,6 @@
 package org.eea.dataset.service.file;
 
 import static org.mockito.Mockito.times;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -142,7 +141,8 @@ public class ZipUtilsTest {
     MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
         "application/x-zip-compressed", baos.toByteArray());
 
-    Assert.assertNotNull(zipUtils.unZipImportSchema(multipartFile));
+    Assert.assertNotNull(zipUtils.unZipImportSchema(multipartFile.getInputStream(),
+        multipartFile.getOriginalFilename()));
   }
 
 
