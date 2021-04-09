@@ -449,11 +449,11 @@ const ValidationsList = withRouter(
         properties: [
           { name: 'table', showInput: true },
           { name: 'field', showInput: true },
-          { name: 'entityType', showInput: true },
-          { name: 'levelError', showInput: true },
-          { name: 'automatic', showInput: true },
-          { name: 'enabled', showInput: true },
-          { name: 'isCorrect', showInput: true }
+          { name: 'entityType' },
+          { name: 'levelError' },
+          { name: 'automatic' },
+          { name: 'enabled' },
+          { name: 'isCorrect' }
         ]
       }
     ];
