@@ -135,12 +135,13 @@ const ReportnetLogin = ({ history }) => {
 
             <fieldset className={`${styles.buttonHolder}`}>
               <Button
-                disabled={isSubmitting}
-                layout="simple"
-                type="button"
-                label={resources.messages['login']}
                 className="rp-btn primary"
+                disabled={isSubmitting}
+                id="kc-login"
+                label={resources.messages['login']}
+                layout="simple"
                 onClick={() => onLogin()}
+                type="button"
               />
             </fieldset>
           </form>
