@@ -1381,11 +1381,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
-      String tableSchemaId, Integer limit, Integer offset) {
+      String tableSchemaId, Integer limit, Integer offset, String filterValue) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
-      exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset);
+      exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
@@ -3512,21 +3512,29 @@ public class DatasetServiceImpl implements DatasetService {
    * @param outputStream the output stream
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset) {
+      Integer limit, Integer offset, String filterValue) {
     try {
+      String filterValuePart = "";
+      if (null != filterValue && !filterValue.isEmpty()) {
+        filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
+      }
+
       String queryFirstPart =
           "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
       String queryMiddlePartOne =
           " end as \"tableName\", ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as totalRecords, (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
       String queryMiddlePartTwo =
-          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) "
+          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
+              + filterValuePart + ") as fieldsAux) "
               + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
       String queryFinalPart =
-          " ) as record) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
+          " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
       String paginationPart = " offset %s limit %s ";
       String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
       String tableName = "";
+
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
       DataSetSchema datasetSchema =
           schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);

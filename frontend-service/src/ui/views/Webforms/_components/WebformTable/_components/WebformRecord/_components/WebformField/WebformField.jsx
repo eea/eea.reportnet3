@@ -321,7 +321,7 @@ export const WebformField = ({
             }}
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="2010:2030"
+            yearRange="1900:2100"
           />
         );
 

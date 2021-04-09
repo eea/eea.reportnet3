@@ -282,7 +282,8 @@ public interface DatasetController {
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("tableSchemaId") String tableSchemaId, @RequestParam("limit") Integer limit,
-      @RequestParam("offset") Integer offset);
+      @RequestParam("offset") Integer offset,
+      @RequestParam(value = "filterValue", required = false) String filterValue);
 
   /**
    * Etl import dataset.

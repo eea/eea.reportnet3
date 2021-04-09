@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
@@ -532,5 +533,5 @@ public interface DatasetSchemaService {
    * @return the table schemas ids
    * @throws EEAException the EEA exception
    */
-  List<String> getTableSchemasIds(Long datasetId) throws EEAException;
+  List<TableSchemaIdNameVO> getTableSchemasIds(Long datasetId) throws EEAException;
 }
