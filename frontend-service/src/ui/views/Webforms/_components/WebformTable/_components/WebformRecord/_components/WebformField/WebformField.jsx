@@ -137,7 +137,7 @@ export const WebformField = ({
         filter,
         !isNil(conditionalField)
           ? conditionalField.type === 'MULTISELECT_CODELIST'
-            ? conditionalField.value?.join(';')
+            ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
             : conditionalField.value
           : field.value,
         datasetSchemaId,
@@ -321,7 +321,7 @@ export const WebformField = ({
             }}
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="2010:2030"
+            yearRange="1900:2100"
           />
         );
 

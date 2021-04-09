@@ -1409,7 +1409,7 @@
   },
   {
     "key": "config/communication/spring.mail.password",
-    "value": ""
+    "value": "IA=="
   },
   {
     "key": "config/communication/spring.mail.properties.mail.smtp.auth",

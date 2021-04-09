@@ -28,7 +28,7 @@ public class EmailConfiguration {
   private String mailServerUsername;
 
   /** The mail server password. */
-  @Value("${spring.mail.password}")
+  @Value("${spring.mail.password:}")
   private String mailServerPassword;
 
   /** The mail server auth. */

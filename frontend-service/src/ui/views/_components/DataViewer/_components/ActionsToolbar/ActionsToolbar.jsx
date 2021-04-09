@@ -31,6 +31,7 @@ const ActionsToolbar = ({
   hasWritePermissions,
   hideValidationFilter,
   isDataflowOpen,
+  isDesignDatasetEditorRead,
   isExportable,
   isFilterable = true,
   isFilterValidationsActive,
@@ -194,9 +195,9 @@ const ActionsToolbar = ({
         {(hasWritePermissions || showWriteButtons) && (
           <Button
             className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
-              !hasWritePermissions || isDataflowOpen ? null : 'p-button-animated-blink'
+              !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
             }`}
-            disabled={!hasWritePermissions || isDataflowOpen}
+            disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
             icon={'import'}
             label={resources.messages['importTable']}
             onClick={() => setImportTableDialogVisible(true)}
@@ -206,9 +207,9 @@ const ActionsToolbar = ({
           <Button
             id="buttonExportTable"
             className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
-              isDataflowOpen ? null : 'p-button-animated-blink'
+              isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
             }`}
-            disabled={isDataflowOpen}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
             label={resources.messages['exportTable']}
             onClick={event => {
@@ -229,11 +230,13 @@ const ActionsToolbar = ({
         {(hasWritePermissions || showWriteButtons) && (
           <Button
             className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
-              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen
+              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
                 ? null
                 : 'p-button-animated-blink'
             }`}
-            disabled={!hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen}
+            disabled={
+              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
+            }
             icon={'trash'}
             label={resources.messages['deleteTable']}
             onClick={() => onSetVisible(setDeleteDialogVisible, true)}
@@ -242,9 +245,9 @@ const ActionsToolbar = ({
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step ${
-            isDataflowOpen ? null : 'p-button-animated-blink'
+            isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={isDataflowOpen}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead}
           icon={'eye'}
           iconClasses={filter.visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
           label={resources.messages['showHideColumns']}

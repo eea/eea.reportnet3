@@ -280,7 +280,9 @@ public interface DatasetController {
   @GetMapping("/{datasetId}/etlExport")
   ResponseEntity<StreamingResponseBody> etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam("tableSchemaId") String tableSchemaId, @RequestParam("limit") Integer limit,
+      @RequestParam("offset") Integer offset);
 
   /**
    * Etl import dataset.

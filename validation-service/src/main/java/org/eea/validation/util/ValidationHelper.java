@@ -447,11 +447,12 @@ public class ValidationHelper implements DisposableBean {
    * @param uuId the uu id
    */
   private void releaseFieldsValidation(Long datasetId, String uuId) {
-    Integer totalFields = validationService.countFieldsDataset(datasetId);
+    int i = 0;
     if (fieldBatchSize != 0) {
-      for (int i = 0; totalFields >= 0; totalFields = totalFields - fieldBatchSize) {
-        releaseFieldValidation(datasetId, uuId, i);
-        i++;
+      for (Integer totalFields =
+          validationService.countFieldsDataset(datasetId); totalFields >= 0; totalFields =
+              totalFields - fieldBatchSize) {
+        releaseFieldValidation(datasetId, uuId, i++);
       }
     }
   }
@@ -463,11 +464,12 @@ public class ValidationHelper implements DisposableBean {
    * @param uuId the uu id
    */
   private void releaseRecordsValidation(Long datasetId, String uuId) {
-    Integer totalRecords = validationService.countRecordsDataset(datasetId);
+    int i = 0;
     if (recordBatchSize != 0) {
-      for (int i = 0; totalRecords >= 0; totalRecords = totalRecords - recordBatchSize) {
-        releaseRecordValidation(datasetId, uuId, i);
-        i++;
+      for (Integer totalRecords =
+          validationService.countRecordsDataset(datasetId); totalRecords >= 0; totalRecords =
+              totalRecords - recordBatchSize) {
+        releaseRecordValidation(datasetId, uuId, i++);
       }
     }
   }
@@ -483,11 +485,10 @@ public class ValidationHelper implements DisposableBean {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
 
     List<TableValue> tableList = tableRepository.findAll();
-    Integer totalTables = tableList.size();
-    for (int i = 0; totalTables > 0; totalTables = totalTables - 1) {
-      Long idTable = tableList.get(i).getId();
+    int i = 0;
+    for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
+      Long idTable = tableList.get(i++).getId();
       releaseTableValidation(datasetId, uuId, idTable);
-      i++;
     }
   }
 

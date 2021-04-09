@@ -443,6 +443,21 @@ const ValidationsList = withRouter(
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
+    const filterOptions = [
+      {
+        type: 'multiselect',
+        properties: [
+          { name: 'table', showInput: true },
+          { name: 'field', showInput: true },
+          { name: 'entityType' },
+          { name: 'levelError' },
+          { name: 'automatic' },
+          { name: 'enabled' },
+          { name: 'isCorrect' }
+        ]
+      }
+    ];
+
     const validationList = () => {
       if (tabsValidationsState.isLoading) {
         return (
@@ -470,9 +485,9 @@ const ValidationsList = withRouter(
               data={tabsValidationsState.validationList.validations}
               getFilteredData={onLoadFilteredData}
               getFilteredSearched={getFilteredState}
+              options={filterOptions}
               searchAll
               searchBy={['name', 'description', 'message']}
-              selectOptions={['table', 'field', 'entityType', 'levelError', 'automatic', 'enabled', 'isCorrect']}
             />
           </div>
 

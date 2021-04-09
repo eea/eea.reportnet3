@@ -597,6 +597,20 @@
         },
         {
           "key": "UPLOAD_FILE_ERROR"
+        },
+        {
+          "key": "SORT_FIELD_DESIGN_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "SORT_FIELD_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
