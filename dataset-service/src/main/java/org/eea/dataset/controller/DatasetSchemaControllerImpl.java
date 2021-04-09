@@ -1015,7 +1015,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/import", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/import")
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
   public void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam("file") MultipartFile file) {
@@ -1027,7 +1027,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
-      dataschemaService.importSchemas(dataflowId, file);
+      dataschemaService.importSchemas(dataflowId, file.getInputStream(),
+          file.getOriginalFilename());
     } catch (Exception e) {
       LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);

@@ -530,7 +530,6 @@ public class DatasetServiceImpl implements DatasetService {
 
         // Retrieve validations to set them into the final result
         retrieveValidations(recordVOs);
-
       }
     }
     result.setTotalRecords(totalRecords);
@@ -2112,7 +2111,7 @@ public class DatasetServiceImpl implements DatasetService {
     Map<String, List<FieldValidation>> fieldValidations = this.getFieldValidations(recordIds);
     Map<String, List<RecordValidation>> recordValidations = this.getRecordValidations(recordIds);
     recordVOs.stream().forEach(record -> {
-      record.getFields().stream().forEach(field -> {
+      record.getFields().parallelStream().forEach(field -> {
         List<FieldValidationVO> validations =
             fieldValidationMapper.entityListToClass(fieldValidations.get(field.getId()));
         field.setFieldValidations(validations);

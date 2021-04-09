@@ -1772,7 +1772,8 @@ public class DatasetSchemaControllerImplTest {
         "application/x-zip-compressed", baos.toByteArray());
 
     dataSchemaControllerImpl.importSchemas(1L, multipartFile);
-    Mockito.verify(dataschemaService, times(1)).importSchemas(Mockito.any(), Mockito.any());
+    Mockito.verify(dataschemaService, times(1)).importSchemas(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
@@ -1784,7 +1785,7 @@ public class DatasetSchemaControllerImplTest {
 
     try {
       doThrow(EEAException.class).when(dataschemaService).importSchemas(Mockito.any(),
-          Mockito.any());
+          Mockito.any(), Mockito.any());
       Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
       Mockito.when(authentication.getName()).thenReturn("user");
 

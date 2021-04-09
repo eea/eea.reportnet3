@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -83,7 +84,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -2160,14 +2160,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Import schemas.
    *
    * @param dataflowId the dataflow id
-   * @param multipartFile the multipart file
-   *
+   * @param is the is
+   * @param fileName the file name
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
   @Async
   @Override
-  public void importSchemas(Long dataflowId, MultipartFile multipartFile)
+  public void importSchemas(Long dataflowId, InputStream is, String fileName)
       throws IOException, EEAException {
 
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
@@ -2176,7 +2176,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     try {
       // Unzip the file and keep the classes on an auxiliary bean
-      ImportSchemas importClasses = zipUtils.unZipImportSchema(multipartFile);
+      ImportSchemas importClasses = zipUtils.unZipImportSchema(is, fileName);
 
       List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
       // If there are no schemas, error

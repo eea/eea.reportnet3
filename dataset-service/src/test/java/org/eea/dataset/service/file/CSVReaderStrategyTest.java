@@ -68,6 +68,7 @@ public class CSVReaderStrategyTest {
     TableSchemaVO table = new TableSchemaVO();
     table.setNameTableSchema("tabla1");
     table.setIdTableSchema("-");
+    table.setFixedNumber(false);
     RecordSchemaVO record = new RecordSchemaVO();
     record.setIdRecordSchema("");
     FieldSchemaVO fschema = new FieldSchemaVO();
@@ -85,7 +86,7 @@ public class CSVReaderStrategyTest {
 
   /**
    * Test parse file.
-   * 
+   *
    * @throws EEAException
    */
   @Test
@@ -94,7 +95,7 @@ public class CSVReaderStrategyTest {
     when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new FieldSchemaVO());
-    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L, "");
+    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L, "-");
     assertNotNull("is null", result);
   }
 
