@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +18,7 @@ import org.eea.dataset.mapper.DataSchemaMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.NoRulesDataSchemaMapper;
 import org.eea.dataset.mapper.SimpleDataSchemaMapper;
+import org.eea.dataset.mapper.TableSchemaIdNameMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.mapper.WebFormMapper;
@@ -63,6 +63,7 @@ import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleTableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -241,6 +242,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
+
+  /** The table schema id name mapper. */
+  @Autowired
+  private TableSchemaIdNameMapper tableSchemaIdNameMapper;
 
 
   /** The zip utils. */
@@ -2283,11 +2288,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<String> getTableSchemasIds(Long datasetId) throws EEAException {
+  public List<TableSchemaIdNameVO> getTableSchemasIds(Long datasetId) throws EEAException {
     String datasetschemaId = getDatasetSchemaId(datasetId);
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(datasetschemaId));
-    return schema.getTableSchemas().stream()
-        .map(tableSchema -> tableSchema.getIdTableSchema().toString()).collect(Collectors.toList());
+    List<TableSchemaIdNameVO> tableSchemasVOList = new ArrayList<>();
+    for (TableSchema table : schema.getTableSchemas()) {
+      tableSchemasVOList.add(tableSchemaIdNameMapper.entityToClass(table));
+    }
+    return tableSchemasVOList;
   }
 
   /**
