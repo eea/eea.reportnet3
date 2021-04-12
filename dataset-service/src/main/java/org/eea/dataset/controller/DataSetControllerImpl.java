@@ -654,9 +654,11 @@ public class DataSetControllerImpl implements DatasetController {
   public ResponseEntity<StreamingResponseBody> etlExportDataset(
       @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam("tableSchemaId") String tableSchemaId, @RequestParam("limit") Integer limit,
-      @RequestParam("offset") Integer offset,
-      @RequestParam(value = "filterValue", required = false) String filterValue) {
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "limit", required = false) Integer limit,
+      @RequestParam(value = "offset", required = false) Integer offset,
+      @RequestParam(value = "filterValue", required = false) String filterValue,
+      @RequestParam(value = "columnName", required = false) String columnName) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -667,7 +669,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
 
     StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-        outputStream, tableSchemaId, limit, offset, filterValue);
+        outputStream, tableSchemaId, limit, offset, filterValue, columnName);
 
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
   }

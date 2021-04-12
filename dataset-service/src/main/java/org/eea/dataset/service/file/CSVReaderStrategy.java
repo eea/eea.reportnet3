@@ -154,9 +154,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldSchemaVOS =
           fileCommon.findFieldSchemas(idTableSchema, dataSetSchema);
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
-      boolean isFixedNumberOfRecords = dataSetSchema.getTableSchemas().stream()
+      TableSchemaVO tableSchemaVO = dataSetSchema.getTableSchemas().stream()
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(idTableSchema)).findFirst()
-          .orElse(new TableSchemaVO()).getFixedNumber();
+          .orElse(new TableSchemaVO());
+      boolean isFixedNumberOfRecords = tableSchemaVO.getFixedNumber();
+      if (!isDesignDataset && tableSchemaVO.getRecordSchema().getFieldSchema().stream()
+          .allMatch(field -> field.getReadOnly())) {
+        throw new IOException("All fields for this table " + tableSchemaVO.getNameTableSchema()
+            + " are readOnly, you can't import new fields");
+      }
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);

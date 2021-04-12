@@ -74,6 +74,7 @@ public class CSVReaderStrategyTest {
     FieldSchemaVO fschema = new FieldSchemaVO();
     fschema.setName("campo_1");
     fschema.setId("");
+    fschema.setReadOnly(false);
     fields.add(fschema);
     record.setFieldSchema(fields);
     table.setRecordSchema(record);
