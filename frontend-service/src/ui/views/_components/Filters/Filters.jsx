@@ -288,32 +288,34 @@ export const Filters = ({
 
       const possibleOptions = new Map();
 
-      filterKeys.forEach(key => possibleOptions.set(key, new Set()));
+      filterKeys.forEach(key => possibleOptions.set(key, []));
 
       const initialFilteredData = ApplyFilterUtils.onApplySearch(data, searchBy, filterState.searchBy, filterState);
 
       initialFilteredData.forEach(item =>
         multiselect.forEach(filterKey => {
-          let currentValue = possibleOptions.get(filterKey);
-          currentValue?.add(item[filterKey]);
+          const currentValue = possibleOptions.get(filterKey);
+
+          currentValue.push(item[filterKey]);
         })
       );
 
-      const removeInexistentMultiselectFilters = keyValue => {
-        multiselect.forEach(key => {
-          const option = possibleOptions.get(key);
+      const distinct = (value, index, self) => {
+        return self.indexOf(value) === index;
+      };
 
-          // key [0], value [1]
-          if (key === keyValue[0]) {
-            if (key === 'pinned' || key === 'table' || key === 'field') {
-              keyValue[1] = keyValue[1].filter(value => option.has(value.toLowerCase()));
-            } else {
-              keyValue[1] = keyValue[1].filter(value => option.has(value));
-            }
+      const removeInexistentMultiselectFilters = entryKeyValue => {
+        multiselect.forEach(multiselectKey => {
+          const option = possibleOptions.get(multiselectKey).filter(distinct);
+
+          const [entryKey, entryValue] = entryKeyValue;
+
+          if (multiselectKey === entryKey) {
+            entryKeyValue[1] = entryValue.filter(value => option.some(o => TextUtils.areEquals(o, value)));
           }
         });
 
-        return keyValue;
+        return entryKeyValue;
       };
 
       const parsedResult = Object.entries(filterBy).map(removeInexistentMultiselectFilters);
