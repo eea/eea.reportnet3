@@ -341,7 +341,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(webformMapper.classToEntity(schemaOrigin.getWebform()));
-    schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
+    schema.setAvailableInPublic(false);
     // table level
     for (TableSchemaVO tableVO : schemaOrigin.getTableSchemas()) {
       ObjectId newTableId = new ObjectId();
