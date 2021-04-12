@@ -105,9 +105,6 @@
     }
 
     .parameters {
-      border-color: var(--inputtext-border-color-focus);
-      border-radius: 5px;
-      box-shadow: var(--inputtext-box-shadow-focus);
       height: 250px;
       outline-offset: 0;
       outline: 0 none;
@@ -121,6 +118,8 @@
         padding: 0;
         position: relative;
         width: 100%;
+        border: var(--inputtext-border);
+        border-radius: 5px;
 
         .item {
           align-items: center;
