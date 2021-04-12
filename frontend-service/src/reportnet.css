@@ -2295,7 +2295,6 @@ textarea:focus {
 }
 
 form .error {
-  color: var(--errors);
   transition: color 0.2s;
 }
 
