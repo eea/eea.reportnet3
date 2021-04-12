@@ -836,7 +836,6 @@ public class FileTreatmentHelper implements DisposableBean {
         }
         recordsToSave.add(oldRecord);
       }
-
     } else {
       List<ObjectId> readOnlyFields =
           tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
