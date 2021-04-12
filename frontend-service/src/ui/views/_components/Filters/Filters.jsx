@@ -308,9 +308,10 @@ export const Filters = ({
         multiselect.forEach(multiselectKey => {
           const option = possibleOptions.get(multiselectKey).filter(distinct);
 
-
           if (multiselectKey === entryKey) {
-            entryKeyValue[1] = entryValue.filter(value => option.some(o => TextUtils.areEquals(o, value)));
+            entryKeyValue[1] = entryValue.filter(value =>
+              option.some(opt => TextUtils.areEquals(opt.toString(), value.toString()))
+            );
           }
         });
 
