@@ -300,9 +300,7 @@ export const Filters = ({
         })
       );
 
-      const distinct = (value, index, self) => {
-        return self.indexOf(value) === index;
-      };
+      const distinct = (value, index, self) => self.indexOf(value) === index;
 
       const removeInexistentMultiselectFilters = entryKeyValue => {
         const [entryKey, entryValue] = entryKeyValue;
