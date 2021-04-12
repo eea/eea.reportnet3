@@ -305,10 +305,11 @@ export const Filters = ({
       };
 
       const removeInexistentMultiselectFilters = entryKeyValue => {
+        const [entryKey, entryValue] = entryKeyValue;
+
         multiselect.forEach(multiselectKey => {
           const option = possibleOptions.get(multiselectKey).filter(distinct);
 
-          const [entryKey, entryValue] = entryKeyValue;
 
           if (multiselectKey === entryKey) {
             entryKeyValue[1] = entryValue.filter(value => option.some(o => TextUtils.areEquals(o, value)));
