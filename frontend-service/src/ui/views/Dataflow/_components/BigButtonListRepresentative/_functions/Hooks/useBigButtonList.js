@@ -42,7 +42,7 @@ const useBigButtonList = ({
       feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
       help: true,
       receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry,
+      release: isLeadReporterOfCountry && !isTestDataset,
       testDatasets: isTestDataset
     };
   };

@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import org.bson.types.ObjectId;
@@ -12,11 +13,11 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Interface DataschemaService.
@@ -502,15 +503,18 @@ public interface DatasetSchemaService {
    */
   byte[] exportSchemas(Long dataflowId) throws IOException, EEAException;
 
+
   /**
    * Import schemas.
    *
    * @param dataflowId the dataflow id
-   * @param multipartFile the multipart file
+   * @param in the in
+   * @param fileName the file name
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  void importSchemas(Long dataflowId, MultipartFile multipartFile) throws IOException, EEAException;
+  void importSchemas(Long dataflowId, InputStream in, String fileName)
+      throws IOException, EEAException;
 
 
   /**
@@ -529,5 +533,5 @@ public interface DatasetSchemaService {
    * @return the table schemas ids
    * @throws EEAException the EEA exception
    */
-  List<String> getTableSchemasIds(Long datasetId) throws EEAException;
+  List<TableSchemaIdNameVO> getTableSchemasIds(Long datasetId) throws EEAException;
 }

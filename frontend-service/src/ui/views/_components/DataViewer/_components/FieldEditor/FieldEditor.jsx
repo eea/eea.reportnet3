@@ -280,10 +280,7 @@ const FieldEditor = ({
     }
   }, [isCalendarVisible]);
 
-  const getIsCorrectDateFormatedValue = date => {
-    const year = date.split('-')[0];
-    return (year > 2009 && year < 2031) || isEmpty(date) ? true : false;
-  };
+  const getIsCorrectDateFormatedValue = date => !isEmpty(date);
 
   const projectCoordinates = (coordinates, newCRS) => {
     return proj4(proj4(currentCRS.value), proj4(newCRS), coordinates);
@@ -595,7 +592,7 @@ const FieldEditor = ({
             monthNavigator={true}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
-            yearRange="2010:2030"
+            yearRange="1900:2100"
           />
         );
       case 'EMAIL':
