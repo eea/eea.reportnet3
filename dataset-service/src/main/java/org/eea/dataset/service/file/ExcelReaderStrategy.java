@@ -210,7 +210,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
         FieldVO field = new FieldVO();
         field.setIdFieldSchema(fieldSchemaVO.getId());
         field.setType(fieldSchemaVO.getType());
-
+        field.setValue(value);
         if (null == field.getType() && value.length() >= fieldMaxLength) {
           field.setValue(value.substring(0, fieldMaxLength));
         } else {
