@@ -27,7 +27,11 @@
   margin: 0.1rem 0 0.1rem 0.5rem;
   padding: 0 0.2rem;
   border-radius: 3px;
-  position: absolute;
+}
+
+.pkFieldWrapper {
+  display: flex;
+  align-items: center;
 }
 
 .selected {
