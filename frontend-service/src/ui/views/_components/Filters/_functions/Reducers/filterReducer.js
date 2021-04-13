@@ -11,16 +11,17 @@ export const filterReducer = (state, { type, payload }) => {
     case 'CLEAR_ALL':
       return {
         ...state,
+        checkboxes: payload.checkboxes,
+        clearedFilters: payload.clearedFilters,
         filterBy: payload.filterBy,
+        filtered: payload.filtered,
         filteredData: payload.filteredData,
+        filteredSearched: payload.filteredSearched,
         labelAnimations: payload.labelAnimations,
         orderBy: payload.orderBy,
-        searchBy: payload.searchBy,
-        checkboxes: payload.checkboxes,
-        filtered: payload.filtered,
-        filteredSearched: payload.filteredSearched,
         property: '',
-        clearedFilters: payload.clearedFilters
+        searchBy: payload.searchBy,
+        isOrdering: false
       };
 
     case 'FILTERED':
@@ -33,7 +34,8 @@ export const filterReducer = (state, { type, payload }) => {
       return {
         ...state,
         filterBy: { ...state.filterBy, [payload.filter]: payload.value },
-        filteredData: payload.filteredData
+        filteredData: payload.filteredData,
+        isOrdering: false
       };
 
     case 'FILTERED_SEARCHED_STATE':
@@ -44,7 +46,7 @@ export const filterReducer = (state, { type, payload }) => {
 
     case 'INITIAL_STATE':
       const getFilterBy = () => {
-        if (state?.previousState?.filtered) {
+        if (state.previousState?.filtered) {
           return { ...state.previousState.filterBy, ...state.filterBy };
         }
         return payload.initialFilterBy;
@@ -58,7 +60,8 @@ export const filterReducer = (state, { type, payload }) => {
         filteredData: payload.initialFilteredData,
         labelAnimations: payload.initialLabelAnimations,
         orderBy: payload.initialOrderBy,
-        previousState: { filtered: state.filtered, filterBy: state.filterBy }
+        previousState: { filtered: state.filtered, filterBy: state.filterBy },
+        isOrdering: false
       };
 
     case 'ON_SEARCH_DATA':
@@ -66,21 +69,24 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         filteredData: payload.searchedValues,
         searchBy: payload.value,
-        searched: payload.searched
+        searched: payload.searched,
+        isOrdering: false
       };
 
     case 'UPDATE_FILTER_BY':
       return {
         ...state,
         filterBy: payload.filterBy,
-        previousState: { filtered: state.filtered, filterBy: payload.filterBy }
+        previousState: { filtered: state.filtered, filterBy: payload.filterBy },
+        isOrdering: false
       };
 
     case 'ON_CHECKBOX_FILTER':
       return {
         ...state,
-        checkboxes: FiltersUtils.getCheckboxState(state.checkboxes, payload.property, payload.value),
-        property: payload.property
+        checkboxes: FiltersUtils.getCheckboxState(state.checkboxes, payload.property),
+        property: payload.property,
+        isOrdering: false
       };
 
     case 'ORDER_DATA':
@@ -88,7 +94,8 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         data: payload.sortedData,
         filteredData: payload.filteredSortedData,
-        orderBy: { ...payload.resetOrder, [payload.property]: -payload.orderBy }
+        orderBy: { ...payload.resetOrder, [payload.property]: -payload.orderBy },
+        isOrdering: true
       };
 
     case 'SET_CLEARED_FILTERS':

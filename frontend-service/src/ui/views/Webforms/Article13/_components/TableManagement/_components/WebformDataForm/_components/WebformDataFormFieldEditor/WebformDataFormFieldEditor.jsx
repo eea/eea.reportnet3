@@ -77,7 +77,10 @@ const WebformDataFormFieldEditor = ({
         onChange={e => onChangeForm(field, e.target.value.value)}
         optionLabel="itemType"
         options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
-        value={RecordUtils.getCodelistValue(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
+        value={RecordUtils.getCodelistValue(
+          RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist']),
+          fieldValue
+        )}
       />
     );
   };
@@ -93,7 +96,6 @@ const WebformDataFormFieldEditor = ({
     }));
     return (
       <MultiSelect
-        addSpaceCommaSeparator={true}
         appendTo={document.body}
         disabled={TextUtils.areEquals(field, 'listofsinglepams') && hasSingle}
         onChange={e => onChangeForm(field, e.value)}
@@ -101,6 +103,7 @@ const WebformDataFormFieldEditor = ({
         options={options}
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(options, fieldValue)}
+        valuesSeparator=";"
       />
     );
   };

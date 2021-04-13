@@ -87,9 +87,17 @@ const FieldEditor = ({
   const calendarId = uuid.v4();
 
   useEffect(() => {
-    if (!isUndefined(colsSchema)) setCodelistItemsOptions(RecordUtils.getCodelistItems(colsSchema, cells.field));
-    setCodelistItemValue(RecordUtils.getCellValue(cells, cells.field).toString());
-    setLinkItemsValue(RecordUtils.getCellValue(cells, cells.field).toString());
+    if (!isUndefined(colsSchema)) setCodelistItemsOptions(getCodelistItemsWithEmptyOption());
+    setCodelistItemValue(
+      Array.isArray(RecordUtils.getCellValue(cells, cells.field))
+        ? RecordUtils.getCellValue(cells, cells.field).join(';')
+        : RecordUtils.getCellValue(cells, cells.field).toString()
+    );
+    setLinkItemsValue(
+      Array.isArray(RecordUtils.getCellValue(cells, cells.field))
+        ? RecordUtils.getCellValue(cells, cells.field).join(';')
+        : RecordUtils.getCellValue(cells, cells.field).toString()
+    );
   }, []);
 
   useEffect(() => {
@@ -122,9 +130,13 @@ const FieldEditor = ({
       datasetSchemaId = metadata.datasetSchemaId;
     }
 
-    const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
+    const fieldInfo = RecordUtils.getCellInfo(colsSchema, cells.field);
+    const referencedFieldInfo = RecordUtils.getCellInfo(colsSchema, colSchema.referencedField.masterConditionalFieldId);
+    const hasMultipleValues = fieldInfo.pkHasMultipleValues;
+
     try {
       setIsLoadingData(true);
+      const conditionalValue = RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId);
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
         datasetId,
         colSchema.field,
@@ -132,7 +144,11 @@ const FieldEditor = ({
         //   ? colSchema.referencedField.idPk
         //   : colSchema.referencedField.referencedField.fieldSchemaId,
         filter,
-        RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId),
+        referencedFieldInfo?.type === 'MULTISELECT_CODELIST'
+          ? Array.isArray(conditionalValue)
+            ? conditionalValue.join('; ')
+            : conditionalValue.replace('; ', ';').replace(';', '; ')
+          : conditionalValue,
         datasetSchemaId,
         100
       );
@@ -264,10 +280,7 @@ const FieldEditor = ({
     }
   }, [isCalendarVisible]);
 
-  const getIsCorrectDateFormatedValue = date => {
-    const year = date.split('-')[0];
-    return (year > 2009 && year < 2031) || isEmpty(date) ? true : false;
-  };
+  const getIsCorrectDateFormatedValue = date => !isEmpty(date);
 
   const projectCoordinates = (coordinates, newCRS) => {
     return proj4(proj4(currentCRS.value), proj4(newCRS), coordinates);
@@ -579,7 +592,7 @@ const FieldEditor = ({
             monthNavigator={true}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
-            yearRange="2010:2030"
+            yearRange="1900:2100"
           />
         );
       case 'EMAIL':
@@ -634,8 +647,6 @@ const FieldEditor = ({
         if (hasMultipleValues) {
           return (
             <MultiSelect
-              // onChange={e => onChangeForm(field, e.value)}
-              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               disabled={isLoadingData}
@@ -666,6 +677,7 @@ const FieldEditor = ({
               options={linkItemsOptions}
               optionLabel="itemType"
               value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
+              valuesSeparator=";"
             />
           );
         } else {
@@ -715,7 +727,6 @@ const FieldEditor = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             onChange={e => {
@@ -740,6 +751,7 @@ const FieldEditor = ({
             options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             optionLabel="itemType"
             value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
+            valuesSeparator=";"
           />
         );
       default:

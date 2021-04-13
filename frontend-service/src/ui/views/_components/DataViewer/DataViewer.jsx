@@ -62,6 +62,7 @@ const DataViewer = withRouter(
     hasCountryCode,
     hasWritePermissions,
     isDataflowOpen,
+    isDesignDatasetEditorRead,
     isExportable,
     isFilterable,
     isGroupedValidationDeleted,
@@ -171,7 +172,7 @@ const DataViewer = withRouter(
     let datatableRef = useRef();
     let divRef = useRef();
 
-    const { areEquals, removeCommaSeparatedWhiteSpaces } = TextUtils;
+    const { areEquals, removeSemicolonSeparatedWhiteSpaces } = TextUtils;
 
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
 
@@ -206,7 +207,7 @@ const DataViewer = withRouter(
 
     const actionTemplate = () => (
       <ActionsColumn
-        disabledButtons={isDataflowOpen}
+        disabledButtons={isDataflowOpen || isDesignDatasetEditorRead}
         hideDeletion={tableFixedNumber}
         hideEdition={RecordUtils.allAttachments(colsSchema)}
         onDeleteClick={() => setConfirmDeleteVisible(true)}
@@ -260,6 +261,7 @@ const DataViewer = withRouter(
       hasWritePermissions && !tableReadOnly,
       initialCellValue,
       isDataflowOpen,
+      isDesignDatasetEditorRead,
       onFileDeleteVisible,
       onFileDownload,
       onFileUploadVisible,
@@ -490,9 +492,9 @@ const DataViewer = withRouter(
             field.fieldData[field.fieldData.fieldSchemaId] !== ''
           ) {
             if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
-              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+              field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(';');
             } else {
-              field.fieldData[field.fieldData.fieldSchemaId] = removeCommaSeparatedWhiteSpaces(
+              field.fieldData[field.fieldData.fieldSchemaId] = removeSemicolonSeparatedWhiteSpaces(
                 field.fieldData[field.fieldData.fieldSchemaId]
               );
             }
@@ -682,7 +684,7 @@ const DataViewer = withRouter(
               field.id,
               field.type,
               field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
-                ? value.join(',')
+                ? value.join(';')
                 : value
             );
 
@@ -1046,10 +1048,10 @@ const DataViewer = withRouter(
         <div className={styles.requiredTemplateWrapper}>
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
             <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
-          ) : rowData.field === 'Single select items' ||
-            rowData.field === 'Multiple select items' ||
-            rowData.field === 'Valid extensions' ? (
-            <Chips disabled={true} value={rowData.value.split(',')} className={styles.chips}></Chips>
+          ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
+            <Chips className={styles.chips} disabled={true} pasteSeparator=";" value={rowData.value.split(';')}></Chips>
+          ) : rowData.field === 'Valid extensions' ? (
+            <Chips className={styles.chips} disabled={true} value={rowData.value.split(',')}></Chips>
           ) : rowData.field === 'Maximum file size' ? (
             `${rowData.value} ${resources.messages['MB']}`
           ) : (
@@ -1109,6 +1111,7 @@ const DataViewer = withRouter(
           hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
           hideValidationFilter={hideValidationFilter}
           isDataflowOpen={isDataflowOpen}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={isExportable}
           isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
@@ -1148,6 +1151,7 @@ const DataViewer = withRouter(
                 <Footer
                   hasWritePermissions={hasWritePermissions && !tableReadOnly}
                   isDataflowOpen={isDataflowOpen}
+                  isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                   onAddClick={() => {
                     setIsNewRecord(true);
                     setAddDialogVisible(true);
@@ -1159,7 +1163,12 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !isEditing && !isDataflowOpen
+              hasWebformWritePermissions &&
+              hasWritePermissions &&
+              !tableReadOnly &&
+              !isEditing &&
+              !isDataflowOpen &&
+              !isDesignDatasetEditorRead
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);

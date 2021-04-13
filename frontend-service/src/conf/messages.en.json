@@ -71,7 +71,7 @@
     "closeSidebar": "Close sidebar",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
-    "codelistEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste your list</strong> (separated by commas) <u><strong>to add</strong></u> new items.",
+    "codelistEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste your list</strong> (separated by semicolons) <u><strong>to add</strong></u> new items.",
     "codelistEditorMessage": "Enter your single select items",
     "codelists": "Single select items",
     "codelistSelection": "No single select item selected",
@@ -1047,6 +1047,9 @@
     "uploadFileError": "Error uploading file",
     "publicStatusLeftSideBarButton": "Public status",
     "showPublicInfoDataflowDialogHeader": "Show/hide public dataflow data",
-    "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available"
+    "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available",
+    "sortFieldDesignFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
+    "sortFieldFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
+    "manageRolesReporterDialogInputPlaceholder": "Reporter account..."
   }
 }

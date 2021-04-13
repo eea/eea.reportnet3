@@ -1,12 +1,10 @@
 package org.eea.dataset.service.helper;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -102,14 +100,8 @@ public class UpdateRecordHelperTest {
   public void propagateNewFieldDesignTest() {
     updateRecordHelper.propagateNewFieldDesign(1L, "5cf0e9b3b793310e9ceca190", 1, 1, "testUuid",
         "5cf0e9b3b793310e9ceca190", DataType.TEXT);
-    Mockito.verify(kafkaSender, times(2)).sendMessage(Mockito.any());
+    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 
-  @Test
-  public void processesMapTest() {
-    ConcurrentHashMap<String, Integer> processesMap = new ConcurrentHashMap<>();;
-    ReflectionTestUtils.setField(updateRecordHelper, "processesMap", processesMap);
-    updateRecordHelper.getProcessesMap();
-    assertEquals(processesMap, updateRecordHelper.getProcessesMap());
-  }
+
 }

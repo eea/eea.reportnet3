@@ -586,9 +586,10 @@ public class DataSetControllerImplTest {
    * Gets the field values referenced.
    *
    * @return the field values referenced
+   * @throws EEAException
    */
   @Test
-  public void getFieldValuesReferencedTest() {
+  public void getFieldValuesReferencedTest() throws EEAException {
     List<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
     Mockito.when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(),
@@ -630,7 +631,7 @@ public class DataSetControllerImplTest {
   public void etlExportDatasetDataflowExceptionTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(null);
     try {
-      dataSetControllerImpl.etlExportDataset(1L, 1L, 1L);
+      dataSetControllerImpl.etlExportDataset(1L, 1L, 1L, "", 1, 1);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;

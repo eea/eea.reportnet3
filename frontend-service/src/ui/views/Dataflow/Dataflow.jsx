@@ -92,18 +92,18 @@ const Dataflow = withRouter(({ history, match }) => {
     isExporting: false,
     isFetchingData: false,
     isImportLeadReportersVisible: false,
-    isManageRightsDialogVisible: false,
+    isManageEditorsDialogVisible: false,
+    isManageReportersDialogVisible: false,
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
     isPageLoading: true,
-    isShowPublicInfoDialogVisible: false,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
     isReleasable: false,
     isReleaseableDialogVisible: false,
     isReleaseDialogVisible: false,
-    isShareRightsDialogVisible: false,
+    isShowPublicInfoDialogVisible: false,
     isSnapshotDialogVisible: false,
     isUserListVisible: false,
     name: '',
@@ -119,11 +119,24 @@ const Dataflow = withRouter(({ history, match }) => {
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   const uniqDataProviders = uniq(map(dataflowState.data.datasets, 'dataProviderId'));
+
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
 
-  const isInsideACountry = !isNil(representativeId) || uniqDataProviders.length === 1;
+  const isLeadDesigner = dataflowState.userRoles.some(
+    userRole => userRole === config.permissions['DATA_STEWARD'] || userRole === config.permissions['DATA_CUSTODIAN']
+  );
+
+  const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
+
+  const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
+
   const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
     config.permissions.LEAD_REPORTER
+  ]);
+
+  const isReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
+    config.permissions.REPORTER_READ,
+    config.permissions.REPORTER_WRITE
   ]);
 
   const isNationalCoordinator = userContext.hasContextAccessPermission(
@@ -151,6 +164,8 @@ const Dataflow = withRouter(({ history, match }) => {
       (uniqDataProviders.length === 1 && uniqRepresentatives.includes(uniqDataProviders[0])));
 
   const isNationalCoordinatorOfCountry = isNationalCoordinator && isInsideACountry;
+
+  const isReporterOfCountry = isReporter && isInsideACountry;
 
   const dataProviderId = isInsideACountry
     ? !isNil(representativeId)
@@ -219,7 +234,7 @@ const Dataflow = withRouter(({ history, match }) => {
         icon: 'userConfig',
         isVisible: buttonsVisibility.manageEditorsBtn,
         label: 'manageEditorsRights',
-        onClick: () => manageDialogs('isShareRightsDialogVisible', true),
+        onClick: () => manageDialogs('isManageEditorsDialogVisible', true),
         title: 'manageEditorsRights'
       };
 
@@ -228,7 +243,7 @@ const Dataflow = withRouter(({ history, match }) => {
         icon: 'userConfig',
         isVisible: buttonsVisibility.manageReportersBtn,
         label: 'manageReportersRights',
-        onClick: () => manageDialogs('isShareRightsDialogVisible', true),
+        onClick: () => manageDialogs('isManageReportersDialogVisible', true),
         title: 'manageReportersRights'
       };
 
@@ -295,7 +310,6 @@ const Dataflow = withRouter(({ history, match }) => {
       const representativesNoDatasets = dataflowState.data.representatives.filter(
         representative => !representative.hasDatasets
       );
-      //set for the first load
       setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
       setFormHasRepresentatives(!isEmpty(representativesNoDatasets));
     }
@@ -327,14 +341,6 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   const getLeftSidebarButtonsVisibility = () => {
-    const { userRoles } = dataflowState;
-
-    const isLeadDesigner = userRoles.some(
-      userRole => userRole === config.permissions['DATA_STEWARD'] || userRole === config.permissions['DATA_CUSTODIAN']
-    );
-
-    const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
-
     if (isEmpty(dataflowState.data)) {
       return {
         apiKeyBtn: false,
@@ -360,18 +366,27 @@ const Dataflow = withRouter(({ history, match }) => {
       usersListBtn:
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
+        isReporterOfCountry ||
         (dataflowState.isCustodian && !isNil(representativeId))
     };
   };
 
   const handleRedirect = target => history.push(target);
 
-  const manageRightsDialogFooter = (
+  const manageReportersDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
-      onClick={() => manageDialogs('isShareRightsDialogVisible', false)}
+      onClick={() => manageDialogs('isManageReportersDialogVisible', false)}
+    />
+  );
+  const manageEditorsDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isManageEditorsDialogVisible', false)}
     />
   );
 
@@ -566,7 +581,7 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: dataflow.designDatasets } });
 
         const datasetSchemaInfo = [];
-        dataflow.designDatasets.map(schema => {
+        dataflow.designDatasets.forEach(schema => {
           datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
         });
 
@@ -867,7 +882,11 @@ const Dataflow = withRouter(({ history, match }) => {
         <Title
           icon="clone"
           iconSize="4rem"
-          subtitle={!isNil(country) ? `${resources.messages['dataflow']} - ${country}` : resources.messages['dataflow']}
+          subtitle={
+            isInsideACountry && !isNil(country) && country.length > 0
+              ? `${resources.messages['dataflow']} - ${country}`
+              : resources.messages['dataflow']
+          }
           title={dataflowState.name}
         />
 
@@ -903,7 +922,6 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowId={dataflowId}
                 representativesImport={dataflowState.representativesImport}
                 setDataProviderSelected={setDataProviderSelected}
-                setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setFormHasRepresentatives={setFormHasRepresentatives}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setRepresentativeImport={isImport =>
@@ -914,20 +932,39 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        {dataflowState.isShareRightsDialogVisible && (
+        {dataflowState.isManageEditorsDialogVisible && (
           <Dialog
-            footer={manageRightsDialogFooter}
-            header={
-              dataflowState.isCustodian
-                ? resources.messages['manageEditorsRights']
-                : resources.messages['manageReportersRights']
-            }
-            onHide={() => manageDialogs('isShareRightsDialogVisible', false)}
-            visible={dataflowState.isShareRightsDialogVisible}>
+            footer={manageEditorsDialogFooter}
+            header={resources.messages['manageEditorsRights']}
+            onHide={() => manageDialogs('isManageEditorsDialogVisible', false)}
+            visible={dataflowState.isManageEditorsDialogVisible}>
             <ShareRights
+              columnHeader={resources.messages['editorsAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
-              isCustodian={dataflowState.isCustodian}
+              deleteConfirmHeader={resources.messages[`editorsRightsDialogConfirmDeleteHeader`]}
+              deleteConfirmMessage={resources.messages[`editorsRightsDialogConfirmDeleteQuestion`]}
+              notificationKey={'DELETE_EDITOR_ERROR'}
+              placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
+              representativeId={representativeId}
+            />
+          </Dialog>
+        )}
+
+        {dataflowState.isManageReportersDialogVisible && (
+          <Dialog
+            footer={manageReportersDialogFooter}
+            header={resources.messages['manageReportersRights']}
+            onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
+            visible={dataflowState.isManageReportersDialogVisible}>
+            <ShareRights
+              columnHeader={resources.messages['reportersAccountColumn']}
+              dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
+              deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
+              deleteConfirmMessage={resources.messages[`reportersRightsDialogConfirmDeleteQuestion`]}
+              notificationKey={'DELETE_REPORTER_ERROR'}
+              placeholder={resources.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
             />
           </Dialog>
@@ -972,7 +1009,7 @@ const Dataflow = withRouter(({ history, match }) => {
             </label>
           </ConfirmDialog>
         )}
-        {console.log(dataflowState.data)}
+
         {dataflowState.isShowPublicInfoDialogVisible && (
           <ConfirmDialog
             disabledConfirm={

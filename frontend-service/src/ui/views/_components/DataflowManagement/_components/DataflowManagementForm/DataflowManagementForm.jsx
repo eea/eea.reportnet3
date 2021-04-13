@@ -88,7 +88,7 @@ const DataflowManagementForm = forwardRef(
             onCreate();
           }
         } catch (error) {
-          console.log('error', error);
+          console.error('error', error);
           if (error?.response?.data === DataflowConf.errorTypes['dataflowExists']) {
             setErrors(previousErrors => {
               return {

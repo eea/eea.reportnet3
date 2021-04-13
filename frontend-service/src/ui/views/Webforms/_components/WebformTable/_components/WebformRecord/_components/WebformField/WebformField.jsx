@@ -135,7 +135,11 @@ export const WebformField = ({
         datasetId,
         field.fieldSchemaId,
         filter,
-        !isNil(conditionalField) ? conditionalField.value : field.value,
+        !isNil(conditionalField)
+          ? conditionalField.type === 'MULTISELECT_CODELIST'
+            ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
+            : conditionalField.value
+          : field.value,
         datasetSchemaId,
         100
       );
@@ -198,7 +202,7 @@ export const WebformField = ({
     webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
-        ? value.join(',')
+        ? value.join(';')
         : value;
 
     try {
@@ -317,7 +321,7 @@ export const WebformField = ({
             }}
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="2010:2030"
+            yearRange="1900:2100"
           />
         );
 
@@ -325,7 +329,6 @@ export const WebformField = ({
         if (field.pkHasMultipleValues) {
           return (
             <MultiSelect
-              addSpaceCommaSeparator={true}
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -343,6 +346,7 @@ export const WebformField = ({
               options={linkItemsOptions}
               optionLabel="itemType"
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
+              valuesSeparator=";"
             />
           );
         } else {
@@ -381,7 +385,6 @@ export const WebformField = ({
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
-            addSpaceCommaSeparator={true}
             appendTo={document.body}
             maxSelectedLabels={10}
             id={field.fieldId}
@@ -407,6 +410,7 @@ export const WebformField = ({
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
             )}
+            valuesSeparator=";"
           />
         );
 

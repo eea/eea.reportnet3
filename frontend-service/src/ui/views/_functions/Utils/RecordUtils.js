@@ -43,7 +43,6 @@ const changeRecordInTable = (tableData, rowIndex, colsSchema, records) => {
 
 const formatDate = (date, isInvalidDate) => {
   if (isInvalidDate) return '';
-
   let d = new Date(date),
     month = '' + (d.getMonth() + 1),
     day = '' + d.getDate(),
@@ -77,7 +76,11 @@ const getCellItems = (colSchemaData, field) => {
 
 const getCellValue = (tableData, field) => {
   const value = tableData.rowData.dataRow.filter(data => data.fieldData[field]);
-  return value.length > 0 ? value[0].fieldData[field] : '';
+  return value.length > 0
+    ? value[0].fieldData[field]?.type === 'MULTISELECT_CODELIST'
+      ? value[0].fieldData[field]?.join(';')
+      : value[0].fieldData[field]
+    : '';
 };
 
 const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirstRow, reporting) => {
@@ -246,7 +249,7 @@ const getLinkValue = (linkOptions, value) => {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-    const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
+    const splittedValue = !Array.isArray(value) ? TextUtils.splitByChar(value, ';') : value;
     return intersection(
       splittedValue,
       multiselectItemsOptions.map(item => item.value)

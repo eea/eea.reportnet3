@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.postgresql.util.PSQLException;
 
 
 
@@ -57,7 +58,7 @@ public class FieldExtendedRepositoryTest {
   }
 
   @Test
-  public void findByIdFieldSchemaWithTagOrderedTest() {
+  public void findByIdFieldSchemaWithTagOrderedTest() throws PSQLException {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
     Mockito.when(entityManager.createQuery(Mockito.anyString())).thenReturn(query);

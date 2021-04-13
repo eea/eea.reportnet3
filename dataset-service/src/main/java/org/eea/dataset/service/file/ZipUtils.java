@@ -19,7 +19,6 @@ import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -107,7 +106,7 @@ public class ZipUtils {
 
       if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
         try (ZipInputStream zip = new ZipInputStream(input)) {
-          for (ZipEntry entry; (entry = zip.getNextEntry()) != null; ) {
+          for (ZipEntry entry; (entry = zip.getNextEntry()) != null;) {
 
             String entryName = entry.getName();
             String mimeType = getMimetype(entryName);

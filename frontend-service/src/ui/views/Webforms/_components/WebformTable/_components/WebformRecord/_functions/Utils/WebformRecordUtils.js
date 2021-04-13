@@ -34,7 +34,7 @@ const getInputType = {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-    const splittedValue = !Array.isArray(value) ? TextUtils.splitByComma(value) : value;
+    const splittedValue = !Array.isArray(value) ? TextUtils.splitByChar(value, ';') : value;
     return intersection(
       splittedValue,
       multiselectItemsOptions.map(item => item.value)
@@ -63,9 +63,9 @@ const parseMultiselect = record => {
         field.fieldData[field.fieldData.fieldSchemaId] !== ''
       ) {
         if (Array.isArray(field.fieldData[field.fieldData.fieldSchemaId])) {
-          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(',');
+          field.fieldData[field.fieldData.fieldSchemaId] = field.fieldData[field.fieldData.fieldSchemaId].join(';');
         } else {
-          field.fieldData[field.fieldData.fieldSchemaId] = TextUtils.removeCommaSeparatedWhiteSpaces(
+          field.fieldData[field.fieldData.fieldSchemaId] = TextUtils.removeSemicolonSeparatedWhiteSpaces(
             field.fieldData[field.fieldData.fieldSchemaId]
           );
         }

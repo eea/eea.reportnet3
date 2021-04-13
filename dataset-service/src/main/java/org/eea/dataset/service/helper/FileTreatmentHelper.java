@@ -1,3 +1,6 @@
+/*
+ *
+ */
 package org.eea.dataset.service.helper;
 
 import java.io.File;
@@ -5,29 +8,40 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.annotation.PostConstruct;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
+import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -37,6 +51,7 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -49,6 +64,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -69,9 +85,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
   /** The import executor service. */
   private ExecutorService importExecutorService;
-
-  /** The batch size. */
-  private int batchSize = 1000;
 
   /** The max running tasks. */
   @Value("${dataset.task.parallelism}")
@@ -94,6 +107,10 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
+  /** The record store controller. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
@@ -109,6 +126,25 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The record value id generator. */
+  @Autowired
+  private RecordValueIdGenerator recordValueIdGenerator;
+
+  /** The field value id generator. */
+  @Autowired
+  private FieldValueIdGenerator fieldValueIdGenerator;
+
+  /** The record repository. */
+  @Autowired
+  private RecordRepository recordRepository;
+
+  /** The table repository. */
+  @Autowired
+  private TableRepository tableRepository;
+
+  /** The batch size. */
+  private int batchSize = 1000;
 
   /**
    * Inits the.
@@ -155,13 +191,6 @@ public class FileTreatmentHelper implements DisposableBean {
           datasetId, tableSchemaId, file.getOriginalFilename());
       throw new EEAException(
           "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
-    }
-
-    if (schemaContainsFixedRecords(datasetId, schema, tableSchemaId)) {
-      LOG_ERROR.error(
-          "Import blocked because of fixed records: datasetId={}, filName={}, tableSchemaId={}",
-          datasetId, file.getOriginalFilename(), tableSchemaId);
-      throw new EEAException("Import blocked: dataset " + datasetId + " contains fixed records");
     }
 
     // We add a lock to the Release process
@@ -370,8 +399,13 @@ public class FileTreatmentHelper implements DisposableBean {
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
-      importExecutorService
-          .submit(() -> rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName));
+      importExecutorService.submit(() -> {
+        try {
+          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName);
+        } catch (Exception e) {
+          LOG_ERROR.error("RN3-Import: Unexpected error", e);
+        }
+      });
     }
   }
 
@@ -438,13 +472,12 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
-   * @param schema the schema
+   * @param datasetSchema the schema
    * @param files the files
    * @param originalFileName the original file name
    */
-  private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
       List<File> files, String originalFileName) {
-
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
     String error = null;
@@ -456,7 +489,7 @@ public class FileTreatmentHelper implements DisposableBean {
       try (InputStream inputStream = new FileInputStream(file)) {
 
         if (guessTableName) {
-          tableSchemaId = getTableSchemaIdFromFileName(schema, fileName);
+          tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName);
         }
 
         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
@@ -467,25 +500,33 @@ public class FileTreatmentHelper implements DisposableBean {
           throw new EEAException("Error processing file " + fileName);
         }
 
-        // The only reference to the list of records to make them eligible for GC in next steps
-        List<List<RecordValue>> recordLists =
-            getListOfRecords(dataset.getTableValues().get(0).getRecords());
-        int totalRecords = dataset.getTableValues().get(0).getRecords().size();
-        dataset.getTableValues().get(0).setRecords(new ArrayList<>());
-
         // Check if the table with idTableSchema has been populated already
         Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
         fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
+        LOG.info("RN3-Import - Filled tableId: datasetId={}, fileName={}", datasetId, fileName);
 
         // Save empty table
         if (null == oldTableId) {
+          LOG.info("RN3-Import - Saving table: datasetId={}, fileName={}", datasetId, fileName);
           datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
+          LOG.info("RN3-Import - Table saved: datasetId={}, fileName={}", datasetId, fileName);
         }
 
-        saveRecords(recordLists, datasetId, originalFileName, totalRecords);
+        if (schemaContainsFixedRecords(datasetId, datasetSchema, tableSchemaId)) {
+          ObjectId tableSchemaIdTemp = new ObjectId(tableSchemaId);
+          TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
+              .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
+              .findFirst().orElse(null);
+          if (tableSchema != null) {
+            updateRecordsWithConditions(dataset.getTableValues().get(0).getRecords(), datasetId,
+                tableSchema);
+          }
+        } else {
+          storeRecords(datasetId, dataset.getTableValues().get(0).getRecords());
+        }
 
         LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
-      } catch (IOException | EEAException e) {
+      } catch (IOException | SQLException | EEAException e) {
         LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
             tableSchemaId, e);
         error = e.getMessage();
@@ -499,8 +540,6 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
   }
-
-
 
   /**
    * Gets the table schema id from file name.
@@ -649,34 +688,6 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
-   * Gets the list of records.
-   *
-   * @param allRecords the all records
-   *
-   * @return the list of records
-   */
-  private List<List<RecordValue>> getListOfRecords(List<RecordValue> allRecords) {
-    List<List<RecordValue>> generalList = new ArrayList<>();
-
-    if (allRecords.isEmpty()) {
-      generalList.add(new ArrayList<>());
-    } else {
-      // dividing the number of records in different lists
-      int nLists = (int) Math.ceil(allRecords.size() / (double) batchSize);
-      if (nLists > 1) {
-        for (int i = 0; i < (nLists - 1); i++) {
-          generalList.add(new ArrayList<>(allRecords.subList(batchSize * i, batchSize * (i + 1))));
-        }
-      }
-      generalList
-          .add(new ArrayList<>(allRecords.subList(batchSize * (nLists - 1), allRecords.size())));
-
-    }
-
-    return generalList;
-  }
-
-  /**
    * Fill table id.
    *
    * @param idTableSchema the id table schema
@@ -750,27 +761,159 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
-   * Save records.
+   * Store records.
    *
-   * @param recordLists the record lists
    * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param totalRecords the total records
+   * @param recordList the record list
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
    */
-  private void saveRecords(List<List<RecordValue>> recordLists, Long datasetId, String fileName,
-      int totalRecords) {
-    int recordListsSize = recordLists.size();
-    int tenPercent = recordListsSize / 10;
-    tenPercent = tenPercent == 0 ? 1 : tenPercent;
-    for (int i = 0; i < recordListsSize; i++) {
-      List<RecordValue> recordList = recordLists.get(i);
-      totalRecords -= recordList.size();
-      if (i % tenPercent == 0) { // Reduce the number of logs.
-        LOG.info("RN3-Import Saving records: datasetId={}, fileName={}, recordsLeft={}", datasetId,
-            fileName, totalRecords);
+  private void storeRecords(Long datasetId, List<RecordValue> recordList)
+      throws IOException, SQLException {
+
+    String schema = LiteralConstants.DATASET_PREFIX + datasetId;
+    LOG.info("RN3-Import - Getting connections: datasetId={}", datasetId);
+    ConnectionDataVO connectionDataVO = recordStoreControllerZuul.getConnectionToDataset(schema);
+
+    LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
+    try (
+        PostgresBulkImporter recordsImporter =
+            new PostgresBulkImporter(connectionDataVO, schema, "record_value", importPath);
+        PostgresBulkImporter fieldsImporter =
+            new PostgresBulkImporter(connectionDataVO, schema, "field_value", importPath)) {
+
+      LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
+
+      for (RecordValue recordValue : recordList) {
+
+        String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
+        recordsImporter.addTuple(new Object[] {recordId, recordValue.getIdRecordSchema(),
+            recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
+            recordValue.getDataProviderCode()});
+
+        for (FieldValue fieldValue : recordValue.getFields()) {
+          String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
+          fieldsImporter.addTuple(new Object[] {fieldId, fieldValue.getType().getValue(),
+              fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
+        }
       }
-      datasetService.saveAllRecords(datasetId, recordList);
-      recordLists.set(i, null); // Make the list of records eligible for GC
+
+      LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
+      recordsImporter.copy();
+      fieldsImporter.copy();
+      LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
     }
   }
+
+  /**
+   * Update records with conditions.
+   *
+   * @param recordList the record list
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   */
+  private void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
+      TableSchema tableSchema) {
+    LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
+    boolean readOnly =
+        tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
+    Long totalRecords =
+        tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
+
+    // get list paginated of old records to modify
+    List<RecordValue> oldRecords = recordRepository.findByTableValueNoOrderOptimized(
+        tableSchema.getIdTableSchema().toString(), PageRequest.of(0, totalRecords.intValue()));
+    // sublist records to insert
+    List<RecordValue> recordsToSave = new ArrayList<>();
+
+    if (!readOnly) {
+      Iterator<RecordValue> itr = recordList.iterator();
+      for (RecordValue oldRecord : oldRecords) {
+        if (itr.hasNext()) {
+          refillFields(oldRecord, itr.next().getFields());
+        } else {
+          refillFields(oldRecord, null);
+        }
+        recordsToSave.add(oldRecord);
+      }
+
+    } else {
+      List<ObjectId> readOnlyFields =
+          tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
+              .map(FieldSchema::getIdFieldSchema).collect(Collectors.toList());
+      Map<Integer, Integer> mapPosition = mapPositionReadOnlyFieldsForReference(readOnlyFields,
+          oldRecords.get(0), recordList.get(0));
+      for (RecordValue oldRecord : oldRecords) {
+        findByReadOnlyRecords(mapPosition, oldRecord, recordList);
+        recordsToSave.add(oldRecord);
+      }
+    }
+    LOG.info("Import dataset table {} with {} number of records", tableSchema.getNameTableSchema(),
+        recordsToSave.size());
+
+    // save
+    datasetService.saveAllRecords(datasetId, recordsToSave);
+  }
+
+  /**
+   * Refill fields.
+   *
+   * @param oldRecord the old record
+   * @param fieldValues the field values
+   */
+  private void refillFields(RecordValue oldRecord, List<FieldValue> fieldValues) {
+    if (fieldValues != null) {
+      oldRecord.getFields().stream()
+          .forEach(oldField -> oldField.setValue(fieldValues.stream()
+              .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
+              .map(FieldValue::getValue).findFirst().orElse("")));
+    } else {
+      oldRecord.getFields().forEach(field -> field.setValue(""));
+    }
+  }
+
+
+  /**
+   * Map position read only fields for reference.
+   *
+   * @param readOnlyFields the read only fields
+   * @param recordValue the record value
+   * @param newRecordValues the new record values
+   * @return the map
+   */
+  private Map<Integer, Integer> mapPositionReadOnlyFieldsForReference(List<ObjectId> readOnlyFields,
+      RecordValue recordValue, RecordValue newRecordValues) {
+    Map<Integer, Integer> mapPosition = new HashMap<>();
+    for (ObjectId id : readOnlyFields) {
+      mapPosition.put(
+          recordValue.getFields().stream().map(FieldValue::getIdFieldSchema)
+              .collect(Collectors.toList()).indexOf(id.toString()),
+          newRecordValues.getFields().stream().map(FieldValue::getIdFieldSchema)
+              .collect(Collectors.toList()).indexOf(id.toString()));
+    }
+    return mapPosition;
+  }
+
+  /**
+   * Find by read only records.
+   *
+   * @param readOnlyPositionFields the read only position fields
+   * @param oldRecord the old record
+   * @param recordList the record list
+   * @return the record value
+   */
+  private void findByReadOnlyRecords(Map<Integer, Integer> readOnlyPositionFields,
+      RecordValue oldRecord, List<RecordValue> recordList) {
+
+    RecordValue recordToUpdate = recordList.stream()
+        .filter(record -> readOnlyPositionFields.entrySet().stream()
+            .allMatch(entry -> record.getFields().get(entry.getValue()).getValue()
+                .equals(oldRecord.getFields().get(entry.getKey()).getValue())))
+        .findFirst().orElse(null);
+    if (recordToUpdate != null) {
+      refillFields(oldRecord, recordToUpdate.getFields());
+    }
+
+  }
+
 }

@@ -109,6 +109,7 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
@@ -120,8 +121,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
@@ -495,34 +498,40 @@ public class DatasetServiceImpl implements DatasetService {
     SortField[] newFields = null;
     TableVO result = new TableVO();
     Long totalRecords = tableRepository.countRecordsByIdTableSchema(idTableSchema);
-
-    // Check if we need to put all the records without pagination
-    pageable = calculatePageable(pageable, totalRecords);
-
-    result = calculatedErrorsAndRecordsToSee(datasetId, idTableSchema, pageable, fields, levelError,
-        commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules, fieldSchema,
-        fieldValue);
-
-    // Table with out values
-    if (null == result.getRecords() || result.getRecords().isEmpty()) {
+    if (totalRecords == 0) {
+      result.setTotalFilteredRecords(0L);
+      result.setTableValidations(new ArrayList<>());
+      result.setTotalRecords(0L);
       result.setRecords(new ArrayList<>());
-      LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
-
     } else {
-      List<RecordVO> recordVOs = result.getRecords();
+      // Check if we need to put all the records without pagination
+      pageable = calculatePageable(pageable, totalRecords);
 
-      LOG.info(
-          "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
-          datasetId, idTableSchema, recordVOs.size(),
-          pageable != null ? pageable.getPageNumber() : null,
-          pageable != null ? pageable.getPageSize() : null);
-      if (null != fields) {
-        LOG.info("Ordered by idFieldSchema {}", commonShortFields);
+      result = calculatedErrorsAndRecordsToSee(datasetId, idTableSchema, pageable, fields,
+          levelError, commonShortFields, mapFields, sortFieldsArray, newFields, result, idRules,
+          fieldSchema, fieldValue);
+
+      // Table with out values
+      if (null == result.getRecords() || result.getRecords().isEmpty()) {
+        result.setRecords(new ArrayList<>());
+        LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
+
+      } else {
+        List<RecordVO> recordVOs = result.getRecords();
+
+        LOG.info(
+            "Total records found in datasetId {} idTableSchema {}: {}. Now in page {}, {} records by page",
+            datasetId, idTableSchema, recordVOs.size(),
+            pageable != null ? pageable.getPageNumber() : null,
+            pageable != null ? pageable.getPageSize() : null);
+        if (null != fields) {
+          LOG.info("Ordered by idFieldSchema {}", commonShortFields);
+        }
+
+        // Retrieve validations to set them into the final result
+        retrieveValidations(recordVOs);
+
       }
-
-      // 5Âº retrieve validations to set them into the final result
-      retrieveValidations(recordVOs);
-
     }
     result.setTotalRecords(totalRecords);
     return result;
@@ -1019,10 +1028,18 @@ public class DatasetServiceImpl implements DatasetService {
     if ((DataType.MULTISELECT_CODELIST.equals(field.getType()) || isLinkMultiselect)
         && null != field.getValue()) {
       List<String> values = new ArrayList<>();
-      Arrays.asList(field.getValue().split(",")).stream()
+      Arrays.asList(field.getValue().split(";")).stream()
           .forEach(value -> values.add(value.trim()));
       Collections.sort(values);
-      field.setValue(values.toString().substring(1, values.toString().length() - 1));
+      String codelist = "";
+      for (int i = 0; i < values.size(); i++) {
+        if (i == 0) {
+          codelist = values.get(0);
+        } else {
+          codelist = codelist + "; " + values.get(i);
+        }
+      }
+      field.setValue(codelist);
     }
     if (updateCascadePK) {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
@@ -1253,10 +1270,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param resultsNumber the results number
    *
    * @return the field values referenced
+   * @throws EEAException
    */
   @Override
   public List<FieldVO> getFieldValuesReferenced(Long datasetIdOrigin, String datasetSchemaId,
-      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) {
+      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber)
+      throws EEAException {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
     Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
@@ -1295,9 +1314,44 @@ public class DatasetServiceImpl implements DatasetService {
       // The query returns the list of fieldsVO ordered by it's type and considering the possible
       // label and conditional values
       FieldValue fvPk = fieldRepository.findFirstTypeByIdFieldSchema(idPk);
-      fieldsVO = fieldRepository.findByIdFieldSchemaWithTagOrdered(idPk, labelSchemaId, searchValue,
-          conditionalSchemaId, conditionalValue, fvPk.getType(), resultsNumber);
+      if (null == fvPk) {
+        fvPk = new FieldValue();
+        fvPk.setType(DataType.TEXT);
+      }
+      // we catch if the query have error pk data and sned notification
+      try {
+        fieldsVO = fieldRepository.findByIdFieldSchemaWithTagOrdered(idPk, labelSchemaId,
+            searchValue, conditionalSchemaId, conditionalValue, fvPk.getType(), resultsNumber);
+      } catch (DataIntegrityViolationException e) {
 
+        LOG_ERROR.error(
+            "Error with dataset id {}  field  with id {} because data has not correct format {}",
+            datasetIdOrigin, idPk, fvPk.getType().toString());
+        // we find table and field to send in notification
+        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
+            fvPk.getRecord().getTableValue().getIdTableSchema());
+        Document fieldSchemaDocument =
+            schemasRepository.findFieldSchema(datasetSchemaId, fvPk.getIdFieldSchema());
+        String tableSchemaName = (String) tableSchema.get("nameTableSchema");
+        String tableSchemaId = tableSchema.get("_id").toString();
+        String fieldSchemaName = (String) fieldSchemaDocument.get("headerName");
+
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetIdOrigin).datasetSchemaId(datasetSchemaId)
+            .tableSchemaId(tableSchemaId).tableSchemaName(tableSchemaName)
+            .fieldSchemaId(fvPk.getIdFieldSchema()).fieldSchemaName(fieldSchemaName).build();
+
+
+        // we send 2 dif notification depends on type
+        DatasetTypeEnum type = getDatasetType(datasetIdOrigin);
+        EventType eventType =
+            DatasetTypeEnum.DESIGN.equals(type) ? EventType.SORT_FIELD_DESIGN_FAILED_EVENT
+                : EventType.SORT_FIELD_FAILED_EVENT;
+
+
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+      }
     }
     return fieldsVO;
   }
@@ -1327,11 +1381,12 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream) {
+  public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
+      String tableSchemaId, Integer limit, Integer offset) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
-      exportDatasetETLSQL(datasetId, outputStream);
+      exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
@@ -2828,9 +2883,9 @@ public class DatasetServiceImpl implements DatasetService {
           // Sort values if there are multiple
           if (DataType.MULTISELECT_CODELIST.equals(dataType) || (DataType.LINK.equals(dataType)
               && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
-            String[] values = value.trim().split("\\s*,\\s*");
+            String[] values = value.trim().split("\\s*;\\s*");
             Arrays.sort(values);
-            value = Arrays.stream(values).collect(Collectors.joining(", "));
+            value = Arrays.stream(values).collect(Collectors.joining("; "));
           }
         }
         fieldVOs.remove(fieldVO);
@@ -2955,7 +3010,6 @@ public class DatasetServiceImpl implements DatasetService {
             fieldValuePkOtherTable.setValue(fieldValueInRecord.getValue());
             fieldRepository.saveValue(fieldValuePkOtherTable.getId(),
                 fieldValuePkOtherTable.getValue());
-
           }
         });
       }
@@ -3452,48 +3506,58 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * 
+   *
    * Export dataset ETLSQL.
    *
    * @param datasetId the dataset id
    * @param outputStream the output stream
    */
-  private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream) {
+  private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
+      Integer limit, Integer offset) {
     try {
       String queryFirstPart =
-          "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
-
-      String queryMiddlePart =
-          " end as \"tableName\",( select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\",(select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
-
+          "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
+      String queryMiddlePartOne =
+          " end as \"tableName\", ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as totalRecords, (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
+      String queryMiddlePartTwo =
+          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) "
+              + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
       String queryFinalPart =
-          " end as \"fieldName\",fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id) as fieldsAux) from dataset_%s.record_value rv where tv.id = rv.id_table ) as record) from dataset_%s.table_value tv ) as tableAux ) as tablesAux ";
-
+          " ) as record) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
+      String paginationPart = " offset %s limit %s ";
       String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
-
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-
+      String tableName = "";
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-      // Get the datasetSchema by the datasetSchemaId
       DataSetSchema datasetSchema =
           schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+      Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+      if (tableSchema != null) {
+        tableName = (String) tableSchema.get("nameTableSchema");
+      }
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-      StringBuilder query = new StringBuilder(queryFirstPart);
-      for (TableSchema table : tableSchemaList) {
-        query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema(),
-            table.getNameTableSchema()));
-      }
-      query.append(queryMiddlePart);
-      for (TableSchema table : tableSchemaList) {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          query.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+      if (null != tableSchemaList) {
+        StringBuilder query = new StringBuilder(queryFirstPart);
+        query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
+        query.append(String.format(queryMiddlePartOne, datasetId));
+        for (TableSchema table : tableSchemaList) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaId))
+            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+              query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                  field.getHeaderName()));
+            }
         }
+        query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
+        Integer offsetAux = (limit * offset) - limit;
+        if (offsetAux < 0) {
+          offsetAux = 0;
+        }
+        query.append(String.format(paginationPart, offsetAux, limit));
+        query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
+        LOG.info("Query: {} ", query);
+        outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+        LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
       }
-      query.append(String.format(queryFinalPart, datasetId, datasetId, datasetId));
-      LOG.info("Query: " + query.toString());
-      outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
-      LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }

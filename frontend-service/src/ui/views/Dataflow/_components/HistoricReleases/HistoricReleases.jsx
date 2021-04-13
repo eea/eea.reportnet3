@@ -174,6 +174,10 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     return fieldColumns;
   };
 
+  const filterOptionsDataCollection = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
+
+  const filterOptionsEUDataset = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
+
   const renderReportingDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
       .filter(key => key.includes('releasedDate'))
@@ -216,7 +220,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}
-          selectOptions={['countryCode']}
+          options={filterOptionsDataCollection}
         />
       )}
 
@@ -225,7 +229,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}
-          selectOptions={['countryCode']}
+          options={filterOptionsEUDataset}
         />
       )}
 
