@@ -761,7 +761,7 @@ public class DatasetServiceImpl implements DatasetService {
       if (null == fieldValue.getValue()) {
         fieldValue.setValue("");
       } else {
-
+        fieldValue.setValue(fieldValue.getValue());
         if (null == fieldValue.getType()) {
           if (null != fieldValue.getValue() && fieldValue.getValue().length() >= fieldMaxLength) {
             fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
@@ -1068,7 +1068,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (updateCascadePK) {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
     }
-
+    field.setValue(field.getValue());
     if (null == field.getType()) {
       if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
         field.setValue(field.getValue().substring(0, fieldMaxLength));
@@ -1565,6 +1565,8 @@ public class DatasetServiceImpl implements DatasetService {
                 default:
                   if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
                     f.setValue(f.getValue().substring(0, fieldMaxLength));
+                  } else {
+                    f.setValue(f.getValue());
                   }
               }
             });

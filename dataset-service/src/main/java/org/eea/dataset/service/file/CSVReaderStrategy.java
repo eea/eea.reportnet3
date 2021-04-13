@@ -383,7 +383,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
         FieldSchemaVO fieldSchemaVO = headers.get(contAux);
         field.setIdFieldSchema(fieldSchemaVO.getId());
         field.setType(fieldSchemaVO.getType());
-
+        field.setValue(value);
         if (null == field.getType()) {
           if (null != value && value.length() >= fieldMaxLength) {
             field.setValue(value.substring(0, fieldMaxLength));
