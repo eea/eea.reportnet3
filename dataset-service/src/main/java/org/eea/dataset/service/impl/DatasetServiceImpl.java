@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -3515,93 +3516,177 @@ public class DatasetServiceImpl implements DatasetService {
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName) {
     try {
-      String filterValuePart = "";
-      if (null != filterValue && !filterValue.isEmpty()) {
-        filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
-      }
-      String queryFirstPart =
-          "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
-      String queryFinalPart =
-          " ) as record where fields is not null ) from dataset_%s.table_value tv) as tableAux  ) as tablesAux ";
-      if (null != tableSchemaId) {
-        queryFirstPart =
-            "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
-        queryFinalPart =
-            " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
-      }
-      String filterBycolum = "";
-      if (null != columnName) {
-        filterBycolum = String.format(" where \"fieldName\" like '%s' ", columnName);
-      }
-      String totalRecords = "";
-      if (null != tableSchemaId) {
-        totalRecords =
-            " ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as totalRecords, ";
-      }
-      String queryMiddlePartOne = " end as \"tableName\"," + totalRecords
-          + " (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
-      String queryMiddlePartTwo =
-          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
-              + filterValuePart + ") as fieldsAux " + filterBycolum + ") "
-              + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
-      String paginationPart = " offset %s limit %s ";
-      String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
-      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-
-      String tableName = "";
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
       DataSetSchema datasetSchema =
           schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-      if (null != tableSchemaId) {
-        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
-        if (tableSchema != null) {
-          tableName = (String) tableSchema.get("nameTableSchema");
+      if (null != datasetSchema) {
+        List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+
+        String filterValuePart = "";
+        if (null != filterValue && !filterValue.isEmpty()) {
+          filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
         }
-      }
-      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-      if (null != tableSchemaList) {
-        StringBuilder query = new StringBuilder(queryFirstPart);
+        String queryFirstPart =
+            "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
+        String queryFinalPart =
+            " ) as record where fields is not null ) from dataset_%s.table_value tv) as tableAux  ) as tablesAux ";
         if (null != tableSchemaId) {
-          query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
-        } else {
-          for (TableSchema table : tableSchemaList) {
-            query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema().toString(),
-                table.getNameTableSchema()));
+          queryFirstPart =
+              "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
+          queryFinalPart =
+              " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
+        }
+        String filterBycolum = "";
+        if (null != columnName) {
+          filterBycolum = String.format(" where \"fieldName\" like '%s' ", columnName);
+        }
+        String totalRecords = "";
+        if (null != tableSchemaId) {
+          totalRecords =
+              " ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as \"totalRecords\", ";
+        }
+
+        if (null != columnName || null != filterValue) {
+          totalRecords =
+              totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
+        }
+
+        String queryMiddlePartOne = " end as \"tableName\"," + totalRecords
+            + " (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
+        String queryMiddlePartTwo =
+            " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
+                + filterValuePart + ") as fieldsAux " + filterBycolum + ") "
+                + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
+        String paginationPart = " offset %s limit %s ";
+        String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
+        String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
+        String tableName = "";
+
+        if (null != tableSchemaId) {
+          Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+          if (tableSchema != null) {
+            tableName = (String) tableSchema.get("nameTableSchema");
           }
         }
-        query.append(String.format(queryMiddlePartOne, datasetId));
-        for (TableSchema table : tableSchemaList) {
-          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
-            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-              query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                  field.getHeaderName()));
-            }
+        if (null != tableSchemaList) {
+          StringBuilder query = new StringBuilder(queryFirstPart);
+          if (null != tableSchemaId) {
+            query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
           } else {
-            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-              query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                  field.getHeaderName()));
+            for (TableSchema table : tableSchemaList) {
+              query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema().toString(),
+                  table.getNameTableSchema()));
             }
           }
-        }
-        query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
-        if (null != offset && null != limit) {
-          Integer offsetAux = (limit * offset) - limit;
-          if (offsetAux < 0) {
-            offsetAux = 0;
+          query.append(String.format(queryMiddlePartOne, datasetId));
+          for (TableSchema table : tableSchemaList) {
+            if (null != tableSchemaId) {
+              if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+                for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+                  query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                      field.getHeaderName()));
+                }
+              }
+            } else {
+              for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+                query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                    field.getHeaderName()));
+              }
+            }
           }
-          query.append(String.format(paginationPart, offsetAux, limit));
+          query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
+          if (null != offset && null != limit) {
+            Integer offsetAux = (limit * offset) - limit;
+            if (offsetAux < 0) {
+              offsetAux = 0;
+            }
+            query.append(String.format(paginationPart, offsetAux, limit));
+          }
+          if (null != tableSchemaId) {
+            query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
+          } else {
+            query.append(String.format(queryFinalPart, datasetId));
+          }
+          LOG.info("Query: {} ", query);
+          outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+          LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
         }
-        if (null != tableSchemaId) {
-          query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
-        } else {
-          query.append(String.format(queryFinalPart, datasetId));
-        }
-        LOG.info("Query: {} ", query);
-        outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
-        LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
       }
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
+  }
+
+  /**
+   * Total records query.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaList the table schema list
+   * @param tableSchemaId the table schema id
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the string
+   */
+  private String totalRecordsQuery(Long datasetId, List<TableSchema> tableSchemaList,
+      String tableSchemaId, String filterValue, String columnName) {
+    String queryPartOne = "( select count(\"fieldName\") as \"totalRecords\" from ( select case ";
+    String queryPartTwo =
+        "end as \"fieldName\",  fv.value as \"value\" from dataset_%s.field_value fv inner join dataset_%s.record_value rv on rv.id = fv.id_record  inner join dataset_%s.table_value tv on rv.id_table = tv.id ";
+
+    String queryValueFilter = " and fv.value like '%s' ";
+
+    String queryColumnFilter = " where \"fieldName\" = '%s'";
+
+    String queryTablePart = " where tv.id_table_schema in( %s ) ";
+
+    String queryPartThree = " ) as countAux ";
+
+    String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
+    StringBuilder query = new StringBuilder(queryPartOne);
+    for (TableSchema table : tableSchemaList) {
+      if (null != tableSchemaId) {
+        if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+            query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                field.getHeaderName()));
+          }
+        }
+      } else {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          query.append(
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+        }
+      }
+    }
+    query.append(String.format(queryPartTwo, datasetId, datasetId, datasetId));
+    StringBuilder tableList = new StringBuilder();
+    Iterator<TableSchema> tableIterator = tableSchemaList.iterator();
+    while (tableIterator.hasNext()) {
+      if (null != tableSchemaId) {
+        String tableschema = tableIterator.next().getIdTableSchema().toString();
+        if (tableschema.equals(tableSchemaId)) {
+          tableList.append("'" + tableschema + "'");
+        }
+      } else {
+        tableList.append("'" + tableIterator.next().getIdTableSchema().toString() + "'");
+        if (tableIterator.hasNext()) {
+          tableList.append(",");
+        }
+      }
+    }
+
+    query.append(String.format(queryTablePart, tableList));
+    if (null != filterValue) {
+      query.append(String.format(queryValueFilter, filterValue));
+    }
+    query.append(queryPartThree);
+    if (null != columnName) {
+      query.append(String.format(queryColumnFilter, columnName));
+    }
+    query.append(" ), ");
+
+    return query.toString();
   }
 }
