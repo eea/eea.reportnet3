@@ -281,7 +281,6 @@ public class FMEIntegrationManagerTest {
 
     Mockito.when(integrationRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(integration));
-    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
     Mockito.when(integrationMapper.classToEntity(Mockito.any())).thenReturn(integration);
     Mockito.when(integrationRepository.save(Mockito.any())).thenReturn(null);
     integrationManager.update(integrationVO);
