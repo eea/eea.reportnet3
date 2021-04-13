@@ -74,9 +74,7 @@ export const Filters = ({
   }, [data]);
 
   useEffect(() => {
-    if (filterState.filtered && !filterState.isOrdering) {
-      parsePrevFilters();
-    }
+    if (filterState.filtered && !filterState.isOrdering) parsePrevFilters();
   }, [filterState.data]);
 
   useEffect(() => {
@@ -109,6 +107,7 @@ export const Filters = ({
       filterDispatch({ type: 'SET_CLEARED_FILTERS', payload: false });
     }
   }, [filterState.clearedFilters]);
+
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[date]) && onAnimateLabel([date], false));
 
   const getCheckboxFilterState = property => {
@@ -309,9 +308,7 @@ export const Filters = ({
           const option = possibleOptions.get(multiselectKey).filter(distinct);
 
           if (multiselectKey === entryKey) {
-            entryKeyValue[1] = entryValue.filter(value =>
-              option.some(opt => TextUtils.areEquals(opt.toString(), value.toString()))
-            );
+            entryKeyValue[1] = entryValue.filter(value => option.some(opt => TextUtils.areEquals(opt, value)));
           }
         });
 
