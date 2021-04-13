@@ -2285,6 +2285,9 @@ textarea:focus {
   outline: none;
   border-width: 2px;
 }
+.formField.error .p-dropdown:hover {
+  border-color: var(--errors);
+}
 .formField input {
   background-color: var(--form-field-bg);
   color: var(--form-field-color);
