@@ -761,8 +761,32 @@ public class DatasetServiceImpl implements DatasetService {
       if (null == fieldValue.getValue()) {
         fieldValue.setValue("");
       } else {
-        if (fieldValue.getValue().length() >= fieldMaxLength) {
-          fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+
+        if (null == fieldValue.getType()) {
+          if (null != fieldValue.getValue() && fieldValue.getValue().length() >= fieldMaxLength) {
+            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+          }
+        } else {
+          switch (fieldValue.getType()) {
+            case POINT:
+              break;
+            case LINESTRING:
+              break;
+            case POLYGON:
+              break;
+            case MULTIPOINT:
+              break;
+            case MULTILINESTRING:
+              break;
+            case MULTIPOLYGON:
+              break;
+            case GEOMETRYCOLLECTION:
+              break;
+            default:
+              if (fieldValue.getValue().length() >= fieldMaxLength) {
+                fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+              }
+          }
         }
       }
       Document fieldSchema =
@@ -1045,8 +1069,31 @@ public class DatasetServiceImpl implements DatasetService {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
     }
 
-    if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
-      field.setValue(field.getValue().substring(0, fieldMaxLength));
+    if (null == field.getType()) {
+      if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
+        field.setValue(field.getValue().substring(0, fieldMaxLength));
+      }
+    } else {
+      switch (field.getType()) {
+        case POINT:
+          break;
+        case LINESTRING:
+          break;
+        case POLYGON:
+          break;
+        case MULTIPOINT:
+          break;
+        case MULTILINESTRING:
+          break;
+        case MULTIPOLYGON:
+          break;
+        case GEOMETRYCOLLECTION:
+          break;
+        default:
+          if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
+            field.setValue(field.getValue().substring(0, fieldMaxLength));
+          }
+      }
     }
 
     fieldRepository.saveValue(field.getId(), field.getValue());
@@ -1497,11 +1544,28 @@ public class DatasetServiceImpl implements DatasetService {
               tableValue.getId(), tableValue.getIdTableSchema());
           tableValue.getRecords().stream().forEach(r -> {
             r.getFields().stream().forEach(f -> {
-              if (DataType.ATTACHMENT.equals(f.getType())) {
-                f.setValue("");
-              }
-              if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
-                f.setValue(f.getValue().substring(0, fieldMaxLength));
+              switch (f.getType()) {
+                case ATTACHMENT:
+                  f.setValue("");
+                  break;
+                case POINT:
+                  break;
+                case LINESTRING:
+                  break;
+                case POLYGON:
+                  break;
+                case MULTIPOINT:
+                  break;
+                case MULTILINESTRING:
+                  break;
+                case MULTIPOLYGON:
+                  break;
+                case GEOMETRYCOLLECTION:
+                  break;
+                default:
+                  if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
+                    f.setValue(f.getValue().substring(0, fieldMaxLength));
+                  }
               }
             });
           });
@@ -2895,8 +2959,25 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Cut string value to maximum length
-    if (value.length() > fieldMaxLength) {
-      value = value.substring(0, fieldMaxLength);
+    switch (dataType) {
+      case POINT:
+        break;
+      case LINESTRING:
+        break;
+      case POLYGON:
+        break;
+      case MULTIPOINT:
+        break;
+      case MULTILINESTRING:
+        break;
+      case MULTIPOLYGON:
+        break;
+      case GEOMETRYCOLLECTION:
+        break;
+      default:
+        if (value.length() >= fieldMaxLength) {
+          value = value.substring(0, fieldMaxLength);
+        }
     }
 
     return value;
