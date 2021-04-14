@@ -9,6 +9,7 @@ export const routes = {
   DATAFLOW: '/dataflow/:dataflowId',
   DATAFLOWS_ERROR: '/dataflows/error/:errorType',
   DATAFLOWS: '/dataflows',
+  DATAFLOWID: '/dataflows/:dataflowId',
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
   DOCUMENTS: '/dataflow/:dataflowId/documents',
