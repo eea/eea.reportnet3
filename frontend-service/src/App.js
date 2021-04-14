@@ -56,13 +56,13 @@ const App = () => {
                               <Route exact path={routes.PUBLIC_COUNTRIES} component={PublicCountries} />
                               <Route
                                 exact
-                                path={routes.PUBLIC_COUNTRY_INFORMATION}
+                                path={[routes.PUBLIC_COUNTRY_INFORMATION, routes.PUBLIC_COUNTRY_INFORMATION_ID]}
                                 component={PublicCountryInformation}
                               />
                               <Route exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
                               <Route
                                 exact
-                                path={routes.PUBLIC_DATAFLOW_INFORMATION}
+                                path={[routes.PUBLIC_DATAFLOW_INFORMATION, routes.PUBLIC_DATAFLOW_INFORMATION_ID]}
                                 component={PublicDataflowInformation}
                               />
                               <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
@@ -73,8 +73,7 @@ const App = () => {
                               <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
                               <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
                               <PrivateRoute exact path={routes.DATAFLOW_REPRESENTATIVE} component={Dataflow} />
-                              <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
-                              <PrivateRoute exact path={routes.DATAFLOWID} component={Dataflow} />
+                              <PrivateRoute exact path={[routes.DATAFLOW, routes.DATAFLOWS_ID]} component={Dataflow} />
                               <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
                               <PrivateRoute exact path={routes.DATAFLOWS_ERROR} component={Dataflows} />
                               <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
