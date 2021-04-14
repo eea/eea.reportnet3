@@ -209,7 +209,7 @@ const ValidationsList = withRouter(
             additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
           }
         } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
-          table?.records.forEach(record =>
+          table?.records?.forEach(record =>
             record.fields.forEach(field => {
               if (!isNil(field)) {
                 if (TextUtils.areEquals(entityType, 'FIELD')) {
