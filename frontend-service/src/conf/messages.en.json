@@ -769,7 +769,6 @@
     "releaseDashboard": "Release status dashboard",
     "releaseDataCollection": "Release to data collection",
     "releaseDate": "Release date",
-    "releasedDate": "Release Date",
     "releaseFailedEvent": "Failed releasing the dataflow",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
     "releaseStartEvent": "Releasing data to data collection.",
@@ -1050,6 +1049,11 @@
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "invalidCharactersTabHeader": "Invalid table name",
+    "invalidCharactersTabHeaderError": "The table name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and '_').",
+    "invalidCharactersFieldMessage": "The field name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and '_').",
+    "invalidCharactersFieldTitle": "Invalid field name",
+    "invalidCharactersSchemaError": "The schema name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-', '_', '(' and ')')."
   }
 }
