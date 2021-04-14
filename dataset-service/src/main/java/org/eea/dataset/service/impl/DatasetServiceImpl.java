@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -760,8 +761,32 @@ public class DatasetServiceImpl implements DatasetService {
       if (null == fieldValue.getValue()) {
         fieldValue.setValue("");
       } else {
-        if (fieldValue.getValue().length() >= fieldMaxLength) {
-          fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+        fieldValue.setValue(fieldValue.getValue());
+        if (null == fieldValue.getType()) {
+          if (null != fieldValue.getValue() && fieldValue.getValue().length() >= fieldMaxLength) {
+            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+          }
+        } else {
+          switch (fieldValue.getType()) {
+            case POINT:
+              break;
+            case LINESTRING:
+              break;
+            case POLYGON:
+              break;
+            case MULTIPOINT:
+              break;
+            case MULTILINESTRING:
+              break;
+            case MULTIPOLYGON:
+              break;
+            case GEOMETRYCOLLECTION:
+              break;
+            default:
+              if (fieldValue.getValue().length() >= fieldMaxLength) {
+                fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+              }
+          }
         }
       }
       Document fieldSchema =
@@ -1043,9 +1068,32 @@ public class DatasetServiceImpl implements DatasetService {
     if (updateCascadePK) {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
     }
-
-    if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
-      field.setValue(field.getValue().substring(0, fieldMaxLength));
+    field.setValue(field.getValue());
+    if (null == field.getType()) {
+      if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
+        field.setValue(field.getValue().substring(0, fieldMaxLength));
+      }
+    } else {
+      switch (field.getType()) {
+        case POINT:
+          break;
+        case LINESTRING:
+          break;
+        case POLYGON:
+          break;
+        case MULTIPOINT:
+          break;
+        case MULTILINESTRING:
+          break;
+        case MULTIPOLYGON:
+          break;
+        case GEOMETRYCOLLECTION:
+          break;
+        default:
+          if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
+            field.setValue(field.getValue().substring(0, fieldMaxLength));
+          }
+      }
     }
 
     fieldRepository.saveValue(field.getId(), field.getValue());
@@ -1381,11 +1429,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
-      String tableSchemaId, Integer limit, Integer offset, String filterValue) {
+      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
-      exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue);
+      exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
+          columnName);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
@@ -1495,11 +1544,30 @@ public class DatasetServiceImpl implements DatasetService {
               tableValue.getId(), tableValue.getIdTableSchema());
           tableValue.getRecords().stream().forEach(r -> {
             r.getFields().stream().forEach(f -> {
-              if (DataType.ATTACHMENT.equals(f.getType())) {
-                f.setValue("");
-              }
-              if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
-                f.setValue(f.getValue().substring(0, fieldMaxLength));
+              switch (f.getType()) {
+                case ATTACHMENT:
+                  f.setValue("");
+                  break;
+                case POINT:
+                  break;
+                case LINESTRING:
+                  break;
+                case POLYGON:
+                  break;
+                case MULTIPOINT:
+                  break;
+                case MULTILINESTRING:
+                  break;
+                case MULTIPOLYGON:
+                  break;
+                case GEOMETRYCOLLECTION:
+                  break;
+                default:
+                  if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
+                    f.setValue(f.getValue().substring(0, fieldMaxLength));
+                  } else {
+                    f.setValue(f.getValue());
+                  }
               }
             });
           });
@@ -2893,8 +2961,25 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Cut string value to maximum length
-    if (value.length() > fieldMaxLength) {
-      value = value.substring(0, fieldMaxLength);
+    switch (dataType) {
+      case POINT:
+        break;
+      case LINESTRING:
+        break;
+      case POLYGON:
+        break;
+      case MULTIPOINT:
+        break;
+      case MULTILINESTRING:
+        break;
+      case MULTIPOLYGON:
+        break;
+      case GEOMETRYCOLLECTION:
+        break;
+      default:
+        if (value.length() >= fieldMaxLength) {
+          value = value.substring(0, fieldMaxLength);
+        }
     }
 
     return value;
@@ -3512,61 +3597,179 @@ public class DatasetServiceImpl implements DatasetService {
    * @param outputStream the output stream
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue) {
+      Integer limit, Integer offset, String filterValue, String columnName) {
     try {
-      String filterValuePart = "";
-      if (null != filterValue && !filterValue.isEmpty()) {
-        filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
-      }
-
-      String queryFirstPart =
-          "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
-      String queryMiddlePartOne =
-          " end as \"tableName\", ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as totalRecords, (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
-      String queryMiddlePartTwo =
-          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
-              + filterValuePart + ") as fieldsAux) "
-              + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
-      String queryFinalPart =
-          " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
-      String paginationPart = " offset %s limit %s ";
-      String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
-      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-
-      String tableName = "";
-
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
       DataSetSchema datasetSchema =
           schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-      Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
-      if (tableSchema != null) {
-        tableName = (String) tableSchema.get("nameTableSchema");
-      }
-      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-      if (null != tableSchemaList) {
-        StringBuilder query = new StringBuilder(queryFirstPart);
-        query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
-        query.append(String.format(queryMiddlePartOne, datasetId));
-        for (TableSchema table : tableSchemaList) {
-          if (table.getIdTableSchema().toString().equals(tableSchemaId))
-            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-              query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                  field.getHeaderName()));
+      if (null != datasetSchema) {
+        List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+
+        String filterValuePart = "";
+        if (null != filterValue && !filterValue.isEmpty()) {
+          filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
+        }
+        String queryFirstPart =
+            "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
+        String queryFinalPart =
+            " ) as record where fields is not null ) from dataset_%s.table_value tv) as tableAux  ) as tablesAux ";
+        if (null != tableSchemaId) {
+          queryFirstPart =
+              "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
+          queryFinalPart =
+              " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
+        }
+        String filterBycolum = "";
+        if (null != columnName) {
+          filterBycolum = String.format(" where \"fieldName\" like '%s' ", columnName);
+        }
+        String totalRecords = "";
+        if (null != tableSchemaId) {
+          totalRecords =
+              " ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as \"totalRecords\", ";
+        }
+
+        if (null != columnName || null != filterValue) {
+          totalRecords =
+              totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
+        }
+
+        String queryMiddlePartOne = " end as \"tableName\"," + totalRecords
+            + " (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
+        String queryMiddlePartTwo =
+            " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
+                + filterValuePart + ") as fieldsAux " + filterBycolum + ") "
+                + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
+        String paginationPart = " offset %s limit %s ";
+        String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
+        String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
+        String tableName = "";
+
+        if (null != tableSchemaId) {
+          Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+          if (tableSchema != null) {
+            tableName = (String) tableSchema.get("nameTableSchema");
+          }
+        }
+        if (null != tableSchemaList) {
+          StringBuilder query = new StringBuilder(queryFirstPart);
+          if (null != tableSchemaId) {
+            query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
+          } else {
+            for (TableSchema table : tableSchemaList) {
+              query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema().toString(),
+                  table.getNameTableSchema()));
             }
+          }
+          query.append(String.format(queryMiddlePartOne, datasetId));
+          for (TableSchema table : tableSchemaList) {
+            if (null != tableSchemaId) {
+              if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+                for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+                  query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                      field.getHeaderName()));
+                }
+              }
+            } else {
+              for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+                query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                    field.getHeaderName()));
+              }
+            }
+          }
+          query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
+          if (null != offset && null != limit) {
+            Integer offsetAux = (limit * offset) - limit;
+            if (offsetAux < 0) {
+              offsetAux = 0;
+            }
+            query.append(String.format(paginationPart, offsetAux, limit));
+          }
+          if (null != tableSchemaId) {
+            query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
+          } else {
+            query.append(String.format(queryFinalPart, datasetId));
+          }
+          LOG.info("Query: {} ", query);
+          outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+          LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
         }
-        query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
-        Integer offsetAux = (limit * offset) - limit;
-        if (offsetAux < 0) {
-          offsetAux = 0;
-        }
-        query.append(String.format(paginationPart, offsetAux, limit));
-        query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
-        LOG.info("Query: {} ", query);
-        outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
-        LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
       }
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
+  }
+
+  /**
+   * Total records query.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaList the table schema list
+   * @param tableSchemaId the table schema id
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the string
+   */
+  private String totalRecordsQuery(Long datasetId, List<TableSchema> tableSchemaList,
+      String tableSchemaId, String filterValue, String columnName) {
+    String queryPartOne = "( select count(\"fieldName\") as \"totalRecords\" from ( select case ";
+    String queryPartTwo =
+        "end as \"fieldName\",  fv.value as \"value\" from dataset_%s.field_value fv inner join dataset_%s.record_value rv on rv.id = fv.id_record  inner join dataset_%s.table_value tv on rv.id_table = tv.id ";
+
+    String queryValueFilter = " and fv.value like '%s' ";
+
+    String queryColumnFilter = " where \"fieldName\" = '%s'";
+
+    String queryTablePart = " where tv.id_table_schema in( %s ) ";
+
+    String queryPartThree = " ) as countAux ";
+
+    String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
+    StringBuilder query = new StringBuilder(queryPartOne);
+    for (TableSchema table : tableSchemaList) {
+      if (null != tableSchemaId) {
+        if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+            query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                field.getHeaderName()));
+          }
+        }
+      } else {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          query.append(
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+        }
+      }
+    }
+    query.append(String.format(queryPartTwo, datasetId, datasetId, datasetId));
+    StringBuilder tableList = new StringBuilder();
+    Iterator<TableSchema> tableIterator = tableSchemaList.iterator();
+    while (tableIterator.hasNext()) {
+      if (null != tableSchemaId) {
+        String tableschema = tableIterator.next().getIdTableSchema().toString();
+        if (tableschema.equals(tableSchemaId)) {
+          tableList.append("'" + tableschema + "'");
+        }
+      } else {
+        tableList.append("'" + tableIterator.next().getIdTableSchema().toString() + "'");
+        if (tableIterator.hasNext()) {
+          tableList.append(",");
+        }
+      }
+    }
+
+    query.append(String.format(queryTablePart, tableList));
+    if (null != filterValue) {
+      query.append(String.format(queryValueFilter, filterValue));
+    }
+    query.append(queryPartThree);
+    if (null != columnName) {
+      query.append(String.format(queryColumnFilter, columnName));
+    }
+    query.append(" ), ");
+
+    return query.toString();
   }
 }

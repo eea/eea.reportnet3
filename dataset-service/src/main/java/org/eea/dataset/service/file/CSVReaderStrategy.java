@@ -16,7 +16,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -154,9 +153,15 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldSchemaVOS =
           fileCommon.findFieldSchemas(idTableSchema, dataSetSchema);
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
-      boolean isFixedNumberOfRecords = dataSetSchema.getTableSchemas().stream()
+      TableSchemaVO tableSchemaVO = dataSetSchema.getTableSchemas().stream()
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(idTableSchema)).findFirst()
-          .orElse(new TableSchemaVO()).getFixedNumber();
+          .orElse(new TableSchemaVO());
+      boolean isFixedNumberOfRecords = tableSchemaVO.getFixedNumber();
+      if (!isDesignDataset && tableSchemaVO.getRecordSchema().getFieldSchema().stream()
+          .allMatch(field -> field.getReadOnly())) {
+        throw new IOException("All fields for this table " + tableSchemaVO.getNameTableSchema()
+            + " are readOnly, you can't import new fields");
+      }
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
@@ -373,16 +378,41 @@ public class CSVReaderStrategy implements ReaderStrategy {
     int contAux = 0;
 
     for (String value : values) {
-      // Trim the string if it is too large
-      if (value.length() >= fieldMaxLength) {
-        value = value.substring(0, fieldMaxLength);
-      }
       final FieldVO field = new FieldVO();
       if (contAux < headers.size()) {
         FieldSchemaVO fieldSchemaVO = headers.get(contAux);
         field.setIdFieldSchema(fieldSchemaVO.getId());
         field.setType(fieldSchemaVO.getType());
-        field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
+        field.setValue(value);
+        if (null == field.getType()) {
+          if (null != value && value.length() >= fieldMaxLength) {
+            field.setValue(value.substring(0, fieldMaxLength));
+          }
+        } else {
+          switch (field.getType()) {
+            case ATTACHMENT:
+              field.setValue("");
+              break;
+            case POINT:
+              break;
+            case LINESTRING:
+              break;
+            case POLYGON:
+              break;
+            case MULTIPOINT:
+              break;
+            case MULTILINESTRING:
+              break;
+            case MULTIPOLYGON:
+              break;
+            case GEOMETRYCOLLECTION:
+              break;
+            default:
+              if (value.length() >= fieldMaxLength) {
+                field.setValue(value.substring(0, fieldMaxLength));
+              }
+          }
+        }
 
         if (field.getIdFieldSchema() != null && ((!fieldSchemaVO.getReadOnly() && !isDesignDataset)
             || isDesignDataset || isFixedNumberOfRecords)) {
