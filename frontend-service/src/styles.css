@@ -2262,12 +2262,12 @@ body .p-growl .p-growl-item-container {
   -webkit-box-shadow: var(--growl-box-shadow);
   -moz-box-shadow: var(--growl-box-shadow);
   box-shadow: var(--growl-box-shadow);
+  word-break: break-word;
 }
 
 body .p-growl-item-container a {
   color: var(--c-corporate-blue);
   text-decoration: none;
-  word-break: break-all;
 }
 body .p-growl-item-container a:hover {
   color: var(--c-corporate-blue-lighter);

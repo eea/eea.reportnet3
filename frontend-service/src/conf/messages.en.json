@@ -769,7 +769,6 @@
     "releaseDashboard": "Release status dashboard",
     "releaseDataCollection": "Release to data collection",
     "releaseDate": "Release date",
-    "releasedDate": "Release Date",
     "releaseFailedEvent": "Failed releasing the dataflow",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
     "releaseStartEvent": "Releasing data to data collection.",
