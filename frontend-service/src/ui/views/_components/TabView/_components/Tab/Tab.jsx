@@ -59,6 +59,8 @@ const Tab = ({
   const [menu, setMenu] = useState();
   const [titleHeader, setTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
 
+  const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
+
   const resources = useContext(ResourcesContext);
 
   let contextMenuRef = useRef();
@@ -348,7 +350,14 @@ const Tab = ({
               onBlur={e => {
                 //Check for empty table name
                 if (titleHeader.trim() !== '') {
-                  onInputBlur(e.target.value.trim(), index, initialTitleHeader);
+                  if (!invalidCharsRegex.test(titleHeader)) {
+                    onInputBlur(e.target.value.trim(), index, initialTitleHeader);
+                  } else {
+                    onTabNameError(
+                      resources.messages['invalidCharactersTabHeader'],
+                      resources.messages['invalidCharactersTabHeaderError']
+                    );
+                  }
                 } else {
                   if (!isUndefined(onTabNameError)) {
                     if (!newTab) {

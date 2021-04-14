@@ -1049,6 +1049,10 @@
     "writePermissionsColumn": "Permissions",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "invalidCharactersTabHeader": "Invalid table name",
+    "invalidCharactersTabHeaderError": "The table name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and  '_').",
+    "invalidCharactersFieldMessage": "The field name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and  '_').",
+    "invalidCharactersFieldTitle": "Invalid field name"
   }
 }
