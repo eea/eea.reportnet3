@@ -66,6 +66,11 @@ export const BigButton = ({
     return repeat.length > 0 && idx !== repeat[0].schemaIndex;
   };
 
+  const checkInvalidCharacters = name => {
+    const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s()]/);
+    return invalidCharsRegex.test(name);
+  };
+
   const onEditorKeyChange = (event, index) => {
     if (event.key === 'Enter') {
       if (buttonsTitle !== '') {
@@ -114,14 +119,27 @@ export const BigButton = ({
   const onUpdateName = (title, index) => {
     if (!isEmpty(buttonsTitle)) {
       if (initialValue !== title) {
-        if (checkDuplicates(title, index) || title.length > 250) {
+        let hasErrors = false;
+        if (checkDuplicates(title, index)) {
           setErrorDialogData({
             isVisible: true,
-            message:
-              title.length > 250
-                ? resources.messages['tooLongSchemaNameError']
-                : resources.messages['duplicateSchemaError']
+            message: resources.messages['duplicateSchemaError']
           });
+          hasErrors = true;
+        } else if (title.length > 250) {
+          setErrorDialogData({
+            isVisible: true,
+            message: resources.messages['tooLongSchemaNameError']
+          });
+          hasErrors = true;
+        } else if (checkInvalidCharacters(title)) {
+          setErrorDialogData({
+            isVisible: true,
+            message: resources.messages['invalidCharactersSchemaError']
+          });
+          hasErrors = true;
+        }
+        if (hasErrors) {
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
           return { correct: false, originalSchemaName: initialValue, wrongName: title };
         } else {
