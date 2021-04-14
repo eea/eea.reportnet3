@@ -107,9 +107,12 @@ public class ExcelReaderStrategyTest {
   @Test
   public void testParseFile()
       throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
+
     DataSetSchemaVO dataset = new DataSetSchemaVO();
+
     Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
-    assertNotNull("is null", excelReaderStrategy.parseFile(fileIn, 1L, 1L, ""));
+    assertNotNull("is null",
+        excelReaderStrategy.parseFile(fileIn, 1L, 1L, "5d0c822ae1ccd34cfcd97e20"));
   }
 
   @Test

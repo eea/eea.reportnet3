@@ -151,7 +151,7 @@ public final class LiteralConstants {
 
   /** The Constant RELEASEMESSAGE. */
   public static final String RELEASEMESSAGE =
-      "This automatic notification informs that %s has successfully released in %s on %s(CET)";
+      "This automatic notification informs that %s has successfully released in %s on %s (CET).";
 
   /**
    * Instantiates a new literal constants.
