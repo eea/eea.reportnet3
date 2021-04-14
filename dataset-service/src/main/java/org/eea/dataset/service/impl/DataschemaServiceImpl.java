@@ -2322,6 +2322,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(schemaOrigin.getWebform());
+    schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
     // table level
     for (TableSchema table : schemaOrigin.getTableSchemas()) {
       ObjectId newTableId = new ObjectId();
