@@ -281,8 +281,11 @@ public interface DatasetController {
   ResponseEntity<StreamingResponseBody> etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam("tableSchemaId") String tableSchemaId, @RequestParam("limit") Integer limit,
-      @RequestParam("offset") Integer offset);
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "limit", required = false) Integer limit,
+      @RequestParam(value = "offset", required = false) Integer offset,
+      @RequestParam(value = "filterValue", required = false) String filterValue,
+      @RequestParam(value = "columnName", required = false) String columnName);
 
   /**
    * Etl import dataset.
