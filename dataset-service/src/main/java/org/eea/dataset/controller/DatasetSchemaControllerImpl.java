@@ -814,10 +814,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/createUniqueConstraint")
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
-      if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-          .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-      }
       if (uniqueConstraint.getDatasetSchemaId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
@@ -846,10 +842,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
   public void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
       @PathVariable("dataflowId") Long dataflowId) {
-    if (!TypeStatusEnum.DESIGN
-        .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-    }
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
     } catch (EEAException e) {
@@ -868,10 +860,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
-    }
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
     if (uniqueConstraint.getDatasetSchemaId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
