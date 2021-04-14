@@ -20,7 +20,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
@@ -207,15 +206,39 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       // Reads the same number of cells as headers we have
       for (int i = 0; i < headersSize; i++) {
         String value = dataFormatter.formatCellValue(recordRow.getCell(i));
-        // Trim the string if it is too large
-        if (value.length() >= fieldMaxLength) {
-          value = value.substring(0, fieldMaxLength);
-        }
         FieldSchemaVO fieldSchemaVO = headers.get(i);
         FieldVO field = new FieldVO();
         field.setIdFieldSchema(fieldSchemaVO.getId());
         field.setType(fieldSchemaVO.getType());
-        field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
+        field.setValue(value);
+        if (null == field.getType() && value.length() >= fieldMaxLength) {
+          field.setValue(value.substring(0, fieldMaxLength));
+        } else {
+          switch (field.getType()) {
+            case ATTACHMENT:
+              field.setValue("");
+              break;
+            case POINT:
+              break;
+            case LINESTRING:
+              break;
+            case POLYGON:
+              break;
+            case MULTIPOINT:
+              break;
+            case MULTILINESTRING:
+              break;
+            case MULTIPOLYGON:
+              break;
+            case GEOMETRYCOLLECTION:
+              break;
+            default:
+              if (value.length() >= fieldMaxLength) {
+                field.setValue(value.substring(0, fieldMaxLength));
+              }
+          }
+        }
+
         if (field.getIdFieldSchema() != null) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());

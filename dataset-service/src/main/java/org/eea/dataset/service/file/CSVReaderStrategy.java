@@ -16,7 +16,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -27,6 +26,10 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.NoArgsConstructor;
+
+/**
+ * Instantiates a new CSV reader strategy.
+ */
 
 /**
  * Instantiates a new CSV reader strategy.
@@ -150,11 +153,20 @@ public class CSVReaderStrategy implements ReaderStrategy {
       List<FieldSchemaVO> fieldSchemaVOS =
           fileCommon.findFieldSchemas(idTableSchema, dataSetSchema);
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
+      TableSchemaVO tableSchemaVO = dataSetSchema.getTableSchemas().stream()
+          .filter(tableSchema -> tableSchema.getIdTableSchema().equals(idTableSchema)).findFirst()
+          .orElse(new TableSchemaVO());
+      boolean isFixedNumberOfRecords = tableSchemaVO.getFixedNumber();
+      if (!isDesignDataset && tableSchemaVO.getRecordSchema().getFieldSchema().stream()
+          .allMatch(field -> field.getReadOnly())) {
+        throw new IOException("All fields for this table " + tableSchemaVO.getNameTableSchema()
+            + " are readOnly, you can't import new fields");
+      }
       // through the file
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, tableVO, tables, values, headers, idTableSchema,
-            idRecordSchema, fieldSchemaVOS, isDesignDataset);
+            idRecordSchema, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords);
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -195,15 +207,17 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idRecordSchema the id record schema
    * @param fieldSchemaVOS the field schema VOS
    * @param isDesignDataset the is design dataset
+   * @param isFixedNumberOfRecords the is fixed number of records
    */
   private void sanitizeAndCreateDataSet(final Long partitionId, TableVO tableVO,
       final List<TableVO> tables, final List<String> values, List<FieldSchemaVO> headers,
       final String idTableSchema, final String idRecordSchema,
-      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
+      final List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset,
+      boolean isFixedNumberOfRecords) {
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
       addRecordToTable(tableVO, tables, values, partitionId, headers, idTableSchema, idRecordSchema,
-          fieldSchemaVOS, isDesignDataset);
+          fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords);
     }
   }
 
@@ -298,22 +312,23 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idRecordSchema the id record schema
    * @param fieldSchemaVOS the field schema VOS
    * @param isDesignDataset the is design dataset
+   * @param isFixedNumberOfRecords the is fixed number of records
    */
   private void addRecordToTable(TableVO tableVO, final List<TableVO> tables,
       final List<String> values, final Long partitionId, List<FieldSchemaVO> headers,
       final String idTableSchema, final String idRecordSchema, List<FieldSchemaVO> fieldSchemaVOS,
-      boolean isDesignDataset) {
+      boolean isDesignDataset, boolean isFixedNumberOfRecords) {
     // Create object Table and set the attributes
     if (null == tableVO.getIdTableSchema()) {
       tableVO.setIdTableSchema(idTableSchema);
 
       tableVO.setRecords(createRecordsVO(values, partitionId, tableVO.getIdTableSchema(), headers,
-          idRecordSchema, fieldSchemaVOS, isDesignDataset));
+          idRecordSchema, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords));
       tables.add(tableVO);
 
     } else {
       tableVO.getRecords().addAll(createRecordsVO(values, partitionId, tableVO.getIdTableSchema(),
-          headers, idRecordSchema, fieldSchemaVOS, isDesignDataset));
+          headers, idRecordSchema, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords));
     }
   }
 
@@ -327,17 +342,19 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idRecordSchema the id record schema
    * @param fieldSchemaVOS the field schema VOS
    * @param isDesignDataset the is design dataset
+   * @param isFixedNumberOfRecords the is fixed number of records
    * @return the list
    */
   private List<RecordVO> createRecordsVO(final List<String> values, final Long partitionId,
       final String idTableSchema, List<FieldSchemaVO> headers, final String idRecordSchema,
-      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset) {
+      List<FieldSchemaVO> fieldSchemaVOS, boolean isDesignDataset, boolean isFixedNumberOfRecords) {
     final List<RecordVO> records = new ArrayList<>();
     final RecordVO record = new RecordVO();
     if (null != idTableSchema) {
       record.setIdRecordSchema(idRecordSchema);
     }
-    record.setFields(createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset));
+    record.setFields(
+        createFieldsVO(values, headers, fieldSchemaVOS, isDesignDataset, isFixedNumberOfRecords));
     record.setDatasetPartitionId(partitionId);
     record.setDataProviderCode(this.providerCode);
     records.add(record);
@@ -351,27 +368,54 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param headers the headers
    * @param headersSchema the headers schema
    * @param isDesignDataset the is design dataset
+   * @param isFixedNumberOfRecords the is fixed number of records
    * @return the list
    */
   private List<FieldVO> createFieldsVO(final List<String> values, List<FieldSchemaVO> headers,
-      List<FieldSchemaVO> headersSchema, boolean isDesignDataset) {
+      List<FieldSchemaVO> headersSchema, boolean isDesignDataset, boolean isFixedNumberOfRecords) {
     final List<FieldVO> fields = new ArrayList<>();
     List<String> idSchema = new ArrayList<>();
     int contAux = 0;
 
     for (String value : values) {
-      // Trim the string if it is too large
-      if (value.length() >= fieldMaxLength) {
-        value = value.substring(0, fieldMaxLength);
-      }
       final FieldVO field = new FieldVO();
       if (contAux < headers.size()) {
         FieldSchemaVO fieldSchemaVO = headers.get(contAux);
         field.setIdFieldSchema(fieldSchemaVO.getId());
         field.setType(fieldSchemaVO.getType());
-        field.setValue(DataType.ATTACHMENT.equals(fieldSchemaVO.getType()) ? "" : value);
+        field.setValue(value);
+        if (null == field.getType()) {
+          if (null != value && value.length() >= fieldMaxLength) {
+            field.setValue(value.substring(0, fieldMaxLength));
+          }
+        } else {
+          switch (field.getType()) {
+            case ATTACHMENT:
+              field.setValue("");
+              break;
+            case POINT:
+              break;
+            case LINESTRING:
+              break;
+            case POLYGON:
+              break;
+            case MULTIPOINT:
+              break;
+            case MULTILINESTRING:
+              break;
+            case MULTIPOLYGON:
+              break;
+            case GEOMETRYCOLLECTION:
+              break;
+            default:
+              if (value.length() >= fieldMaxLength) {
+                field.setValue(value.substring(0, fieldMaxLength));
+              }
+          }
+        }
 
-        if (field.getIdFieldSchema() != null) {
+        if (field.getIdFieldSchema() != null && ((!fieldSchemaVO.getReadOnly() && !isDesignDataset)
+            || isDesignDataset || isFixedNumberOfRecords)) {
           fields.add(field);
           idSchema.add(field.getIdFieldSchema());
         }
