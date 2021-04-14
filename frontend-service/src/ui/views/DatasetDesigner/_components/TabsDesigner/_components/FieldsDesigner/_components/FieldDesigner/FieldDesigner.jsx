@@ -32,6 +32,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
+  checkInvalidCharacters,
   codelistItems,
   datasetId,
   datasetSchemaId,
@@ -287,17 +288,26 @@ export const FieldDesigner = ({
             fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
           } else {
-            if (!checkDuplicates(name, fieldId)) {
-              if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
-                onFieldAdd({ name });
-              }
-            } else {
+            if (checkInvalidCharacters(name)) {
               fieldTypeRef.current.hide();
               onShowDialogError(
-                resources.messages['duplicatedFieldMessage'],
-                resources.messages['duplicatedFieldTitle']
+                resources.messages['invalidCharactersFieldMessage'],
+                resources.messages['invalidCharactersFieldTitle']
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+            } else {
+              if (!checkDuplicates(name, fieldId)) {
+                if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
+                  onFieldAdd({ name });
+                }
+              } else {
+                fieldTypeRef.current.hide();
+                onShowDialogError(
+                  resources.messages['duplicatedFieldMessage'],
+                  resources.messages['duplicatedFieldTitle']
+                );
+                dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+              }
             }
           }
         } else {
@@ -307,15 +317,24 @@ export const FieldDesigner = ({
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
           } else {
             if (name !== fieldDesignerState.initialFieldValue) {
-              if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate({ name });
-              } else {
+              if (checkInvalidCharacters(name)) {
                 fieldTypeRef.current.hide();
                 onShowDialogError(
-                  resources.messages['duplicatedFieldMessage'],
-                  resources.messages['duplicatedFieldTitle']
+                  resources.messages['invalidCharactersFieldMessage'],
+                  resources.messages['invalidCharactersFieldTitle']
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+              } else {
+                if (!checkDuplicates(name, fieldId)) {
+                  fieldUpdate({ name });
+                } else {
+                  fieldTypeRef.current.hide();
+                  onShowDialogError(
+                    resources.messages['duplicatedFieldMessage'],
+                    resources.messages['duplicatedFieldTitle']
+                  );
+                  dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+                }
               }
             }
           }

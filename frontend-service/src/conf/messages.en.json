@@ -1051,17 +1051,9 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
-    "deleteWebLinkError": "Error deleting web link",
-    "addWebLinkError": "Error adding web link",
-    "editWebLinkError": "Error editing web link",
-    "uploadFileError": "Error uploading file",
-    "publicStatusLeftSideBarButton": "Public status",
-    "showPublicInfoDataflowDialogHeader": "Show/hide public dataflow data",
-    "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available",
-    "sortFieldDesignFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
-    "sortFieldFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
-    "manageRolesReporterDialogInputPlaceholder": "Reporter account...",
     "invalidCharactersTabHeader": "Invalid table name",
-    "invalidCharactersTabHeaderError": "The schema name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and  '_')"
+    "invalidCharactersTabHeaderError": "The table name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and  '_').",
+    "invalidCharactersFieldMessage": "The field name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and  '_').",
+    "invalidCharactersFieldTitle": "Invalid field name"
   }
 }

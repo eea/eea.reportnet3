@@ -61,7 +61,6 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
   };
 
   const checkInput = () => {
-    console.log(checkIsDuplicateSchemaName(), checkIsEmptyInput(), checkIsInvalidName());
     setHasErrors(checkIsDuplicateSchemaName() || checkIsEmptyInput() || checkIsInvalidName());
     return !checkIsDuplicateSchemaName() && !checkIsEmptyInput() && !checkIsInvalidName();
   };
