@@ -7,8 +7,11 @@
 }
 .inputWrapper {
   display: flex;
+}
+.inputWrapperMargin:not(:last-child) {
   margin-bottom: 0.5rem;
 }
+
 .dataProvidersDropdown {
   max-width: 16rem;
 }
