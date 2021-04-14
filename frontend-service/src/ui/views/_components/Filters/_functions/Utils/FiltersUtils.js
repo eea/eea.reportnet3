@@ -64,8 +64,9 @@ const getFilterInitialState = (data, input, multiselect, date, dropdown, checkbo
   return filterBy;
 };
 
-const getFilterKeys = (state, filter, inputOptions = []) =>
-  Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
+const getFilterKeys = (state, filter, inputOptions = []) => {
+  return Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
+};
 
 const getLabelInitialState = (input, multiselect, date, dropdown, checkbox = [], filteredBy) => {
   const labelByGroup = input.concat(multiselect, date, dropdown, checkbox);
@@ -83,54 +84,48 @@ const getOptionsNames = options => {
   return separateOptions;
 };
 
-const getOptionTypes = (data, option, list, order) => {
-  if (list && list[option]) {
-    return list[option].map(item => ({
-      type: item.acronym ? `${item.acronym} - ${item.name}` : item.name,
-      value: item.id
-    }));
-  } else {
-    const optionItems = uniq(data.map(item => item[option]));
+const getOptionsTemplate = (filteredOptions, property) => {
+  const template = [];
 
-    const filteredOptionItems = optionItems.filter(option =>
-      typeof option === 'boolean' ? option : !isNil(option) && !isEmpty(option)
-    );
+  filteredOptions.forEach(option => {
+    switch (property) {
+      case 'automatic':
+        template.push({ type: option ? 'AUTOMATIC' : 'MANUAL', value: option });
+        break;
 
-    const orderedOptions = filteredOptionItems.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER')
-      ? order(filteredOptionItems)
-      : filteredOptionItems;
+      case 'enabled':
+        template.push({ type: option ? 'ENABLED' : 'DISABLED', value: option });
+        break;
 
-    const validOptionItems = orderedOptions.some(item => typeof item === 'boolean') ? [true, false] : orderedOptions;
+      case 'isCorrect':
+        template.push({ type: option ? 'VALID' : 'INVALID', value: option });
+        break;
 
-    for (let i = 0; i < validOptionItems.length; i++) {
-      const template = [];
+      case 'userRole':
+        const text = option.toString();
+        template.push({ type: text.replace('_', ' ').toUpperCase(), value: text.toUpperCase() });
+        break;
 
-      validOptionItems.forEach(item => {
-        if (option === 'isCorrect' && item) {
-          template.push({ type: 'VALID', value: item });
-        } else if (option === 'isCorrect' && !item) {
-          template.push({ type: 'INVALID', value: item });
-        } else if (option === 'enabled' && item) {
-          template.push({ type: 'ENABLED', value: item });
-        } else if (option === 'enabled' && !item) {
-          template.push({ type: 'DISABLED', value: item });
-        } else if (option === 'automatic' && item) {
-          template.push({ type: 'AUTOMATIC', value: item });
-        } else if (option === 'automatic' && !item) {
-          template.push({ type: 'MANUAL', value: item });
-        } else if (option === 'userRole') {
-          template.push({
-            type: item.toString().replace('_', ' ').toUpperCase(),
-            value: item.toString().toUpperCase()
-          });
-        } else {
-          template.push({ type: item.toString().toUpperCase(), value: item.toString().toUpperCase() });
-        }
-      });
-
-      return sortBy(template, 'type');
+      default:
+        template.push({ type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() });
     }
+  });
+
+  return sortBy(template, 'type');
+};
+
+const getOptionsTypes = (data, property, list, sortErrors) => {
+  if (list && list[property]) {
+    return list[property].map(item => {
+      return { type: item.acronym ? `${item.acronym} - ${item.name}` : item.name, value: item.id };
+    });
   }
+
+  const options = uniq(data.map(item => item[property])).filter(onFilterBooleanOptions);
+  const sortedOptions = options.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER') ? sortErrors(options) : options;
+  const filteredOptions = sortedOptions.some(item => typeof item === 'boolean') ? [true, false] : sortedOptions;
+
+  return getOptionsTemplate(filteredOptions, property);
 };
 
 const getSelectedKeys = (state, select, selectOptions = []) => {
@@ -156,6 +151,8 @@ const getValidationsOptionTypes = (data, option) => {
   }
 };
 
+const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(option) && !isEmpty(option) : true);
+
 export const FiltersUtils = {
   getCheckboxFilterInitialState,
   getCheckboxState,
@@ -164,7 +161,7 @@ export const FiltersUtils = {
   getFilterKeys,
   getLabelInitialState,
   getOptionsNames,
-  getOptionTypes,
+  getOptionsTypes,
   getSelectedKeys,
   getValidationsOptionTypes
 };

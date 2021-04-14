@@ -434,7 +434,7 @@ export const Filters = ({
       <Dropdown
         ariaLabel={property}
         className={styles.dropdownFilter}
-        filter={FiltersUtils.getOptionTypes(data, property, dropDownList).length > 10}
+        filter={FiltersUtils.getOptionsTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
@@ -446,7 +446,7 @@ export const Filters = ({
           event.stopPropagation();
         }}
         optionLabel="type"
-        options={FiltersUtils.getOptionTypes(data, property, dropDownList)}
+        options={FiltersUtils.getOptionsTypes(data, property, dropDownList)}
         showClear={!isEmpty(filterState.filterBy[property])}
         showFilterClear={true}
         value={filterState.filterBy[property]}
@@ -516,7 +516,7 @@ export const Filters = ({
         options={
           validations
             ? FiltersUtils.getValidationsOptionTypes(validationsAllTypesFilters, property)
-            : FiltersUtils.getOptionTypes(data, property, selectList, ErrorUtils.orderLevelErrors)
+            : FiltersUtils.getOptionsTypes(data, property, selectList, ErrorUtils.orderLevelErrors)
         }
         value={filterState.filterBy[property]}
       />
