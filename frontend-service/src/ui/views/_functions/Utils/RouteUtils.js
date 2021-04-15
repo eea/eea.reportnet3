@@ -6,10 +6,8 @@ const parseParentPath = (parentPath, location) => {
   splittedParentPath.forEach((token, i) => {
     if (token.includes(':')) {
       newPath = `${newPath}/${splittedPath[i]}`;
-    } else {
-      if (token !== '') {
-        newPath = `${newPath}/${token}`;
-      }
+    } else if (token !== '') {
+      newPath = `${newPath}/${token}`;
     }
   });
   return newPath;
