@@ -10,11 +10,8 @@ import Tooltip from 'primereact/tooltip';
 
 export const ChipButton = ({
   className = '',
-  disabled = false,
   hasLevelErrorIcon = false,
-  id,
   key,
-  labelClassName,
   levelError,
   onClick,
   style,
@@ -22,7 +19,6 @@ export const ChipButton = ({
   tooltipOptions,
   value
 }) => {
-  let myTooltip;
   const inputElement = useRef();
   const listElement = useRef();
   const [iconToShow, setIconToShow] = useState('cancel');
@@ -34,7 +30,7 @@ export const ChipButton = ({
   }, []);
 
   const renderTooltip = () => {
-    myTooltip = new Tooltip({
+    new Tooltip({
       target: listElement.current,
       targetContainer: listElement.current,
       content: tooltip,
