@@ -83,7 +83,8 @@
 }
 
 .hasErrors {
-  border: 2px solid var(--errors) !important;
+  border: 1px solid var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
   &:focus {
     box-shadow: none !important;
   }
