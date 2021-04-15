@@ -38,7 +38,6 @@ const Chips = ({
   tooltipOptions = null,
   value = null
 }) => {
-  let myTooltip;
   const inputElement = useRef();
   const listElement = useRef();
   //   const [values, setValues] = useState();
@@ -287,7 +286,7 @@ const Chips = ({
   };
 
   const renderTooltip = () => {
-    myTooltip = new Tooltip({
+    new Tooltip({
       target: inputElement.current.element,
       targetContainer: listElement.current.element,
       content: tooltip,
