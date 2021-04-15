@@ -1151,6 +1151,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     }
                   }}
                   style={{
+                    color: 'var(--main-font-color)',
                     cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
                     fontSize: '11pt',
                     fontWeight: 'bold',
