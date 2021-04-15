@@ -146,6 +146,7 @@ export const PublicDataflowInformation = withRouter(
 
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
+        console.log('eii');
         const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
 
         DownloadFile(fileContent.data, fileName);
@@ -164,6 +165,7 @@ export const PublicDataflowInformation = withRouter(
 
     const onLoadDataflowData = async () => {
       try {
+        console.log(dataflowId);
         const { data } = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
         parseDataflowData(data.datasets);

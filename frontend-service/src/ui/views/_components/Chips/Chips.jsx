@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import isNil from 'lodash/isNil';
 
