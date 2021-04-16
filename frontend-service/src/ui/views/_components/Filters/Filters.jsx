@@ -544,11 +544,13 @@ export const Filters = ({
         htmlFor={'searchInput'}
         dangerouslySetInnerHTML={{
           __html: TextUtils.parseText(resources.messages['searchAllLabel'], {
-            searchData: !isEmpty(searchBy) ? `(${searchBy.join(', ')})` : ''
+            searchData: !isEmpty(searchBy) ? `(${getSearchByLabelParams(searchBy).join(', ').toLowerCase()})` : ''
           })
         }}></label>
     </span>
   );
+
+  const getSearchByLabelParams = (searchBy = []) => searchBy.map(key => resources.messages[key]);
 
   const filtersRenderer = () => {
     return options.map(filterOption => {
