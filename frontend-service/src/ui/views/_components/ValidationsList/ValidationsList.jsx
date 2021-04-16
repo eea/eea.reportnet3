@@ -485,7 +485,7 @@ const ValidationsList = withRouter(
               getFilteredSearched={getFilteredState}
               options={filterOptions}
               searchAll
-              searchBy={['name', 'description', 'message']}
+              searchBy={['name', 'description', 'message', 'shortCode']}
             />
           </div>
 
