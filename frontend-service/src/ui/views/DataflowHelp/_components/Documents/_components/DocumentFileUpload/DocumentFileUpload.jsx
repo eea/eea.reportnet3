@@ -7,6 +7,7 @@ import styles from './DocumentFileUpload.module.scss';
 import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
 
 import { DocumentService } from 'core/services/Document';
@@ -37,6 +38,7 @@ const DocumentFileUpload = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [inputs, setInputs] = useState(documentInitialValues);
+  const [langValue, setLangValue] = useState({});
 
   useEffect(() => {
     if (isUploadDialogVisible) inputRef.current.focus();
@@ -159,6 +161,14 @@ const DocumentFileUpload = ({
     }
   };
 
+  const getOptionTypes = () => {
+    const template = [];
+    config.languages.forEach(language => {
+      template.push({ label: language.name, value: language.code });
+    });
+    return sortBy(template, 'type');
+  };
+
   return (
     <form onSubmit={e => e.preventDefault()}>
       <fieldset>
@@ -194,34 +204,29 @@ const DocumentFileUpload = ({
         </div>
 
         <div className={`formField ${errors.lang.hasErrors ? 'error' : ''}`}>
-          <select
+          <Dropdown
+            appendTo={document.body}
+            className={styles.dropdownWrapper}
             id="selectLanguage"
             name="lang"
-            component="select"
-            multiple={false}
-            value={inputs.lang}
-            onBlur={() => checkInputForErrors('lang')}
             onChange={e => {
-              e.persist();
+              setLangValue(e.target.value);
               setInputs(previousValues => {
-                return { ...previousValues, lang: e.target.value };
+                return { ...previousValues, lang: e.target.value.value };
               });
-            }}
-            onFocus={() =>
               setErrors(previousErrors => {
                 return { ...previousErrors, ['lang']: { message: '', hasErrors: false } };
-              })
-            }
+              });
+            }}
             onKeyPress={e => {
               if (e.key === 'Enter' && !checkInputForErrors('lang')) onConfirm();
-            }}>
-            <option value="">{resources.messages['selectLang']}</option>
-            {sortBy(config.languages, ['name']).map(language => (
-              <option key={language.code} value={language.code}>
-                {language.name}
-              </option>
-            ))}
-          </select>
+            }}
+            optionLabel="label"
+            options={getOptionTypes()}
+            optionValue="value"
+            placeholder={resources.messages['selectLang']}
+            value={langValue}
+          />
           <label htmlFor="selectLanguage" className="srOnly">
             {resources.messages['selectLang']}
           </label>
