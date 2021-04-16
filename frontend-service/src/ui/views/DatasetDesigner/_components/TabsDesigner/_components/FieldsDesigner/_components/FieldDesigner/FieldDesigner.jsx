@@ -100,6 +100,7 @@ export const FieldDesigner = ({
   const getFieldTypeValue = value => {
     return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
   };
+  
   const initialFieldDesignerState = {
     addFieldCallSent: false,
     codelistItems: codelistItems,
@@ -165,6 +166,17 @@ export const FieldDesigner = ({
       }
     });
   }, [headerHeight]);
+
+  useEffect(() => {
+    if (!isNil(fieldLink)) {
+      dispatchFieldDesigner({
+        type: 'SET_FIELD_LINK',
+        payload: {
+          link: fieldLink
+        }
+      });
+    }
+  }, [fieldLink]);
 
   const onSetInitHeaderHeight = () => {
     const header = document.getElementById('header');
