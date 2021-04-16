@@ -23,3 +23,7 @@
     @content;
   }
 }
+
+@mixin shadow-1px($shadow-color) {
+  box-shadow: inset 0px 0px 0px 1px $shadow-color;
+}
