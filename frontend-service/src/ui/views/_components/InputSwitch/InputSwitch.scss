@@ -26,7 +26,6 @@ body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:before {
   -ms-transform: translateX(1.25em);
   transform: translateX(1.25em);
   background-color: var(--inputswitch-checked-before-bg);
-  /* box-shadow: var(--inputswitch-dark-theme-checked); */
 }
 body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   outline: 0 none;

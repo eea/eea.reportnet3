@@ -15,9 +15,6 @@ body .p-dropdown:not(.p-disabled):hover {
 body .p-dropdown:not(.p-disabled).p-focus {
   outline: 0 none;
   outline-offset: 0;
-  /* -webkit-box-shadow: 0 0 0 0.2em var(--blue-120);
-    -moz-box-shadow: 0 0 0 0.2em var(--blue-120);
-    box-shadow: 0 0 0 0.2em var(--blue-120); */
   border-color: var(--dropdown-bg-focus);
 }
 body .p-dropdown .p-dropdown-label {
