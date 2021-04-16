@@ -107,7 +107,7 @@ const DatasetSchema = ({
           names: {
             tableName: 'Table',
             fieldName: 'Field',
-            entityType: 'Type of qc',
+            entityType: 'Type of QC',
             levelError: 'Level error',
             ruleName: 'Rule name'
           }
