@@ -17,7 +17,6 @@ textarea {
 }
 
 textarea {
-  /* min-height: 5rem; */
   font-family: 'Open Sans', sans-serif;
   resize: none;
 }
@@ -60,6 +59,9 @@ textarea:focus {
   box-shadow: none;
   outline: none;
   border-width: 2px;
+  &:hover {
+    border-color: var(--errors);
+  }
 }
 .formField input {
   background-color: var(--form-field-bg);
@@ -71,7 +73,6 @@ textarea:focus {
 }
 
 form .error {
-  color: var(--errors);
   transition: color 0.2s;
 }
 
@@ -80,7 +81,7 @@ form .error {
 }
 
 .formField.error:hover input {
-  border-color: var(--dialog-content-color);
-  box-shadow: none;
+  border-color: var(--errors);
+  box-shadow: inset 0px 0px 0px 1px var(--errors);
   outline: none;
 }
