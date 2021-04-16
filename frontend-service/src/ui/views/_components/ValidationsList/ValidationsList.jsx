@@ -2,10 +2,10 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import upperFirst from 'lodash/upperFirst';
 
 import styles from './ValidationsList.module.scss';
 
@@ -257,7 +257,7 @@ const ValidationsList = withRouter(
           break;
       }
 
-      return capitalize(header);
+      return upperFirst(header);
     };
 
     const getOrderedValidations = validations => {
@@ -485,7 +485,7 @@ const ValidationsList = withRouter(
               getFilteredSearched={getFilteredState}
               options={filterOptions}
               searchAll
-              searchBy={['name', 'description', 'message', 'shortCode']}
+              searchBy={['shortCode', 'name', 'description', 'message']}
             />
           </div>
 
