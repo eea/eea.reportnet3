@@ -253,11 +253,11 @@ const ValidationsList = withRouter(
           header = resources.messages['entityType'];
           break;
         default:
-          header = fieldHeader;
+          header = upperFirst(fieldHeader);
           break;
       }
 
-      return upperFirst(header);
+      return header;
     };
 
     const getOrderedValidations = validations => {
