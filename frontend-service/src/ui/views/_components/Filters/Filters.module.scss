@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .filter-lines {
   display: grid;
   grid-row-gap: 2.5rem;
@@ -129,6 +131,41 @@
     flex-direction: row;
     font-size: 10pt;
     width: 100%;
+  }
+
+  @include for-phone-only {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    .dataflowInput {
+      margin-bottom: 1.5rem;
+    }
+  }
+  @include for-tablet-portrait-up {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    .dataflowInput {
+      width: 33%;
+      margin-bottom: 1.5rem;
+    }
+    .buttonWrapper {
+      margin-left: 1.5rem;
+    }
+  }
+  @include for-desktop-up {
+    .dataflowInput {
+      width: 25%;
+    }
+    .buttonWrapper {
+      margin-left: 0px;
+    }
+  }
+  @include for-big-desktop-up {
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    .dataflowInput {
+      width: 100%;
+      margin-bottom: 0;
+    }
   }
 }
 
