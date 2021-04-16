@@ -63,6 +63,9 @@ textarea:focus {
     border-color: var(--errors);
   }
 }
+.formField.error .p-dropdown:not(.p-disabled).p-focus {
+  border-color: var(--errors);
+}
 .formField input {
   background-color: var(--form-field-bg);
   color: var(--form-field-color);
@@ -71,7 +74,6 @@ textarea:focus {
   background-color: var(--form-field-bg);
   color: var(--form-field-color);
 }
-
 form .error {
   transition: color 0.2s;
 }
