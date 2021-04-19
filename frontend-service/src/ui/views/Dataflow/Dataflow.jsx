@@ -15,7 +15,6 @@ import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/requester/d
 import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
 import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { routes } from 'ui/routes';
-import DataflowConf from 'conf/dataflow.config.json';
 import { RepresentativeConfig } from 'conf/domain/model/Representative';
 
 import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
@@ -123,11 +122,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
 
   const isLeadDesigner = dataflowState.userRoles.some(
-    userRole =>
-      userRole === config.permissions.roles.DATA_STEWARD.key || userRole === config.permissions.roles.DATA_CUSTODIAN.key
+    userRole => userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
   );
 
-  const isDesign = dataflowState.status === DataflowConf.dataflowStatus.DESIGN;
+  const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
 
   const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
 
@@ -191,7 +189,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (dataflowState.isCustodian) {
-      if (dataflowState.status === DataflowConf.dataflowStatus['OPEN']) {
+      if (dataflowState.status === config.dataflowStatus.OPEN) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
         leftSideBarContext.addHelpSteps(DataflowRequesterHelpConfig, 'dataflowRequesterDesignHelp');
@@ -516,29 +514,34 @@ const Dataflow = withRouter(({ history, match }) => {
     const currentDatasetId = getCurrentDatasetId();
 
     const hasWritePermissions = userContext.hasPermission(
-      [config.permissions.LEAD_REPORTER],
-      `${config.permissions.DATAFLOW}${dataflowId}`
+      [config.permissions.roles.LEAD_REPORTER.key],
+      `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
     );
 
     const hasUserListRights = userContext.hasPermission(
-      [config.permissions.LEAD_REPORTER, config.permissions.DATA_STEWARD, config.permissions.DATA_CUSTODIAN],
-      `${config.permissions.DATAFLOW}${dataflowId}`
+      [
+        config.permissions.roles.CUSTODIAN.key,
+        config.permissions.roles.STEWARD.key,
+        config.permissions.roles.LEAD_REPORTER.key
+      ],
+      `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
     );
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
       config.permissions.prefixes.NATIONAL_COORDINATOR,
       null,
-      [config.permissions.NATIONAL_COORDINATOR]
+      [config.permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
     const entity = isNil(representativeId)
-      ? `${config.permissions['DATAFLOW']}${dataflowId}`
-      : `${config.permissions['DATASET']}${currentDatasetId}`;
+      ? `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+      : `${config.permissions.prefixes.DATASET}${currentDatasetId}`;
 
     const userRoles = userContext.getUserRole(entity);
 
     const isCustodian = userRoles.some(
-      userRole => userRole === config.permissions['DATA_STEWARD'] || userRole === config.permissions['DATA_CUSTODIAN']
+      userRole =>
+        userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
     );
 
     dataflowDispatch({

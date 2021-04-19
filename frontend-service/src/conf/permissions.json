@@ -12,7 +12,7 @@
       "key": "DATA_CUSTODIAN",
       "label": "CUSTODIAN"
     },
-    "DATA_STEWARD": {
+    "STEWARD": {
       "key": "DATA_STEWARD",
       "label": "STEWARD"
     },

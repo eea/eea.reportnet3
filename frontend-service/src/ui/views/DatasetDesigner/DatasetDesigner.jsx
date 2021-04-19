@@ -13,7 +13,6 @@ import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import { routes } from 'ui/routes';
 import WebformsConfig from 'conf/webforms.config.json';
 
 import { Webforms } from 'ui/views/Webforms';
@@ -187,7 +186,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
+      if (userContext.accessRole[0] !== config.permissions.roles.EDITOR_READ.key) {
         if (datasetSchemaAllTables.length > 1) {
           leftSideBarContext.addHelpSteps(
             DatasetSchemaRequesterWithTabsHelpConfig,
@@ -239,12 +238,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (!isUndefined(userContext.contextRoles)) {
       const isDataflowOpen =
         userContext.hasPermission(
-          [config.permissions.DATA_CUSTODIAN, config.permissions.DATA_STEWARD],
-          `${config.permissions.DATAFLOW}${dataflowId}`
-        ) && designerState?.metaData?.dataflow?.status === 'DRAFT';
+          [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+          `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+        ) && designerState?.metaData?.dataflow?.status === config.dataflowStatus.OPEN;
       const isDesignDatasetEditorRead =
-        userContext.hasPermission([config.permissions.EDITOR_READ], `${config.permissions.DATAFLOW}${dataflowId}`) &&
-        designerState?.metaData?.dataflow?.status === 'DESIGN';
+        userContext.hasPermission(
+          [config.permissions.roles.EDITOR_READ.key],
+          `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+        ) && designerState?.metaData?.dataflow?.status === config.dataflowStatus.DESIGN;
 
       designerDispatch({
         type: 'IS_DATAFLOW_EDITABLE',

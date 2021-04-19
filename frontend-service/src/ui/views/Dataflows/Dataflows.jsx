@@ -140,7 +140,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const onLoadPermissions = () => {
     const isCustodian = userContext.hasPermission([
       config.permissions.roles.CUSTODIAN.key,
-      config.permissions.roles.DATA_STEWARD.key
+      config.permissions.roles.STEWARD.key
     ]);
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(

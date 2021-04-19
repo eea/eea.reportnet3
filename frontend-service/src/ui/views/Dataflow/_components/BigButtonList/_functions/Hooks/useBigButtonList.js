@@ -7,7 +7,6 @@ import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -49,24 +48,21 @@ const useBigButtonList = ({
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
 
-  const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-    config.permissions.DATA_STEWARD,
-    config.permissions.DATA_CUSTODIAN
+  const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN.key,
+    config.permissions.roles.STEWARD.key
   ]);
 
   const getButtonsVisibility = useCallback(() => {
-    const isCustodian = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-      config.permissions.DATA_CUSTODIAN
-    ]);
     const isDesigner =
       isLeadDesigner ||
-      userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-        config.permissions.EDITOR_WRITE
+      userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+        config.permissions.roles.EDITOR_WRITE.key
       ]);
-    const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
-    const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['OPEN'];
-    const isEditorRead = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-      config.permissions.EDITOR_READ
+    const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
+    const isDraftStatus = dataflowState.status === config.dataflowStatus.OPEN;
+    const isEditorRead = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.EDITOR_READ.key
     ]);
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isReleased =
@@ -80,9 +76,9 @@ const useBigButtonList = ({
       dashboard: isLeadDesigner && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
-          userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-            config.permissions.EDITOR_READ,
-            config.permissions.EDITOR_WRITE
+          userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+            config.permissions.roles.EDITOR_READ.key,
+            config.permissions.roles.EDITOR_WRITE.key
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
@@ -98,7 +94,7 @@ const useBigButtonList = ({
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
-      testDatasetVisibility: isDraftStatus && isCustodian
+      testDatasetVisibility: isLeadDesigner && isDraftStatus
     };
   }, [
     dataflowId,
@@ -233,24 +229,21 @@ const useBigButtonList = ({
                   label: resources.messages['rename'],
                   icon: 'pencil',
                   disabled:
-                    dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-                    !buttonsVisibility.designDatasetsActions
+                    dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
                 },
                 {
                   label: resources.messages['delete'],
                   icon: 'trash',
                   disabled:
-                    dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-                    !buttonsVisibility.designDatasetsActions,
+                    dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions,
                   command: () => getDeleteSchemaIndex(newDatasetSchema.index),
                   disabled:
-                    dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-                    !buttonsVisibility.designDatasetsActions
+                    dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
                 }
                 // {
                 //   label: resources.messages['exportDatasetSchema'],
                 //   icon: 'import',
-                //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
+                //   // disabled: dataflowState.status !== config.dataflowStatus.DESIGN,
                 //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
                 // }
               ]
