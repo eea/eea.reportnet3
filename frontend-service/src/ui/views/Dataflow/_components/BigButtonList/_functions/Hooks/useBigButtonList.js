@@ -59,6 +59,9 @@ const useBigButtonList = ({
       userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
         config.permissions.roles.EDITOR_WRITE.key
       ]);
+    const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.OBSERVER.key
+    ]);
     const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
     const isDraftStatus = dataflowState.status === config.dataflowStatus.OPEN;
     const isEditorRead = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -73,7 +76,7 @@ const useBigButtonList = ({
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEuDataset: isLeadDesigner && isDraftStatus,
       exportEuDataset: isLeadDesigner && isDraftStatus,
-      dashboard: isLeadDesigner && isDraftStatus,
+      dashboard: (isLeadDesigner || isObserver) && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
           userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -87,7 +90,7 @@ const useBigButtonList = ({
       feedback:
         (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
-      groupByRepresentative: isLeadDesigner && isDraftStatus,
+      groupByRepresentative: (isLeadDesigner || isObserver) && isDraftStatus,
       manageReporters: isLeadDesigner,
       manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
@@ -240,12 +243,6 @@ const useBigButtonList = ({
                   disabled:
                     dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
                 }
-                // {
-                //   label: resources.messages['exportDatasetSchema'],
-                //   icon: 'import',
-                //   // disabled: dataflowState.status !== config.dataflowStatus.DESIGN,
-                //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
-                // }
               ]
             : [],
         onSaveName: onSaveName,

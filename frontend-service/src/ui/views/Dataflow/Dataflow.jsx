@@ -76,7 +76,6 @@ const Dataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     formHasRepresentatives: false,
     hasRepresentativesWithoutDatasets: false,
-    hasUserListRights: false,
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
@@ -95,6 +94,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isManageReportersDialogVisible: false,
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
+    isObserver: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
@@ -368,7 +368,7 @@ const Dataflow = withRouter(({ history, match }) => {
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
-        (dataflowState.isCustodian && !isNil(representativeId))
+        ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
     };
   };
 
@@ -518,15 +518,6 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
     );
 
-    const hasUserListRights = userContext.hasPermission(
-      [
-        config.permissions.roles.CUSTODIAN.key,
-        config.permissions.roles.STEWARD.key,
-        config.permissions.roles.LEAD_REPORTER.key
-      ],
-      `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
-    );
-
     const isNationalCoordinator = userContext.hasContextAccessPermission(
       config.permissions.prefixes.NATIONAL_COORDINATOR,
       null,
@@ -544,13 +535,17 @@ const Dataflow = withRouter(({ history, match }) => {
         userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
     );
 
+    const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.OBSERVER.key
+    ]);
+
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
       payload: {
         hasWritePermissions,
         isCustodian,
+        isObserver,
         userRoles,
-        hasUserListRights,
         isNationalCoordinator
       }
     });
