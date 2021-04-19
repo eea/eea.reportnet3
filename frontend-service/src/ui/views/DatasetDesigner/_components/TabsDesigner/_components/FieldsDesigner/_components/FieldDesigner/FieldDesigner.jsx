@@ -101,6 +101,7 @@ export const FieldDesigner = ({
   const getFieldTypeValue = value => {
     return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
   };
+
   const initialFieldDesignerState = {
     addFieldCallSent: false,
     codelistItems: codelistItems,
@@ -166,6 +167,17 @@ export const FieldDesigner = ({
       }
     });
   }, [headerHeight]);
+
+  useEffect(() => {
+    if (!isNil(fieldLink)) {
+      dispatchFieldDesigner({
+        type: 'SET_FIELD_LINK',
+        payload: {
+          link: fieldLink
+        }
+      });
+    }
+  }, [fieldLink]);
 
   const onSetInitHeaderHeight = () => {
     const header = document.getElementById('header');
@@ -930,18 +942,35 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={
+          isDataflowOpen ||
+          isDesignDatasetEditorRead ||
+          (!isNil(fieldDesignerState.fieldLinkValue) &&
+            !isEmpty(fieldDesignerState.fieldLinkValue) &&
+            isNil(fieldDesignerState.fieldLinkValue.name))
+        }
+        icon={
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? null
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? 'spinnerAnimate'
+            : null
+        }
         label={
-          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
-            ? `${fieldDesignerState.fieldLinkValue.name}`
-            : resources.messages['linkSelection']
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? resources.messages['linkSelection']
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? '...'
+            : `${fieldDesignerState.fieldLinkValue.name}`
         }
         onClick={() => onLinkDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
         tooltip={
-          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
-            ? `${fieldDesignerState.fieldLinkValue.name}`
-            : resources.messages['linkSelection']
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? resources.messages['linkSelection']
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? '...'
+            : `${fieldDesignerState.fieldLinkValue.name}`
         }
         tooltipOptions={{ position: 'top' }}
       />
