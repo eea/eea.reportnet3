@@ -80,7 +80,9 @@ const all = async userData => {
     const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes['DATAFLOW']));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: config.permissions.roles[role] });
+      const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
+
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole });
     });
 
     for (let index = 0; index < dataflowsDTO.data.length; index++) {

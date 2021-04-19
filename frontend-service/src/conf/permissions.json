@@ -8,7 +8,7 @@
     "NATIONAL_COORDINATOR": "PROVIDER"
   },
   "roles": {
-    "DATA_CUSTODIAN": {
+    "CUSTODIAN": {
       "key": "DATA_CUSTODIAN",
       "label": "CUSTODIAN"
     },
@@ -16,7 +16,7 @@
       "key": "DATA_STEWARD",
       "label": "STEWARD"
     },
-    "DATA_OBSERVER": {
+    "OBSERVER": {
       "key": "DATA_OBSERVER",
       "label": "OBSERVER"
     },
