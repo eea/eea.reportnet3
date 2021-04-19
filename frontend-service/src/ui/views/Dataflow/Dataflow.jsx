@@ -123,26 +123,29 @@ const Dataflow = withRouter(({ history, match }) => {
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
 
   const isLeadDesigner = dataflowState.userRoles.some(
-    userRole => userRole === config.permissions['DATA_STEWARD'] || userRole === config.permissions['DATA_CUSTODIAN']
+    userRole =>
+      userRole === config.permissions.roles.DATA_STEWARD.key || userRole === config.permissions.roles.DATA_CUSTODIAN.key
   );
 
-  const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
+  const isDesign = dataflowState.status === DataflowConf.dataflowStatus.DESIGN;
 
   const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
 
-  const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
-    config.permissions.LEAD_REPORTER
-  ]);
+  const isLeadReporter = userContext.hasContextAccessPermission(
+    config.permissions.prefixes.DATAFLOW,
+    dataflowState.id,
+    [config.permissions.roles.LEAD_REPORTER.key]
+  );
 
-  const isReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
-    config.permissions.REPORTER_READ,
-    config.permissions.REPORTER_WRITE
+  const isReporter = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowState.id, [
+    config.permissions.roles.REPORTER_READ.key,
+    config.permissions.roles.REPORTER_WRITE.key
   ]);
 
   const isNationalCoordinator = userContext.hasContextAccessPermission(
-    config.permissions.NATIONAL_COORDINATOR_PREFIX,
+    config.permissions.prefixes.NATIONAL_COORDINATOR,
     null,
-    [config.permissions.NATIONAL_COORDINATOR]
+    [config.permissions.roles.NATIONAL_COORDINATOR.key]
   );
 
   const country =
@@ -523,7 +526,7 @@ const Dataflow = withRouter(({ history, match }) => {
     );
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
-      config.permissions.NATIONAL_COORDINATOR_PREFIX,
+      config.permissions.prefixes.NATIONAL_COORDINATOR,
       null,
       [config.permissions.NATIONAL_COORDINATOR]
     );

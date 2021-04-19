@@ -1,6 +1,5 @@
 import avatarImages from './avatarImages.json';
 import countryByGroup from './countriesByGroup';
-import dataflowPermissions from './dataflowPermissions';
 import exportTypeCode from './exportType.code.json';
 import footer from './footer.config.json';
 import languageCode from './language.code.json';
@@ -27,7 +26,6 @@ config.MAX_ATTACHMENT_SIZE = 20 * 1000 * 1024;
 
 config.avatars = images;
 config.countriesByGroup = countryByGroup;
-config.dataflowPermissions = dataflowPermissions;
 config.exportTypes = exportTypes;
 config.footer = footer;
 config.icons = icons;
