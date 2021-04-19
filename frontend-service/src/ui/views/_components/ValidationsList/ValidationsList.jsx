@@ -2,10 +2,10 @@ import React, { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import upperFirst from 'lodash/upperFirst';
 
 import styles from './ValidationsList.module.scss';
 
@@ -200,40 +200,38 @@ const ValidationsList = withRouter(
     const getAdditionalValidationInfo = (referenceId, entityType, relations) => {
       const additionalInfo = {};
       datasetSchemaAllTables.forEach(table => {
-        if (!isUndefined(table.records)) {
-          if (TextUtils.areEquals(entityType, 'TABLE')) {
-            if (table.tableSchemaId === referenceId) {
-              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-            }
-          } else if (TextUtils.areEquals(entityType, 'RECORD')) {
-            if (table.recordSchemaId === referenceId) {
-              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
-            }
-          } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
-            table.records.forEach(record =>
-              record.fields.forEach(field => {
-                if (!isNil(field)) {
-                  if (TextUtils.areEquals(entityType, 'FIELD')) {
-                    if (field.fieldId === referenceId) {
+        if (TextUtils.areEquals(entityType, 'TABLE')) {
+          if (table.tableSchemaId === referenceId) {
+            additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+          }
+        } else if (TextUtils.areEquals(entityType, 'RECORD')) {
+          if (table.recordSchemaId === referenceId) {
+            additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+          }
+        } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
+          table?.records?.forEach(record =>
+            record.fields.forEach(field => {
+              if (!isNil(field)) {
+                if (TextUtils.areEquals(entityType, 'FIELD')) {
+                  if (field.fieldId === referenceId) {
+                    additionalInfo.tableName = !isUndefined(table.tableSchemaName)
+                      ? table.tableSchemaName
+                      : table.header;
+                    additionalInfo.fieldName = field.name;
+                  }
+                } else {
+                  if (!isEmpty(relations)) {
+                    if (field.fieldId === relations.links[0].originField.code) {
                       additionalInfo.tableName = !isUndefined(table.tableSchemaName)
                         ? table.tableSchemaName
                         : table.header;
                       additionalInfo.fieldName = field.name;
                     }
-                  } else {
-                    if (!isEmpty(relations)) {
-                      if (field.fieldId === relations.links[0].originField.code) {
-                        additionalInfo.tableName = !isUndefined(table.tableSchemaName)
-                          ? table.tableSchemaName
-                          : table.header;
-                        additionalInfo.fieldName = field.name;
-                      }
-                    }
                   }
                 }
-              })
-            );
-          }
+              }
+            })
+          );
         }
       });
       return additionalInfo;
@@ -255,11 +253,11 @@ const ValidationsList = withRouter(
           header = resources.messages['entityType'];
           break;
         default:
-          header = fieldHeader;
+          header = upperFirst(fieldHeader);
           break;
       }
 
-      return capitalize(header);
+      return header;
     };
 
     const getOrderedValidations = validations => {
@@ -487,7 +485,7 @@ const ValidationsList = withRouter(
               getFilteredSearched={getFilteredState}
               options={filterOptions}
               searchAll
-              searchBy={['name', 'description', 'message']}
+              searchBy={['shortCode', 'name', 'description', 'message']}
             />
           </div>
 
