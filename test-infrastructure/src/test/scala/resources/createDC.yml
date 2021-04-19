@@ -1,5 +1,3 @@
-gatling_config:
-  scenarios:
     - requestName: createDataCollection
       endpoint: /datacollection/create?stopAndNotifySQLErrors=false&showPublicInfo=false
       usersNumber: 4
@@ -11,6 +9,3 @@ gatling_config:
       requestBody: '{"dueDate":"${dueDate}","idDataflow":"${dataflowId}"}'
       headers:
          Authorization: Bearer ${token}
-        
-        
-        
