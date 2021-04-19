@@ -70,7 +70,7 @@ const DocumentFileUpload = ({
   const checkInputForErrors = inputName => {
     let hasErrors = false;
     let message = '';
-    const inputValue = inputs[inputName];
+    const inputValue = inputName === 'lang' ? inputs[inputName].value : inputs[inputName];
 
     const inputUpload = document.querySelector('#uploadFile');
 
@@ -122,7 +122,7 @@ const DocumentFileUpload = ({
           await DocumentService.editDocument(
             dataflowId,
             inputs.description,
-            inputs.lang,
+            inputs.lang.value,
             inputs.uploadFile,
             inputs.isPublic,
             inputs.id
@@ -132,7 +132,7 @@ const DocumentFileUpload = ({
           await DocumentService.uploadDocument(
             dataflowId,
             inputs.description,
-            inputs.lang,
+            inputs.lang.value,
             inputs.uploadFile,
             inputs.isPublic
           );
@@ -210,9 +210,8 @@ const DocumentFileUpload = ({
             id="selectLanguage"
             name="lang"
             onChange={e => {
-              setLangValue(e.target.value);
               setInputs(previousValues => {
-                return { ...previousValues, lang: e.target.value.value };
+                return { ...previousValues, lang: e.target.value };
               });
               setErrors(previousErrors => {
                 return { ...previousErrors, ['lang']: { message: '', hasErrors: false } };
@@ -225,7 +224,7 @@ const DocumentFileUpload = ({
             options={getOptionTypes()}
             optionValue="value"
             placeholder={resources.messages['selectLang']}
-            value={langValue}
+            value={inputs.lang}
           />
           <label htmlFor="selectLanguage" className="srOnly">
             {resources.messages['selectLang']}
