@@ -27,6 +27,6 @@
     <validation.version>v3.0.2.0-RC3</validation.version>
     <common-interfaces.version>v3.0.2.0-RC3</common-interfaces.version>
     <common-utitlities.version>v3.0.2.0-RC3</common-utitlities.version>
-    <rod.version>v3.0.2.0-RC3/rod.version>
+    <rod.version>v3.0.2.0-RC3</rod.version>
   </properties>
 </project>
