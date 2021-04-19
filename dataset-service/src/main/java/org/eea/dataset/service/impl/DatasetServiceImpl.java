@@ -947,7 +947,6 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  @Transactional
   public byte[] exportFile(Long datasetId, String mimeType, final String tableSchemaId)
       throws EEAException, IOException {
     // Get the dataFlowId from the metabase
@@ -955,11 +954,27 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Find if the dataset type is EU to include the countryCode
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    final IFileExportContext context = fileExportFactory.createContext(mimeType);
+    LOG.info("mimetype es {}", mimeType);
+    String[] type = mimeType.split(" ");
+    String extension = "";
+    if (type.length > 1) {
+      extension = type[1];
+    } else {
+      extension = type[0];
+    }
+    final IFileExportContext context = fileExportFactory.createContext(extension);
+    LOG.info("extension es {}", extension);
+    byte[] content = context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
+    Boolean includeZip = false;
+    if (type.length > 1) {
+      includeZip = true;
+    }
+    exportZip(datasetId, mimeType, content, includeZip);
     LOG.info("End of exportFile");
-    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
+    return content;
   }
 
   /**
@@ -3697,7 +3712,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     } catch (IOException e) {
-      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+      LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
   }
 
@@ -3772,4 +3787,100 @@ public class DatasetServiceImpl implements DatasetService {
 
     return query.toString();
   }
+
+
+  private void exportZip(Long datasetId, String mimeType, byte[] file, boolean includeZip)
+      throws IOException {
+
+    try {
+
+      String nameFileUnique = "Fichero_" + datasetId;
+      String nameFileScape = nameFileUnique + "." + mimeType;
+
+      // we create folder to save the file.zip
+      File fileFolderProvider = new File(pathPublicFile, "dataset-" + datasetId);
+      fileFolderProvider.mkdirs();
+
+      // make the zip
+      if (includeZip) {
+        // we create the file.zip
+        File fileWriteZip =
+            new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileUnique + ".zip");
+
+        // create the context to add all files in a treemap inside to attachment and file
+        // information
+        try (ZipOutputStream out =
+            new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+          // we get the dataschema and check every table to see if find any field attachemnt
+          DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+          DataSetSchema dataSetSchema =
+              schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+          for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+
+            // we find if in any table have one field type ATTACHMENT
+            List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+                .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+                .collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+
+              LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+                  tableSchema.getIdTableSchema());
+              // We took every field for every table
+              for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+                List<AttachmentValue> attachmentValue =
+                    attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(
+                        fieldAttach.getIdFieldSchema().toString());
+
+                // if there are filled we create a folder and inside of any folder we create the
+                // fields
+                if (!CollectionUtils.isEmpty(attachmentValue)) {
+                  LOG.info(
+                      "We  are in tableSchema with id {}, checking field {} and we have attachments files",
+                      tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+                  try {
+                    for (AttachmentValue attachment : attachmentValue) {
+
+                      ZipEntry eFieldAttach = new ZipEntry(
+                          tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                      out.putNextEntry(eFieldAttach);
+                      out.write(attachment.getContent(), 0, attachment.getContent().length);
+                    }
+                    out.closeEntry();
+                  } catch (ZipException e) {
+                    // LOG.info("Error creating file {} because already exist",
+                    // attachment.getFileName(), e);
+                  }
+                }
+              }
+            }
+          }
+
+          ZipEntry e = new ZipEntry(nameFileScape);
+          out.putNextEntry(e);
+          out.write(file, 0, file.length);
+          out.closeEntry();
+
+          LOG.info("We create file {} in the route ", fileWriteZip.toString());
+        }
+      }
+      // only the xlsx or the csv file
+      else {
+        LOG.info("exporto sin zip");
+        File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId),
+            "fichero_" + datasetId + ".xlsx");
+        try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
+          out.write(file, 0, file.length);
+        }
+      }
+
+      // Map<String, Object> value = new HashMap<>();
+      // value.put("dataset_id", datasetId);
+      // kafkaSenderUtils.releaseKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, value);
+
+    } catch (Exception e) {
+      LOG_ERROR.error(e.getMessage(), e);
+    }
+
+  }
+
 }

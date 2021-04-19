@@ -376,7 +376,15 @@ public enum EventType {
       "sort_field_design_failed_event", true),
 
   /** The sort field failed event. */
-  SORT_FIELD_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "sort_field_failed_event", true);
+  SORT_FIELD_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "sort_field_failed_event", true),
+
+  DOWNLOAD_EXPORT_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "download_export_event", true),
+
+  EXPORT_DATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_dataset_completed_event", true),
+
+  EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
+      true);
 
   /** The topic. */
   private String topic;
