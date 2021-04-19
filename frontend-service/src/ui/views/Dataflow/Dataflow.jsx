@@ -832,6 +832,19 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const editorsReportersRightsTypeOptions = [
+    { label: resources.messages['readPermission'], writePermission: false },
+    { label: resources.messages['readAndWritePermission'], writePermission: true }
+  ];
+
+  const requestersRightsTypeOptions = [
+    { label: 'CUSTODIAN', rightsType: 'CUSTODIAN' },
+    { label: 'STEWARD', rightsType: 'STEWARD' },
+    { label: 'OBSERVER', rightsType: 'OBSERVER' },
+    { label: 'EDITOR WRITE', rightsType: 'EDITOR_WRITE' },
+    { label: 'EDITOR READ', rightsType: 'EDITOR_READ' }
+  ];
+
   const getBigButtonList = () => {
     if (isNil(representativeId)) {
       return (
@@ -919,6 +932,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
+                rightsOptions={requestersRightsTypeOptions}
                 dataflowId={dataflowId}
                 representativesImport={dataflowState.representativesImport}
                 setDataProviderSelected={setDataProviderSelected}
@@ -932,13 +946,36 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        {dataflowState.isManageEditorsDialogVisible && (
+        {/* {dataflowState.isManageEditorsDialogVisible && (
           <Dialog
             footer={manageEditorsDialogFooter}
             header={resources.messages['manageEditorsRights']}
             onHide={() => manageDialogs('isManageEditorsDialogVisible', false)}
             visible={dataflowState.isManageEditorsDialogVisible}>
             <ShareRights
+              userType={'editor'}
+              rightsOptions={editorsReportersRightsTypeOptions}
+              columnHeader={resources.messages['editorsAccountColumn']}
+              dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
+              deleteConfirmHeader={resources.messages[`editorsRightsDialogConfirmDeleteHeader`]}
+              deleteConfirmMessage={resources.messages[`editorsRightsDialogConfirmDeleteQuestion`]}
+              notificationKey={'DELETE_EDITOR_ERROR'}
+              placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
+              representativeId={representativeId}
+            />
+          </Dialog>
+        )} */}
+
+        {dataflowState.isManageEditorsDialogVisible && ( // todo
+          <Dialog
+            footer={manageEditorsDialogFooter}
+            header={resources.messages['manageEditorsRights']}
+            onHide={() => manageDialogs('isManageEditorsDialogVisible', false)}
+            visible={dataflowState.isManageEditorsDialogVisible}>
+            <ShareRights
+              userType={'editor'}
+              rightsOptions={editorsReportersRightsTypeOptions}
               columnHeader={resources.messages['editorsAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
@@ -958,6 +995,8 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
+              userType={'reporter'}
+              rightsOptions={editorsReportersRightsTypeOptions}
               columnHeader={resources.messages['reportersAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}

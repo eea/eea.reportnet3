@@ -1,4 +1,4 @@
-export class Contributor {
+export class UserRights {
   constructor({ account, dataProviderId, id = 0, isNew = false, role, writePermission } = {}) {
     this.account = account;
     this.dataProviderId = dataProviderId;

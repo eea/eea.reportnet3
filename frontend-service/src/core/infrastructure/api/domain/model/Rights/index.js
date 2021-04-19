@@ -1,0 +1,1 @@
+export { apiRights } from './ApiRights';
