@@ -910,12 +910,9 @@ public class DataflowServiceImpl implements DataflowService {
         dataflow.setObligation(
             obligationControllerZull.findObligationById(dataflow.getObligation().getObligationId()));
 
-      } catch (RuntimeException e) {
+      } catch (FeignException e) {
         LOG_ERROR.error("Error while getting obligation by id {}", e.getMessage(), e);
         ObligationVO obligationVO = new ObligationVO();
-        LegalInstrumentVO legalInstrumentVO = new LegalInstrumentVO();
-        legalInstrumentVO.setSourceAlias("");
-        obligationVO.setLegalInstrument(legalInstrumentVO);
         dataflow.setObligation(obligationVO);
       }
     }
@@ -1033,13 +1030,10 @@ public class DataflowServiceImpl implements DataflowService {
           dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
         }
       }
-    } catch (RuntimeException e) {
+    } catch (FeignException e) {
       LOG_ERROR.error("Error while getting all opened obligations {}", e.getMessage(), e);
       for (DataFlowVO dataFlowVO : dataflowVOs) {
         ObligationVO obligationVO = new ObligationVO();
-        LegalInstrumentVO legalInstrumentVO = new LegalInstrumentVO();
-        legalInstrumentVO.setSourceAlias("");
-        obligationVO.setLegalInstrument(legalInstrumentVO);
         dataFlowVO.setObligation(obligationVO);
       }
     }
