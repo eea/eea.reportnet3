@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
 
 import styles from './DocumentFileUpload.module.scss';
@@ -30,6 +31,7 @@ const DocumentFileUpload = ({
 
   const inputRef = useRef(null);
 
+  const [areAllInputsChecked, setAreAllInputsChecked] = useState(false);
   const [errors, setErrors] = useState({
     description: { message: '', hasErrors: false },
     lang: { message: '', hasErrors: false },
@@ -38,8 +40,11 @@ const DocumentFileUpload = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [inputs, setInputs] = useState(documentInitialValues);
-  const [langValue, setLangValue] = useState({});
-
+  const [inputsChecked, setInputsChecked] = useState({
+    description: false,
+    lang: false,
+    uploadFile: false
+  });
   useEffect(() => {
     if (isUploadDialogVisible) inputRef.current.focus();
   }, [isUploadDialogVisible]);
@@ -49,6 +54,16 @@ const DocumentFileUpload = ({
       checkInputForErrors('uploadFile');
     }
   }, [inputs]);
+
+  useEffect(() => {
+    if (!Object.values(inputsChecked).includes(false) || isEditForm) {
+      setAreAllInputsChecked(true);
+    }
+  }, [inputsChecked, isEditForm]);
+
+  useEffect(() => {
+    isEditForm && setAreAllInputsChecked(true);
+  }, [isEditForm]);
 
   const checkIsEmptyInput = inputValue => {
     return inputValue.trim() === '';
@@ -100,6 +115,10 @@ const DocumentFileUpload = ({
       return { ...previousErrors, [inputName]: { message, hasErrors } };
     });
 
+    setInputsChecked(previousInputsChecked => {
+      return { ...previousInputsChecked, [inputName]: true };
+    });
+
     return hasErrors;
   };
 
@@ -108,7 +127,12 @@ const DocumentFileUpload = ({
     checkInputForErrors('lang');
     checkInputForErrors('uploadFile');
 
-    if (!errors.description.hasErrors && !errors.lang.hasErrors && !errors.uploadFile.hasErrors) {
+    if (
+      areAllInputsChecked &&
+      !errors.description.hasErrors &&
+      !errors.lang.hasErrors &&
+      !errors.uploadFile.hasErrors
+    ) {
       setIsUploading(true);
       setSubmitting(true);
       setFileUpdatingId(inputs.id);
