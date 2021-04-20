@@ -510,7 +510,6 @@ export const ManageIntegrations = ({
             onKeyDown={event => onSaveKeyDown(event)}
             placeholder={resources.messages[option]}
             ref={inputRefs[option]}
-            type="search"
             value={manageIntegrationsState[option]}
           />
         </div>

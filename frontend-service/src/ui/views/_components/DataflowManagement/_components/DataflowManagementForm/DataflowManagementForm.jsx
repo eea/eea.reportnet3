@@ -119,6 +119,11 @@ const DataflowManagementForm = forwardRef(
               id="dataflowName"
               ref={inputRef}
               onBlur={() => checkIsCorrectInputValue(name, 'name')}
+              onFocus={() => {
+                setErrors(previousErrors => {
+                  return { ...previousErrors, ['name']: { message: '', hasErrors: false } };
+                });
+              }}
               onKeyPress={e => {
                 if (e.key === 'Enter' && !checkIsCorrectInputValue(name, 'name')) onConfirm();
               }}
@@ -140,16 +145,21 @@ const DataflowManagementForm = forwardRef(
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <textarea
               autoComplete="off"
+              component="textarea"
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
-              component="textarea"
-              rows={10}
               onChange={event => {
                 getData({ ...data, description: event.target.value });
                 setDescription(event.target.value);
               }}
+              onFocus={() => {
+                setErrors(previousErrors => {
+                  return { ...previousErrors, ['description']: { message: '', hasErrors: false } };
+                });
+              }}
               placeholder={resources.messages['createDataflowDescription']}
+              rows={10}
               value={description}
             />
             <label htmlFor="dataflowDescription" className="srOnly">

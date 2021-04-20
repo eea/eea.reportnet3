@@ -410,9 +410,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
   };
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
-    if (cClickedFields.includes(field)) {
-      cClickedFields.splice(cClickedFields.indexOf(field), 1);
+    if (field === 'table' || field === 'field' || field === 'errorLevel') {
       setClickedFields(cClickedFields);
+    } else {
+      if (cClickedFields.includes(field)) {
+        cClickedFields.splice(cClickedFields.indexOf(field), 1);
+        setClickedFields(cClickedFields);
+      }
     }
   };
 
