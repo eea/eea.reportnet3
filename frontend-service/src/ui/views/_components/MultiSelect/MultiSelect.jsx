@@ -270,10 +270,12 @@ export class MultiSelect extends Component {
     this.clearClickState();
 
     setTimeout(() => {
-      this.panel.element.style.display = 'none';
-      DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
-      this.clearFilter();
-      this.setState({ isPanelVisible: false });
+      if (this.panel) {
+        this.panel.element.style.display = 'none';
+        DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+        this.clearFilter();
+        this.setState({ isPanelVisible: false });
+      }
     }, 150);
   }
 
