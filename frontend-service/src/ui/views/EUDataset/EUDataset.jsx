@@ -1,13 +1,15 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { Menu } from 'primereact/menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -46,6 +48,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaId: null,
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
+    exportExtensionsList: [],
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
@@ -71,6 +74,8 @@ export const EUDataset = withRouter(({ history, match }) => {
     tableSchemaColumns
   } = euDatasetState;
 
+  let exportMenuRef = useRef();
+
   useEffect(() => {
     leftSideBarContext.removeModels();
     callSetMetaData();
@@ -80,6 +85,10 @@ export const EUDataset = withRouter(({ history, match }) => {
   useEffect(() => {
     onLoadDatasetSchema();
   }, [euDatasetState.isDataUpdated]);
+
+  useEffect(() => {
+    getExportExtensionsList();
+  }, []);
 
   useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, metaData });
 
@@ -114,12 +123,34 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   };
 
+  const getExportExtensionsList = () => {
+    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
+      icon: config.icons['archive'],
+      label: type.text
+    }));
+
+    euDatasetDispatch({
+      type: 'GET_EXPORT_EXTENSIONS_LIST',
+      payload: { internalExtensionList }
+    });
+  };
+
   const getMetadata = async ids => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
+  };
+
+  const getPosition = e => {
+    const button = e.currentTarget;
+    const left = `${button.offsetLeft}px`;
+    const topValue = button.offsetHeight + button.offsetTop + 3;
+    const top = `${topValue}px `;
+    const menu = button.nextElementSibling;
+    menu.style.top = top;
+    menu.style.left = left;
   };
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
@@ -246,6 +277,14 @@ export const EUDataset = withRouter(({ history, match }) => {
             icon={'export'}
             id="buttonExportDataset"
             label={resourcesContext.messages['exportDataset']}
+            onClick={event => exportMenuRef.current.show(event)}
+          />
+          <Menu
+            id="exportDataSetMenu"
+            model={euDatasetState.exportExtensionsList}
+            onShow={e => getPosition(e)}
+            popup={true}
+            ref={exportMenuRef}
           />
         </div>
       </Toolbar>

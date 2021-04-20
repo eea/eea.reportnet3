@@ -12,6 +12,9 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'GET_DATAFLOW_NAME':
       return { ...state, dataflowName: payload.name };
 
+    case 'GET_EXPORT_EXTENSIONS_LIST':
+      return { ...state, exportExtensionsList: payload.internalExtensionList };
+
     case 'GET_METADATA':
       return { ...state, metaData: payload.metadata };
 

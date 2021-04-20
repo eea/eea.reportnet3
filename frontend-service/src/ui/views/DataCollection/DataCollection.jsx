@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
@@ -11,6 +12,7 @@ import { routes } from 'ui/routes';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { Menu } from 'primereact/menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -40,11 +42,13 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataCollectionName, setDataCollectionName] = useState();
   const [dataflowName, setDataflowName] = useState('');
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
+  const [exportButtonsList, setExportButtonsList] = useState([]);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
 
+  let exportMenuRef = useRef();
   let growlRef = useRef();
 
   useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history });
@@ -61,6 +65,10 @@ export const DataCollection = withRouter(({ match, history }) => {
     } catch (error) {
       console.error(error.response);
     }
+  }, []);
+
+  useEffect(() => {
+    setExportButtonsList(internalExtensions);
   }, []);
 
   const getDataflowName = async () => {
@@ -81,6 +89,20 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   };
 
+  const getPosition = e => {
+    const button = e.currentTarget;
+    const left = `${button.offsetLeft}px`;
+    const topValue = button.offsetHeight + button.offsetTop + 3;
+    const top = `${topValue}px `;
+    const menu = button.nextElementSibling;
+    menu.style.top = top;
+    menu.style.left = left;
+  };
+
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
+    label: type.text,
+    icon: config.icons['archive']
+  }));
   const onLoadDataflowData = async () => {
     try {
       const { data } = await DataflowService.reporting(match.params.dataflowId);
@@ -211,6 +233,14 @@ export const DataCollection = withRouter(({ match, history }) => {
             icon={'export'}
             id="buttonExportDataset"
             label={resourcesContext.messages['exportDataset']}
+            onClick={event => exportMenuRef.current.show(event)}
+          />
+          <Menu
+            id="exportDataSetMenu"
+            model={exportButtonsList}
+            onShow={e => getPosition(e)}
+            popup={true}
+            ref={exportMenuRef}
           />
         </div>
       </Toolbar>
