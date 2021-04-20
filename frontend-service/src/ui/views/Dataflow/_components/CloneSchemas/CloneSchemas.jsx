@@ -88,7 +88,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const cloneableDataflowList = dataflows => {
     let cloneableDataflows = dataflows.filter(
-      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions.roles.CUSTODIAN.key
+      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions.roles.CUSTODIAN.label
     );
 
     let dataflowsToFilter = [];
@@ -98,8 +98,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
       dataflowToFilter.id = dataflow.id;
       dataflowToFilter.name = dataflow.name;
       dataflowToFilter.description = dataflow.description;
-      dataflowToFilter.obligationTitle = dataflow.obligation ? dataflow.obligation.title : null;
-      dataflowToFilter.legalInstruments = dataflow.obligation ? dataflow.obligation.legalInstruments.alias : null;
+      dataflowToFilter.obligationTitle = dataflow.obligation?.title;
+      dataflowToFilter.legalInstruments = dataflow.obligation?.legalInstruments?.alias;
       dataflowToFilter.status = dataflow.status;
       dataflowToFilter.expirationDate = dataflow.expirationDate;
       dataflowsToFilter.push(dataflowToFilter);
