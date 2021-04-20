@@ -3,6 +3,8 @@ import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
+import styles from './EUDataset.module.scss';
+
 import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
@@ -270,24 +272,27 @@ export const EUDataset = withRouter(({ history, match }) => {
   return renderLayout(
     <Fragment>
       <Title icon="euDataset" iconSize="3.5rem" subtitle={dataflowName} title={datasetName} />
-      <Toolbar>
-        <div className="p-toolbar-group-left">
-          <Button
-            className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
-            icon={'export'}
-            id="buttonExportDataset"
-            label={resourcesContext.messages['exportDataset']}
-            onClick={event => exportMenuRef.current.show(event)}
-          />
-          <Menu
-            id="exportDataSetMenu"
-            model={euDatasetState.exportExtensionsList}
-            onShow={e => getPosition(e)}
-            popup={true}
-            ref={exportMenuRef}
-          />
-        </div>
-      </Toolbar>
+      <div className={styles.ButtonsBar}>
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+              icon={'export'}
+              id="buttonExportDataset"
+              label={resourcesContext.messages['exportDataset']}
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              className={styles.exportSubmenu}
+              id="exportDataSetMenu"
+              model={euDatasetState.exportExtensionsList}
+              onShow={e => getPosition(e)}
+              popup={true}
+              ref={exportMenuRef}
+            />
+          </div>
+        </Toolbar>
+      </div>
       {renderTabsSchema()}
     </Fragment>
   );

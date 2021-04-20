@@ -4,6 +4,8 @@ import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 
+import styles from './DataCollection.module.scss';
+
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -103,6 +105,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     label: type.text,
     icon: config.icons['archive']
   }));
+
   const onLoadDataflowData = async () => {
     try {
       const { data } = await DataflowService.reporting(match.params.dataflowId);
@@ -226,24 +229,27 @@ export const DataCollection = withRouter(({ match, history }) => {
   return layout(
     <Fragment>
       <Title title={dataCollectionName} subtitle={dataflowName} icon="dataCollection" iconSize="3.5rem" />
-      <Toolbar>
-        <div className="p-toolbar-group-left">
-          <Button
-            className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
-            icon={'export'}
-            id="buttonExportDataset"
-            label={resourcesContext.messages['exportDataset']}
-            onClick={event => exportMenuRef.current.show(event)}
-          />
-          <Menu
-            id="exportDataSetMenu"
-            model={exportButtonsList}
-            onShow={e => getPosition(e)}
-            popup={true}
-            ref={exportMenuRef}
-          />
-        </div>
-      </Toolbar>
+      <div className={styles.ButtonsBar}>
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+              icon={'export'}
+              id="buttonExportDataset"
+              label={resourcesContext.messages['exportDataset']}
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              className={styles.exportSubmenu}
+              id="exportDataSetMenu"
+              model={exportButtonsList}
+              onShow={e => getPosition(e)}
+              popup={true}
+              ref={exportMenuRef}
+            />
+          </div>
+        </Toolbar>
+      </div>
       {onRenderTabsSchema}
     </Fragment>
   );
