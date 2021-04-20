@@ -103,8 +103,19 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
-    icon: config.icons['archive']
+    icon: config.icons['archive'],
+    command: () => onExportDataInternalExtension(type.code)
   }));
+
+  const onExportDataInternalExtension = async fileType => {
+    notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
+
+    try {
+      await DatasetService.exportDataById(datasetId, fileType);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   const onLoadDataflowData = async () => {
     try {

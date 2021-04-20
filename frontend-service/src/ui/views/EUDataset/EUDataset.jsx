@@ -127,6 +127,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getExportExtensionsList = () => {
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
+      command: () => onExportDataInternalExtension(type.code),
       icon: config.icons['archive'],
       label: type.text
     }));
@@ -165,6 +166,16 @@ export const EUDataset = withRouter(({ history, match }) => {
   };
 
   const isLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const onExportDataInternalExtension = async fileType => {
+    notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
+
+    try {
+      await DatasetService.exportDataById(datasetId, fileType);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   const onHighlightRefresh = value => euDatasetDispatch({ type: 'ON_HIGHLIGHT_REFRESH', payload: { value } });
 
