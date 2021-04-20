@@ -50,7 +50,7 @@ const Documents = ({
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [documentInitialValues, setDocumentInitialValues] = useState({
     description: '',
-    lang: '',
+    lang: { label: '', value: '' },
     uploadFile: {},
     isPublic: false
   });
@@ -86,11 +86,9 @@ const Documents = ({
           setRowDataState(rowData);
         }}
         onEditClick={() => {
-          const langField = config.languages
-            .filter(language => language.name === rowData.language[0])
-            .map(country => country.code)[0];
+          const langField = config.languages.filter(language => language.name === rowData.language[0]);
 
-          rowData = { ...rowData, lang: langField };
+          rowData = { ...rowData, lang: { label: langField[0].name, value: langField[0].code } };
 
           setDocumentInitialValues(rowData);
           onEditDocument();
@@ -227,7 +225,7 @@ const Documents = ({
               onClick={() => {
                 setDocumentInitialValues({
                   description: '',
-                  lang: '',
+                  lang: { label: '', value: '' },
                   uploadFile: {},
                   isPublic: false
                 });

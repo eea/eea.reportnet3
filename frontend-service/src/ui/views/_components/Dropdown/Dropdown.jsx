@@ -45,6 +45,7 @@ export class Dropdown extends Component {
     onContextMenu: null,
     onEmptyList: null,
     onFilterInputChangeBackend: null,
+    onKeyPress: null,
     onMouseDown: null,
     optionLabel: null,
     options: null,
@@ -88,6 +89,7 @@ export class Dropdown extends Component {
     onContextMenu: PropTypes.func,
     onEmptyList: PropTypes.func,
     onFilterInputChangeBackend: PropTypes.func,
+    onKeyPress: PropTypes.func,
     onMouseDown: PropTypes.func,
     optionLabel: PropTypes.string,
     options: PropTypes.array,
@@ -121,9 +123,16 @@ export class Dropdown extends Component {
     this.onOptionClick = this.onOptionClick.bind(this);
     this.onFilterInputChange = this.onFilterInputChange.bind(this);
     this.onFilterInputKeyDown = this.onFilterInputKeyDown.bind(this);
+    this.onKeyPress = this.onKeyPress.bind(this);
     this.panelClick = this.panelClick.bind(this);
     this.clear = this.clear.bind(this);
     this.clearFilter = this.clearFilter.bind(this);
+  }
+
+  onKeyPress(event) {
+    if (this.props.onKeyPress && event.which === 13) {
+      this.props.onKeyPress(event);
+    }
   }
 
   onClick(event) {
@@ -230,6 +239,7 @@ export class Dropdown extends Component {
       //enter
       case 13:
         this.hide();
+        this.onKeyPress(event);
         event.preventDefault();
         break;
 
@@ -830,6 +840,7 @@ export class Dropdown extends Component {
         style={this.props.style}
         onClick={this.onClick}
         onMouseDown={this.props.onMouseDown}
+        onKeyPress={this.props.onKeyPress}
         onContextMenu={this.props.onContextMenu}>
         {keyboardHelper}
         {hiddenSelect}
