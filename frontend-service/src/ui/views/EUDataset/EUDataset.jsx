@@ -6,16 +6,19 @@ import isUndefined from 'lodash/isUndefined';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
+import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { euDatasetReducer } from './_functions/Reducers/euDatasetReducer';
 
@@ -32,6 +35,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     dataflowName: '',
@@ -235,6 +239,16 @@ export const EUDataset = withRouter(({ history, match }) => {
   return renderLayout(
     <Fragment>
       <Title icon="euDataset" iconSize="3.5rem" subtitle={dataflowName} title={datasetName} />
+      <Toolbar>
+        <div className="p-toolbar-group-left">
+          <Button
+            className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+            icon={'export'}
+            id="buttonExportDataset"
+            label={resourcesContext.messages['exportDataset']}
+          />
+        </div>
+      </Toolbar>
       {renderTabsSchema()}
     </Fragment>
   );

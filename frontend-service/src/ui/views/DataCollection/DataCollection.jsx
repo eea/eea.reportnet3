@@ -8,17 +8,20 @@ import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
+import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 
@@ -32,6 +35,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [dataCollectionName, setDataCollectionName] = useState();
   const [dataflowName, setDataflowName] = useState('');
@@ -200,6 +204,16 @@ export const DataCollection = withRouter(({ match, history }) => {
   return layout(
     <Fragment>
       <Title title={dataCollectionName} subtitle={dataflowName} icon="dataCollection" iconSize="3.5rem" />
+      <Toolbar>
+        <div className="p-toolbar-group-left">
+          <Button
+            className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+            icon={'export'}
+            id="buttonExportDataset"
+            label={resourcesContext.messages['exportDataset']}
+          />
+        </div>
+      </Toolbar>
       {onRenderTabsSchema}
     </Fragment>
   );
