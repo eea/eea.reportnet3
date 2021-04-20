@@ -293,7 +293,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
-        fmeJobId = executeSubmit(defaultRepository, euDatasetJob, fmeAsyncJob);
+        fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       default:
         fmeJobId = null;

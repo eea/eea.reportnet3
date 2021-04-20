@@ -100,6 +100,11 @@ const ReportnetLogin = ({ history }) => {
                   setLoginError('');
                 }}
                 onBlur={() => checkIsEmptyUserName()}
+                onFocus={() =>
+                  setErrors(previousErrors => {
+                    return { ...previousErrors, userName: '' };
+                  })
+                }
               />
               {errors['userName'] !== '' && <ErrorMessage message={errors['userName']} />}
             </fieldset>
@@ -119,6 +124,11 @@ const ReportnetLogin = ({ history }) => {
                   setLoginError('');
                 }}
                 onBlur={() => checkIsEmptyPassword()}
+                onFocus={() =>
+                  setErrors(previousErrors => {
+                    return { ...previousErrors, password: '' };
+                  })
+                }
               />
               {errors['password'] !== '' && <ErrorMessage message={errors['password']} />}
             </fieldset>

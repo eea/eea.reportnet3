@@ -324,7 +324,11 @@ const RepresentativesList = ({
       const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
 
       return (
-        <div className={styles.inputWrapper} key={`${leadReporter.id}-${representativeId}`}>
+        <div
+          className={`${styles.inputWrapper} ${
+            representative.leadReporters.length > 1 ? styles.inputWrapperMargin : undefined
+          }`}
+          key={`${leadReporter.id}-${representativeId}`}>
           <InputText
             autoFocus={isNewLeadReporter}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}

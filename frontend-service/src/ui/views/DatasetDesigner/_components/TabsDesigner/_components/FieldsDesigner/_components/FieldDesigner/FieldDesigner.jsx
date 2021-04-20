@@ -32,6 +32,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
+  checkInvalidCharacters,
   codelistItems,
   datasetId,
   datasetSchemaId,
@@ -100,6 +101,7 @@ export const FieldDesigner = ({
   const getFieldTypeValue = value => {
     return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
   };
+
   const initialFieldDesignerState = {
     addFieldCallSent: false,
     codelistItems: codelistItems,
@@ -165,6 +167,17 @@ export const FieldDesigner = ({
       }
     });
   }, [headerHeight]);
+
+  useEffect(() => {
+    if (!isNil(fieldLink)) {
+      dispatchFieldDesigner({
+        type: 'SET_FIELD_LINK',
+        payload: {
+          link: fieldLink
+        }
+      });
+    }
+  }, [fieldLink]);
 
   const onSetInitHeaderHeight = () => {
     const header = document.getElementById('header');
@@ -287,17 +300,26 @@ export const FieldDesigner = ({
             fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
           } else {
-            if (!checkDuplicates(name, fieldId)) {
-              if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
-                onFieldAdd({ name });
-              }
-            } else {
+            if (checkInvalidCharacters(name)) {
               fieldTypeRef.current.hide();
               onShowDialogError(
-                resources.messages['duplicatedFieldMessage'],
-                resources.messages['duplicatedFieldTitle']
+                resources.messages['invalidCharactersFieldMessage'],
+                resources.messages['invalidCharactersFieldTitle']
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+            } else {
+              if (!checkDuplicates(name, fieldId)) {
+                if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
+                  onFieldAdd({ name });
+                }
+              } else {
+                fieldTypeRef.current.hide();
+                onShowDialogError(
+                  resources.messages['duplicatedFieldMessage'],
+                  resources.messages['duplicatedFieldTitle']
+                );
+                dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+              }
             }
           }
         } else {
@@ -307,15 +329,24 @@ export const FieldDesigner = ({
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
           } else {
             if (name !== fieldDesignerState.initialFieldValue) {
-              if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate({ name });
-              } else {
+              if (checkInvalidCharacters(name)) {
                 fieldTypeRef.current.hide();
                 onShowDialogError(
-                  resources.messages['duplicatedFieldMessage'],
-                  resources.messages['duplicatedFieldTitle']
+                  resources.messages['invalidCharactersFieldMessage'],
+                  resources.messages['invalidCharactersFieldTitle']
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+              } else {
+                if (!checkDuplicates(name, fieldId)) {
+                  fieldUpdate({ name });
+                } else {
+                  fieldTypeRef.current.hide();
+                  onShowDialogError(
+                    resources.messages['duplicatedFieldMessage'],
+                    resources.messages['duplicatedFieldTitle']
+                  );
+                  dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+                }
               }
             }
           }
@@ -911,18 +942,35 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={
+          isDataflowOpen ||
+          isDesignDatasetEditorRead ||
+          (!isNil(fieldDesignerState.fieldLinkValue) &&
+            !isEmpty(fieldDesignerState.fieldLinkValue) &&
+            isNil(fieldDesignerState.fieldLinkValue.name))
+        }
+        icon={
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? null
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? 'spinnerAnimate'
+            : null
+        }
         label={
-          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
-            ? `${fieldDesignerState.fieldLinkValue.name}`
-            : resources.messages['linkSelection']
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? resources.messages['linkSelection']
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? '...'
+            : `${fieldDesignerState.fieldLinkValue.name}`
         }
         onClick={() => onLinkDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
         tooltip={
-          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
-            ? `${fieldDesignerState.fieldLinkValue.name}`
-            : resources.messages['linkSelection']
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? resources.messages['linkSelection']
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? '...'
+            : `${fieldDesignerState.fieldLinkValue.name}`
         }
         tooltipOptions={{ position: 'top' }}
       />

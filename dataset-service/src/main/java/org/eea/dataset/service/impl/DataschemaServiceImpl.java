@@ -56,6 +56,7 @@ import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
@@ -2024,7 +2025,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleVO.setRuleName(LiteralConstants.RULE_TABLE_MANDATORY);
     ruleVO.setEnabled(true);
     ruleVO.setType(EntityTypeEnum.TABLE);
-    ruleVO.setThenCondition(Arrays.asList("Mandatory table has no records", "ERROR"));
+    ruleVO.setThenCondition(
+        Arrays.asList("Mandatory table has no records", ErrorTypeEnum.BLOCKER.getValue()));
     ruleVO
         .setDescription("When a table is marked as mandatory, checks at least one record is added");
 
@@ -2322,7 +2324,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(schemaOrigin.getWebform());
-    schema.setAvailableInPublic(false);
+    schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
     // table level
     for (TableSchema table : schemaOrigin.getTableSchemas()) {
       ObjectId newTableId = new ObjectId();
