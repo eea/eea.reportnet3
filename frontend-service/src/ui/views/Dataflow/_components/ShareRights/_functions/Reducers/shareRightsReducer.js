@@ -1,8 +1,5 @@
 export const shareRightsReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'ADD_USER':
-      return { ...state, account: payload.email };
-
     case 'GET_ALL_USERS':
       return { ...state, userRightList: payload.userRightList, clonedUserRightList: payload.clonedUserRightList };
 
@@ -13,7 +10,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return {
         ...state,
         isDeleteDialogVisible: payload.isDeleteDialogVisible,
-        userAccountToDelete: payload.userAccountToDelete
+        userRightAccountToDelete: payload.userRightAccountToDelete
       };
 
     case 'ON_SET_ACCOUNT':

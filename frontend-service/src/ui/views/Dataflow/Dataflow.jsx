@@ -856,22 +856,26 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const editorsRightsTypeOptions = [
-    { label: resources.messages['readPermission'], writePermission: false },
-    { label: resources.messages['readAndWritePermission'], writePermission: true }
+  const editorRoleOptions = [
+    { label: config.permissions.roles.EDITOR_WRITE.label, role: 'EDITOR_WRITE' },
+    { label: config.permissions.roles.EDITOR_READ.label, role: 'EDITOR' } //CHANGE
+    // { label: config.permissions.roles.EDITOR_WRITE.label, role: config.permissions.roles.EDITOR_WRITE.key },
+    // { label: config.permissions.roles.EDITOR_READ.label, role: config.permissions.roles.EDITOR_READ.key }
   ];
 
-  const reportersRightsTypeOptions = [
-    { label: resources.messages['readPermission'], writePermission: false },
-    { label: resources.messages['readAndWritePermission'], writePermission: true }
+  const reporterRoleOptions = [
+    { label: config.permissions.roles.REPORTER_WRITE.label, role: 'REPORTER_WRITE' },
+    { label: config.permissions.roles.REPORTER_READ.label, role: 'REPORTER' }
+    // { label: config.permissions.roles.REPORTER_WRITE.label, role: config.permissions.roles.REPORTER_WRITE.key },
+    // { label: config.permissions.roles.REPORTER_READ.label, role: config.permissions.roles.REPORTER_READ.key }
   ];
 
-  const requestersRightsTypeOptions = [
-    { label: 'CUSTODIAN', role: 'CUSTODIAN' },
-    { label: 'STEWARD', role: 'STEWARD' },
-    { label: 'OBSERVER', rightsType: 'OBSERVER' },
-    { label: 'EDITOR WRITE', rightsType: 'EDITOR_WRITE' },
-    { label: 'EDITOR READ', rightsType: 'EDITOR_READ' }
+  const requesterRoleOptions = [
+    { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
+    { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
+    { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key },
+    { label: config.permissions.roles.EDITOR_WRITE.label, role: config.permissions.roles.EDITOR_WRITE.key },
+    { label: config.permissions.roles.EDITOR_READ.label, role: config.permissions.roles.EDITOR_READ.key }
   ];
 
   const getBigButtonList = () => {
@@ -961,7 +965,6 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <RepresentativesList
-                rightsOptions={requestersRightsTypeOptions}
                 dataflowId={dataflowId}
                 representativesImport={dataflowState.representativesImport}
                 setDataProviderSelected={setDataProviderSelected}
@@ -983,7 +986,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageEditorsDialogVisible}>
             <ShareRights
               userType={'editor'}
-              rightsOptions={editorsRightsTypeOptions}
+              roleOptions={editorRoleOptions}
               columnHeader={resources.messages['editorsAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
@@ -1004,8 +1007,8 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
-              userType={'requester'}
-              rightsOptions={requestersRightsTypeOptions}
+              userType={'editor'}
+              roleOptions={requesterRoleOptions}
               columnHeader={resources.messages['requestersAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
@@ -1027,7 +1030,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
               userType={'reporter'}
-              rightsOptions={reportersRightsTypeOptions}
+              roleOptions={reporterRoleOptions}
               columnHeader={resources.messages['reportersAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
