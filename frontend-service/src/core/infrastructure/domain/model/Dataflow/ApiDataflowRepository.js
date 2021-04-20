@@ -8,7 +8,6 @@ import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
 
@@ -40,24 +39,26 @@ const getUserRoles = userRoles => {
     }
   }
 
-  const dataflowPermissionsConfig = {
-    1: config.dataflowPermissions.DATA_CUSTODIAN,
-    2: config.dataflowPermissions.EDITOR_WRITE,
-    3: config.dataflowPermissions.EDITOR_READ,
-    4: config.dataflowPermissions.LEAD_REPORTER,
-    5: config.dataflowPermissions.NATIONAL_COORDINATOR,
-    6: config.dataflowPermissions.REPORTER_WRITE,
-    7: config.dataflowPermissions.REPORTER_READ
+  const dataflowPermisssionsOrderConfig = {
+    1: config.permissions.roles.CUSTODIAN,
+    2: config.permissions.roles.STEWARD,
+    3: config.permissions.roles.OBSERVER,
+    4: config.permissions.roles.EDITOR_WRITE,
+    5: config.permissions.roles.EDITOR_READ,
+    6: config.permissions.roles.LEAD_REPORTER,
+    7: config.permissions.roles.NATIONAL_COORDINATOR,
+    8: config.permissions.roles.REPORTER_WRITE,
+    9: config.permissions.roles.REPORTER_READ
   };
 
-  const dataflowPermissions = Object.values(dataflowPermissionsConfig);
+  const dataflowPermissions = Object.values(dataflowPermisssionsOrderConfig);
 
   dataflowDuplicatedRoles.forEach(dataflowRoles => {
     let rol = null;
 
     dataflowPermissions.forEach(permission => {
       dataflowRoles.forEach(dataflowRol => {
-        if (isNil(rol) && dataflowRol.userRole === permission) {
+        if (isNil(rol) && dataflowRol.userRole.key === permission) {
           rol = dataflowRol;
         }
       });
@@ -75,16 +76,18 @@ const all = async userData => {
   const userRoles = [];
 
   if (userData) {
-    const dataflowsRoles = userData.filter(role => role.includes(config.permissions['DATAFLOW']));
+    const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: config.permissions[role] });
+      const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
+
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole });
     });
 
     for (let index = 0; index < dataflowsDTO.data.length; index++) {
       const dataflow = dataflowsDTO.data[index];
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-      const isOpen = dataflow.status === DataflowConf.dataflowStatus['OPEN'];
+      const isOpen = dataflow.status === config.dataflowStatus.OPEN;
 
       if (isOpen) {
         dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
