@@ -175,6 +175,16 @@ export const EUDataset = withRouter(({ history, match }) => {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       console.log('error', error);
+
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+
+      notificationContext.add({
+        type: 'EXPORT_DATA_BY_ID_ERROR',
+        content: { dataflowName: dataflowName, datasetName: datasetName }
+      });
     } finally {
       setIsLoadingFile(false);
     }
