@@ -4,10 +4,28 @@ package performance
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 import scala.io.Source
 import scala.util.Random
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import scalaj.http._
+import scala.util.parsing.json.JSON
 
-class CSVFeeder(csvFileName: String) {
+class CSVFeeder(csvFileName: String, requireAuth: Boolean) {
   var data = getDataFeeder(csvFileName)
-
+println("\nLA AUTENTICACION: "+ requireAuth +"\n ")
+    val url = sys.env("URL_BASE");
+  
+    def getToken(username: String, password: String) : String = {
+      val result = Http(url+"/user/generateToken").param("username",username).param("password",password).postData("").asString 
+    println(result.body)
+    val mapper = new ObjectMapper
+    val root = mapper.readTree(result.body.toString)
+    val token = root.at("/accessToken").asText()
+    println("token:" + token.toString)
+    return token.toString
+  }
+  
+  
   def getDataFeeder(csvFileName: String): Seq[Map[String, Any]] = {
     val lines = Source.fromFile(csvFileName).getLines.toList
     var headers = lines(0).split(",")

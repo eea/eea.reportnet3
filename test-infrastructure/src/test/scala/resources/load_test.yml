@@ -5,6 +5,7 @@ gatling_config:
       usersNumber: 4
       numberExecutions: 1
       useFeeder: true
+      requireAuth: true
       method: post
       puaseTime: 2
       timeOut: 20000
