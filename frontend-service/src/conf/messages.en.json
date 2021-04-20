@@ -230,7 +230,6 @@
     "deleteAttachmentHeader": "Delete attachment",
     "deleteAutomaticSnapshotTooltip": "You can't delete a release copy",
     "deleteCategory": "Delete category",
-    "deleteContributorButtonTableHeader": "Delete contributor",
     "deleteDataEuDatasetHeader": "Delete EU dataset data",
     "deleteDataflow": "This action cannot be undone. This will permanently delete the dataflow, datasets and dataset schemas. Are you sure you want to delete the dataflow?",
     "deleteDataflowButton": "Delete this dataflow",
@@ -1055,6 +1054,15 @@
     "invalidCharactersFieldMessage": "The field name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and '_').",
     "invalidCharactersFieldTitle": "Invalid field name",
     "invalidCharactersSchemaError": "The schema name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-', '_', '(' and ')').",
-    "shortCode": "code"
+    "shortCode": "code",
+    "manageRequestersRights": "Manage requesters",
+    "requestersAccountColumn": "Requester account",
+    "requestersRightsDialogConfirmDeleteHeader": "Delete requester",
+    "requestersRightsDialogConfirmDeleteQuestion": "Do you really want to delete this requester?",
+    "manageRolesRequesterDialogInputPlaceholder": "Requester account...",
+    "deleteRequesterError": "Error deleting requester",
+    "deleteEditorButtonTableHeader": "Delete editor",
+    "deleteRequesterButtonTableHeader": "Delete requester",
+    "deleteReporterButtonTableHeader": "Delete reporter"
   }
 }

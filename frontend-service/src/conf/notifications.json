@@ -416,6 +416,9 @@
           "key": "DELETE_EDITOR_ERROR"
         },
         {
+          "key": "DELETE_REQUESTER_ERROR"
+        },
+        {
           "key": "DELETE_REPORTER_ERROR"
         },
         {

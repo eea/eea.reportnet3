@@ -93,6 +93,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isFetchingData: false,
     isImportLeadReportersVisible: false,
     isManageEditorsDialogVisible: false,
+    isManageRequestersDialogVisible: false,
     isManageReportersDialogVisible: false,
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
@@ -238,6 +239,15 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'manageEditorsRights'
       };
 
+      const manageRequestersBtn = {
+        className: 'dataflow-manage-rights-help-step',
+        icon: 'userConfig',
+        isVisible: buttonsVisibility.manageRequestersBtn,
+        label: 'manageRequestersRights',
+        onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
+        title: 'manageRequestersRights'
+      };
+
       const manageReportersBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
@@ -292,6 +302,7 @@ const Dataflow = withRouter(({ history, match }) => {
         apiKeyBtn,
         manageReportersBtn,
         manageEditorsBtn,
+        manageRequestersBtn,
         userListBtn
       ];
 
@@ -346,10 +357,11 @@ const Dataflow = withRouter(({ history, match }) => {
         apiKeyBtn: false,
         editBtn: false,
         exportBtn: false,
-        releaseableBtn: false,
         manageEditorsBtn: false,
         manageReportersBtn: false,
+        manageRequestersBtn: false,
         propertiesBtn: false,
+        releaseableBtn: false,
         usersListBtn: false
       };
     }
@@ -358,10 +370,11 @@ const Dataflow = withRouter(({ history, match }) => {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
-      releaseableBtn: !isDesign && isLeadDesigner,
       manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
+      manageRequestersBtn: dataflowState.isCustodian,
       propertiesBtn: true,
+      releaseableBtn: !isDesign && isLeadDesigner,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry ||
@@ -381,12 +394,22 @@ const Dataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isManageReportersDialogVisible', false)}
     />
   );
+
   const manageEditorsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
       label={resources.messages['close']}
       onClick={() => manageDialogs('isManageEditorsDialogVisible', false)}
+    />
+  );
+
+  const manageRequestersDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isManageRequestersDialogVisible', false)}
     />
   );
 
@@ -832,14 +855,19 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const editorsReportersRightsTypeOptions = [
+  const editorsRightsTypeOptions = [
+    { label: resources.messages['readPermission'], writePermission: false },
+    { label: resources.messages['readAndWritePermission'], writePermission: true }
+  ];
+
+  const reportersRightsTypeOptions = [
     { label: resources.messages['readPermission'], writePermission: false },
     { label: resources.messages['readAndWritePermission'], writePermission: true }
   ];
 
   const requestersRightsTypeOptions = [
-    { label: 'CUSTODIAN', rightsType: 'CUSTODIAN' },
-    { label: 'STEWARD', rightsType: 'STEWARD' },
+    { label: 'CUSTODIAN', role: 'CUSTODIAN' },
+    { label: 'STEWARD', role: 'STEWARD' },
     { label: 'OBSERVER', rightsType: 'OBSERVER' },
     { label: 'EDITOR WRITE', rightsType: 'EDITOR_WRITE' },
     { label: 'EDITOR READ', rightsType: 'EDITOR_READ' }
@@ -946,7 +974,7 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        {/* {dataflowState.isManageEditorsDialogVisible && (
+        {dataflowState.isManageEditorsDialogVisible && (
           <Dialog
             footer={manageEditorsDialogFooter}
             header={resources.messages['manageEditorsRights']}
@@ -954,10 +982,11 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageEditorsDialogVisible}>
             <ShareRights
               userType={'editor'}
-              rightsOptions={editorsReportersRightsTypeOptions}
+              rightsOptions={editorsRightsTypeOptions}
               columnHeader={resources.messages['editorsAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
+              deleteColumnHeader={resources.messages['deleteEditorButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`editorsRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`editorsRightsDialogConfirmDeleteQuestion`]}
               notificationKey={'DELETE_EDITOR_ERROR'}
@@ -965,24 +994,25 @@ const Dataflow = withRouter(({ history, match }) => {
               representativeId={representativeId}
             />
           </Dialog>
-        )} */}
+        )}
 
-        {dataflowState.isManageEditorsDialogVisible && ( // todo
+        {dataflowState.isManageRequestersDialogVisible && (
           <Dialog
-            footer={manageEditorsDialogFooter}
-            header={resources.messages['manageEditorsRights']}
-            onHide={() => manageDialogs('isManageEditorsDialogVisible', false)}
-            visible={dataflowState.isManageEditorsDialogVisible}>
+            footer={manageRequestersDialogFooter}
+            header={resources.messages['manageRequestersRights']}
+            onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+            visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
-              userType={'editor'}
-              rightsOptions={editorsReportersRightsTypeOptions}
-              columnHeader={resources.messages['editorsAccountColumn']}
+              userType={'requester'}
+              rightsOptions={requestersRightsTypeOptions}
+              columnHeader={resources.messages['requestersAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
-              deleteConfirmHeader={resources.messages[`editorsRightsDialogConfirmDeleteHeader`]}
-              deleteConfirmMessage={resources.messages[`editorsRightsDialogConfirmDeleteQuestion`]}
-              notificationKey={'DELETE_EDITOR_ERROR'}
-              placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
+              deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
+              deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
+              deleteConfirmMessage={resources.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+              notificationKey={'DELETE_REQUESTER_ERROR'}
+              placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
             />
           </Dialog>
@@ -996,10 +1026,11 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
               userType={'reporter'}
-              rightsOptions={editorsReportersRightsTypeOptions}
+              rightsOptions={reportersRightsTypeOptions}
               columnHeader={resources.messages['reportersAccountColumn']}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
+              deleteColumnHeader={resources.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`reportersRightsDialogConfirmDeleteQuestion`]}
               notificationKey={'DELETE_REPORTER_ERROR'}
