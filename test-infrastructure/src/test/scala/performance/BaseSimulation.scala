@@ -45,37 +45,23 @@ class BaseSimulation extends Simulation {
   val assertionList = new ListBuffer[io.gatling.commons.stats.assertion.Assertion]()
   val testScenarioFunction: (TestScenario) => Unit = (testScenario) => {
     var scalaHeaders: MMap[String, String] = collection.mutable.Map.empty
-     println(testScenario.requireAuth)
     if (null != testScenario.headers && !testScenario.headers.isEmpty()) {
       scalaHeaders = collection.mutable.Map(testScenario.headers.toSeq: _*)
     }
-    
-  //getToken("custodian1","1234")
-  
-    //Map(Authorization -> Bearer ${token})
-    
     val finalHeaders = scalaHeaders.toMap
-    
-    println(finalHeaders)
     //Retrieve the proper scenario builder function and execute it
     val scn = executionFunctions.get(ExecutionConfiguration.calculateExecutionKey(testScenario)).get(testScenario.requestName, testScenario.endpoint, finalHeaders, testScenario.pauseTime, testScenario.requestBody, testScenario.uploadFileName, testScenario.uploadFileKey, testScenario.numberExecutions, testScenario.requireAuth)
-    println("SCN")
-    println(scn)
     //Add the just created scenario to the list of scenarios
     scenariosList += scn.inject(atOnceUsers(testScenario.usersNumber)).protocols(httpProtocol)
-    println("ScenariosList")
-    println(scenariosList)
     //Define assertions
     assertionList += details(testScenario.requestName).responseTime.max.lt(testScenario.timeOut)
-    print("done")
+    println(testScenario.requestName + ": Done")
   }
   config.gatlingScenarios.scenarios.foreach(testScenarioFunction)
 
   var allScenarios = scenariosList.toList
 
-
   setUp(allScenarios).assertions(assertionList)
-
 
 }
 

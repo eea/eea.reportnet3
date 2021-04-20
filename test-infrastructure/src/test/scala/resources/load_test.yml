@@ -1,8 +1,21 @@
 gatling_config:
   scenarios:
+    - requestName: importFileData
+      endpoint: /dataset/${datasetId}/importFileData?replace=true
+      usersNumber: 2
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: post
+      puaseTime: 2
+      timeOut: 20000
+      uploadFileName: C:\\Users\\Mario Severa\\Desktop\\TC\\es3\t1.zip
+      uploadFileKey: file
+      headers:
+         Authorization: Bearer ${token}
     - requestName: createDataCollection
       endpoint: /datacollection/create?stopAndNotifySQLErrors=false&showPublicInfo=false
-      usersNumber: 4
+      usersNumber: 2
       numberExecutions: 1
       useFeeder: true
       requireAuth: true
@@ -11,7 +24,25 @@ gatling_config:
       timeOut: 20000
       requestBody: '{"dueDate":"${dueDate}","idDataflow":"${dataflowId}"}'
       headers:
+         Authorization: Bearer ${token}        
+    - requestName: exportFileData
+      endpoint: /dataset/exportFile?datasetId=${datasetId}&mimeType=xlsx
+      usersNumber: 1
+      numberExecutions: 1
+      useFeeder: true
+      method: get
+      puaseTime: 2
+      timeOut: 20000
+      headers:
          Authorization: Bearer ${token}
-        
-        
-        
+    - requestName: releaseDataCollection
+      endpoint: /snapshot/dataflow/${dataflowId}/dataProvider/${dataProviderId}/release?restrictFromPublic=false
+      usersNumber: 1
+      numberExecutions: 1
+      useFeeder: true
+      method: post
+      puaseTime: 2
+      timeOut: 20000
+      headers:
+         Authorization: Bearer ${token}
+    

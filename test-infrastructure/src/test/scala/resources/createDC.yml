@@ -1,8 +1,9 @@
     - requestName: createDataCollection
       endpoint: /datacollection/create?stopAndNotifySQLErrors=false&showPublicInfo=false
-      usersNumber: 4
+      usersNumber: 1
       numberExecutions: 1
       useFeeder: true
+      requireAuth: true
       method: post
       puaseTime: 2
       timeOut: 20000

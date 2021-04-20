@@ -7,8 +7,6 @@ import scala.collection.mutable.{Map => MMap}
 
 
 object ExecutionConfiguration {
-
-
   
   def calculateExecutionKey(testScenario: TestScenario): String = {
     val executionKey = StringBuilder.newBuilder

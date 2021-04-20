@@ -1,2 +1,3 @@
-token,datasetId,fileName
-0f669d0f-1e5c-40af-ad2f-28d624436d92,3449,t1.zip
+username,password,datasetId,fileName
+custodian1,1234,1755,t1.zip
+custodian2,1234,1675,t1.zip

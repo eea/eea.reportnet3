@@ -16,7 +16,7 @@ declarar variables de entorno.
 			http://rn3sandbox-api.altia.es/dataschema/copy?sourceDataflow=11&targetDataflow=12
 		Data Collection creation (and dataset)
 		Release to DC
-		Validation
+		Validation(se hace con el import)
 			/validation/dataset/5
 		Create snapshot	
 			http://rn3sandbox-api.altia.es/snapshot/dataschema/607e8b5d1e32710001628460/dataset/5/create?description=ds1
