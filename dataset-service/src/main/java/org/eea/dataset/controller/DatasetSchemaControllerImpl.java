@@ -179,7 +179,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_LEAD_REPORTER', 'DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_LEAD_REPORTER','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
@@ -721,7 +721,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId) {
     // Recover the designs datasets of the dataflowId given. And then, for each design dataset
     // executes a validation.
@@ -814,10 +814,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/createUniqueConstraint")
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
-      if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-          .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-      }
       if (uniqueConstraint.getDatasetSchemaId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
@@ -846,10 +842,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
   public void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
       @PathVariable("dataflowId") Long dataflowId) {
-    if (!TypeStatusEnum.DESIGN
-        .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-    }
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
     } catch (EEAException e) {
@@ -868,10 +860,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
-    }
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
     if (uniqueConstraint.getDatasetSchemaId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

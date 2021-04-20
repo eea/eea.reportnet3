@@ -276,7 +276,8 @@
     "feedback-separator-color": "var(--c-corporate-blue)",
     "webform-table-bg": "var(--gray-10)",
     "webform-table-border": "1px solid var(--gray-10)",
-    "general-text-color": "var(--grey-110)"
+    "general-text-color": "var(--grey-110)",
+    "radioButton-dc-hover-bg": "var(--gray-5)"
   },
   "dark": {
     "bg": "var(--c-dark-blue)",
@@ -556,7 +557,8 @@
     "feedback-separator-color": "var(--c-corporate-yellow)",
     "webform-table-bg": "transparent",
     "webform-table-border": "1px solid var(--gray-10)",
-    "general-text-color": "var(--white)"
+    "general-text-color": "var(--white)",
+    "radioButton-dc-hover-bg": "var(--gray-110)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,

@@ -67,6 +67,8 @@ public class UserRoleServiceImpl implements UserRoleService {
       getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.REPORTER_WRITE.toString());
       // STEWARD
       getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_STEWARD.toString());
+      // OBSERVER
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_OBSERVER.toString());
 
     }
     return finalList;
@@ -86,7 +88,8 @@ public class UserRoleServiceImpl implements UserRoleService {
         .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
         .collect(Collectors.toList());
     if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(long1))
-        || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(long1))) {
+        || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(long1))
+        || authorities.contains(ObjectAccessRoleEnum.DATASET_OBSERVER.getAccessRole(long1))) {
       // CUSTODIAN
       setGroupsIntoMap(groupInfoMap,
           new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
@@ -97,6 +100,11 @@ public class UserRoleServiceImpl implements UserRoleService {
           new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
               .getGroupsWithSearch(ResourceGroupEnum.DATASET_STEWARD.getGroupName(long1)))),
           SecurityRoleEnum.DATA_STEWARD.toString());
+      // OBSERVER
+      setGroupsIntoMap(groupInfoMap,
+          new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
+              .getGroupsWithSearch(ResourceGroupEnum.DATASET_OBSERVER.getGroupName(long1)))),
+          SecurityRoleEnum.DATA_OBSERVER.toString());
     }
     if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(long1))
         || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(long1))
