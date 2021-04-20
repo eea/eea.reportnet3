@@ -81,7 +81,7 @@ const all = async userData => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
       const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
 
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole });
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: userRole?.label });
     });
 
     for (let index = 0; index < dataflowsDTO.data.length; index++) {

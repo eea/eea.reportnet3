@@ -104,7 +104,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
       <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
           <span>{`${resources.messages['role']}: `}</span>
-          {itemContent.userRole?.label}
+          {itemContent.userRole}
         </p>
       </div>
 
