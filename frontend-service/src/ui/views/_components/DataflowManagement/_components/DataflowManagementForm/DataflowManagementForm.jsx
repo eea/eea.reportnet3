@@ -4,8 +4,6 @@ import isNil from 'lodash/isNil';
 
 import styles from './DataflowManagementForm.module.scss';
 
-import DataflowConf from 'conf/dataflow.config.json';
-
 import { Button } from 'ui/views/_components/Button';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
 
@@ -89,7 +87,7 @@ const DataflowManagementForm = forwardRef(
           }
         } catch (error) {
           console.error('error', error);
-          if (error?.response?.data === DataflowConf.errorTypes['dataflowExists']) {
+          if (error?.response?.data === 'Dataflow name already exists') {
             setErrors(previousErrors => {
               return {
                 ...previousErrors,

@@ -7,8 +7,8 @@ import uuid from 'uuid';
 
 import styles from './BigButton.module.scss';
 
+import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
@@ -225,7 +225,7 @@ export const BigButton = ({
             data-for={tooltipId}
             className={styles.caption}
             onDoubleClick={
-              dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
+              dataflowStatus === config.dataflowStatus.DESIGN && canEditName ? onEnableSchemaNameEdit : null
             }>
             {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
           </p>
