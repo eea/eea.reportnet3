@@ -88,7 +88,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const cloneableDataflowList = dataflows => {
     let cloneableDataflows = dataflows.filter(
-      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions.roles.CUSTODIAN.key
+      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions.roles.CUSTODIAN.label
     );
 
     let dataflowsToFilter = [];
