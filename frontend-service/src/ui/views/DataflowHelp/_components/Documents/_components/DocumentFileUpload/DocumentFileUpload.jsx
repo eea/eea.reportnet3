@@ -242,7 +242,7 @@ const DocumentFileUpload = ({
               });
             }}
             onKeyPress={e => {
-              if (e.key === 'Enter' && !checkInputForErrors('lang')) onConfirm();
+              if (e.which === 13 && !checkInputForErrors('lang')) onConfirm();
             }}
             optionLabel="label"
             options={getOptionTypes()}
