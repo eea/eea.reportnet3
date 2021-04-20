@@ -45,6 +45,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataflowName, setDataflowName] = useState('');
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tableSchema, setTableSchema] = useState();
@@ -108,12 +109,15 @@ export const DataCollection = withRouter(({ match, history }) => {
   }));
 
   const onExportDataInternalExtension = async fileType => {
+    setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
 
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       console.log('error', error);
+    } finally {
+      setIsLoadingFile(false);
     }
   };
 
@@ -245,7 +249,7 @@ export const DataCollection = withRouter(({ match, history }) => {
           <div className="p-toolbar-group-left">
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
-              icon={'export'}
+              icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
               id="buttonExportDataset"
               label={resourcesContext.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}

@@ -168,12 +168,15 @@ export const EUDataset = withRouter(({ history, match }) => {
   const isLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onExportDataInternalExtension = async fileType => {
+    setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
 
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       console.log('error', error);
+    } finally {
+      setIsLoadingFile(false);
     }
   };
 
@@ -257,6 +260,8 @@ export const EUDataset = withRouter(({ history, match }) => {
     </MainLayout>
   );
 
+  const setIsLoadingFile = value => euDatasetDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
+
   const renderTabsSchema = () => (
     <TabsSchema
       hasWritePermissions={false}
@@ -288,7 +293,7 @@ export const EUDataset = withRouter(({ history, match }) => {
           <div className="p-toolbar-group-left">
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
-              icon={'export'}
+              icon={euDatasetState.isLoadingFile ? 'spinnerAnimate' : 'export'}
               id="buttonExportDataset"
               label={resourcesContext.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
