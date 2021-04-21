@@ -125,6 +125,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -955,12 +956,73 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Find if the dataset type is EU to include the countryCode
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
     return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
   }
+
+
+
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @Override
+  @Async
+  public void exportDatasetFile(Long datasetId, String mimeType) {
+
+    Long idDataflow = getDataFlowIdById(datasetId);
+
+    // Look for the dataset type is EU or DC to include the countryCode
+    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
+
+    // Extension arrive with zip+xlsx or xlsx, but to the backend arrives with empty space. Split
+    // the extensions to know
+    // if its a zip or only xlsx
+    String[] type = mimeType.split(" ");
+    String extension = "";
+    if (type.length > 1) {
+      extension = type[1];
+    } else {
+      extension = type[0];
+    }
+    final IFileExportContext context = fileExportFactory.createContext(extension);
+
+    try {
+      byte[] content = context.fileWriter(idDataflow, datasetId, null, includeCountryCode);
+      Boolean includeZip = false;
+      // If the length after splitting the file type arrives it's more than 1, then there's a
+      // zip+xlsx type
+      if (type.length > 1) {
+        includeZip = true;
+      }
+      generateFile(datasetId, extension, content, includeZip);
+      LOG.info("End of exportDatasetFile datasetId {}", datasetId);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
+          datasetId, mimeType, e.getMessage(), e);
+      // Send notification
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).error("Error exporting dataset data").build();
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
+            notificationVO);
+      } catch (EEAException ex) {
+        LOG_ERROR.error("Error sending export dataset fail notification. Message {}",
+            e.getMessage(), ex);
+      }
+    }
+
+  }
+
 
   /**
    * Export file through integration.
@@ -3280,6 +3342,28 @@ public class DatasetServiceImpl implements DatasetService {
     return file;
   }
 
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public File downloadFile(Long datasetId, String fileName) throws IOException, EEAException {
+    // we compound the route and create the file
+    File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
+    if (!file.exists()) {
+      LOG_ERROR.error(
+          "Trying to download a file generated during the export dataset data process but the file is not found");
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
   /**
    * Creeate all dataset files.
    *
@@ -3697,7 +3781,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     } catch (IOException e) {
-      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+      LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
   }
 
@@ -3772,4 +3856,100 @@ public class DatasetServiceImpl implements DatasetService {
 
     return query.toString();
   }
+
+
+  /**
+   * Generate file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param file the file
+   * @param includeZip the include zip
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  private void generateFile(Long datasetId, String mimeType, byte[] file, boolean includeZip)
+      throws IOException, EEAException {
+
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String nameDataset = dataset.getDataSetName();
+    String nameFile = "";
+    // create folder if doesn't exist to save the file
+    File fileFolderProvider = new File(pathPublicFile, "dataset-" + datasetId);
+    fileFolderProvider.mkdirs();
+
+    // make the zip
+    if (includeZip) {
+      nameFile = nameDataset + ".zip";
+      // we create the file.zip
+      File fileWriteZip = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
+
+      try (ZipOutputStream out =
+          new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+        // we get the dataschema and check every table to see if there's any field attachemnt
+
+        DataSetSchema dataSetSchema =
+            schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+        for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+
+          // we find if in any table have one field type ATTACHMENT
+          List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+              .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+              .collect(Collectors.toList());
+          if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+            // We took every field for every table
+            for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+              List<AttachmentValue> attachmentValue =
+                  attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(
+                      fieldAttach.getIdFieldSchema().toString());
+
+              // if there are filled we create a folder and inside of any folder we create the
+              // fields
+              if (!CollectionUtils.isEmpty(attachmentValue)) {
+                LOG.info(
+                    "Generating zip file with attachments. Found in tableSchema with id {}, field {}",
+                    tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+
+                for (AttachmentValue attachment : attachmentValue) {
+                  try {
+                    ZipEntry eFieldAttach = new ZipEntry(
+                        tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                    out.putNextEntry(eFieldAttach);
+                    out.write(attachment.getContent(), 0, attachment.getContent().length);
+                  } catch (ZipException e) {
+                    LOG.info("Error adding file to the zip {} because already exists",
+                        attachment.getFileName(), e);
+                  }
+                }
+                out.closeEntry();
+              }
+            }
+          }
+        }
+        // Adding the xlsx/csv file to the zip
+        ZipEntry e = new ZipEntry(nameDataset + "." + mimeType);
+        out.putNextEntry(e);
+        out.write(file, 0, file.length);
+        out.closeEntry();
+        LOG.info("Creating file {} in the route ", fileWriteZip);
+      }
+    }
+    // only the xlsx file
+    else {
+      nameFile = nameDataset + "." + mimeType;
+      File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
+      try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
+        out.write(file, 0, file.length);
+      }
+    }
+    // Send notification
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .datasetName(nameFile).build();
+
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
+        notificationVO);
+
+  }
+
 }
