@@ -538,6 +538,27 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/exportDatasetFile")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
+  public void exportDatasetFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("mimeType") String mimeType) {
+
+    datasetService.exportFileAsync(datasetId, mimeType);
+
+    // try {
+    // byte[] file = datasetService.exportFile(datasetId, mimeType, tableSchemaId);
+    // String fileName = tableName + "." + mimeType;
+    // HttpHeaders httpHeaders = new HttpHeaders();
+    // httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    // return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+    // } catch (EEAException | IOException e) {
+    // throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    // }
+  }
+
+
   /**
    * Export file through integration.
    *
@@ -919,6 +940,25 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping("/private/checkAnySchemaAvailableInPublic")
   public boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId) {
     return datasetService.checkAnySchemaAvailableInPublic(dataflowId);
+  }
+
+
+  @Override
+  @GetMapping("/downloadFile")
+  public ResponseEntity<InputStreamResource> downloadFile(@RequestParam Long datasetId,
+      @RequestParam String fileName) {
+
+    try {
+      File content = datasetService.downloadFile(datasetId, fileName);
+      InputStreamResource resource = new InputStreamResource(new FileInputStream(content));
+      HttpHeaders header = new HttpHeaders();
+      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      return ResponseEntity.ok().headers(header).contentLength(content.length())
+          .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
   }
 
 

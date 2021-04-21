@@ -398,4 +398,13 @@ public interface DatasetController {
   @GetMapping("/private/checkAnySchemaAvailableInPublic")
   boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId);
 
+  @GetMapping(value = "/exportDatasetFile")
+  void exportDatasetFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("mimeType") String mimeType);
+
+
+  @GetMapping("/downloadFile")
+  ResponseEntity<InputStreamResource> downloadFile(@RequestParam Long datasetId,
+      @RequestParam String fileName);
+
 }

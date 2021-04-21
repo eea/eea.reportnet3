@@ -603,4 +603,9 @@ public interface DatasetService {
    */
   void initializeDataset(Long datasetId, String idDatasetSchema);
 
+
+  void exportFileAsync(Long datasetId, String mimeType);
+
+  File downloadFile(Long datasetId, String fileName) throws IOException, EEAException;
+
 }

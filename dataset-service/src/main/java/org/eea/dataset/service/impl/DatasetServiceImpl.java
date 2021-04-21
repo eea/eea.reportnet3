@@ -125,6 +125,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -947,6 +948,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
+  @Transactional
   public byte[] exportFile(Long datasetId, String mimeType, final String tableSchemaId)
       throws EEAException, IOException {
     // Get the dataFlowId from the metabase
@@ -972,10 +974,49 @@ public class DatasetServiceImpl implements DatasetService {
     if (type.length > 1) {
       includeZip = true;
     }
-    exportZip(datasetId, mimeType, content, includeZip);
+    LOG.info("la extension es {}", extension);
+    exportZip(datasetId, extension, content, includeZip);
     LOG.info("End of exportFile");
     return content;
   }
+
+
+
+  @Override
+  @Async
+  public void exportFileAsync(Long datasetId, String mimeType) {
+    // Get the dataFlowId from the metabase
+    Long idDataflow = getDataFlowIdById(datasetId);
+
+    // Find if the dataset type is EU to include the countryCode
+    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
+
+    LOG.info("mimetype es {}", mimeType);
+    String[] type = mimeType.split(" ");
+    String extension = "";
+    if (type.length > 1) {
+      extension = type[1];
+    } else {
+      extension = type[0];
+    }
+    final IFileExportContext context = fileExportFactory.createContext(extension);
+    LOG.info("extension es {}", extension);
+    try {
+      byte[] content = context.fileWriter(idDataflow, datasetId, null, includeCountryCode);
+      Boolean includeZip = false;
+      if (type.length > 1) {
+        includeZip = true;
+      }
+      exportZip(datasetId, extension, content, includeZip);
+      LOG.info("End of exportFile");
+    } catch (EEAException | IOException e) {
+
+    }
+
+  }
+
 
   /**
    * Export file through integration.
@@ -3295,6 +3336,17 @@ public class DatasetServiceImpl implements DatasetService {
     return file;
   }
 
+
+  @Override
+  public File downloadFile(Long datasetId, String fileName) throws IOException, EEAException {
+    // we compound the route and create the file
+    File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
+    if (!file.exists()) {
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
   /**
    * Creeate all dataset files.
    *
@@ -3793,11 +3845,12 @@ public class DatasetServiceImpl implements DatasetService {
       throws IOException {
 
     try {
-
-      String nameFileUnique = "Fichero_" + datasetId;
+      DataSetMetabase datasetMetabase =
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+      String nameFileUnique = datasetMetabase.getDataSetName();
       String nameFileScape = nameFileUnique + "." + mimeType;
-
-      // we create folder to save the file.zip
+      LOG.info("El nombre del fichero es {}", nameFileScape);
+      // create folder if doesn't exist to save the file
       File fileFolderProvider = new File(pathPublicFile, "dataset-" + datasetId);
       fileFolderProvider.mkdirs();
 
@@ -3866,8 +3919,7 @@ public class DatasetServiceImpl implements DatasetService {
       // only the xlsx or the csv file
       else {
         LOG.info("exporto sin zip");
-        File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId),
-            "fichero_" + datasetId + ".xlsx");
+        File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileScape);
         try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
           out.write(file, 0, file.length);
         }
@@ -3876,6 +3928,12 @@ public class DatasetServiceImpl implements DatasetService {
       // Map<String, Object> value = new HashMap<>();
       // value.put("dataset_id", datasetId);
       // kafkaSenderUtils.releaseKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, value);
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).datasetName(nameFileScape).build();
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
+          notificationVO);
 
     } catch (Exception e) {
       LOG_ERROR.error(e.getMessage(), e);
