@@ -57,6 +57,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error(error);
+      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
     }

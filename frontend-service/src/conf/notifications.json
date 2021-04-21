@@ -575,6 +575,9 @@
           "key": "DOWNLOAD_DATASET_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_EXPORT_DATASET_FILE_ERROR"
+        },
+        {
           "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
         },
         {
