@@ -9,17 +9,22 @@ declarar variables de entorno.
 	y llamarse como el nombre de caso de prueba seguido de _param.csv. 
 	Ejemplo: cloneDataflowWithData_param.csv
   
+  https://rn3api.eionet.europa.eu/
+  
   	TESTS:
 		File import/export
 		import/export from FME (sirven los de import y export solo hay que configurar una external integration)
+			
 		Cloning schema
-			http://rn3sandbox-api.altia.es/dataschema/copy?sourceDataflow=11&targetDataflow=12
+			/dataschema/copy?sourceDataflow=11&targetDataflow=12
 		Data Collection creation (and dataset)
+			
 		Release to DC
+			
 		Validation(se hace con el import)
 			/validation/dataset/5
 		Create snapshot	
-			http://rn3sandbox-api.altia.es/snapshot/dataschema/607e8b5d1e32710001628460/dataset/5/create?description=ds1
+			/snapshot/dataschema/607e8b5d1e32710001628460/dataset/5/create?description=ds1
 		Restore snapshot
 			/snapshot/6/dataschema/5/restore
   

@@ -74,7 +74,7 @@ class GatlingScenarios(@JsonProperty("scenarios") _scenarios: JList[TestScenario
 }
 
 class TestScenario(@JsonProperty("requestName") _requestName: String, @JsonProperty("endpoint") _endpoint: String, @JsonProperty("usersNumber") _usersNumber: Integer, @JsonProperty("method") _method: String,
-                   @JsonProperty("headers") _headers: JMap[String, String], @JsonProperty("puaseTime") _pauseTime: Integer, @JsonProperty("requestBody") _requestBody: String, @JsonProperty("uploadFileName") _uploadFileName: String,
+                   @JsonProperty("headers") _headers: JMap[String, String], @JsonProperty("pauseTime") _pauseTime: Integer, @JsonProperty("requestBody") _requestBody: String, @JsonProperty("uploadFileName") _uploadFileName: String,
                    @JsonProperty("uploadFileKey") _uploadFileKey: String, @JsonProperty("timeOut") _timeOut: Integer, @JsonProperty("numberExecutions") _numberExecutions: Integer, @JsonProperty("useFeeder") _useFeeder: Boolean,@JsonProperty("requireAuth") _requireAuth: Boolean) {
   var endpoint = _endpoint
   var usersNumber = _usersNumber

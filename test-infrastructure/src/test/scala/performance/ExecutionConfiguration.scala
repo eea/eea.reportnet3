@@ -128,6 +128,15 @@ object ExecutionConfiguration {
             .pause(requestPauseTime)
         }
     })
+    executionFunctions.put("put_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+      val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
+      scenario(requestName).repeat(getExpresionOutOfInteger(numberExecutions)) {
+        feed(feeder.apply()).exec(http(requestName)
+          .put(endpoint)
+          .headers(requestHeaders))
+          .pause(requestPauseTime)
+      }
+    })
     executionFunctions.put("delete_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       //val param_feeder=Iterator.continually(getRandomValue(getDataFeeder("../"+requestName+"_param.csv")))
       val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
