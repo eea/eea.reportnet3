@@ -14,14 +14,52 @@ const GlobalNotifications = () => {
   const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
-    if (findHiddenNotification()) downloadExportFMEFile();
+    if (findHiddenExportFMENotification()) downloadExportFMEFile();
+
+    if (findHiddenExportDatasetNotification()) downloadExportDatasetFile();
   }, [notificationContext.hidden]);
 
-  const findHiddenNotification = () => {
+  const findHiddenExportFMENotification = () => {
     return notificationContext.hidden.find(
       notification =>
         notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' || 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
     );
+  };
+
+  const findHiddenExportDatasetNotification = () => {
+    return notificationContext.hidden.find(notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT');
+  };
+
+  const downloadExportDatasetFile = async () => {
+    try {
+      const [notification] = notificationContext.hidden.filter(
+        notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT'
+      );
+
+      const getFileName = () => {
+        const extension = notification.content.datasetName.split('.').pop();
+        return `${notification.content.datasetName}.${extension}`;
+      };
+
+      let datasetData;
+
+      if (notification) {
+        const { data } = await DatasetService.downloadExportDatasetFile(
+          notification.content.datasetId,
+          notification.content.datasetName
+        );
+        datasetData = data;
+
+        notificationContext.add({
+          type: 'EXTERNAL_INTEGRATION_DOWNLOAD ',
+          onClick: () => DownloadFile(datasetData, getFileName())
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
   };
 
   const downloadExportFMEFile = async () => {
