@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';

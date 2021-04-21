@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';

@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';

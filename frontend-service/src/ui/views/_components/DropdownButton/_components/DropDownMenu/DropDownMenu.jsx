@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import style from './DropDownMenu.module.scss';
 import { Icon } from 'ui/views/_components/Icon';
 
@@ -90,33 +90,33 @@ class DropDownMenu extends Component {
         <div className={style.dropDownMenu} style={this.state.style}>
           <ul>
             {model ? (
-              model.map((item, i) => (
-                item.title ? 
-                <li
-                  key={i}
-                  className={style.listItemTitle}>
-                  <a className={style.title}>
-                    <Icon icon={item.icon} style={item.iconStyle ?? item.style} />
-                    {item.label}
-                  </a>
-                </li> :
-                <li
-                key={i}
-                className={item.disabled ? style.listItemDisabled : style.listItemEnabled}
-                onClick={e => {
-                  e.preventDefault();
-                  if (!item.disabled) item.command();
-                  else
-                    this.setState(state => {
-                      return { ...state, menuClick: true };
-                    });
-                }}>
-                <a className={item.disabled ? style.menuItemDisabled : null} disabled={item.disabled}>
-                  <Icon icon={item.icon} style={item.iconStyle ?? item.style} />
-                  {item.label}
-                </a>
-              </li>
-              ))
+              model.map((item, i) =>
+                item.title ? (
+                  <li key={i} className={style.listItemTitle}>
+                    <a className={style.title}>
+                      <Icon icon={item.icon} style={item.iconStyle ?? item.style} />
+                      {item.label}
+                    </a>
+                  </li>
+                ) : (
+                  <li
+                    key={i}
+                    className={item.disabled ? style.listItemDisabled : style.listItemEnabled}
+                    onClick={e => {
+                      e.preventDefault();
+                      if (!item.disabled) item.command();
+                      else
+                        this.setState(state => {
+                          return { ...state, menuClick: true };
+                        });
+                    }}>
+                    <a className={item.disabled ? style.menuItemDisabled : null} disabled={item.disabled}>
+                      <Icon icon={item.icon} style={item.iconStyle ?? item.style} />
+                      {item.label}
+                    </a>
+                  </li>
+                )
+              )
             ) : (
               <li></li>
             )}

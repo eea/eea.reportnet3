@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from 'react';
+import { Fragment, useReducer, useRef } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';
@@ -223,7 +223,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       {!isUndefined(property) && !isNull(property) ? (
         <div
           style={{
@@ -232,7 +232,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             marginLeft: '10px'
           }}>
           {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
-            <React.Fragment>
+            <Fragment>
               <span className={styles.propertyTitle}>
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
@@ -246,7 +246,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
               ) : (
                 '-'
               )}
-            </React.Fragment>
+            </Fragment>
           ) : (
             <TreeViewExpandableItem
               items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}
@@ -279,7 +279,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
           )}
         </div>
       ) : null}
-    </React.Fragment>
+    </Fragment>
   );
 };
 

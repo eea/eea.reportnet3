@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState, useReducer } from 'react';
+import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';

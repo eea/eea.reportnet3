@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -341,7 +341,7 @@ export const useSetColumns = (
           }
           field={column.field}
           header={
-            <React.Fragment>
+            <Fragment>
               {column.readOnly && (
                 <FontAwesomeIcon
                   aria-hidden={false}
@@ -360,7 +360,7 @@ export const useSetColumns = (
                 tooltip={getTooltipMessage(column)}
                 tooltipOptions={{ position: 'top' }}
               />
-            </React.Fragment>
+            </Fragment>
           }
           key={column.field}
           sortable={sort}

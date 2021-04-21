@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
@@ -590,7 +590,7 @@ const DataFormFieldEditor = ({
   );
 
   return (
-    <React.Fragment>
+    <Fragment>
       {renderFieldEditor()}
       {map.isMapOpen && (
         <Dialog
@@ -605,7 +605,7 @@ const DataFormFieldEditor = ({
           <div className="p-grid p-fluid">{renderMap()}</div>
         </Dialog>
       )}
-    </React.Fragment>
+    </Fragment>
   );
 };
 

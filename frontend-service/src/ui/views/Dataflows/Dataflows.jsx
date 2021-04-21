@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';

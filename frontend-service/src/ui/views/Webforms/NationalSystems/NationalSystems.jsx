@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import styles from './NationalSystems.module.scss';
 

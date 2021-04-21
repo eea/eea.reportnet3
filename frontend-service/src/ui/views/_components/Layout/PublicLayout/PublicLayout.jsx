@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect } from 'react';
+import { Fragment, useContext, useEffect } from 'react';
 
 import { config } from 'conf';
 

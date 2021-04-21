@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';

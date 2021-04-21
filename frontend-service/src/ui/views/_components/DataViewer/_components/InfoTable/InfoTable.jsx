@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -165,7 +165,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           body={dataTemplate}
           field={column.field}
           header={
-            <React.Fragment>
+            <Fragment>
               {column.header}
               <Button
                 className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
@@ -174,7 +174,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
                 tooltip={getTooltipMessage(column)}
                 tooltipOptions={{ position: 'top' }}
               />
-            </React.Fragment>
+            </Fragment>
           }
           key={column.field}
           filterMaxLength={fieldMaxLength}
@@ -228,7 +228,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
     );
   };
   return (
-    <React.Fragment>
+    <Fragment>
       <InfoTableMessages
         checkValidCoordinates={checkValidCoordinates}
         data={data}
@@ -260,6 +260,6 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           </div>
         </div>
       )}
-    </React.Fragment>
+    </Fragment>
   );
 };

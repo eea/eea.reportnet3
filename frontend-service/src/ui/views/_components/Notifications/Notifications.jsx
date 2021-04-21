@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isNil from 'lodash/isNil';
