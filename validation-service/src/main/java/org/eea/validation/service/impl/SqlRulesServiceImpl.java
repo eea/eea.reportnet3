@@ -376,22 +376,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private void checkQueryTestExecution(String query, Long datasetId, Rule rule)
       throws EEAInvalidSQLException {
     String newQuery = proccessQuery(datasetId, query);
-    DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
-    switch (rule.getType()) {
-      case FIELD:
-        retriveFieldName(schema, rule.getReferenceId().toString());
-        retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString(), datasetId);
-        break;
-      case TABLE:
-        retriveTableName(schema, rule.getReferenceId().toString());
-        datasetRepository.getTableId(rule.getReferenceId().toString(), datasetId);
-        break;
-      case RECORD:
-        retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString(), datasetId);
-        break;
-      case DATASET:
-        break;
-    }
     datasetRepository.validateQuery("explain " + newQuery, datasetId);
   }
 
