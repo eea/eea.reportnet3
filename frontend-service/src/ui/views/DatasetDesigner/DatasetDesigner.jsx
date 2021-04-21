@@ -102,8 +102,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       tableSchemaId: QuerystringUtils.getUrlParamValue('tab')
     },
     exportButtonsList: [],
-    exportDatasetData: null,
-    exportDatasetDataName: '',
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
     hasWritePermissions: false,
@@ -223,12 +221,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   useEffect(() => {
     getExportList();
   }, [designerState.datasetSchemaName, designerState.externalOperationsList]);
-
-  useEffect(() => {
-    if (!isNil(designerState.exportDatasetData)) {
-      DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
-    }
-  }, [designerState.exportDatasetData]);
 
   useEffect(() => {
     getImportList();
@@ -544,10 +536,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       await DatasetService.exportDataById(datasetId, fileType);
-
-      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData.data, name: datasetName } });
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {

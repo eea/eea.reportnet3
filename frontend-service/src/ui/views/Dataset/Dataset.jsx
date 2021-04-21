@@ -83,8 +83,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
-  const [exportDatasetData, setExportDatasetData] = useState(undefined);
-  const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [externalOperationsList, setExternalOperationsList] = useState({
     export: [],
     import: [],
@@ -190,12 +188,6 @@ export const Dataset = withRouter(({ match, history }) => {
   useEffect(() => {
     setImportButtonsList(importFromFile.concat(importFromOtherSystems));
   }, [externalOperationsList.import]);
-
-  useEffect(() => {
-    if (!isUndefined(exportDatasetData)) {
-      DownloadFile(exportDatasetData, exportDatasetDataName);
-    }
-  }, [exportDatasetData]);
 
   const {
     isLoadingSnapshotListData,
@@ -514,8 +506,6 @@ export const Dataset = withRouter(({ match, history }) => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      setExportDatasetDataName(createFileName(datasetName, fileType));
-      setExportDatasetData(datasetData.data);
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
