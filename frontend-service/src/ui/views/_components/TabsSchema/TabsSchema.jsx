@@ -1,5 +1,3 @@
-import React from 'react';
-
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 

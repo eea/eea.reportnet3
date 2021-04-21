@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import { useReducer } from 'react';
 
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 

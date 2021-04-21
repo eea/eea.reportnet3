@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
@@ -54,7 +54,7 @@ export class DropdownPanel extends Component {
   }
 }
 
-// import React, { useRef } from 'react';
+// import  { useRef } from 'react';
 // import PropTypes from 'prop-types';
 // import ReactDOM from 'react-dom';
 // import classNames from 'classnames';

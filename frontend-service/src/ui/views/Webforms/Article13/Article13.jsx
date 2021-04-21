@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';

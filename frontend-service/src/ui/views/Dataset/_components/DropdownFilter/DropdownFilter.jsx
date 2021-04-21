@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import isUndefined from 'lodash/isUndefined';
@@ -13,7 +13,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-class DropdownFilter extends React.Component {
+class DropdownFilter extends Component {
   static defaultProps = {
     showFilters: undefined,
     showLevelErrorIcons: false,

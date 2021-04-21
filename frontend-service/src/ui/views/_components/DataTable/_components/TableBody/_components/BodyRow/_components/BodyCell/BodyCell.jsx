@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
@@ -207,14 +207,14 @@ export class BodyCell extends Component {
     } else if (this.props.rowEditor) {
       if (this.state.editing) {
         content = (
-          <React.Fragment>
+          <Fragment>
             <button onClick={this.props.onRowEditSave} className="p-row-editor-save p-link">
               <span className="p-row-editor-save-icon pi pi-fw pi-check p-clickable"></span>
             </button>
             <button onClick={this.props.onRowEditCancel} className="p-row-editor-cancel p-link">
               <span className="p-row-editor-cancel-icon pi pi-fw pi-times p-clickable"></span>
             </button>
-          </React.Fragment>
+          </Fragment>
         );
       } else {
         content = (

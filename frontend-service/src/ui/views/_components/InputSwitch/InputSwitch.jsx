@@ -1,4 +1,4 @@
-// import React from 'react';
+//
 // import { InputSwitch as PrimeInputSwitch } from 'primereact/inputswitch';
 
 // const InputSwitch = ({ checked, className, disabled, onChange, style }) => {
@@ -9,7 +9,7 @@
 
 // export { InputSwitch };
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';

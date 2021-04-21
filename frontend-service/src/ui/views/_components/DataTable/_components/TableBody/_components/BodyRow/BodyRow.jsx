@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component, Children } from 'react';
 import classNames from 'classnames';
 import { BodyCell } from './_components/BodyCell';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
@@ -218,7 +218,7 @@ export class BodyRow extends Component {
   }
 
   render() {
-    let columns = React.Children.toArray(this.props.children);
+    let columns = Children.toArray(this.props.children);
     let conditionalStyles = {
       'p-highlight': this.props.selected,
       'p-highlight-contextmenu': this.props.contextMenuSelected

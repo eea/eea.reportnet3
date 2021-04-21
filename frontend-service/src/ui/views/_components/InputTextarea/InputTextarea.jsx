@@ -1,4 +1,4 @@
-// import React, { forwardRef } from 'react';
+// import  { forwardRef } from 'react';
 // import { InputTextarea as PrimeInputTextarea } from 'primereact/inputtextarea';
 
 // const InputTextarea = forwardRef((props, _) => {
@@ -42,7 +42,7 @@
 
 // export { InputTextarea };
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';

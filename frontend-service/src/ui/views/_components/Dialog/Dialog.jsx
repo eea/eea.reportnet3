@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import uuid from 'uuid';
 
 import styles from './Dialog.module.scss';

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -1032,7 +1032,7 @@ export const FieldDesigner = ({
     ) : null;
 
   const renderInputs = () => (
-    <React.Fragment>
+    <Fragment>
       <InputText
         autoFocus={false}
         className={`${styles.inputField} ${
@@ -1115,11 +1115,11 @@ export const FieldDesigner = ({
           fieldDesignerState.fieldTypeValue !== '' ? fieldDesignerState.fieldTypeValue : getFieldTypeValue(fieldType)
         }
       />
-    </React.Fragment>
+    </Fragment>
   );
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
@@ -1213,7 +1213,7 @@ export const FieldDesigner = ({
           {}
         </Dialog>
       ) : null}
-    </React.Fragment>
+    </Fragment>
   );
 };
 FieldDesigner.propTypes = {};
