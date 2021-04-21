@@ -983,9 +983,9 @@ public class DatasetServiceImpl implements DatasetService {
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    // Extension arrive with zip+xlsx or zip+csv, but to the backend arrives with empty space. Split
+    // Extension arrive with zip+xlsx or xlsx, but to the backend arrives with empty space. Split
     // the extensions to know
-    // if its a zip or only xlsx/csv
+    // if its a zip or only xlsx
     String[] type = mimeType.split(" ");
     String extension = "";
     if (type.length > 1) {
@@ -998,6 +998,8 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       byte[] content = context.fileWriter(idDataflow, datasetId, null, includeCountryCode);
       Boolean includeZip = false;
+      // If the length after splitting the file type arrives it's more than 1, then there's a
+      // zip+xlsx type
       if (type.length > 1) {
         includeZip = true;
       }
@@ -3933,7 +3935,7 @@ public class DatasetServiceImpl implements DatasetService {
         LOG.info("Creating file {} in the route ", fileWriteZip);
       }
     }
-    // only the xlsx or the csv file
+    // only the xlsx file
     else {
       File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileScape);
       try (OutputStream out = new FileOutputStream(fileWrite.toString())) {

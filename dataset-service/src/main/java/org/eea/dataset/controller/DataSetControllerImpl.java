@@ -858,11 +858,7 @@ public class DataSetControllerImpl implements DatasetController {
 
     try {
       File zipContent = datasetService.exportPublicFile(dataflowId, dataProviderId, fileName);
-      InputStreamResource resource = new InputStreamResource(new FileInputStream(zipContent));
-      HttpHeaders header = new HttpHeaders();
-      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      return ResponseEntity.ok().headers(header).contentLength(zipContent.length())
-          .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+      return createResponseEntity(fileName, zipContent);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -931,9 +927,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/exportDatasetFile")
+  @GetMapping(value = "/{datasetId}/exportDatasetFile")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
-  public void exportDatasetFile(@RequestParam("datasetId") Long datasetId,
+  public void exportDatasetFile(@PathVariable("datasetId") Long datasetId,
       @RequestParam("mimeType") String mimeType) {
     LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
     datasetService.exportDatasetFile(datasetId, mimeType);
@@ -949,25 +945,41 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the response entity
    */
   @Override
-  @GetMapping("/downloadFile")
+  @GetMapping(value = "/{datasetId}/downloadFile",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
-  public ResponseEntity<InputStreamResource> downloadFile(@RequestParam Long datasetId,
+  public ResponseEntity<InputStreamResource> downloadFile(@PathVariable Long datasetId,
       @RequestParam String fileName) {
 
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
           datasetId, fileName);
       File content = datasetService.downloadFile(datasetId, fileName);
-      InputStreamResource resource = new InputStreamResource(new FileInputStream(content));
-      HttpHeaders header = new HttpHeaders();
-      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      return ResponseEntity.ok().headers(header).contentLength(content.length())
-          .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+
+      return createResponseEntity(fileName, content);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("File download from the datasetId {} doesn't exist. Filename {}", datasetId,
           fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+  }
+
+
+  /**
+   * Creates the response entity.
+   *
+   * @param fileName the file name
+   * @param content the content
+   * @return the response entity
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private ResponseEntity<InputStreamResource> createResponseEntity(String fileName, File content)
+      throws IOException {
+    InputStreamResource resource = new InputStreamResource(new FileInputStream(content));
+    HttpHeaders header = new HttpHeaders();
+    header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    return ResponseEntity.ok().headers(header).contentLength(content.length())
+        .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
   }
 
 
