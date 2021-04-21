@@ -25,6 +25,11 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
+const getUserRoleLabel = role => {
+  const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
+  return userRole?.label;
+};
+
 const getUserRoles = userRoles => {
   const userRoleToDataflow = [];
   userRoles.filter(userRol => !userRol.duplicatedRoles && userRoleToDataflow.push(userRol));
@@ -79,9 +84,8 @@ const all = async userData => {
     const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-      const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
 
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole });
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: getUserRoleLabel(role) });
     });
 
     for (let index = 0; index < dataflowsDTO.data.length; index++) {
@@ -625,7 +629,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = role.replace('_', ' ');
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
       });
     });
   });
@@ -645,7 +649,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
 const parseUsersList = usersListDTO => {
   usersListDTO.forEach((user, usersIndex) => {
     user.roles.forEach((role, roleIndex) => {
-      usersListDTO[usersIndex].roles[roleIndex] = role.replace('_', ' ');
+      usersListDTO[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
     });
   });
   const usersList = [];

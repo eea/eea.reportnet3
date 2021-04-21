@@ -102,8 +102,7 @@ const getOptionsTemplate = (filteredOptions, property) => {
         break;
 
       case 'userRole':
-        const text = option.toString();
-        template.push({ type: text.replace('_', ' ').toUpperCase(), value: text.toUpperCase() });
+        template.push({ type: option, value: option });
         break;
 
       default:
