@@ -248,8 +248,6 @@ export const WebformField = ({
     });
   };
 
-  // const onSelectField = field => webformFieldDispatch({ type: 'ON_SELECT_FIELD', payload: { field } });
-
   const onToggleDeleteAttachmentDialogVisible = value =>
     webformFieldDispatch({ type: 'ON_TOGGLE_DELETE_DIALOG', payload: { value } });
 
@@ -371,9 +369,6 @@ export const WebformField = ({
                 else onEditorSubmitValue(field, option, value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
-              // onFocus={() => {
-              //   onFilter('', field);
-              // }}
               optionLabel="itemType"
               options={linkItemsOptions}
               showFilterClear={true}
@@ -386,26 +381,19 @@ export const WebformField = ({
         return (
           <MultiSelect
             appendTo={document.body}
-            maxSelectedLabels={10}
             id={field.fieldId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
+            maxSelectedLabels={10}
             onChange={event => {
               onFillField(field, option, event.target.value);
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}
-            // onFocus={e => {
-            //   e.preventDefault();
-            //   if (!isUndefined(codelistItemValue)) {
-            //     onEditorValueFocus(cells, codelistItemValue);
-            //   }
-            // }}
             options={
               field.name === 'Objective'
                 ? getObjectiveOptions(sectorAffectedValue)
                 : field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))
             }
-            // optionLabel="itemType"
             value={getMultiselectValues(
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
@@ -419,19 +407,12 @@ export const WebformField = ({
           <Dropdown
             appendTo={document.body}
             id={field.fieldId}
-            // currentValue={RecordUtils.getCellValue(cells, cells.field)}
-            // filter={true}
-            // filterPlaceholder={resources.messages['linkFilterPlaceholder']}
-            // filterBy="itemType,value"
             onChange={event => {
               onFillField(field, option, event.target.value);
               webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value: event.target.value } });
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);
             }}
-            // onFilterInputChangeBackend={onFilter}
-            // onMouseDown={e => onEditorValueFocus(cells, event.target.value)}
-            // optionLabel="label"
             options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
             showFilterClear={true}
             value={field.value}
@@ -545,25 +526,6 @@ export const WebformField = ({
             />
           </div>
         );
-      // return (
-      //   <Button
-      //     className={`p-button-animated-blink p-button-primary-transparent`}
-      //     // disabled={true}
-      //     icon={'import'}
-      //     label={resources.messages['uploadAttachment']}
-      //     onClick={() => {
-      //       onToggleDialogVisible(true);
-      //       onSelectField(field);
-      //       // setIsAttachFileVisible(true);
-      //       // onFileUploadVisible(
-      //       //   fieldId,
-      //       //   fieldSchemaId,
-      //       //   !isNil(colSchema) ? colSchema.validExtensions : [],
-      //       //   colSchema.maxSize
-      //       // );
-      //     }}
-      //   />
-      //);
 
       default:
         break;

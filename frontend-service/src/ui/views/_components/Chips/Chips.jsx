@@ -40,7 +40,6 @@ const Chips = ({
 }) => {
   const inputElement = useRef();
   const listElement = useRef();
-  //   const [values, setValues] = useState();
   const [hasErrors, setHasErrors] = useState(false);
   useEffect(() => {
     if (!isNil(tooltip)) {
@@ -71,7 +70,6 @@ const Chips = ({
             return;
           } else {
             values.push(inputValue);
-            //   setValues({ values: values });
 
             if (!isNil(onAdd)) {
               onAdd({
@@ -132,7 +130,6 @@ const Chips = ({
         return;
       } else {
         values.push(inputValue);
-        //   setValues({ values: values });
 
         if (!isNil(onAdd)) {
           onAdd({

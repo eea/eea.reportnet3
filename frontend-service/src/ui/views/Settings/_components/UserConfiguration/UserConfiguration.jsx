@@ -76,7 +76,6 @@ const UserConfiguration = () => {
         id={`basemapLayer`}
         itemTemplate={basemapTemplate}
         name="basemapLayer"
-        // optionLabel="label"
         options={resources.userParameters['defaultBasemapLayer']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };

@@ -666,14 +666,6 @@ export class Dropdown extends Component {
     }
   }
 
-  // renderFilterClearIcon() {
-  //   if (this.props.value != null && this.props.showFilterClear && !this.props.disabled) {
-  //     return <span className="p-dropdown-filter-icon pi pi-times" onClick={this.clearFilter}></span>;
-  //   } else {
-  //     return null;
-  //   }
-  // }
-
   renderDropdownIcon() {
     return (
       <div className="p-dropdown-trigger">

@@ -261,14 +261,6 @@ const Tab = ({
           zIndex: 9999
         }}>
         <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} />
-        {/* <div
-          style={{
-            height: '40px',
-            width: '30px',
-            // border: '2px 2px 0 2px solid gray',
-            marginRight: '3px',
-            backgroundColor: 'var(--c-corporate-yellow)'
-          }}></div> */}
       </div>
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}

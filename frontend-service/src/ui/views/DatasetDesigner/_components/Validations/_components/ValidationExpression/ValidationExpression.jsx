@@ -347,7 +347,6 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
-          // appendTo={document.body}
           disabled={isDisabled || position === 0}
           onChange={e => onUpdateExpressionField('union', e.target.value)}
           optionLabel="label"

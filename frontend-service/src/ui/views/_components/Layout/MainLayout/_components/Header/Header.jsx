@@ -221,7 +221,6 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         ref={avatarImage}
         src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
       />
-      {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>
         {!isUndefined(userContext.email) &&
         !isUndefined(userContext.lastName) &&

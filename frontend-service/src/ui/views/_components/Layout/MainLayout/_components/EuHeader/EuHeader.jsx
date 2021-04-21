@@ -14,14 +14,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  // const [searchInput, setSearchInput] = useState('');
   const [openGloban, setOpenGloban] = useState(false);
-
-  // const onSearch = () => {
-  //   window.document.location.href = `https://ec.europa.eu/search/?query_source=TCORNER&QueryText=${encodeURI(
-  //     searchInput
-  //   )}&op=Search&swlang=en&form_build_id=form-8X47OfGhYybVDfQbtJNCrERR9n519jEiL2dVIl2S2Ps&form_id=nexteuropa_europa_search_search_form`;
-  // };
 
   return (
     <Fragment>
@@ -69,13 +62,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
             <span>{resources.messages['home']}</span>
           </a>
         </div>
-        <div className={styles.searchBarWrapper}>
-          {/* <div className={styles.language}>English</div> */}
-          {/* <div className={styles.searchBar}>
-            <InputText onChange={e => setSearchInput(e.target.value)} />
-            <button onClick={e => onSearch()}>{resources.messages['search...']}</button>
-          </div> */}
-        </div>
+        <div className={styles.searchBarWrapper}></div>
       </div>
     </Fragment>
   );

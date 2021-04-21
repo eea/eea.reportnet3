@@ -69,11 +69,6 @@ export const Button = ({
           tooltipOptions={tooltipOptions}
           value={value}
         />
-        {/* {!title && (
-          <label htmlFor={id} className="srOnly">
-            {tooltip}
-          </label>
-        )} */}
       </>
     ) : null;
   }

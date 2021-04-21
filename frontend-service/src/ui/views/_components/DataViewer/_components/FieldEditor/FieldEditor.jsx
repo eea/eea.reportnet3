@@ -140,9 +140,6 @@ const FieldEditor = ({
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
         datasetId,
         colSchema.field,
-        // isUndefined(colSchema.referencedField.name)
-        //   ? colSchema.referencedField.idPk
-        //   : colSchema.referencedField.referencedField.fieldSchemaId,
         filter,
         referencedFieldInfo?.type === 'MULTISELECT_CODELIST'
           ? Array.isArray(conditionalValue)
@@ -289,11 +286,9 @@ const FieldEditor = ({
   const renderField = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
-    // const dateCharacters = 10;
     const textCharacters = 10000;
     const richTextCharacters = 10000;
     const emailCharacters = 256;
-    // const phoneCharacters = 256;
     const urlCharacters = 5000;
 
     switch (type) {
@@ -452,7 +447,6 @@ const FieldEditor = ({
                   )
                 );
               }}
-              // style={{ marginRight: '2rem' }}
               type="text"
               value={
                 RecordUtils.getCellValue(cells, cells.field) !== ''
@@ -568,19 +562,6 @@ const FieldEditor = ({
         );
       case 'DATE':
         return (
-          // <InputText
-          //   keyfilter={getFilter(type)}
-          //   onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-          //   onChange={e => onEditorValueChange(cells, e.target.value)}
-          //   onFocus={e => {
-          //     e.preventDefault();
-          //     onEditorValueFocus(cells, e.target.value);
-          //   }}
-          //   // type="date"
-          //   maxLength={dateCharacters}
-          //   placeHolder="YYYY-MM-DD"
-          //   value={RecordUtils.getCellValue(cells, cells.field)}
-          // />
           <Calendar
             inputId={calendarId}
             onBlur={onCalendarBlur}
@@ -588,7 +569,6 @@ const FieldEditor = ({
             onSelect={onSelectCalendar}
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            // keepInvalid={true}
             monthNavigator={true}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
@@ -627,20 +607,6 @@ const FieldEditor = ({
         );
       case 'ATTACHMENT':
         return false;
-      // (
-      //   <InputText
-      //     keyfilter={getFilter(type)}
-      //     maxLength={phoneCharacters}
-      //     onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-      //     onChange={e => onEditorValueChange(cells, e.target.value)}
-      //     onFocus={e => {
-      //       e.preventDefault();
-      //       onEditorValueFocus(cells, e.target.value);
-      //     }}
-      //     onKeyDown={e => onEditorKeyChange(cells, e, record)}
-      //     value={RecordUtils.getCellValue(cells, cells.field)}
-      //   />
-      // );
 
       case 'LINK':
         const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;

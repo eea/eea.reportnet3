@@ -79,7 +79,6 @@ const MainLayout = ({ children, isPublic = false }) => {
     window.addEventListener(
       'dragover',
       function (e) {
-        // e.dataTransfer.effectAllowed = 'none';
         e.preventDefault();
         e = e || window.event;
       },

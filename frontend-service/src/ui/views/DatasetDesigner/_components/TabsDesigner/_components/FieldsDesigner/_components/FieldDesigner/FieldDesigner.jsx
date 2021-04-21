@@ -99,9 +99,7 @@ export const FieldDesigner = ({
   ];
 
   const geometricTypes = ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'];
-  const getFieldTypeValue = value => {
-    return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
-  };
+  const getFieldTypeValue = value => fieldTypes.find(field => TextUtils.areEquals(field.fieldType, value))
 
   const initialFieldDesignerState = {
     addFieldCallSent: false,
