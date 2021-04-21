@@ -541,6 +541,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+
     try {
       const datasetName = createFileName(designerState.datasetSchemaName, fileType);
       await DatasetService.exportDataById(datasetId, fileType);

@@ -512,6 +512,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
       setExportDatasetData(datasetData.data);
