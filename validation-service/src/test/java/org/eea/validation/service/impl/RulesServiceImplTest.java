@@ -761,8 +761,10 @@ public class RulesServiceImplTest {
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(false);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setWhenCondition(new RuleExpressionDTO());
     try {
-      rulesServiceImpl.createNewRule(1L, new RuleVO());
+      rulesServiceImpl.createNewRule(1L, ruleVO);
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.ERROR_CREATING_RULE, e.getMessage());
       throw e;

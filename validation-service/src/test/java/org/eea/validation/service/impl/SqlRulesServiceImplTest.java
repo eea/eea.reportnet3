@@ -181,8 +181,6 @@ public class SqlRulesServiceImplTest {
         .thenReturn(schema);
     Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(auxId);
-    Mockito.when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.anyLong(), Mockito.anyLong())).thenReturn(null);
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong()))
         .thenReturn(schema);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.anyLong())).thenReturn(1L);
@@ -328,10 +326,9 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.DESIGN);
-    Mockito.when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.anyLong(), Mockito.anyLong())).thenReturn(null);
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong()))
         .thenReturn(schema);
+
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.anyLong())).thenReturn(1L);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");

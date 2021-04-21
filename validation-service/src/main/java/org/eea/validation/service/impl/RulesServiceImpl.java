@@ -404,6 +404,8 @@ public class RulesServiceImpl implements RulesService {
       recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
       validateRule(rule);
+    } else {
+      createRule(datasetSchemaId, rule);
     }
 
   }
