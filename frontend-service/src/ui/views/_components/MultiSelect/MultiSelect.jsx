@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
@@ -485,7 +485,7 @@ export class MultiSelect extends Component {
       if (!this.isEmpty()) {
         if (this.props.value.length <= this.props.maxSelectedLabels) {
           return this.props.value.map((val, index) => {
-            return <React.Fragment key={index}>{this.props.selectedItemTemplate(val)}</React.Fragment>;
+            return <Fragment key={index}>{this.props.selectedItemTemplate(val)}</Fragment>;
           });
         } else {
           return this.getSelectedItemsLabel();

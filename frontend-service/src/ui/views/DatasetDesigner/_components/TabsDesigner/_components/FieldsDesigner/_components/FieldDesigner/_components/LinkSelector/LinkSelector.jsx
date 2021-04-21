@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -251,7 +251,7 @@ const LinkSelector = withRouter(
 
     const renderLinkSelector = () => {
       return (
-        <React.Fragment>
+        <Fragment>
           <div className={styles.schemaWrapper}>
             {!isUndefined(datasetSchemas) &&
               !isEmpty(datasetSchemas) &&
@@ -346,7 +346,7 @@ const LinkSelector = withRouter(
             <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
             <span>{!isNil(link) ? link.name : ''}</span>
           </div>
-        </React.Fragment>
+        </Fragment>
       );
     };
 

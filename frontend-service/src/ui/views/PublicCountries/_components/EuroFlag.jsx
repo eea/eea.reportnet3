@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './EuroFlag.module.scss';
 
 export const EuroFlag = ({ className }) => {
