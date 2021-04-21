@@ -106,7 +106,8 @@ export class MultiSelect extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      filter: ''
+      filter: '',
+      isPanelVisible: false
     };
 
     this.onClick = this.onClick.bind(this);
@@ -258,6 +259,7 @@ export class MultiSelect extends Component {
 
       this.alignPanel();
       this.bindDocumentClickListener();
+      this.setState({ isPanelVisible: true });
     }
   }
 
@@ -268,9 +270,12 @@ export class MultiSelect extends Component {
     this.clearClickState();
 
     setTimeout(() => {
-      this.panel.element.style.display = 'none';
-      DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
-      this.clearFilter();
+      if (this.panel) {
+        this.panel.element.style.display = 'none';
+        DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+        this.clearFilter();
+        this.setState({ isPanelVisible: false });
+      }
     }, 150);
   }
 
@@ -520,6 +525,7 @@ export class MultiSelect extends Component {
         filterPlaceholder={this.props.filterPlaceholder}
         filterValue={this.state.filter}
         headerClassName={this.props.headerClassName}
+        isPanelVisible={this.state.isPanelVisible}
         notCheckAllHeader={this.props.notCheckAllHeader}
         onClose={this.onCloseClick}
         onFilter={this.onFilter}

@@ -1,0 +1,35 @@
+/*spinner*/
+
+.p-progress-spinner {
+  --spinner-width: 5rem;
+  top: calc(30vh - calc(var(--spinner-width) / 2));
+  left: calc(50% - calc(var(--spinner-width) / 2));
+  width: var(--spinner-width);
+  height: var(--spinner-width);
+}
+
+/*Tooltip*/
+.p-tooltip {
+  z-index: 6000 !important;
+}
+/*dialog*/
+body .p-dialog.edit-table .p-dialog-content {
+  max-height: 65vh;
+}
+body .p-dialog.edit-table.calendar-table .p-dialog-content {
+  overflow-y: visible !important;
+}
+
+/* Toolbar */
+.p-toolbar.p-component {
+  position: relative;
+}
+
+/*growl notifications*/
+.p-growl.p-component.p-growl-topright {
+  z-index: 5100 !important;
+}
+
+.p-growl.p-growl-topright {
+  top: 75px !important;
+}

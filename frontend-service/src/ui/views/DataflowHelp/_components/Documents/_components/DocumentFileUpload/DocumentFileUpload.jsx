@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
 
 import styles from './DocumentFileUpload.module.scss';
@@ -7,6 +8,7 @@ import styles from './DocumentFileUpload.module.scss';
 import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
 
 import { DocumentService } from 'core/services/Document';
@@ -29,6 +31,7 @@ const DocumentFileUpload = ({
 
   const inputRef = useRef(null);
 
+  const [areAllInputsChecked, setAreAllInputsChecked] = useState(false);
   const [errors, setErrors] = useState({
     description: { message: '', hasErrors: false },
     lang: { message: '', hasErrors: false },
@@ -37,7 +40,11 @@ const DocumentFileUpload = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [inputs, setInputs] = useState(documentInitialValues);
-
+  const [inputsChecked, setInputsChecked] = useState({
+    description: false,
+    lang: false,
+    uploadFile: false
+  });
   useEffect(() => {
     if (isUploadDialogVisible) inputRef.current.focus();
   }, [isUploadDialogVisible]);
@@ -47,6 +54,16 @@ const DocumentFileUpload = ({
       checkInputForErrors('uploadFile');
     }
   }, [inputs]);
+
+  useEffect(() => {
+    if (!Object.values(inputsChecked).includes(false) || isEditForm) {
+      setAreAllInputsChecked(true);
+    }
+  }, [inputsChecked, isEditForm]);
+
+  useEffect(() => {
+    isEditForm && setAreAllInputsChecked(true);
+  }, [isEditForm]);
 
   const checkIsEmptyInput = inputValue => {
     return inputValue.trim() === '';
@@ -68,7 +85,7 @@ const DocumentFileUpload = ({
   const checkInputForErrors = inputName => {
     let hasErrors = false;
     let message = '';
-    const inputValue = inputs[inputName];
+    const inputValue = inputName === 'lang' ? inputs[inputName].value : inputs[inputName];
 
     const inputUpload = document.querySelector('#uploadFile');
 
@@ -98,6 +115,10 @@ const DocumentFileUpload = ({
       return { ...previousErrors, [inputName]: { message, hasErrors } };
     });
 
+    setInputsChecked(previousInputsChecked => {
+      return { ...previousInputsChecked, [inputName]: true };
+    });
+
     return hasErrors;
   };
 
@@ -106,7 +127,12 @@ const DocumentFileUpload = ({
     checkInputForErrors('lang');
     checkInputForErrors('uploadFile');
 
-    if (!errors.description.hasErrors && !errors.lang.hasErrors && !errors.uploadFile.hasErrors) {
+    if (
+      areAllInputsChecked &&
+      !errors.description.hasErrors &&
+      !errors.lang.hasErrors &&
+      !errors.uploadFile.hasErrors
+    ) {
       setIsUploading(true);
       setSubmitting(true);
       setFileUpdatingId(inputs.id);
@@ -120,7 +146,7 @@ const DocumentFileUpload = ({
           await DocumentService.editDocument(
             dataflowId,
             inputs.description,
-            inputs.lang,
+            inputs.lang.value,
             inputs.uploadFile,
             inputs.isPublic,
             inputs.id
@@ -130,7 +156,7 @@ const DocumentFileUpload = ({
           await DocumentService.uploadDocument(
             dataflowId,
             inputs.description,
-            inputs.lang,
+            inputs.lang.value,
             inputs.uploadFile,
             inputs.isPublic
           );
@@ -159,6 +185,14 @@ const DocumentFileUpload = ({
     }
   };
 
+  const getOptionTypes = () => {
+    const template = [];
+    config.languages.forEach(language => {
+      template.push({ label: language.name, value: language.code });
+    });
+    return sortBy(template, 'type');
+  };
+
   return (
     <form onSubmit={e => e.preventDefault()}>
       <fieldset>
@@ -178,8 +212,13 @@ const DocumentFileUpload = ({
                 return { ...previousValues, description: e.target.value };
               });
             }}
+            onFocus={() =>
+              setErrors(previousErrors => {
+                return { ...previousErrors, ['description']: { message: '', hasErrors: false } };
+              })
+            }
             onKeyPress={e => {
-              if (e.key === 'Enter' && !checkInputForErrors('description')) onConfirm();
+              if (!checkInputForErrors('description') && e.key === 'Enter') onConfirm();
             }}
           />
           <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
@@ -189,29 +228,31 @@ const DocumentFileUpload = ({
         </div>
 
         <div className={`formField ${errors.lang.hasErrors ? 'error' : ''}`}>
-          <select
+          <Dropdown
+            appendTo={document.body}
+            className={styles.dropdownWrapper}
             id="selectLanguage"
             name="lang"
-            component="select"
-            multiple={false}
-            value={inputs.lang}
-            onBlur={() => checkInputForErrors('lang')}
             onChange={e => {
-              e.persist();
               setInputs(previousValues => {
                 return { ...previousValues, lang: e.target.value };
               });
+              setErrors(previousErrors => {
+                return { ...previousErrors, ['lang']: { message: '', hasErrors: false } };
+              });
+              setInputsChecked(previousInputsChecked => {
+                return { ...previousInputsChecked, ['lang']: true };
+              });
             }}
             onKeyPress={e => {
-              if (e.key === 'Enter' && !checkInputForErrors('lang')) onConfirm();
-            }}>
-            <option value="">{resources.messages['selectLang']}</option>
-            {sortBy(config.languages, ['name']).map(language => (
-              <option key={language.code} value={language.code}>
-                {language.name}
-              </option>
-            ))}
-          </select>
+              if (e.which === 13 && !checkInputForErrors('lang')) onConfirm();
+            }}
+            optionLabel="label"
+            options={getOptionTypes()}
+            optionValue="value"
+            placeholder={resources.messages['selectLang']}
+            value={inputs.lang}
+          />
           <label htmlFor="selectLanguage" className="srOnly">
             {resources.messages['selectLang']}
           </label>

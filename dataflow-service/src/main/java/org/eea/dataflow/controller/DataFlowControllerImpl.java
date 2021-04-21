@@ -18,9 +18,9 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
-import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +77,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Dataflow by its Id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class)
@@ -91,7 +91,7 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     DataFlowVO result = null;
     try {
-      if (isUserDataCustodian()) {
+      if (isUserRequester(dataflowId)) {
         result = dataflowService.getById(dataflowId);
       } else {
         result = dataflowService.getByIdWithRepresentativesFilteredByUserEmail(dataflowId);
@@ -381,7 +381,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class)
@@ -449,8 +449,9 @@ public class DataFlowControllerImpl implements DataFlowController {
 
 
   /**
-   * Gets the public dataflow
+   * Gets the public dataflow.
    *
+   * @param dataflowId the dataflow id
    * @return the public dataflow
    */
   @Override
@@ -531,10 +532,6 @@ public class DataFlowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
     }
 
-    String userId =
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID);
-
     dataflows = dataflowService.getDataflowsByDataProviderIds(dataProviderIds);
     dataProviderIds.stream().forEach(
         dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
@@ -545,15 +542,20 @@ public class DataFlowControllerImpl implements DataFlowController {
 
 
   /**
-   * Checks if is user data custodian.
+   * Checks if is user requester.
    *
-   * @return true, if is user data custodian
+   * @param dataflowId the dataflow id
+   * @return true, if is user requester
    */
-  private boolean isUserDataCustodian() {
-    String dataCustodianRole = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
+  private boolean isUserRequester(Long dataflowId) {
     for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
         .getAuthorities()) {
-      if (dataCustodianRole.equals(role.getAuthority())) {
+      if (ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)
+          .equals(role.getAuthority())
+          || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
+              .equals(role.getAuthority())
+          || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
+              .equals(role.getAuthority())) {
         return true;
       }
     }

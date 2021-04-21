@@ -8,8 +8,6 @@ import pull from 'lodash/pull';
 
 import styles from './DataflowsList.module.scss';
 
-import DataflowConf from 'conf/dataflow.config.json';
-
 import { DataflowsItem } from './_components/DataflowsItem';
 import { Filters } from 'ui/views/_components/Filters';
 

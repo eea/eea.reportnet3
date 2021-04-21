@@ -1317,9 +1317,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void testCreateUniqueConstraintTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     List<String> fields = new ArrayList<>();
     fields.add(new ObjectId().toString());
@@ -1331,29 +1328,12 @@ public class DatasetSchemaControllerImplTest {
     Mockito.verify(dataschemaService, times(1)).createUniqueConstraint(Mockito.any());
   }
 
-  @Test(expected = ResponseStatusException.class)
-  public void createUniqueConstraintForbiddenTest() {
-    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
-    uniqueConstraint.setDataflowId("1");
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    try {
-      dataSchemaControllerImpl.createUniqueConstraint(uniqueConstraint);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
-      throw e;
-    }
-  }
 
   /**
    * Creates the unique constraint schema id error test.
    */
   @Test(expected = ResponseStatusException.class)
   public void createUniqueConstraintSchemaIdErrorTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDataflowId("1");
     try {
@@ -1370,9 +1350,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createUniqueConstraintNofieldsErrorTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
@@ -1391,9 +1368,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createUniqueConstraintTableSchemaIdErrorTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setDataflowId("1");
@@ -1420,18 +1394,6 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
-  @Test(expected = ResponseStatusException.class)
-  public void delteUniqueConstraintForbiddenTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    try {
-      dataSchemaControllerImpl.deleteUniqueConstraint("", 1L);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
-      throw e;
-    }
-  }
 
   /**
    * Delete unique constraint test.
@@ -1440,9 +1402,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void deleteUniqueConstraintTest() throws EEAException {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
     Mockito.verify(dataschemaService, times(1)).deleteUniqueConstraint(Mockito.any());
   }
@@ -1454,9 +1413,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteUniqueConstraintErrorTest() throws EEAException {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     doThrow(EEAException.class).when(dataschemaService).deleteUniqueConstraint(Mockito.any());
     try {
       dataSchemaControllerImpl.deleteUniqueConstraint(new ObjectId().toString(), 1L);
@@ -1471,9 +1427,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateUniqueConstraintTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     List<String> fields = new ArrayList<>();
     fields.add(new ObjectId().toString());
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
@@ -1491,9 +1444,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintSchemaIdErrorTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setUniqueId(new ObjectId().toString());
     uniqueConstraint.setDataflowId("1");
@@ -1506,29 +1456,12 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
-  @Test(expected = ResponseStatusException.class)
-  public void updateUniqueConstraintForbiddenTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
-    uniqueConstraint.setDataflowId("1");
-    try {
-      dataSchemaControllerImpl.updateUniqueConstraint(uniqueConstraint);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
-      throw e;
-    }
-  }
 
   /**
    * Update unique constraint table schema id error test.
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintTableSchemaIdErrorTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setUniqueId(new ObjectId().toString());
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
@@ -1547,9 +1480,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintIdErrorTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());
@@ -1568,9 +1498,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateUniqueConstraintFieldErrorTest() {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     UniqueConstraintVO uniqueConstraint = new UniqueConstraintVO();
     uniqueConstraint.setDatasetSchemaId(new ObjectId().toString());
     uniqueConstraint.setTableSchemaId(new ObjectId().toString());

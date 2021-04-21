@@ -1,0 +1,37 @@
+.headline-m {
+  font-size: 40px;
+  font-weight: bold;
+  color: var(--white);
+}
+.headline-m.bold {
+  font-weight: bold;
+}
+.headline-m.regular {
+  font-weight: normal;
+}
+
+.heading-1 {
+  font-size: 44px;
+  font-weight: 600;
+}
+
+.heading-2 {
+  font-size: 33px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.heading-3 {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.heading-4 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.heading-5 {
+  font-size: 22px;
+  font-weight: 600;
+}

@@ -145,18 +145,18 @@ export const Dataset = withRouter(({ match, history }) => {
       if (!isUndefined(userContext.contextRoles)) {
         setHasWritePermissions(
           userContext.hasPermission(
-            [config.permissions.LEAD_REPORTER, config.permissions.REPORTER_WRITE],
-            `${config.permissions.DATASET}${datasetId}`
+            [config.permissions.roles.LEAD_REPORTER.key, config.permissions.roles.REPORTER_WRITE.key],
+            `${config.permissions.prefixes.DATASET}${datasetId}`
           ) ||
             userContext.hasPermission(
-              [config.permissions.DATA_CUSTODIAN],
-              `${config.permissions.TESTDATASET}${datasetId}`
+              [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+              `${config.permissions.prefixes.TESTDATASET}${datasetId}`
             )
         );
         setIsTestDataset(
           userContext.hasPermission(
-            [config.permissions.DATA_CUSTODIAN],
-            `${config.permissions.TESTDATASET}${datasetId}`
+            [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+            `${config.permissions.prefixes.TESTDATASET}${datasetId}`
           )
         );
       }
