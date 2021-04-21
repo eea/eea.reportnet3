@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * The Class ExportDatasetCompletedEvent.
+ * The Class ExportDatasetFailedEvent.
  */
 @Component
-public class ExportDatasetCompletedEvent implements NotificableEventHandler {
+public class ExportDatasetFailedEvent implements NotificableEventHandler {
 
   /** The dataset service. */
   @Autowired
@@ -36,7 +36,7 @@ public class ExportDatasetCompletedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.EXPORT_DATASET_COMPLETED_EVENT;
+    return EventType.EXPORT_DATASET_FAILED_EVENT;
   }
 
   /**
@@ -61,8 +61,7 @@ public class ExportDatasetCompletedEvent implements NotificableEventHandler {
     notification.put("dataflowId", dataflowId);
     notification.put("dataflowName", dataflowName);
     notification.put("datasetId", notificationVO.getDatasetId());
-    notification.put("datasetName", notificationVO.getDatasetName());
-
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 }

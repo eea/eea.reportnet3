@@ -538,26 +538,6 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/exportDatasetFile")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
-  public void exportDatasetFile(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("mimeType") String mimeType) {
-
-    datasetService.exportFileAsync(datasetId, mimeType);
-
-    // try {
-    // byte[] file = datasetService.exportFile(datasetId, mimeType, tableSchemaId);
-    // String fileName = tableName + "." + mimeType;
-    // HttpHeaders httpHeaders = new HttpHeaders();
-    // httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-    // return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
-    // } catch (EEAException | IOException e) {
-    // throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    // }
-  }
-
 
   /**
    * Export file through integration.
@@ -943,12 +923,40 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/exportDatasetFile")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
+  public void exportDatasetFile(@RequestParam("datasetId") Long datasetId,
+      @RequestParam("mimeType") String mimeType) {
+    LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
+    datasetService.exportDatasetFile(datasetId, mimeType);
+
+  }
+
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the response entity
+   */
   @Override
   @GetMapping("/downloadFile")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
   public ResponseEntity<InputStreamResource> downloadFile(@RequestParam Long datasetId,
       @RequestParam String fileName) {
 
     try {
+      LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
+          datasetId, fileName);
       File content = datasetService.downloadFile(datasetId, fileName);
       InputStreamResource resource = new InputStreamResource(new FileInputStream(content));
       HttpHeaders header = new HttpHeaders();

@@ -378,11 +378,11 @@ public enum EventType {
   /** The sort field failed event. */
   SORT_FIELD_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "sort_field_failed_event", true),
 
-  DOWNLOAD_EXPORT_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "download_export_event", true),
-
+  /** The export dataset completed event. */
   EXPORT_DATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_dataset_completed_event", true),
 
+  /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
       true);
 

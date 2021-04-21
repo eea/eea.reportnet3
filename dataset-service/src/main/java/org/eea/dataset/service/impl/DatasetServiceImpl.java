@@ -959,41 +959,33 @@ public class DatasetServiceImpl implements DatasetService {
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    LOG.info("mimetype es {}", mimeType);
-    String[] type = mimeType.split(" ");
-    String extension = "";
-    if (type.length > 1) {
-      extension = type[1];
-    } else {
-      extension = type[0];
-    }
-    final IFileExportContext context = fileExportFactory.createContext(extension);
-    LOG.info("extension es {}", extension);
-    byte[] content = context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
-    Boolean includeZip = false;
-    if (type.length > 1) {
-      includeZip = true;
-    }
-    LOG.info("la extension es {}", extension);
-    exportZip(datasetId, extension, content, includeZip);
+    final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return content;
+    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
   }
 
 
 
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
   @Override
   @Async
-  public void exportFileAsync(Long datasetId, String mimeType) {
-    // Get the dataFlowId from the metabase
+  public void exportDatasetFile(Long datasetId, String mimeType) {
+
     Long idDataflow = getDataFlowIdById(datasetId);
 
-    // Find if the dataset type is EU to include the countryCode
+    // Look for the dataset type is EU or DC to include the countryCode
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    LOG.info("mimetype es {}", mimeType);
+    // Extension arrive with zip+xlsx or zip+csv, but to the backend arrives with empty space. Split
+    // the extensions to know
+    // if its a zip or only xlsx/csv
     String[] type = mimeType.split(" ");
     String extension = "";
     if (type.length > 1) {
@@ -1002,17 +994,29 @@ public class DatasetServiceImpl implements DatasetService {
       extension = type[0];
     }
     final IFileExportContext context = fileExportFactory.createContext(extension);
-    LOG.info("extension es {}", extension);
+
     try {
       byte[] content = context.fileWriter(idDataflow, datasetId, null, includeCountryCode);
       Boolean includeZip = false;
       if (type.length > 1) {
         includeZip = true;
       }
-      exportZip(datasetId, extension, content, includeZip);
-      LOG.info("End of exportFile");
+      generateFile(datasetId, extension, content, includeZip);
+      LOG.info("End of exportDatasetFile datasetId {}", datasetId);
     } catch (EEAException | IOException e) {
-
+      LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
+          datasetId, mimeType, e.getMessage(), e);
+      // Send notification
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).error("Error exporting dataset data").build();
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
+            notificationVO);
+      } catch (EEAException ex) {
+        LOG_ERROR.error("Error sending export dataset fail notification. Message {}",
+            e.getMessage(), ex);
+      }
     }
 
   }
@@ -3342,6 +3346,8 @@ public class DatasetServiceImpl implements DatasetService {
     // we compound the route and create the file
     File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
     if (!file.exists()) {
+      LOG_ERROR.error(
+          "Trying to download a file generated during the export dataset data process but the file is not found");
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
     return file;
@@ -3841,103 +3847,97 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-  private void exportZip(Long datasetId, String mimeType, byte[] file, boolean includeZip)
-      throws IOException {
+  /**
+   * Generate file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param file the file
+   * @param includeZip the include zip
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  private void generateFile(Long datasetId, String mimeType, byte[] file, boolean includeZip)
+      throws IOException, EEAException {
 
-    try {
-      DataSetMetabase datasetMetabase =
-          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
-      String nameFileUnique = datasetMetabase.getDataSetName();
-      String nameFileScape = nameFileUnique + "." + mimeType;
-      LOG.info("El nombre del fichero es {}", nameFileScape);
-      // create folder if doesn't exist to save the file
-      File fileFolderProvider = new File(pathPublicFile, "dataset-" + datasetId);
-      fileFolderProvider.mkdirs();
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String nameFileUnique = dataset.getDataSetName();
+    String nameFileScape = nameFileUnique + "." + mimeType;
 
-      // make the zip
-      if (includeZip) {
-        // we create the file.zip
-        File fileWriteZip =
-            new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileUnique + ".zip");
+    // create folder if doesn't exist to save the file
+    File fileFolderProvider = new File(pathPublicFile, "dataset-" + datasetId);
+    fileFolderProvider.mkdirs();
 
-        // create the context to add all files in a treemap inside to attachment and file
-        // information
-        try (ZipOutputStream out =
-            new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
-          // we get the dataschema and check every table to see if find any field attachemnt
-          DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-          DataSetSchema dataSetSchema =
-              schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-          for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+    // make the zip
+    if (includeZip) {
+      // we create the file.zip
+      File fileWriteZip =
+          new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileUnique + ".zip");
 
-            // we find if in any table have one field type ATTACHMENT
-            List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
-                .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
-                .collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+      try (ZipOutputStream out =
+          new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+        // we get the dataschema and check every table to see if there's any field attachemnt
 
-              LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-                  tableSchema.getIdTableSchema());
-              // We took every field for every table
-              for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-                List<AttachmentValue> attachmentValue =
-                    attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(
-                        fieldAttach.getIdFieldSchema().toString());
+        DataSetSchema dataSetSchema =
+            schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+        for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-                // if there are filled we create a folder and inside of any folder we create the
-                // fields
-                if (!CollectionUtils.isEmpty(attachmentValue)) {
-                  LOG.info(
-                      "We  are in tableSchema with id {}, checking field {} and we have attachments files",
-                      tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+          // we find if in any table have one field type ATTACHMENT
+          List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+              .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+              .collect(Collectors.toList());
+          if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+            // We took every field for every table
+            for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+              List<AttachmentValue> attachmentValue =
+                  attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(
+                      fieldAttach.getIdFieldSchema().toString());
+
+              // if there are filled we create a folder and inside of any folder we create the
+              // fields
+              if (!CollectionUtils.isEmpty(attachmentValue)) {
+                LOG.info(
+                    "Generating zip file with attachments. Found in tableSchema with id {}, field {}",
+                    tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+
+                for (AttachmentValue attachment : attachmentValue) {
                   try {
-                    for (AttachmentValue attachment : attachmentValue) {
-
-                      ZipEntry eFieldAttach = new ZipEntry(
-                          tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
-                      out.putNextEntry(eFieldAttach);
-                      out.write(attachment.getContent(), 0, attachment.getContent().length);
-                    }
-                    out.closeEntry();
+                    ZipEntry eFieldAttach = new ZipEntry(
+                        tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                    out.putNextEntry(eFieldAttach);
+                    out.write(attachment.getContent(), 0, attachment.getContent().length);
                   } catch (ZipException e) {
-                    // LOG.info("Error creating file {} because already exist",
-                    // attachment.getFileName(), e);
+                    LOG.info("Error adding file to the zip {} because already exists",
+                        attachment.getFileName(), e);
                   }
                 }
+                out.closeEntry();
               }
             }
           }
-
-          ZipEntry e = new ZipEntry(nameFileScape);
-          out.putNextEntry(e);
-          out.write(file, 0, file.length);
-          out.closeEntry();
-
-          LOG.info("We create file {} in the route ", fileWriteZip.toString());
         }
+        // Adding the xlsx/csv file to the zip
+        ZipEntry e = new ZipEntry(nameFileScape);
+        out.putNextEntry(e);
+        out.write(file, 0, file.length);
+        out.closeEntry();
+        LOG.info("Creating file {} in the route ", fileWriteZip);
       }
-      // only the xlsx or the csv file
-      else {
-        LOG.info("exporto sin zip");
-        File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileScape);
-        try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
-          out.write(file, 0, file.length);
-        }
-      }
-
-      // Map<String, Object> value = new HashMap<>();
-      // value.put("dataset_id", datasetId);
-      // kafkaSenderUtils.releaseKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, value);
-      NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).datasetName(nameFileScape).build();
-
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
-          notificationVO);
-
-    } catch (Exception e) {
-      LOG_ERROR.error(e.getMessage(), e);
     }
+    // only the xlsx or the csv file
+    else {
+      File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileScape);
+      try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
+        out.write(file, 0, file.length);
+      }
+    }
+    // Send notification
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .datasetName(nameFileScape).build();
+
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
+        notificationVO);
 
   }
 
