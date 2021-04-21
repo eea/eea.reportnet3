@@ -112,17 +112,13 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   };
 
   const userLogout = async () => {
-    {
-      userContext.socket.deactivate();
-      try {
-        await UserService.logout();
-      } catch (error) {
-        notificationContext.add({
-          type: 'USER_LOGOUT_ERROR'
-        });
-      } finally {
-        userContext.onLogout();
-      }
+    userContext.socket.deactivate();
+    try {
+      await UserService.logout();
+    } catch (error) {
+      notificationContext.add({ type: 'USER_LOGOUT_ERROR' });
+    } finally {
+      userContext.onLogout();
     }
   };
 
