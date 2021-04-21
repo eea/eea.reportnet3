@@ -1,2 +1,3 @@
-import React from 'react';
-export const SnapshotContext = React.createContext();
+import { createContext } from 'react';
+
+export const SnapshotContext = createContext();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 

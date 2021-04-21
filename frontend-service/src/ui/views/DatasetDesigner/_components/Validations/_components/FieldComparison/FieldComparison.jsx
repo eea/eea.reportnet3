@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import styles from './FieldComparison.module.scss';
 
@@ -22,7 +22,7 @@ export const FieldComparison = ({
   const resourcesContext = useContext(ResourcesContext);
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div className={styles.section}>
         <ul className={styles.list}>
           {creationFormState.candidateRule.expressions &&
@@ -75,6 +75,6 @@ export const FieldComparison = ({
           rows="5"
           value={creationFormState.validationRuleString}></textarea>
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 };
