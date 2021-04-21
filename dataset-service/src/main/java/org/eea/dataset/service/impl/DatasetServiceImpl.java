@@ -3872,18 +3872,17 @@ public class DatasetServiceImpl implements DatasetService {
       throws IOException, EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-    String nameFileUnique = dataset.getDataSetName();
-    String nameFileScape = nameFileUnique + "." + mimeType;
-
+    String nameDataset = dataset.getDataSetName();
+    String nameFile = "";
     // create folder if doesn't exist to save the file
     File fileFolderProvider = new File(pathPublicFile, "dataset-" + datasetId);
     fileFolderProvider.mkdirs();
 
     // make the zip
     if (includeZip) {
+      nameFile = nameDataset + ".zip";
       // we create the file.zip
-      File fileWriteZip =
-          new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileUnique + ".zip");
+      File fileWriteZip = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
 
       try (ZipOutputStream out =
           new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
@@ -3928,7 +3927,7 @@ public class DatasetServiceImpl implements DatasetService {
           }
         }
         // Adding the xlsx/csv file to the zip
-        ZipEntry e = new ZipEntry(nameFileScape);
+        ZipEntry e = new ZipEntry(nameDataset + "." + mimeType);
         out.putNextEntry(e);
         out.write(file, 0, file.length);
         out.closeEntry();
@@ -3937,7 +3936,8 @@ public class DatasetServiceImpl implements DatasetService {
     }
     // only the xlsx file
     else {
-      File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFileScape);
+      nameFile = nameDataset + "." + mimeType;
+      File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
       try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
         out.write(file, 0, file.length);
       }
@@ -3945,7 +3945,7 @@ public class DatasetServiceImpl implements DatasetService {
     // Send notification
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .datasetName(nameFileScape).build();
+        .datasetName(nameFile).build();
 
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
         notificationVO);
