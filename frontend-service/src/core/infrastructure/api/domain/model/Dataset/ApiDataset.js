@@ -62,6 +62,12 @@ export const apiDataset = {
     });
   },
 
+  downloadExportDatasetFile: async (datasetId, fileName) => {
+    return await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
+    });
+  },
+
   downloadExportFile: async (datasetId, fileName, providerId = null) => {
     const url = providerId
       ? getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName, providerId })

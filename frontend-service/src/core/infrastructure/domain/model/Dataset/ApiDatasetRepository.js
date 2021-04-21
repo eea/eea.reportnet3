@@ -90,6 +90,9 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
 
+const downloadExportDatasetFile = async (datasetId, fileName) =>
+  await apiDataset.downloadExportDatasetFile(datasetId, fileName);
+
 const downloadExportFile = async (datasetId, fileName, providerId) =>
   await apiDataset.downloadExportFile(datasetId, fileName, providerId);
 
@@ -700,6 +703,7 @@ export const ApiDatasetRepository = {
   deleteTableDataById,
   deleteTableDesign,
   downloadDatasetFileData,
+  downloadExportDatasetFile,
   downloadExportFile,
   downloadFileData,
   errorPositionByObjectId,

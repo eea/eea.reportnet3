@@ -14,6 +14,7 @@
   "deleteRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}",
   "deleteTableDesign": "/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}",
   "downloadDatasetFileData": "/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?fileName={:fileName}",
+  "downloadExportDatasetFile": "/dataset/{:datasetId}/downloadFile?fileName={:fileName}",
   "downloadExportFile": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}",
   "downloadExportFileNoProviderId": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}",
   "downloadFileData": "/dataset/{:datasetId}/field/{:fieldId}/attachment",

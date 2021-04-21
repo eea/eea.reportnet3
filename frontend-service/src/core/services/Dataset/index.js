@@ -12,6 +12,7 @@ import { DeleteSchema } from './DeleteSchema';
 import { DeleteTableData } from './DeleteTableData';
 import { DeleteTableDesign } from './DeleteTableDesign';
 import { DownloadDatasetFileData } from './DownloadDatasetFileData';
+import { DownloadExportDatasetFile } from './DownloadExportDatasetFile';
 import { DownloadExportFile } from './DownloadExportFile';
 import { DownloadFileData } from './DownloadFileData';
 import { ExportData } from './ExportData';
@@ -51,6 +52,7 @@ export const DatasetService = {
   deleteTableDataById: DeleteTableData({ datasetRepository }),
   deleteTableDesign: DeleteTableDesign({ datasetRepository }),
   downloadDatasetFileData: DownloadDatasetFileData({ datasetRepository }),
+  downloadExportDatasetFile: DownloadExportDatasetFile({ datasetRepository }),
   downloadExportFile: DownloadExportFile({ datasetRepository }),
   downloadFileData: DownloadFileData({ datasetRepository }),
   errorPositionByObjectId: GetErrorPosition({ datasetRepository }),
