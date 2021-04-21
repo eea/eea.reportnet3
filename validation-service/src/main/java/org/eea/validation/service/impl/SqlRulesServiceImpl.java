@@ -251,7 +251,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Async
   @Override
   public void validateSQLRules(Long datasetId, String datasetSchemaId, Boolean showNotification) {
-    Long currentTime = System.currentTimeMillis();
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
@@ -297,7 +296,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
       }
     }
-    LOG.info("Performing data base health check {} ", System.currentTimeMillis() - currentTime);
   }
 
   /**
