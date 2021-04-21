@@ -1,3 +1,3 @@
-import React from 'react';
+import { createContext } from 'react';
 
-export const ResourcesContext = React.createContext({ resources: {} });
+export const ResourcesContext = createContext({ resources: {} });

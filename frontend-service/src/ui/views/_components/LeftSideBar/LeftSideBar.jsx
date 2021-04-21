@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -112,17 +112,13 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   };
 
   const userLogout = async () => {
-    {
-      userContext.socket.deactivate();
-      try {
-        await UserService.logout();
-      } catch (error) {
-        notificationContext.add({
-          type: 'USER_LOGOUT_ERROR'
-        });
-      } finally {
-        userContext.onLogout();
-      }
+    userContext.socket.deactivate();
+    try {
+      await UserService.logout();
+    } catch (error) {
+      notificationContext.add({ type: 'USER_LOGOUT_ERROR' });
+    } finally {
+      userContext.onLogout();
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import camelCase from 'lodash/camelCase';
@@ -15,7 +15,6 @@ import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/r
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import WebformsConfig from 'conf/webforms.config.json';
 
-import { Webforms } from 'ui/views/Webforms';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -24,7 +23,6 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -33,12 +31,14 @@ import { Menu } from 'primereact/menu';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { ValidationsList } from 'ui/views/_components/ValidationsList';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
+import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
+import { Webforms } from 'ui/views/Webforms';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';

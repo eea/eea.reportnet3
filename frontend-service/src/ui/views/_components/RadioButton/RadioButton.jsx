@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
@@ -112,7 +112,7 @@ RadioButton.defaultProps = {
   value: null
 };
 
-// import React, { Component } from 'react';
+// import  { Component } from 'react';
 // import PropTypes from 'prop-types';
 // import classNames from 'classnames';
 // import { tip } from '../tooltip/Tooltip';

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 
 import { Article13 } from './Article13';
 import { Article15 } from './Article15';

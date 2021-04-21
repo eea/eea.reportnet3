@@ -1,11 +1,11 @@
-import React from 'react';
+import { memo } from 'react';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './Title.module.scss';
 
-const Title = React.memo(({ icon, iconSize, insideTitle, subtitle, title }) => {
+const Title = memo(({ icon, iconSize, insideTitle, subtitle, title }) => {
   return (
     <div className={styles.titleWrap}>
       <div className={styles.iconWrap}>

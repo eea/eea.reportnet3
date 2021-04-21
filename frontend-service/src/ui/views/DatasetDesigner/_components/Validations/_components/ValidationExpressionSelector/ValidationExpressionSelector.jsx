@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { ComparisonExpression } from 'ui/views/DatasetDesigner/_components/Validations/_components/ComparisonExpression';
 import { RelationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_components/RelationExpression';
 import { ValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_components/ValidationExpression';
@@ -19,6 +17,6 @@ export const ValidationExpressionSelector = props => {
   if (expressionType === 'fieldRelations') {
     return <RelationExpression {...props} />;
   }
-  
+
   return <ValidationExpression {...props} />;
 };
