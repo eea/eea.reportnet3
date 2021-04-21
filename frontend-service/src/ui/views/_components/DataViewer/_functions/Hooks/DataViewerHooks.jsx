@@ -321,7 +321,7 @@ export const useSetColumns = (
   };
 
   useEffect(() => {
-    const maxWidths = [];
+    // const maxWidths = [];
 
     // if (!isEditing) {
     //Calculate the max width of the shown data
