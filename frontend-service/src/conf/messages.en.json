@@ -410,7 +410,7 @@
     "exportEuDatasetHeader": "Export EU Datasets",
     "exportEuDatasetInit": "Exporting EU datasets data",
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
-    "exportExternalIntegrationDataset": "Exporting dataset data",
+    "exportDatasetData": "Exporting dataset data",
     "exportLeadReporters": "Export lead reporters",
     "exportLeadReportersTemplate": "Export template",
     "exportOperationManageIntegration": "Export",

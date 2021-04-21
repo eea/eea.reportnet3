@@ -869,7 +869,7 @@
           "key": "EXPORT_EU_DATASET_INIT"
         },
         {
-          "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
+          "key": "EXPORT_DATASET_DATA"
         },
         {
           "key": "DATASET_IMPORT_INIT"

@@ -110,7 +110,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
       await DatasetService.exportDataById(datasetId, fileType);

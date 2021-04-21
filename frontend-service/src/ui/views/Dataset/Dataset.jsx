@@ -501,7 +501,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({
-      type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
+      type: 'EXPORT_DATASET_DATA'
     });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -514,8 +514,8 @@ export const Dataset = withRouter(({ match, history }) => {
     setIsLoadingFile(true);
     try {
       setExportDatasetDataName(createFileName(datasetName, fileType));
-      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
       setExportDatasetData(datasetData.data);
+      await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
     } finally {
