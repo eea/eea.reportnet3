@@ -3341,6 +3341,15 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Override
   public File downloadFile(Long datasetId, String fileName) throws IOException, EEAException {
     // we compound the route and create the file

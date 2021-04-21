@@ -964,7 +964,8 @@ public class DataSetControllerImpl implements DatasetController {
       return ResponseEntity.ok().headers(header).contentLength(content.length())
           .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
     } catch (IOException | EEAException e) {
-      LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
+      LOG_ERROR.error("File download from the datasetId {} doesn't exist. Filename {}", datasetId,
+          fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
