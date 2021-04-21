@@ -860,7 +860,6 @@ export class DataTable extends Component {
 
       if (this.draggedColumn !== dropHeader) {
         let targetLeft = dropHeaderOffset.left - containerOffset.left;
-        //let targetTop =  containerOffset.top - dropHeaderOffset.top;
         let columnCenter = dropHeaderOffset.left + dropHeader.offsetWidth / 2;
 
         this.reorderIndicatorUp.style.top = dropHeaderOffset.top - containerOffset.top - (this.iconHeight - 1) + 'px';

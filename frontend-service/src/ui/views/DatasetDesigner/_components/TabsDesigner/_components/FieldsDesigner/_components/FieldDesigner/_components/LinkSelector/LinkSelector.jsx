@@ -285,7 +285,6 @@ const LinkSelector = withRouter(
               optionLabel="name"
               options={linkedTableFields}
               placeholder={resources.messages['linkedTableLabel']}
-              // scrollHeight="450px"
               value={pkLinkedTableLabel}
             />
           </div>
@@ -301,7 +300,6 @@ const LinkSelector = withRouter(
               optionLabel="name"
               options={masterTableFields}
               placeholder={resources.messages['masterTableConditional']}
-              // scrollHeight="450px"
               value={pkMasterTableConditional}
             />
             <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>

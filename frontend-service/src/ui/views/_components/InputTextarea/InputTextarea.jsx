@@ -1,47 +1,3 @@
-// import  { forwardRef } from 'react';
-// import { InputTextarea as PrimeInputTextarea } from 'primereact/inputtextarea';
-
-// const InputTextarea = forwardRef((props, _) => {
-//   const {
-//     autoFocus,
-//     autoResize,
-//     className,
-//     cols,
-//     disabled = false,
-//     inputTextareaRef,
-//     onBlur,
-//     onChange,
-//     onFocus,
-//     onInput,
-//     onKeyDown,
-//     placeholder,
-//     rows,
-//     type,
-//     value
-//   } = props;
-//   return (
-//     <PrimeInputTextarea
-//       autoResize={autoResize}
-//       autoFocus={autoFocus}
-//       className={className}
-//       cols={cols}
-//       disabled={disabled}
-//       onBlur={onBlur}
-//       onChange={onChange}
-//       onFocus={onFocus}
-//       onInput={onInput}
-//       onKeyDown={onKeyDown}
-//       placeholder={placeholder}
-//       ref={inputTextareaRef}
-//       rows={rows}
-//       type={type}
-//       value={value}
-//     />
-//   );
-// });
-
-// export { InputTextarea };
-
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -63,7 +19,6 @@ export class InputTextarea extends Component {
     rows: 1,
     tooltip: null,
     tooltipOptions: null
-    // value: undefined
   };
 
   static propTypes = {
@@ -76,7 +31,6 @@ export class InputTextarea extends Component {
     rows: PropTypes.number,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object
-    // value: PropTypes.string
   };
 
   constructor(props) {

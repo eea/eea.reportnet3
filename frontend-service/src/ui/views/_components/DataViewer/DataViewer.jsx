@@ -273,12 +273,6 @@ const DataViewer = withRouter(
       reporting
     );
 
-    // useEffect(() => {
-    //   let inmLevelErrorTypesWithCorrects = [...levelErrorTypesWithCorrects];
-    //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
-    //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
-    // }, [levelErrorTypes]);
-
     useEffect(() => {
       if (isGroupedValidationSelected) {
         dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
@@ -969,7 +963,6 @@ const DataViewer = withRouter(
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
-          // disabled={isSaving}
           label={areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']}
           icon={'check'}
           onClick={
@@ -984,10 +977,6 @@ const DataViewer = withRouter(
             icon="cancel"
             label={resources.messages['cancel']}
             onClick={() => {
-              // dispatchRecords({
-              //   type: 'SET_NEW_RECORD',
-              //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-              // });
               dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
             }}
           />
@@ -1141,7 +1130,6 @@ const DataViewer = withRouter(
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
-            // autoLayout={true}
             contextMenuSelection={records.selectedRecord}
             editable={hasWritePermissions && !tableReadOnly}
             id={tableId}

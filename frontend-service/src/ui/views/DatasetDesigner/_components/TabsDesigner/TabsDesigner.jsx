@@ -312,14 +312,6 @@ export const TabsDesigner = withRouter(
       </div>
     );
 
-    // const getSchemaIndexById = (datasetSchemaId, datasetSchemasArray) => {
-    //   return datasetSchemasArray
-    //     .map(datasetSchema => {
-    //       return datasetSchema.datasetSchemaId;
-    //     })
-    //     .indexOf(datasetSchemaId);
-    // };
-
     const renderErrors = (errorTitle, error) => {
       return (
         <Fragment>
