@@ -69,7 +69,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const onLoadDataflows = async () => {
     try {
       const { data } = await DataflowService.all(userContext.contextRoles);
-      cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: parseDataflowList(data) } });
+      cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
     } catch (error) {
       console.error('onLoadDataflows error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -86,20 +86,20 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
   };
 
-  const parseDataflowList = dataflows => {
-    let parsedDataflows = dataflows.filter(
-      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions['DATA_CUSTODIAN']
+  const cloneableDataflowList = dataflows => {
+    let cloneableDataflows = dataflows.filter(
+      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions.roles.CUSTODIAN.label
     );
 
     let dataflowsToFilter = [];
 
-    parsedDataflows.forEach(dataflow => {
+    cloneableDataflows.forEach(dataflow => {
       let dataflowToFilter = {};
       dataflowToFilter.id = dataflow.id;
       dataflowToFilter.name = dataflow.name;
       dataflowToFilter.description = dataflow.description;
-      dataflowToFilter.obligationTitle = dataflow.obligation ? dataflow.obligation.title : null;
-      dataflowToFilter.legalInstruments = dataflow.obligation ? dataflow.obligation.legalInstruments.alias : null;
+      dataflowToFilter.obligationTitle = dataflow.obligation?.title;
+      dataflowToFilter.legalInstruments = dataflow.obligation?.legalInstruments?.alias;
       dataflowToFilter.status = dataflow.status;
       dataflowToFilter.expirationDate = dataflow.expirationDate;
       dataflowsToFilter.push(dataflowToFilter);

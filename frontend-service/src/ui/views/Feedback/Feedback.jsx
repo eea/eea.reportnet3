@@ -101,8 +101,8 @@ export const Feedback = withRouter(({ match, history }) => {
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       const isCustodian = userContext.hasPermission([
-        config.permissions.DATA_CUSTODIAN,
-        config.permissions.DATA_STEWARD
+        config.permissions.roles.CUSTODIAN.key,
+        config.permissions.roles.STEWARD.key
       ]);
       dispatchFeedback({ type: 'SET_IS_CUSTODIAN', payload: isCustodian });
     }

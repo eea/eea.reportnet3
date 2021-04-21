@@ -1,13 +1,11 @@
-import isNil from 'lodash/isNil';
-
 const parseDataToFilter = (data, pinnedDataflows) => {
   return data.map(dataflow => ({
     id: dataflow.id,
     description: dataflow.description,
     expirationDate: dataflow.expirationDate,
-    legalInstrument: !isNil(dataflow.obligation) ? dataflow.obligation.legalInstruments.alias : null,
+    legalInstrument: dataflow.obligation?.legalInstruments?.alias,
     name: dataflow.name,
-    obligationTitle: !isNil(dataflow.obligation) ? dataflow.obligation.title : null,
+    obligationTitle: dataflow.obligation?.title,
     pinned: pinnedDataflows.some(pinnedDataflow => pinnedDataflow === dataflow.id.toString()) ? 'pinned' : 'unpinned',
     reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
     status: dataflow.status,
