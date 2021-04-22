@@ -51,7 +51,7 @@ const GlobalNotifications = () => {
         datasetData = data;
 
         notificationContext.add({
-          type: 'EXTERNAL_INTEGRATION_DOWNLOAD ',
+          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
           onClick: () => DownloadFile(datasetData, getFileName())
         });
       }
