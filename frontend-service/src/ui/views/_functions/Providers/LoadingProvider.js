@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import { useReducer } from 'react';
 import { GlobalLoading } from 'ui/views/_components/GlobalLoading';
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 

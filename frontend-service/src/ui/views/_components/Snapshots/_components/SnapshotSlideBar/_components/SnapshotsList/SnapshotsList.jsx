@@ -1,5 +1,3 @@
-import React from 'react';
-
 import styles from './SnapshotsList.module.scss';
 
 import { SnapshotItem } from './_components/SnapshotItem';

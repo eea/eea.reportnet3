@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import { Component, Children } from 'react';
+
 import { BodyRow } from './_components/BodyRow';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
@@ -426,7 +427,7 @@ export class TableBody extends Component {
   renderRowGroupHeader(rowData, index) {
     return (
       <tr key={index + '_rowgroupheader'} className="p-rowgroup-header">
-        <td colSpan={React.Children.count(this.props.children)}>
+        <td colSpan={Children.count(this.props.children)}>
           <span className="p-rowgroup-header-name">{this.props.rowGroupHeaderTemplate(rowData, index)}</span>
         </td>
       </tr>

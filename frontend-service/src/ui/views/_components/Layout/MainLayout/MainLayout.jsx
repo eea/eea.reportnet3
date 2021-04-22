@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -79,7 +79,6 @@ const MainLayout = ({ children, isPublic = false }) => {
     window.addEventListener(
       'dragover',
       function (e) {
-        // e.dataTransfer.effectAllowed = 'none';
         e.preventDefault();
         e = e || window.event;
       },

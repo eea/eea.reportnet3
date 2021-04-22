@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState, useReducer } from 'react';
+import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';
@@ -95,18 +95,6 @@ const ActionsToolbar = ({
       dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
     }
   }, [isValidationSelected]);
-
-  useEffect(() => {
-    // const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
-    // const dropdownFilter = colsSchema
-    //   .map(colSchema => {
-    //     if (!mustShowColumns.includes(colSchema.field)) {
-    //       return { label: colSchema.header, key: colSchema.field };
-    //     }
-    //   })
-    //   .filter(colSchema => !isUndefined(colSchema));
-    // dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
-  }, [levelErrorTypesWithCorrects]);
 
   useEffect(() => {
     if (!isUndefined(exportTableData)) {
@@ -311,55 +299,9 @@ const ActionsToolbar = ({
                 value={selectedRuleMessage}
               />
             )}
-            {/* <Button
-              className={`p-button-rounded p-button-secondary-transparent`}
-              disabled={!filter.groupedFilter}
-              icon={'groupBy'}
-              label={resources.messages['groupBy']}
-              onClick={() => {
-                onHideSelectGroupedValidation();
-                showGroupedValidationFilter(false);
-                dispatchFilter({
-                  type: 'SET_VALIDATION_GROUPED_FILTER',
-                  payload: { groupedFilter: false }
-                });
-              }}
-            /> */}
           </>
         )}
-
-        {/* <Button
-          className={`p-button-rounded p-button-secondary-transparent`}
-          disabled={true}
-          icon={'groupBy'}
-          label={resources.messages['groupBy']}
-        />
-
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent`}
-          disabled={true}
-          icon={'sort'}
-          label={resources.messages['sort']}
-        />
-
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent`}
-          disabled={true}
-          icon="filter"
-          label={resources.messages['filters']}
-          onClick={() => {}
-          /> */}
       </div>
-      {/* <div className="p-toolbar-group-right">
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
-            isLoading ? 'p-button-animated-spin' : ''
-          }`}
-          icon={'refresh'}
-          label={resources.messages['refresh']}
-          onClick={() => onRefresh()}
-        />
-      </div> */}
     </Toolbar>
   );
 };

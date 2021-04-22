@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';

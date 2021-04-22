@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -311,14 +311,6 @@ export const TabsDesigner = withRouter(
         <Button label={resources.messages['ok']} icon="check" onClick={() => setIsErrorDialogVisible(false)} />
       </div>
     );
-
-    // const getSchemaIndexById = (datasetSchemaId, datasetSchemasArray) => {
-    //   return datasetSchemasArray
-    //     .map(datasetSchema => {
-    //       return datasetSchema.datasetSchemaId;
-    //     })
-    //     .indexOf(datasetSchemaId);
-    // };
 
     const renderErrors = (errorTitle, error) => {
       return (
