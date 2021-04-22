@@ -50,4 +50,14 @@ public interface DatasetExtendedRepository {
    * @return the table id
    */
   Long getTableId(String idTableSchema, Long datasetId);
+
+  /**
+   * Validate query.
+   *
+   * @param query the query
+   * @return the result set
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  void validateQuery(String query, Long datasetId) throws EEAInvalidSQLException;
+
 }

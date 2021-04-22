@@ -1,3 +1,3 @@
-import React from 'react';
+import { createContext } from 'react';
 
-export const NotificationContext = React.createContext({});
+export const NotificationContext = createContext({});

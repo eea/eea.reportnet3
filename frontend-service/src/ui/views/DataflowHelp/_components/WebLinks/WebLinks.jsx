@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
@@ -370,7 +370,7 @@ export const WebLinks = ({
           visible={webLinksState.isAddOrEditWebLinkDialogVisible}>
           <form>
             <fieldset>
-              <div className={`formField${webLinksState.errors.description.hasErrors ? ' error' : ''}`}>
+              <div className={`formField ${webLinksState.errors.description.hasErrors ? 'error' : ''}`}>
                 <input
                   id={`descriptionWebLinks`}
                   ref={inputRef}
@@ -379,6 +379,7 @@ export const WebLinks = ({
                     onDescriptionChange(e.target.value);
                   }}
                   onBlur={() => checkIsCorrectInputValue('description')}
+                  onFocus={() => setErrors('description', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('description')) {
                       onSaveRecord();
@@ -397,12 +398,13 @@ export const WebLinks = ({
                 )}
               </div>
 
-              <div className={`formField${webLinksState.errors.url.hasErrors ? ' error' : ''}`}>
+              <div className={`formField ${webLinksState.errors.url.hasErrors ? 'error' : ''}`}>
                 <input
                   id={`urlWebLinks`}
                   name="url"
                   onChange={e => onWebLinkUrlChange(e.target.value)}
                   onBlur={() => checkIsCorrectInputValue('url')}
+                  onFocus={() => setErrors('url', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('url')) {
                       onSaveRecord();

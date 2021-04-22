@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useReducer } from 'react';
+import { Fragment, useContext, useReducer } from 'react';
 import ReactTooltip from 'react-tooltip';
 
 import styles from './ManageManualAcceptanceDataset.module.scss';

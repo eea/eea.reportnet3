@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -26,7 +26,6 @@ import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 export const FieldsDesigner = ({
-  //activeIndex,
   datasetId,
   datasetSchemaId,
   datasetSchemas,
@@ -142,7 +141,6 @@ export const FieldsDesigner = ({
     });
     onChangeFields(inmFields, TextUtils.areEquals(type, 'LINK'), table.tableSchemaId);
     setFields(inmFields);
-    // window.scrollTo(0, document.body.scrollHeight);
   };
 
   const onFieldDelete = (deletedFieldIndex, deletedFieldType) => {
@@ -408,6 +406,7 @@ export const FieldsDesigner = ({
         <FieldDesigner
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+          checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
           codelistItems={[]}
           datasetId={datasetId}
           datasetSchemaId={datasetSchemaId}
@@ -447,6 +446,7 @@ export const FieldsDesigner = ({
             <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
               <FieldDesigner
                 checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+                checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
                 datasetSchemaId={datasetSchemaId}

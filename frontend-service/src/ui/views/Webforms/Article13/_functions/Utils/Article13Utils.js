@@ -83,13 +83,6 @@ const getSingleRecordOption = singleRecord => {
   }
 
   return `${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
-  // if (singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value === '') {
-  //   return `#${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
-  // }
-
-  // return `#${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value} - ${
-  //   singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Title')).value
-  // }`;
 };
 
 const hasErrors = data => {

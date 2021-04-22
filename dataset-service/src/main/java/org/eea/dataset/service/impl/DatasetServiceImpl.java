@@ -761,8 +761,32 @@ public class DatasetServiceImpl implements DatasetService {
       if (null == fieldValue.getValue()) {
         fieldValue.setValue("");
       } else {
-        if (fieldValue.getValue().length() >= fieldMaxLength) {
-          fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+        fieldValue.setValue(fieldValue.getValue());
+        if (null == fieldValue.getType()) {
+          if (null != fieldValue.getValue() && fieldValue.getValue().length() >= fieldMaxLength) {
+            fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+          }
+        } else {
+          switch (fieldValue.getType()) {
+            case POINT:
+              break;
+            case LINESTRING:
+              break;
+            case POLYGON:
+              break;
+            case MULTIPOINT:
+              break;
+            case MULTILINESTRING:
+              break;
+            case MULTIPOLYGON:
+              break;
+            case GEOMETRYCOLLECTION:
+              break;
+            default:
+              if (fieldValue.getValue().length() >= fieldMaxLength) {
+                fieldValue.setValue(fieldValue.getValue().substring(0, fieldMaxLength));
+              }
+          }
         }
       }
       Document fieldSchema =
@@ -931,12 +955,15 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Find if the dataset type is EU to include the countryCode
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
     return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
   }
+
+
 
   /**
    * Export file through integration.
@@ -1044,9 +1071,32 @@ public class DatasetServiceImpl implements DatasetService {
     if (updateCascadePK) {
       fieldValueUpdatePK(field, fieldSchema, datasetSchemaId);
     }
-
-    if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
-      field.setValue(field.getValue().substring(0, fieldMaxLength));
+    field.setValue(field.getValue());
+    if (null == field.getType()) {
+      if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
+        field.setValue(field.getValue().substring(0, fieldMaxLength));
+      }
+    } else {
+      switch (field.getType()) {
+        case POINT:
+          break;
+        case LINESTRING:
+          break;
+        case POLYGON:
+          break;
+        case MULTIPOINT:
+          break;
+        case MULTILINESTRING:
+          break;
+        case MULTIPOLYGON:
+          break;
+        case GEOMETRYCOLLECTION:
+          break;
+        default:
+          if (null != field.getValue() && field.getValue().length() >= fieldMaxLength) {
+            field.setValue(field.getValue().substring(0, fieldMaxLength));
+          }
+      }
     }
 
     fieldRepository.saveValue(field.getId(), field.getValue());
@@ -1497,11 +1547,30 @@ public class DatasetServiceImpl implements DatasetService {
               tableValue.getId(), tableValue.getIdTableSchema());
           tableValue.getRecords().stream().forEach(r -> {
             r.getFields().stream().forEach(f -> {
-              if (DataType.ATTACHMENT.equals(f.getType())) {
-                f.setValue("");
-              }
-              if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
-                f.setValue(f.getValue().substring(0, fieldMaxLength));
+              switch (f.getType()) {
+                case ATTACHMENT:
+                  f.setValue("");
+                  break;
+                case POINT:
+                  break;
+                case LINESTRING:
+                  break;
+                case POLYGON:
+                  break;
+                case MULTIPOINT:
+                  break;
+                case MULTILINESTRING:
+                  break;
+                case MULTIPOLYGON:
+                  break;
+                case GEOMETRYCOLLECTION:
+                  break;
+                default:
+                  if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
+                    f.setValue(f.getValue().substring(0, fieldMaxLength));
+                  } else {
+                    f.setValue(f.getValue());
+                  }
               }
             });
           });
@@ -2895,8 +2964,25 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     // Cut string value to maximum length
-    if (value.length() > fieldMaxLength) {
-      value = value.substring(0, fieldMaxLength);
+    switch (dataType) {
+      case POINT:
+        break;
+      case LINESTRING:
+        break;
+      case POLYGON:
+        break;
+      case MULTIPOINT:
+        break;
+      case MULTILINESTRING:
+        break;
+      case MULTIPOLYGON:
+        break;
+      case GEOMETRYCOLLECTION:
+        break;
+      default:
+        if (value.length() >= fieldMaxLength) {
+          value = value.substring(0, fieldMaxLength);
+        }
     }
 
     return value;
@@ -3192,6 +3278,28 @@ public class DatasetServiceImpl implements DatasetService {
     File file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
         "dataProvider-" + dataProviderId.toString()), fileName);
     if (!file.exists()) {
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public File downloadFile(Long datasetId, String fileName) throws IOException, EEAException {
+    // we compound the route and create the file
+    File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
+    if (!file.exists()) {
+      LOG_ERROR.error(
+          "Trying to download a file generated during the export dataset data process but the file is not found");
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
     return file;
@@ -3616,7 +3724,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
     } catch (IOException e) {
-      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+      LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
   }
 
@@ -3691,4 +3799,5 @@ public class DatasetServiceImpl implements DatasetService {
 
     return query.toString();
   }
+
 }

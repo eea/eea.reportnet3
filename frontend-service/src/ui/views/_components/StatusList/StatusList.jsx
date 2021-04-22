@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 
 import styles from './StatusList.module.scss';
 import colors from 'conf/colors.json';

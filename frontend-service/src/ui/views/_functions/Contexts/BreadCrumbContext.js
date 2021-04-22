@@ -1,5 +1,5 @@
-import React from 'react';
+import { createContext } from 'react';
 
-export const BreadCrumbContext = React.createContext({
+export const BreadCrumbContext = createContext({
   model: []
 });

@@ -42,6 +42,11 @@ const checkDuplicates = (fields, name, fieldId) => {
   }
 };
 
+const checkInvalidCharacters = name => {
+  const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
+  return invalidCharsRegex.test(name);
+};
+
 const getIndexByFieldName = (fieldName, fieldsArray) => {
   return fieldsArray
     .map(field => {
@@ -61,6 +66,7 @@ const getIndexByFieldId = (fieldId, fieldsArray) => {
 export const FieldsDesignerUtils = {
   arrayShift,
   checkDuplicates,
+  checkInvalidCharacters,
   getIndexByFieldName,
   getIndexByFieldId
 };

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import styles from './BreadCrumb.module.scss';
 
@@ -59,10 +59,10 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
         const separator = index === model.length - 1 ? null : onLoadSeparator();
 
         return (
-          <React.Fragment key={item.label + '_' + index}>
+          <Fragment key={item.label + '_' + index}>
             {menuitem}
             {separator}
-          </React.Fragment>
+          </Fragment>
         );
       });
 

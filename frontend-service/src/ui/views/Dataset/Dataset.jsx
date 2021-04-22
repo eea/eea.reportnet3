@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -145,18 +145,18 @@ export const Dataset = withRouter(({ match, history }) => {
       if (!isUndefined(userContext.contextRoles)) {
         setHasWritePermissions(
           userContext.hasPermission(
-            [config.permissions.LEAD_REPORTER, config.permissions.REPORTER_WRITE],
-            `${config.permissions.DATASET}${datasetId}`
+            [config.permissions.roles.LEAD_REPORTER.key, config.permissions.roles.REPORTER_WRITE.key],
+            `${config.permissions.prefixes.DATASET}${datasetId}`
           ) ||
             userContext.hasPermission(
-              [config.permissions.DATA_CUSTODIAN],
-              `${config.permissions.TESTDATASET}${datasetId}`
+              [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+              `${config.permissions.prefixes.TESTDATASET}${datasetId}`
             )
         );
         setIsTestDataset(
           userContext.hasPermission(
-            [config.permissions.DATA_CUSTODIAN],
-            `${config.permissions.TESTDATASET}${datasetId}`
+            [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+            `${config.permissions.prefixes.TESTDATASET}${datasetId}`
           )
         );
       }
@@ -810,13 +810,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const renderSwitchView = () =>
     !isNil(webformData) &&
     hasWritePermissions && (
-      // <div className={styles.switch}>
-      //   <div className={`${styles.wrap}`}>
-      //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
-      //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
-      //     <span className={styles.text}>{resources.messages['webform']}</span>
-      //   </div>
-      // </div>
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch

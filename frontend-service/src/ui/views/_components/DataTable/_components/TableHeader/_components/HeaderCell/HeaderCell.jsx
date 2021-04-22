@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import uuid from 'uuid';
 
 import { InputText } from 'ui/views/_components/InputText';
-//'primereact/inputtext';
+
 import classNames from 'classnames';
 import { RowCheckbox } from 'ui/views/_components/DataTable/_components/RowCheckbox';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';

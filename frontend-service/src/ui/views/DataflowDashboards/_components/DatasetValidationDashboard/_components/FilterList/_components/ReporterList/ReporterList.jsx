@@ -1,5 +1,3 @@
-import React from 'react';
-
 import styles from '../../FilterList.module.scss';
 
 import { ReporterListItem } from './ReporterListItem';

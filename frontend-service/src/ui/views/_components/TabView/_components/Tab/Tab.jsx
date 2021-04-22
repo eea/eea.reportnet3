@@ -1,7 +1,10 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import { isNil, isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { config } from 'conf';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './Tab.module.css';
 
@@ -11,9 +14,6 @@ import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 const Tab = ({
   addTab,
@@ -58,6 +58,8 @@ const Tab = ({
   const [iconToShow, setIconToShow] = useState(!isUndefined(closeIcon) ? closeIcon : 'cancel');
   const [menu, setMenu] = useState();
   const [titleHeader, setTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
+
+  const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
 
   const resources = useContext(ResourcesContext);
 
@@ -231,7 +233,7 @@ const Tab = ({
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div
         style={{
           display: isDragging ? 'inline' : 'none',
@@ -259,14 +261,6 @@ const Tab = ({
           zIndex: 9999
         }}>
         <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} />
-        {/* <div
-          style={{
-            height: '40px',
-            width: '30px',
-            // border: '2px 2px 0 2px solid gray',
-            marginRight: '3px',
-            backgroundColor: 'var(--c-corporate-yellow)'
-          }}></div> */}
       </div>
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
@@ -348,7 +342,14 @@ const Tab = ({
               onBlur={e => {
                 //Check for empty table name
                 if (titleHeader.trim() !== '') {
-                  onInputBlur(e.target.value.trim(), index, initialTitleHeader);
+                  if (!invalidCharsRegex.test(titleHeader)) {
+                    onInputBlur(e.target.value.trim(), index, initialTitleHeader);
+                  } else {
+                    onTabNameError(
+                      resources.messages['invalidCharactersTabHeader'],
+                      resources.messages['invalidCharactersTabHeaderError']
+                    );
+                  }
                 } else {
                   if (!isUndefined(onTabNameError)) {
                     if (!newTab) {
@@ -405,7 +406,7 @@ const Tab = ({
       {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
         <ContextMenu model={menu} ref={contextMenuRef} />
       ) : null}
-    </React.Fragment>
+    </Fragment>
   );
 };
 

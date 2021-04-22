@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { ColorPicker as PrimeColorPicker } from 'primereact/colorpicker';
 
 export const ColorPicker = ({

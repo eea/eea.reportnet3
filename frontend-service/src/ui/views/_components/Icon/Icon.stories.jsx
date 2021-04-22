@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { storiesOf } from '../../../../../.storybook/storiesOf';
 
 import { Icon } from './Icon';

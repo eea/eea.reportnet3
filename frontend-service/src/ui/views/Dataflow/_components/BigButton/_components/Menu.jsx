@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import styles from './Menu.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 

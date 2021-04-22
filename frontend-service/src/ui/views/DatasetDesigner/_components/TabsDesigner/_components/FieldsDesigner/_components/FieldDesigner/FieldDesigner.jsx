@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -32,6 +32,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 export const FieldDesigner = ({
   addField = false,
   checkDuplicates,
+  checkInvalidCharacters,
   codelistItems,
   datasetId,
   datasetSchemaId,
@@ -97,9 +98,9 @@ export const FieldDesigner = ({
     { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
-  const getFieldTypeValue = value => {
-    return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
-  };
+  const geometricTypes = ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'];
+  const getFieldTypeValue = value => fieldTypes.find(field => TextUtils.areEquals(field.fieldType, value))
+
   const initialFieldDesignerState = {
     addFieldCallSent: false,
     codelistItems: codelistItems,
@@ -166,6 +167,17 @@ export const FieldDesigner = ({
     });
   }, [headerHeight]);
 
+  useEffect(() => {
+    if (!isNil(fieldLink)) {
+      dispatchFieldDesigner({
+        type: 'SET_FIELD_LINK',
+        payload: {
+          link: fieldLink
+        }
+      });
+    }
+  }, [fieldLink]);
+
   const onSetInitHeaderHeight = () => {
     const header = document.getElementById('header');
     setHeaderInitialHeight(header.offsetHeight);
@@ -184,6 +196,12 @@ export const FieldDesigner = ({
       }
     }
   }, [totalFields]);
+
+  const validField = () =>
+    !isNil(fieldDesignerState.fieldTypeValue) &&
+    fieldDesignerState.fieldTypeValue !== '' &&
+    !isNil(fieldDesignerState.fieldValue) &&
+    fieldDesignerState.fieldValue !== '';
 
   const onAttachmentDropdownSelected = fieldType => {
     if (!isUndefined(fieldType)) {
@@ -216,11 +234,7 @@ export const FieldDesigner = ({
             dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: true });
             onFieldAdd({
               type: parseGeospatialTypes(type.fieldType),
-              pk: ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
-                type.fieldType.toUpperCase()
-              )
-                ? false
-                : fieldDesignerState.fieldPKValue
+              pk: geometricTypes.includes(type.fieldType.toUpperCase()) ? false : fieldDesignerState.fieldPKValue
             });
           }
         }
@@ -228,11 +242,7 @@ export const FieldDesigner = ({
         if (type !== '' && type !== fieldDesignerState.fieldValue) {
           fieldUpdate({
             codelistItems: null,
-            pk: ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
-              type.fieldType.toUpperCase()
-            )
-              ? false
-              : fieldDesignerState.fieldPKValue,
+            pk: geometricTypes.includes(type.fieldType.toUpperCase()) ? false : fieldDesignerState.fieldPKValue,
             type: parseGeospatialTypes(type.fieldType),
             isLinkChange: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'LINK')
           });
@@ -244,11 +254,7 @@ export const FieldDesigner = ({
         }
       }
       dispatchFieldDesigner({ type: 'RESET_FIELD' });
-      if (
-        ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
-          type.fieldType.toUpperCase()
-        )
-      )
+      if (geometricTypes.includes(type.fieldType.toUpperCase()))
         dispatchFieldDesigner({ type: 'SET_PK', payload: false });
     }
     onCodelistAndLinkShow(fieldId, type);
@@ -287,17 +293,26 @@ export const FieldDesigner = ({
             fieldTypeRef.current.hide();
             onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
           } else {
-            if (!checkDuplicates(name, fieldId)) {
-              if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
-                onFieldAdd({ name });
-              }
-            } else {
+            if (checkInvalidCharacters(name)) {
               fieldTypeRef.current.hide();
               onShowDialogError(
-                resources.messages['duplicatedFieldMessage'],
-                resources.messages['duplicatedFieldTitle']
+                resources.messages['invalidCharactersFieldMessage'],
+                resources.messages['invalidCharactersFieldTitle']
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+            } else {
+              if (!checkDuplicates(name, fieldId)) {
+                if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
+                  onFieldAdd({ name });
+                }
+              } else {
+                fieldTypeRef.current.hide();
+                onShowDialogError(
+                  resources.messages['duplicatedFieldMessage'],
+                  resources.messages['duplicatedFieldTitle']
+                );
+                dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+              }
             }
           }
         } else {
@@ -307,15 +322,24 @@ export const FieldDesigner = ({
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
           } else {
             if (name !== fieldDesignerState.initialFieldValue) {
-              if (!checkDuplicates(name, fieldId)) {
-                fieldUpdate({ name });
-              } else {
+              if (checkInvalidCharacters(name)) {
                 fieldTypeRef.current.hide();
                 onShowDialogError(
-                  resources.messages['duplicatedFieldMessage'],
-                  resources.messages['duplicatedFieldTitle']
+                  resources.messages['invalidCharactersFieldMessage'],
+                  resources.messages['invalidCharactersFieldTitle']
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+              } else {
+                if (!checkDuplicates(name, fieldId)) {
+                  fieldUpdate({ name });
+                } else {
+                  fieldTypeRef.current.hide();
+                  onShowDialogError(
+                    resources.messages['duplicatedFieldMessage'],
+                    resources.messages['duplicatedFieldTitle']
+                  );
+                  dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
+                }
               }
             }
           }
@@ -353,7 +377,6 @@ export const FieldDesigner = ({
     if (masterTableConditional !== '') {
       inmReferencedField.masterTableConditional = masterTableConditional;
     }
-    // onCodelistAndLinkShow(fieldId, { fieldType: 'Link', value: 'Link to another record', fieldTypeIcon: 'link' });
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
@@ -374,8 +397,6 @@ export const FieldDesigner = ({
   };
 
   const onCancelSaveCodelist = () => {
-    // onCodelistAndLinkShow(fieldId, { fieldType: 'Codelist', value: 'Codelist', fieldTypeIcon: 'list' });
-
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
@@ -539,7 +560,7 @@ export const FieldDesigner = ({
       input === 'NAME'
         ? dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue })
         : dispatchFieldDesigner({ type: 'SET_DESCRIPTION', payload: fieldDesignerState.initialDescriptionValue });
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       if (input === 'NAME') {
         onBlurFieldName(event.target.value);
       }
@@ -549,12 +570,7 @@ export const FieldDesigner = ({
   const onPKChange = checked => {
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
-        if (
-          !isNil(fieldDesignerState.fieldTypeValue) &&
-          fieldDesignerState.fieldTypeValue !== '' &&
-          !isNil(fieldDesignerState.fieldValue) &&
-          fieldDesignerState.fieldValue !== ''
-        ) {
+        if (validField()) {
           onFieldAdd({ pk: checked });
         }
       } else {
@@ -567,12 +583,7 @@ export const FieldDesigner = ({
   const onReadOnlyChange = checked => {
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
-        if (
-          !isNil(fieldDesignerState.fieldTypeValue) &&
-          fieldDesignerState.fieldTypeValue !== '' &&
-          !isNil(fieldDesignerState.fieldValue) &&
-          fieldDesignerState.fieldValue !== ''
-        ) {
+        if (validField()) {
           onFieldAdd({ readOnly: checked });
         }
       } else {
@@ -585,12 +596,7 @@ export const FieldDesigner = ({
   const onRequiredChange = checked => {
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
-        if (
-          !isNil(fieldDesignerState.fieldTypeValue) &&
-          fieldDesignerState.fieldTypeValue !== '' &&
-          !isNil(fieldDesignerState.fieldValue) &&
-          fieldDesignerState.fieldValue !== ''
-        ) {
+        if (validField()) {
           onFieldAdd({ required: checked });
         }
       } else {
@@ -824,9 +830,7 @@ export const FieldDesigner = ({
         disabled={
           (!isNil(fieldDesignerState.fieldTypeValue) &&
             !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
-            ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
-              fieldDesignerState.fieldTypeValue.fieldType.toUpperCase()
-            )) ||
+            geometricTypes.includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())) ||
           (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)) ||
           isDataflowOpen ||
           isDesignDatasetEditorRead
@@ -911,18 +915,35 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={
+          isDataflowOpen ||
+          isDesignDatasetEditorRead ||
+          (!isNil(fieldDesignerState.fieldLinkValue) &&
+            !isEmpty(fieldDesignerState.fieldLinkValue) &&
+            isNil(fieldDesignerState.fieldLinkValue.name))
+        }
+        icon={
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? null
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? 'spinnerAnimate'
+            : null
+        }
         label={
-          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
-            ? `${fieldDesignerState.fieldLinkValue.name}`
-            : resources.messages['linkSelection']
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? resources.messages['linkSelection']
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? '...'
+            : `${fieldDesignerState.fieldLinkValue.name}`
         }
         onClick={() => onLinkDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
         tooltip={
-          !isUndefined(fieldDesignerState.fieldLinkValue) && !isEmpty(fieldDesignerState.fieldLinkValue)
-            ? `${fieldDesignerState.fieldLinkValue.name}`
-            : resources.messages['linkSelection']
+          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+            ? resources.messages['linkSelection']
+            : isNil(fieldDesignerState.fieldLinkValue.name)
+            ? '...'
+            : `${fieldDesignerState.fieldLinkValue.name}`
         }
         tooltipOptions={{ position: 'top' }}
       />
@@ -984,7 +1005,7 @@ export const FieldDesigner = ({
     ) : null;
 
   const renderInputs = () => (
-    <React.Fragment>
+    <Fragment>
       <InputText
         autoFocus={false}
         className={`${styles.inputField} ${
@@ -1067,11 +1088,11 @@ export const FieldDesigner = ({
           fieldDesignerState.fieldTypeValue !== '' ? fieldDesignerState.fieldTypeValue : getFieldTypeValue(fieldType)
         }
       />
-    </React.Fragment>
+    </Fragment>
   );
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
@@ -1165,7 +1186,7 @@ export const FieldDesigner = ({
           {}
         </Dialog>
       ) : null}
-    </React.Fragment>
+    </Fragment>
   );
 };
 FieldDesigner.propTypes = {};

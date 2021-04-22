@@ -512,7 +512,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATASET_OBSERVER')")
   public ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType) {
@@ -536,6 +536,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
 
 
   /**
@@ -857,11 +858,7 @@ public class DataSetControllerImpl implements DatasetController {
 
     try {
       File zipContent = datasetService.exportPublicFile(dataflowId, dataProviderId, fileName);
-      InputStreamResource resource = new InputStreamResource(new FileInputStream(zipContent));
-      HttpHeaders header = new HttpHeaders();
-      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      return ResponseEntity.ok().headers(header).contentLength(zipContent.length())
-          .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+      return createResponseEntity(fileName, zipContent);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -919,6 +916,70 @@ public class DataSetControllerImpl implements DatasetController {
   @GetMapping("/private/checkAnySchemaAvailableInPublic")
   public boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId) {
     return datasetService.checkAnySchemaAvailableInPublic(dataflowId);
+  }
+
+
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{datasetId}/exportDatasetFile")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
+  public void exportDatasetFile(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("mimeType") String mimeType) {
+    LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
+    fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+
+  }
+
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the response entity
+   */
+  @Override
+  @GetMapping(value = "/{datasetId}/downloadFile",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
+  public ResponseEntity<InputStreamResource> downloadFile(@PathVariable Long datasetId,
+      @RequestParam String fileName) {
+
+    try {
+      LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
+          datasetId, fileName);
+      File content = datasetService.downloadFile(datasetId, fileName);
+
+      return createResponseEntity(fileName, content);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("File download from the datasetId {} doesn't exist. Filename {}", datasetId,
+          fileName);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+
+  /**
+   * Creates the response entity.
+   *
+   * @param fileName the file name
+   * @param content the content
+   * @return the response entity
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private ResponseEntity<InputStreamResource> createResponseEntity(String fileName, File content)
+      throws IOException {
+    InputStreamResource resource = new InputStreamResource(new FileInputStream(content));
+    HttpHeaders header = new HttpHeaders();
+    header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    return ResponseEntity.ok().headers(header).contentLength(content.length())
+        .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
   }
 
 

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -19,7 +19,8 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const regex = new RegExp(/[a-zA-Z0-9_-\s()]/);
+  const validCharsRegex = new RegExp(/[a-zA-Z0-9_-\s()]/);
+  const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s()]/);
 
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [errorMessage, setErrorMessage] = useState({ datasetSchemaName: '' });
@@ -32,6 +33,14 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
     if (!isNil(inputRef.current)) inputRef.current.focus();
   }, []);
 
+  const checkIsInvalidName = () => {
+    if (invalidCharsRegex.test(inputRef.current.value)) {
+      setErrorMessage({ datasetSchemaName: resources.messages['invalidCharactersSchemaError'] });
+      return true;
+    }
+    return false;
+  };
+
   const checkIsDuplicateSchemaName = () => {
     const isDuplicatedName = datasetSchemaInfo.some(schema =>
       TextUtils.areEquals(schema.schemaName, datasetSchemaName)
@@ -39,17 +48,21 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
 
     if (isDuplicatedName) {
       setErrorMessage({ datasetSchemaName: resources.messages['duplicateSchemaError'] });
-    } else {
-      setErrorMessage({ datasetSchemaName: '' });
     }
     return isDuplicatedName;
   };
 
-  const checkIsEmptyInput = () => datasetSchemaName.trim() === '';
+  const checkIsEmptyInput = () => {
+    if (datasetSchemaName.trim() === '') {
+      setErrorMessage({ datasetSchemaName: '' });
+      return true;
+    }
+    return false;
+  };
 
   const checkInput = () => {
-    setHasErrors(checkIsDuplicateSchemaName() || checkIsEmptyInput());
-    return !checkIsDuplicateSchemaName() && !checkIsEmptyInput();
+    setHasErrors(checkIsDuplicateSchemaName() || checkIsEmptyInput() || checkIsInvalidName());
+    return !checkIsDuplicateSchemaName() && !checkIsEmptyInput() && !checkIsInvalidName();
   };
 
   const onConfirm = async event => {
@@ -103,11 +116,11 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           id={'datasetSchemaName'}
           maxLength={250}
           name="datasetSchemaName"
-          onBlur={() => checkInput(datasetSchemaName)}
+          onBlur={() => checkInput()}
           onChange={e => setDatasetSchemaName(e.target.value)}
           onKeyPress={e => {
             if (e.key === 'Enter') onConfirm(e);
-            else if (!regex.test(e.key) || e.key === 'Dead') {
+            else if (!validCharsRegex.test(e.key) || e.key === 'Dead') {
               e.preventDefault();
               return false;
             }

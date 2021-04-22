@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import camelCase from 'lodash/camelCase';
@@ -13,10 +13,8 @@ import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import { routes } from 'ui/routes';
 import WebformsConfig from 'conf/webforms.config.json';
 
-import { Webforms } from 'ui/views/Webforms';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -25,7 +23,6 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -34,12 +31,14 @@ import { Menu } from 'primereact/menu';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
-import { ValidationsList } from 'ui/views/_components/ValidationsList';
+import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'ui/views/DatasetDesigner/_components/Validations';
+import { ValidationsList } from 'ui/views/_components/ValidationsList';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
+import { Webforms } from 'ui/views/Webforms';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -187,7 +186,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      if (userContext.accessRole[0] === 'DATA_CUSTODIAN') {
+      if (userContext.accessRole[0] !== config.permissions.roles.EDITOR_READ.key) {
         if (datasetSchemaAllTables.length > 1) {
           leftSideBarContext.addHelpSteps(
             DatasetSchemaRequesterWithTabsHelpConfig,
@@ -239,12 +238,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     if (!isUndefined(userContext.contextRoles)) {
       const isDataflowOpen =
         userContext.hasPermission(
-          [config.permissions.DATA_CUSTODIAN, config.permissions.DATA_STEWARD],
-          `${config.permissions.DATAFLOW}${dataflowId}`
-        ) && designerState?.metaData?.dataflow?.status === 'DRAFT';
+          [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+          `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+        ) && designerState?.metaData?.dataflow?.status === config.dataflowStatus.OPEN;
       const isDesignDatasetEditorRead =
-        userContext.hasPermission([config.permissions.EDITOR_READ], `${config.permissions.DATAFLOW}${dataflowId}`) &&
-        designerState?.metaData?.dataflow?.status === 'DESIGN';
+        userContext.hasPermission(
+          [config.permissions.roles.EDITOR_READ.key],
+          `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+        ) && designerState?.metaData?.dataflow?.status === config.dataflowStatus.DESIGN;
 
       designerDispatch({
         type: 'IS_DATAFLOW_EDITABLE',
@@ -926,25 +927,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             : resources.messages['designView']
         }
       />
-    );
-
-    // return Object.keys(designerState.viewType).map((view, index) => (
-    //   <div className={styles.radioButton} key={index}>
-    //     <RadioButton
-    //       className={styles.button}
-    //       checked={designerState.viewType[view]}
-    //       inputId={view}
-    //       onChange={event => {
-    //         onChangeView(event.target.value);
-    //         changeMode(view);
-    //       }}
-    //       value={view}
-    //     />
-    //     <label className={styles.label} htmlFor={view}>
-    //       {resources.messages[`${view}View`]}
-    //     </label>
-    //   </div>
-    // ));
+    );  
   };
 
   const renderSwitchView = () => {
@@ -1151,6 +1134,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                     }
                   }}
                   style={{
+                    color: 'var(--main-font-color)',
                     cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
                     fontSize: '11pt',
                     fontWeight: 'bold',
@@ -1268,7 +1252,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
+                disabled={isDesignDatasetEditorRead}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}

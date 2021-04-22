@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useRef } from 'react';
+import { Fragment, useContext, useEffect, useRef } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
