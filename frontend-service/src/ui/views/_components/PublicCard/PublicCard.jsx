@@ -94,7 +94,7 @@ export const PublicCard = ({
           </div>
         )}
         {pilotScenarioAmbition && (
-          <div className={styles.legalInstrumentAndObligation} onMouseDown={() => window.open('blablab.com')}>
+          <div className={styles.legalInstrumentAndObligation}>
             <p>
               <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
             </p>
