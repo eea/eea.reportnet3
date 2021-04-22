@@ -36,23 +36,15 @@ const GlobalNotifications = () => {
         notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT'
       );
 
-      const getFileName = () => {
-        const extension = notification.content.datasetName.split('.').pop();
-        return `${notification.content.datasetName}.${extension}`;
-      };
-
-      let datasetData;
-
       if (notification) {
         const { data } = await DatasetService.downloadExportDatasetFile(
           notification.content.datasetId,
           notification.content.datasetName
         );
-        datasetData = data;
 
         notificationContext.add({
           type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
-          onClick: () => DownloadFile(datasetData, getFileName())
+          onClick: () => DownloadFile(data, notification.content.datasetName)
         });
       }
     } catch (error) {
