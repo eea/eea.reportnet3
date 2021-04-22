@@ -292,10 +292,8 @@ export const Feedback = withRouter(({ match, history }) => {
           {isCustodian && (
             <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
               <InputTextarea
-                // autoFocus={true}
                 className={styles.sendMessageTextarea}
                 collapsedHeight={50}
-                // expandableOnClick={true}
                 disabled={isCustodian && isEmpty(selectedDataProvider)}
                 id="feedbackSender"
                 key="feedbackSender"

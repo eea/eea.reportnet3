@@ -4,7 +4,6 @@ import { isUndefined } from 'lodash';
 
 import styles from './TreeViewExpandableItem.module.css';
 
-// import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -133,12 +132,10 @@ const TreeViewExpandableItem = ({
         {renderButtons()}
         {renderInfoButtons()}
       </div>
-      {/* <div className={styles.treeChildrenWrapper}> */}
       {isOpen ? <div className={styles.treeChildrenWrapper}>{children}</div> : null}
       {Children.count(children) === 0 && isOpen && !isUndefined(items[0]) ? (
         <span className={styles.emptyProperty}>{`${resources.messages['emptyDatasetDesign']} ${items[0].label}`}</span>
-      ) : null}
-      {/* </div> */}
+      ) : null}      
     </Fragment>
   );
 };

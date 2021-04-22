@@ -266,7 +266,6 @@ export const WebformRecord = ({
                       record={record}
                     />
                   )}
-                  {/* {renderTemplate(element, element.fieldSchemaId, element.fieldType)} */}
                 </div>
                 {element.validations &&
                   uniqBy(element.validations, element => {

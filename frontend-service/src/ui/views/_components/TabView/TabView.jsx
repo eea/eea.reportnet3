@@ -278,9 +278,6 @@ const TabView = withRouter(
             className={styles.scrollTab}
             ref={divTabsRef}
             style={{ marginBottom: totalTabs === 1 ? '-5px' : '-1px' }}>
-            {/* <div className={styles.iconsWrapper}> */}
-
-            {/* </div> */}
             <ul className="p-tabview-nav p-reset" role="tablist" style={{ display: 'inline-flex' }} ref={ulTabsRef}>
               {headers}
             </ul>

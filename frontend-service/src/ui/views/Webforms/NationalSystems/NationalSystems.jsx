@@ -42,10 +42,6 @@ export const NationalSystems = ({ datasetId, state }) => {
       errorMessages.push(resources.messages['webformTableWithMoreRecords']);
     }
 
-    // if (!areEquals(data?.records[0]?.fields[0].type, 'ATTACHMENT')) {
-    //   errorMessages.push(resources.messages['webformShouldBeAttachment']);
-    // }
-
     return errorMessages;
   };
 

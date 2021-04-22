@@ -248,7 +248,6 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           {getColumns()}
         </DataTable>
       ) : (
-        //previewPastedData()
         <div className={styles.infoTablePaste}>
           <div className={styles.infoTableItem}>
             <p>{resources.messages['pasteRecordsMessage']}</p>
