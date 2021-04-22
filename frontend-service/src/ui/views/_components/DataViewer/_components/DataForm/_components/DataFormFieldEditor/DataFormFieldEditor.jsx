@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-// import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -9,8 +8,6 @@ import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
 
 import styles from './DataFormFieldEditor.module.scss';
-
-// import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
@@ -240,7 +237,6 @@ const DataFormFieldEditor = ({
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
         datasetId,
         field,
-        // isUndefined(referencedField.name) ? referencedField.idPk : referencedField.referencedField.fieldSchemaId,
         filter,
         conditionalFieldValue,
         datasetSchemaId,
@@ -575,7 +571,6 @@ const DataFormFieldEditor = ({
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
-        // disabled={isSaving}
         label={resources.messages['save']}
         icon={'check'}
         onClick={() => onSavePoint(map.newPoint, map.newPointCRS)}

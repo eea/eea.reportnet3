@@ -18,14 +18,6 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, 
             <label htmlFor={column.field}>
               {!isNil(fieldTitle) && !isEmpty(fieldTitle) ? fieldTitle.header : column.header}
             </label>
-            {/* <Button
-            className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-            icon="infoCircle"
-            onClick={() => onShowFieldInfo(column.header, true)}
-            tabIndex="-1"
-            tooltip={getTooltipMessage(column)}
-            tooltipOptions={{ position: 'top' }}
-          /> */}
           </div>
 
           <div

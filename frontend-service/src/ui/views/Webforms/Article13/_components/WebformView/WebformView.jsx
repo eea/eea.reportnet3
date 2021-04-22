@@ -103,8 +103,6 @@ export const WebformView = ({
       case 'pamnames':
         fields = combinationFieldRender('paMName', 'id');
         return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
-      // case 'ispolicymeasureenvisaged':
-      //   return <span disabled={true}>{checkValueFieldRender(field.name, 'Yes')}</span>;
       case 'statusimplementation':
         return tableFieldRender(field.name, [
           'implementationperiodstart',
@@ -125,25 +123,6 @@ export const WebformView = ({
 
     return <span disabled={true}>{field.value}</span>;
   };
-
-  // const checkValueFieldRender = (fieldName, valueToCheck) => {
-  //   let containsValue = false;
-  //   let fieldValue;
-
-  //   singlesCalculatedData.forEach(singleRecord => {
-  //     const singleRecordValue =
-  //       singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
-  //     if (!isNil(singleRecordValue)) {
-  //       if (TextUtils.areEquals(singleRecordValue, valueToCheck)) {
-  //         containsValue = true;
-  //       } else {
-  //         fieldValue = singleRecordValue;
-  //       }
-  //     }
-  //   });
-
-  //   return containsValue ? valueToCheck : fieldValue;
-  // };
 
   const combinationFieldRender = (fieldName, previousField = '', separator = '-') => {
     const combinatedValues = [];

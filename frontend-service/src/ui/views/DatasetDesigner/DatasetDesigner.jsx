@@ -918,25 +918,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             : resources.messages['designView']
         }
       />
-    );
-
-    // return Object.keys(designerState.viewType).map((view, index) => (
-    //   <div className={styles.radioButton} key={index}>
-    //     <RadioButton
-    //       className={styles.button}
-    //       checked={designerState.viewType[view]}
-    //       inputId={view}
-    //       onChange={event => {
-    //         onChangeView(event.target.value);
-    //         changeMode(view);
-    //       }}
-    //       value={view}
-    //     />
-    //     <label className={styles.label} htmlFor={view}>
-    //       {resources.messages[`${view}View`]}
-    //     </label>
-    //   </div>
-    // ));
+    );  
   };
 
   const renderSwitchView = () => {

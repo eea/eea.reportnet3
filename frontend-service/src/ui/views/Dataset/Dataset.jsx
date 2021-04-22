@@ -801,13 +801,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const renderSwitchView = () =>
     !isNil(webformData) &&
     hasWritePermissions && (
-      // <div className={styles.switch}>
-      //   <div className={`${styles.wrap}`}>
-      //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
-      //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
-      //     <span className={styles.text}>{resources.messages['webform']}</span>
-      //   </div>
-      // </div>
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
