@@ -1,4 +1,5 @@
-import React, { Fragment, useContext } from 'react';
+import { Fragment, useContext } from 'react';
+
 import styles from './userConfiguration.module.scss';
 
 import DarkGray from 'assets/images/layers/DarkGray.png';
@@ -76,7 +77,6 @@ const UserConfiguration = () => {
         id={`basemapLayer`}
         itemTemplate={basemapTemplate}
         name="basemapLayer"
-        // optionLabel="label"
         options={resources.userParameters['defaultBasemapLayer']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
@@ -367,10 +367,10 @@ const UserConfiguration = () => {
   );
 
   const dateFormatSubtitle = (
-    <React.Fragment>
+    <Fragment>
       <div>{resources.messages['dateFormatSubtitle']}</div>
       <div className={styles.dateFormatWarning}>{resources.messages['dateFormatWarning']}</div>
-    </React.Fragment>
+    </Fragment>
   );
 
   const dateFormatConfiguration = (
@@ -384,7 +384,7 @@ const UserConfiguration = () => {
   );
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div className={styles.userConfiguration}>
         {rowsInPaginationConfiguration}
         {dateFormatConfiguration}
@@ -395,7 +395,7 @@ const UserConfiguration = () => {
         {pushNotificationsConfiguration}
         {basemapLayerConfiguration}
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 };
 

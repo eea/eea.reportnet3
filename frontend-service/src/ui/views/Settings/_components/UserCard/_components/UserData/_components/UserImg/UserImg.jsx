@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useContext, useState } from 'react';
+import { useRef, useEffect, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -130,7 +130,6 @@ const UserImg = () => {
           ref={uploadedImage}
           icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
           src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
-          // onClick={() => imageUploader.current.click()}
         />
         <Icon icon="edit" className={styles.editIcon} />
       </div>
@@ -152,7 +151,6 @@ const UserImg = () => {
         place="top">
         <Button
           className={`p-button-secondary p-button-animated-blink`}
-          // label={isEditForm ? resources.messages['save'] : resources.messages['create']}
           icon={'add'}
           label={resources.messages['uploadImage']}
           onClick={() => imageUploader.current.click()}
@@ -160,15 +158,12 @@ const UserImg = () => {
         />
         <Button
           className={`p-button-secondary p-button-animated-blink`}
-          // label={isEditForm ? resources.messages['save'] : resources.messages['create']}
           icon={'userPlus'}
           label={resources.messages['selectImage']}
           onClick={() => setIsAvatarDialogVisible(true)}
         />
       </ReactTooltip>
     </div>
-
-    // <FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
   );
 };
 

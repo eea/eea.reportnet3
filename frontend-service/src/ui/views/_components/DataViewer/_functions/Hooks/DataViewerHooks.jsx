@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -250,9 +250,7 @@ export const useSetColumns = (
                 field.fieldData.type
               )
               ? field.fieldData[column.field].sort().join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
-              : // : Array.isArray(field.fieldData[column.field])
-              // ? field.fieldData[column.field].join(', ')
-              (!isNil(field.fieldData[column.field]) &&
+              : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
                 (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
@@ -291,9 +289,7 @@ export const useSetColumns = (
               !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
                 field.fieldData.type
               )
-              ? // ? field.fieldData[column.field].sort().join(', ')
-                // : Array.isArray(field.fieldData[column.field])
-                field.fieldData[column.field].join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
+              ? field.fieldData[column.field].join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
@@ -321,26 +317,6 @@ export const useSetColumns = (
   };
 
   useEffect(() => {
-    // const maxWidths = [];
-
-    // if (!isEditing) {
-    //Calculate the max width of the shown data
-    // colsSchema.forEach(col => {
-    //   const bulkData = fetchedData.map(data => data.dataRow.map(d => d.fieldData).flat()).flat();
-    //   const filteredBulkData = bulkData
-    //     .filter(data => col.field === Object.keys(data)[0])
-    //     .map(filteredData => Object.values(filteredData)[0]);
-    //   if (filteredBulkData.length > 0) {
-    //     const maxDataWidth = filteredBulkData.map(data => getTextWidth(data, '14pt Open Sans'));
-    //     maxWidths.push(Math.max(...maxDataWidth) - 10 > 400 ? 400 : Math.max(...maxDataWidth) - 10);
-    //   }
-    // });
-    //Template for Field validation
-
-    //Calculate the max width of data column
-    // const textMaxWidth = colsSchema.map(col => RecordUtils.getTextWidth(col.header, '14pt Open Sans'));
-    // const maxWidth = Math.max(...textMaxWidth);
-
     let columnsArr = colsSchema.map((column, i) => {
       let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
       let invisibleColumn =
@@ -365,7 +341,7 @@ export const useSetColumns = (
           }
           field={column.field}
           header={
-            <React.Fragment>
+            <Fragment>
               {column.readOnly && (
                 <FontAwesomeIcon
                   aria-hidden={false}
@@ -380,13 +356,11 @@ export const useSetColumns = (
                 icon="infoCircle"
                 onClick={() => {
                   onShowFieldInfo(column.header, true);
-                  // setSelectedHeader(column.header);
-                  // setIsColumnInfoVisible(true);
                 }}
                 tooltip={getTooltipMessage(column)}
                 tooltipOptions={{ position: 'top' }}
               />
-            </React.Fragment>
+            </Fragment>
           }
           key={column.field}
           sortable={sort}

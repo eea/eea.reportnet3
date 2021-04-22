@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 import uuid from 'uuid';
 
@@ -10,7 +10,7 @@ import ReactTooltip from 'react-tooltip';
 
 import styles from './TitleWithItem.module.scss';
 
-const TitleWithItem = React.memo(
+const TitleWithItem = memo(
   ({
     hasInfoTooltip = false,
     icon,

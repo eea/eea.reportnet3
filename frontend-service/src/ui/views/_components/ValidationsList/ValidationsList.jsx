@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -199,6 +199,7 @@ const ValidationsList = withRouter(
 
     const getAdditionalValidationInfo = (referenceId, entityType, relations) => {
       const additionalInfo = {};
+
       datasetSchemaAllTables.forEach(table => {
         if (TextUtils.areEquals(entityType, 'TABLE')) {
           if (table.tableSchemaId === referenceId) {
@@ -209,7 +210,7 @@ const ValidationsList = withRouter(
             additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
           }
         } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
-          table?.records?.forEach(record =>
+          table.records?.forEach(record =>
             record.fields.forEach(field => {
               if (!isNil(field)) {
                 if (TextUtils.areEquals(entityType, 'FIELD')) {
@@ -310,6 +311,7 @@ const ValidationsList = withRouter(
         }
         return 'trash';
       };
+
       return (
         <div className={styles.actionTemplate}>
           <Button

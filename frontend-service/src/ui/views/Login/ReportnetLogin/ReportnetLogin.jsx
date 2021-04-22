@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 
 import { isEmpty, isUndefined } from 'lodash';
 
@@ -82,7 +82,6 @@ const ReportnetLogin = ({ history }) => {
             <img src={logo} alt="Reportnet" />
             <h1>{resources.messages['appName']}</h1>
             {!isEmpty(loginError) && <div className={styles.error}>{loginError}</div>}
-            {/* <Link to={routes.DATAFLOWS}>cast</Link> */}
           </div>
 
           <form>

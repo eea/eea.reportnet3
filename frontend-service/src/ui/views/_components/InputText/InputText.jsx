@@ -1,40 +1,4 @@
-// import React, { forwardRef } from 'react';
-// import { InputText as PrimeInputText } from 'primereact/inputtext';
-
-// export const InputText = forwardRef((props, _) => {
-//   const {
-//     autoFocus,
-//     className,
-//     disabled = false,
-//     inputRef,
-//     onBlur,
-//     onChange,
-//     onFocus,
-//     onInput,
-//     onKeyDown,
-//     placeholder,
-//     type,
-//     value
-//   } = props;
-//   return (
-//     <PrimeInputText
-//       autoFocus={autoFocus}
-//       className={className}
-//       disabled={disabled}
-//       onBlur={onBlur}
-//       onChange={onChange}
-//       onFocus={onFocus}
-//       onInput={onInput}
-//       onKeyDown={onKeyDown}
-//       placeholder={placeholder}
-//       type={type}
-//       ref={inputRef}
-//       value={value}
-//     />
-//   );
-// });
-
-import React, { Component } from 'react';
+import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -149,7 +113,7 @@ export class InputText extends Component {
 
     let inputProps = ObjectUtils.findDiffKeys(this.props, InputText.defaultProps);
     return (
-      <React.Fragment>
+      <Fragment>
         <input
           autoComplete="off"
           autoFocus={this.props.autoFocus}
@@ -173,7 +137,7 @@ export class InputText extends Component {
             />
           </div>
         ) : null}
-      </React.Fragment>
+      </Fragment>
     );
   }
 }

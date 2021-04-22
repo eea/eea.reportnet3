@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 import { Client } from '@stomp/stompjs';
@@ -15,7 +15,7 @@ const useSocket = () => {
   const userContext = useContext(UserContext);
   const socket_url = window.env.WEBSOCKET_URL;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isUndefined(userContext.socket)) {
       const stompClient = new Client({
         brokerURL: socket_url,

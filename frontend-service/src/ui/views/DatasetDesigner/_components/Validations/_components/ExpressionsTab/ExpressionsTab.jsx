@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import styles from './ExpressionsTab.module.scss';
 
@@ -19,11 +19,10 @@ export const ExpressionsTab = ({
   tabsChanges
 }) => {
   const resourcesContext = useContext(ResourcesContext);
- 
 
   return (
-    <React.Fragment>
-      <div className={styles.section}>       
+    <Fragment>
+      <div className={styles.section}>
         <ul>
           {creationFormState.candidateRule.expressions &&
             creationFormState.candidateRule.expressions.map((expression, i) => (
@@ -72,6 +71,6 @@ export const ExpressionsTab = ({
           rows="5"
           value={creationFormState.validationRuleString}></textarea>
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import styles from './LeftSideBarButton.module.scss';
 

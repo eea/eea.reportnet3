@@ -1,10 +1,9 @@
-import React, { useContext, useState, useEffect } from 'react';
+import { Children, Fragment, useContext, useEffect, useState } from 'react';
 
 import { isUndefined } from 'lodash';
 
 import styles from './TreeViewExpandableItem.module.css';
 
-// import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -107,7 +106,7 @@ const TreeViewExpandableItem = ({
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div
         style={{
           cursor: 'pointer',
@@ -133,13 +132,11 @@ const TreeViewExpandableItem = ({
         {renderButtons()}
         {renderInfoButtons()}
       </div>
-      {/* <div className={styles.treeChildrenWrapper}> */}
       {isOpen ? <div className={styles.treeChildrenWrapper}>{children}</div> : null}
-      {React.Children.count(children) === 0 && isOpen && !isUndefined(items[0]) ? (
+      {Children.count(children) === 0 && isOpen && !isUndefined(items[0]) ? (
         <span className={styles.emptyProperty}>{`${resources.messages['emptyDatasetDesign']} ${items[0].label}`}</span>
-      ) : null}
-      {/* </div> */}
-    </React.Fragment>
+      ) : null}      
+    </Fragment>
   );
 };
 

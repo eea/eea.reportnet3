@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -144,16 +144,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
         payload: getDatasetSchemaTableFields(table, tabs)
       });
     }
-
-    // if (validationContext.referenceId) {
-    //   creationFormDispatch({
-    //     type: 'SET_FORM_FIELD',
-    //     payload: {
-    //       key: 'field',
-    //       value: getSelectedFieldById(validationContext.referenceId, tabs)
-    //     }
-    //   });
-    // }
   }, [creationFormState.candidateRule.table]);
 
   useEffect(() => {
@@ -173,11 +163,6 @@ export const RowValidation = ({ datasetId, tabs }) => {
 
   useEffect(() => {
     if (validationContext.referenceId) {
-      // if (!isNil(validationContext.tableSchemaId)) {
-      //   table = getSelectedTableByTableSchemaId(validationContext.tableSchemaId, tabs);
-      // } else {
-      //   table = getSelectedTableByFieldId(validationContext.referenceId, tabs);
-      // }
       const table = getSelectedTableByRecordId(validationContext.referenceId, tabs);
       creationFormDispatch({
         type: 'SET_FORM_FIELD',
