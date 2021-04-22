@@ -28,6 +28,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
@@ -55,6 +56,17 @@ export const DataCollection = withRouter(({ match, history }) => {
   let growlRef = useRef();
 
   useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history });
+
+  useCheckNotifications(
+    [
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FAILED_EVENT',
+      'EXPORT_DATASET_FILE_DOWNLOAD'
+    ],
+    setIsLoadingFile,
+    false
+  );
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -126,8 +138,6 @@ export const DataCollection = withRouter(({ match, history }) => {
         type: 'EXPORT_DATA_BY_ID_ERROR',
         content: { dataflowName: dataflowName, datasetName: datasetName }
       });
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 

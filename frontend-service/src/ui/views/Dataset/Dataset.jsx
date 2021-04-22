@@ -466,7 +466,14 @@ export const Dataset = withRouter(({ match, history }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(
-    ['DOWNLOAD_FME_FILE_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
+    [
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'DOWNLOAD_FME_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FAILED_EVENT',
+      'EXPORT_DATASET_FILE_DOWNLOAD',
+      'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'
+    ],
     setIsLoadingFile,
     false
   );
@@ -509,8 +516,6 @@ export const Dataset = withRouter(({ match, history }) => {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 

@@ -530,7 +530,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
-      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
+      onExportError('EXTERNAL_EXPORT_DESIGN_FAILED_EVENT');
     }
   };
 
@@ -542,8 +542,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 
@@ -559,7 +557,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(
-    ['DOWNLOAD_FME_FILE_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
+    [
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'DOWNLOAD_FME_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FAILED_EVENT',
+      'EXPORT_DATASET_FILE_DOWNLOAD',
+      'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'
+    ],
     setIsLoadingFile,
     false
   );
