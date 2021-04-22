@@ -237,8 +237,6 @@ const useBigButtonList = ({
                 {
                   label: resources.messages['delete'],
                   icon: 'trash',
-                  disabled:
-                    dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions,
                   command: () => getDeleteSchemaIndex(newDatasetSchema.index),
                   disabled:
                     dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
