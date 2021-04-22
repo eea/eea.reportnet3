@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
 
@@ -317,8 +318,12 @@ public class AutomaticRules {
    */
   public static Rule createGeometryAutomaticRule(DataType typeData, String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
-    String error = "The value does not follow the expected syntax for a valid "
-        + typeData.toString().toLowerCase();
+    String error = "";
+    if (DataType.POLYGON.equals(typeData)) {
+      error = LiteralConstants.POLYGONERROR;
+    } else {
+      error = LiteralConstants.GEOMETRYERROR + typeData.toString().toLowerCase();
+    }
     return composeRule(referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,
         ErrorTypeEnum.ERROR.getValue(), shortCode, description);
   }
