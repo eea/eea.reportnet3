@@ -43,7 +43,7 @@ const GlobalNotifications = () => {
         );
 
         notificationContext.add({
-          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
+          type: 'EXPORT_DATASET_FILE_DOWNLOAD',
           onClick: () => DownloadFile(data, notification.content.datasetName)
         });
       }
@@ -87,7 +87,7 @@ const GlobalNotifications = () => {
         }
 
         notificationContext.add({
-          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
+          type: 'EXPORT_DATASET_FILE_DOWNLOAD',
           onClick: () => DownloadFile(datasetData, getFileName())
         });
       }

@@ -800,7 +800,7 @@
           }
         },
         {
-          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
+          "key": "EXPORT_DATASET_FILE_DOWNLOAD"
         },
         {
           "key": "VALIDATE_RULES_COMPLETED_EVENT",

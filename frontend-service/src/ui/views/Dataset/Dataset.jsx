@@ -466,7 +466,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(
-    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
+    ['DOWNLOAD_FME_FILE_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
     setIsLoadingFile,
     false
   );

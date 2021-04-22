@@ -559,7 +559,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(
-    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
+    ['DOWNLOAD_FME_FILE_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
     setIsLoadingFile,
     false
   );

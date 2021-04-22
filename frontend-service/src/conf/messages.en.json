@@ -430,7 +430,7 @@
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalIntegrationDownload": "Export file is ready to be downloaded ",
+    "exportDatasetFileDownload": "Export file is ready to be downloaded ",
     "externalIntegrations": "External integrations",
     "fcSubmitButtonDisabled": "One or more required field(s) are missing",
     "feedbackDataProvider": "Data provider: ",
