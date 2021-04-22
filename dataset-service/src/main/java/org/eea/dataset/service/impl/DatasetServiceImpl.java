@@ -3871,7 +3871,8 @@ public class DatasetServiceImpl implements DatasetService {
   private void generateFile(Long datasetId, String mimeType, byte[] file, boolean includeZip)
       throws IOException, EEAException {
 
-    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
     String nameDataset = dataset.getDataSetName();
     String nameFile = "";
     // create folder if doesn't exist to save the file
