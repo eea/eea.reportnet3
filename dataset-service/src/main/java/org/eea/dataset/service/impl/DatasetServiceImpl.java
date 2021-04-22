@@ -979,7 +979,7 @@ public class DatasetServiceImpl implements DatasetService {
     Long idDataflow = getDataFlowIdById(datasetId);
 
     // Look for the dataset type is EU or DC to include the countryCode
-    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
