@@ -932,7 +932,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void exportDatasetFile(@PathVariable("datasetId") Long datasetId,
       @RequestParam("mimeType") String mimeType) {
     LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
-    datasetService.exportDatasetFile(datasetId, mimeType);
+    fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
 
   }
 

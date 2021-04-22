@@ -605,14 +605,6 @@ public interface DatasetService {
 
 
   /**
-   * Export dataset file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   */
-  void exportDatasetFile(Long datasetId, String mimeType);
-
-  /**
    * Download file.
    *
    * @param datasetId the dataset id

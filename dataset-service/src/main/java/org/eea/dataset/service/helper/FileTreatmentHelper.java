@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -19,16 +20,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
@@ -36,8 +41,11 @@ import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.file.interfaces.IFileExportContext;
+import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
@@ -48,6 +56,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -65,6 +74,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -143,8 +153,21 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private TableRepository tableRepository;
 
-  /** The batch size. */
-  private int batchSize = 1000;
+  /** The path public file. */
+  @Value("${pathPublicFile}")
+  private String pathPublicFile;
+
+  /** The file export factory. */
+  @Autowired
+  private IFileExportFactory fileExportFactory;
+
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
+
+  /** The attachment repository. */
+  @Autowired
+  private AttachmentRepository attachmentRepository;
 
   /**
    * Inits the.
@@ -914,6 +937,158 @@ public class FileTreatmentHelper implements DisposableBean {
     if (recordToUpdate != null) {
       refillFields(oldRecord, recordToUpdate.getFields());
     }
+
+  }
+
+
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @Async
+  public void exportDatasetFile(Long datasetId, String mimeType) {
+
+    Long idDataflow = datasetService.getDataFlowIdById(datasetId);
+
+    // Look for the dataset type is EU or DC to include the countryCode
+    DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
+
+    // Extension arrive with zip+xlsx or xlsx, but to the backend arrives with empty space. Split
+    // the extensions to know
+    // if its a zip or only xlsx
+    String[] type = mimeType.split(" ");
+    String extension = "";
+    if (type.length > 1) {
+      extension = type[1];
+    } else {
+      extension = type[0];
+    }
+    final IFileExportContext context = fileExportFactory.createContext(extension);
+
+    try {
+      byte[] content = context.fileWriter(idDataflow, datasetId, null, includeCountryCode);
+      Boolean includeZip = false;
+      // If the length after splitting the file type arrives it's more than 1, then there's a
+      // zip+xlsx type
+      if (type.length > 1) {
+        includeZip = true;
+      }
+      generateFile(datasetId, extension, content, includeZip);
+      LOG.info("End of exportDatasetFile datasetId {}", datasetId);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
+          datasetId, mimeType, e.getMessage(), e);
+      // Send notification
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).error("Error exporting dataset data").build();
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
+            notificationVO);
+      } catch (EEAException ex) {
+        LOG_ERROR.error("Error sending export dataset fail notification. Message {}",
+            e.getMessage(), ex);
+      }
+    }
+
+  }
+
+
+  /**
+   * Generate file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param file the file
+   * @param includeZip the include zip
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  private void generateFile(Long datasetId, String mimeType, byte[] file, boolean includeZip)
+      throws IOException, EEAException {
+
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String nameDataset = dataset.getDataSetName();
+    String nameFile = "";
+    // create folder if doesn't exist to save the file
+    File fileFolderProvider = new File(pathPublicFile, "dataset-" + datasetId);
+    fileFolderProvider.mkdirs();
+
+    // make the zip
+    if (includeZip) {
+      nameFile = nameDataset + ".zip";
+      // we create the file.zip
+      File fileWriteZip = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
+
+      try (ZipOutputStream out =
+          new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+        // we get the dataschema and check every table to see if there's any field attachemnt
+
+        DataSetSchema dataSetSchema =
+            schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+        for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+
+          // we find if in any table have one field type ATTACHMENT
+          List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+              .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+              .collect(Collectors.toList());
+          if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+            // We took every field for every table
+            for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+              List<AttachmentValue> attachmentValue =
+                  attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(
+                      fieldAttach.getIdFieldSchema().toString());
+
+              // if there are filled we create a folder and inside of any folder we create the
+              // fields
+              if (!CollectionUtils.isEmpty(attachmentValue)) {
+                LOG.info(
+                    "Generating zip file with attachments. Found in tableSchema with id {}, field {}",
+                    tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+
+                for (AttachmentValue attachment : attachmentValue) {
+                  try {
+                    ZipEntry eFieldAttach = new ZipEntry(
+                        tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                    out.putNextEntry(eFieldAttach);
+                    out.write(attachment.getContent(), 0, attachment.getContent().length);
+                  } catch (ZipException e) {
+                    LOG.info("Error adding file to the zip {} because already exists",
+                        attachment.getFileName(), e);
+                  }
+                }
+                out.closeEntry();
+              }
+            }
+          }
+        }
+        // Adding the xlsx/csv file to the zip
+        ZipEntry e = new ZipEntry(nameDataset + "." + mimeType);
+        out.putNextEntry(e);
+        out.write(file, 0, file.length);
+        out.closeEntry();
+        LOG.info("Creating file {} in the route ", fileWriteZip);
+      }
+    }
+    // only the xlsx file
+    else {
+      nameFile = nameDataset + "." + mimeType;
+      File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
+      try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
+        out.write(file, 0, file.length);
+      }
+    }
+    // Send notification
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .datasetName(nameFile).build();
+
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
+        notificationVO);
 
   }
 
