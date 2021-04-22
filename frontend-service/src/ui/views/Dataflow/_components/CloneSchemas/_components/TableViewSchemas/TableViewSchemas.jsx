@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';

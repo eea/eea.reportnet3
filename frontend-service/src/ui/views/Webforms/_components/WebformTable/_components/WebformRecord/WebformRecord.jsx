@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
@@ -266,7 +266,6 @@ export const WebformRecord = ({
                       record={record}
                     />
                   )}
-                  {/* {renderTemplate(element, element.fieldSchemaId, element.fieldType)} */}
                 </div>
                 {element.validations &&
                   uniqBy(element.validations, element => {

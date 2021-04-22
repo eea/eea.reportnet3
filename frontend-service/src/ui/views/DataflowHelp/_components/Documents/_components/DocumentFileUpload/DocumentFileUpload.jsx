@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
@@ -218,7 +218,7 @@ const DocumentFileUpload = ({
               })
             }
             onKeyPress={e => {
-              if (e.key === 'Enter' && !checkInputForErrors('description')) onConfirm();
+              if (!checkInputForErrors('description') && e.key === 'Enter') onConfirm();
             }}
           />
           <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
@@ -239,6 +239,9 @@ const DocumentFileUpload = ({
               });
               setErrors(previousErrors => {
                 return { ...previousErrors, ['lang']: { message: '', hasErrors: false } };
+              });
+              setInputsChecked(previousInputsChecked => {
+                return { ...previousInputsChecked, ['lang']: true };
               });
             }}
             onKeyPress={e => {

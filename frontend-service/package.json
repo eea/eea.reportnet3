@@ -17,7 +17,6 @@
     "dompurify": "^2.1.1",
     "esri-leaflet": "^2.5.0",
     "esri-leaflet-geocoder": "^2.3.3",
-    "formik": "^1.5.8",
     "js-file-download": "^0.4.8",
     "jwt-decode": "^2.2.0",
     "leaflet": "^1.6.0",
@@ -40,8 +39,7 @@
     "react-scripts": "^4.0.3",
     "react-tooltip": "^3.11.1",
     "sass": "^1.32.8",
-    "uuid": "^3.3.3",
-    "yup": "^0.27.0"
+    "uuid": "^3.3.3"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -246,4 +246,33 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     }
     return tableValue;
   }
+
+  /**
+   * Validate query.
+   *
+   * @param query the query
+   * @return the result set
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  @Override
+  @Transactional
+  public void validateQuery(String query, Long datasetId) throws EEAInvalidSQLException {
+    try {
+      Session session = (Session) entityManager.getDelegate();
+      session.doReturningWork(new ReturningWork<ResultSet>() {
+        @Override
+        public ResultSet execute(Connection conn) throws SQLException {
+          conn.setSchema("dataset_" + datasetId);
+          try (PreparedStatement stmt = conn.prepareStatement(query);
+              ResultSet rs = stmt.executeQuery();) {
+            LOG.info("executing query: {}", query);
+            return rs;
+          }
+        }
+      });
+    } catch (HibernateException e) {
+      throw new EEAInvalidSQLException("SQL not valid: " + query, e);
+    }
+
+  }
 }

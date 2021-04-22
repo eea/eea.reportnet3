@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { storiesOf } from '../../../../../.storybook/storiesOf';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';

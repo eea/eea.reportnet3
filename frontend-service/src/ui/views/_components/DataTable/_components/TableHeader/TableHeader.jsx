@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import { Component, Children } from 'react';
 import { HeaderCell } from './_components/HeaderCell';
 
 export class TableHeader extends Component {
   createHeaderCells(root) {
-    let children = React.Children.toArray(root.props.children);
+    let children = Children.toArray(root.props.children);
 
-    return React.Children.map(children, (column, i) => {
+    return Children.map(children, (column, i) => {
       return (
         <HeaderCell
           key={i}
@@ -36,7 +36,7 @@ export class TableHeader extends Component {
   render() {
     let content;
     if (this.props.columnGroup) {
-      let rows = React.Children.toArray(this.props.columnGroup.props.children);
+      let rows = Children.toArray(this.props.columnGroup.props.children);
       content = rows.map((row, i) => {
         return <tr key={i}>{this.createHeaderCells(row)}</tr>;
       });

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
@@ -665,14 +665,6 @@ export class Dropdown extends Component {
       return null;
     }
   }
-
-  // renderFilterClearIcon() {
-  //   if (this.props.value != null && this.props.showFilterClear && !this.props.disabled) {
-  //     return <span className="p-dropdown-filter-icon pi pi-times" onClick={this.clearFilter}></span>;
-  //   } else {
-  //     return null;
-  //   }
-  // }
 
   renderDropdownIcon() {
     return (

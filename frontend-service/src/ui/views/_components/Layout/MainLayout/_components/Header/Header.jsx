@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { config } from 'conf';
@@ -221,7 +221,6 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         ref={avatarImage}
         src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
       />
-      {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>
         {!isUndefined(userContext.email) &&
         !isUndefined(userContext.lastName) &&

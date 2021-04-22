@@ -955,12 +955,15 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Find if the dataset type is EU to include the countryCode
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
     return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
   }
+
+
 
   /**
    * Export file through integration.
@@ -3280,6 +3283,28 @@ public class DatasetServiceImpl implements DatasetService {
     return file;
   }
 
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public File downloadFile(Long datasetId, String fileName) throws IOException, EEAException {
+    // we compound the route and create the file
+    File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
+    if (!file.exists()) {
+      LOG_ERROR.error(
+          "Trying to download a file generated during the export dataset data process but the file is not found");
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
   /**
    * Creeate all dataset files.
    *
@@ -3697,7 +3722,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     } catch (IOException e) {
-      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+      LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
   }
 
@@ -3772,4 +3797,5 @@ public class DatasetServiceImpl implements DatasetService {
 
     return query.toString();
   }
+
 }

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
@@ -257,8 +257,6 @@ export const NationalSystemsField = ({
         );
 
       case 'ATTACHMENT':
-        // const colSchema = columnsSchema.filter(colSchema => colSchema.fieldSchemaId === field.fieldSchemaId)[0];
-
         return (
           <div className={styles.attachmentWrapper}>
             {!isNil(field.value) && field.value !== '' && (
@@ -281,12 +279,6 @@ export const NationalSystemsField = ({
                 }
                 onClick={() => {
                   handleDialogs('uploadFile', true);
-                  // onFileUploadVisible(
-                  //   field.fieldId,
-                  //   field.fieldSchemaId,
-                  //   !isNil(colSchema) ? colSchema.validExtensions : [],
-                  //   !isNil(colSchema) ? colSchema.maxSize : 20
-                  // );
                 }}
               />
             }
@@ -295,7 +287,6 @@ export const NationalSystemsField = ({
               className={`p-button-animated-blink p-button-primary-transparent`}
               icon={'trash'}
               onClick={() => {
-                // onFileDeleteVisible(field.fieldId, field.fieldSchemaId);
                 handleDialogs('deleteAttachment', true);
               }}
             />

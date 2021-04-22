@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -199,6 +199,8 @@ const DatasetSchema = ({
             let referencedField = {};
             if (!isNil(fieldDTO.referencedField)) {
               referencedField = onGetReferencedFieldName(fieldDTO.referencedField);
+              referencedField.pkHasMultipleValues = fieldDTO.pkHasMultipleValues;
+              referencedField.pkMustBeUsed = fieldDTO.pkMustBeUsed;
             }
 
             field.pk = fieldDTO.pk;
@@ -217,26 +219,7 @@ const DatasetSchema = ({
             field.format = getFieldFormat(fieldDTO);
             if (containsLinks) {
               if (!isNil(fieldDTO.referencedField)) {
-                field.referencedField = `
-                ${referencedField.tableName} - ${referencedField.fieldName}
-
-                ${
-                  !isNil(referencedField.linkedTableLabel) && referencedField.linkedTableLabel !== ''
-                    ? `Linked label: ${referencedField.linkedTableLabel}`
-                    : ''
-                }
-
-                ${
-                  !isNil(referencedField.linkedTableConditional) && referencedField.linkedTableConditional !== ''
-                    ? `Linked conditional: ${referencedField.linkedTableConditional}`
-                    : ''
-                }
-                
-                ${
-                  !isNil(referencedField.masterTableConditional) && referencedField.masterTableConditional !== ''
-                    ? `Master conditional: ${referencedField.masterTableConditional}`
-                    : ''
-                }`;
+                field.referencedField = referencedField;
               } else {
                 field.referencedField = '';
               }

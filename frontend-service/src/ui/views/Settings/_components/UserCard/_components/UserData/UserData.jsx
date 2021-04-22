@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import isUndefined from 'lodash/isUndefined';
 
 import styles from './UserData.module.scss';

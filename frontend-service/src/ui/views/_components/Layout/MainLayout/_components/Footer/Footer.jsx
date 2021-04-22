@@ -1,4 +1,4 @@
-import React, { useContext, Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import styles from './Footer.module.scss';

@@ -1,4 +1,4 @@
-import React, { useContext, useReducer } from 'react';
+import { useContext, useReducer } from 'react';
 import isNil from 'lodash/isNil';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext.js';
