@@ -13,6 +13,8 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.{Map => MMap}
 import java.io.File
 import java.io.FileInputStream
+import scalaj.http._
+import scala.util.parsing.json.JSON
 //import performance.ExecutionConfiguration
 //import performance.CSVFeeder
 import scala.collection.mutable.{ListBuffer, Map => MMap}
@@ -43,28 +45,23 @@ class BaseSimulation extends Simulation {
   val assertionList = new ListBuffer[io.gatling.commons.stats.assertion.Assertion]()
   val testScenarioFunction: (TestScenario) => Unit = (testScenario) => {
     var scalaHeaders: MMap[String, String] = collection.mutable.Map.empty
-
     if (null != testScenario.headers && !testScenario.headers.isEmpty()) {
       scalaHeaders = collection.mutable.Map(testScenario.headers.toSeq: _*)
     }
     val finalHeaders = scalaHeaders.toMap
     //Retrieve the proper scenario builder function and execute it
-    val scn = executionFunctions.get(ExecutionConfiguration.calculateExecutionKey(testScenario)).get(testScenario.requestName, testScenario.endpoint, finalHeaders, testScenario.pauseTime, testScenario.requestBody, testScenario.uploadFileName, testScenario.uploadFileKey, testScenario.numberExecutions)
+    val scn = executionFunctions.get(ExecutionConfiguration.calculateExecutionKey(testScenario)).get(testScenario.requestName, testScenario.endpoint, finalHeaders, testScenario.pauseTime, testScenario.requestBody, testScenario.uploadFileName, testScenario.uploadFileKey, testScenario.numberExecutions, testScenario.requireAuth)
     //Add the just created scenario to the list of scenarios
     scenariosList += scn.inject(atOnceUsers(testScenario.usersNumber)).protocols(httpProtocol)
-
-
     //Define assertions
     assertionList += details(testScenario.requestName).responseTime.max.lt(testScenario.timeOut)
-    print("done")
+    println(testScenario.requestName + ": Done")
   }
   config.gatlingScenarios.scenarios.foreach(testScenarioFunction)
 
   var allScenarios = scenariosList.toList
 
-
   setUp(allScenarios).assertions(assertionList)
-
 
 }
 
@@ -77,8 +74,8 @@ class GatlingScenarios(@JsonProperty("scenarios") _scenarios: JList[TestScenario
 }
 
 class TestScenario(@JsonProperty("requestName") _requestName: String, @JsonProperty("endpoint") _endpoint: String, @JsonProperty("usersNumber") _usersNumber: Integer, @JsonProperty("method") _method: String,
-                   @JsonProperty("headers") _headers: JMap[String, String], @JsonProperty("puaseTime") _pauseTime: Integer, @JsonProperty("requestBody") _requestBody: String, @JsonProperty("uploadFileName") _uploadFileName: String,
-                   @JsonProperty("uploadFileKey") _uploadFileKey: String, @JsonProperty("timeOut") _timeOut: Integer, @JsonProperty("numberExecutions") _numberExecutions: Integer, @JsonProperty("useFeeder") _useFeeder: Boolean) {
+                   @JsonProperty("headers") _headers: JMap[String, String], @JsonProperty("pauseTime") _pauseTime: Integer, @JsonProperty("requestBody") _requestBody: String, @JsonProperty("uploadFileName") _uploadFileName: String,
+                   @JsonProperty("uploadFileKey") _uploadFileKey: String, @JsonProperty("timeOut") _timeOut: Integer, @JsonProperty("numberExecutions") _numberExecutions: Integer, @JsonProperty("useFeeder") _useFeeder: Boolean,@JsonProperty("requireAuth") _requireAuth: Boolean) {
   var endpoint = _endpoint
   var usersNumber = _usersNumber
   var method = _method
@@ -94,7 +91,7 @@ class TestScenario(@JsonProperty("requestName") _requestName: String, @JsonPrope
     numberExecutions = _numberExecutions;
   }
   var useFeeder = _useFeeder
-
+  var requireAuth = _requireAuth
 }
 
 
