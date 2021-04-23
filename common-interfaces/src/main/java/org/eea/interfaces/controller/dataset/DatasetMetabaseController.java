@@ -114,7 +114,7 @@ public interface DatasetMetabaseController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @PathVariable("dataschemaId") String dataschemaId,
-      @PathVariable("dataflowId") String dataflowId);
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Gets the reportings id by schema id.
