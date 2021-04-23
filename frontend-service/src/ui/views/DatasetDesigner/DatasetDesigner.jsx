@@ -186,7 +186,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      if (userContext.accessRole[0] !== config.permissions.roles.EDITOR_READ.key) {
+      if (userContext.accessRole[0] !== config.permissions.roles.EDITOR_READ.key && !isDataflowOpen) {
         if (datasetSchemaAllTables.length > 1) {
           leftSideBarContext.addHelpSteps(
             DatasetSchemaRequesterWithTabsHelpConfig,
@@ -198,6 +198,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             'datasetSchemaRequesterEmptyHelpConfig'
           );
         }
+      } else {
+        leftSideBarContext.removeHelpSteps();
       }
     }
   }, [userContext, designerState, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
@@ -927,7 +929,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             : resources.messages['designView']
         }
       />
-    );  
+    );
   };
 
   const renderSwitchView = () => {

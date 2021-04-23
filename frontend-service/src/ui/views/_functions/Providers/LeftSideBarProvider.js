@@ -90,6 +90,12 @@ const LeftSideBarProvider = ({ children }) => {
             payload: { component, steps }
           });
         },
+        removeHelpSteps: () => {
+          dispatch({
+            type: 'ADD_HELP_STEPS',
+            payload: { steps: [] }
+          });
+        },
         removeModels: () => {
           dispatch({
             type: 'REMOVE_MODEL',

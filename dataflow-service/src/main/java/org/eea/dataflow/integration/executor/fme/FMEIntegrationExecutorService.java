@@ -242,6 +242,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter(IntegrationParams.FOLDER,
             integrationOperationParams.get(IntegrationParams.DATASET_ID) + "/"
                 + paramDataProvider));
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
         LOG.info("Creating Export FS in FME");
@@ -262,7 +263,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter(IntegrationParams.INPUT_FILE, fileName));
         parameters
             .add(saveParameter(IntegrationParams.FOLDER, datasetId + "/" + paramDataProvider));
-
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
         byte[] decodedBytes = Base64.getDecoder()
@@ -272,6 +273,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
         LOG.info("Executing FME Import");
+
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
@@ -281,17 +283,14 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             : "XX";
         parameters.add(saveParameter(IntegrationParams.COUNTRY_CODE, countryCode));
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Import to other system");
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case EXPORT_EU_DATASET:
-        parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC,
-            integration.getExternalParameters().get(IntegrationParams.DATABASE_CONNECTION_PUBLIC)));
-        parameters.add(saveParameter(IntegrationParams.MODE, ""));
-
-        fmeAsyncJob.setPublishedParameters(parameters);
+        fmeAsyncJob.setPublishedParameters(addExternalParametersToFMEExecution(integration));
         LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
@@ -315,6 +314,21 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     }
     fmeJobRepository.save(fmeJob);
     return executionResultVO;
+  }
+
+  private List<PublishedParameter> addExternalParametersToFMEExecution(IntegrationVO integration) {
+    List<PublishedParameter> parameters = new ArrayList<>();
+    if (null != integration && null != integration.getExternalParameters()) {
+      integration.getExternalParameters().forEach((key, value) -> {
+        PublishedParameter parameter = new PublishedParameter();
+        if (!key.equals(IntegrationParams.FILE_IS)) {
+          parameter.setName(key);
+          parameter.setValue(value);
+          parameters.add(parameter);
+        }
+      });
+    }
+    return parameters;
   }
 
   /**
