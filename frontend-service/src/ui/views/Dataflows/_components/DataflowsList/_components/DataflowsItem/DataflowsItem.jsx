@@ -110,12 +110,8 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
 
       <div className={`${styles.obligation} `}>
         <p className="dataflowList-obligation-description-help-step">
-          {!isNil(itemContent.legalInstrument) ? (
-            <Fragment>
-              <span>{`${resources.messages['legalInstrumentDataflowItem']}: `}</span>
-              {itemContent.legalInstrument}
-            </Fragment>
-          ) : null}
+          <span>{`${resources.messages['legalInstrumentDataflowItem']}: `}</span>
+          {itemContent.legalInstrument}
         </p>
         <p>
           <span>{`${resources.messages['obligationDataflowItem']}: `}</span>

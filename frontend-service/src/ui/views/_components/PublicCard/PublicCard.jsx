@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import uuid from 'uuid';
@@ -15,7 +15,6 @@ export const PublicCard = ({
   dataflowId,
   dueDate,
   frequency,
-  instrument,
   obligation,
   onCardClick,
   isReleasable,
@@ -25,6 +24,7 @@ export const PublicCard = ({
   externalCard
 }) => {
   const idTooltip = uuid.v4();
+  const baseRod3Url = 'https://rod.eionet.europa.eu';
 
   const onOpenTab = (e, url) => {
     e.preventDefault();
@@ -71,28 +71,25 @@ export const PublicCard = ({
             {subtitle.text}
           </ReactTooltip>
         </div>
-        {obligation && (
-          <div className={styles.legalInstrumentAndObligation}>
-            <p>
-              <strong>Obligation: </strong>
-              {renderRedirectText(
-                obligation?.title,
-                `https://rod.eionet.europa.eu/obligations/${obligation?.obligationId}`
-              )}
-            </p>
-          </div>
-        )}
-        {instrument && (
-          <div className={styles.legalInstrumentAndObligation}>
-            <p>
-              <strong>Instrument: </strong>
-              {renderRedirectText(
-                obligation?.legalInstruments?.alias,
-                `https://rod.eionet.europa.eu/instruments/${obligation?.legalInstruments?.id}`
-              )}
-            </p>
-          </div>
-        )}
+        <div className={styles.legalInstrumentAndObligation}>
+          <p>
+            <strong>Obligation: </strong>
+            {obligation?.obligationId
+              ? renderRedirectText(obligation?.title, `${baseRod3Url}/obligations/${obligation?.obligationId}`)
+              : obligation?.title}
+          </p>
+        </div>
+        <div className={styles.legalInstrumentAndObligation}>
+          <p>
+            <strong>Instrument: </strong>
+            {obligation?.legalInstruments?.id
+              ? renderRedirectText(
+                  obligation?.legalInstruments?.alias,
+                  `${baseRod3Url}/instruments/${obligation?.legalInstruments?.id}`
+                )
+              : obligation?.legalInstruments?.alias}
+          </p>
+        </div>
         {pilotScenarioAmbition && (
           <div className={styles.legalInstrumentAndObligation}>
             <p>
