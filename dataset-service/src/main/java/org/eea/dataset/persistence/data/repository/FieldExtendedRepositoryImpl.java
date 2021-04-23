@@ -278,7 +278,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param dateStr String to check
    * @return true if is Date
    */
-  public boolean stringIsDate(String dateStr) {
+  private boolean stringIsDate(String dateStr) {
     DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     try {
       sdf.parse(dateStr);
