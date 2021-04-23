@@ -152,7 +152,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName) {
 
-    String nameTrimmed = datasetName;
+    String nameTrimmed = datasetName.trim();
     filterName(nameTrimmed);
     datasetName = nameTrimmed;
 
