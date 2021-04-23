@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from 'react';
+import { Fragment, useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import uuid from 'uuid';
@@ -76,8 +76,8 @@ export const PublicCard = ({
             <p>
               <strong>Obligation: </strong>
               {renderRedirectText(
-                obligation.title,
-                `https://rod.eionet.europa.eu/obligations/${obligation.obligationId}`
+                obligation?.title,
+                `https://rod.eionet.europa.eu/obligations/${obligation?.obligationId}`
               )}
             </p>
           </div>
@@ -87,14 +87,14 @@ export const PublicCard = ({
             <p>
               <strong>Instrument: </strong>
               {renderRedirectText(
-                obligation.legalInstruments.alias,
-                `https://rod.eionet.europa.eu/instruments/${obligation.legalInstruments.id}`
+                obligation?.legalInstruments?.alias,
+                `https://rod.eionet.europa.eu/instruments/${obligation?.legalInstruments?.id}`
               )}
             </p>
           </div>
         )}
         {pilotScenarioAmbition && (
-          <div className={styles.legalInstrumentAndObligation} onMouseDown={() => window.open('blablab.com')}>
+          <div className={styles.legalInstrumentAndObligation}>
             <p>
               <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
             </p>

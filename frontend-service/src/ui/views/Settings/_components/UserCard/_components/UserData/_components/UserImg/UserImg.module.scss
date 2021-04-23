@@ -13,7 +13,6 @@
   margin: 3rem 0rem 3rem 0rem;
 }
 .overlay {
-  // position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
@@ -27,7 +26,6 @@
 }
 .userDataIcon {
   font-size: 2.8rem !important;
-  // padding: 0.5rem;
   margin: 0.5rem;
   border-radius: 50%;
   -moz-border-radius: 50%;
@@ -39,7 +37,6 @@
 }
 
 .userDataIcon:hover {
-  // background-color: var(--user-image-bg-hover);
   opacity: var(--user-image-bg-opacity);
   border: 3px dashed var(--user-image-bg-hover);
   cursor: pointer;

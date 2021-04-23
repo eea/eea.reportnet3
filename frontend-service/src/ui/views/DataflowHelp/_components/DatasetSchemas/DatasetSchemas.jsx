@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -156,8 +156,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         type: error.message
       };
       notificationContext.add(schemaError);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -225,8 +223,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         type: error.message
       };
       notificationContext.add(schemaError);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -306,8 +302,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         type: error.message
       };
       notificationContext.add(schemaError);
-    } finally {
-      // setIsLoading(false);
     }
   };
 

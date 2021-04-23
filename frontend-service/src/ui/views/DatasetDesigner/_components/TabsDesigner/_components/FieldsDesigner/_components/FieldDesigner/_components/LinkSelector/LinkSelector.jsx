@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -251,7 +251,7 @@ const LinkSelector = withRouter(
 
     const renderLinkSelector = () => {
       return (
-        <React.Fragment>
+        <Fragment>
           <div className={styles.schemaWrapper}>
             {!isUndefined(datasetSchemas) &&
               !isEmpty(datasetSchemas) &&
@@ -285,7 +285,6 @@ const LinkSelector = withRouter(
               optionLabel="name"
               options={linkedTableFields}
               placeholder={resources.messages['linkedTableLabel']}
-              // scrollHeight="450px"
               value={pkLinkedTableLabel}
             />
           </div>
@@ -301,7 +300,6 @@ const LinkSelector = withRouter(
               optionLabel="name"
               options={masterTableFields}
               placeholder={resources.messages['masterTableConditional']}
-              // scrollHeight="450px"
               value={pkMasterTableConditional}
             />
             <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
@@ -346,7 +344,7 @@ const LinkSelector = withRouter(
             <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
             <span>{!isNil(link) ? link.name : ''}</span>
           </div>
-        </React.Fragment>
+        </Fragment>
       );
     };
 

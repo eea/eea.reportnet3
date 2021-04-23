@@ -204,7 +204,7 @@ const userRole = (user, entity) => {
   const roleDTO = user.contextRoles.filter(role => role.includes(entity));
   if (roleDTO.length) {
     const [roleName] = roleDTO[0].split('-').reverse();
-    return config.permissions[roleName];
+    return config.permissions.roles[roleName];
   }
   return;
 };

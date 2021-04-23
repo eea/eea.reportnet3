@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import { useReducer } from 'react';
 
 import { DialogContext } from 'ui/views/_functions/Contexts/DialogContext';
 

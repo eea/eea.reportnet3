@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -113,7 +113,7 @@ export class InputText extends Component {
 
     let inputProps = ObjectUtils.findDiffKeys(this.props, InputText.defaultProps);
     return (
-      <React.Fragment>
+      <Fragment>
         <input
           autoComplete="off"
           autoFocus={this.props.autoFocus}
@@ -137,7 +137,7 @@ export class InputText extends Component {
             />
           </div>
         ) : null}
-      </React.Fragment>
+      </Fragment>
     );
   }
 }

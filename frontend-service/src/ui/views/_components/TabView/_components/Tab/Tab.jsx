@@ -1,7 +1,10 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import { isNil, isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { config } from 'conf';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './Tab.module.css';
 
@@ -11,9 +14,6 @@ import { ContextMenu } from 'ui/views/_components/ContextMenu';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 const Tab = ({
   addTab,
@@ -233,7 +233,7 @@ const Tab = ({
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div
         style={{
           display: isDragging ? 'inline' : 'none',
@@ -261,14 +261,6 @@ const Tab = ({
           zIndex: 9999
         }}>
         <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} />
-        {/* <div
-          style={{
-            height: '40px',
-            width: '30px',
-            // border: '2px 2px 0 2px solid gray',
-            marginRight: '3px',
-            backgroundColor: 'var(--c-corporate-yellow)'
-          }}></div> */}
       </div>
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
@@ -414,7 +406,7 @@ const Tab = ({
       {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
         <ContextMenu model={menu} ref={contextMenuRef} />
       ) : null}
-    </React.Fragment>
+    </Fragment>
   );
 };
 

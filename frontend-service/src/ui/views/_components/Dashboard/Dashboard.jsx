@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, memo, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import capitalize from 'lodash/capitalize';
@@ -21,7 +21,7 @@ import { useStatusFilter } from 'ui/views/_components/StatusList/_hooks/useStatu
 import { ErrorUtils } from 'ui/views/_functions/Utils';
 
 const Dashboard = withRouter(
-  React.memo(
+  memo(
     ({
       refresh,
       tableSchemaNames,

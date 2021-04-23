@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';

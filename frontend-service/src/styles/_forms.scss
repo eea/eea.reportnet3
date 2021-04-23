@@ -38,7 +38,12 @@ textarea:focus {
   box-shadow: inset 0px 0px 0px 1px var(--c-corporate-blue);
   outline: none;
 }
-
+.p-dropdown:not(.p-disabled).p-focus {
+  border-color: var(--c-corporate-blue);
+  box-shadow: outset 0px 0px 0px 1px var(--c-corporate-blue);
+  border-width: 2px;
+  outline: none;
+}
 .formField.error input {
   border-color: var(--errors);
   box-shadow: inset 0px 0px 0px 1px var(--errors);

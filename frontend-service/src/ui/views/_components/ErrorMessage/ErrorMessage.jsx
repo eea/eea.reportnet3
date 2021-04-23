@@ -1,8 +1,8 @@
-import React from 'react';
+import { memo } from 'react';
 
 import styles from './ErrorMessage.module.scss';
 
-const ErrorMessage = React.memo(({ message }) => {
+const ErrorMessage = memo(({ message }) => {
   return (
     <div className={styles.wrapper}>
       <span>{message}</span>

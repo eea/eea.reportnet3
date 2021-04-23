@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { config } from 'conf';
 
 export const Icon = ({ className, icon, style, onClick, onMouseOver }) => {
