@@ -198,7 +198,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
         }
       } else {
         leftSideBarContext.removeHelpSteps();
-        console.log(isDataflowOpen, leftSideBarContext);
       }
     }
   }, [userContext, designerState, designerState.areLoadingSchemas, designerState.areUpdatingTables]);

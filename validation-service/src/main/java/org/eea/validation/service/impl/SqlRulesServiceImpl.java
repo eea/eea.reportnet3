@@ -96,6 +96,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private RepresentativeControllerZuul representativeController;
 
+  /** The test dataset controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
 
@@ -327,13 +328,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       // validate query sintax
       if (checkQuerySyntax(query)) {
         try {
-          String preparedquery = "";
-          if (query.contains(";")) {
-            preparedquery = query.replace(";", "") + " limit 5";
-          } else {
-            preparedquery = query + " limit 5";
-          }
-          retrieveTableData(preparedquery, datasetId, rule, ischeckDC);
+          checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
         } catch (EEAInvalidSQLException e) {
           LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
           isSQLCorrect = false;
@@ -368,6 +363,20 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       }
     }
     return queryContainsKeyword;
+  }
+
+  /**
+   * Check query test execution.
+   *
+   * @param query the query
+   * @param datasetId the dataset id
+   * @param rule the rule
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  private void checkQueryTestExecution(String query, Long datasetId, Rule rule)
+      throws EEAInvalidSQLException {
+    String newQuery = proccessQuery(datasetId, query);
+    datasetRepository.validateQuery("explain " + newQuery, datasetId);
   }
 
   /**
