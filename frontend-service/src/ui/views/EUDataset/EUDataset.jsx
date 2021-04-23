@@ -92,6 +92,12 @@ export const EUDataset = withRouter(({ history, match }) => {
     getExportExtensionsList();
   }, []);
 
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
+    }
+  }, [notificationContext.hidden]);
+
   useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, metaData });
 
   const callSetMetaData = async () => {
@@ -174,8 +180,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
-      console.log('error', error);
-
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -271,12 +275,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   const setIsLoadingFile = value => euDatasetDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   useCheckNotifications(
-    [
-      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
-      'EXPORT_DATA_BY_ID_ERROR',
-      'EXPORT_DATASET_FAILED_EVENT',
-      'EXPORT_DATASET_FILE_DOWNLOAD'
-    ],
+    ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD'],
     setIsLoadingFile,
     false
   );

@@ -189,6 +189,12 @@ export const Dataset = withRouter(({ match, history }) => {
     setImportButtonsList(importFromFile.concat(importFromOtherSystems));
   }, [externalOperationsList.import]);
 
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
+    }
+  }, [notificationContext.hidden]);
+
   const {
     isLoadingSnapshotListData,
     isSnapshotDialogVisible,
@@ -470,7 +476,6 @@ export const Dataset = withRouter(({ match, history }) => {
       'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
       'DOWNLOAD_FME_FILE_ERROR',
       'EXPORT_DATA_BY_ID_ERROR',
-      'EXPORT_DATASET_FAILED_EVENT',
       'EXPORT_DATASET_FILE_DOWNLOAD',
       'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'
     ],

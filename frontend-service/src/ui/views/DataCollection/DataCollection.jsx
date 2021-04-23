@@ -58,12 +58,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history });
 
   useCheckNotifications(
-    [
-      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
-      'EXPORT_DATA_BY_ID_ERROR',
-      'EXPORT_DATASET_FAILED_EVENT',
-      'EXPORT_DATASET_FILE_DOWNLOAD'
-    ],
+    ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD'],
     setIsLoadingFile,
     false
   );
@@ -85,6 +80,12 @@ export const DataCollection = withRouter(({ match, history }) => {
   useEffect(() => {
     setExportButtonsList(internalExtensions);
   }, []);
+
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
+    }
+  }, [notificationContext.hidden]);
 
   const getDataflowName = async () => {
     try {
@@ -127,8 +128,6 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
-      console.log('error', error);
-
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

@@ -249,6 +249,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   }, [userContext, designerState?.metaData?.dataflow?.status]);
 
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
+    }
+  }, [notificationContext.hidden]);
+
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
   const callSetMetaData = async () => {
@@ -561,7 +567,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
       'DOWNLOAD_FME_FILE_ERROR',
       'EXPORT_DATA_BY_ID_ERROR',
-      'EXPORT_DATASET_FAILED_EVENT',
       'EXPORT_DATASET_FILE_DOWNLOAD',
       'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'
     ],
