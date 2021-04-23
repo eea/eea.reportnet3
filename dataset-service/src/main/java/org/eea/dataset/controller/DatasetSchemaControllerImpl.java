@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -66,6 +67,12 @@ import io.netty.util.internal.StringUtil;
 @RequestMapping("/dataschema")
 public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
+  /** The Constant REGEX_NAME: {@value}. */
+  private static final String REGEX_NAME = "[a-zA-Z0-9\\s_-]+";
+
+  /** The Constant REGEX_NAME_SCHEMA: {@value}. */
+  private static final String REGEX_NAME_SCHEMA = "[a-zA-Z0-9\\s\\(\\)_-]+";
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSchemaControllerImpl.class);
 
@@ -124,7 +131,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/createEmptyDatasetSchema")
   @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') AND hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
-      @RequestParam("datasetSchemaName") final String datasetSchemaName) {
+      @RequestParam("datasetSchemaName") String datasetSchemaName) {
+
+    String nameTrimmed = datasetSchemaName.trim();
+    boolean isSchema = true;
+    filterName(nameTrimmed, isSchema);
+    datasetSchemaName = nameTrimmed;
 
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
@@ -306,6 +318,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
 
+    String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
+    boolean isSchema = false;
+    filterName(nameTrimmed, isSchema);
+    tableSchemaVO.setNameTableSchema(nameTrimmed);
+
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
@@ -339,6 +356,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/tableSchema")
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
+
+    String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
+    boolean isSchema = false;
+    filterName(nameTrimmed, isSchema);
+    tableSchemaVO.setNameTableSchema(nameTrimmed);
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -470,6 +492,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
 
+    String nameTrimmed = fieldSchemaVO.getName().trim();
+    boolean isSchema = false;
+    filterName(nameTrimmed, isSchema);
+    fieldSchemaVO.setName(nameTrimmed);
+
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       String response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO);
@@ -520,6 +547,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/fieldSchema")
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
+
+    String nameTrimmed = fieldSchemaVO.getName().trim();
+    boolean isSchema = false;
+    filterName(nameTrimmed, isSchema);
+    fieldSchemaVO.setName(nameTrimmed);
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -1024,4 +1056,24 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+
+  /**
+   * Filter name.
+   *
+   * @param nameTrimmed the name trimmed
+   * @param isSchema the is schema
+   */
+  private void filterName(String nameTrimmed, boolean isSchema) {
+    if (isSchema) {
+      if (!Pattern.matches(REGEX_NAME_SCHEMA, nameTrimmed)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+      }
+    } else {
+      if (!Pattern.matches(REGEX_NAME, nameTrimmed)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+      }
+    }
+  }
 }

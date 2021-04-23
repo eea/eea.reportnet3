@@ -240,6 +240,10 @@ public final class EEAErrorMessage {
   public static final String DATASET_SCHEMA_ID_NOT_FOUND =
       "DatasetSchemaId not found for datasetId %s";
 
+  /** The Constant DATASET_SCHEMA_INVALID_NAME_ERROR: {@value}. */
+  public static final String DATASET_SCHEMA_INVALID_NAME_ERROR =
+      "DatasetSchemaName invalid, use valid name";
+
   /** The Constant TABLE_READ_ONLY: {@value}. */
   public static final String TABLE_READ_ONLY = "The table is marked as read only";
 
