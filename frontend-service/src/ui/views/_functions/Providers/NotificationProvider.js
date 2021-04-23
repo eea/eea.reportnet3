@@ -1,4 +1,4 @@
-import React, { useContext, useReducer } from 'react';
+import { useContext, useReducer } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';

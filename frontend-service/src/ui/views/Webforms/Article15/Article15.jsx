@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useReducer } from 'react';
+import { Fragment, useEffect, useReducer } from 'react';
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';

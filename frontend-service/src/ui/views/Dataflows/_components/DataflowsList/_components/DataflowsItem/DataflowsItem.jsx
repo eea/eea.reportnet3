@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
@@ -110,12 +110,8 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
 
       <div className={`${styles.obligation} `}>
         <p className="dataflowList-obligation-description-help-step">
-          {!isNil(itemContent.legalInstrument) ? (
-            <Fragment>
-              <span>{`${resources.messages['legalInstrumentDataflowItem']}: `}</span>
-              {itemContent.legalInstrument}
-            </Fragment>
-          ) : null}
+          <span>{`${resources.messages['legalInstrumentDataflowItem']}: `}</span>
+          {itemContent.legalInstrument}
         </p>
         <p>
           <span>{`${resources.messages['obligationDataflowItem']}: `}</span>

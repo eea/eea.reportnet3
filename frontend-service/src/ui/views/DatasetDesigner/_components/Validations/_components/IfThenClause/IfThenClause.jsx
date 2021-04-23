@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import styles from './IfThenClause.module.scss';
 
@@ -27,7 +27,7 @@ export const IfThenClause = ({
   const resourcesContext = useContext(ResourcesContext);
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div className={styles.section}>
         <h3 className="if">IF</h3>
         <ul className={styles.list}>
@@ -127,6 +127,6 @@ export const IfThenClause = ({
           rows="5"
           value={creationFormState.validationRuleString}></textarea>
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 };

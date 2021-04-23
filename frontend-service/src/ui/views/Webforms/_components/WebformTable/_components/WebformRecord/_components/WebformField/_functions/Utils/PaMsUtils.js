@@ -1,5 +1,3 @@
-// ('Other objectives');
-
 const getObjectiveOptions = value => {
   switch (value) {
     case 'Agriculture':

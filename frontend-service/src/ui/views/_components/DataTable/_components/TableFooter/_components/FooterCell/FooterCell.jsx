@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const FooterCell = props => {
   let className = props.footerClassName || props.className;
 

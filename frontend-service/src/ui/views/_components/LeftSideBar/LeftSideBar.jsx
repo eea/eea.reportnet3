@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -155,6 +155,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       <Joyride
         callback={handleJoyrideCallback}
         continuous={true}
+        disableScrolling={true}
         run={run}
         scrollToFirstStep={true}
         showProgress={true}

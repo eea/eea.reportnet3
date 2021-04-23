@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ReactDOM from 'react-dom';
@@ -295,7 +295,6 @@ export class ContextMenu extends Component {
         left -= width;
       }
 
-      //flip
       if (top + height - document.body.scrollTop > viewport.height) {
         top -= height;
       }
@@ -305,7 +304,6 @@ export class ContextMenu extends Component {
         left = document.body.scrollLeft;
       }
 
-      //fit
       if (top < document.body.scrollTop) {
         top = document.body.scrollTop;
       }

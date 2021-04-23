@@ -1,4 +1,4 @@
-import React, { useContext, useReducer } from 'react';
+import { useContext, useReducer } from 'react';
 import isNil from 'lodash/isNil';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext.js';
@@ -88,6 +88,12 @@ const LeftSideBarProvider = ({ children }) => {
           dispatch({
             type: 'ADD_HELP_STEPS',
             payload: { component, steps }
+          });
+        },
+        removeHelpSteps: () => {
+          dispatch({
+            type: 'ADD_HELP_STEPS',
+            payload: { steps: [] }
           });
         },
         removeModels: () => {

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import './ConfirmDialog.stories.module.css';
 
 import { storiesOf } from '../../../../../.storybook/storiesOf';

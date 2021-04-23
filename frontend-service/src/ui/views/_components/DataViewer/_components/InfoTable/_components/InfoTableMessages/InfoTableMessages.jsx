@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -54,5 +54,5 @@ export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns
     }
   };
 
-  return <React.Fragment>{!isUndefined(data) ? checkPastedColumnsErrors() : null}</React.Fragment>;
+  return <Fragment>{!isUndefined(data) ? checkPastedColumnsErrors() : null}</Fragment>;
 };

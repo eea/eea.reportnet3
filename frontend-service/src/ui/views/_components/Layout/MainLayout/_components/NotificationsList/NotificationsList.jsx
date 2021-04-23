@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
@@ -23,10 +23,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const [columns, setColumns] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  // const [numberRows, setNumberRows] = useState(0);
-  // const [firstRow, setFirstRow] = useState(0);
-  // const [sortField, setSortField] = useState('');
-  // const [sortOrder, setSortOrder] = useState(0);
 
   useEffect(() => {
     const headers = [
@@ -95,7 +91,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           : ''
       };
     });
-    // console.info('notifications: %o', notificationsArray);
     setNotifications(notificationsArray);
   }, [notificationContext, userContext]);
 
@@ -123,11 +118,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       )
     );
   };
-
-  // const onChangePage = event => {
-  //   setNumberRows(event.rows);
-  //   setFirstRow(event.first);
-  // };
 
   return (
     isNotificationVisible && (
