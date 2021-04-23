@@ -62,6 +62,7 @@ public class ExportDatasetFailedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("error", notificationVO.getError());
+    notification.put("datasetType", notificationVO.getDatasetType());
     return notification;
   }
 }

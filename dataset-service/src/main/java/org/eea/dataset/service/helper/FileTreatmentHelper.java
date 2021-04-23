@@ -979,7 +979,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
       generateFile(datasetId, extension, content, includeZip, datasetType);
       LOG.info("End of exportDatasetFile datasetId {}", datasetId);
-    } catch (EEAException | IOException e) {
+    } catch (EEAException | IOException | NullPointerException e) {
       LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
           datasetId, mimeType, e.getMessage(), e);
       // Send notification
