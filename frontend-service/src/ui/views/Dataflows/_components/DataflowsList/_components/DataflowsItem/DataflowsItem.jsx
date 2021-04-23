@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
@@ -90,19 +90,21 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
       <div className={`${styles.status}  dataflowList-status-help-step`}>
         {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'OPEN' && (
           <p>
-            <span>{`${resources.messages['deliveryStatus']}:`}</span>{' '}
+            <span>{`${resources.messages['deliveryStatus']}: `}</span>
             {itemContent.reportingDatasetsStatus === 'PENDING'
               ? resources.messages['draft'].toUpperCase()
               : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
           </p>
         )}
         <p>
-          <span>{`${resources.messages['dataflowStatus']}:`}</span> {itemContent.status}
+          <span>{`${resources.messages['dataflowStatus']}: `}</span>
+          {itemContent.status}
         </p>
       </div>
       <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
-          <span>{`${resources.messages['role']}:`}</span> {itemContent.userRole?.replace('_', ' ')}
+          <span>{`${resources.messages['role']}: `}</span>
+          {itemContent.userRole}
         </p>
       </div>
 
@@ -110,12 +112,14 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         <p className="dataflowList-obligation-description-help-step">
           {!isNil(itemContent.legalInstrument) ? (
             <Fragment>
-              <span>{`${resources.messages['legalInstrumentDataflowItem']}:`}</span> {itemContent.legalInstrument}
+              <span>{`${resources.messages['legalInstrumentDataflowItem']}: `}</span>
+              {itemContent.legalInstrument}
             </Fragment>
           ) : null}
         </p>
         <p>
-          <span>{`${resources.messages['obligationDataflowItem']}:`}</span> {itemContent.obligationTitle}
+          <span>{`${resources.messages['obligationDataflowItem']}: `}</span>
+          {itemContent.obligationTitle}
         </p>
       </div>
     </Fragment>

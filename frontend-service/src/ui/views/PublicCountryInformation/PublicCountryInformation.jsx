@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, Fragment } from 'react';
+import { useContext, useEffect, useState, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
@@ -187,7 +187,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         id: dataflow.id,
         name: dataflow.name,
         obligation: dataflow.obligation,
-        legalInstrument: dataflow.obligation.legalInstruments,
+        legalInstrument: dataflow.obligation?.legalInstruments,
         deadline: dataflow.expirationDate,
         isReleased: isReleased,
         isReleasable: dataflow.isReleasable,
@@ -295,8 +295,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
       {renderRedirectText(
-        rowData.legalInstrument.alias,
-        `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument.id}`
+        rowData.legalInstrument?.alias,
+        `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument?.id}`
       )}
     </div>
   );
@@ -304,8 +304,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const renderObligationBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
       {renderRedirectText(
-        rowData.obligation.title,
-        `https://rod.eionet.europa.eu/obligations/${rowData.obligation.obligationId}`
+        rowData.obligation?.title,
+        `https://rod.eionet.europa.eu/obligations/${rowData.obligation?.obligationId}`
       )}
     </div>
   );

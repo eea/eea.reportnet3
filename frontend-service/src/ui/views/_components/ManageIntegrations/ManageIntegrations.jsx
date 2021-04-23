@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
@@ -510,7 +510,6 @@ export const ManageIntegrations = ({
             onKeyDown={event => onSaveKeyDown(event)}
             placeholder={resources.messages[option]}
             ref={inputRefs[option]}
-            type="search"
             value={manageIntegrationsState[option]}
           />
         </div>

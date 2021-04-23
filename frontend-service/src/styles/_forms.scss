@@ -40,7 +40,12 @@ textarea:focus {
   @include shadow-1px(var(--c-corporate-blue));
   outline: none;
 }
-
+.p-dropdown:not(.p-disabled).p-focus {
+  border-color: var(--c-corporate-blue);
+  box-shadow: outset 0px 0px 0px 1px var(--c-corporate-blue);
+  border-width: 2px;
+  outline: none;
+}
 .formField.error input {
   border-color: var(--errors);
   @include shadow-1px(var(--errors));
@@ -65,6 +70,9 @@ textarea:focus {
     border-color: var(--errors);
   }
 }
+.formField.error .p-dropdown:not(.p-disabled).p-focus {
+  border-color: var(--errors);
+}
 .formField input {
   background-color: var(--form-field-bg);
   color: var(--form-field-color);
@@ -73,7 +81,6 @@ textarea:focus {
   background-color: var(--form-field-bg);
   color: var(--form-field-color);
 }
-
 form .error {
   transition: color 0.2s;
 }

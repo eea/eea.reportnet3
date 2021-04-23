@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, memo, useContext, useEffect, useReducer, useState } from 'react';
+
 import PropTypes from 'prop-types';
 
 import concat from 'lodash/concat';
@@ -24,7 +25,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { validationReducer } from './_functions/Reducers/validationReducer';
 
-const ValidationViewer = React.memo(
+const ValidationViewer = memo(
   ({
     buttonsList = undefined,
     datasetId,

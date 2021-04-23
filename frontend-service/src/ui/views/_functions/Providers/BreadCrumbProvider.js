@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import { useReducer } from 'react';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext.js';
 

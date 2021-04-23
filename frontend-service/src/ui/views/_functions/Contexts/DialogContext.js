@@ -1,5 +1,5 @@
-import React from 'react';
+import { createContext } from 'react';
 
-export const DialogContext = React.createContext({
+export const DialogContext = createContext({
   open: []
 });

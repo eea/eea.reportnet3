@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { config } from 'conf';
 
 import { storiesOf } from '../../../../../.storybook/storiesOf';
