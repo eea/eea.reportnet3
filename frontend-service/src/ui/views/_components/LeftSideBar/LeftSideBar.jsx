@@ -155,6 +155,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       <Joyride
         callback={handleJoyrideCallback}
         continuous={true}
+        disableScrolling={true}
         run={run}
         scrollToFirstStep={true}
         showProgress={true}
