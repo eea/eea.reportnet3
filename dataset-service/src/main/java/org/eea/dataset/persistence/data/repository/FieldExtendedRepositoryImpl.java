@@ -280,12 +280,13 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private boolean stringIsDate(String dateStr) {
     DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    boolean isDate = true;
     try {
       sdf.parse(dateStr);
     } catch (ParseException e) {
-      return false;
+      isDate = false;
     }
-    return true;
+    return isDate;
   }
 
 
