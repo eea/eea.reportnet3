@@ -398,18 +398,32 @@ const parseValue = (type, value, feToBe = false) => {
           break;
         case 'POLYGON':
         case 'MULTILINESTRING':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
-            coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))
-          );
+          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => {
+            if (Array.isArray(coordinate)) {
+              return coordinate.map(innerCoordinate =>
+                !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
+              );
+            } else {
+              return [];
+            }
+          });
           break;
         case 'MULTIPOLYGON':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
-            polygon.map(coordinate =>
-              coordinate.map(innerCoordinate =>
-                !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
-              )
-            )
-          );
+          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon => {
+            if (Array.isArray(polygon)) {
+              return polygon.map(coordinate => {
+                if (Array.isArray(coordinate)) {
+                  return coordinate.map(innerCoordinate =>
+                    !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
+                  );
+                } else {
+                  return [];
+                }
+              });
+            } else {
+              return [];
+            }
+          });
           break;
         default:
           break;
