@@ -222,7 +222,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @PathVariable("dataschemaId") String dataschemaId,
-      @PathVariable("dataflowId") String dataflowId) {
+      @PathVariable("dataflowId") Long dataflowId) {
 
     List<StatisticsVO> statistics = null;
 
