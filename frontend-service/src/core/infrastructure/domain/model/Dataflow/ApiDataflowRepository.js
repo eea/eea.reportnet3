@@ -239,7 +239,7 @@ const datasetsFinalFeedback = async dataflowId => {
       dataProviderName: dataset.dataSetName,
       datasetName: dataset.nameDatasetSchema,
       datasetId: dataset.id,
-      isReleased: dataset.isReleased,
+      isReleased: dataset.isReleased ?? false,
       feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
     };
   });
