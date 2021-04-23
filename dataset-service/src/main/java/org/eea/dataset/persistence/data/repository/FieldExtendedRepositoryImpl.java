@@ -4,7 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -137,20 +141,12 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder.append(QUERY_1);
-    if (dataTypePk != null && (DataType.NUMBER_DECIMAL.equals(dataTypePk)
-        || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
-      queryBuilder.append(SORT_NUMBER_QUERY);
-    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
-      queryBuilder.append(SORT_DATE_QUERY);
-    } else {
-      queryBuilder.append(SORT_STRING_QUERY);
-    }
+
     if (StringUtils.isNotBlank(conditionalSchemaId)) {
       queryBuilder.append(QUERY_2_WITH_CONDITIONAL).append(QUERY_3).append(QUERY_3_CONDITIONAL);
     } else {
       queryBuilder.append(QUERY_2_WITHOUT_CONDITIONAL).append(QUERY_3);
     }
-    queryBuilder.append(QUERY_ORDER);
 
     Query query = entityManager.createQuery(queryBuilder.toString());
     query.setParameter("fieldSchemaId", idPk);
@@ -181,6 +177,14 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     // Remove the duplicate values
     HashSet<String> seen = new HashSet<>();
     fieldsVO.removeIf(e -> !seen.add(e.getValue()));
+
+    // Remove all values that are not of the correct type
+    if (dataTypePk != null && (DataType.NUMBER_DECIMAL.equals(dataTypePk)
+        || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
+      fieldsVO.removeIf(e -> !stringIsNumeric(e.getValue()));
+    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
+      fieldsVO.removeIf(e -> !stringIsDate(e.getValue()));
+    }
 
     return fieldsVO;
   }
@@ -250,6 +254,38 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     UnaryOperator<String> addQuotes = s -> "'" + s + "'";
     return idsList.stream().map(addQuotes).collect(Collectors.joining(", "));
+  }
+
+  /**
+   * Check if a String is Numeric
+   * @param strNum String to check
+   * @return true if is numeric
+   */
+  private boolean stringIsNumeric(String strNum) {
+    if (strNum == null) {
+      return false;
+    }
+    try {
+      Double.parseDouble(strNum);
+    } catch (NumberFormatException nfe) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Check if a String is Date
+   * @param dateStr String to check
+   * @return true if is Date
+   */
+  public boolean stringIsDate(String dateStr) {
+    DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    try {
+      sdf.parse(dateStr);
+    } catch (ParseException e) {
+      return false;
+    }
+    return true;
   }
 
 
