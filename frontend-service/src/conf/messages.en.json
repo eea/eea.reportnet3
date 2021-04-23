@@ -1056,6 +1056,10 @@
     "invalidCharactersFieldTitle": "Invalid field name",
     "invalidCharactersSchemaError": "The schema name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-', '_', '(' and ')').",
     "shortCode": "code",
-    "downloadExportDatasetFileError": "Error downloading file"
+    "downloadExportDatasetFileError": "Error downloading file",
+    "exportReportingTestDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "exportDesignerDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "exportDataCollectionDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "exportEuDatasetDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }

@@ -16,7 +16,7 @@ const GlobalNotifications = () => {
   useEffect(() => {
     if (findHiddenExportFMENotification()) downloadExportFMEFile();
 
-    if (findHiddenExportDatasetNotification()) downloadExportDatasetFile();
+    findHiddenExportDatasetNotification();
   }, [notificationContext.hidden]);
 
   const findHiddenExportFMENotification = () => {
@@ -27,15 +27,25 @@ const GlobalNotifications = () => {
   };
 
   const findHiddenExportDatasetNotification = () => {
-    return notificationContext.hidden.find(notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT');
+    const successNotification = notificationContext.hidden.find(
+      notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT'
+    );
+
+    if (successNotification) {
+      downloadExportDatasetFile(successNotification);
+    }
+
+    const errorNotification = notificationContext.hidden.find(
+      notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT'
+    );
+
+    if (errorNotification) {
+      getErrorNotification(errorNotification);
+    }
   };
 
-  const downloadExportDatasetFile = async () => {
+  const downloadExportDatasetFile = async notification => {
     try {
-      const [notification] = notificationContext.hidden.filter(
-        notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT'
-      );
-
       if (notification) {
         const { data } = await DatasetService.downloadExportDatasetFile(
           notification.content.datasetId,
@@ -96,6 +106,35 @@ const GlobalNotifications = () => {
       notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const getNotificationByDatasetType = (dataflowId, datasetId, datasetName, datasetType) => {
+    return notificationContext.add({
+      type: datasetType,
+      content: {
+        dataflowId,
+        datasetId,
+        datasetName
+      }
+    });
+  };
+
+  const getErrorNotification = notification => {
+    const dataflowId = notification.content.dataflowId;
+    const datasetId = notification.content.datasetId;
+    const datasetName = notification.content.datasetName;
+
+    if (notification.content.datasetType === 'REPORTING') {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_REPORTING_TEST_DATASET_ERROR');
+    } else if (notification.content.datasetType === 'DESIGN') {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_DESIGNER_DATASET_ERROR');
+    } else if (notification.content.datasetType === 'COLLECTION') {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_DATA_COLLECTION_DATASET_ERROR');
+    } else if (notification.content.datasetType === 'TEST') {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_REPORTING_TEST_DATASET_ERROR');
+    } else {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_EU_DATASET_DATASET_ERROR');
     }
   };
 
