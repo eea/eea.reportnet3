@@ -1149,4 +1149,13 @@ public class DataSetControllerImplTest {
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
   }
+
+
+  @Test
+  public void exportDatasetTest() throws IOException, EEAException {
+
+    dataSetControllerImpl.exportDatasetFile(1L, "xlsx");
+    Mockito.verify(fileTreatmentHelper, times(1)).exportDatasetFile(Mockito.anyLong(),
+        Mockito.any());
+  }
 }
