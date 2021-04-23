@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ValidationExpression.module.scss';
@@ -9,7 +10,7 @@ import { config } from 'conf/';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'ui/views/_components/InputText';
 
@@ -347,37 +348,43 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
-          // appendTo={document.body}
+          appendTo={document.body}
           disabled={isDisabled || position === 0}
-          onChange={e => onUpdateExpressionField('union', e.target.value)}
+          onChange={e => onUpdateExpressionField('union', e.target.value.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
           placeholder={resourcesContext.messages.union}
-          value={expressionValues.union}
+          value={first(config.validations.logicalOperators.filter(option => option.value === expressionValues.union))}
         />
       </span>
       <span
         onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
+          appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
+          onChange={e => {
+            console.log(`e.target.value`, e.target.value);
+            onUpdateExpressionField('operatorType', e.target.value.value);
+          }}
           optionLabel="label"
           options={operatorTypes}
           placeholder={resourcesContext.messages.operatorType}
-          value={expressionValues.operatorType}
+          value={first(operatorTypes.filter(option => option.value === expressionValues.operatorType))}
         />
       </span>
       <span
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
+        {console.log('operatorValues', operatorValues)}
         <Dropdown
+          appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('operatorValue', e.target.value.value)}
           optionLabel="label"
           options={operatorValues}
           placeholder={resourcesContext.messages.operator}
-          value={expressionValues.operatorValue}
+          value={first(operatorValues.filter(option => option.value === expressionValues.operatorValue))}
         />
       </span>
       <span

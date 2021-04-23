@@ -75,6 +75,7 @@ export const InfoTab = ({
       setFieldsDropdown(
         <Dropdown
           id={`${componentName}__field`}
+          appendTo={document.body}
           disabled={
             creationFormState.candidateRule.automatic || validationContext.ruleEdit
               ? true
