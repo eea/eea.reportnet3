@@ -62,6 +62,8 @@ public class ExportDatasetCompletedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("datasetName", notificationVO.getDatasetName());
+    notification.put("datasetType", notificationVO.getDatasetType());
+
 
     return notification;
   }
