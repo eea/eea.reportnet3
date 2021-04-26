@@ -143,7 +143,7 @@ export const BigButton = ({
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
           return { correct: false, originalSchemaName: initialValue, wrongName: title };
         } else {
-          onSaveName(title, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
+          onSaveName(title.trim(), index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
         }
       } else {
         setIsEditEnabled(false);
@@ -200,7 +200,8 @@ export const BigButton = ({
           className={`${styles.inputText}`}
           key={index}
           onBlur={e => {
-            onInputSave(e.target.value, index);
+            onInputSave(e.target.value.trim(), index);
+            setButtonsTitle(e.target.value.trim());
           }}
           onChange={e => setButtonsTitle(e.target.value)}
           onFocus={e => {

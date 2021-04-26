@@ -99,7 +99,7 @@ export const FieldDesigner = ({
   ];
 
   const geometricTypes = ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'];
-  const getFieldTypeValue = value => fieldTypes.find(field => TextUtils.areEquals(field.fieldType, value))
+  const getFieldTypeValue = value => fieldTypes.find(field => TextUtils.areEquals(field.fieldType, value));
 
   const initialFieldDesignerState = {
     addFieldCallSent: false,
@@ -562,7 +562,7 @@ export const FieldDesigner = ({
         : dispatchFieldDesigner({ type: 'SET_DESCRIPTION', payload: fieldDesignerState.initialDescriptionValue });
     } else if (event.key === 'Enter') {
       if (input === 'NAME') {
-        onBlurFieldName(event.target.value);
+        onBlurFieldName(event.target.value.trim());
       }
     }
   };
@@ -1018,11 +1018,12 @@ export const FieldDesigner = ({
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
-          onBlurFieldName(e.target.value);
+          onBlurFieldName(e.target.value.trim());
+          dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value.trim() });
         }}
         onChange={e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })}
         onFocus={e => {
-          dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value });
+          dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value.trim() });
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
         }}
         onKeyDown={e => onKeyChange(e, 'NAME')}
