@@ -46,6 +46,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.rod.LegalInstrumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -905,8 +906,15 @@ public class DataflowServiceImpl implements DataflowService {
     // We check that the field is not empty to avoid the call to rod due to maintain backward
     // compatibility concerns
     if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
-      dataflow.setObligation(
-          obligationControllerZull.findObligationById(dataflow.getObligation().getObligationId()));
+      try {
+        dataflow.setObligation(
+            obligationControllerZull.findObligationById(dataflow.getObligation().getObligationId()));
+
+      } catch (FeignException e) {
+        LOG_ERROR.error("Error while getting obligation by id {}", e.getMessage(), e);
+        ObligationVO obligationVO = new ObligationVO();
+        dataflow.setObligation(obligationVO);
+      }
     }
   }
 
@@ -1008,17 +1016,25 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
 
-    // Get all opened obligations from ROD
-    List<ObligationVO> obligations =
-        obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+    try {
+      // Get all opened obligations from ROD
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
 
-    Map<Integer, ObligationVO> obligationMap = obligations.stream()
-        .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
+      Map<Integer, ObligationVO> obligationMap = obligations.stream()
+          .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
 
-    for (DataFlowVO dataFlowVO : dataflowVOs) {
-      if (dataFlowVO.getObligation() != null
-          && dataFlowVO.getObligation().getObligationId() != null) {
-        dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+      for (DataFlowVO dataFlowVO : dataflowVOs) {
+        if (dataFlowVO.getObligation() != null
+            && dataFlowVO.getObligation().getObligationId() != null) {
+          dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+        }
+      }
+    } catch (FeignException e) {
+      LOG_ERROR.error("Error while getting all opened obligations {}", e.getMessage(), e);
+      for (DataFlowVO dataFlowVO : dataflowVOs) {
+        ObligationVO obligationVO = new ObligationVO();
+        dataFlowVO.setObligation(obligationVO);
       }
     }
   }

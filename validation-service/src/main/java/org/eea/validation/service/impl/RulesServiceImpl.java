@@ -345,10 +345,7 @@ public class RulesServiceImpl implements RulesService {
     if (null == ruleVO.getWhenCondition()) {
       rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
     } else {
-      validateRule(rule);
-      if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
-        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-      }
+      createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
 
@@ -389,6 +386,7 @@ public class RulesServiceImpl implements RulesService {
           .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build();
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
           notificationVO);
+      createRule(datasetSchemaId, rule);
 
     } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType())
         && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
@@ -396,7 +394,7 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(true);
       rule.setWhenCondition("isTableEmpty(this)");
-
+      createRule(datasetSchemaId, rule);
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       if (rule.getSqlSentence().contains("!=")) {
         rule.setSqlSentence(rule.getSqlSentence().replace("!=", "<>"));
@@ -405,8 +403,21 @@ public class RulesServiceImpl implements RulesService {
           .append(rule.getRuleId().toString()).append("')").toString());
       recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
+      validateRule(rule);
+    } else {
+      createRule(datasetSchemaId, rule);
     }
 
+  }
+
+  /**
+   * Creates the rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void createRule(String datasetSchemaId, Rule rule) throws EEAException {
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
