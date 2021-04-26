@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 
 import styles from './SnapshotSliderBar.module.scss';
 
+import isEmpty from 'lodash/isEmpty';
+
 import { Button } from 'ui/views/_components/Button';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotsList } from './_components/SnapshotsList';
@@ -116,6 +118,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                 id="createSnapshotDescription"
                 maxLength={255}
                 name="createSnapshotDescription"
+                onBlur={e => !hasCorrectDescriptionLength(e.target.value) && setHasError(true)}
                 onChange={e => setInputValue(e.target.value)}
                 onFocus={() => setHasError(false)}
                 placeholder={resources.messages.createSnapshotPlaceholder}
