@@ -32,9 +32,6 @@
   margin: 0px 0 5px 0;
   width: 100%;
 }
-.draggableFieldDiv :global .p-dropdown {
-  /* align-self: center; */
-}
 
 .draggableFieldDiv:active {
   cursor: grabbing;
@@ -62,8 +59,6 @@
 
 .codelistButton {
   margin-left: 0.4rem !important;
-  /* color: #404040; */
-  /* background-color: var(--gray-5) !important; */
   border: 1px solid var(--gray-25) !important;
   width: 8%;
   height: 1.95rem;

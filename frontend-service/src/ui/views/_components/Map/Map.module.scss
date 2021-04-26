@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .crsSwitcherSplitButton {
   width: 25% !important;
   min-width: 20% !important;
@@ -185,5 +187,5 @@
 }
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
-  box-shadow: 0 0 0 0em #004494 !important;
+  @include shadow-0em;
 }
