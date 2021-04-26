@@ -173,8 +173,6 @@ export default class DomHandler {
     let style = getComputedStyle(el);
 
     width -= parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-    // parseFloat(style.borderLeftWidth) +
-    // parseFloat(style.borderRightWidth);
 
     return width;
   }
