@@ -3,8 +3,6 @@ import { useContext, useEffect, useState } from 'react';
 
 import styles from './SnapshotSliderBar.module.scss';
 
-import isEmpty from 'lodash/isEmpty';
-
 import { Button } from 'ui/views/_components/Button';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotsList } from './_components/SnapshotsList';
