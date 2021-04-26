@@ -1,6 +1,7 @@
 package org.eea.dataset.service.helper;
 
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
@@ -23,6 +25,7 @@ import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
 import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -31,6 +34,8 @@ import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.file.interfaces.IFileExportContext;
+import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
@@ -134,6 +139,18 @@ public class FileTreatmentHelperTest {
   /** The record repository. */
   @Mock
   private RecordRepository recordRepository;
+
+  /** The data set metabase repository. */
+  @Mock
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The file export factory. */
+  @Mock
+  private IFileExportFactory fileExportFactory;
+
+  /** The context export. */
+  @Mock
+  private IFileExportContext contextExport;
 
   /**
    * Inits the mocks.
@@ -706,6 +723,33 @@ public class FileTreatmentHelperTest {
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
+
+
+  @Test
+  public void exportDatasetFileXlsxTest() throws IOException, InvalidFileException, EEAException {
+    DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
+    dataSetMetabase.setDataflowId(1L);
+    dataSetMetabase.setDataProviderId(1L);
+    dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
+    dataSetMetabase.setDataSetName("file");
+
+    final MockMultipartFile file =
+        new MockMultipartFile("file", "fileOriginal", "xslx", "content".getBytes());
+    // Mockito.when(file.toString()).thenReturn(value)
+
+
+    byte[] expectedResult = null;
+    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
+    when(
+        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+            .thenReturn(expectedResult);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(dataSetMetabase);
+    fileTreatmentHelper.exportDatasetFile(1L, "xslx");
+    Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
+  }
+
+
 }
 
 

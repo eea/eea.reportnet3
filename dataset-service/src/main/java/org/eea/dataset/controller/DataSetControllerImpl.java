@@ -4,11 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -937,31 +941,41 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
 
+
   /**
    * Download file.
    *
    * @param datasetId the dataset id
    * @param fileName the file name
-   * @return the response entity
+   * @param response the response
    */
   @Override
   @GetMapping(value = "/{datasetId}/downloadFile",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
-  public ResponseEntity<InputStreamResource> downloadFile(@PathVariable Long datasetId,
-      @RequestParam String fileName) {
-
+  public void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
+      HttpServletResponse response) {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
           datasetId, fileName);
-      File content = datasetService.downloadFile(datasetId, fileName);
+      File file = datasetService.downloadExportedFile(datasetId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
-      return createResponseEntity(fileName, content);
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+      // copy from in to out
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+      // delete the file after downloading it
+      FileUtils.forceDelete(file);
     } catch (IOException | EEAException e) {
-      LOG_ERROR.error("File download from the datasetId {} doesn't exist. Filename {}", datasetId,
-          fileName);
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      LOG_ERROR.error(
+          "Error downloading file generated from export from the datasetId {}. Filename {}",
+          datasetId, fileName);
     }
+
+
   }
 
 
@@ -975,7 +989,8 @@ public class DataSetControllerImpl implements DatasetController {
    */
   private ResponseEntity<InputStreamResource> createResponseEntity(String fileName, File content)
       throws IOException {
-    InputStreamResource resource = new InputStreamResource(new FileInputStream(content));
+
+    InputStreamResource resource = new InputStreamResource(FileUtils.openInputStream(content));
     HttpHeaders header = new HttpHeaders();
     header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
     return ResponseEntity.ok().headers(header).contentLength(content.length())
