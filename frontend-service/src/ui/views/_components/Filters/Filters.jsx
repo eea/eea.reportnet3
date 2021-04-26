@@ -379,7 +379,7 @@ export const Filters = ({
     );
   };
 
-  const strictModeCheckbox = () => (
+  const matchModeCheckbox = () => (
     <Fragment>
       <span className={styles.checkboxWrap} data-tip data-for="checkboxTooltip">
         {resources.messages['strictModeCheckboxFilter']}
@@ -592,7 +592,7 @@ export const Filters = ({
     <div className={className ? styles[className] : styles.header}>
       {searchAll && renderSearchAll()}
       {filtersRenderer()}
-      {matchMode && strictModeCheckbox()}
+      {matchMode && matchModeCheckbox()}
 
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
         {sendData ? (
