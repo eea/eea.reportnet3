@@ -642,6 +642,15 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME"
+        },
+        {
+          "key": "DATASET_SCHEMA_TABLE_INVALID_NAME"
+        },
+        {
+          "key": "DATASET_SCHEMA_FIELD_INVALID_NAME"
         }
       ]
     },

@@ -22,6 +22,7 @@ import { LinkSelector } from './_components/LinkSelector';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
@@ -131,6 +132,7 @@ export const FieldDesigner = ({
   const fieldTypeRef = useRef();
   const inputRef = useRef();
 
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -484,6 +486,14 @@ export const FieldDesigner = ({
       }
     } catch (error) {
       console.error('Error during field Add: ', error);
+      if (error?.response.status === 400) {
+        if (error.response?.data?.message?.includes('name invalid')) {
+          notificationContext.add({
+            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+            content: { fieldName: name }
+          });
+        }
+      }
     } finally {
       if (!isNil(inputRef.current)) {
         if (index === '-1') {
@@ -788,6 +798,14 @@ export const FieldDesigner = ({
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
+      if (error?.response.status === 400) {
+        if (error.response?.data?.message?.includes('name invalid')) {
+          notificationContext.add({
+            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+            content: { fieldName: name }
+          });
+        }
+      }
     }
   };
 
