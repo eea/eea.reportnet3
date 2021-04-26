@@ -71,12 +71,12 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * The Constant SORT_NUMBER_QUERY.
    */
   private static final String SORT_NUMBER_QUERY =
-      ",CAST(fv.value as java.math.BigDecimal) as orden ";
+      ",CASE WHEN is_numeric(fv.value)= true THEN CAST(fv.value as java.math.BigDecimal) END as orden ";
 
   /**
    * The Constant SORT_DATE_QUERY.
    */
-  private static final String SORT_DATE_QUERY = ",CAST(fv.value as java.sql.Date) as orden ";
+  private static final String SORT_DATE_QUERY = ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as java.sql.Date) END as orden ";
 
   /**
    * The Constant SORT_STRING_QUERY.
@@ -118,6 +118,10 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final String QUERY_ORDER = "ORDER BY orden";
 
+  private enum SortQueryType {
+    NUMBER, DATE, STRING
+  }
+
 
   /**
    * Find by id field schema with tag ordered.
@@ -140,14 +144,25 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     List<FieldValueWithLabel> fields = new ArrayList<>();
 
     StringBuilder queryBuilder = new StringBuilder();
+    SortQueryType sortQueryType = SortQueryType.STRING;
     queryBuilder.append(QUERY_1);
-
+    if (dataTypePk != null && (DataType.NUMBER_DECIMAL.equals(dataTypePk)
+        || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
+      queryBuilder.append(SORT_NUMBER_QUERY);
+      sortQueryType = SortQueryType.NUMBER;
+    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
+      queryBuilder.append(SORT_DATE_QUERY);
+      sortQueryType = SortQueryType.DATE;
+    } else {
+      queryBuilder.append(SORT_STRING_QUERY);
+    }
     if (StringUtils.isNotBlank(conditionalSchemaId)) {
       queryBuilder.append(QUERY_2_WITH_CONDITIONAL).append(QUERY_3).append(QUERY_3_CONDITIONAL);
     } else {
       queryBuilder.append(QUERY_2_WITHOUT_CONDITIONAL).append(QUERY_3);
     }
-
+    queryBuilder.append(QUERY_ORDER);
+    
     Query query = entityManager.createQuery(queryBuilder.toString());
     query.setParameter("fieldSchemaId", idPk);
     query.setParameter("labelId", labelSchemaId);
@@ -179,10 +194,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     fieldsVO.removeIf(e -> !seen.add(e.getValue()));
 
     // Remove all values that are not of the correct type
-    if (dataTypePk != null && (DataType.NUMBER_DECIMAL.equals(dataTypePk)
-        || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
+    if (sortQueryType == SortQueryType.NUMBER) {
       fieldsVO.removeIf(e -> !stringIsNumeric(e.getValue()));
-    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
+    } else if (sortQueryType == SortQueryType.DATE) {
       fieldsVO.removeIf(e -> !stringIsDate(e.getValue()));
     }
 
