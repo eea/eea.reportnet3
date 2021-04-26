@@ -115,9 +115,6 @@ export const designerReducer = (state, { type, payload }) => {
     case 'MANAGE_UNIQUE_CONSTRAINT_DATA':
       return { ...state, manageUniqueConstraintData: { ...state.manageUniqueConstraintData, ...payload.data } };
 
-    case 'ON_EXPORT_DATA':
-      return { ...state, exportDatasetData: payload.data, exportDatasetDataName: payload.name };
-
     case 'ON_UPDATE_DATA':
       return { ...state, isDataUpdated: payload.isUpdated };
 
