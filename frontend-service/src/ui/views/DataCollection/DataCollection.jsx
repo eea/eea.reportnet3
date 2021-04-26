@@ -58,7 +58,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history });
 
   useCheckNotifications(
-    ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD'],
+    ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD'],
     setIsLoadingFile,
     false
   );

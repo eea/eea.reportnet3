@@ -15,7 +15,7 @@
       "code": "xlsx"
     },
     {
-      "text": "ZIP (XLSX + Attachments)",
+      "text": "ZIP (XLSX + attachments)",
       "code": "zip+xlsx"
     }
   ]

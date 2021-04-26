@@ -642,6 +642,15 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME"
+        },
+        {
+          "key": "DATASET_SCHEMA_TABLE_INVALID_NAME"
+        },
+        {
+          "key": "DATASET_SCHEMA_FIELD_INVALID_NAME"
         }
       ]
     },
@@ -861,6 +870,9 @@
             "section": "DATAFLOW_REPRESENTATIVE",
             "parameters": ["dataflowId", "dataProvider", "representativeId"]
           }
+        },
+        {
+          "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
         }
       ]
     },
