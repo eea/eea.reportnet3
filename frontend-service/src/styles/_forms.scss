@@ -1,3 +1,5 @@
+@import 'mixins';
+
 /* forms */
 fieldset {
   border: none;
@@ -35,28 +37,28 @@ select:focus,
 input:focus,
 textarea:focus {
   border-color: var(--c-corporate-blue);
-  box-shadow: inset 0px 0px 0px 1px var(--c-corporate-blue);
+  @include shadow-1px(var(--c-corporate-blue));
   outline: none;
 }
 .p-dropdown:not(.p-disabled).p-focus {
   border-color: var(--c-corporate-blue);
-  box-shadow: outset 0px 0px 0px 1px var(--c-corporate-blue);
-  border-width: 2px;
+  box-shadow: 0px 0px 1px 1px var(--c-corporate-blue);
   outline: none;
 }
 .formField.error input {
   border-color: var(--errors);
-  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  @include shadow-1px(var(--errors));
   outline: none;
+  overflow: hidden;
 }
 .formField.error select {
   border-color: var(--errors);
-  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  @include shadow-1px(var(--errors));
   outline: none;
 }
 .formField.error textarea {
   border-color: var(--errors);
-  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  @include shadow-1px(var(--errors));
   outline: none;
 }
 .formField.error .p-dropdown {
@@ -89,6 +91,6 @@ form .error {
 
 .formField.error:hover input {
   border-color: var(--errors);
-  box-shadow: inset 0px 0px 0px 1px var(--errors);
+  @include shadow-1px(var(--errors));
   outline: none;
 }

@@ -22,6 +22,7 @@ import { LinkSelector } from './_components/LinkSelector';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
@@ -99,7 +100,7 @@ export const FieldDesigner = ({
   ];
 
   const geometricTypes = ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'];
-  const getFieldTypeValue = value => fieldTypes.find(field => TextUtils.areEquals(field.fieldType, value))
+  const getFieldTypeValue = value => fieldTypes.find(field => TextUtils.areEquals(field.fieldType, value));
 
   const initialFieldDesignerState = {
     addFieldCallSent: false,
@@ -131,6 +132,7 @@ export const FieldDesigner = ({
   const fieldTypeRef = useRef();
   const inputRef = useRef();
 
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -484,6 +486,14 @@ export const FieldDesigner = ({
       }
     } catch (error) {
       console.error('Error during field Add: ', error);
+      if (error?.response.status === 400) {
+        if (error.response?.data?.message?.includes('name invalid')) {
+          notificationContext.add({
+            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+            content: { fieldName: name }
+          });
+        }
+      }
     } finally {
       if (!isNil(inputRef.current)) {
         if (index === '-1') {
@@ -562,7 +572,7 @@ export const FieldDesigner = ({
         : dispatchFieldDesigner({ type: 'SET_DESCRIPTION', payload: fieldDesignerState.initialDescriptionValue });
     } else if (event.key === 'Enter') {
       if (input === 'NAME') {
-        onBlurFieldName(event.target.value);
+        onBlurFieldName(event.target.value.trim());
       }
     }
   };
@@ -788,6 +798,14 @@ export const FieldDesigner = ({
       }
     } catch (error) {
       console.error(`Error during field Update: ${error}`);
+      if (error?.response.status === 400) {
+        if (error.response?.data?.message?.includes('name invalid')) {
+          notificationContext.add({
+            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+            content: { fieldName: name }
+          });
+        }
+      }
     }
   };
 
@@ -1018,11 +1036,12 @@ export const FieldDesigner = ({
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
-          onBlurFieldName(e.target.value);
+          onBlurFieldName(e.target.value.trim());
+          dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value.trim() });
         }}
         onChange={e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })}
         onFocus={e => {
-          dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value });
+          dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value.trim() });
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
         }}
         onKeyDown={e => onKeyChange(e, 'NAME')}
