@@ -14,14 +14,52 @@ const GlobalNotifications = () => {
   const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
-    if (findHiddenNotification()) downloadExportFMEFile();
+    if (findHiddenExportFMENotification()) downloadExportFMEFile();
+
+    findHiddenExportDatasetNotification();
   }, [notificationContext.hidden]);
 
-  const findHiddenNotification = () => {
+  const findHiddenExportFMENotification = () => {
     return notificationContext.hidden.find(
       notification =>
         notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' || 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
     );
+  };
+
+  const findHiddenExportDatasetNotification = () => {
+    const successNotification = notificationContext.hidden.find(
+      notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT'
+    );
+
+    if (successNotification) {
+      downloadExportDatasetFile(successNotification);
+    }
+
+    const errorNotification = notificationContext.hidden.find(
+      notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT'
+    );
+
+    if (errorNotification) {
+      getErrorNotification(errorNotification);
+    }
+  };
+
+  const downloadExportDatasetFile = async notification => {
+    try {
+      notificationContext.add({ type: 'EXPORT_DATASET_FILE_DOWNLOAD' });
+
+      const { data } = await DatasetService.downloadExportDatasetFile(
+        notification.content.datasetId,
+        notification.content.datasetName
+      );
+
+      DownloadFile(data, notification.content.datasetName);
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
   };
 
   const downloadExportFMEFile = async () => {
@@ -56,7 +94,7 @@ const GlobalNotifications = () => {
         }
 
         notificationContext.add({
-          type: 'EXTERNAL_INTEGRATION_DOWNLOAD',
+          type: 'EXPORT_DATASET_FILE_DOWNLOAD',
           onClick: () => DownloadFile(datasetData, getFileName())
         });
       }
@@ -65,6 +103,33 @@ const GlobalNotifications = () => {
       notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const getNotificationByDatasetType = (dataflowId, datasetId, datasetName, datasetType) => {
+    return notificationContext.add({
+      type: datasetType,
+      content: {
+        dataflowId,
+        datasetId,
+        datasetName
+      }
+    });
+  };
+
+  const getErrorNotification = notification => {
+    const dataflowId = notification.content.dataflowId;
+    const datasetId = notification.content.datasetId;
+    const datasetName = notification.content.datasetName;
+
+    if (notification.content.datasetType === 'REPORTING' || notification.content.datasetType === 'TEST') {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_REPORTING_TEST_DATASET_ERROR');
+    } else if (notification.content.datasetType === 'DESIGN') {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_DESIGNER_DATASET_ERROR');
+    } else if (notification.content.datasetType === 'COLLECTION') {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_DATA_COLLECTION_DATASET_ERROR');
+    } else {
+      getNotificationByDatasetType(dataflowId, datasetId, datasetName, 'EXPORT_EU_DATASET_DATASET_ERROR');
     }
   };
 

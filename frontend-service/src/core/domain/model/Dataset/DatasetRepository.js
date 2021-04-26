@@ -13,6 +13,7 @@ export const DatasetRepository = {
   deleteTableDataById: () => Promise.reject('[DatasetRepository#deleteTableDataById] must be implemented'),
   deleteTableDesign: () => Promise.reject('[DatasetRepository#deleteTableDesign] must be implemented'),
   downloadDatasetFileData: () => Promise.reject('[DatasetRepository#downloadDatasetFileData] must be implemented'),
+  downloadExportDatasetFile: () => Promise.reject('[DatasetRepository#downloadExportDatasetFile] must be implemented'),
   downloadExportFile: () => Promise.reject('[DatasetRepository#downloadExportFile] must be implemented'),
   downloadFileData: () => Promise.reject('[DatasetRepository#downloadFileData] must be implemented'),
   errorPositionByObjectId: () => Promise.reject('[DatasetRepository#errorPositionByObjectId] must be implemented'),
