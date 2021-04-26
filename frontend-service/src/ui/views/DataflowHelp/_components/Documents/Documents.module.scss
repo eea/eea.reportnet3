@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .crudColumn {
   text-align: center;
 }
@@ -40,7 +42,7 @@
 
 .deleteRowButton {
   border: 1px solid var(--c-custom-gray) !important;
-  box-shadow: 0 0 0 0em var(--blue-100) !important;
+  @include shadow-0em;
   color: var(--errors) !important;
   margin-left: 3px !important;
 }
@@ -52,7 +54,7 @@
 
 .editRowButton {
   border: 1px solid var(--c-custom-gray) !important;
-  box-shadow: 0 0 0 0em var(--blue-100) !important;
+  @include shadow-0em;
   margin-left: 3px !important;
 }
 

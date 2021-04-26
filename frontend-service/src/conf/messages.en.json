@@ -410,7 +410,7 @@
     "exportEuDatasetHeader": "Export EU Datasets",
     "exportEuDatasetInit": "Exporting EU datasets data",
     "exportEuDatasetMessage": "Are you sure you want to export EU Datasets?",
-    "exportExternalIntegrationDataset": "Exporting dataset data",
+    "exportDatasetData": "Exporting dataset data",
     "exportLeadReporters": "Export lead reporters",
     "exportLeadReportersTemplate": "Export template",
     "exportOperationManageIntegration": "Export",
@@ -430,7 +430,7 @@
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalIntegrationDownload": "Export file is ready to be downloaded ",
+    "exportDatasetFileDownload": "Export file is ready to be downloaded ",
     "externalIntegrations": "External integrations",
     "fcSubmitButtonDisabled": "One or more required field(s) are missing",
     "feedbackDataProvider": "Data provider: ",
@@ -1056,6 +1056,15 @@
     "invalidCharactersFieldTitle": "Invalid field name",
     "invalidCharactersSchemaError": "The schema name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-', '_', '(' and ')').",
     "shortCode": "code",
+    "downloadExportDatasetFileError": "Error downloading file",
+    "exportReportingTestDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "exportDesignerDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "exportDataCollectionDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "exportEuDatasetDatasetError": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "datasetSchemaCreationErrorInvalidName": "Invalid Dataset schema name. The schema name <strong>{:schemaName})</strong> must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-', '_', '(' and ')').",
+    "datasetSchemaTableInvalidName": "Invalid Dataset table name. The table name <strong>{:tableName}</strong> must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and '_').",
+    "datasetSchemaFieldInvalidName": "Invalid Dataset field name. The field name <strong>{:fieldName}</strong> must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and '_').",
+    "exportDatasetFileAutomaticallyDownload": "Export file generated successfully",
     "onlyReleasedCheckboxLabel": "Only released"
   }
 }
