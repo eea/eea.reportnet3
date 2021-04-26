@@ -114,8 +114,8 @@ const create = async (name, description, obligationId) => await apiDataflow.crea
 const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
   await apiDataflow.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
 
-const datasetsValidationStatistics = async datasetSchemaId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
+const datasetsValidationStatistics = async (dataflowId, datasetSchemaId) => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId, datasetSchemaId);
   datasetsDashboardsDataDTO.data.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
@@ -239,7 +239,7 @@ const datasetsFinalFeedback = async dataflowId => {
       dataProviderName: dataset.dataSetName,
       datasetName: dataset.nameDatasetSchema,
       datasetId: dataset.id,
-      isReleased: dataset.isReleased,
+      isReleased: dataset.isReleased ?? false,
       feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
     };
   });

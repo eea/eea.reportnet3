@@ -13,6 +13,9 @@ public enum ResourceGroupEnum {
   /** The dataflow custodian. */
   DATAFLOW_CUSTODIAN("Dataflow-%s-DATA_CUSTODIAN"),
 
+  /** The dataflow observer. */
+  DATAFLOW_OBSERVER("Dataflow-%s-DATA_OBSERVER"),
+
   /** The dataflow requester. */
   DATAFLOW_REQUESTER("Dataflow-%s-DATA_REQUESTER"),
 
@@ -41,6 +44,9 @@ public enum ResourceGroupEnum {
 
   /** The dataset custodian. */
   DATASET_CUSTODIAN("Dataset-%s-DATA_CUSTODIAN"),
+
+  /** The dataset observer. */
+  DATASET_OBSERVER("Dataset-%s-DATA_OBSERVER"),
 
   /** The dataset requester. */
   DATASET_REQUESTER("Dataset-%s-DATA_REQUESTER"),
@@ -91,6 +97,9 @@ public enum ResourceGroupEnum {
   /** The datacollection custodian. */
   DATACOLLECTION_CUSTODIAN("DataCollection-%s-DATA_CUSTODIAN"),
 
+  /** The datacollection observer. */
+  DATACOLLECTION_OBSERVER("DataCollection-%s-DATA_OBSERVER"),
+
   /** The datacollection lead reporter. */
   DATACOLLECTION_LEAD_REPORTER("DataCollection-%s-DATA_LEAD_REPORTER"),
 
@@ -101,6 +110,9 @@ public enum ResourceGroupEnum {
 
   /** The eudataset custodian. */
   EUDATASET_CUSTODIAN("EUDataset-%s-DATA_CUSTODIAN"),
+
+  /** The eudataset observer. */
+  EUDATASET_OBSERVER("EUDataset-%s-DATA_OBSERVER"),
 
   /** The testdataset steward. */
   TESTDATASET_STEWARD("TestDataset-%s-DATA_STEWARD"),

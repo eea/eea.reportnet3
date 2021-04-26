@@ -473,6 +473,34 @@
           }
         },
         {
+          "key": "EXPORT_REPORTING_TEST_DATASET_ERROR",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXPORT_DESIGNER_DATASET_ERROR",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXPORT_DATA_COLLECTION_DATASET_ERROR",
+          "navigateTo": {
+            "section": "DATA_COLLECTION",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "EXPORT_EU_DATASET_DATASET_ERROR",
+          "navigateTo": {
+            "section": "EU_DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "LOAD_HISTORIC_RELEASES_ERROR"
         },
         {
@@ -575,6 +603,9 @@
           "key": "DOWNLOAD_DATASET_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_EXPORT_DATASET_FILE_ERROR"
+        },
+        {
           "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
         },
         {
@@ -611,6 +642,15 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME"
+        },
+        {
+          "key": "DATASET_SCHEMA_TABLE_INVALID_NAME"
+        },
+        {
+          "key": "DATASET_SCHEMA_FIELD_INVALID_NAME"
         }
       ]
     },
@@ -797,7 +837,7 @@
           }
         },
         {
-          "key": "EXTERNAL_INTEGRATION_DOWNLOAD"
+          "key": "EXPORT_DATASET_FILE_DOWNLOAD"
         },
         {
           "key": "VALIDATE_RULES_COMPLETED_EVENT",
@@ -869,7 +909,7 @@
           "key": "EXPORT_EU_DATASET_INIT"
         },
         {
-          "key": "EXPORT_EXTERNAL_INTEGRATION_DATASET"
+          "key": "EXPORT_DATASET_DATA"
         },
         {
           "key": "DATASET_IMPORT_INIT"
@@ -904,6 +944,8 @@
     }
   ],
   "hiddenNotifications": [
+    "EXPORT_DATASET_COMPLETED_EVENT",
+    "EXPORT_DATASET_FAILED_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",

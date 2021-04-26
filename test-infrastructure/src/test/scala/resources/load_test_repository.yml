@@ -1,5 +1,5 @@
 gatling_config:
-   scenarios:
+  scenarios:
     - requestName: importFileData
       endpoint: /dataset/${datasetId}/importFileData?replace=true
       usersNumber: 5
@@ -64,7 +64,7 @@ gatling_config:
          Authorization: Bearer ${token}
          
     - requestName: validationTest
-      endpoint: /validation/dataset/${datasetId}
+      endpoint: /validation/dataset/{datasetId}
       usersNumber: 5
       numberExecutions: 1
       useFeeder: true
@@ -76,7 +76,7 @@ gatling_config:
          Authorization: Bearer ${token}
          
     - requestName: createSnapshot
-      endpoint: /snapshot/dataschema/${schemaId}/dataset/${datasetId}/create?description=${description}
+      endpoint: /snapshot/dataschema/{schemaId}/dataset/{datasetId}/create?description={description}
       usersNumber: 5
       numberExecutions: 1
       useFeeder: true
@@ -88,7 +88,7 @@ gatling_config:
          Authorization: Bearer ${token}
          
     - requestName: restoreSnapshot
-      endpoint: /snapshot/${snapshotDatasetId}/dataschema/${datasetIdTarget}/restore
+      endpoint: /snapshot/{snapshotDatasetId}/dataschema/{datasetIdTarget}/restore
       usersNumber: 5
       numberExecutions: 1
       useFeeder: true
@@ -98,3 +98,5 @@ gatling_config:
       timeOut: 20000
       headers:
          Authorization: Bearer ${token}
+
+    

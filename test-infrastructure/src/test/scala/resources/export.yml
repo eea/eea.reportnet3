@@ -1,0 +1,10 @@
+     - requestName: exportFileData
+       endpoint: /dataset/exportFile?datasetId=${datasetId}&mimeType=xlsx
+       usersNumber: 1
+       numberExecutions: 1
+       useFeeder: true
+       method: get
+       puaseTime: 2
+       timeOut: 20000
+       headers:
+        Authorization: Bearer ${token}
