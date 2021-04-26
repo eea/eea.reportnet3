@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .descriptionLabel {
   margin: 0.5vw 0 0.5vw 1vw;
   color: var(--main-font-color);
@@ -117,5 +119,5 @@
   transition: 0.5s !important;
 }
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
-  box-shadow: 0 0 0 0em var(--blue-120) !important;
+  @include shadow-0em;
 }
