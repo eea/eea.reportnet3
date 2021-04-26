@@ -971,8 +971,8 @@ public class DataSetControllerImpl implements DatasetController {
       FileUtils.forceDelete(file);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(
-          "Error downloading file generated from export from the datasetId {}. Filename {}",
-          datasetId, fileName);
+          "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
+          datasetId, fileName, e.getMessage());
     }
 
 

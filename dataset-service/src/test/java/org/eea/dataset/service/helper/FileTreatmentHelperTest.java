@@ -733,11 +733,6 @@ public class FileTreatmentHelperTest {
     dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
     dataSetMetabase.setDataSetName("file");
 
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal", "xslx", "content".getBytes());
-    // Mockito.when(file.toString()).thenReturn(value)
-
-
     byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(
