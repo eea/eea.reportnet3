@@ -603,4 +603,16 @@ public interface DatasetService {
    */
   void initializeDataset(Long datasetId, String idDatasetSchema);
 
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  File downloadFile(Long datasetId, String fileName) throws IOException, EEAException;
+
 }

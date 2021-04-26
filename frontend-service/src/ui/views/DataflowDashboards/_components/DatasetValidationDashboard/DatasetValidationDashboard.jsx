@@ -17,7 +17,7 @@ import { filterReducer } from './_functions/filterReducer';
 import { DataflowService } from 'core/services/Dataflow';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
 
-export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName, isVisible }) => {
+export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datasetSchemaName, isVisible }) => {
   const resources = useContext(ResourcesContext);
   const initialFiltersState = {
     data: {},
@@ -55,7 +55,7 @@ export const DatasetValidationDashboard = ({ datasetSchemaId, datasetSchemaName,
 
   const onLoadDashboard = async () => {
     try {
-      const { data } = await DataflowService.datasetsValidationStatistics(datasetSchemaId);
+      const { data } = await DataflowService.datasetsValidationStatistics(dataflowId, datasetSchemaId);
       setLevelErrorTypes(data.levelErrors);
 
       if (!isUndefined(data.datasetId) && !isNull(data.datasetId)) {

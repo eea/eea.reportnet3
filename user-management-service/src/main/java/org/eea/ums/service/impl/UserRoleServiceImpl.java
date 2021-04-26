@@ -67,6 +67,8 @@ public class UserRoleServiceImpl implements UserRoleService {
       getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.REPORTER_WRITE.toString());
       // STEWARD
       getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_STEWARD.toString());
+      // OBSERVER
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_OBSERVER.toString());
 
     }
     return finalList;
@@ -77,49 +79,55 @@ public class UserRoleServiceImpl implements UserRoleService {
    * Gets the group info map.
    *
    * @param groupInfoMap the group info map
-   * @param long1 the long 1
+   * @param datasetId the dataset Id
    * @return the group info map
    */
-  private void getGroupInfoMap(Map<String, List<GroupInfo>> groupInfoMap, Long long1) {
+  private void getGroupInfoMap(Map<String, List<GroupInfo>> groupInfoMap, Long datasetId) {
 
     Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
         .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
         .collect(Collectors.toList());
-    if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(long1))
-        || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(long1))) {
+    if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(datasetId))
+        || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(datasetId))
+        || authorities.contains(ObjectAccessRoleEnum.DATASET_OBSERVER.getAccessRole(datasetId))) {
       // CUSTODIAN
       setGroupsIntoMap(groupInfoMap,
           new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
-              .getGroupsWithSearch(ResourceGroupEnum.DATASET_CUSTODIAN.getGroupName(long1)))),
+              .getGroupsWithSearch(ResourceGroupEnum.DATASET_CUSTODIAN.getGroupName(datasetId)))),
           SecurityRoleEnum.DATA_CUSTODIAN.toString());
       // STEWARD
       setGroupsIntoMap(groupInfoMap,
           new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
-              .getGroupsWithSearch(ResourceGroupEnum.DATASET_STEWARD.getGroupName(long1)))),
+              .getGroupsWithSearch(ResourceGroupEnum.DATASET_STEWARD.getGroupName(datasetId)))),
           SecurityRoleEnum.DATA_STEWARD.toString());
+      // OBSERVER
+      setGroupsIntoMap(groupInfoMap,
+          new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
+              .getGroupsWithSearch(ResourceGroupEnum.DATASET_OBSERVER.getGroupName(datasetId)))),
+          SecurityRoleEnum.DATA_OBSERVER.toString());
     }
-    if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(long1))
-        || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(long1))
+    if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(datasetId))
+        || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(datasetId))
         || authorities
-            .contains(ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR.getAccessRole(long1))) {
+            .contains(ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR.getAccessRole(datasetId))) {
       // NATIONAL COORDINATOR
       setGroupsIntoMap(groupInfoMap,
           new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService.getGroupsWithSearch(
-              ResourceGroupEnum.DATASET_NATIONAL_COORDINATOR.getGroupName(long1)))),
+              ResourceGroupEnum.DATASET_NATIONAL_COORDINATOR.getGroupName(datasetId)))),
           SecurityRoleEnum.NATIONAL_COORDINATOR.toString());
     }
     // REPORTERS
     setGroupsIntoMap(groupInfoMap,
         new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
-            .getGroupsWithSearch(ResourceGroupEnum.DATASET_LEAD_REPORTER.getGroupName(long1)))),
+            .getGroupsWithSearch(ResourceGroupEnum.DATASET_LEAD_REPORTER.getGroupName(datasetId)))),
         SecurityRoleEnum.LEAD_REPORTER.toString());
     setGroupsIntoMap(groupInfoMap,
         new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
-            .getGroupsWithSearch(ResourceGroupEnum.DATASET_REPORTER_READ.getGroupName(long1)))),
+            .getGroupsWithSearch(ResourceGroupEnum.DATASET_REPORTER_READ.getGroupName(datasetId)))),
         SecurityRoleEnum.REPORTER_READ.toString());
     setGroupsIntoMap(groupInfoMap,
-        new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
-            .getGroupsWithSearch(ResourceGroupEnum.DATASET_REPORTER_WRITE.getGroupName(long1)))),
+        new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService.getGroupsWithSearch(
+            ResourceGroupEnum.DATASET_REPORTER_WRITE.getGroupName(datasetId)))),
         SecurityRoleEnum.REPORTER_WRITE.toString());
 
   }
