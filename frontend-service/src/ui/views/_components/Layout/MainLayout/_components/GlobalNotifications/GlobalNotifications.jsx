@@ -46,7 +46,7 @@ const GlobalNotifications = () => {
 
   const downloadExportDatasetFile = async notification => {
     try {
-      notificationContext.add({ type: 'EXPORT_DATASET_FILE_DOWNLOAD' });
+      notificationContext.add({ type: 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD' });
 
       const { data } = await DatasetService.downloadExportDatasetFile(
         notification.content.datasetId,

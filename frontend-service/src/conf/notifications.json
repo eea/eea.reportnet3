@@ -870,6 +870,9 @@
             "section": "DATAFLOW_REPRESENTATIVE",
             "parameters": ["dataflowId", "dataProvider", "representativeId"]
           }
+        },
+        {
+          "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
         }
       ]
     },
