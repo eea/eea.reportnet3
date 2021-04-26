@@ -179,8 +179,8 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     {
       type: 'checkbox',
       properties: [
-        { name: 'isDataCollectionReleased', label: resources.messages['isDataCollectionReleased'] },
-        { name: 'isEUReleased', label: resources.messages['euDataset'] }
+        { name: 'isDataCollectionReleased', label: resources.messages['onlyReleasedDataCollectionCheckboxLabel'] },
+        { name: 'isEUReleased', label: resources.messages['onlyReleasedEuDatasetCheckboxLabel'] }
       ]
     }
   ];
