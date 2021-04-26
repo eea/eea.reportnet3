@@ -1,21 +1,28 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
+import styles from './EUDataset.module.scss';
+
+import { config } from 'conf';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
+import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
+import { Menu } from 'primereact/menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { euDatasetReducer } from './_functions/Reducers/euDatasetReducer';
 
@@ -32,6 +39,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     dataflowName: '',
@@ -42,6 +50,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaId: null,
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
+    exportExtensionsList: [],
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
@@ -67,6 +76,8 @@ export const EUDataset = withRouter(({ history, match }) => {
     tableSchemaColumns
   } = euDatasetState;
 
+  let exportMenuRef = useRef();
+
   useEffect(() => {
     leftSideBarContext.removeModels();
     callSetMetaData();
@@ -76,6 +87,16 @@ export const EUDataset = withRouter(({ history, match }) => {
   useEffect(() => {
     onLoadDatasetSchema();
   }, [euDatasetState.isDataUpdated]);
+
+  useEffect(() => {
+    getExportExtensionsList();
+  }, []);
+
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
+    }
+  }, [notificationContext.hidden]);
 
   useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, metaData });
 
@@ -110,12 +131,35 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   };
 
+  const getExportExtensionsList = () => {
+    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
+      command: () => onExportDataInternalExtension(type.code),
+      icon: config.icons['archive'],
+      label: type.text
+    }));
+
+    euDatasetDispatch({
+      type: 'GET_EXPORT_EXTENSIONS_LIST',
+      payload: { internalExtensionList }
+    });
+  };
+
   const getMetadata = async ids => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
+  };
+
+  const getPosition = e => {
+    const button = e.currentTarget;
+    const left = `${button.offsetLeft}px`;
+    const topValue = button.offsetHeight + button.offsetTop + 3;
+    const top = `${topValue}px `;
+    const menu = button.nextElementSibling;
+    menu.style.top = top;
+    menu.style.left = left;
   };
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
@@ -128,6 +172,25 @@ export const EUDataset = withRouter(({ history, match }) => {
   };
 
   const isLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
+
+  const onExportDataInternalExtension = async fileType => {
+    setIsLoadingFile(true);
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+
+    try {
+      await DatasetService.exportDataById(datasetId, fileType);
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await getMetadata({ dataflowId, datasetId });
+
+      notificationContext.add({
+        type: 'EXPORT_DATA_BY_ID_ERROR',
+        content: { dataflowName: dataflowName, datasetName: datasetName }
+      });
+    }
+  };
 
   const onHighlightRefresh = value => euDatasetDispatch({ type: 'ON_HIGHLIGHT_REFRESH', payload: { value } });
 
@@ -209,6 +272,14 @@ export const EUDataset = withRouter(({ history, match }) => {
     </MainLayout>
   );
 
+  const setIsLoadingFile = value => euDatasetDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
+
+  useCheckNotifications(
+    ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_DOWNLOAD'],
+    setIsLoadingFile,
+    false
+  );
+
   const renderTabsSchema = () => (
     <TabsSchema
       hasWritePermissions={false}
@@ -235,6 +306,27 @@ export const EUDataset = withRouter(({ history, match }) => {
   return renderLayout(
     <Fragment>
       <Title icon="euDataset" iconSize="3.5rem" subtitle={dataflowName} title={datasetName} />
+      <div className={styles.ButtonsBar}>
+        <Toolbar>
+          <div className="p-toolbar-group-left">
+            <Button
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+              icon={euDatasetState.isLoadingFile ? 'spinnerAnimate' : 'export'}
+              id="buttonExportDataset"
+              label={resourcesContext.messages['exportDataset']}
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              className={styles.exportSubmenu}
+              id="exportDataSetMenu"
+              model={euDatasetState.exportExtensionsList}
+              onShow={e => getPosition(e)}
+              popup={true}
+              ref={exportMenuRef}
+            />
+          </div>
+        </Toolbar>
+      </div>
       {renderTabsSchema()}
     </Fragment>
   );
