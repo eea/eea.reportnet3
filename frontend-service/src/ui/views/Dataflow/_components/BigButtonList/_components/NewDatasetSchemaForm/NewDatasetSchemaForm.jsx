@@ -72,7 +72,10 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
       setIsSubmitting(true);
       showLoading();
       try {
-        const response = await DataflowService.newEmptyDatasetSchema(dataflowId, encodeURIComponent(datasetSchemaName));
+        const response = await DataflowService.newEmptyDatasetSchema(
+          dataflowId,
+          encodeURIComponent(datasetSchemaName.trim())
+        );
         if (response.status >= 200 && response.status <= 299) {
           onUpdateData();
           setIsSubmitting(false);
