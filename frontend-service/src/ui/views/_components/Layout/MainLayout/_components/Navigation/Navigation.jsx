@@ -17,12 +17,12 @@ const Navigation = withRouter(({ history }) => {
   return (
     <div id="header" className={styles.header}>
       <a
-        href={getUrl(routes.DATAFLOWS)}
+        href={getUrl(routes.ACCESS_POINT)}
         className={styles.appLogo}
         title={resources.messages['titleHeader']}
         onClick={e => {
           e.preventDefault();
-          history.push(getUrl(routes.DATAFLOWS));
+          history.push(getUrl(routes.ACCESS_POINT));
         }}>
         <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
         <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>

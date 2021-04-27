@@ -88,8 +88,10 @@ export const BigButton = ({
     }
   };
 
-  const onEditorValueFocus = value => {
-    setInitialValue(!isEmpty(value) ? value : initialValue);
+  const onEditorValueFocus = (value, index) => {
+    if (!checkDuplicates(value, index) && !checkInvalidCharacters(value) && value.length <= 250) {
+      setInitialValue(!isEmpty(value) ? value : initialValue);
+    }
   };
 
   const onEnableSchemaNameEdit = () => {
@@ -206,7 +208,7 @@ export const BigButton = ({
           onChange={e => setButtonsTitle(e.target.value)}
           onFocus={e => {
             e.preventDefault();
-            onEditorValueFocus(e.target.value);
+            onEditorValueFocus(e.target.value, index);
           }}
           onKeyDown={e => {
             if (!regex.test(e.key) || e.key === 'Dead') {
