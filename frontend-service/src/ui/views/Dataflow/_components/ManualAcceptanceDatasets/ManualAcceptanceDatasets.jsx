@@ -118,7 +118,8 @@ export const ManualAcceptanceDatasets = ({
 
   const filterOptions = [
     { type: 'input', properties: [{ name: 'datasetName' }] },
-    { type: 'multiselect', properties: [{ name: 'dataProviderName' }, { name: 'feedbackStatus' }] }
+    { type: 'multiselect', properties: [{ name: 'dataProviderName' }, { name: 'feedbackStatus' }] },
+    { type: 'checkbox', properties: [{ name: 'isReleased', label: resources.messages['onlyReleasedCheckboxLabel'] }] }
   ];
 
   const renderColumns = datasets => {
@@ -156,7 +157,6 @@ export const ManualAcceptanceDatasets = ({
   ) : (
     <div className={styles.manualAcceptanceDatasets}>
       <Filters
-        checkboxOptions={['isReleased']}
         data={manualAcceptanceDatasetsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFiltered}
