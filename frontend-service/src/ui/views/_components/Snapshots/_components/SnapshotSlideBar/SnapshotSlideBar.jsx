@@ -116,6 +116,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                 id="createSnapshotDescription"
                 maxLength={255}
                 name="createSnapshotDescription"
+                onBlur={e => !hasCorrectDescriptionLength(e.target.value) && setHasError(true)}
                 onChange={e => setInputValue(e.target.value)}
                 onFocus={() => setHasError(false)}
                 placeholder={resources.messages.createSnapshotPlaceholder}
