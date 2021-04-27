@@ -2993,7 +2993,7 @@ public class DatasetServiceTest {
   @Test(expected = EEAException.class)
   public void downloadFileExceptionTest() throws IOException, EEAException {
     try {
-      datasetService.downloadFile(1L, "file.xlsx");
+      datasetService.downloadExportedFile(1L, "file.xlsx");
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.FILE_NOT_FOUND, e.getMessage());
       throw e;

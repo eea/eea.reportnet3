@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -418,7 +419,7 @@ public interface DatasetController {
    * @return the response entity
    */
   @GetMapping("/{datasetId}/downloadFile")
-  ResponseEntity<InputStreamResource> downloadFile(@PathVariable Long datasetId,
-      @RequestParam String fileName);
+  void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
+      HttpServletResponse response);
 
 }

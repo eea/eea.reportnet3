@@ -364,7 +364,6 @@ const ValidationExpression = ({
           appendTo={document.body}
           disabled={isDisabled}
           onChange={e => {
-            console.log(`e.target.value`, e.target.value);
             onUpdateExpressionField('operatorType', e.target.value.value);
           }}
           optionLabel="label"
@@ -376,7 +375,6 @@ const ValidationExpression = ({
       <span
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
-        {console.log('operatorValues', operatorValues)}
         <Dropdown
           appendTo={document.body}
           disabled={isDisabled}

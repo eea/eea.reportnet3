@@ -431,6 +431,8 @@ const useBigButtonList = ({
         visibility: true
       }));
 
+  const isReleasing = dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing);
+
   const onBuildReceiptButton = () => {
     return [
       {
@@ -438,7 +440,8 @@ const useBigButtonList = ({
         buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
-        handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        enabled: !isReleasing,
+        handleRedirect: dataflowState.isReceiptLoading || isReleasing ? () => {} : () => onLoadReceiptData(),
         helpClassName: 'dataflow-big-buttons-confirmation-receipt-help-step',
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
@@ -446,8 +449,6 @@ const useBigButtonList = ({
       }
     ];
   };
-
-  const isReleasing = dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing);
 
   const onBuildReleaseButton = () => {
     return [

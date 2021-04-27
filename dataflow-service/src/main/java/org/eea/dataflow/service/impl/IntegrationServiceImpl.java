@@ -278,7 +278,6 @@ public class IntegrationServiceImpl implements IntegrationService {
 
     Map<String, String> externalParameters = new HashMap<>();
     externalParameters.put(IntegrationParams.DATABASE_CONNECTION_PUBLIC, "");
-    externalParameters.put(IntegrationParams.MODE, "");
 
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setDescription("Export EU Dataset");

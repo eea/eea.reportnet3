@@ -46,7 +46,6 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
-import org.eea.interfaces.vo.rod.LegalInstrumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -907,8 +906,8 @@ public class DataflowServiceImpl implements DataflowService {
     // compatibility concerns
     if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
       try {
-        dataflow.setObligation(
-            obligationControllerZull.findObligationById(dataflow.getObligation().getObligationId()));
+        dataflow.setObligation(obligationControllerZull
+            .findObligationById(dataflow.getObligation().getObligationId()));
 
       } catch (FeignException e) {
         LOG_ERROR.error("Error while getting obligation by id {}", e.getMessage(), e);
@@ -955,10 +954,6 @@ public class DataflowServiceImpl implements DataflowService {
     } else {
       dataflowVO.setReportingDatasets(new ArrayList<>());
     }
-    // Add the design datasets
-    dataflowVO.setDesignDatasets(
-        datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the data collections
     dataflowVO.setDataCollections(
@@ -973,10 +968,15 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
         .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
-    // Add the representatives
+    // Add the representatives and design datasets
     if (includeAllRepresentatives) {
       dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
+      dataflowVO
+          .setDesignDatasets(datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id));
     } else {
+      dataflowVO.setDesignDatasets(datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id)
+          .stream().filter(dataset -> datasetsIds.contains(dataset.getId()))
+          .collect(Collectors.toList()));
       String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
           .getDetails()).get(AuthenticationDetails.USER_ID);
       UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);

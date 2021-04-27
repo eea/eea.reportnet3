@@ -1072,6 +1072,9 @@
     "deleteRequesterButtonTableHeader": "Delete requester",
     "deleteReporterButtonTableHeader": "Delete reporter",
     "selectRole": "Select role",
-    "rolesColumn": "Roles"
+    "rolesColumn": "Roles",
+    "onlyReleasedCheckboxLabel": "Only released",
+    "onlyReleasedDataCollectionCheckboxLabel": "Only released to Data Collection",
+    "onlyReleasedEuDatasetCheckboxLabel": "Only released to EU dataset"
   }
 }
