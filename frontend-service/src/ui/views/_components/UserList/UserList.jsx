@@ -38,7 +38,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
     try {
       let response;
       setIsLoading(true);
-      if (isNil(representativeId)) {
+      if (isNil(representativeId) && isNil(dataflowId)) {
         response = await DataflowService.getAllDataflowsUserList();
       } else if (isNil(representativeId) && !isNil(dataflowId)) {
         response = await DataflowService.getRepresentativesUsersList(dataflowId);
@@ -114,7 +114,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={userListData.length}>
-              {isNil(representativeId) && (
+              {isNil(representativeId) && isNil(dataflowId) && (
                 <Column field="dataflowName" header={resources.messages['dataflowName']} sortable={true} />
               )}
               <Column field="role" header={resources.messages['role']} sortable={true} />
