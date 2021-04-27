@@ -90,6 +90,9 @@ const deleteTableDataById = async (datasetId, tableId) => await apiDataset.delet
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
   await apiDataset.deleteTableDesign(datasetId, tableSchemaId);
 
+const downloadExportDatasetFile = async (datasetId, fileName) =>
+  await apiDataset.downloadExportDatasetFile(datasetId, fileName);
+
 const downloadExportFile = async (datasetId, fileName, providerId) =>
   await apiDataset.downloadExportFile(datasetId, fileName, providerId);
 
@@ -398,18 +401,32 @@ const parseValue = (type, value, feToBe = false) => {
           break;
         case 'POLYGON':
         case 'MULTILINESTRING':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
-            coordinate.map(innerCoordinate => (!isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []))
-          );
+          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => {
+            if (Array.isArray(coordinate)) {
+              return coordinate.map(innerCoordinate =>
+                !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
+              );
+            } else {
+              return [];
+            }
+          });
           break;
         case 'MULTIPOLYGON':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon =>
-            polygon.map(coordinate =>
-              coordinate.map(innerCoordinate =>
-                !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
-              )
-            )
-          );
+          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon => {
+            if (Array.isArray(polygon)) {
+              return polygon.map(coordinate => {
+                if (Array.isArray(coordinate)) {
+                  return coordinate.map(innerCoordinate =>
+                    !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
+                  );
+                } else {
+                  return [];
+                }
+              });
+            } else {
+              return [];
+            }
+          });
           break;
         default:
           break;
@@ -700,6 +717,7 @@ export const ApiDatasetRepository = {
   deleteTableDataById,
   deleteTableDesign,
   downloadDatasetFileData,
+  downloadExportDatasetFile,
   downloadExportFile,
   downloadFileData,
   errorPositionByObjectId,

@@ -950,7 +950,7 @@ public class FileTreatmentHelper implements DisposableBean {
   @Async
   public void exportDatasetFile(Long datasetId, String mimeType) {
 
-    Long idDataflow = datasetService.getDataFlowIdById(datasetId);
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
 
     // Look for the dataset type is EU or DC to include the countryCode
     DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
@@ -970,22 +970,23 @@ public class FileTreatmentHelper implements DisposableBean {
     final IFileExportContext context = fileExportFactory.createContext(extension);
 
     try {
-      byte[] content = context.fileWriter(idDataflow, datasetId, null, includeCountryCode);
+      byte[] content = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
       Boolean includeZip = false;
       // If the length after splitting the file type arrives it's more than 1, then there's a
       // zip+xlsx type
       if (type.length > 1) {
         includeZip = true;
       }
-      generateFile(datasetId, extension, content, includeZip);
+      generateFile(datasetId, extension, content, includeZip, datasetType);
       LOG.info("End of exportDatasetFile datasetId {}", datasetId);
-    } catch (EEAException | IOException e) {
+    } catch (EEAException | IOException | NullPointerException e) {
       LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
           datasetId, mimeType, e.getMessage(), e);
       // Send notification
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).error("Error exporting dataset data").build();
+          .dataflowId(dataflowId).datasetId(datasetId).datasetType(datasetType)
+          .error("Error exporting dataset data").build();
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
             notificationVO);
@@ -1005,11 +1006,12 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param mimeType the mime type
    * @param file the file
    * @param includeZip the include zip
+   * @param datasetType the dataset type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  private void generateFile(Long datasetId, String mimeType, byte[] file, boolean includeZip)
-      throws IOException, EEAException {
+  private void generateFile(Long datasetId, String mimeType, byte[] file, boolean includeZip,
+      DatasetTypeEnum datasetType) throws IOException, EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String nameDataset = dataset.getDataSetName();
@@ -1085,7 +1087,7 @@ public class FileTreatmentHelper implements DisposableBean {
     // Send notification
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .datasetName(nameFile).build();
+        .datasetName(nameFile).datasetType(datasetType).build();
 
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
         notificationVO);

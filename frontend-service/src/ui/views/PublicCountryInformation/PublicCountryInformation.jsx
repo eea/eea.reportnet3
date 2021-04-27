@@ -39,6 +39,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
+  const baseRod3Url = 'https://rod.eionet.europa.eu';
+
   const [contentStyles, setContentStyles] = useState({});
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
@@ -294,19 +296,23 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {renderRedirectText(
-        rowData.legalInstrument?.alias,
-        `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument?.id}`
-      )}
+      {rowData.legalInstrument?.id
+        ? renderRedirectText(
+            rowData.legalInstrument?.alias,
+            `${baseRod3Url}/instruments/${rowData.legalInstrument?.id}`
+          )
+        : rowData.legalInstrument?.alias}
     </div>
   );
 
   const renderObligationBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {renderRedirectText(
-        rowData.obligation?.title,
-        `https://rod.eionet.europa.eu/obligations/${rowData.obligation?.obligationId}`
-      )}
+      {rowData.obligation?.obligationId
+        ? renderRedirectText(
+            rowData.obligation?.title,
+            `${baseRod3Url}/obligations/${rowData.obligation?.obligationId}`
+          )
+        : rowData.obligation?.title}
     </div>
   );
 

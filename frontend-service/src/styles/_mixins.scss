@@ -23,3 +23,11 @@
     @content;
   }
 }
+
+@mixin shadow-1px($shadow-color) {
+  box-shadow: inset 0px 0px 0px 1px $shadow-color;
+}
+
+@mixin shadow-0em {
+  box-shadow: 0 0 0 0em var(--blue-120) !important;
+}

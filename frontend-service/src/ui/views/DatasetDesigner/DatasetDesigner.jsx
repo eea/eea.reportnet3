@@ -102,8 +102,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       tableSchemaId: QuerystringUtils.getUrlParamValue('tab')
     },
     exportButtonsList: [],
-    exportDatasetData: null,
-    exportDatasetDataName: '',
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
     hasWritePermissions: false,
@@ -186,7 +184,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      if (userContext.accessRole[0] !== config.permissions.roles.EDITOR_READ.key) {
+      if (userContext.accessRole[0] !== config.permissions.roles.EDITOR_READ.key && !isDataflowOpen) {
         if (datasetSchemaAllTables.length > 1) {
           leftSideBarContext.addHelpSteps(
             DatasetSchemaRequesterWithTabsHelpConfig,
@@ -198,6 +196,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             'datasetSchemaRequesterEmptyHelpConfig'
           );
         }
+      } else {
+        leftSideBarContext.removeHelpSteps();
       }
     }
   }, [userContext, designerState, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
@@ -225,12 +225,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   }, [designerState.datasetSchemaName, designerState.externalOperationsList]);
 
   useEffect(() => {
-    if (!isNil(designerState.exportDatasetData)) {
-      DownloadFile(designerState.exportDatasetData, designerState.exportDatasetDataName);
-    }
-  }, [designerState.exportDatasetData]);
-
-  useEffect(() => {
     getImportList();
   }, [designerState.externalOperationsList]);
 
@@ -253,6 +247,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       });
     }
   }, [userContext, designerState?.metaData?.dataflow?.status]);
+
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
+    }
+  }, [notificationContext.hidden]);
 
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
@@ -530,26 +530,23 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET' });
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
-      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
+      onExportError('EXTERNAL_EXPORT_DESIGN_FAILED_EVENT');
     }
   };
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    try {
-      const datasetName = createFileName(designerState.datasetSchemaName, fileType);
-      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
-      designerDispatch({ type: 'ON_EXPORT_DATA', payload: { data: datasetData.data, name: datasetName } });
+    try {
+      await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 
@@ -565,7 +562,14 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(
-    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'],
+    [
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'DOWNLOAD_FME_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXPORT_DATASET_FILE_DOWNLOAD',
+      'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'
+    ],
     setIsLoadingFile,
     false
   );
@@ -927,7 +931,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             : resources.messages['designView']
         }
       />
-    );  
+    );
   };
 
   const renderSwitchView = () => {

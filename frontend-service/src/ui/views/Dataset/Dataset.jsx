@@ -83,8 +83,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
-  const [exportDatasetData, setExportDatasetData] = useState(undefined);
-  const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [externalOperationsList, setExternalOperationsList] = useState({
     export: [],
     import: [],
@@ -192,10 +190,10 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [externalOperationsList.import]);
 
   useEffect(() => {
-    if (!isUndefined(exportDatasetData)) {
-      DownloadFile(exportDatasetData, exportDatasetDataName);
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
     }
-  }, [exportDatasetData]);
+  }, [notificationContext.hidden]);
 
   const {
     isLoadingSnapshotListData,
@@ -474,7 +472,14 @@ export const Dataset = withRouter(({ match, history }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(
-    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
+    [
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'DOWNLOAD_FME_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXPORT_DATASET_FILE_DOWNLOAD',
+      'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'
+    ],
     setIsLoadingFile,
     false
   );
@@ -501,7 +506,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({
-      type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
+      type: 'EXPORT_DATASET_DATA'
     });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -512,14 +517,11 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      setExportDatasetDataName(createFileName(datasetName, fileType));
-      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
-      setExportDatasetData(datasetData.data);
+      await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 

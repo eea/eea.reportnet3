@@ -72,7 +72,10 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
       setIsSubmitting(true);
       showLoading();
       try {
-        const response = await DataflowService.newEmptyDatasetSchema(dataflowId, encodeURIComponent(datasetSchemaName));
+        const response = await DataflowService.newEmptyDatasetSchema(
+          dataflowId,
+          encodeURIComponent(datasetSchemaName.trim())
+        );
         if (response.status >= 200 && response.status <= 299) {
           onUpdateData();
           setIsSubmitting(false);
@@ -89,6 +92,11 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
         if (error.response?.data?.message?.includes('duplicated')) {
           notificationContext.add({
             type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
+            content: { schemaName: datasetSchemaName }
+          });
+        } else if (error.response?.data?.message?.includes('name invalid')) {
+          notificationContext.add({
+            type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
             content: { schemaName: datasetSchemaName }
           });
         } else {
