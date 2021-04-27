@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.dataflow.integration.executor.fme;
 
 import java.util.ArrayList;
@@ -88,7 +91,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The crud manager factory. */
+  /** The integration repository. */
   @Autowired
   private IntegrationRepository integrationRepository;
 
