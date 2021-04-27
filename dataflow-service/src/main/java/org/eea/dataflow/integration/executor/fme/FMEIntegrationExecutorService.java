@@ -13,7 +13,9 @@ import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -85,6 +87,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The crud manager factory. */
+  @Autowired
+  private IntegrationRepository integrationRepository;
 
   /**
    * Gets the executor type.
@@ -263,6 +269,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter(IntegrationParams.INPUT_FILE, fileName));
         parameters
             .add(saveParameter(IntegrationParams.FOLDER, datasetId + "/" + paramDataProvider));
+
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
@@ -316,16 +323,21 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     return executionResultVO;
   }
 
+  /**
+   * Adds the external parameters to FME execution.
+   *
+   * @param integration the integration
+   * @return the list
+   */
   private List<PublishedParameter> addExternalParametersToFMEExecution(IntegrationVO integration) {
     List<PublishedParameter> parameters = new ArrayList<>();
-    if (null != integration && null != integration.getExternalParameters()) {
+    Integration integrationAux = integrationRepository.findById(integration.getId()).orElse(null);
+    if (null != integrationAux && null != integrationAux.getExternalParameters()) {
       integration.getExternalParameters().forEach((key, value) -> {
         PublishedParameter parameter = new PublishedParameter();
-        if (!key.equals(IntegrationParams.FILE_IS)) {
-          parameter.setName(key);
-          parameter.setValue(value);
-          parameters.add(parameter);
-        }
+        parameter.setName(key);
+        parameter.setValue(value);
+        parameters.add(parameter);
       });
     }
     return parameters;
