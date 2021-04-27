@@ -1,9 +1,11 @@
-import React, { useContext } from 'react';
+import { useContext, useRef } from 'react';
 
 import { Checkbox } from 'primereact/checkbox';
 import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+
+import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
 export const MultiSelectHeader = ({
   allChecked,
@@ -13,6 +15,7 @@ export const MultiSelectHeader = ({
   filterPlaceholder,
   filterValue,
   headerClassName,
+  isPanelVisible,
   notCheckAllHeader,
   onClose,
   onFilter,
@@ -20,21 +23,19 @@ export const MultiSelectHeader = ({
 }) => {
   const resources = useContext(ResourcesContext);
 
+  const filterRef = useRef(null);
+
+  useInputTextFocus(isPanelVisible, filterRef);
+
   const onFilterEvent = event => {
     if (onFilter) {
-      onFilter({
-        originalEvent: event,
-        query: event.target.value
-      });
+      onFilter({ originalEvent: event, query: event.target.value });
     }
   };
 
   const onToggleAllEvent = event => {
     if (onToggleAll) {
-      onToggleAll({
-        originalEvent: event,
-        checked: allChecked
-      });
+      onToggleAll({ checked: allChecked, originalEvent: event });
     }
   };
 
@@ -43,12 +44,13 @@ export const MultiSelectHeader = ({
       return (
         <div className="p-multiselect-filter-container">
           <InputText
-            type="text"
-            role="textbox"
-            value={filterValue}
-            onChange={event => onFilterEvent(event)}
             className="p-inputtext p-component"
+            onChange={event => onFilterEvent(event)}
             placeholder={filterPlaceholder}
+            ref={filterRef}
+            role="textbox"
+            type="text"
+            value={filterValue}
           />
           <span className="p-multiselect-filter-icon pi pi-search"></span>
         </div>
