@@ -1318,9 +1318,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param conditionalValue the conditional value
    * @param searchValue the search value
    * @param resultsNumber the results number
-   *
    * @return the field values referenced
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public List<FieldVO> getFieldValuesReferenced(Long datasetIdOrigin, String datasetSchemaId,
@@ -1424,10 +1423,13 @@ public class DatasetServiceImpl implements DatasetService {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
-   *
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the ETL dataset VO
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
@@ -3284,8 +3286,9 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+
   /**
-   * Download file.
+   * Download exported file.
    *
    * @param datasetId the dataset id
    * @param fileName the file name
@@ -3294,7 +3297,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public File downloadFile(Long datasetId, String fileName) throws IOException, EEAException {
+  public File downloadExportedFile(Long datasetId, String fileName)
+      throws IOException, EEAException {
     // we compound the route and create the file
     File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
     if (!file.exists()) {
@@ -3304,6 +3308,8 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return file;
   }
+
+
 
   /**
    * Creeate all dataset files.
@@ -3513,7 +3519,6 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
-   * @throws EEAException the EEA exception
    */
   @Override
   public void initializeDataset(Long datasetId, String idDatasetSchema) {
@@ -3615,12 +3620,16 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   *
    * Export dataset ETLSQL.
    *
    * @param datasetId the dataset id
    * @param outputStream the output stream
-   * @throws EEAException
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @throws EEAException the EEA exception
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName) throws EEAException {

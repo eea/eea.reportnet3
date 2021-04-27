@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -82,9 +83,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,6 +98,12 @@ import com.mongodb.client.result.UpdateResult;
  */
 @Service("dataschemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
+
+  /** The Constant REGEX_NAME: {@value}. */
+  private static final String REGEX_NAME = "[a-zA-Z0-9\\s_-]+";
+
+  /** The Constant REGEX_NAME_SCHEMA: {@value}. */
+  private static final String REGEX_NAME_SCHEMA = "[a-zA-Z0-9\\s\\(\\)_-]+";
 
   /**
    * The Constant LOG.
@@ -2187,6 +2196,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         throw new EEAException(
             "No schemas from the zip file to import in the dataflowId " + dataflowId);
       }
+
+      validateNames(importClasses);
+
       for (DataSetSchema schema : importClasses.getSchemas()) {
         // Create the empty new dataset schema
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
@@ -2327,6 +2339,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
     // table level
     for (TableSchema table : schemaOrigin.getTableSchemas()) {
+      String nameTrimmed = table.getNameTableSchema().trim();
+      table.setNameTableSchema(nameTrimmed);
+
       ObjectId newTableId = new ObjectId();
       dictionaryOriginTargetObjectId.put(table.getIdTableSchema().toString(),
           newTableId.toString());
@@ -2343,6 +2358,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         record.setIdTableSchema(newTableId);
         // field level
         for (FieldSchema fieldOrigin : table.getRecordSchema().getFieldSchema()) {
+          nameTrimmed = fieldOrigin.getHeaderName().trim();
+          fieldOrigin.setHeaderName(nameTrimmed);
+
           ObjectId newFieldId = new ObjectId();
           dictionaryOriginTargetObjectId.put(fieldOrigin.getIdFieldSchema().toString(),
               newFieldId.toString());
@@ -2557,7 +2575,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // The name of the dataset copied will be IMPORTED_whatever. If it exists, it will be
     // IMPORTED_whatever (1) and so
     String name = schemaNames.get(datasetSchemaId);
-    String result = "IMPORTED_" + name;
+    String result = "IMPORTED_" + name.trim();
+
     int index = 1;
     for (int i = 0; i < designs.size(); i++) {
       if (designs.get(i).getDataSetName().equals(result)) {
@@ -2573,4 +2592,47 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return result;
   }
 
+  /**
+   * Filter name.
+   *
+   * @param nameTrimmed the name trimmed
+   * @param isSchema the is schema
+   */
+  private void filterName(String nameTrimmed, boolean isSchema) {
+    if (isSchema) {
+      if (!Pattern.matches(REGEX_NAME_SCHEMA, nameTrimmed)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+      }
+    } else {
+      if (!Pattern.matches(REGEX_NAME, nameTrimmed)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+      }
+    }
+  }
+
+  private void validateNames(ImportSchemas schemas) {
+    for (DataSetSchema schema : schemas.getSchemas()) {
+      Map<String, String> schemasNames = schemas.getSchemaNames();
+      String datasetSchemaId = schema.getIdDataSetSchema().toString();
+      String name = schemasNames.get(datasetSchemaId);
+
+      String nameTrimmed = name.trim();
+      boolean isSchema = true;
+      filterName(nameTrimmed, isSchema);
+
+      for (TableSchema table : schema.getTableSchemas()) {
+        nameTrimmed = table.getNameTableSchema().trim();
+        isSchema = false;
+        filterName(nameTrimmed, isSchema);
+
+        for (FieldSchema fieldOrigin : table.getRecordSchema().getFieldSchema()) {
+          nameTrimmed = fieldOrigin.getHeaderName().trim();
+          isSchema = false;
+          filterName(nameTrimmed, isSchema);
+        }
+      }
+    }
+  }
 }
