@@ -563,22 +563,41 @@ const FieldEditor = ({
       case 'DATE':
         return (
           <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
             inputId={calendarId}
+            monthNavigator={true}
             onBlur={onCalendarBlur}
             onFocus={onCalendarFocus}
             onSelect={onSelectCalendar}
-            appendTo={document.body}
-            dateFormat="yy-mm-dd"
-            monthNavigator={true}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
             yearRange="1900:2100"
           />
         );
+      case 'DATETIME':
+        return (
+          <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
+            inputId={calendarId}
+            monthNavigator={true}
+            onBlur={onCalendarBlur}
+            onFocus={onCalendarFocus}
+            onSelect={onSelectCalendar}
+            showSeconds={true}
+            showTime={true}
+            value={RecordUtils.getCellValue(cells, cells.field)}
+            yearNavigator={true}
+            yearRange="1900:2100"
+          />
+        );
+
       case 'EMAIL':
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={emailCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -586,7 +605,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={emailCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );

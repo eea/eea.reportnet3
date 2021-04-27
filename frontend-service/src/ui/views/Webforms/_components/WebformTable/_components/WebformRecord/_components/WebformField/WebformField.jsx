@@ -322,6 +322,33 @@ export const WebformField = ({
             yearRange="1900:2100"
           />
         );
+        case 'DATETIME':
+          return (
+            <Calendar
+              appendTo={document.body}
+              dateFormat="yy-mm-dd"
+              id={field.fieldId}
+              monthNavigator={true}
+              onBlur={event => {
+                if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
+                else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+              }}
+              onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
+              onFocus={event => {
+                changeDatePickerPosition(event.target.getBoundingClientRect().left);
+                onFocusField(event.target.value);
+              }}
+              onSelect={event => {
+                onFillField(field, option, formatDate(event.value, isNil(event.value)));
+                onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
+              }}
+              showSeconds={true}
+              showTime={true}
+              value={field.value}
+              yearNavigator={true}
+              yearRange="1900:2100"
+            />
+          );
 
       case 'LINK':
         if (field.pkHasMultipleValues) {

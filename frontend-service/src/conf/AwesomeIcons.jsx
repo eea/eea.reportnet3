@@ -92,7 +92,8 @@ import {
   faTable,
   faDownload,
   faVolumeUp,
-  faFlagCheckered
+  faFlagCheckered,
+  faClock
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -403,6 +404,8 @@ export const AwesomeIcons = icon => {
       return faVolumeUp;
     case 'flag':
       return faFlagCheckered;
+    case 'clock':
+      return faClock;
     default:
       return faFileAlt;
   }

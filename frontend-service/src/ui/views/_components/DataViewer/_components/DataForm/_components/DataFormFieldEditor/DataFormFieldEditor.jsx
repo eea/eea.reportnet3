@@ -330,6 +330,7 @@ const DataFormFieldEditor = ({
     const longCharacters = 20;
     const decimalCharacters = 40;
     const dateCharacters = 10;
+    const datetimeCharacters = 20;
     const textCharacters = 10000;
     const richTextCharacters = 10000;
     const emailCharacters = 256;
@@ -345,6 +346,8 @@ const DataFormFieldEditor = ({
         return textCharacters;
       case 'DATE':
         return dateCharacters;
+      case 'DATETIME':
+        return datetimeCharacters;
       case 'TEXT':
       case 'TEXTAREA':
         return textCharacters;
@@ -370,6 +373,8 @@ const DataFormFieldEditor = ({
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
       renderCalendar(field, fieldValue)
+    ) : type === 'DATETIME' ? (
+      renderDatetimeCalendar(field, fieldValue)
     ) : type === 'POINT' ? (
       renderMapType(field, fieldValue)
     ) : type === 'ATTACHMENT' ? (
@@ -411,6 +416,26 @@ const DataFormFieldEditor = ({
         inputRef={refCalendar}
         style={{ width: '60px' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
+        yearNavigator={true}
+        yearRange="1900:2100"
+      />
+    );
+  };
+
+  const renderDatetimeCalendar = (field, fieldValue) => {
+    return (
+      <Calendar
+        appendTo={document.body}
+        baseZIndex={9999}
+        dateFormat="yy-mm-dd"
+        disabled={(column.readOnly && reporting) || isSaving}
+        monthNavigator={true}
+        onChange={e => onChangeForm(field, e.target.value, isConditional)}
+        inputRef={refCalendar}
+        showSeconds={true}
+        showTime={true}
+        style={{ width: '60px' }}
+        value={fieldValue}
         yearNavigator={true}
         yearRange="1900:2100"
       />
