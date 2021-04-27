@@ -402,6 +402,45 @@ const getAllDataflowsUserList = async () => {
   return usersListDTO;
 };
 
+const getRepresentativesUsersList = async dataflowId => {
+  const response = {
+    data: [
+      {
+        dataProviderId: 44,
+        datasetName: 'Austria',
+        users: [
+          {
+            email: 'miriam.provider@reportnet.net',
+            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+          },
+          {
+            email: 'mikel.provider@reportnet.net',
+            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+          }
+        ]
+      },
+      {
+        dataProviderId: 34,
+        datasetName: 'France',
+        users: [
+          {
+            email: 'miriam.provider@reportnet.net',
+            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+          },
+          {
+            email: 'mikel.provider@reportnet.net',
+            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
+          }
+        ]
+      }
+    ]
+  };
+  // const response = await apiDataflow.getRepresentativesUsersList(dataflowId);
+  const usersList = parseCountriesUserList(response.data);
+  response.data = sortBy(usersList, 'datasetName');
+  return response;
+};
+
 const getUserList = async (dataflowId, representativeId) => {
   const response = await apiDataflow.getUserList(dataflowId, representativeId);
   const usersList = parseUsersList(response.data);
@@ -646,6 +685,27 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   return usersList;
 };
 
+const parseCountriesUserList = countriesUserListDTO => {
+  countriesUserListDTO.forEach((country, countryIndex) => {
+    country.users.forEach((user, usersIndex) => {
+      user.roles.forEach((role, roleIndex) => {
+        countriesUserListDTO[countryIndex].users[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
+      });
+    });
+  });
+  const usersList = [];
+  countriesUserListDTO.forEach(country => {
+    const { dataProviderId, datasetName } = country;
+    country.users.forEach(parsedUser => {
+      const { email, roles } = parsedUser;
+      roles.forEach(role => {
+        usersList.push({ dataProviderId, datasetName, email, role });
+      });
+    });
+  });
+  return usersList;
+};
+
 const parseUsersList = usersListDTO => {
   usersListDTO.forEach((user, usersIndex) => {
     user.roles.forEach((role, roleIndex) => {
@@ -732,6 +792,7 @@ export const ApiDataflowRepository = {
   getAllSchemas,
   getApiKey,
   getAllDataflowsUserList,
+  getRepresentativesUsersList,
   getPublicDataflowData,
   getPublicDataflowsByCountryCode,
   getUserList,

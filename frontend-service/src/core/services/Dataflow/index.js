@@ -9,6 +9,7 @@ import { GenerateApiKey } from './GenerateApiKey';
 import { GetAll } from './GetAll';
 import { GetAllSchemas } from './GetAllSchemas';
 import { GetAllDataflowsUserList } from './GetAllDataflowsUserList';
+import { GetRepresentativesUsersList } from './GetRepresentativesUsersList';
 import { GetUserList } from './GetUserList';
 import { GetApiKey } from './GetApiKey';
 import { GetDatasetStatisticStatus } from './GetDatasetStatisticStatus';
@@ -32,6 +33,7 @@ export const DataflowService = {
   deleteById: Delete({ dataflowRepository }),
   downloadById: Download({ dataflowRepository }),
   getAllDataflowsUserList: GetAllDataflowsUserList({ dataflowRepository }),
+  getRepresentativesUsersList: GetRepresentativesUsersList({ dataflowRepository }),
   getUserList: GetUserList({ dataflowRepository }),
   getAllSchemas: GetAllSchemas({ dataflowRepository }),
   getApiKey: GetApiKey({ dataflowRepository }),

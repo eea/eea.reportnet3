@@ -40,6 +40,8 @@ export const UserList = ({ dataflowId, representativeId }) => {
       setIsLoading(true);
       if (isNil(representativeId)) {
         response = await DataflowService.getAllDataflowsUserList();
+      } else if (isNil(representativeId) && !isNil(dataflowId)) {
+        response = await DataflowService.getRepresentativesUsersList(dataflowId);
       } else {
         response = await DataflowService.getUserList(dataflowId, representativeId);
       }
