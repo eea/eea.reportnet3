@@ -22,8 +22,9 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
+import { Button } from '../../Button/Button';
 
-export const MainLayout = ({ children, isPublic = false }) => {
+export const MainLayout = ({ children, isPublic = false, history }) => {
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
@@ -164,8 +165,13 @@ export const MainLayout = ({ children, isPublic = false }) => {
     setMainContentStyle(newMainContentStyle);
   };
 
-  const onResetErrorBoundary = () => {
-    getUserConfiguration();
+  const onResetErrorBoundary = error => {
+    console.log(`Error: `, error);
+    console.log(`Path: `, history.location.pathname);
+    console.log(`userContext.id`, userContext.id);
+    setTimeout(() => {
+      history.go(0);
+    }, 10000);
   };
 
   useSocket();
@@ -181,6 +187,7 @@ export const MainLayout = ({ children, isPublic = false }) => {
         <Header isPublic={isPublic} onMainContentStyleChange={onMainContentStyleChange} />
         <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
           <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
+
           <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
             {children}
           </div>
@@ -197,7 +204,21 @@ export const MainLayout = ({ children, isPublic = false }) => {
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
     <MainLayout>
-      <pre>Error occurred: {error.message}</pre> <button onClick={resetErrorBoundary}>Try again</button>
+      <div className="rep-container">
+        <div className="rep-row">
+          <h3>Error occurred: {error.message}</h3>
+        </div>
+        <div className="rep-row">
+          <div>
+            <Button
+              className="p-button-success p-button-animated-blink"
+              icon={'refresh'}
+              label={'Send to helpdesk'}
+              onClick={resetErrorBoundary}
+            />
+          </div>
+        </div>
+      </div>
     </MainLayout>
   );
 }

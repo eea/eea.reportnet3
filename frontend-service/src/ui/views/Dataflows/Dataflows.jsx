@@ -43,6 +43,8 @@ const Dataflows = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [showBadComponent, setShowBadComponent] = useState(false);
+
   const [tabMenuItems] = useState([
     {
       label: resources.messages['dataflowsListTab'],
@@ -173,8 +175,10 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
+  const RenderDistruction = ({ vitalArrayProp }) => vitalArrayProp.map(element => <div>{element.name}</div>);
+
   const renderLayout = children => (
-    <MainLayout>
+    <MainLayout history={history}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
@@ -185,6 +189,15 @@ const Dataflows = withRouter(({ history, match }) => {
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
         <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
+        <Button
+          className="p-button-danger p-button-animated-blink"
+          icon={'cancel'}
+          label={'DESTROY'}
+          onClick={() => setShowBadComponent(true)}
+        />
+
+        {showBadComponent && <RenderDistruction />}
+
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={dataflowsState.allDataflows}
