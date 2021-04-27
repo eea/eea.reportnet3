@@ -368,7 +368,7 @@ const Dataflow = withRouter(({ history, match }) => {
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
-        ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
+        ((dataflowState.isCustodian || dataflowState.isObserver) && dataflowState.status === 'DRAFT')
     };
   };
 
@@ -489,7 +489,7 @@ const Dataflow = withRouter(({ history, match }) => {
     </>
   );
 
-  const dataflowUsersListFooter = (
+  const renderDataflowUsersListFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
@@ -1079,7 +1079,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={dataflowUsersListFooter}
+            footer={renderDataflowUsersListFooter}
             header={resources.messages['dataflowUsersList']}
             onHide={() => manageDialogs('isUserListVisible', false)}
             visible={dataflowState.isUserListVisible}>
