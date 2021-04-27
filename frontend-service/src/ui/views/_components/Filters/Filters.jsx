@@ -339,7 +339,7 @@ export const Filters = ({
   const renderCalendarFilter = property => {
     const inputId = uuid.v4();
     return (
-      <span key={property} className={styles.dataflowInput} ref={dateRef}>
+      <span key={property} className={styles.input} ref={dateRef}>
         {renderOrderFilter(property)}
         <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
           <Calendar
@@ -402,13 +402,14 @@ export const Filters = ({
           </label>
         </span>
       </span>
+      <div></div>
     </Fragment>
   );
 
   const renderCheckboxFilter = (property, label, i) => {
     return (
-      <span key={i} className={styles.checkboxWrap}>
-        <div>
+      <span key={i} className={styles.inputCheckbox}>
+        <div className={styles.flex}>
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
             <Checkbox
@@ -429,7 +430,7 @@ export const Filters = ({
   };
 
   const renderDropdown = property => (
-    <span key={property} className={`${styles.dataflowInput}`}>
+    <span key={property} className={`${styles.input}`}>
       {renderOrderFilter(property)}
       <Dropdown
         ariaLabel={property}
@@ -455,7 +456,7 @@ export const Filters = ({
   );
 
   const renderInputFilter = property => (
-    <span key={property} className={styles.dataflowInput}>
+    <span key={property} className={styles.input}>
       {renderOrderFilter(property)}
       <span className={`p-float-label ${styles.label}`}>
         <InputText
@@ -496,7 +497,7 @@ export const Filters = ({
     );
 
   const renderMultiselectSelectFilter = (property, showInput) => (
-    <span key={property} className={`${styles.dataflowInput}`}>
+    <span key={property} className={`${styles.input}`}>
       {renderOrderFilter(property)}
       <MultiSelect
         ariaLabelledBy={property}
@@ -524,7 +525,7 @@ export const Filters = ({
   );
 
   const renderSearchAll = () => (
-    <span className={`p-float-label ${styles.dataflowInput}`}>
+    <span className={`p-float-label ${styles.input}`}>
       <InputText
         className={styles.searchInput}
         id={'searchInput'}
