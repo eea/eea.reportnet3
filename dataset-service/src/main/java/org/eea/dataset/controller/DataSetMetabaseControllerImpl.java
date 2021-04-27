@@ -5,6 +5,7 @@ package org.eea.dataset.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -43,6 +44,10 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RestController
 @RequestMapping("/datasetmetabase")
 public class DataSetMetabaseControllerImpl implements DatasetMetabaseController {
+
+
+  /** The Constant REGEX_NAME_SCHEMA: {@value}. */
+  private static final String REGEX_NAME_SCHEMA = "[a-zA-Z0-9\\s\\(\\)_-]+";
 
   /** The dataset metabase service. */
   @Autowired
@@ -146,6 +151,11 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   public void updateDatasetName(@RequestParam(value = "datasetId", required = true) Long datasetId,
       @RequestParam(value = "datasetName", required = false) String datasetName) {
+
+    String nameTrimmed = datasetName.trim();
+    filterName(nameTrimmed);
+    datasetName = nameTrimmed;
+
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -217,11 +227,12 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/globalStatistics/{dataschemaId}",
+  @GetMapping(value = "/globalStatistics/dataflow/{dataflowId}/dataSchema/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
-      @PathVariable("dataschemaId") String dataschemaId) {
+      @PathVariable("dataschemaId") String dataschemaId,
+      @PathVariable("dataflowId") Long dataflowId) {
 
     List<StatisticsVO> statistics = null;
 
@@ -442,5 +453,18 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
       @PathVariable("id") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId) {
     return reportingDatasetService.getDataSetIdByDataflowIdAndDataProviderId(dataflowId,
         dataProviderId);
+  }
+
+
+  /**
+   * Filter name.
+   *
+   * @param nameTrimmed the name trimmed
+   */
+  private void filterName(String nameTrimmed) {
+    if (!Pattern.matches(REGEX_NAME_SCHEMA, nameTrimmed)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+    }
   }
 }
