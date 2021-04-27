@@ -3640,8 +3640,6 @@ public class DatasetServiceImpl implements DatasetService {
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
       String tableName = "";
       StringBuilder query = new StringBuilder();
-
-
       if (null == tableSchemaId) {
         query.append(" select cast(json_build_object('tables',json_agg(tables)) as TEXT) from ( ");
       } else {
@@ -3665,9 +3663,8 @@ public class DatasetServiceImpl implements DatasetService {
           }
         }
       }
-      String queryTableName =
-          " select json_build_object('tableName',(case " + caseTables.toString() + " end), ";
-      query.append(queryTableName);
+      query.append(
+          " select json_build_object('tableName',(case " + caseTables.toString() + " end), ");
       String totalRecords = "";
       if (null != tableSchemaId) {
         totalRecords = String.format(
@@ -3678,15 +3675,13 @@ public class DatasetServiceImpl implements DatasetService {
         totalRecords =
             totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
       }
-      query.append(totalRecords);
-
-      query.append(" 'records', json_agg(records)) as tables ");
-      query.append(" from ( ");
-      query.append(
-          " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ");
-      query.append(
-          " select data_provider_code,id_table_schema,id_record,json_build_object('fieldName',\"fieldName\",'value',value) as fields from( ");
-      query.append(" select case ");
+      query.append(totalRecords).append(" 'records', json_agg(records)) as tables ")
+          .append(" from ( ")
+          .append(
+              " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
+          .append(
+              " select data_provider_code,id_table_schema,id_record,json_build_object('fieldName',\"fieldName\",'value',value) as fields from( ")
+          .append(" select case ");
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
       for (TableSchema table : tableSchemaList) {
         if (null != tableSchemaId) {
@@ -3724,13 +3719,10 @@ public class DatasetServiceImpl implements DatasetService {
         }
         query.append(String.format(paginationPart, offsetAux, limit));
       }
-      String queryFinalPart =
-          " ) records group by id_table_schema,id_record,data_provider_code ) tablesAux group by id_table_schema ";
-      query.append(queryFinalPart);
-      String queryAllTablesFinalPart = " ) as json ";
-      query.append(queryAllTablesFinalPart);
-
+      query.append(
+          ") records group by id_table_schema,id_record,data_provider_code ) tablesAux group by id_table_schema ) as json ");
       LOG.info("Query: {} ", query);
+      // Delete the query log and the timestamp part later, once the tests are finished.
       outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
       LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
     } catch (IOException e) {
