@@ -69,7 +69,7 @@ const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getT
 
 const onApplyFilters = ({
   actualFilterBy,
-  checkboxOptions = [],
+  checkbox = [],
   checkedKeys,
   data,
   date,
@@ -84,7 +84,7 @@ const onApplyFilters = ({
   const result = data.filter(dataItem => {
     if (
       (multiselect.includes(filter) && !isNil(dataItem[filter])) ||
-      (checkboxOptions.includes(filter) && !isNil(dataItem[filter]))
+      (checkbox.includes(filter) && !isNil(dataItem[filter]))
     ) {
       const isApplySelected = onApplySelected(dataItem, filter, state, value);
       const isCheckFilters = onCheckFilters(

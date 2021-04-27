@@ -4,7 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -67,12 +71,12 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * The Constant SORT_NUMBER_QUERY.
    */
   private static final String SORT_NUMBER_QUERY =
-      ",CAST(fv.value as java.math.BigDecimal) as orden ";
+      ",CASE WHEN is_numeric(fv.value)= true THEN CAST(fv.value as java.math.BigDecimal) END as orden ";
 
   /**
    * The Constant SORT_DATE_QUERY.
    */
-  private static final String SORT_DATE_QUERY = ",CAST(fv.value as java.sql.Date) as orden ";
+  private static final String SORT_DATE_QUERY = ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as java.sql.Date) END as orden ";
 
   /**
    * The Constant SORT_STRING_QUERY.
@@ -114,6 +118,13 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final String QUERY_ORDER = "ORDER BY orden";
 
+  /**
+   * The enum SortQueryType
+   */
+  private enum SortQueryType {
+    NUMBER, DATE, STRING
+  }
+
 
   /**
    * Find by id field schema with tag ordered.
@@ -136,12 +147,15 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     List<FieldValueWithLabel> fields = new ArrayList<>();
 
     StringBuilder queryBuilder = new StringBuilder();
+    SortQueryType sortQueryType = SortQueryType.STRING;
     queryBuilder.append(QUERY_1);
     if (dataTypePk != null && (DataType.NUMBER_DECIMAL.equals(dataTypePk)
         || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
       queryBuilder.append(SORT_NUMBER_QUERY);
+      sortQueryType = SortQueryType.NUMBER;
     } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
       queryBuilder.append(SORT_DATE_QUERY);
+      sortQueryType = SortQueryType.DATE;
     } else {
       queryBuilder.append(SORT_STRING_QUERY);
     }
@@ -151,7 +165,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
       queryBuilder.append(QUERY_2_WITHOUT_CONDITIONAL).append(QUERY_3);
     }
     queryBuilder.append(QUERY_ORDER);
-
+    
     Query query = entityManager.createQuery(queryBuilder.toString());
     query.setParameter("fieldSchemaId", idPk);
     query.setParameter("labelId", labelSchemaId);
@@ -181,6 +195,13 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     // Remove the duplicate values
     HashSet<String> seen = new HashSet<>();
     fieldsVO.removeIf(e -> !seen.add(e.getValue()));
+
+    // Remove all values that are not of the correct type
+    if (sortQueryType == SortQueryType.NUMBER) {
+      fieldsVO.removeIf(e -> !stringIsNumeric(e.getValue()));
+    } else if (sortQueryType == SortQueryType.DATE) {
+      fieldsVO.removeIf(e -> !stringIsDate(e.getValue()));
+    }
 
     return fieldsVO;
   }
@@ -250,6 +271,39 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     UnaryOperator<String> addQuotes = s -> "'" + s + "'";
     return idsList.stream().map(addQuotes).collect(Collectors.joining(", "));
+  }
+
+  /**
+   * Check if a String is Numeric
+   * @param strNum String to check
+   * @return true if is numeric
+   */
+  private boolean stringIsNumeric(String strNum) {
+    if (strNum == null) {
+      return false;
+    }
+    try {
+      Double.parseDouble(strNum);
+    } catch (NumberFormatException nfe) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Check if a String is Date
+   * @param dateStr String to check
+   * @return true if is Date
+   */
+  private boolean stringIsDate(String dateStr) {
+    DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    boolean isDate = true;
+    try {
+      sdf.parse(dateStr);
+    } catch (ParseException e) {
+      isDate = false;
+    }
+    return isDate;
   }
 
 
