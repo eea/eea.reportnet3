@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
@@ -7,8 +7,8 @@ import uuid from 'uuid';
 
 import styles from './BigButton.module.scss';
 
+import { config } from 'conf';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
@@ -66,6 +66,11 @@ export const BigButton = ({
     return repeat.length > 0 && idx !== repeat[0].schemaIndex;
   };
 
+  const checkInvalidCharacters = name => {
+    const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s()]/);
+    return invalidCharsRegex.test(name);
+  };
+
   const onEditorKeyChange = (event, index) => {
     if (event.key === 'Enter') {
       if (buttonsTitle !== '') {
@@ -114,18 +119,31 @@ export const BigButton = ({
   const onUpdateName = (title, index) => {
     if (!isEmpty(buttonsTitle)) {
       if (initialValue !== title) {
-        if (checkDuplicates(title, index) || title.length > 250) {
+        let hasErrors = false;
+        if (checkDuplicates(title, index)) {
           setErrorDialogData({
             isVisible: true,
-            message:
-              title.length > 250
-                ? resources.messages['tooLongSchemaNameError']
-                : resources.messages['duplicateSchemaError']
+            message: resources.messages['duplicateSchemaError']
           });
+          hasErrors = true;
+        } else if (title.length > 250) {
+          setErrorDialogData({
+            isVisible: true,
+            message: resources.messages['tooLongSchemaNameError']
+          });
+          hasErrors = true;
+        } else if (checkInvalidCharacters(title)) {
+          setErrorDialogData({
+            isVisible: true,
+            message: resources.messages['invalidCharactersSchemaError']
+          });
+          hasErrors = true;
+        }
+        if (hasErrors) {
           document.getElementsByClassName('p-inputtext p-component')[0].focus();
           return { correct: false, originalSchemaName: initialValue, wrongName: title };
         } else {
-          onSaveName(title, index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
+          onSaveName(title.trim(), index) && setIsEditEnabled(false) && setInitialValue(buttonsTitle);
         }
       } else {
         setIsEditEnabled(false);
@@ -182,7 +200,8 @@ export const BigButton = ({
           className={`${styles.inputText}`}
           key={index}
           onBlur={e => {
-            onInputSave(e.target.value, index);
+            onInputSave(e.target.value.trim(), index);
+            setButtonsTitle(e.target.value.trim());
           }}
           onChange={e => setButtonsTitle(e.target.value)}
           onFocus={e => {
@@ -207,7 +226,7 @@ export const BigButton = ({
             data-for={tooltipId}
             className={styles.caption}
             onDoubleClick={
-              dataflowStatus === DataflowConf.dataflowStatus['DESIGN'] && canEditName ? onEnableSchemaNameEdit : null
+              dataflowStatus === config.dataflowStatus.DESIGN && canEditName ? onEnableSchemaNameEdit : null
             }>
             {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
           </p>

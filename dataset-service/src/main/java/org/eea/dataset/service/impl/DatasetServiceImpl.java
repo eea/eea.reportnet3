@@ -955,12 +955,15 @@ public class DatasetServiceImpl implements DatasetService {
 
     // Find if the dataset type is EU to include the countryCode
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
     return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
   }
+
+
 
   /**
    * Export file through integration.
@@ -1315,9 +1318,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param conditionalValue the conditional value
    * @param searchValue the search value
    * @param resultsNumber the results number
-   *
    * @return the field values referenced
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public List<FieldVO> getFieldValuesReferenced(Long datasetIdOrigin, String datasetSchemaId,
@@ -1421,10 +1423,13 @@ public class DatasetServiceImpl implements DatasetService {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
-   *
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the ETL dataset VO
-   *
-   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
@@ -1439,7 +1444,7 @@ public class DatasetServiceImpl implements DatasetService {
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
           endTime / 1000);
-    } catch (IOException e) {
+    } catch (IOException | EEAException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
     }
   }
@@ -3280,6 +3285,32 @@ public class DatasetServiceImpl implements DatasetService {
     return file;
   }
 
+
+
+  /**
+   * Download exported file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public File downloadExportedFile(Long datasetId, String fileName)
+      throws IOException, EEAException {
+    // we compound the route and create the file
+    File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
+    if (!file.exists()) {
+      LOG_ERROR.error(
+          "Trying to download a file generated during the export dataset data process but the file is not found");
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
+
+
   /**
    * Creeate all dataset files.
    *
@@ -3488,7 +3519,6 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
-   * @throws EEAException the EEA exception
    */
   @Override
   public void initializeDataset(Long datasetId, String idDatasetSchema) {
@@ -3590,114 +3620,120 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   *
    * Export dataset ETLSQL.
    *
    * @param datasetId the dataset id
    * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @throws EEAException the EEA exception
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue, String columnName) {
+      Integer limit, Integer offset, String filterValue, String columnName) throws EEAException {
     try {
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-      DataSetSchema datasetSchema =
-          schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-      if (null != datasetSchema) {
-        List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
 
-        String filterValuePart = "";
-        if (null != filterValue && !filterValue.isEmpty()) {
-          filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
+      DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+          .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
+      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+
+      String filterValuePart = "";
+      if (null != filterValue && !filterValue.isEmpty()) {
+        filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
+      }
+      String queryFirstPart =
+          "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
+      String queryFinalPart =
+          " ) as record where fields is not null ) from dataset_%s.table_value tv) as tableAux  ) as tablesAux ";
+      if (null != tableSchemaId) {
+        queryFirstPart =
+            "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
+        queryFinalPart =
+            " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
+      }
+      String filterBycolum = "";
+      if (null != columnName) {
+        filterBycolum = String.format(" where \"fieldName\" like '%s' ", columnName);
+      }
+      String totalRecords = "";
+      if (null != tableSchemaId) {
+        totalRecords =
+            " ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as \"totalRecords\", ";
+      }
+
+      if (null != columnName || null != filterValue) {
+        totalRecords =
+            totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
+      }
+
+      String queryMiddlePartOne = " end as \"tableName\"," + totalRecords
+          + " (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
+      String queryMiddlePartTwo =
+          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
+              + filterValuePart + ") as fieldsAux " + filterBycolum + ") "
+              + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
+      String paginationPart = " offset %s limit %s ";
+      String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
+      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+
+      String tableName = "";
+
+      if (null != tableSchemaId) {
+        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+        if (tableSchema != null) {
+          tableName = (String) tableSchema.get("nameTableSchema");
         }
-        String queryFirstPart =
-            "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
-        String queryFinalPart =
-            " ) as record where fields is not null ) from dataset_%s.table_value tv) as tableAux  ) as tablesAux ";
+      }
+      if (null != tableSchemaList) {
+        StringBuilder query = new StringBuilder(queryFirstPart);
         if (null != tableSchemaId) {
-          queryFirstPart =
-              "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
-          queryFinalPart =
-              " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
-        }
-        String filterBycolum = "";
-        if (null != columnName) {
-          filterBycolum = String.format(" where \"fieldName\" like '%s' ", columnName);
-        }
-        String totalRecords = "";
-        if (null != tableSchemaId) {
-          totalRecords =
-              " ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as \"totalRecords\", ";
-        }
-
-        if (null != columnName || null != filterValue) {
-          totalRecords =
-              totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
-        }
-
-        String queryMiddlePartOne = " end as \"tableName\"," + totalRecords
-            + " (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
-        String queryMiddlePartTwo =
-            " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
-                + filterValuePart + ") as fieldsAux " + filterBycolum + ") "
-                + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
-        String paginationPart = " offset %s limit %s ";
-        String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
-        String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-
-        String tableName = "";
-
-        if (null != tableSchemaId) {
-          Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
-          if (tableSchema != null) {
-            tableName = (String) tableSchema.get("nameTableSchema");
-          }
-        }
-        if (null != tableSchemaList) {
-          StringBuilder query = new StringBuilder(queryFirstPart);
-          if (null != tableSchemaId) {
-            query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
-          } else {
-            for (TableSchema table : tableSchemaList) {
-              query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema().toString(),
-                  table.getNameTableSchema()));
-            }
-          }
-          query.append(String.format(queryMiddlePartOne, datasetId));
+          query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
+        } else {
           for (TableSchema table : tableSchemaList) {
-            if (null != tableSchemaId) {
-              if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
-                for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-                  query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                      field.getHeaderName()));
-                }
-              }
-            } else {
+            query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema().toString(),
+                table.getNameTableSchema()));
+          }
+        }
+        query.append(String.format(queryMiddlePartOne, datasetId));
+        for (TableSchema table : tableSchemaList) {
+          if (null != tableSchemaId) {
+            if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
               for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
                 query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
                     field.getHeaderName()));
               }
             }
-          }
-          query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
-          if (null != offset && null != limit) {
-            Integer offsetAux = (limit * offset) - limit;
-            if (offsetAux < 0) {
-              offsetAux = 0;
-            }
-            query.append(String.format(paginationPart, offsetAux, limit));
-          }
-          if (null != tableSchemaId) {
-            query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
           } else {
-            query.append(String.format(queryFinalPart, datasetId));
+            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+              query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                  field.getHeaderName()));
+            }
           }
-          LOG.info("Query: {} ", query);
-          outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
-          LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
         }
+        query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
+        if (null != offset && null != limit) {
+          Integer offsetAux = (limit * offset) - limit;
+          if (offsetAux < 0) {
+            offsetAux = 0;
+          }
+          query.append(String.format(paginationPart, offsetAux, limit));
+        }
+        if (null != tableSchemaId) {
+          query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
+        } else {
+          query.append(String.format(queryFinalPart, datasetId));
+        }
+        LOG.info("Query: {} ", query);
+        outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+        LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
       }
+
     } catch (IOException e) {
-      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+      LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
   }
 
@@ -3772,4 +3808,5 @@ public class DatasetServiceImpl implements DatasetService {
 
     return query.toString();
   }
+
 }

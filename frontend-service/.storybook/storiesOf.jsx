@@ -1,4 +1,3 @@
-import React from 'react';
 import { storiesOf as storiesOfOriginal } from '@storybook/react';
 
 import { withKnobs } from '@storybook/addon-knobs';

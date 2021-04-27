@@ -1,5 +1,3 @@
-import React from 'react';
-
 import styles from './IconTooltip.module.css';
 
 import { Button } from 'ui/views/_components/Button';

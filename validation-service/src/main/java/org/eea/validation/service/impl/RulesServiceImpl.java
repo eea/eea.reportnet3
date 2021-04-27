@@ -345,10 +345,7 @@ public class RulesServiceImpl implements RulesService {
     if (null == ruleVO.getWhenCondition()) {
       rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
     } else {
-      validateRule(rule);
-      if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
-        throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
-      }
+      createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
 
@@ -396,7 +393,6 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(true);
       rule.setWhenCondition("isTableEmpty(this)");
-
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       if (rule.getSqlSentence().contains("!=")) {
         rule.setSqlSentence(rule.getSqlSentence().replace("!=", "<>"));
@@ -406,7 +402,17 @@ public class RulesServiceImpl implements RulesService {
       recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
+    createRule(datasetSchemaId, rule);
+  }
 
+  /**
+   * Creates the rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param rule the rule
+   * @throws EEAException the EEA exception
+   */
+  private void createRule(String datasetSchemaId, Rule rule) throws EEAException {
     validateRule(rule);
     if (!rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);

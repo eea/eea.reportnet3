@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .expression {
   --tableFieldWidth: 200px;
 
@@ -15,10 +17,10 @@
 
   .deleteButtonWrap {
     margin-bottom: 1rem;
-    
+
     .deleteButton {
       border: 1px solid var(--c-custom-gray) !important;
-      box-shadow: 0 0 0 0em var(--blue-120) !important;
+      @include shadow-0em;
       color: var(--errors) !important;
       margin: 0 !important;
     }

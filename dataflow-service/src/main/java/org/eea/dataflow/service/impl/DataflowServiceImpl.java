@@ -905,8 +905,15 @@ public class DataflowServiceImpl implements DataflowService {
     // We check that the field is not empty to avoid the call to rod due to maintain backward
     // compatibility concerns
     if (dataflow.getObligation() != null && dataflow.getObligation().getObligationId() != null) {
-      dataflow.setObligation(
-          obligationControllerZull.findObligationById(dataflow.getObligation().getObligationId()));
+      try {
+        dataflow.setObligation(obligationControllerZull
+            .findObligationById(dataflow.getObligation().getObligationId()));
+
+      } catch (FeignException e) {
+        LOG_ERROR.error("Error while getting obligation by id {}", e.getMessage(), e);
+        ObligationVO obligationVO = new ObligationVO();
+        dataflow.setObligation(obligationVO);
+      }
     }
   }
 
@@ -947,10 +954,6 @@ public class DataflowServiceImpl implements DataflowService {
     } else {
       dataflowVO.setReportingDatasets(new ArrayList<>());
     }
-    // Add the design datasets
-    dataflowVO.setDesignDatasets(
-        datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the data collections
     dataflowVO.setDataCollections(
@@ -965,10 +968,15 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
         .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
-    // Add the representatives
+    // Add the representatives and design datasets
     if (includeAllRepresentatives) {
       dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
+      dataflowVO
+          .setDesignDatasets(datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id));
     } else {
+      dataflowVO.setDesignDatasets(datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id)
+          .stream().filter(dataset -> datasetsIds.contains(dataset.getId()))
+          .collect(Collectors.toList()));
       String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
           .getDetails()).get(AuthenticationDetails.USER_ID);
       UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
@@ -1008,17 +1016,25 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private void getOpenedObligations(List<DataFlowVO> dataflowVOs) {
 
-    // Get all opened obligations from ROD
-    List<ObligationVO> obligations =
-        obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+    try {
+      // Get all opened obligations from ROD
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
 
-    Map<Integer, ObligationVO> obligationMap = obligations.stream()
-        .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
+      Map<Integer, ObligationVO> obligationMap = obligations.stream()
+          .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
 
-    for (DataFlowVO dataFlowVO : dataflowVOs) {
-      if (dataFlowVO.getObligation() != null
-          && dataFlowVO.getObligation().getObligationId() != null) {
-        dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+      for (DataFlowVO dataFlowVO : dataflowVOs) {
+        if (dataFlowVO.getObligation() != null
+            && dataFlowVO.getObligation().getObligationId() != null) {
+          dataFlowVO.setObligation(obligationMap.get(dataFlowVO.getObligation().getObligationId()));
+        }
+      }
+    } catch (FeignException e) {
+      LOG_ERROR.error("Error while getting all opened obligations {}", e.getMessage(), e);
+      for (DataFlowVO dataFlowVO : dataflowVOs) {
+        ObligationVO obligationVO = new ObligationVO();
+        dataFlowVO.setObligation(obligationVO);
       }
     }
   }

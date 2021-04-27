@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import cloneDeep from 'lodash/cloneDeep';
@@ -272,12 +272,6 @@ const DataViewer = withRouter(
       validationsTemplate,
       reporting
     );
-
-    // useEffect(() => {
-    //   let inmLevelErrorTypesWithCorrects = [...levelErrorTypesWithCorrects];
-    //   inmLevelErrorTypesWithCorrects = inmLevelErrorTypesWithCorrects.concat(levelErrorTypes);
-    //   setLevelErrorTypesWithCorrects(inmLevelErrorTypesWithCorrects);
-    // }, [levelErrorTypes]);
 
     useEffect(() => {
       if (isGroupedValidationSelected) {
@@ -969,7 +963,6 @@ const DataViewer = withRouter(
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
-          // disabled={isSaving}
           label={areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']}
           icon={'check'}
           onClick={
@@ -984,10 +977,6 @@ const DataViewer = withRouter(
             icon="cancel"
             label={resources.messages['cancel']}
             onClick={() => {
-              // dispatchRecords({
-              //   type: 'SET_NEW_RECORD',
-              //   payload: RecordUtils.createEmptyObject(colsSchema, undefined)
-              // });
               dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
             }}
           />
@@ -1141,7 +1130,6 @@ const DataViewer = withRouter(
         <ContextMenu model={menu} ref={contextMenuRef} />
         <div className={styles.Table}>
           <DataTable
-            // autoLayout={true}
             contextMenuSelection={records.selectedRecord}
             editable={hasWritePermissions && !tableReadOnly}
             id={tableId}

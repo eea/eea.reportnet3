@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component, Children } from 'react';
 import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
@@ -860,7 +860,6 @@ export class DataTable extends Component {
 
       if (this.draggedColumn !== dropHeader) {
         let targetLeft = dropHeaderOffset.left - containerOffset.left;
-        //let targetTop =  containerOffset.top - dropHeaderOffset.top;
         let columnCenter = dropHeaderOffset.left + dropHeader.offsetWidth / 2;
 
         this.reorderIndicatorUp.style.top = dropHeaderOffset.top - containerOffset.top - (this.iconHeight - 1) + 'px';
@@ -908,7 +907,7 @@ export class DataTable extends Component {
       }
 
       if (allowDrop) {
-        let columns = this.state.columnOrder ? this.getColumns() : React.Children.toArray(this.props.children);
+        let columns = this.state.columnOrder ? this.getColumns() : Children.toArray(this.props.children);
         ObjectUtils.reorderArray(columns, dragIndex, dropIndex);
         let columnOrder = [];
         for (let column of columns) {
@@ -955,7 +954,7 @@ export class DataTable extends Component {
   exportCSV() {
     let data = this.processData();
     let csv = '\ufeff';
-    let columns = React.Children.toArray(this.props.children);
+    let columns = Children.toArray(this.props.children);
 
     //headers
     for (let i = 0; i < columns.length; i++) {
@@ -1034,7 +1033,7 @@ export class DataTable extends Component {
   filterLocal(value, localFilters) {
     let filteredValue = [];
     let filters = localFilters || this.getFilters();
-    let columns = React.Children.toArray(this.props.children);
+    let columns = Children.toArray(this.props.children);
 
     for (let i = 0; i < value.length; i++) {
       let localMatch = true;
@@ -1268,7 +1267,7 @@ export class DataTable extends Component {
   }
 
   getColumns() {
-    let columns = React.Children.toArray(this.props.children);
+    let columns = Children.toArray(this.props.children);
 
     if (columns && columns.length) {
       if (this.props.reorderableColumns && this.state.columnOrder) {
@@ -1312,7 +1311,7 @@ export class DataTable extends Component {
   }
 
   resetColumnOrder() {
-    let columns = React.Children.toArray(this.props.children);
+    let columns = Children.toArray(this.props.children);
     let columnOrder = [];
 
     for (let column of columns) {

@@ -1,0 +1,96 @@
+@import 'mixins';
+
+/* forms */
+fieldset {
+  border: none;
+}
+.formField {
+  margin-bottom: 1rem;
+}
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--c-black-200);
+  padding: 0.5rem;
+  border-radius: 3px;
+}
+
+textarea {
+  font-family: 'Open Sans', sans-serif;
+  resize: none;
+}
+
+input,
+select,
+textarea {
+  font-family: 'Open Sans', sans-serif;
+}
+
+hr {
+  border: 0.5px solid var(--gray-50);
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  border-color: var(--c-corporate-blue);
+  @include shadow-1px(var(--c-corporate-blue));
+  outline: none;
+}
+.p-dropdown:not(.p-disabled).p-focus {
+  border-color: var(--c-corporate-blue);
+  box-shadow: 0px 0px 1px 1px var(--c-corporate-blue);
+  outline: none;
+}
+.formField.error input {
+  border-color: var(--errors);
+  @include shadow-1px(var(--errors));
+  outline: none;
+  overflow: hidden;
+}
+.formField.error select {
+  border-color: var(--errors);
+  @include shadow-1px(var(--errors));
+  outline: none;
+}
+.formField.error textarea {
+  border-color: var(--errors);
+  @include shadow-1px(var(--errors));
+  outline: none;
+}
+.formField.error .p-dropdown {
+  border-color: var(--errors);
+  box-shadow: none;
+  outline: none;
+  border-width: 2px;
+  &:hover {
+    border-color: var(--errors);
+  }
+}
+.formField.error .p-dropdown:not(.p-disabled).p-focus {
+  border-color: var(--errors);
+}
+.formField input {
+  background-color: var(--form-field-bg);
+  color: var(--form-field-color);
+}
+.formField textarea {
+  background-color: var(--form-field-bg);
+  color: var(--form-field-color);
+}
+form .error {
+  transition: color 0.2s;
+}
+
+.formField.error:hover {
+  color: var(--dialog-content-color);
+}
+
+.formField.error:hover input {
+  border-color: var(--errors);
+  @include shadow-1px(var(--errors));
+  outline: none;
+}

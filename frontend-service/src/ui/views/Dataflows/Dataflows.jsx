@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -45,7 +45,6 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const [tabMenuItems] = useState([
     {
-      // label: resources.messages['dataflowAcceptedPendingTab'],
       label: resources.messages['dataflowsListTab'],
       className: styles.flow_tab,
       tabKey: 'pending'
@@ -138,12 +137,15 @@ const Dataflows = withRouter(({ history, match }) => {
   };
 
   const onLoadPermissions = () => {
-    const isCustodian = userContext.hasPermission([config.permissions.DATA_CUSTODIAN, config.permissions.DATA_STEWARD]);
+    const isCustodian = userContext.hasPermission([
+      config.permissions.roles.CUSTODIAN.key,
+      config.permissions.roles.STEWARD.key
+    ]);
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
-      config.permissions.NATIONAL_COORDINATOR_PREFIX,
+      config.permissions.prefixes.NATIONAL_COORDINATOR,
       null,
-      [config.permissions.NATIONAL_COORDINATOR]
+      [config.permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
     dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian, isNationalCoordinator } });

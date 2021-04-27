@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { memo, useContext } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -13,7 +13,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
 
-const UserCard = React.memo(() => {
+const UserCard = memo(() => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   return (

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import logo from 'assets/images/logos/logo.png';

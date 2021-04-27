@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, Fragment } from 'react';
+import { useContext, useEffect, useState, Fragment } from 'react';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
@@ -38,6 +38,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
+
+  const baseRod3Url = 'https://rod.eionet.europa.eu';
 
   const [contentStyles, setContentStyles] = useState({});
   const [countryName, setCountryName] = useState('');
@@ -102,7 +104,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         header = resources.messages['delivered'];
         break;
       case 'releaseDate':
-        header = resources.messages['releasedDate'];
+        header = resources.messages['releaseDate'];
         break;
       case 'publicFilesNames':
         header = resources.messages['files'];
@@ -187,7 +189,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         id: dataflow.id,
         name: dataflow.name,
         obligation: dataflow.obligation,
-        legalInstrument: dataflow.obligation.legalInstruments,
+        legalInstrument: dataflow.obligation?.legalInstruments,
         deadline: dataflow.expirationDate,
         isReleased: isReleased,
         isReleasable: dataflow.isReleasable,
@@ -294,19 +296,23 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {renderRedirectText(
-        rowData.legalInstrument.alias,
-        `https://rod.eionet.europa.eu/instruments/${rowData.legalInstrument.id}`
-      )}
+      {rowData.legalInstrument?.id
+        ? renderRedirectText(
+            rowData.legalInstrument?.alias,
+            `${baseRod3Url}/instruments/${rowData.legalInstrument?.id}`
+          )
+        : rowData.legalInstrument?.alias}
     </div>
   );
 
   const renderObligationBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {renderRedirectText(
-        rowData.obligation.title,
-        `https://rod.eionet.europa.eu/obligations/${rowData.obligation.obligationId}`
-      )}
+      {rowData.obligation?.obligationId
+        ? renderRedirectText(
+            rowData.obligation?.title,
+            `${baseRod3Url}/obligations/${rowData.obligation?.obligationId}`
+          )
+        : rowData.obligation?.title}
     </div>
   );
 

@@ -62,6 +62,12 @@ export const apiDataset = {
     });
   },
 
+  downloadExportDatasetFile: async (datasetId, fileName) => {
+    return await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
+    });
+  },
+
   downloadExportFile: async (datasetId, fileName, providerId = null) => {
     const url = providerId
       ? getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName, providerId })
@@ -110,7 +116,7 @@ export const apiDataset = {
 
   exportDataById: async (datasetId, fileType) => {
     return await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetData, { datasetId: datasetId, fileType: fileType }),
+      url: getUrl(DatasetConfig.exportDatasetData, { datasetId, fileType }),
       headers: { 'Content-Type': 'application/octet-stream' }
     });
   },

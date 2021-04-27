@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import styles from './FieldRelations.module.scss';
 
@@ -21,7 +21,7 @@ export const FieldRelations = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
-    <React.Fragment>
+    <Fragment>
       <div className={styles.section}>
         <ul className={styles.list}>
           {creationFormState.candidateRule.relations.links &&
@@ -54,6 +54,6 @@ export const FieldRelations = ({
           />
         </div>
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 };

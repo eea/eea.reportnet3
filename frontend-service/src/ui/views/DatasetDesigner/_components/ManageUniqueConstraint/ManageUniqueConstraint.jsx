@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
@@ -123,10 +123,10 @@ export const ManageUniqueConstraint = ({
     }
 
     return (
-      <span>
+      <div className={styles.pkFieldWrapper}>
         {`${option.name}`}
         {isPk ? <span className={styles.pkField}>{'PK'}</span> : ''}
-      </span>
+      </div>
     );
   };
 

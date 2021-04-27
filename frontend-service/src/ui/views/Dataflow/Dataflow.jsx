@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
@@ -15,7 +15,6 @@ import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/requester/d
 import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
 import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { routes } from 'ui/routes';
-import DataflowConf from 'conf/dataflow.config.json';
 import { RepresentativeConfig } from 'conf/domain/model/Representative';
 
 import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
@@ -77,7 +76,6 @@ const Dataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     formHasRepresentatives: false,
     hasRepresentativesWithoutDatasets: false,
-    hasUserListRights: false,
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
@@ -96,6 +94,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isManageReportersDialogVisible: false,
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
+    isObserver: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
@@ -123,26 +122,28 @@ const Dataflow = withRouter(({ history, match }) => {
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
 
   const isLeadDesigner = dataflowState.userRoles.some(
-    userRole => userRole === config.permissions['DATA_STEWARD'] || userRole === config.permissions['DATA_CUSTODIAN']
+    userRole => userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
   );
 
-  const isDesign = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
+  const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
 
   const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
 
-  const isLeadReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
-    config.permissions.LEAD_REPORTER
-  ]);
+  const isLeadReporter = userContext.hasContextAccessPermission(
+    config.permissions.prefixes.DATAFLOW,
+    dataflowState.id,
+    [config.permissions.roles.LEAD_REPORTER.key]
+  );
 
-  const isReporter = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowState.id, [
-    config.permissions.REPORTER_READ,
-    config.permissions.REPORTER_WRITE
+  const isReporter = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowState.id, [
+    config.permissions.roles.REPORTER_READ.key,
+    config.permissions.roles.REPORTER_WRITE.key
   ]);
 
   const isNationalCoordinator = userContext.hasContextAccessPermission(
-    config.permissions.NATIONAL_COORDINATOR_PREFIX,
+    config.permissions.prefixes.NATIONAL_COORDINATOR,
     null,
-    [config.permissions.NATIONAL_COORDINATOR]
+    [config.permissions.roles.NATIONAL_COORDINATOR.key]
   );
 
   const country =
@@ -188,7 +189,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (dataflowState.isCustodian) {
-      if (dataflowState.status === DataflowConf.dataflowStatus['OPEN']) {
+      if (dataflowState.status === config.dataflowStatus.OPEN) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
         leftSideBarContext.addHelpSteps(DataflowRequesterHelpConfig, 'dataflowRequesterDesignHelp');
@@ -367,7 +368,7 @@ const Dataflow = withRouter(({ history, match }) => {
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
-        (dataflowState.isCustodian && !isNil(representativeId))
+        ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
     };
   };
 
@@ -513,38 +514,38 @@ const Dataflow = withRouter(({ history, match }) => {
     const currentDatasetId = getCurrentDatasetId();
 
     const hasWritePermissions = userContext.hasPermission(
-      [config.permissions.LEAD_REPORTER],
-      `${config.permissions.DATAFLOW}${dataflowId}`
-    );
-
-    const hasUserListRights = userContext.hasPermission(
-      [config.permissions.LEAD_REPORTER, config.permissions.DATA_STEWARD, config.permissions.DATA_CUSTODIAN],
-      `${config.permissions.DATAFLOW}${dataflowId}`
+      [config.permissions.roles.LEAD_REPORTER.key],
+      `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
     );
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
-      config.permissions.NATIONAL_COORDINATOR_PREFIX,
+      config.permissions.prefixes.NATIONAL_COORDINATOR,
       null,
-      [config.permissions.NATIONAL_COORDINATOR]
+      [config.permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
     const entity = isNil(representativeId)
-      ? `${config.permissions['DATAFLOW']}${dataflowId}`
-      : `${config.permissions['DATASET']}${currentDatasetId}`;
+      ? `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+      : `${config.permissions.prefixes.DATASET}${currentDatasetId}`;
 
     const userRoles = userContext.getUserRole(entity);
 
     const isCustodian = userRoles.some(
-      userRole => userRole === config.permissions['DATA_STEWARD'] || userRole === config.permissions['DATA_CUSTODIAN']
+      userRole =>
+        userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
     );
+
+    const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.OBSERVER.key
+    ]);
 
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
       payload: {
         hasWritePermissions,
         isCustodian,
+        isObserver,
         userRoles,
-        hasUserListRights,
         isNationalCoordinator
       }
     });
@@ -689,6 +690,12 @@ const Dataflow = withRouter(({ history, match }) => {
       setUpdatedDatasetSchema(updatedTitles);
     } catch (error) {
       console.error('error', error);
+      if (error?.response?.status === 400) {
+        notificationContext.add({
+          type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
+          content: { schemaName: value }
+        });
+      }
     }
   };
 

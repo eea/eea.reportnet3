@@ -1,0 +1,12 @@
+    - requestName: importFileData
+      endpoint: /dataset/${datasetId}/importFileData?replace=false
+      usersNumber: 1
+      numberExecutions: 1
+      useFeeder: true
+      method: post
+      puaseTime: 2
+      timeOut: 20000
+      uploadFileName: C:\\Users\\Mario Severa\\Desktop\\TC\\es3\t1.zip
+      uploadFileKey: file
+      headers:
+         Authorization: Bearer ${token}

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -6,7 +6,7 @@ import { config } from 'conf';
 
 import styles from './ExpressionSelector.module.scss';
 
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ExpressionsTab } from 'ui/views/DatasetDesigner/_components/Validations/_components/ExpressionsTab';
 import { FieldComparison } from 'ui/views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'ui/views/DatasetDesigner/_components/Validations/_components/IfThenClause';
@@ -92,6 +92,12 @@ export const ExpressionSelector = ({
     setExpressionTypeValue(expressionType);
   }, [expressionType]);
 
+  const getSelectorValue = () => {
+    const option = getOptions().filter(option => option.value === expressionTypeValue);
+    const [selectedOption] = option;
+
+    return selectedOption;
+  };
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldComparison') {
       return (
@@ -186,12 +192,13 @@ export const ExpressionSelector = ({
       {!validationContext.ruleEdit && (
         <div className={styles.section}>
           <Dropdown
-            onChange={e => onExpressionTypeToggle(e.value)}
+            appendTo={document.body}
+            onChange={e => onExpressionTypeToggle(e.value.value)}
             optionLabel="label"
             options={getOptions()}
             placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
             style={{ width: '12em' }}
-            value={expressionTypeValue}
+            value={getSelectorValue()}
           />
         </div>
       )}
