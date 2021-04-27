@@ -1,6 +1,6 @@
 import isNil from 'lodash/isNil';
 
-import styles from './ActionsColumn.module.css';
+import styles from './ActionsColumn.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 

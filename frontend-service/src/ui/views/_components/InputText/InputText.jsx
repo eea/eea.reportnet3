@@ -2,7 +2,7 @@ import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import './InputText.css';
+import './InputText.scss';
 
 import KeyFilter from 'ui/views/_functions/PrimeReact/KeyFilter';
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
