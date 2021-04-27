@@ -118,6 +118,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final String QUERY_ORDER = "ORDER BY orden";
 
+  /**
+   * The enum SortQueryType
+   */
   private enum SortQueryType {
     NUMBER, DATE, STRING
   }
