@@ -223,10 +223,14 @@ export const TableManagement = ({
   };
 
   const onEditFormInput = (property, value) => {
+    if (property === 'ListOfSinglePams' && isArray(value)) {
+      value = value.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })).join('; ');
+    }
+
     let updatedRecord = RecordUtils.changeRecordValue(
       { ...selectedRecord },
       getFieldSchemaColumnIdByHeader(tableSchemaColumns, property),
-      property === 'ListOfSinglePams' && isArray(value) ? value.join(', ') : value
+      value
     );
 
     tableManagementDispatch({ type: 'EDIT_SELECTED_RECORD', payload: updatedRecord });
