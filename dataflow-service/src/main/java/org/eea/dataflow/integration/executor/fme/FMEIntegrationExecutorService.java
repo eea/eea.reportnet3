@@ -282,8 +282,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         LOG.info("Upload {} to FME", fileName);
         fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
-        LOG.info("Executing FME Import");
 
+        LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
