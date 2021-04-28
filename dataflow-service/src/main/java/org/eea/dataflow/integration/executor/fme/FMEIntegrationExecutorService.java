@@ -9,6 +9,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.transaction.Transactional;
 import org.eea.dataflow.integration.executor.fme.domain.Directive;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
@@ -114,6 +115,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    * @return the execution result VO
    */
   @Override
+  @Transactional
   public ExecutionResultVO execute(IntegrationOperationTypeEnum integrationOperationTypeEnum,
       Object... executionParams) {
 
@@ -263,7 +265,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         } else {
           LOG.info("Directory created successful");
         }
-        LOG.info("Executing FME Export");
+        LOG.info("Executing FME Export: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
@@ -283,7 +285,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
 
-        LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
+        LOG.info("Executing FME Import: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
@@ -295,12 +297,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
-        LOG.info("Executing FME Import to other system");
+        LOG.info("Executing FME Import to other system: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case EXPORT_EU_DATASET:
-        fmeAsyncJob.setPublishedParameters(addExternalParametersToFMEExecution(integration));
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
+        fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
