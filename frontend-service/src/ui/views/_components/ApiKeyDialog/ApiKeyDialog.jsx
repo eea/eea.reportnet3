@@ -32,11 +32,22 @@ const ApiKeyDialog = ({
 
   const onCloseDialog = () => manageDialogs('isApiKeyDialogVisible', false);
 
+  const removeElementsByClass = className => {
+    const elements = document.getElementsByClassName(className);
+    while (elements.length > 0) {
+      elements[0].parentNode.removeChild(elements[0]);
+    }
+  };
+
   const onCopyToClipboard = () => {
     const textArea = textAreaRef;
     textArea.select();
     document.execCommand('copy');
     window.getSelection().removeAllRanges();
+
+    setTimeout(() => {
+      removeElementsByClass('p-tooltip');
+    }, 750);
   };
 
   const onGetApiKey = async () => {
