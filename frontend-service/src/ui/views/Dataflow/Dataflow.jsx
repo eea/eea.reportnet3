@@ -1083,7 +1083,10 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resources.messages['dataflowUsersList']}
             onHide={() => manageDialogs('isUserListVisible', false)}
             visible={dataflowState.isUserListVisible}>
-            <UserList dataflowId={dataflowId} representativeId={dataProviderId} />
+            <UserList
+              dataflowId={dataflowId}
+              representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
+            />
           </Dialog>
         )}
 
