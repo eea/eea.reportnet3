@@ -267,7 +267,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   const onSetIsValidationSelected = value => euDatasetDispatch({ type: 'IS_VALIDATION_SELECTED', payload: { value } });
 
   const renderLayout = children => (
-    <MainLayout>
+    <MainLayout history={history}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );

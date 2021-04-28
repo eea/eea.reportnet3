@@ -109,7 +109,7 @@ export const DataflowDashboards = withRouter(
       ));
 
     const layout = children => (
-      <MainLayout>
+      <MainLayout history={history}>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

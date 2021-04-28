@@ -211,7 +211,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   };
 
   const renderLayout = children => (
-    <MainLayout>
+    <MainLayout history={history}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );

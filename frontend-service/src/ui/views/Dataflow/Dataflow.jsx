@@ -876,7 +876,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const layout = children => (
-    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
+    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }} history={history}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );

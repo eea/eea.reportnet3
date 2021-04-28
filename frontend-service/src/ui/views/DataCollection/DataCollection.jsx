@@ -249,7 +249,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const layout = children => {
     return (
-      <MainLayout leftSideBarConfig={{ buttons: [] }}>
+      <MainLayout leftSideBarConfig={{ buttons: [] }} history={history}>
         <Growl ref={growlRef} />
         <div className="rep-container">{children}</div>
       </MainLayout>
