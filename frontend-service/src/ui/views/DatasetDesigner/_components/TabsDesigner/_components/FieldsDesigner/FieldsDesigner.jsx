@@ -235,9 +235,12 @@ export const FieldsDesigner = ({
     }
   };
 
-  const onShowDialogError = (message, title) => {
+  const onShowDialogError = (message, title, callback) => {
     setErrorMessageAndTitle({ title, message });
     setIsErrorDialogVisible(true);
+    if (!isNil(callback)) {
+      callback();
+    }
   };
 
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
