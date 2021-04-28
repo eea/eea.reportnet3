@@ -28,7 +28,10 @@ public class EmailServiceImpl implements EmailService {
   private String mailServerUsername;
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Send simple message.
@@ -55,8 +58,8 @@ public class EmailServiceImpl implements EmailService {
       } else {
         LOG.error("Mail Service is disabled in this server");
       }
-    } catch (MailException exception) {
-      exception.printStackTrace();
+    } catch (MailException e) {
+      LOG_ERROR.error("Error sending email. Message {}", e.getMessage(), e);
     }
   }
 
