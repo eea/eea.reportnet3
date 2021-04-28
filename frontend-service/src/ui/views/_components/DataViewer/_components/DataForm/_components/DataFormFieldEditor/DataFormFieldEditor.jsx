@@ -373,7 +373,7 @@ const DataFormFieldEditor = ({
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
       renderCalendar(field, fieldValue)
-    ) : type === 'DATETIME' ? (
+    ) : type === 'DATETIME' || type==='PHONE' ? (
       renderDatetimeCalendar(field, fieldValue)
     ) : type === 'POINT' ? (
       renderMapType(field, fieldValue)

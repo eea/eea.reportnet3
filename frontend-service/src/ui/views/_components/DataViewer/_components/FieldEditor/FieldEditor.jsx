@@ -575,6 +575,7 @@ const FieldEditor = ({
             yearRange="1900:2100"
           />
         );
+      case 'PHONE':
       case 'DATETIME':
         return (
           <Calendar
