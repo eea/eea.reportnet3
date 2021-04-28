@@ -302,7 +302,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case EXPORT_EU_DATASET:
-        fmeAsyncJob.setPublishedParameters(addExternalParametersToFMEExecution(integration));
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
+        fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
