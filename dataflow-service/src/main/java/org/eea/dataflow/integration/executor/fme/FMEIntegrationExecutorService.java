@@ -336,11 +336,11 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     List<PublishedParameter> parameters = new ArrayList<>();
     Integration integrationAux = integrationRepository.findById(integration.getId()).orElse(null);
     if (null != integrationAux && null != integrationAux.getExternalParameters()) {
-      integration.getExternalParameters().forEach((key, value) -> {
-        if (!key.equals(IntegrationParams.FILE_IS)) {
+      integrationAux.getExternalParameters().stream().forEach(external -> {
+        if (!external.getParameter().equals(IntegrationParams.FILE_IS)) {
           PublishedParameter parameter = new PublishedParameter();
-          parameter.setName(key);
-          parameter.setValue(value);
+          parameter.setName(external.getParameter());
+          parameter.setValue(external.getValue());
           parameters.add(parameter);
         }
       });
