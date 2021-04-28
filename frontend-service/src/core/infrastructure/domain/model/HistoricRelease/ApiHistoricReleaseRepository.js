@@ -28,7 +28,7 @@ const parseReleases = historicReleasesDTO => {
           id: historicReleaseDTO.id,
           isDataCollectionReleased: historicReleaseDTO.dcrelease,
           isEUReleased: historicReleaseDTO.eurelease,
-          releasedDate: historicReleaseDTO.dateReleased
+          releaseDate: historicReleaseDTO.dateReleased
         })
     );
   }
