@@ -71,6 +71,14 @@ export const UserList = ({ dataflowId, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
+  const filterOptionsDataflowIdRepresentativeId = [
+    {
+      type: 'multiselect',
+      properties: [{ name: 'datasetName', showInput: true, label: resources.messages['countries'] }, { name: 'role' }]
+    },
+    { type: 'input', properties: [{ name: 'email' }] }
+  ];
+
   const filterOptionsNoRepresentative = [
     { type: 'input', properties: [{ name: 'dataflowName' }] },
     { type: 'multiselect', properties: [{ name: 'role' }] },
@@ -82,6 +90,37 @@ export const UserList = ({ dataflowId, representativeId }) => {
     { type: 'input', properties: [{ name: 'email' }] }
   ];
 
+  const renderFilters = () => {
+    if (isNil(representativeId) && isNil(dataflowId)) {
+      return (
+        <Filters
+          data={userListData}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
+          options={filterOptionsNoRepresentative}
+        />
+      );
+    } else if (isNil(representativeId) && !isNil(dataflowId)) {
+      return (
+        <Filters
+          data={userListData}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
+          options={filterOptionsDataflowIdRepresentativeId}
+        />
+      );
+    } else {
+      return (
+        <Filters
+          data={userListData}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
+          options={filterOptionsHasRepresentativeId}
+        />
+      );
+    }
+  };
+
   return (
     <div className={styles.container}>
       {isLoading ? (
@@ -90,22 +129,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
         <div className={styles.noUsers}>{resources.messages['noUsers']}</div>
       ) : (
         <div className={styles.users}>
-          {isNil(representativeId) ? (
-            <Filters
-              data={userListData}
-              getFilteredData={onLoadFilteredData}
-              getFilteredSearched={getFilteredState}
-              options={filterOptionsNoRepresentative}
-            />
-          ) : (
-            <Filters
-              data={userListData}
-              getFilteredData={onLoadFilteredData}
-              getFilteredSearched={getFilteredState}
-              options={filterOptionsHasRepresentativeId}
-            />
-          )}
-
+          {renderFilters()}
           {!isEmpty(filteredData) ? (
             <DataTable
               value={filteredData}
