@@ -34,13 +34,14 @@ const ValidationExpression = ({
   } = config;
   const inputStringMatchRef = useRef(null);
   const resourcesContext = useContext(ResourcesContext);
+
   const [clickedFields, setClickedFields] = useState([]);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
+  const [previousValue, setPreviousValue] = useState();
   const [valueInputProps, setValueInputProps] = useState();
   const [valueKeyFilter, setValueKeyFilter] = useState();
-  const [previousValue, setPreviousValue] = useState();
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
