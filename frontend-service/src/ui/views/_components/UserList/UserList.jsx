@@ -71,7 +71,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
-  const filterOptionsDataflowIdRepresentativeId = [
+  const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'multiselect',
       properties: [{ name: 'datasetName', showInput: true, label: resources.messages['countries'] }, { name: 'role' }]
@@ -90,6 +90,9 @@ export const UserList = ({ dataflowId, representativeId }) => {
     { type: 'input', properties: [{ name: 'email' }] }
   ];
 
+  console.log('representativeId', representativeId);
+  console.log('dataflowId', dataflowId);
+
   const renderFilters = () => {
     if (isNil(representativeId) && isNil(dataflowId)) {
       return (
@@ -106,7 +109,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
           data={userListData}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredState}
-          options={filterOptionsDataflowIdRepresentativeId}
+          options={filterOptionsWithDataflowIdRepresentativeId}
         />
       );
     } else {

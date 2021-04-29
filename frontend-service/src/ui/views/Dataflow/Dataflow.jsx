@@ -279,9 +279,19 @@ const Dataflow = withRouter(({ history, match }) => {
         className: 'dataflow-properties-help-step',
         icon: 'users',
         isVisible: buttonsVisibility.usersListBtn,
-        label: 'dataflowUsersList',
+        label:
+          ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+            (isNil(representativeId) && dataflowState.isObserver)) &&
+          dataflowState.status === 'DRAFT'
+            ? 'dataflowUsersByCountryList'
+            : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
-        title: 'dataflowUsersList'
+        title:
+          ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+            (isNil(representativeId) && dataflowState.isObserver)) &&
+          dataflowState.status === 'DRAFT'
+            ? 'dataflowUsersByCountryList'
+            : 'dataflowUsersList'
       };
 
       const allButtons = [
@@ -1080,7 +1090,13 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowState.isUserListVisible && (
           <Dialog
             footer={renderDataflowUsersListFooter}
-            header={resources.messages['dataflowUsersList']}
+            header={
+              ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+                (isNil(representativeId) && dataflowState.isObserver)) &&
+              dataflowState.status === 'DRAFT'
+                ? resources.messages['dataflowUsersByCountryList']
+                : resources.messages['dataflowUsersList']
+            }
             onHide={() => manageDialogs('isUserListVisible', false)}
             visible={dataflowState.isUserListVisible}>
             <UserList
