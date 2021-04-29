@@ -61,7 +61,7 @@ const ValidationExpression = ({
   useEffect(() => {
     const options = [];
     if (!isNil(fieldType)) {
-      operatorByType[fieldType].forEach(key => {
+      operatorByType[fieldType]?.forEach(key => {
         options.push(operatorTypesConf[key].option);
       });
     } else {
