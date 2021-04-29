@@ -1,5 +1,4 @@
 (Pablo)
-src\App.js
 src\ui\views\DataCollection\DataCollection.jsx
 src\ui\views\DataflowDashboards\DataflowDashboards.jsx
 src\ui\views\DataflowDashboards\_components\DatasetValidationDashboard\DatasetValidationDashboard.jsx
