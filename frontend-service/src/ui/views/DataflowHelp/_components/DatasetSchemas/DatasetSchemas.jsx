@@ -308,20 +308,18 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       <div className="dataflowHelp-datasetSchema-help-step">
-        {datasetsSchemas.map((designDataset, i) => {
-          return (
-            <DatasetSchema
-              designDataset={designDataset}
-              extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
-              index={i}
-              isCustodian={isCustodian}
-              key={i}
-              onGetReferencedFieldName={onGetReferencedFieldName}
-              uniqueList={filterData(designDataset, uniqueList)}
-              validationList={filterData(designDataset, validationList)}
-            />
-          );
-        })}
+        {datasetsSchemas.map((designDataset, i) => (
+          <DatasetSchema
+            designDataset={designDataset}
+            extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
+            index={i}
+            isCustodian={isCustodian}
+            key={designDataset.datasetSchemaId}
+            onGetReferencedFieldName={onGetReferencedFieldName}
+            uniqueList={filterData(designDataset, uniqueList)}
+            validationList={filterData(designDataset, validationList)}
+          />
+        ))}
       </div>
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
