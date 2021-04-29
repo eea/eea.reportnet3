@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -376,13 +376,13 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
 
       await ValidationService.createTableRule(datasetId, candidateRule);
-      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
       console.error('onCreateValidationRule error', error);
     } finally {
+      onHide();
       setIsSubmitDisabled(false);
     }
   };
@@ -403,13 +403,13 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
       }
-      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });
       console.error('onUpdateValidationRule error', error);
     } finally {
+      onHide();
       setIsSubmitDisabled(false);
     }
   };

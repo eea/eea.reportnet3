@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import { Children, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
@@ -251,7 +251,7 @@ const TabView = withRouter(
     };
 
     const renderTabHeaders = () => {
-      return React.Children.map(children, (tab, index) => {
+      return Children.map(children, (tab, index) => {
         return renderTabHeader(tab, index);
       });
     };
@@ -278,9 +278,6 @@ const TabView = withRouter(
             className={styles.scrollTab}
             ref={divTabsRef}
             style={{ marginBottom: totalTabs === 1 ? '-5px' : '-1px' }}>
-            {/* <div className={styles.iconsWrapper}> */}
-
-            {/* </div> */}
             <ul className="p-tabview-nav p-reset" role="tablist" style={{ display: 'inline-flex' }} ref={ulTabsRef}>
               {headers}
             </ul>
@@ -304,7 +301,7 @@ const TabView = withRouter(
     };
 
     const renderContent = () => {
-      const contents = React.Children.map(children, (tab, index) => {
+      const contents = Children.map(children, (tab, index) => {
         if (!renderActiveOnly || isSelected(index)) {
           return createContent(tab, index);
         }

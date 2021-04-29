@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ValidationExpression.module.scss';
@@ -9,7 +10,7 @@ import { config } from 'conf/';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'ui/views/_components/InputText';
 
@@ -33,10 +34,12 @@ const ValidationExpression = ({
   } = config;
   const inputStringMatchRef = useRef(null);
   const resourcesContext = useContext(ResourcesContext);
+
   const [clickedFields, setClickedFields] = useState([]);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
+  const [previousValue, setPreviousValue] = useState();
   const [valueInputProps, setValueInputProps] = useState();
   const [valueKeyFilter, setValueKeyFilter] = useState();
 
@@ -58,7 +61,7 @@ const ValidationExpression = ({
   useEffect(() => {
     const options = [];
     if (!isNil(fieldType)) {
-      operatorByType[fieldType].forEach(key => {
+      operatorByType[fieldType]?.forEach(key => {
         options.push(operatorTypesConf[key].option);
       });
     } else {
@@ -124,6 +127,13 @@ const ValidationExpression = ({
     }
   }, [clickedFields, showRequiredFields]);
 
+  useEffect(() => {
+    setPreviousValue(expressionValues.expressionValue);
+    return () => {
+      setPreviousValue('');
+    };
+  }, []);
+
   const printRequiredFieldError = field => {
     let conditions = false;
     if (field === 'union') {
@@ -183,6 +193,14 @@ const ValidationExpression = ({
     ) {
       const number = Number(fieldValue);
       if (!number) onUpdateExpressionField('expressionValue', '');
+    }
+
+    if ((expressionValues.operatorType === 'LEN' || expressionValues.operatorType === 'number') && field === 'number') {
+      if (!Number(fieldValue) && Number(fieldValue) !== 0) {
+        onUpdateExpressionField('expressionValue', previousValue);
+      } else {
+        setPreviousValue(fieldValue);
+      }
     }
   };
 
@@ -274,7 +292,6 @@ const ValidationExpression = ({
           />
         );
       }
-
       return (
         <InputNumber
           disabled={isDisabled}
@@ -321,6 +338,19 @@ const ValidationExpression = ({
         />
       );
     }
+    if (operatorType === 'LEN') {
+      return (
+        <InputText
+          keyfilter={valueKeyFilter}
+          disabled={isDisabled}
+          format={false}
+          onBlur={e => checkField('number', e.target.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          placeholder={resourcesContext.messages.value}
+          value={expressionValues.expressionValue}
+        />
+      );
+    }
     return (
       <InputText
         keyfilter={valueKeyFilter}
@@ -347,37 +377,41 @@ const ValidationExpression = ({
         onBlur={() => onAddToClickedFields('union')}
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
         <Dropdown
-          // appendTo={document.body}
+          appendTo={document.body}
           disabled={isDisabled || position === 0}
-          onChange={e => onUpdateExpressionField('union', e.target.value)}
+          onChange={e => onUpdateExpressionField('union', e.target.value.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
           placeholder={resourcesContext.messages.union}
-          value={expressionValues.union}
+          value={first(config.validations.logicalOperators.filter(option => option.value === expressionValues.union))}
         />
       </span>
       <span
         onBlur={() => onAddToClickedFields('operatorType')}
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
         <Dropdown
+          appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorType', e.target.value)}
+          onChange={e => {
+            onUpdateExpressionField('operatorType', e.target.value.value);
+          }}
           optionLabel="label"
           options={operatorTypes}
           placeholder={resourcesContext.messages.operatorType}
-          value={expressionValues.operatorType}
+          value={first(operatorTypes.filter(option => option.value === expressionValues.operatorType))}
         />
       </span>
       <span
         onBlur={() => onAddToClickedFields('operatorValue')}
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
         <Dropdown
+          appendTo={document.body}
           disabled={isDisabled}
-          onChange={e => onUpdateExpressionField('operatorValue', e.target.value)}
+          onChange={e => onUpdateExpressionField('operatorValue', e.target.value.value)}
           optionLabel="label"
           options={operatorValues}
           placeholder={resourcesContext.messages.operator}
-          value={expressionValues.operatorValue}
+          value={first(operatorValues.filter(option => option.value === expressionValues.operatorValue))}
         />
       </span>
       <span

@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from 'react';
+import { Fragment, useReducer, useRef } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';
@@ -100,6 +100,44 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
     }
   };
 
+  const referencedFieldTemplate = rowData => {
+    if (!isNil(rowData?.referencedField) && rowData?.referencedField !== '') {
+      return (
+        <div>
+          <h5>{`${rowData.referencedField?.tableName} - ${rowData.referencedField?.fieldName}`}</h5>
+          <div>
+            <span className={styles.propertyValueTableName}>{`Linked label: `}</span>
+            <span>{`${rowData.referencedField?.linkedTableLabel ?? '-'}`}</span>
+          </div>
+          <div>
+            <span className={styles.propertyValueTableName}>{`Linked conditional: `}</span>
+            <span>{`${rowData.referencedField?.linkedTableConditional ?? '-'}`}</span>
+          </div>
+          <div>
+            <span className={styles.propertyValueTableName}>{`Master conditional: `}</span>
+            <span>{`${rowData.referencedField?.masterTableConditional ?? '-'}`}</span>
+          </div>
+          <div>
+            <span className={styles.propertyValueTableName}>{`Supports multiple values?`}</span>
+            <FontAwesomeIcon
+              icon={AwesomeIcons(rowData.referencedField?.pkHasMultipleValues ? 'check' : 'cross')}
+              style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
+            />
+          </div>
+          <div>
+            <span className={styles.propertyValueTableName}>{`All PK values must be used on link?`}</span>
+            <FontAwesomeIcon
+              icon={AwesomeIcons(rowData.referencedField?.pkMustBeUsed ? 'check' : 'cross')}
+              style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
+            />
+          </div>
+        </div>
+      );
+    } else {
+      return '';
+    }
+  };
+
   const parseData = fieldsDTO => {
     fieldsDTO.forEach(fieldDTO => {
       for (let [key, value] of Object.entries(fieldDTO)) {
@@ -136,6 +174,8 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             ? rowData => itemTemplate(rowData, 'readOnly')
             : field === 'levelError'
             ? levelErrorTemplate
+            : field === 'referencedField'
+            ? referencedFieldTemplate
             : null
         }
         key={field}
@@ -159,7 +199,13 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
         }
         sortable={true}
         style={{
-          width: TextUtils.areEquals(field, 'DESCRIPTION') ? '60%' : '20%',
+          width: TextUtils.areEquals(field, 'DESCRIPTION')
+            ? '55%'
+            : TextUtils.areEquals(field, 'TYPE')
+            ? '25%'
+            : TextUtils.areEquals(field, 'REFERENCEDFIELD')
+            ? '30%'
+            : '20%',
           display:
             !isUndefined(columnOptions[propertyName]) &&
             !isUndefined(columnOptions[propertyName]['invisible']) &&
@@ -177,7 +223,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       {!isUndefined(property) && !isNull(property) ? (
         <div
           style={{
@@ -186,7 +232,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             marginLeft: '10px'
           }}>
           {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
-            <React.Fragment>
+            <Fragment>
               <span className={styles.propertyTitle}>
                 {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
               </span>
@@ -200,7 +246,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
               ) : (
                 '-'
               )}
-            </React.Fragment>
+            </Fragment>
           ) : (
             <TreeViewExpandableItem
               items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}
@@ -233,7 +279,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
           )}
         </div>
       ) : null}
-    </React.Fragment>
+    </Fragment>
   );
 };
 
@@ -283,11 +329,11 @@ const itemTemplate = (rowData, key) => {
 
 const typeTemplate = rowData => {
   return (
-    <div>
+    <div style={{ display: 'flex', alignItems: 'baseline' }}>
       <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>
       <FontAwesomeIcon
         icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)}
-        style={{ float: 'right', color: 'var(--treeview-table-icon-color)' }}
+        style={{ marginLeft: 'auto', color: 'var(--treeview-table-icon-color)' }}
       />
     </div>
   );

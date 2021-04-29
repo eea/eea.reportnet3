@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.dataflow.integration.executor.fme;
 
 import java.util.ArrayList;
@@ -6,6 +9,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.transaction.Transactional;
 import org.eea.dataflow.integration.executor.fme.domain.Directive;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
@@ -13,7 +17,9 @@ import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.integration.executor.service.AbstractIntegrationExecutorService;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -86,6 +92,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The integration repository. */
+  @Autowired
+  private IntegrationRepository integrationRepository;
+
   /**
    * Gets the executor type.
    *
@@ -105,6 +115,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    * @return the execution result VO
    */
   @Override
+  @Transactional
   public ExecutionResultVO execute(IntegrationOperationTypeEnum integrationOperationTypeEnum,
       Object... executionParams) {
 
@@ -242,6 +253,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter(IntegrationParams.FOLDER,
             integrationOperationParams.get(IntegrationParams.DATASET_ID) + "/"
                 + paramDataProvider));
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
         LOG.info("Creating Export FS in FME");
@@ -253,7 +265,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         } else {
           LOG.info("Directory created successful");
         }
-        LOG.info("Executing FME Export");
+        LOG.info("Executing FME Export: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
@@ -263,6 +275,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters
             .add(saveParameter(IntegrationParams.FOLDER, datasetId + "/" + paramDataProvider));
 
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
         byte[] decodedBytes = Base64.getDecoder()
@@ -271,7 +284,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         LOG.info("Upload {} to FME", fileName);
         fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
-        LOG.info("Executing FME Import");
+
+        LOG.info("Executing FME Import: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
@@ -281,16 +295,14 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             : "XX";
         parameters.add(saveParameter(IntegrationParams.COUNTRY_CODE, countryCode));
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
-        LOG.info("Executing FME Import to other system");
+        LOG.info("Executing FME Import to other system: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
             fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
         break;
       case EXPORT_EU_DATASET:
-        parameters.add(saveParameter(IntegrationParams.DATABASE_CONNECTION_PUBLIC,
-            integration.getExternalParameters().get(IntegrationParams.DATABASE_CONNECTION_PUBLIC)));
-        parameters.add(saveParameter(IntegrationParams.MODE, ""));
-
+        parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
@@ -315,6 +327,28 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     }
     fmeJobRepository.save(fmeJob);
     return executionResultVO;
+  }
+
+  /**
+   * Adds the external parameters to FME execution.
+   *
+   * @param integration the integration
+   * @return the list
+   */
+  private List<PublishedParameter> addExternalParametersToFMEExecution(IntegrationVO integration) {
+    List<PublishedParameter> parameters = new ArrayList<>();
+    Integration integrationAux = integrationRepository.findById(integration.getId()).orElse(null);
+    if (null != integrationAux && null != integrationAux.getExternalParameters()) {
+      integrationAux.getExternalParameters().stream().forEach(external -> {
+        if (!external.getParameter().equals(IntegrationParams.FILE_IS)) {
+          PublishedParameter parameter = new PublishedParameter();
+          parameter.setName(external.getParameter());
+          parameter.setValue(external.getValue());
+          parameters.add(parameter);
+        }
+      });
+    }
+    return parameters;
   }
 
   /**

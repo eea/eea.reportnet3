@@ -71,8 +71,8 @@ export const useBreadCrumbs = ({
 
   const getHomeCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.DATAFLOWS)),
-      href: getUrl(routes.DATAFLOWS),
+      command: () => history.push(getUrl(routes.ACCESS_POINT)),
+      href: getUrl(routes.ACCESS_POINT),
       label: resources.messages['homeBreadcrumb']
     };
   };

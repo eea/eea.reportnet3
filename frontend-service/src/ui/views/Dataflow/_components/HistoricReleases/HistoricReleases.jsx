@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -75,18 +75,18 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
         historicReleases = uniqBy(
           data.map(historic => {
             return {
-              releasedDate: historic.releasedDate,
+              releaseDate: historic.releaseDate,
               countryCode: historic.countryCode
             };
           }),
-          'releasedDate'
+          'releaseDate'
         );
       } else {
         const { data } = await HistoricReleaseService.allHistoricReleases(datasetId);
         historicReleases = data;
       }
 
-      historicReleases.sort((a, b) => b.releasedDate - a.releasedDate);
+      historicReleases.sort((a, b) => b.releaseDate - a.releaseDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
         payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
@@ -99,10 +99,10 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     }
   };
 
-  const releasedDateTemplate = rowData => {
+  const releaseDateTemplate = rowData => {
     return (
       <div className={styles.checkedValueColumn}>
-        {dayjs(rowData.releasedDate).format(
+        {dayjs(rowData.releaseDate).format(
           `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
             userContext.userProps.amPm24h ? '' : ' A'
           }`
@@ -130,13 +130,13 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
       .filter(
         key =>
           key.includes('countryCode') ||
-          key.includes('releasedDate') ||
+          key.includes('releaseDate') ||
           key.includes('isDataCollectionReleased') ||
           key.includes('isEUReleased')
       )
       .map(field => {
         let template = null;
-        if (field === 'releasedDate') template = releasedDateTemplate;
+        if (field === 'releaseDate') template = releaseDateTemplate;
         if (field === 'isEUReleased') template = isEUReleasedTemplate;
         if (field === 'isDataCollectionReleased') template = isDataCollectionReleasedTemplate;
 
@@ -156,10 +156,10 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
 
   const renderEUDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('countryCode') || key.includes('releasedDate'))
+      .filter(key => key.includes('countryCode') || key.includes('releaseDate'))
       .map(field => {
         let template = null;
-        if (field === 'releasedDate') template = releasedDateTemplate;
+        if (field === 'releaseDate') template = releaseDateTemplate;
         return (
           <Column
             body={template}
@@ -174,16 +174,25 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     return fieldColumns;
   };
 
-  const filterOptionsDataCollection = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
+  const filterOptionsDataCollection = [
+    { type: 'multiselect', properties: [{ name: 'countryCode' }] },
+    {
+      type: 'checkbox',
+      properties: [
+        { name: 'isDataCollectionReleased', label: resources.messages['onlyReleasedDataCollectionCheckboxLabel'] },
+        { name: 'isEUReleased', label: resources.messages['onlyReleasedEuDatasetCheckboxLabel'] }
+      ]
+    }
+  ];
 
   const filterOptionsEUDataset = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
 
   const renderReportingDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('releasedDate'))
+      .filter(key => key.includes('releaseDate'))
       .map(field => {
         let template = null;
-        if (field === 'releasedDate') template = releasedDateTemplate;
+        if (field === 'releaseDate') template = releaseDateTemplate;
         return (
           <Column
             body={template}
@@ -216,7 +225,6 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
     <div className={styles.historicReleases}>
       {historicReleasesView === 'dataCollection' && (
         <Filters
-          checkboxOptions={['isDataCollectionReleased', 'isEUReleased']}
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}

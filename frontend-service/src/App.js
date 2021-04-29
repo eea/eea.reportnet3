@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import styles from './App.module.css';
@@ -23,6 +22,7 @@ import { PublicCountryInformation } from 'ui/views/PublicCountryInformation';
 import { PublicDataflowInformation } from 'ui/views/PublicDataflowInformation';
 import { PublicDataflows } from 'ui/views/PublicDataflows';
 import { PublicFrontpage } from 'ui/views/PublicFrontpage';
+import { PublicRoute } from 'ui/views/_components/PublicRoute';
 import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
 import { ScrollToTop } from 'ui/views/_components/ScrollToTop';
 import { Settings } from 'ui/views/Settings';
@@ -53,17 +53,29 @@ const App = () => {
                         <Router>
                           <ScrollToTop>
                             <Switch>
-                              <Route exact path={routes.PUBLIC_COUNTRIES} component={PublicCountries} />
-                              <Route
+                              <PublicRoute exact path={routes.PUBLIC_COUNTRIES} component={PublicCountries} />
+                              <PublicRoute
+                                component={PublicCountryInformation}
                                 exact
                                 path={routes.PUBLIC_COUNTRY_INFORMATION}
-                                component={PublicCountryInformation}
                               />
-                              <Route exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
-                              <Route
+                              <PublicRoute
+                                component={PublicCountryInformation}
+                                exact
+                                parentPath={routes.PUBLIC_COUNTRY_INFORMATION}
+                                path={routes.PUBLIC_COUNTRY_INFORMATION_ID}
+                              />
+                              <PublicRoute exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
+                              <PublicRoute
+                                component={PublicDataflowInformation}
                                 exact
                                 path={routes.PUBLIC_DATAFLOW_INFORMATION}
+                              />
+                              <PublicRoute
                                 component={PublicDataflowInformation}
+                                exact
+                                parentPath={routes.PUBLIC_DATAFLOW_INFORMATION}
+                                path={routes.PUBLIC_DATAFLOW_INFORMATION_ID}
                               />
                               <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
                               <Route exact path={routes.LOGIN} component={ReportnetLogin} />
@@ -74,6 +86,12 @@ const App = () => {
                               <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
                               <PrivateRoute exact path={routes.DATAFLOW_REPRESENTATIVE} component={Dataflow} />
                               <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
+                              <PrivateRoute
+                                component={Dataflow}
+                                exact
+                                parentPath={routes.DATAFLOW}
+                                path={routes.DATAFLOWS_ID}
+                              />
                               <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
                               <PrivateRoute exact path={routes.DATAFLOWS_ERROR} component={Dataflows} />
                               <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />

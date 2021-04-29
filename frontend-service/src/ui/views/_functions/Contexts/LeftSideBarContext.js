@@ -1,5 +1,5 @@
-import React from 'react';
+import { createContext } from 'react';
 
-export const LeftSideBarContext = React.createContext({
+export const LeftSideBarContext = createContext({
   models: []
 });

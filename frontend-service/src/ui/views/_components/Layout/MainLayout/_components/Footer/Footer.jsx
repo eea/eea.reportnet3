@@ -1,4 +1,4 @@
-import React, { useContext, Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import styles from './Footer.module.scss';
@@ -26,12 +26,12 @@ export const Footer = withRouter(({ history, leftMargin }) => {
           </div>
           <div className={styles.reportnetLogo}>
             <a
-              href={getUrl(routes.DATAFLOWS)}
+              href={getUrl(routes.ACCESS_POINT)}
               className={styles.title}
               title={resources.messages['titleHeader']}
               onClick={e => {
                 e.preventDefault();
-                history.push(getUrl(routes.DATAFLOWS));
+                history.push(getUrl(routes.ACCESS_POINT));
               }}>
               <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
               <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>

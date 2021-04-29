@@ -1,14 +1,10 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import './interceptors.js';
-
 import 'primereact/resources/primereact.min.css';
-import './styles.css';
 import 'primeicons/primeicons.css';
-import './index.css';
-import './reportnet.css';
+import './index.scss';
 
 var { registerObserver } = require('react-perf-devtool');
 registerObserver();

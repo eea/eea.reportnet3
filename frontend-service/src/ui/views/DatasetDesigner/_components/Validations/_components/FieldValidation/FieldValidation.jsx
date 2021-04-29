@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -279,13 +279,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       await ValidationService.create(datasetId, candidateRule);
-      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
       console.error('onCreateValidationRule error', error);
     } finally {
+      onHide();
       setIsSubmitDisabled(false);
     }
   };
@@ -298,13 +298,12 @@ const FieldValidation = ({ datasetId, tabs }) => {
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
       }
-      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });
-      console.error('onUpdateValidationRule error', error);
     } finally {
+      onHide();
       setIsSubmitDisabled(false);
     }
   };
@@ -410,9 +409,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
   };
   const onDeleteFromClickedFields = field => {
     const cClickedFields = [...clickedFields];
-    if (cClickedFields.includes(field)) {
-      cClickedFields.splice(cClickedFields.indexOf(field), 1);
+    if (field === 'table' || field === 'field' || field === 'errorLevel') {
       setClickedFields(cClickedFields);
+    } else {
+      if (cClickedFields.includes(field)) {
+        cClickedFields.splice(cClickedFields.indexOf(field), 1);
+        setClickedFields(cClickedFields);
+      }
     }
   };
 

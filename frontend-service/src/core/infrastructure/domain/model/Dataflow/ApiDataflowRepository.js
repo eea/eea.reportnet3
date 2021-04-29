@@ -8,7 +8,6 @@ import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { apiDataflow } from 'core/infrastructure/api/domain/model/Dataflow';
 
@@ -26,6 +25,11 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
 import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
+const getUserRoleLabel = role => {
+  const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
+  return userRole?.label;
+};
+
 const getUserRoles = userRoles => {
   const userRoleToDataflow = [];
   userRoles.filter(userRol => !userRol.duplicatedRoles && userRoleToDataflow.push(userRol));
@@ -40,24 +44,26 @@ const getUserRoles = userRoles => {
     }
   }
 
-  const dataflowPermissionsConfig = {
-    1: config.dataflowPermissions.DATA_CUSTODIAN,
-    2: config.dataflowPermissions.EDITOR_WRITE,
-    3: config.dataflowPermissions.EDITOR_READ,
-    4: config.dataflowPermissions.LEAD_REPORTER,
-    5: config.dataflowPermissions.NATIONAL_COORDINATOR,
-    6: config.dataflowPermissions.REPORTER_WRITE,
-    7: config.dataflowPermissions.REPORTER_READ
+  const dataflowPermisssionsOrderConfig = {
+    1: config.permissions.roles.CUSTODIAN,
+    2: config.permissions.roles.STEWARD,
+    3: config.permissions.roles.OBSERVER,
+    4: config.permissions.roles.EDITOR_WRITE,
+    5: config.permissions.roles.EDITOR_READ,
+    6: config.permissions.roles.LEAD_REPORTER,
+    7: config.permissions.roles.NATIONAL_COORDINATOR,
+    8: config.permissions.roles.REPORTER_WRITE,
+    9: config.permissions.roles.REPORTER_READ
   };
 
-  const dataflowPermissions = Object.values(dataflowPermissionsConfig);
+  const dataflowPermissions = Object.values(dataflowPermisssionsOrderConfig);
 
   dataflowDuplicatedRoles.forEach(dataflowRoles => {
     let rol = null;
 
     dataflowPermissions.forEach(permission => {
       dataflowRoles.forEach(dataflowRol => {
-        if (isNil(rol) && dataflowRol.userRole === permission) {
+        if (isNil(rol) && dataflowRol.userRole.key === permission) {
           rol = dataflowRol;
         }
       });
@@ -75,16 +81,17 @@ const all = async userData => {
   const userRoles = [];
 
   if (userData) {
-    const dataflowsRoles = userData.filter(role => role.includes(config.permissions['DATAFLOW']));
+    const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: config.permissions[role] });
+
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: getUserRoleLabel(role) });
     });
 
     for (let index = 0; index < dataflowsDTO.data.length; index++) {
       const dataflow = dataflowsDTO.data[index];
       const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-      const isOpen = dataflow.status === DataflowConf.dataflowStatus['OPEN'];
+      const isOpen = dataflow.status === config.dataflowStatus.OPEN;
 
       if (isOpen) {
         dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
@@ -107,8 +114,8 @@ const create = async (name, description, obligationId) => await apiDataflow.crea
 const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
   await apiDataflow.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
 
-const datasetsValidationStatistics = async datasetSchemaId => {
-  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(datasetSchemaId);
+const datasetsValidationStatistics = async (dataflowId, datasetSchemaId) => {
+  const datasetsDashboardsDataDTO = await apiDataflow.datasetsValidationStatistics(dataflowId, datasetSchemaId);
   datasetsDashboardsDataDTO.data.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
@@ -232,7 +239,7 @@ const datasetsFinalFeedback = async dataflowId => {
       dataProviderName: dataset.dataSetName,
       datasetName: dataset.nameDatasetSchema,
       datasetId: dataset.id,
-      isReleased: dataset.isReleased,
+      isReleased: dataset.isReleased ?? false,
       feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
     };
   });
@@ -622,7 +629,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = role.replace('_', ' ');
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
       });
     });
   });
@@ -642,7 +649,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
 const parseUsersList = usersListDTO => {
   usersListDTO.forEach((user, usersIndex) => {
     user.roles.forEach((role, roleIndex) => {
-      usersListDTO[usersIndex].roles[roleIndex] = role.replace('_', ' ');
+      usersListDTO[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
     });
   });
   const usersList = [];

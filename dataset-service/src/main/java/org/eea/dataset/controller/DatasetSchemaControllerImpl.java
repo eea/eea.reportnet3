@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -66,6 +67,12 @@ import io.netty.util.internal.StringUtil;
 @RequestMapping("/dataschema")
 public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
+  /** The Constant REGEX_NAME: {@value}. */
+  private static final String REGEX_NAME = "[a-zA-Z0-9\\s_-]+";
+
+  /** The Constant REGEX_NAME_SCHEMA: {@value}. */
+  private static final String REGEX_NAME_SCHEMA = "[a-zA-Z0-9\\s\\(\\)_-]+";
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSchemaControllerImpl.class);
 
@@ -124,7 +131,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/createEmptyDatasetSchema")
   @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') AND hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
-      @RequestParam("datasetSchemaName") final String datasetSchemaName) {
+      @RequestParam("datasetSchemaName") String datasetSchemaName) {
+
+    String nameTrimmed = datasetSchemaName.trim();
+    boolean isSchema = true;
+    filterName(nameTrimmed, isSchema);
+    datasetSchemaName = nameTrimmed;
 
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
@@ -179,7 +191,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_LEAD_REPORTER', 'DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_LEAD_REPORTER','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
   public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
@@ -306,6 +318,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
 
+    String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
+    boolean isSchema = false;
+    filterName(nameTrimmed, isSchema);
+    tableSchemaVO.setNameTableSchema(nameTrimmed);
+
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
@@ -339,6 +356,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/tableSchema")
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
+
+    boolean isSchema = false;
+    if (null != tableSchemaVO.getNameTableSchema()) {
+      String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
+      filterName(nameTrimmed, isSchema);
+      tableSchemaVO.setNameTableSchema(nameTrimmed);
+    }
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -470,6 +494,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
 
+    String nameTrimmed = fieldSchemaVO.getName().trim();
+    boolean isSchema = false;
+    filterName(nameTrimmed, isSchema);
+    fieldSchemaVO.setName(nameTrimmed);
+
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       String response = dataschemaService.createFieldSchema(datasetSchemaId, fieldSchemaVO);
@@ -520,6 +549,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PutMapping("/{datasetId}/fieldSchema")
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
+
+    if (null != fieldSchemaVO.getName()) {
+      String nameTrimmed = fieldSchemaVO.getName().trim();
+      boolean isSchema = false;
+      filterName(nameTrimmed, isSchema);
+      fieldSchemaVO.setName(nameTrimmed);
+    }
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -721,7 +757,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId) {
     // Recover the designs datasets of the dataflowId given. And then, for each design dataset
     // executes a validation.
@@ -773,7 +809,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the unique constraints
    */
   @Override
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER')")
   @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<UniqueConstraintVO> getUniqueConstraints(
@@ -814,10 +850,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/createUniqueConstraint")
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
-      if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-          .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-      }
       if (uniqueConstraint.getDatasetSchemaId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
@@ -846,10 +878,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
   public void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
       @PathVariable("dataflowId") Long dataflowId) {
-    if (!TypeStatusEnum.DESIGN
-        .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
-    }
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
     } catch (EEAException e) {
@@ -868,10 +896,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
-    }
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(Long.parseLong(uniqueConstraint.getDataflowId())).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
     if (uniqueConstraint.getDatasetSchemaId() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -1036,4 +1060,24 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+
+  /**
+   * Filter name.
+   *
+   * @param nameTrimmed the name trimmed
+   * @param isSchema the is schema
+   */
+  private void filterName(String nameTrimmed, boolean isSchema) {
+    if (isSchema) {
+      if (!Pattern.matches(REGEX_NAME_SCHEMA, nameTrimmed)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+      }
+    } else {
+      if (!Pattern.matches(REGEX_NAME, nameTrimmed)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+      }
+    }
+  }
 }

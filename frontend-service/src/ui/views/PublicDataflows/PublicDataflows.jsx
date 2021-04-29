@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { config } from 'conf';
@@ -71,7 +71,6 @@ export const PublicDataflows = withRouter(({ history, match }) => {
                     animation
                     card={dataflow}
                     dueDate={dataflow.expirationDate}
-                    instrument={dataflow.obligation.legalInstruments}
                     isReleasable={dataflow.isReleasable}
                     key={dataflow.id}
                     obligation={dataflow.obligation}

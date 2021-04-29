@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .ButtonsBar {
   margin-bottom: 0.5rem;
   padding: 0.25rem;
@@ -81,24 +83,6 @@
   display: flex;
   align-items: center;
   margin-left: auto;
-  /* flex-direction: row-reverse; */
-
-  // .radioButton {
-  //   border-radius: 10px;
-  //   padding: 0.5rem;
-
-  //   &:hover {
-  //     background: var(--gray-5);
-  //   }
-
-  //   .button {
-  //     margin-right: 0.5rem;
-  //   }
-
-  //   .label {
-  //     cursor: pointer;
-  //   }
-  // }
 }
 
 .switchTextInput {
@@ -113,7 +97,7 @@
 }
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
-  box-shadow: 0 0 0 0em var(--blue-120) !important;
+  @include shadow-0em;
 }
 
 .noScrollDatasetDesigner {

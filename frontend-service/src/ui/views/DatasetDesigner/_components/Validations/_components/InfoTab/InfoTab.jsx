@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -75,6 +75,7 @@ export const InfoTab = ({
       setFieldsDropdown(
         <Dropdown
           id={`${componentName}__field`}
+          appendTo={document.body}
           disabled={
             creationFormState.candidateRule.automatic || validationContext.ruleEdit
               ? true

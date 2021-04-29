@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -18,6 +18,7 @@ import { TabPanel } from 'ui/views/_components/TabView/_components/TabPanel';
 
 import { DatasetService } from 'core/services/Dataset';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
@@ -63,6 +64,7 @@ export const TabsDesigner = withRouter(
     const {
       params: { dataflowId, datasetId }
     } = match;
+    const notificationContext = useContext(NotificationContext);
     const validationContext = useContext(ValidationContext);
 
     const [errorMessage, setErrorMessage] = useState();
@@ -193,6 +195,11 @@ export const TabsDesigner = withRouter(
           setErrorMessage(resources.messages['duplicatedTabHeaderError']);
           setIsErrorDialogVisible(true);
           return { correct: false, tableName: header };
+        } else if (checkInvalidCharacters(header)) {
+          setErrorMessageTitle(resources.messages['invalidCharactersTabHeader']);
+          setErrorMessage(resources.messages['invalidCharactersTabHeaderError']);
+          setIsErrorDialogVisible(true);
+          return { correct: false, tableName: header };
         } else {
           if (tabs[tabIndex].newTab) {
             addTable(header, tabIndex);
@@ -242,6 +249,14 @@ export const TabsDesigner = withRouter(
         }
       } catch (error) {
         console.error('Error during field Add: ', error);
+        if (error?.response.status === 400) {
+          if (error.response?.data?.message?.includes('name invalid')) {
+            notificationContext.add({
+              type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
+              content: { tableName: header }
+            });
+          }
+        }
       }
     };
 
@@ -282,6 +297,11 @@ export const TabsDesigner = withRouter(
       return editingTabs.length > 0;
     };
 
+    const checkInvalidCharacters = header => {
+      const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
+      return invalidCharsRegex.test(header);
+    };
+
     const deleteTable = async deletedTableSchemaId => {
       try {
         const response = await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
@@ -311,14 +331,6 @@ export const TabsDesigner = withRouter(
         <Button label={resources.messages['ok']} icon="check" onClick={() => setIsErrorDialogVisible(false)} />
       </div>
     );
-
-    // const getSchemaIndexById = (datasetSchemaId, datasetSchemasArray) => {
-    //   return datasetSchemasArray
-    //     .map(datasetSchema => {
-    //       return datasetSchema.datasetSchemaId;
-    //     })
-    //     .indexOf(datasetSchemaId);
-    // };
 
     const renderErrors = (errorTitle, error) => {
       return (
@@ -461,6 +473,14 @@ export const TabsDesigner = withRouter(
         }
       } catch (error) {
         console.error('error', error);
+        if (error?.response.status === 400) {
+          if (error.response?.data?.message?.includes('name invalid')) {
+            notificationContext.add({
+              type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
+              content: { tableName: tableSchemaName }
+            });
+          }
+        }
       }
     };
 

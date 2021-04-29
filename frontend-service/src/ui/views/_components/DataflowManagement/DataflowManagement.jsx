@@ -1,11 +1,11 @@
-import React, { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
 import styles from './DataflowManagement.module.scss';
 
+import { config } from 'conf';
 import { routes } from 'ui/routes';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -129,7 +129,7 @@ export const DataflowManagement = ({
   const renderDataflowDialog = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
-        {isEditForm && state.isCustodian && state.status === DataflowConf.dataflowStatus['DESIGN'] && (
+        {isEditForm && state.isCustodian && state.status === config.dataflowStatus.DESIGN && (
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"

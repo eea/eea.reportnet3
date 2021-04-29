@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -83,8 +83,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const [datasetHasData, setDatasetHasData] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
-  const [exportDatasetData, setExportDatasetData] = useState(undefined);
-  const [exportDatasetDataName, setExportDatasetDataName] = useState('');
   const [externalOperationsList, setExternalOperationsList] = useState({
     export: [],
     import: [],
@@ -145,18 +143,18 @@ export const Dataset = withRouter(({ match, history }) => {
       if (!isUndefined(userContext.contextRoles)) {
         setHasWritePermissions(
           userContext.hasPermission(
-            [config.permissions.LEAD_REPORTER, config.permissions.REPORTER_WRITE],
-            `${config.permissions.DATASET}${datasetId}`
+            [config.permissions.roles.LEAD_REPORTER.key, config.permissions.roles.REPORTER_WRITE.key],
+            `${config.permissions.prefixes.DATASET}${datasetId}`
           ) ||
             userContext.hasPermission(
-              [config.permissions.DATA_CUSTODIAN],
-              `${config.permissions.TESTDATASET}${datasetId}`
+              [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+              `${config.permissions.prefixes.TESTDATASET}${datasetId}`
             )
         );
         setIsTestDataset(
           userContext.hasPermission(
-            [config.permissions.DATA_CUSTODIAN],
-            `${config.permissions.TESTDATASET}${datasetId}`
+            [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+            `${config.permissions.prefixes.TESTDATASET}${datasetId}`
           )
         );
       }
@@ -192,10 +190,10 @@ export const Dataset = withRouter(({ match, history }) => {
   }, [externalOperationsList.import]);
 
   useEffect(() => {
-    if (!isUndefined(exportDatasetData)) {
-      DownloadFile(exportDatasetData, exportDatasetDataName);
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
+      setIsLoadingFile(false);
     }
-  }, [exportDatasetData]);
+  }, [notificationContext.hidden]);
 
   const {
     isLoadingSnapshotListData,
@@ -474,7 +472,14 @@ export const Dataset = withRouter(({ match, history }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(
-    ['DOWNLOAD_FME_FILE_ERROR', 'EXTERNAL_INTEGRATION_DOWNLOAD', 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'],
+    [
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'DOWNLOAD_FME_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXPORT_DATASET_FILE_DOWNLOAD',
+      'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'
+    ],
     setIsLoadingFile,
     false
   );
@@ -501,7 +506,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
     notificationContext.add({
-      type: 'EXPORT_EXTERNAL_INTEGRATION_DATASET'
+      type: 'EXPORT_DATASET_DATA'
     });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -512,14 +517,11 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      setExportDatasetDataName(createFileName(datasetName, fileType));
-      const datasetData = await DatasetService.exportDataById(datasetId, fileType);
-      setExportDatasetData(datasetData.data);
+      await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
       onExportError('EXPORT_DATA_BY_ID_ERROR');
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 
@@ -810,13 +812,6 @@ export const Dataset = withRouter(({ match, history }) => {
   const renderSwitchView = () =>
     !isNil(webformData) &&
     hasWritePermissions && (
-      // <div className={styles.switch}>
-      //   <div className={`${styles.wrap}`}>
-      //     <span className={styles.text}>{resources.messages['tabularDataView']}</span>
-      //     <InputSwitch checked={!isTableView} onChange={() => setIsTableView(!isTableView)} />
-      //     <span className={styles.text}>{resources.messages['webform']}</span>
-      //   </div>
-      // </div>
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch

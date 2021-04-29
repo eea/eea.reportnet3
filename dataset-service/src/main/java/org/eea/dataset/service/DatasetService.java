@@ -340,8 +340,8 @@ public interface DatasetService {
    * @param conditionalValue the conditional value
    * @param searchValue the search value
    * @param resultsNumber the results number
-   *
    * @return the field values referenced
+   * @throws EEAException the EEA exception
    */
   List<FieldVO> getFieldValuesReferenced(Long datasetId, String datasetSchemaId,
       String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber)
@@ -362,9 +362,13 @@ public interface DatasetService {
    * Etl export dataset.
    *
    * @param datasetId the dataset id
-   *
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the ETL dataset VO
-   *
    */
   void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName);
@@ -599,8 +603,20 @@ public interface DatasetService {
    *
    * @param datasetId the id dataset
    * @param idDatasetSchema the id dataset schema
-   * @throws EEAException the EEA exception
    */
   void initializeDataset(Long datasetId, String idDatasetSchema);
+
+
+
+  /**
+   * Download exported file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  File downloadExportedFile(Long datasetId, String fileName) throws IOException, EEAException;
 
 }

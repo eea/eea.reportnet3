@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { config } from 'conf';
@@ -131,12 +131,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
 
   const loadTitle = () => (
     <a
-      href={getUrl(routes.DATAFLOWS)}
+      href={getUrl(routes.ACCESS_POINT)}
       className={styles.title}
       title={resources.messages['titleHeader']}
       onClick={e => {
         e.preventDefault();
-        history.push(getUrl(routes.DATAFLOWS));
+        history.push(getUrl(routes.ACCESS_POINT));
       }}>
       {isPublic ? (
         <img height="50px" src={ReportnetPublicLogo} alt="Reportnet 3" className={styles.appLogo} />
@@ -221,7 +221,6 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         ref={avatarImage}
         src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
       />
-      {/* <FontAwesomeIcon className={styles.avatar} icon={AwesomeIcons('user-profile')} />{' '} */}
       <span>
         {!isUndefined(userContext.email) &&
         !isUndefined(userContext.lastName) &&
@@ -278,10 +277,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const { current } = avatarImage;
-    current.onload = function () {
-      ctx.drawImage(current, 0, 0);
-    };
-    current.src = userContext.userProps.userImage.join('');
+    if (!isUndefined(current)) {
+      current.onload = function () {
+        ctx.drawImage(current, 0, 0);
+      };
+      current.src = userContext.userProps.userImage.join('');
+    }
   };
 
   return (

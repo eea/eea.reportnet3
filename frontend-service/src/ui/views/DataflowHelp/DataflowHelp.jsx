@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -67,17 +67,17 @@ export const DataflowHelp = withRouter(({ match, history }) => {
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
-      const userRoles = userContext.getUserRole(`${config.permissions.DATAFLOW}${dataflowId}`);
+      const userRoles = userContext.getUserRole(`${config.permissions.prefixes.DATAFLOW}${dataflowId}`);
       setIsCustodian(
-        userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
-          userRoles.includes(config.permissions['DATA_STEWARD']) ||
-          userRoles.includes(config.permissions['EDITOR_WRITE']) ||
-          userRoles.includes(config.permissions['EDITOR_READ'])
+        userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
+          userRoles.includes(config.permissions.roles.STEWARD.key) ||
+          userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||
+          userRoles.includes(config.permissions.roles.EDITOR_READ.key)
       );
 
       setIsToolbarVisible(
-        userRoles.includes(config.permissions['DATA_CUSTODIAN']) ||
-          userRoles.includes(config.permissions['DATA_STEWARD'])
+        userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
+          userRoles.includes(config.permissions.roles.STEWARD.key)
       );
     }
   }, [userContext]);

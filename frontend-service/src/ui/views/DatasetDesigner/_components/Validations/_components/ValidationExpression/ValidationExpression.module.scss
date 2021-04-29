@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .expression {
   display: flex;
   justify-content: flex-start;
@@ -6,7 +8,6 @@
   --fieldsGap: 1rem;
   .group {
     margin-right: 1rem;
-    // margin-left: 0.5rem;
     :global .p-checkbox {
       width: 33px !important;
       height: 33px !important;
@@ -18,9 +19,6 @@
         font-size: 27px;
       }
     }
-  }
-  :global .p-dropdown {
-    padding-bottom: 2px;
   }
   .union {
     width: var(--unionWidth);
@@ -52,7 +50,7 @@
   }
   .deleteButton {
     border: 1px solid var(--c-custom-gray) !important;
-    box-shadow: 0 0 0 0em var(--blue-120) !important;
+    @include shadow-0em;
     color: var(--errors) !important;
     margin: 0 !important;
   }

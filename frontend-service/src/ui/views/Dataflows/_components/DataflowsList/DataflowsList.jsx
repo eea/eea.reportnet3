@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
@@ -7,8 +7,6 @@ import orderBy from 'lodash/orderBy';
 import pull from 'lodash/pull';
 
 import styles from './DataflowsList.module.scss';
-
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { DataflowsItem } from './_components/DataflowsItem';
 import { Filters } from 'ui/views/_components/Filters';

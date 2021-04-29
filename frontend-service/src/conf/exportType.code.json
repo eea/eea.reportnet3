@@ -1,20 +1,22 @@
 {
-    "exportTypes": {
-        "exportTableTypes": [
-            {
-                "text": "CSV (.csv)",
-                "code": "csv"    
-            },          
-            {
-                "text": "XLSX (.xlsx)",
-                "code": "xlsx"    
-            }
-        ],
-        "exportDatasetTypes": [           
-            {
-                "text": "XLSX (.xlsx)",
-                "code": "xlsx"    
-            }
-        ]
+  "exportTableTypes": [
+    {
+      "text": "CSV (.csv)",
+      "code": "csv"
+    },
+    {
+      "text": "XLSX (.xlsx)",
+      "code": "xlsx"
     }
+  ],
+  "exportDatasetTypes": [
+    {
+      "text": "XLSX (.xlsx)",
+      "code": "xlsx"
+    },
+    {
+      "text": "ZIP (XLSX + attachments)",
+      "code": "zip+xlsx"
+    }
+  ]
 }

@@ -7,7 +7,6 @@ import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
-import DataflowConf from 'conf/dataflow.config.json';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -49,24 +48,24 @@ const useBigButtonList = ({
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
 
-  const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-    config.permissions.DATA_STEWARD,
-    config.permissions.DATA_CUSTODIAN
+  const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN.key,
+    config.permissions.roles.STEWARD.key
   ]);
 
   const getButtonsVisibility = useCallback(() => {
-    const isCustodian = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-      config.permissions.DATA_CUSTODIAN
-    ]);
     const isDesigner =
       isLeadDesigner ||
-      userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-        config.permissions.EDITOR_WRITE
+      userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+        config.permissions.roles.EDITOR_WRITE.key
       ]);
-    const isDesignStatus = dataflowState.status === DataflowConf.dataflowStatus['DESIGN'];
-    const isDraftStatus = dataflowState.status === DataflowConf.dataflowStatus['OPEN'];
-    const isEditorRead = userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-      config.permissions.EDITOR_READ
+    const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.OBSERVER.key
+    ]);
+    const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
+    const isDraftStatus = dataflowState.status === config.dataflowStatus.OPEN;
+    const isEditorRead = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.EDITOR_READ.key
     ]);
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isReleased =
@@ -77,12 +76,12 @@ const useBigButtonList = ({
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEuDataset: isLeadDesigner && isDraftStatus,
       exportEuDataset: isLeadDesigner && isDraftStatus,
-      dashboard: isLeadDesigner && isDraftStatus,
+      dashboard: (isLeadDesigner || isObserver) && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
-          userContext.hasContextAccessPermission(config.permissions.DATAFLOW, dataflowId, [
-            config.permissions.EDITOR_READ,
-            config.permissions.EDITOR_WRITE
+          userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+            config.permissions.roles.EDITOR_READ.key,
+            config.permissions.roles.EDITOR_WRITE.key
           ])) &&
         isDesignStatus,
       designDatasetsActions: isDesigner && isDesignStatus,
@@ -91,14 +90,14 @@ const useBigButtonList = ({
       feedback:
         (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
-      groupByRepresentative: isLeadDesigner && isDraftStatus,
+      groupByRepresentative: (isLeadDesigner || isObserver) && isDraftStatus,
       manageReporters: isLeadDesigner,
       manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
-      testDatasetVisibility: isDraftStatus && isCustodian
+      testDatasetVisibility: isLeadDesigner && isDraftStatus
     };
   }, [
     dataflowId,
@@ -233,26 +232,15 @@ const useBigButtonList = ({
                   label: resources.messages['rename'],
                   icon: 'pencil',
                   disabled:
-                    dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-                    !buttonsVisibility.designDatasetsActions
+                    dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
                 },
                 {
                   label: resources.messages['delete'],
                   icon: 'trash',
-                  disabled:
-                    dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-                    !buttonsVisibility.designDatasetsActions,
                   command: () => getDeleteSchemaIndex(newDatasetSchema.index),
                   disabled:
-                    dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'] ||
-                    !buttonsVisibility.designDatasetsActions
+                    dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
                 }
-                // {
-                //   label: resources.messages['exportDatasetSchema'],
-                //   icon: 'import',
-                //   // disabled: dataflowState.status !== DataflowConf.dataflowStatus['DESIGN'],
-                //   command: () => exportDatatableSchema(newDatasetSchema.datasetId, newDatasetSchema.datasetSchemaName)
-                // }
               ]
             : [],
         onSaveName: onSaveName,
@@ -443,6 +431,8 @@ const useBigButtonList = ({
         visibility: true
       }));
 
+  const isReleasing = dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing);
+
   const onBuildReceiptButton = () => {
     return [
       {
@@ -450,7 +440,8 @@ const useBigButtonList = ({
         buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         caption: resources.messages['confirmationReceipt'],
-        handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+        enabled: !isReleasing,
+        handleRedirect: dataflowState.isReceiptLoading || isReleasing ? () => {} : () => onLoadReceiptData(),
         helpClassName: 'dataflow-big-buttons-confirmation-receipt-help-step',
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
@@ -458,8 +449,6 @@ const useBigButtonList = ({
       }
     ];
   };
-
-  const isReleasing = dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing);
 
   const onBuildReleaseButton = () => {
     return [

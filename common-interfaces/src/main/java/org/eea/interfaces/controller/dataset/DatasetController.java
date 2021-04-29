@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -397,5 +398,28 @@ public interface DatasetController {
    */
   @GetMapping("/private/checkAnySchemaAvailableInPublic")
   boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId);
+
+
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @GetMapping(value = "/{datasetId}/exportDatasetFile")
+  void exportDatasetFile(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("mimeType") String mimeType);
+
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the response entity
+   */
+  @GetMapping("/{datasetId}/downloadFile")
+  void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
+      HttpServletResponse response);
 
 }

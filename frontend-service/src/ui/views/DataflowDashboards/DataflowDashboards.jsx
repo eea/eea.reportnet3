@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { isUndefined } from 'lodash';
@@ -100,10 +100,11 @@ export const DataflowDashboards = withRouter(
       !isUndefined(dataSchema) &&
       dataSchema.map(schema => (
         <DatasetValidationDashboard
-          key={schema.datasetSchemaId}
+          dataflowId={dataflowId}
           datasetSchemaId={schema.datasetSchemaId}
-          isVisible={chartState[schema.datasetSchemaId]}
           datasetSchemaName={schema.datasetSchemaName}
+          isVisible={chartState[schema.datasetSchemaId]}
+          key={schema.datasetSchemaId}
         />
       ));
 

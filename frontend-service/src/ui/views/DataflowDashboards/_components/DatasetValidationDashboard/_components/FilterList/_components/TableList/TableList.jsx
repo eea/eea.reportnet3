@@ -1,5 +1,3 @@
-import React from 'react';
-
 import styles from './TableList.module.css';
 
 import uuid from 'uuid';
