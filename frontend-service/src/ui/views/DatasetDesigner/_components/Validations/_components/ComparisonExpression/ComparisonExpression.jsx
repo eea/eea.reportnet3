@@ -494,7 +494,8 @@ const ComparisonExpression = ({
 
     if (operatorType === 'LEN') {
       return (
-        <InputText
+        <InputNumber
+          id={uuid.v4()}
           keyfilter={valueKeyFilter}
           disabled={isDisabled}
           format={false}

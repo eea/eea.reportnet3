@@ -340,7 +340,7 @@ const ValidationExpression = ({
     }
     if (operatorType === 'LEN') {
       return (
-        <InputText
+        <InputNumber
           keyfilter={valueKeyFilter}
           disabled={isDisabled}
           format={false}
