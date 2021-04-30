@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -157,4 +158,9 @@ export const UserList = ({ dataflowId, representativeId }) => {
       )}
     </div>
   );
+};
+
+UserList.propTypes = {
+  dataflowId: PropTypes.number,
+  representativeId: PropTypes.number
 };
