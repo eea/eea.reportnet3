@@ -12,6 +12,8 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -23,6 +25,9 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
   /** The rule expression service. */
   @Autowired
   private RuleExpressionService ruleExpressionService;
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Class to entity.
@@ -89,7 +94,12 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     if (StringUtils.isBlank(ruleVO.getSqlSentence())
         && (!rule.isAutomatic() && !EntityTypeEnum.DATASET.equals(rule.getType())
             && !EntityTypeEnum.TABLE.equals(rule.getType()))) {
-      ruleVO.setWhenCondition(ruleExpressionService.convertToDTO(rule.getWhenCondition()));
+      try {
+        ruleVO.setWhenCondition(ruleExpressionService.convertToDTO(rule.getWhenCondition()));
+      } catch (IllegalStateException e) {
+        ruleVO.setEnabled(false);
+        LOG_ERROR.error("Error with the rule {}", ruleVO);
+      }
     }
   }
 }
