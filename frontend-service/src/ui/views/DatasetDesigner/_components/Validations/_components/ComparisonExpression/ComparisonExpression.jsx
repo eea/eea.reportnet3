@@ -496,7 +496,7 @@ const ComparisonExpression = ({
       return (
         <InputNumber
           id={uuid.v4()}
-          keyfilter={valueKeyFilter}
+          min={-1}
           disabled={isDisabled}
           format={false}
           onBlur={e => checkField('number', e.target.value)}
