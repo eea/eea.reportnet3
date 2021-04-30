@@ -165,7 +165,7 @@ const ComparisonExpression = ({
   useEffect(() => {
     const options = [];
     if (!isNil(fieldType)) {
-      operatorByType[fieldType].forEach(key => {
+      operatorByType[fieldType]?.forEach(key => {
         options.push(operatorTypesConf[key].option);
       });
     } else {
@@ -494,7 +494,8 @@ const ComparisonExpression = ({
 
     if (operatorType === 'LEN') {
       return (
-        <InputText
+        <InputNumber
+          id={uuid.v4()}
           keyfilter={valueKeyFilter}
           disabled={isDisabled}
           format={false}

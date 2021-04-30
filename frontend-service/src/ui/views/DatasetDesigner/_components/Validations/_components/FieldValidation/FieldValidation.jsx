@@ -279,13 +279,13 @@ const FieldValidation = ({ datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       await ValidationService.create(datasetId, candidateRule);
-      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
       console.error('onCreateValidationRule error', error);
     } finally {
+      onHide();
       setIsSubmitDisabled(false);
     }
   };
@@ -298,13 +298,12 @@ const FieldValidation = ({ datasetId, tabs }) => {
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
       }
-      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });
-      console.error('onUpdateValidationRule error', error);
     } finally {
+      onHide();
       setIsSubmitDisabled(false);
     }
   };
