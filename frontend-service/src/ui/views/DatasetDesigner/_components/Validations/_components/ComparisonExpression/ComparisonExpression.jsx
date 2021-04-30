@@ -494,8 +494,9 @@ const ComparisonExpression = ({
 
     if (operatorType === 'LEN') {
       return (
-        <InputText
-          keyfilter={valueKeyFilter}
+        <InputNumber
+          id={uuid.v4()}
+          min={-1}
           disabled={isDisabled}
           format={false}
           onBlur={e => checkField('number', e.target.value)}
