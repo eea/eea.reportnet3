@@ -297,6 +297,7 @@ const ValidationExpression = ({
           disabled={isDisabled}
           format={false}
           mode="decimal"
+          onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
