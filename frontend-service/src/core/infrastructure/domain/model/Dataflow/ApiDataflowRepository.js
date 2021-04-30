@@ -63,7 +63,7 @@ const getUserRoles = userRoles => {
 
     dataflowPermissions.forEach(permission => {
       dataflowRoles.forEach(dataflowRol => {
-        if (isNil(rol) && dataflowRol.userRole.key === permission) {
+        if (isNil(rol) && dataflowRol.userRole === permission.label) {
           rol = dataflowRol;
         }
       });
