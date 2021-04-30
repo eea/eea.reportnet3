@@ -14,11 +14,6 @@ src\ui\views\DataflowDashboards\_components\ReleasedDatasetsDashboard\ReleasedDa
 
 
 (Kiko)
-src\ui\views\DataflowHelp\DataflowHelp.jsx
-src\ui\views\DataflowHelp\_components\DatasetSchemas\DatasetSchemas.jsx
-src\ui\views\DataflowHelp\_components\Documents\Documents.jsx
-src\ui\views\DataflowHelp\_components\Documents\_components\DocumentFileUpload\DocumentFileUpload.jsx
-src\ui\views\DataflowHelp\_components\WebLinks\WebLinks.jsx
 src\ui\views\Dataflow\Dataflow.jsx
 src\ui\views\Dataflow\_components\BigButtonListRepresentative\BigButtonListRepresentative.jsx
 src\ui\views\Dataflow\_components\BigButtonList\BigButtonList.jsx

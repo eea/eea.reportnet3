@@ -213,6 +213,8 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                     unique.fieldName = uniqueTableAndField.fieldName;
                   }
                   return pick(unique, 'tableName', 'fieldName', 'datasetSchemaId');
+                } else {
+                  return [];
                 }
               })
             : []
@@ -327,26 +329,26 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   };
 
   const renderToolbar = () => {
-    return isCustodian ? (
-      <Toolbar className={styles.datasetSchemasToolbar}>
-        <div className="p-toolbar-group-right">
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${
-              isLoading ? 'p-button-animated-spin' : ''
-            }`}
-            disabled={false}
-            icon={'refresh'}
-            label={resources.messages['refresh']}
-            onClick={async () => {
-              setIsLoading(true);
-              await onLoadDatasetsSchemas();
-              setIsLoading(false);
-            }}
-          />
-        </div>
-      </Toolbar>
-    ) : (
-      <></>
+    return (
+      isCustodian && (
+        <Toolbar className={styles.datasetSchemasToolbar}>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${
+                isLoading ? 'p-button-animated-spin' : ''
+              }`}
+              disabled={false}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={async () => {
+                setIsLoading(true);
+                await onLoadDatasetsSchemas();
+                setIsLoading(false);
+              }}
+            />
+          </div>
+        </Toolbar>
+      )
     );
   };
 
