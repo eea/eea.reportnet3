@@ -297,7 +297,6 @@ const ValidationExpression = ({
           disabled={isDisabled}
           format={false}
           mode="decimal"
-          onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
           steps={0}
@@ -341,8 +340,8 @@ const ValidationExpression = ({
     if (operatorType === 'LEN') {
       return (
         <InputNumber
-          keyfilter={valueKeyFilter}
           disabled={isDisabled}
+          min={-1}
           format={false}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
