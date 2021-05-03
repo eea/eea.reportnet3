@@ -1,5 +1,7 @@
 import { Children, Fragment, useContext, useEffect, useState } from 'react';
 
+import uuid from 'uuid';
+
 import { isUndefined } from 'lodash';
 
 import styles from './TreeViewExpandableItem.module.css';
@@ -45,7 +47,7 @@ const TreeViewExpandableItem = ({
       !isUndefined(item.type) && item.type === 'box' ? (
         <div
           className={styles.defaultHeaderItem}
-          key={i}
+          key={uuid.v4()}
           style={{
             width: `${width}%`
           }}>
@@ -54,7 +56,7 @@ const TreeViewExpandableItem = ({
       ) : (
         <span
           className={styles.defaultHeaderItem}
-          key={i}
+          key={uuid.v4()}
           style={{
             width: `${width}%`
           }}>
@@ -75,7 +77,7 @@ const TreeViewExpandableItem = ({
             } ${!isUndefined(button.iconSlashed) && button.iconSlashed ? styles.slashSpan : null}`}
             disabled={!isUndefined(button.disabled) ? button.disabled : false}
             icon={button.icon}
-            key={i}
+            key={uuid.v4()}
             label={button.label}
             onClick={button.onClick}
             onMouseDown={button.onMouseDown}
@@ -94,7 +96,7 @@ const TreeViewExpandableItem = ({
           <Button
             className={`${button.className} ${styles.defaultInfoButton}`}
             icon={button.icon}
-            key={i}
+            key={uuid.v4()}
             label={button.label}
             onClick={() => setIsOpen(true)}
             style={{ ...button.style, marginLeft: '0.5rem' }}
@@ -108,22 +110,22 @@ const TreeViewExpandableItem = ({
   return (
     <Fragment>
       <div
+        className={!isUndefined(className) ? className : styles.defaultExpandable}
+        onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
         style={{
           cursor: 'pointer',
           color: blockExpand ? 'var(--errors)' : 'inherit',
           opacity: blockExpand ? '0.7' : '1'
-        }}
-        className={!isUndefined(className) ? className : styles.defaultExpandable}
-        onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}>
+        }}>
         {!isUndefined(items) & (items.length > 0) ? (
           <FontAwesomeIcon
             icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
+            onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
             style={{
               cursor: 'pointer',
               color: blockExpand ? 'var(--errors)' : 'inherit',
               opacity: blockExpand ? '0.7' : '1'
             }}
-            onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
           />
         ) : (
           ''
@@ -135,7 +137,7 @@ const TreeViewExpandableItem = ({
       {isOpen ? <div className={styles.treeChildrenWrapper}>{children}</div> : null}
       {Children.count(children) === 0 && isOpen && !isUndefined(items[0]) ? (
         <span className={styles.emptyProperty}>{`${resources.messages['emptyDatasetDesign']} ${items[0].label}`}</span>
-      ) : null}      
+      ) : null}
     </Fragment>
   );
 };

@@ -1,5 +1,7 @@
 import { useEffect, useReducer } from 'react';
 
+import uuid from 'uuid';
+
 import styles from './TabularSwitch.module.scss';
 
 import { tabularSwitchReducer } from './_functions/Reducers/tabularSwitchReducer';
@@ -44,10 +46,10 @@ const TabularSwitch = ({
   return (
     <div className={`${className} ${styles.tabBar}`} id={id}>
       <div className={styles.indicator} style={{ left: `calc(${onSwitchAnimate(views) * 150}px + 1.5rem)` }} />
-      {elements.map((element, i) => (
+      {elements.map(element => (
         <div
           className={`${styles.tabItem} ${views[element] ? styles.selected : null}`}
-          key={i}
+          key={uuid.v4()}
           onClick={() => onSwitchView(element)}>
           <p className={styles.tabLabel}>{element}</p>
         </div>

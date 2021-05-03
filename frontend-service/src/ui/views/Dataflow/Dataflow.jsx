@@ -154,10 +154,7 @@ const Dataflow = withRouter(({ history, match }) => {
       ? null
       : uniq(
           map(
-            dataflowState.data?.datasets?.filter(d => {
-              console.log(d.dataProviderId, representativeId);
-              return d.dataProviderId == representativeId;
-            }),
+            dataflowState.data?.datasets?.filter(d => d.dataProviderId?.toString() === representativeId),
             'datasetSchemaName'
           )
         );
