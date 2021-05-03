@@ -251,7 +251,11 @@ export const FieldDesigner = ({
         } else {
           if (type !== '') {
             fieldTypeRef.current.hide();
-            onShowDialogError(resources.messages['emptyFieldTypeMessage'], resources.messages['emptyFieldTypeTitle']);
+            onShowDialogError(
+              resources.messages['emptyFieldTypeMessage'],
+              resources.messages['emptyFieldTypeTitle'],
+              inputRef?.current?.element
+            );
           }
         }
       }
@@ -293,13 +297,18 @@ export const FieldDesigner = ({
             !isUndefined(fieldDesignerState.fieldTypeValue)
           ) {
             fieldTypeRef.current.hide();
-            onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+            onShowDialogError(
+              resources.messages['emptyFieldMessage'],
+              resources.messages['emptyFieldTitle'],
+              inputRef?.current?.element
+            );
           } else {
             if (checkInvalidCharacters(name)) {
               fieldTypeRef.current.hide();
               onShowDialogError(
                 resources.messages['invalidCharactersFieldMessage'],
-                resources.messages['invalidCharactersFieldTitle']
+                resources.messages['invalidCharactersFieldTitle'],
+                inputRef?.current?.element
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
             } else {
@@ -311,7 +320,8 @@ export const FieldDesigner = ({
                 fieldTypeRef.current.hide();
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
-                  resources.messages['duplicatedFieldTitle']
+                  resources.messages['duplicatedFieldTitle'],
+                  inputRef?.current?.element
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
               }
@@ -320,7 +330,11 @@ export const FieldDesigner = ({
         } else {
           if (name === '') {
             fieldTypeRef.current.hide();
-            onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+            onShowDialogError(
+              resources.messages['emptyFieldMessage'],
+              resources.messages['emptyFieldTitle'],
+              inputRef?.current?.element
+            );
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
           } else {
             if (name !== fieldDesignerState.initialFieldValue) {
@@ -328,7 +342,8 @@ export const FieldDesigner = ({
                 fieldTypeRef.current.hide();
                 onShowDialogError(
                   resources.messages['invalidCharactersFieldMessage'],
-                  resources.messages['invalidCharactersFieldTitle']
+                  resources.messages['invalidCharactersFieldTitle'],
+                  inputRef?.current?.element
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
               } else {
@@ -338,7 +353,8 @@ export const FieldDesigner = ({
                   fieldTypeRef.current.hide();
                   onShowDialogError(
                     resources.messages['duplicatedFieldMessage'],
-                    resources.messages['duplicatedFieldTitle']
+                    resources.messages['duplicatedFieldTitle'],
+                    inputRef?.current?.element
                   );
                   dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
                 }
@@ -623,7 +639,11 @@ export const FieldDesigner = ({
     });
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
-      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+      onShowDialogError(
+        resources.messages['emptyFieldMessage'],
+        resources.messages['emptyFieldTitle'],
+        inputRef?.current?.element
+      );
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
@@ -640,7 +660,11 @@ export const FieldDesigner = ({
     dispatchFieldDesigner({ type: 'SET_CODELIST_ITEMS', payload: codelistItems });
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
-      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+      onShowDialogError(
+        resources.messages['emptyFieldMessage'],
+        resources.messages['emptyFieldTitle'],
+        inputRef?.current?.element
+      );
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
@@ -684,7 +708,11 @@ export const FieldDesigner = ({
     });
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
-      onShowDialogError(resources.messages['emptyFieldMessage'], resources.messages['emptyFieldTitle']);
+      onShowDialogError(
+        resources.messages['emptyFieldMessage'],
+        resources.messages['emptyFieldTitle'],
+        inputRef?.current?.element
+      );
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
@@ -1041,7 +1069,13 @@ export const FieldDesigner = ({
         }}
         onChange={e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })}
         onFocus={e => {
-          dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value.trim() });
+          if (
+            e.target.value.trim() !== '' &&
+            !checkDuplicates(e.target.value.trim(), fieldId) &&
+            !checkInvalidCharacters(e.target.value.trim())
+          ) {
+            dispatchFieldDesigner({ type: 'SET_INITIAL_FIELD_VALUE', payload: e.target.value.trim() });
+          }
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
         }}
         onKeyDown={e => onKeyChange(e, 'NAME')}

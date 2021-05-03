@@ -71,6 +71,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
                     animation
                     card={dataflow}
                     dueDate={dataflow.expirationDate}
+                    externalCard={false}
                     isReleasable={dataflow.isReleasable}
                     key={dataflow.id}
                     obligation={dataflow.obligation}

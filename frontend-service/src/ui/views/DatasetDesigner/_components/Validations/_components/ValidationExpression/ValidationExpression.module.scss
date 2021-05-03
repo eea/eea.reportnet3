@@ -41,6 +41,9 @@
   .expressionValue {
     height: 0.5px;
     width: calc(100% - (var(--operatorsWidth) * 2) - var(--unionWidth) - (var(--fieldsGap) * 5));
+    :global .p-inputnumber {
+      width: 100%;
+    }
   }
   > span {
     margin-right: var(--fieldsGap);
