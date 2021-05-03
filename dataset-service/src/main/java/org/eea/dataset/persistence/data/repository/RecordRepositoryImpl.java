@@ -503,7 +503,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public String findAndGenerateETLJson(String stringQuery) {
     Query query = entityManager.createNativeQuery(stringQuery);
-    return query.getSingleResult().toString();
+    Object result = null;
+    try {
+      result = query.getSingleResult();
+    } catch (NoResultException nre) {
+      LOG.info("no result, ignore message");
+    }
+    if (null == result) {
+      result = "";
+    }
+    return result.toString();
   }
 
 }
