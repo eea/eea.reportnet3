@@ -166,15 +166,15 @@ export const PublicFrontpage = ({ history }) => {
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.dataflows.map(dataflow => (
                   <PublicCard
-                    key={dataflow.key}
                     card={dataflow}
                     dataflowId={dataflow.id}
                     dueDate={dataflow.targetDate}
+                    externalCard={true}
                     frequency={dataflow.reportingFrequency}
+                    key={dataflow.key}
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
-                    externalCard={true}
                   />
                 ))}
               </div>
@@ -182,11 +182,12 @@ export const PublicFrontpage = ({ history }) => {
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.voluntaryDataflows.map(dataflow => (
                   <PublicCard
-                    key={dataflow.key}
                     card={dataflow}
                     dataflowId={dataflow.id}
                     dueDate={dataflow.targetDate}
+                    externalCard={true}
                     frequency={dataflow.reportingFrequency}
+                    key={dataflow.key}
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
