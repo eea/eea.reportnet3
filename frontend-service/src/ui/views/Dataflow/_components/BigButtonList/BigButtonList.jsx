@@ -199,7 +199,7 @@ export const BigButtonList = ({
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['ok']} icon="check" onClick={() => onHideErrorDialog()} />
+      <Button icon="check" label={resources.messages['ok']} onClick={() => onHideErrorDialog()} />
     </div>
   );
 
@@ -459,17 +459,15 @@ export const BigButtonList = ({
 
   const renderDialogFooter =
     isHistoricReleasesDialogVisible || isManualTechnicalAcceptanceDialogVisible ? (
-      <Fragment>
-        <Button
-          className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-          icon={'cancel'}
-          label={resources.messages['close']}
-          onClick={() => {
-            setIsHistoricReleasesDialogVisible(false);
-            setIsManualTechnicalAcceptanceDialogVisible(false);
-          }}
-        />
-      </Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => {
+          setIsHistoricReleasesDialogVisible(false);
+          setIsManualTechnicalAcceptanceDialogVisible(false);
+        }}
+      />
     ) : (
       <Fragment>
         <Button
@@ -512,18 +510,16 @@ export const BigButtonList = ({
   const renderRadioButtonsCreateDC = () => {
     return Object.keys(manualTechnicalAcceptanceOptions).map((value, index) => (
       <div className={styles.radioButton} key={index}>
-        <Fragment>
-          <RadioButton
-            checked={manualTechnicalAcceptanceOptions[value]}
-            className={styles.button}
-            inputId={`technicalAcceptance${value}`}
-            onChange={event => onChangeRadioButton(event.target.value)}
-            value={value}
-          />
-          <label className={styles.label} htmlFor={`technicalAcceptance${value}`}>
-            {value}
-          </label>
-        </Fragment>
+        <RadioButton
+          checked={manualTechnicalAcceptanceOptions[value]}
+          className={styles.button}
+          inputId={`technicalAcceptance${value}`}
+          onChange={event => onChangeRadioButton(event.target.value)}
+          value={value}
+        />
+        <label className={styles.label} htmlFor={`technicalAcceptance${value}`}>
+          {value}
+        </label>
       </div>
     ));
   };
@@ -640,8 +636,8 @@ export const BigButtonList = ({
           onHide={() => setIsHistoricReleasesDialogVisible(false)}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
-            dataflowId={dataflowId}
             dataProviderId={providerId}
+            dataflowId={dataflowId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
           />
@@ -692,8 +688,8 @@ export const BigButtonList = ({
         <ConfirmDialog
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
-          header={resources.messages['createDataCollection']}
           footerAddon={checkShowPublicInfo}
+          header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['create']}
           onConfirm={() => setIsConfirmCollectionDialog(true)}
@@ -792,16 +788,16 @@ export const BigButtonList = ({
       {isImportSchemaVisible && (
         <CustomFileUpload
           // dialogClassName={styles.Dialog}
-          dialogHeader={`${resources.messages['importSchema']}`}
-          dialogOnHide={() => setIsImportSchemaVisible(false)}
-          dialogVisible={isImportSchemaVisible}
           accept=".zip"
-          chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
+          chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
-          isDialog={true}
+          dialogHeader={`${resources.messages['importSchema']}`}
+          dialogOnHide={() => setIsImportSchemaVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
+          dialogVisible={isImportSchemaVisible}
           fileLimit={1}
           infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .zip`}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          isDialog={true}
           mode="advanced"
           multiple={false}
           name="file"
