@@ -34,10 +34,12 @@ const ValidationExpression = ({
   } = config;
   const inputStringMatchRef = useRef(null);
   const resourcesContext = useContext(ResourcesContext);
+
   const [clickedFields, setClickedFields] = useState([]);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
+  const [previousValue, setPreviousValue] = useState();
   const [valueInputProps, setValueInputProps] = useState();
   const [valueKeyFilter, setValueKeyFilter] = useState();
 
@@ -59,7 +61,7 @@ const ValidationExpression = ({
   useEffect(() => {
     const options = [];
     if (!isNil(fieldType)) {
-      operatorByType[fieldType].forEach(key => {
+      operatorByType[fieldType]?.forEach(key => {
         options.push(operatorTypesConf[key].option);
       });
     } else {
@@ -125,6 +127,13 @@ const ValidationExpression = ({
     }
   }, [clickedFields, showRequiredFields]);
 
+  useEffect(() => {
+    setPreviousValue(expressionValues.expressionValue);
+    return () => {
+      setPreviousValue('');
+    };
+  }, []);
+
   const printRequiredFieldError = field => {
     let conditions = false;
     if (field === 'union') {
@@ -184,6 +193,14 @@ const ValidationExpression = ({
     ) {
       const number = Number(fieldValue);
       if (!number) onUpdateExpressionField('expressionValue', '');
+    }
+
+    if ((expressionValues.operatorType === 'LEN' || expressionValues.operatorType === 'number') && field === 'number') {
+      if (!Number(fieldValue) && Number(fieldValue) !== 0) {
+        onUpdateExpressionField('expressionValue', previousValue);
+      } else {
+        setPreviousValue(fieldValue);
+      }
     }
   };
 
@@ -275,7 +292,6 @@ const ValidationExpression = ({
           />
         );
       }
-
       return (
         <InputNumber
           disabled={isDisabled}
@@ -318,6 +334,19 @@ const ValidationExpression = ({
           placeholder={resourcesContext.messages.value}
           steps={0}
           useGrouping={false}
+          value={expressionValues.expressionValue}
+        />
+      );
+    }
+    if (operatorType === 'LEN') {
+      return (
+        <InputNumber
+          disabled={isDisabled}
+          min={-1}
+          format={false}
+          onBlur={e => checkField('number', e.target.value)}
+          onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          placeholder={resourcesContext.messages.value}
           value={expressionValues.expressionValue}
         />
       );

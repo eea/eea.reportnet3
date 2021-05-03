@@ -235,8 +235,8 @@ export const FieldsDesigner = ({
     }
   };
 
-  const onShowDialogError = (message, title) => {
-    setErrorMessageAndTitle({ title, message });
+  const onShowDialogError = (message, title, focusElement) => {
+    setErrorMessageAndTitle({ title, message, focusElement });
     setIsErrorDialogVisible(true);
   };
 
@@ -260,7 +260,14 @@ export const FieldsDesigner = ({
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button icon="check" label={resources.messages['ok']} onClick={() => setIsErrorDialogVisible(false)} />
+      <Button
+        icon="check"
+        label={resources.messages['ok']}
+        onClick={() => {
+          setIsErrorDialogVisible(false);
+          errorMessageAndTitle?.focusElement?.focus();
+        }}
+      />
     </div>
   );
 
@@ -392,7 +399,10 @@ export const FieldsDesigner = ({
           footer={errorDialogFooter}
           header={errorTitle}
           modal={true}
-          onHide={() => setIsErrorDialogVisible(false)}
+          onHide={() => {
+            setIsErrorDialogVisible(false);
+            errorMessageAndTitle?.focusElement?.focus();
+          }}
           visible={isErrorDialogVisible}>
           <div className="p-grid p-fluid">{error}</div>
         </Dialog>
@@ -691,7 +701,7 @@ export const FieldsDesigner = ({
         </div>
       )}
       {renderAllFields()}
-      {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message)}
+      {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message, errorMessageAndTitle.focusElement)}
       {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
     </Fragment>
   );
