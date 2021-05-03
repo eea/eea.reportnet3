@@ -2337,6 +2337,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(schemaOrigin.getWebform());
     schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
+    schema.setReferenceDataset(schemaOrigin.isReferenceDataset());
     // table level
     for (TableSchema table : schemaOrigin.getTableSchemas()) {
       String nameTrimmed = table.getNameTableSchema().trim();
