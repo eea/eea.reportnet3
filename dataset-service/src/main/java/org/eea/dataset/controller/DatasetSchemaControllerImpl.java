@@ -357,10 +357,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody TableSchemaVO tableSchemaVO) {
 
-    String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
     boolean isSchema = false;
-    filterName(nameTrimmed, isSchema);
-    tableSchemaVO.setNameTableSchema(nameTrimmed);
+    if (null != tableSchemaVO.getNameTableSchema()) {
+      String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
+      filterName(nameTrimmed, isSchema);
+      tableSchemaVO.setNameTableSchema(nameTrimmed);
+    }
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -548,10 +550,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody FieldSchemaVO fieldSchemaVO) {
 
-    String nameTrimmed = fieldSchemaVO.getName().trim();
-    boolean isSchema = false;
-    filterName(nameTrimmed, isSchema);
-    fieldSchemaVO.setName(nameTrimmed);
+    if (null != fieldSchemaVO.getName()) {
+      String nameTrimmed = fieldSchemaVO.getName().trim();
+      boolean isSchema = false;
+      filterName(nameTrimmed, isSchema);
+      fieldSchemaVO.setName(nameTrimmed);
+    }
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {

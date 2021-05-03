@@ -10,6 +10,8 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.JavaType;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.RuleOperatorEnum;
 import org.eea.validation.service.RuleExpressionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /** The Class RuleExpressionServiceImpl. */
@@ -18,6 +20,9 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
 
   /** The Constant VALUE */
   private static final String VALUE = "VALUE";
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Converts a String containing a rule expression (Java code) into a RuleExpressionDTO data
@@ -78,11 +83,19 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
   @Override
   public boolean isDataTypeCompatible(String ruleExpressionString, EntityTypeEnum entityType,
       Map<String, DataType> dataTypeMap) {
+    boolean compatible = true;
     if (ruleExpressionString == null || ruleExpressionString.isEmpty()) {
-      return false;
+      compatible = false;
     } else {
-      return isDataTypeCompatible(convertToDTO(ruleExpressionString), entityType, dataTypeMap);
+      try {
+        compatible =
+            isDataTypeCompatible(convertToDTO(ruleExpressionString), entityType, dataTypeMap);
+      } catch (IllegalStateException e) {
+        compatible = false;
+        LOG_ERROR.error("Error with the rule {}", ruleExpressionString);
+      }
     }
+    return compatible;
   }
 
   /**

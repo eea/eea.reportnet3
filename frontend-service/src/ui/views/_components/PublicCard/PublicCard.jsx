@@ -10,18 +10,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
 
 export const PublicCard = ({
-  card,
   animation,
+  card,
   dataflowId,
   dueDate,
+  externalCard,
   frequency,
+  isReleasable,
   obligation,
   onCardClick,
-  isReleasable,
   pilotScenarioAmbition,
   subtitle,
-  title,
-  externalCard
+  title
 }) => {
   const idTooltip = uuid.v4();
   const baseRod3Url = 'https://rod.eionet.europa.eu';
@@ -71,34 +71,38 @@ export const PublicCard = ({
             {subtitle.text}
           </ReactTooltip>
         </div>
-        <div className={styles.legalInstrumentAndObligation}>
-          <p>
-            <strong>Obligation: </strong>
-            {obligation?.obligationId
-              ? renderRedirectText(obligation?.title, `${baseRod3Url}/obligations/${obligation?.obligationId}`)
-              : obligation?.title}
-          </p>
-        </div>
-        <div className={styles.legalInstrumentAndObligation}>
-          <p>
-            <strong>Instrument: </strong>
-            {obligation?.legalInstruments?.id
-              ? renderRedirectText(
-                  obligation?.legalInstruments?.alias,
-                  `${baseRod3Url}/instruments/${obligation?.legalInstruments?.id}`
-                )
-              : obligation?.legalInstruments?.alias}
-          </p>
-        </div>
-        {pilotScenarioAmbition && (
+
+        {externalCard ? (
           <div className={styles.legalInstrumentAndObligation}>
             <p>
               <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
             </p>
           </div>
+        ) : (
+          <Fragment>
+            <div className={styles.legalInstrumentAndObligation}>
+              <p>
+                <strong>Obligation: </strong>
+                {obligation?.obligationId
+                  ? renderRedirectText(obligation?.title, `${baseRod3Url}/obligations/${obligation?.obligationId}`)
+                  : obligation?.title}
+              </p>
+            </div>
+            <div className={styles.legalInstrumentAndObligation}>
+              <p>
+                <strong>Instrument: </strong>
+                {obligation?.legalInstruments?.id
+                  ? renderRedirectText(
+                      obligation?.legalInstruments?.alias,
+                      `${baseRod3Url}/instruments/${obligation?.legalInstruments?.id}`
+                    )
+                  : obligation?.legalInstruments?.alias}
+              </p>
+            </div>
+          </Fragment>
         )}
         <div className={`${styles.footer}`}>
-          {frequency ? (
+          {externalCard ? (
             <span>
               {
                 <Fragment>
