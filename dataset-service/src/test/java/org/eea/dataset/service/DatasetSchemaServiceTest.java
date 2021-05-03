@@ -2279,4 +2279,11 @@ public class DatasetSchemaServiceTest {
     }
   }
 
+
+  @Test
+  public void updateDatasetSchemaExportable() {
+    dataSchemaServiceImpl.updateDatasetSchemaExportable("", false);
+    Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaExportable(Mockito.any(),
+        Mockito.anyBoolean());
+  }
 }
