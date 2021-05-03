@@ -352,7 +352,7 @@ export const BigButtonList = ({
       const { status } = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
       if (status >= 200 && status <= 299) {
         onUpdateData();
-        setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex != index));
+        setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
       }
     } catch (error) {
       console.error(error.response);
@@ -509,7 +509,7 @@ export const BigButtonList = ({
 
   const renderRadioButtonsCreateDC = () => {
     return Object.keys(manualTechnicalAcceptanceOptions).map((value, index) => (
-      <div className={styles.radioButton} key={index}>
+      <div className={styles.radioButton} key={`technicalAcceptance${value}`}>
         <RadioButton
           checked={manualTechnicalAcceptanceOptions[value]}
           className={styles.button}
@@ -554,7 +554,7 @@ export const BigButtonList = ({
     setErrorDialogData
   })
     .filter(button => button.visibility)
-    .map((button, i) => <BigButton key={i} {...button} />);
+    .map((button, i) => <BigButton key={button.caption} {...button} />);
 
   const getManageAcceptanceDataset = data => setDatasetFeedbackStatusToEdit(data);
 

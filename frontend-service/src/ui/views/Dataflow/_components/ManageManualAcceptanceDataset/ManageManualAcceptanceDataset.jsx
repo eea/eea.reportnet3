@@ -85,9 +85,14 @@ export const ManageManualAcceptanceDataset = ({
 
   const renderDialogFooter = (
     <Fragment>
-      <span data-tip data-for="createTooltip">
+      <span data-for="createTooltip" data-tip>
         <Button
-          className="p-button-primary p-button-animated-blink"
+          className={`p-button-primary ${
+            !isEmpty(manageManualAcceptanceDatasetState.datasetMessage) &&
+            manageManualAcceptanceDatasetState.datasetFeedbackStatus !== dataset.feedbackStatus
+              ? 'p-button-animated-blink'
+              : ''
+          }`}
           disabled={
             isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
             manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus
@@ -112,16 +117,14 @@ export const ManageManualAcceptanceDataset = ({
     </Fragment>
   );
   const renderDialogLayout = children => (
-    <Fragment>
-      <Dialog
-        footer={renderDialogFooter}
-        header={`${resources.messages['editStatusDataset']} ${datasetName}`}
-        onHide={() => manageDialogs(false)}
-        style={{ width: '50%' }}
-        visible={isManageManualAcceptanceDatasetDialogVisible}>
-        {children}
-      </Dialog>
-    </Fragment>
+    <Dialog
+      footer={renderDialogFooter}
+      header={`${resources.messages['editStatusDataset']} ${datasetName}`}
+      onHide={() => manageDialogs(false)}
+      style={{ width: '50%' }}
+      visible={isManageManualAcceptanceDatasetDialogVisible}>
+      {children}
+    </Dialog>
   );
 
   const idTextArea = uuid.v4();
@@ -151,8 +154,8 @@ export const ManageManualAcceptanceDataset = ({
       return (
         <div className={styles.radioButtonWrapper} key={feedbackStatus}>
           <RadioButton
-            className={styles.radioButton}
             checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedbackStatus}
+            className={styles.radioButton}
             inputId={feedbackStatus}
             onChange={event => onChangeStatus(event.target.value)}
             value={feedbackStatus}
@@ -165,14 +168,12 @@ export const ManageManualAcceptanceDataset = ({
     });
 
   return renderDialogLayout(
-    <Fragment>
-      <div className={styles.content}>
-        <div className={styles.group}>
-          <div>{resources.messages['feedbackStatus']}</div>
-          {renderRadioButtons()}
-        </div>
-        <div className={styles.group}>{renderInputTextLayout('feedbackMessage')}</div>
+    <div className={styles.content}>
+      <div className={styles.group}>
+        <div>{resources.messages['feedbackStatus']}</div>
+        {renderRadioButtons()}
       </div>
-    </Fragment>
+      <div className={styles.group}>{renderInputTextLayout('feedbackMessage')}</div>
+    </div>
   );
 };
