@@ -40,16 +40,18 @@ const ComparisonExpression = ({
 
   const resourcesContext = useContext(ResourcesContext);
   const inputStringMatchRef = useRef(null);
+
   const [clickedFields, setClickedFields] = useState([]);
   const [disabledFields, setDisabledFields] = useState({});
   const [fieldType, setFieldType] = useState(null);
+  const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
+  const [previousValue, setPreviousValue] = useState();
   const [secondFieldOptions, setSecondFieldOptions] = useState();
   const [tableFields, setTableFields] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
-  const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
@@ -127,6 +129,9 @@ const ComparisonExpression = ({
     if (expressionValues.operatorType) {
       setOperatorValues(operatorTypesConf[expressionValues.operatorType].values);
     }
+    if (expressionValues.operatorType === 'LEN') {
+      setValueKeyFilter('num');
+    }
   }, [expressionValues.operatorType]);
 
   useEffect(() => {
@@ -160,7 +165,7 @@ const ComparisonExpression = ({
   useEffect(() => {
     const options = [];
     if (!isNil(fieldType)) {
-      operatorByType[fieldType].forEach(key => {
+      operatorByType[fieldType]?.forEach(key => {
         options.push(operatorTypesConf[key].option);
       });
     } else {
@@ -198,6 +203,13 @@ const ComparisonExpression = ({
       onExpressionsErrors(expressionId, false);
     }
   }, [clickedFields, showRequiredFields]);
+
+  useEffect(() => {
+    setPreviousValue(expressionValues.field2);
+    return () => {
+      setPreviousValue('');
+    };
+  }, []);
 
   const printRequiredFieldError = field => {
     let conditions = false;
@@ -284,6 +296,16 @@ const ComparisonExpression = ({
         const number = Number(fieldValue);
         if (!number) {
           onUpdateExpressionField('field2', '');
+        }
+      }
+      if (
+        (expressionValues.operatorType === 'LEN' || expressionValues.operatorType === 'number') &&
+        field === 'number'
+      ) {
+        if (!Number(fieldValue) && Number(fieldValue) !== 0) {
+          onUpdateExpressionField('field2', previousValue);
+        } else {
+          setPreviousValue(fieldValue);
         }
       }
     }
@@ -469,6 +491,22 @@ const ComparisonExpression = ({
         />
       );
     }
+
+    if (operatorType === 'LEN') {
+      return (
+        <InputNumber
+          id={uuid.v4()}
+          min={-1}
+          disabled={isDisabled}
+          format={false}
+          onBlur={e => checkField('number', e.target.value)}
+          onChange={e => onUpdateExpressionField('field2', e.target.value)}
+          placeholder={resourcesContext.messages.value}
+          value={field2}
+        />
+      );
+    }
+
     return (
       <InputText
         id={uuid.v4()}
