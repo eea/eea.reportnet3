@@ -44,7 +44,7 @@ const getUserRoles = userRoles => {
     }
   }
 
-  const dataflowPermisssionsOrderConfig = {
+  const dataflowPermissionsOrderConfig = {
     1: config.permissions.roles.CUSTODIAN,
     2: config.permissions.roles.STEWARD,
     3: config.permissions.roles.OBSERVER,
@@ -56,14 +56,14 @@ const getUserRoles = userRoles => {
     9: config.permissions.roles.REPORTER_READ
   };
 
-  const dataflowPermissions = Object.values(dataflowPermisssionsOrderConfig);
+  const dataflowPermissions = Object.values(dataflowPermissionsOrderConfig);
 
   dataflowDuplicatedRoles.forEach(dataflowRoles => {
     let rol = null;
 
     dataflowPermissions.forEach(permission => {
       dataflowRoles.forEach(dataflowRol => {
-        if (isNil(rol) && dataflowRol.userRole.key === permission) {
+        if (isNil(rol) && dataflowRol.userRole === permission.label) {
           rol = dataflowRol;
         }
       });

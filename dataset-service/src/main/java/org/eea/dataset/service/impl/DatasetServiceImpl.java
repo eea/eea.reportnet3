@@ -3401,54 +3401,54 @@ public class DatasetServiceImpl implements DatasetService {
             "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
 
     // create the context to add all files in a treemap inside to attachment and file information
-    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
-    // we get the dataschema and check every table to see if find any field attachemnt
-    DataSetSchema dataSetSchema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
-    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+    try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+      // we get the dataschema and check every table to see if find any field attachemnt
+      DataSetSchema dataSetSchema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
+      for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-      // we find if in any table have one field type ATTACHMENT
-      List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
-          .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
-          .collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+        // we find if in any table have one field type ATTACHMENT
+        List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+            .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+            .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
 
-        LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-            tableSchema.getIdTableSchema());
-        // We took every field for every table
-        for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-          List<AttachmentValue> attachmentValue = attachmentRepository
-              .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
+          LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+              tableSchema.getIdTableSchema());
+          // We took every field for every table
+          for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+            List<AttachmentValue> attachmentValue = attachmentRepository
+                .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
 
-          // if there are filled we create a folder and inside of any folder we create the fields
-          if (!CollectionUtils.isEmpty(attachmentValue)) {
-            LOG.info(
-                "We  are in tableSchema with id {}, checking field {} and we have attachments files",
-                tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+            // if there are filled we create a folder and inside of any folder we create the fields
+            if (!CollectionUtils.isEmpty(attachmentValue)) {
+              LOG.info(
+                  "We  are in tableSchema with id {}, checking field {} and we have attachments files",
+                  tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
 
-            for (AttachmentValue attachment : attachmentValue) {
-              try {
-                ZipEntry eFieldAttach =
-                    new ZipEntry(tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
-                out.putNextEntry(eFieldAttach);
-                out.write(attachment.getContent(), 0, attachment.getContent().length);
-              } catch (ZipException e) {
-                LOG.info("Error creating file {} because already exist", attachment.getFileName(),
-                    e);
+              for (AttachmentValue attachment : attachmentValue) {
+                try {
+                  ZipEntry eFieldAttach = new ZipEntry(
+                      tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                  out.putNextEntry(eFieldAttach);
+                  out.write(attachment.getContent(), 0, attachment.getContent().length);
+                } catch (ZipException e) {
+                  LOG.info("Error creating file {} because already exist", attachment.getFileName(),
+                      e);
+                }
+                out.closeEntry();
               }
-              out.closeEntry();
             }
           }
         }
       }
-    }
 
-    ZipEntry e = new ZipEntry(nameFileScape);
-    out.putNextEntry(e);
-    out.write(file, 0, file.length);
-    out.closeEntry();
-    out.close();
-    LOG.info("We create file {} in the route ", fileWriteZip.toString());
+      ZipEntry e = new ZipEntry(nameFileScape);
+      out.putNextEntry(e);
+      out.write(file, 0, file.length);
+      out.closeEntry();
+      LOG.info("We create file {} in the route ", fileWriteZip);
+    }
   }
 
 
@@ -3635,53 +3635,18 @@ public class DatasetServiceImpl implements DatasetService {
       Integer limit, Integer offset, String filterValue, String columnName) throws EEAException {
     try {
       String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-
       DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
           .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
-
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-
-      String filterValuePart = "";
-      if (null != filterValue && !filterValue.isEmpty()) {
-        filterValuePart = String.format("  and fv.value like '%s' ", filterValue);
-      }
-      String queryFirstPart =
-          "select cast(row_to_json(tablesAux) as TEXT) from ( select json_agg(tableAux)  as \"tables\" from( select case ";
-      String queryFinalPart =
-          " ) as record where fields is not null ) from dataset_%s.table_value tv) as tableAux  ) as tablesAux ";
-      if (null != tableSchemaId) {
-        queryFirstPart =
-            "select  cast(row_to_json(tableAux)  as text)  as \"tables\" from (select case ";
-        queryFinalPart =
-            " ) as record where fields is not null ) from dataset_%s.table_value tv where tv.id_table_schema = '%s' ) as tableAux ";
-      }
-      String filterBycolum = "";
-      if (null != columnName) {
-        filterBycolum = String.format(" where \"fieldName\" like '%s' ", columnName);
-      }
-      String totalRecords = "";
-      if (null != tableSchemaId) {
-        totalRecords =
-            " ( select count(*) from dataset_%s.record_value rv where  tv.id = rv.id_table) as \"totalRecords\", ";
-      }
-
-      if (null != columnName || null != filterValue) {
-        totalRecords =
-            totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
-      }
-
-      String queryMiddlePartOne = " end as \"tableName\"," + totalRecords
-          + " (select json_agg(row_to_json(record)) as records from (select rv.data_provider_code as \"countryCode\", (select json_agg(row_to_json(fieldsAux)) as fields from ( select case ";
-      String queryMiddlePartTwo =
-          " end as \"fieldName\", fv.value as \"value\" from dataset_%s.field_value fv where fv.id_record = rv.id "
-              + filterValuePart + ") as fieldsAux " + filterBycolum + ") "
-              + " from dataset_%s.record_value rv where tv.id = rv.id_table ";
-      String paginationPart = " offset %s limit %s ";
-      String tableSchemaQueryPart = " when tv.id_table_schema = '%s' then '%s' ";
-      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-
       String tableName = "";
-
+      StringBuilder query = new StringBuilder();
+      if (null == tableSchemaId) {
+        query.append(" select cast(json_build_object('tables',json_agg(tables)) as TEXT) from ( ");
+      } else {
+        query.append(" select cast(tables as TEXT) from ( ");
+      }
+      String tableSchemaQueryPart = " when id_table_schema = '%s' then '%s' ";
+      StringBuilder caseTables = new StringBuilder();
       if (null != tableSchemaId) {
         Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
         if (tableSchema != null) {
@@ -3689,53 +3654,82 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       if (null != tableSchemaList) {
-        StringBuilder query = new StringBuilder(queryFirstPart);
         if (null != tableSchemaId) {
-          query.append(String.format(tableSchemaQueryPart, tableSchemaId, tableName));
+          caseTables.append((String.format(tableSchemaQueryPart, tableSchemaId, tableName)));
         } else {
           for (TableSchema table : tableSchemaList) {
-            query.append(String.format(tableSchemaQueryPart, table.getIdTableSchema().toString(),
-                table.getNameTableSchema()));
+            caseTables.append((String.format(tableSchemaQueryPart,
+                table.getIdTableSchema().toString(), table.getNameTableSchema())));
           }
         }
-        query.append(String.format(queryMiddlePartOne, datasetId));
-        for (TableSchema table : tableSchemaList) {
-          if (null != tableSchemaId) {
-            if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
-              for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-                query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                    field.getHeaderName()));
-              }
-            }
-          } else {
+      }
+      query.append(
+          " select json_build_object('tableName',(case " + caseTables.toString() + " end), ");
+      String totalRecords = "";
+      if (null != tableSchemaId) {
+        totalRecords = String.format(
+            " 'totalRecords',(select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table), ",
+            datasetId, datasetId, tableSchemaId);
+      }
+      if (null != columnName || null != filterValue) {
+        totalRecords =
+            totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
+      }
+      query.append(totalRecords).append(" 'records', json_agg(records)) as tables ")
+          .append(" from ( ")
+          .append(
+              " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
+          .append(
+              " select data_provider_code,id_table_schema,id_record,json_build_object('fieldName',\"fieldName\",'value',value) as fields from( ")
+          .append(" select case ");
+      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+      for (TableSchema table : tableSchemaList) {
+        if (null != tableSchemaId) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
             for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
               query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
                   field.getHeaderName()));
             }
           }
-        }
-        query.append(String.format(queryMiddlePartTwo, datasetId, datasetId));
-        if (null != offset && null != limit) {
-          Integer offsetAux = (limit * offset) - limit;
-          if (offsetAux < 0) {
-            offsetAux = 0;
-          }
-          query.append(String.format(paginationPart, offsetAux, limit));
-        }
-        if (null != tableSchemaId) {
-          query.append(String.format(queryFinalPart, datasetId, tableSchemaId));
         } else {
-          query.append(String.format(queryFinalPart, datasetId));
+          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+            query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                field.getHeaderName()));
+          }
         }
-        LOG.info("Query: {} ", query);
-        outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
-        LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
       }
-
+      query.append(String.format(
+          " end as \"fieldName\", fv.value as \"value\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table ) fieldsAux",
+          datasetId, datasetId, datasetId));
+      if (null != tableSchemaId || null != filterValue || null != columnName) {
+        query.append(" where ")
+            .append(null != tableSchemaId
+                ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
+                : "")
+            .append(null != columnName ? String.format(" \"fieldName\" like '%s' and ", columnName)
+                : "")
+            .append(null != filterValue ? String.format(" value like '%s' and ", filterValue) : "");
+        query.delete(query.lastIndexOf("and "), query.length() - 1);
+      }
+      String paginationPart = " offset %s limit %s ";
+      if (null != offset && null != limit) {
+        Integer offsetAux = (limit * offset) - limit;
+        if (offsetAux < 0) {
+          offsetAux = 0;
+        }
+        query.append(String.format(paginationPart, offsetAux, limit));
+      }
+      query.append(
+          ") records group by id_table_schema,id_record,data_provider_code ) tablesAux group by id_table_schema ) as json ");
+      LOG.info("Query: {} ", query);
+      // Delete the query log and the timestamp part later, once the tests are finished.
+      outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+      LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
   }
+
 
   /**
    * Total records query.
@@ -3749,20 +3743,15 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private String totalRecordsQuery(Long datasetId, List<TableSchema> tableSchemaList,
       String tableSchemaId, String filterValue, String columnName) {
-    String queryPartOne = "( select count(\"fieldName\") as \"totalRecords\" from ( select case ";
+    String queryPartOne =
+        " 'totalRecords',( select count(\"fieldName\") as \"totalRecords\" from ( select case ";
     String queryPartTwo =
         "end as \"fieldName\",  fv.value as \"value\" from dataset_%s.field_value fv inner join dataset_%s.record_value rv on rv.id = fv.id_record  inner join dataset_%s.table_value tv on rv.id_table = tv.id ";
-
     String queryValueFilter = " and fv.value like '%s' ";
-
     String queryColumnFilter = " where \"fieldName\" = '%s'";
-
     String queryTablePart = " where tv.id_table_schema in( %s ) ";
-
     String queryPartThree = " ) as countAux ";
-
     String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-
     StringBuilder query = new StringBuilder(queryPartOne);
     for (TableSchema table : tableSchemaList) {
       if (null != tableSchemaId) {
@@ -3795,7 +3784,6 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     }
-
     query.append(String.format(queryTablePart, tableList));
     if (null != filterValue) {
       query.append(String.format(queryValueFilter, filterValue));
@@ -3804,8 +3792,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (null != columnName) {
       query.append(String.format(queryColumnFilter, columnName));
     }
-    query.append(" ), ");
-
+    query.append(" ) , ");
     return query.toString();
   }
 

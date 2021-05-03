@@ -228,16 +228,16 @@ public class FKValidationUtils {
     } else {
       // Retrieve PK List
       List<String> pkList = mountQuery(datasetSchemaPK, idFieldSchemaPKString, datasetIdRefered);
-      pkList.add("");
       // Get list of Fields to validate
       List<FieldValue> fkFields = fieldRepository.findByIdFieldSchema(idFieldSchema);
       if (!pkMustBeUsed) {
+        pkList.add("");
         createFieldValueValidation(fkFieldSchema, pkList, fkFields, pkValidation, errorFields);
         saveFieldValidations(errorFields);
         // Force true because we only need Field Validations
         return true;
       } else {
-        if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed() && pkMustBeUsed) {
+        if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()) {
           return setValuesToValidate(fkFieldSchema, pkList, fkFields);
         }
 
@@ -350,7 +350,8 @@ public class FKValidationUtils {
     for (int i = 0; i < fkList.size(); i++) {
       if (null != pkMap.get(fkList.get(i)[2])) {
         List<String> pksByOptionalValue = Arrays.asList(pkMap.get(fkList.get(i)[2]).split(","));
-        List<String> fksByOptionalValue = Arrays.asList(fkList.get(i)[1].toString().split(","));
+        List<String> fksByOptionalValue = Arrays.asList(fkList.get(i)[1].toString().split(";"));
+
 
         for (String value : fksByOptionalValue) {
 
@@ -474,6 +475,9 @@ public class FKValidationUtils {
       // we look one by one to know if all values are avaliable
       checkAllValuesMulti(pkSet, fkFields);
     } else {
+      // remove the empty char from the list to avoid false error positives
+      pkSet.remove("");
+
       // Values must check
       fkFields.stream().forEach(field -> pkSet.remove(field.getValue()));
     }
@@ -517,7 +521,7 @@ public class FKValidationUtils {
   private static void checkAllValuesMulti(Set<String> pkSet, List<FieldValue> fkFields) {
 
     for (FieldValue fieldValue : fkFields) {
-      final List<String> arrayValue = Arrays.asList(fieldValue.getValue().split(","));
+      final List<String> arrayValue = Arrays.asList(fieldValue.getValue().split(";"));
 
       for (String valueArray : arrayValue) {
         pkSet.remove(valueArray.trim());
