@@ -1,4 +1,4 @@
-import { useEffect, useContext, useReducer, useState, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import { isEmpty, isNull, isUndefined } from 'lodash';
 
@@ -19,24 +19,23 @@ import { ErrorUtils } from 'ui/views/_functions/Utils';
 
 export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datasetSchemaName, isVisible }) => {
   const resources = useContext(ResourcesContext);
-  const initialFiltersState = {
-    data: {},
-    originalData: {},
-    reporterFilter: [],
-    statusFilter: [],
-    tableFilter: []
-  };
-  const [dashboardColors] = useState({
-    CORRECT: colors.correct,
-    INFO: colors.info,
-    WARNING: colors.warning,
-    ERROR: colors.error,
-    BLOCKER: colors.blocker
-  });
+
+  const initialFiltersState = { data: {}, originalData: {}, reporterFilter: [], statusFilter: [], tableFilter: [] };
+
   const [filterState, filterDispatch] = useReducer(filterReducer, initialFiltersState);
+
+  const [dashboardColors] = useState({
+    BLOCKER: colors.blocker,
+    CORRECT: colors.correct,
+    ERROR: colors.error,
+    INFO: colors.info,
+    WARNING: colors.warning
+  });
+
   const [isLoading, setLoading] = useState(true);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [validationDashboardData, setValidationDashboardData] = useState();
+
   const chartRef = useRef();
 
   useEffect(() => {
@@ -172,54 +171,43 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
     }
   };
 
-  if (isLoading) {
-    return <Spinner className={styles.positioning} />;
-  }
+  if (isLoading) return <Spinner className={styles.positioning} />;
+
   return (
-    <>
-      {isVisible ? (
-        <div className={`rep-row ${styles.chart_released}`}>
-          <h3 className={styles.dashboardName}>{datasetSchemaName}</h3>
-          {filterState.data ? (
-            <>
-              <FilterList
-                color={dashboardColors}
-                datasetSchemaId={datasetSchemaId}
-                filterDispatch={filterDispatch}
-                levelErrors={levelErrorTypes}
-                originalData={filterState.originalData}
-                reporterFilters={filterState.reporterFilter}
-                statusFilters={filterState.statusFilter}
-                tableFilters={filterState.tableFilter}
-              />
-              {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
-              <Chart
-                data={filterState.data}
-                height="30%"
-                options={datasetOptionsObject}
-                ref={chartRef}
-                style={{ marginTop: '3rem' }}
-                type="bar"
-                width="100%"
-              />
-            </>
-          ) : (
-            <>
-              <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
-              {onLoadStamp(resources.messages['empty'])}
-              <Chart
-                className={styles.emptyChart}
-                height="30%"
-                options={datasetOptionsObject}
-                type="bar"
-                width="100%"
-              />
-            </>
-          )}
-        </div>
-      ) : (
-        <></>
-      )}
-    </>
+    isVisible && (
+      <div className={`rep-row ${styles.chart_released}`}>
+        <h3 className={styles.dashboardName}>{datasetSchemaName}</h3>
+        {filterState.data ? (
+          <Fragment>
+            <FilterList
+              color={dashboardColors}
+              datasetSchemaId={datasetSchemaId}
+              filterDispatch={filterDispatch}
+              levelErrors={levelErrorTypes}
+              originalData={filterState.originalData}
+              reporterFilters={filterState.reporterFilter}
+              statusFilters={filterState.statusFilter}
+              tableFilters={filterState.tableFilter}
+            />
+            {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
+            <Chart
+              data={filterState.data}
+              height="30%"
+              options={datasetOptionsObject}
+              ref={chartRef}
+              style={{ marginTop: '3rem' }}
+              type="bar"
+              width="100%"
+            />
+          </Fragment>
+        ) : (
+          <Fragment>
+            <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
+            {onLoadStamp(resources.messages['empty'])}
+            <Chart className={styles.emptyChart} height="30%" options={datasetOptionsObject} type="bar" width="100%" />
+          </Fragment>
+        )}
+      </div>
+    )
   );
 };
