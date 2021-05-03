@@ -254,7 +254,7 @@ export const FieldDesigner = ({
             onShowDialogError(
               resources.messages['emptyFieldTypeMessage'],
               resources.messages['emptyFieldTypeTitle'],
-              inputRef?.current?.element?.focus()
+              inputRef?.current?.element
             );
           }
         }
@@ -300,7 +300,7 @@ export const FieldDesigner = ({
             onShowDialogError(
               resources.messages['emptyFieldMessage'],
               resources.messages['emptyFieldTitle'],
-              inputRef?.current?.element?.focus()
+              inputRef?.current?.element
             );
           } else {
             if (checkInvalidCharacters(name)) {
@@ -308,7 +308,7 @@ export const FieldDesigner = ({
               onShowDialogError(
                 resources.messages['invalidCharactersFieldMessage'],
                 resources.messages['invalidCharactersFieldTitle'],
-                inputRef?.current?.element?.focus()
+                inputRef?.current?.element
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
             } else {
@@ -321,7 +321,7 @@ export const FieldDesigner = ({
                 onShowDialogError(
                   resources.messages['duplicatedFieldMessage'],
                   resources.messages['duplicatedFieldTitle'],
-                  inputRef?.current?.element?.focus()
+                  inputRef?.current?.element
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
               }
@@ -333,7 +333,7 @@ export const FieldDesigner = ({
             onShowDialogError(
               resources.messages['emptyFieldMessage'],
               resources.messages['emptyFieldTitle'],
-              inputRef?.current?.element?.focus()
+              inputRef?.current?.element
             );
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
           } else {
@@ -343,7 +343,7 @@ export const FieldDesigner = ({
                 onShowDialogError(
                   resources.messages['invalidCharactersFieldMessage'],
                   resources.messages['invalidCharactersFieldTitle'],
-                  inputRef?.current?.element?.focus()
+                  inputRef?.current?.element
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
               } else {
@@ -354,7 +354,7 @@ export const FieldDesigner = ({
                   onShowDialogError(
                     resources.messages['duplicatedFieldMessage'],
                     resources.messages['duplicatedFieldTitle'],
-                    inputRef?.current?.element?.focus()
+                    inputRef?.current?.element
                   );
                   dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
                 }
@@ -642,7 +642,7 @@ export const FieldDesigner = ({
       onShowDialogError(
         resources.messages['emptyFieldMessage'],
         resources.messages['emptyFieldTitle'],
-        inputRef?.current?.element?.focus()
+        inputRef?.current?.element
       );
     } else {
       if (!isUndefined(fieldId)) {
@@ -663,7 +663,7 @@ export const FieldDesigner = ({
       onShowDialogError(
         resources.messages['emptyFieldMessage'],
         resources.messages['emptyFieldTitle'],
-        inputRef?.current?.element?.focus()
+        inputRef?.current?.element
       );
     } else {
       if (!isUndefined(fieldId)) {
@@ -711,7 +711,7 @@ export const FieldDesigner = ({
       onShowDialogError(
         resources.messages['emptyFieldMessage'],
         resources.messages['emptyFieldTitle'],
-        inputRef?.current?.element?.focus()
+        inputRef?.current?.element
       );
     } else {
       if (!isUndefined(fieldId)) {

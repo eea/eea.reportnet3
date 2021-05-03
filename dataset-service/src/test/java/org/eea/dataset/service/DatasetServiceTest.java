@@ -3,11 +3,13 @@ package org.eea.dataset.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -93,6 +95,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -296,6 +299,9 @@ public class DatasetServiceTest {
 
   @Mock
   private TestDatasetRepository testDatasetRepository;
+
+  @Mock
+  private OutputStream outputStream;
 
   /** The field value. */
   private FieldValue fieldValue;
@@ -2891,4 +2897,93 @@ public class DatasetServiceTest {
     }
   }
 
+  @Test
+  public void etlExportDatasetTest() throws IOException {
+    ObjectId id = new ObjectId();
+    DataSetSchema dsSchema = new DataSetSchema();
+    TableSchema tSchema = new TableSchema();
+    RecordSchema rSchema = new RecordSchema();
+    FieldSchema fSchema = new FieldSchema();
+    rSchema.setFieldSchema(Arrays.asList(fSchema));
+    tSchema.setIdTableSchema(id);
+    tSchema.setRecordSchema(rSchema);
+    dsSchema.setTableSchemas(Arrays.asList(tSchema));
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn(id.toString());
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
+    Mockito.when(recordRepository.findAndGenerateETLJson(Mockito.any())).thenReturn("");
+    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "");
+    Mockito.verify(outputStream, times(1)).flush();
+  }
+
+  @Test
+  public void createLockWithSignatureTest() throws EEAException {
+    datasetService.createLockWithSignature(LockSignature.EMPTY, new HashMap<>(), "");
+    Mockito.verify(lockService, times(1)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void getSchemaIfReportableNullTest() {
+    assertNull(datasetService.getSchemaIfReportable(0L, new ObjectId().toString()));
+  }
+
+  @Test
+  public void getSchemaIfReportableDesingTest() {
+    ObjectId id = new ObjectId();
+    DesignDataset dataset = new DesignDataset();
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    dataset.setDatasetSchema(id.toString());
+    Mockito.when(designDatasetRepository.findById(Mockito.any())).thenReturn(Optional.of(dataset));
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    assertNull(datasetService.getSchemaIfReportable(0L, id.toString()));
+  }
+
+  @Test
+  public void getSchemaIfReportableDraftTest() {
+    ObjectId id = new ObjectId();
+    ReportingDataset dataset = new ReportingDataset();
+    DataFlowVO dataflowVO = new DataFlowVO();
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(id);
+    schema.setTableSchemas(Arrays.asList(tableSchema));
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataset.setDatasetSchema(id.toString());
+    Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(dataset));
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    assertEquals(schema, datasetService.getSchemaIfReportable(0L, id.toString()));
+  }
+
+  @Test
+  public void getSchemaIfReportableDraftNullTest() {
+    ObjectId id = new ObjectId();
+    ReportingDataset dataset = new ReportingDataset();
+    DataFlowVO dataflowVO = new DataFlowVO();
+    DataSetSchema schema = new DataSetSchema();
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId());
+    schema.setTableSchemas(Arrays.asList(tableSchema));
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataset.setDatasetSchema(id.toString());
+    Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(dataset));
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    assertNull(datasetService.getSchemaIfReportable(0L, id.toString()));
+  }
+
+  @Test
+  public void checkAnySchemaAvailableTest() {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndProviderIdNotNull(Mockito.any()))
+        .thenReturn(Arrays.asList(datasetMetabase));
+    Mockito.when(schemasRepository.findAvailableInPublicByIdDataSetSchema(Mockito.any()))
+        .thenReturn(Boolean.TRUE);
+    assertTrue(datasetService.checkAnySchemaAvailableInPublic(0L));
+  }
 }

@@ -3116,54 +3116,54 @@ public class DatasetServiceImpl implements DatasetService {
             "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
 
     // create the context to add all files in a treemap inside to attachment and file information
-    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
-    // we get the dataschema and check every table to see if find any field attachemnt
-    DataSetSchema dataSetSchema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
-    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+    try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+      // we get the dataschema and check every table to see if find any field attachemnt
+      DataSetSchema dataSetSchema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
+      for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-      // we find if in any table have one field type ATTACHMENT
-      List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
-          .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
-          .collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+        // we find if in any table have one field type ATTACHMENT
+        List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+            .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+            .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
 
-        LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-            tableSchema.getIdTableSchema());
-        // We took every field for every table
-        for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-          List<AttachmentValue> attachmentValue = attachmentRepository
-              .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
+          LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+              tableSchema.getIdTableSchema());
+          // We took every field for every table
+          for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+            List<AttachmentValue> attachmentValue = attachmentRepository
+                .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
 
-          // if there are filled we create a folder and inside of any folder we create the fields
-          if (!CollectionUtils.isEmpty(attachmentValue)) {
-            LOG.info(
-                "We  are in tableSchema with id {}, checking field {} and we have attachments files",
-                tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+            // if there are filled we create a folder and inside of any folder we create the fields
+            if (!CollectionUtils.isEmpty(attachmentValue)) {
+              LOG.info(
+                  "We  are in tableSchema with id {}, checking field {} and we have attachments files",
+                  tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
 
-            for (AttachmentValue attachment : attachmentValue) {
-              try {
-                ZipEntry eFieldAttach =
-                    new ZipEntry(tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
-                out.putNextEntry(eFieldAttach);
-                out.write(attachment.getContent(), 0, attachment.getContent().length);
-              } catch (ZipException e) {
-                LOG.info("Error creating file {} because already exist", attachment.getFileName(),
-                    e);
+              for (AttachmentValue attachment : attachmentValue) {
+                try {
+                  ZipEntry eFieldAttach = new ZipEntry(
+                      tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                  out.putNextEntry(eFieldAttach);
+                  out.write(attachment.getContent(), 0, attachment.getContent().length);
+                } catch (ZipException e) {
+                  LOG.info("Error creating file {} because already exist", attachment.getFileName(),
+                      e);
+                }
+                out.closeEntry();
               }
-              out.closeEntry();
             }
           }
         }
       }
-    }
 
-    ZipEntry e = new ZipEntry(nameFileScape);
-    out.putNextEntry(e);
-    out.write(file, 0, file.length);
-    out.closeEntry();
-    out.close();
-    LOG.info("We create file {} in the route ", fileWriteZip.toString());
+      ZipEntry e = new ZipEntry(nameFileScape);
+      out.putNextEntry(e);
+      out.write(file, 0, file.length);
+      out.closeEntry();
+      LOG.info("We create file {} in the route ", fileWriteZip);
+    }
   }
 
 

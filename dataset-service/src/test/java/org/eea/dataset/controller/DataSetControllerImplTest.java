@@ -7,11 +7,13 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -93,6 +95,9 @@ public class DataSetControllerImplTest {
   /** The delete helper. */
   @Mock
   private DeleteHelper deleteHelper;
+
+  @Mock
+  HttpServletResponse httpServletResponse;
 
   /** The records. */
   private List<RecordVO> records;
@@ -1158,4 +1163,13 @@ public class DataSetControllerImplTest {
     Mockito.verify(fileTreatmentHelper, times(1)).exportDatasetFile(Mockito.anyLong(),
         Mockito.any());
   }
+
+  @Test
+  public void downloadFileTest() throws IOException, EEAException {
+    Mockito.when(datasetService.downloadExportedFile(Mockito.any(), Mockito.any()))
+        .thenReturn(new File(""));
+    dataSetControllerImpl.downloadFile(0L, recordId, httpServletResponse);
+    Mockito.verify(httpServletResponse, times(1)).getOutputStream();
+  }
+
 }
