@@ -16,6 +16,7 @@ import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { NotificationsList } from './_components/NotificationsList';
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
@@ -28,6 +29,7 @@ export const MainLayout = ({ children, isPublic = false, history }) => {
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
+
   const themeContext = useContext(ThemeContext);
   const userContext = useContext(UserContext);
 
@@ -165,13 +167,8 @@ export const MainLayout = ({ children, isPublic = false, history }) => {
     setMainContentStyle(newMainContentStyle);
   };
 
-  const onResetErrorBoundary = error => {
-    console.log(`Error: `, error);
-    console.log(`Path: `, history.location.pathname);
-    console.log(`userContext.id`, userContext.id);
-    setTimeout(() => {
-      history.go(0);
-    }, 10000);
+  const onResetErrorBoundary = () => {
+    history.go(0);
   };
 
   useSocket();
@@ -202,20 +199,45 @@ export const MainLayout = ({ children, isPublic = false, history }) => {
 };
 
 function ErrorFallback({ error, resetErrorBoundary }) {
+  const resources = useContext(ResourcesContext);
+  const onCopyErrorToClipboard = error => {
+    const stringError = JSON.stringify({
+      msg: error.message,
+      stack: error.stack
+    });
+
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = stringError;
+    tempTextArea.setAttribute('readonly', '');
+    tempTextArea.style = { position: 'absolute', left: '-9999px' };
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempTextArea);
+  };
+
   return (
     <MainLayout>
       <div className="rep-container">
-        <div className="rep-row">
-          <h3>Error occurred: {error.message}</h3>
+        <div className="rep-col-sm-6">
+          <h3 className="warning">{resources.messages['errorBoundaryTitle']}</h3>
         </div>
-        <div className="rep-row">
+        <div className="rep-col-sm-6">
+          <p>{error.message}</p>
+        </div>
+
+        <div className="rep-col-sm-12">
           <div>
             <Button
-              className="p-button-success p-button-animated-blink"
-              icon={'refresh'}
-              label={'Send to helpdesk'}
-              onClick={resetErrorBoundary}
+              tooltip={resources.messages['copyToClipboardSuccess']}
+              tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+              icon={'copy'}
+              label={'Copy to clipboard'}
+              onClick={() => onCopyErrorToClipboard(error)}
             />
+          </div>
+          <div>
+            <Button icon={'refresh'} label={'Refresh'} onClick={resetErrorBoundary} />
           </div>
         </div>
       </div>

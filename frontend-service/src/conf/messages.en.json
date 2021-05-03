@@ -1067,6 +1067,7 @@
     "exportDatasetFileAutomaticallyDownload": "Export file generated successfully",
     "onlyReleasedCheckboxLabel": "Only released",
     "onlyReleasedDataCollectionCheckboxLabel": "Only released to Data Collection",
-    "onlyReleasedEuDatasetCheckboxLabel": "Only released to EU dataset"
+    "onlyReleasedEuDatasetCheckboxLabel": "Only released to EU dataset",
+    "errorBoundaryTitle": "Unexpected Error occurred:"
   }
 }
