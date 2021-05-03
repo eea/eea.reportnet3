@@ -55,6 +55,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -742,6 +743,17 @@ public class FileTreatmentHelperTest {
         .thenReturn(dataSetMetabase);
     fileTreatmentHelper.exportDatasetFile(1L, "xslx");
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
+  }
+
+
+  @After
+  public void afterTests() {
+    File file = new File("./dataset-1");
+    try {
+      FileUtils.deleteDirectory(file);
+    } catch (IOException e) {
+
+    }
   }
 
 

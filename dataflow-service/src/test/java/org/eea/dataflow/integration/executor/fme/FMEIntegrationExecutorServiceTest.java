@@ -4,9 +4,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.persistence.domain.Integration;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -60,8 +63,15 @@ public class FMEIntegrationExecutorServiceTest {
   @Mock
   FMEJobRepository fmeJobRepository;
 
+  /** The integration repository. */
+  @Mock
+  IntegrationRepository integrationRepository;
+
+  /** The integrationVO. */
+  IntegrationVO integrationVO = new IntegrationVO();
+
   /** The integration. */
-  IntegrationVO integration = new IntegrationVO();
+  Integration integration = new Integration();
 
   /** The security context. */
   private SecurityContext securityContext;
@@ -75,13 +85,13 @@ public class FMEIntegrationExecutorServiceTest {
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
-    integration.setTool(IntegrationToolTypeEnum.FME);
+    integrationVO.setTool(IntegrationToolTypeEnum.FME);
     Map<String, String> internalParameters = new HashMap<String, String>();
     internalParameters.put(IntegrationParams.REPOSITORY, "test");
-    integration.setInternalParameters(internalParameters);
+    integrationVO.setInternalParameters(internalParameters);
     Map<String, String> externalParameters = new HashMap<String, String>();
     externalParameters.put(IntegrationParams.FILE_IS, "test");
-    integration.setExternalParameters(externalParameters);
+    integrationVO.setExternalParameters(externalParameters);
 
     authentication = Mockito.mock(Authentication.class);
     securityContext = Mockito.mock(SecurityContext.class);
@@ -108,8 +118,9 @@ public class FMEIntegrationExecutorServiceTest {
     when(fmeCommunicationService.createDirectory(Mockito.any(), Mockito.any()))
         .thenReturn(HttpStatus.OK);
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
+    when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT, "test", 1L,
-        integration);
+        integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 
@@ -128,9 +139,10 @@ public class FMEIntegrationExecutorServiceTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
+    when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT, "test", 1L,
-        integration);
+        integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 
@@ -150,8 +162,9 @@ public class FMEIntegrationExecutorServiceTest {
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
+    when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM,
-        "test", 1L, integration);
+        "test", 1L, integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 
@@ -171,8 +184,9 @@ public class FMEIntegrationExecutorServiceTest {
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
+    when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT_EU_DATASET, "test",
-        1L, integration);
+        1L, integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 }
