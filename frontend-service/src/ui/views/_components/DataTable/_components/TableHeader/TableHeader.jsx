@@ -6,7 +6,6 @@ export class TableHeader extends Component {
     let children = Children.toArray(root.props.children);
 
     return Children.map(children, (column, i) => {
-      console.log(column.key, this.props.value);
       return (
         <HeaderCell
           key={column.key}

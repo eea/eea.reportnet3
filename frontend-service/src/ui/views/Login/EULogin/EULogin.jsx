@@ -44,7 +44,7 @@ const EULogin = ({ location, history }) => {
   return (
     <div className="rp-container">
       <div className={`${styles.loginBoxContainer}`}>
-        {isLoading && <img className={styles.logo} alt="EEA logo" src={logo} />}
+        {isLoading && <img alt="EEA logo" className={styles.logo} src={logo} />}
       </div>
     </div>
   );

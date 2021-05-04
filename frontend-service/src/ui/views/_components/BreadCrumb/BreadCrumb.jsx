@@ -33,15 +33,15 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
   const onLoadItem = item => {
     const className = !isUndefined(item.className) || !isEmpty(item.className) ? item.className : '';
     return (
-      <li role="menuitem" className={className} style={item.style}>
+      <li className={className} role="menuitem" style={item.style}>
         <a
-          href={item.href || ''}
           className="p-menuitem-link"
-          target={item.target}
+          href={item.href || ''}
           onClick={event => {
             event.preventDefault();
             onItemClick(event, item);
-          }}>
+          }}
+          target={item.target}>
           {!isNil(item.icon) && (
             <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
           )}
@@ -78,8 +78,8 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
 
   return (
     <div
-      id={id}
       className={`${styles.container} ${isPublic ? styles.isPublic : ''} ${className ? className : ''}`}
+      id={id}
       style={style}>
       <ul>{onLoadModel()}</ul>
     </div>

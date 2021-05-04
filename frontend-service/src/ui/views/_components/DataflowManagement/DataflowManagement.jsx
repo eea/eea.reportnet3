@@ -119,7 +119,7 @@ export const DataflowManagement = ({
 
   const renderCancelButton = action => (
     <Button
-      className="p-button-secondary button-right-aligned"
+      className="p-button-secondary button-right-aligned p-button-animated-blink"
       icon="cancel"
       label={resources.messages['cancel']}
       onClick={() => action()}
@@ -139,6 +139,7 @@ export const DataflowManagement = ({
         )}
       </div>
       <Button
+        className={`p-button-primary ${!dataflowManagementState.isSubmitting ? 'p-button-animated-blink' : ''}`}
         disabled={dataflowManagementState.isSubmitting}
         icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
         label={isEditForm ? resources.messages['save'] : resources.messages['create']}

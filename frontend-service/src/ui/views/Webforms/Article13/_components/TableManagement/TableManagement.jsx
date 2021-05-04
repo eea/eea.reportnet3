@@ -431,8 +431,8 @@ export const TableManagement = ({
   const renderValidationColumn = (
     <Column
       body={validationsTemplate}
-      header={resources.messages['validationsDataColumn']}
       field="validations"
+      header={resources.messages['validationsDataColumn']}
       key="recordValidation"
       sortable={false}
       style={{ width: '100px' }}
@@ -471,8 +471,8 @@ export const TableManagement = ({
         renderEmptyTable()
       ) : (
         <DataTable
-          className={styles.table}
           autoLayout={true}
+          className={styles.table}
           loading={loading}
           onRowClick={event =>
             tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
@@ -510,8 +510,8 @@ export const TableManagement = ({
               datasetId={datasetId}
               editDialogVisible={isDialogVisible.manageRows}
               onChangeForm={onEditFormInput}
-              selectedRecord={selectedRecord}
               records={tableManagementState.records}
+              selectedRecord={selectedRecord}
               tableColumns={tableColumns}
             />
           </div>
