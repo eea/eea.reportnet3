@@ -123,10 +123,10 @@ export const ManageUniqueConstraint = ({
     }
 
     return (
-      <span>
+      <div className={styles.pkFieldWrapper}>
         {`${option.name}`}
         {isPk ? <span className={styles.pkField}>{'PK'}</span> : ''}
-      </span>
+      </div>
     );
   };
 

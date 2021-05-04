@@ -1,0 +1,61 @@
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+body {
+  margin: 0px;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100%;
+}
+
+body a {
+  color: var(--hyperlink-color);
+  text-decoration: none;
+}
+body a:hover {
+  color: var(--hyperlink-color-hover);
+}
+body a:active {
+  color: var(--hyperlink-color-active);
+}
+body a:visited {
+  color: var(--hyperlink-color-visited);
+}
+
+body .warning {
+  color: var(--errors);
+}
+
+/* Change all scrollbar styles for webkit-based browsers */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-75);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-50);
+  cursor: pointer;
+}
+
+/* Accessibility */
+
+body .srOnly {
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  position: absolute;
+  white-space: nowrap;
+}

@@ -408,6 +408,7 @@ export const FieldsDesigner = ({
         <FieldDesigner
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+          checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
           codelistItems={[]}
           datasetId={datasetId}
           datasetSchemaId={datasetSchemaId}
@@ -447,6 +448,7 @@ export const FieldsDesigner = ({
             <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
               <FieldDesigner
                 checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+                checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
                 datasetSchemaId={datasetSchemaId}
