@@ -38,27 +38,21 @@ const SnapshotItem = ({ itemData }) => {
 
       <div className={styles.listActions}>
         <Button
-          tooltip={resources.messages.restoreSnapshotTooltip}
-          tooltipOptions={{ position: 'top' }}
-          icon="replay"
           className={`${styles.btn} rp-btn secondary`}
+          icon="replay"
           onClick={() => {
             snapshotContext.snapshotDispatch({
               type: 'RESTORE_SNAPSHOT',
               payload: { ...itemData }
             });
           }}
+          tooltip={resources.messages.restoreSnapshotTooltip}
+          tooltipOptions={{ position: 'top' }}
         />
 
         <Button
-          tooltip={
-            itemData.isAutomatic
-              ? resources.messages['deleteAutomaticSnapshotTooltip']
-              : resources.messages['deleteSnapshotTooltip']
-          }
-          tooltipOptions={{ position: 'left' }}
-          icon="trash"
           className={`${styles.btn} rp-btn warning deleteButton ${itemData.isAutomatic && 'p-disabled'}`}
+          icon="trash"
           onClick={() =>
             itemData.isAutomatic
               ? {}
@@ -67,6 +61,12 @@ const SnapshotItem = ({ itemData }) => {
                   payload: { ...itemData }
                 })
           }
+          tooltip={
+            itemData.isAutomatic
+              ? resources.messages['deleteAutomaticSnapshotTooltip']
+              : resources.messages['deleteSnapshotTooltip']
+          }
+          tooltipOptions={{ position: 'left' }}
         />
       </div>
     </li>

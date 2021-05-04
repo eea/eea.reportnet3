@@ -400,8 +400,8 @@ export const useSetColumns = (
       <Column
         body={validationsTemplate}
         className={`${isDataflowOpen && isDesignDatasetEditorRead && styles.fieldDisabled}`}
-        header={resources.messages['validationsDataColumn']}
         field="validations"
+        header={resources.messages['validationsDataColumn']}
         key="recordValidation"
         sortable={false}
         style={{ width: '125px' }}

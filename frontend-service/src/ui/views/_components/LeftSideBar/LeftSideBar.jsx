@@ -108,7 +108,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   };
 
   const renderSectionButtons = () => {
-    return leftSideBarContext.models.map((model, i) => <LeftSideBarButton key={i} {...model} />);
+    return leftSideBarContext.models.map(model => <LeftSideBarButton key={model.label} {...model} />);
   };
 
   const userLogout = async () => {

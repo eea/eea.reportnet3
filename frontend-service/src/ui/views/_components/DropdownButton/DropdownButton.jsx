@@ -17,7 +17,7 @@ const DropdownButton = ({ children, icon, model, buttonStyle, iconStyle, disable
         <Icon icon={icon} style={iconStyle ? iconStyle : { fontSize: '1.5rem' }} />
         {children}
       </div>
-      <DropDownMenu ref={menuRef} model={model} />
+      <DropDownMenu model={model} ref={menuRef} />
     </div>
   );
 };

@@ -179,7 +179,7 @@ export class BodyCell extends Component {
         'pi-chevron-right': !this.props.expanded
       });
       content = (
-        <button onClick={this.onExpanderClick} className="p-row-toggler p-link">
+        <button className="p-row-toggler p-link" onClick={this.onExpanderClick}>
           <span className={iconClassName}></span>
         </button>
       );
@@ -208,17 +208,17 @@ export class BodyCell extends Component {
       if (this.state.editing) {
         content = (
           <Fragment>
-            <button onClick={this.props.onRowEditSave} className="p-row-editor-save p-link">
+            <button className="p-row-editor-save p-link" onClick={this.props.onRowEditSave}>
               <span className="p-row-editor-save-icon pi pi-fw pi-check p-clickable"></span>
             </button>
-            <button onClick={this.props.onRowEditCancel} className="p-row-editor-cancel p-link">
+            <button className="p-row-editor-cancel p-link" onClick={this.props.onRowEditCancel}>
               <span className="p-row-editor-cancel-icon pi pi-fw pi-times p-clickable"></span>
             </button>
           </Fragment>
         );
       } else {
         content = (
-          <button onClick={this.props.onRowEditInit} className="p-row-editor-init p-link">
+          <button className="p-row-editor-init p-link" onClick={this.props.onRowEditInit}>
             <span className="p-row-editor-init-icon pi pi-fw pi-pencil p-clickable"></span>
           </button>
         );
@@ -254,15 +254,15 @@ export class BodyCell extends Component {
 
     return (
       <td
+        className={cellClassName}
+        onBlur={this.onBlur}
+        onClick={this.onClick}
+        onKeyDown={this.onKeyDown}
         ref={el => {
           this.container = el;
         }}
-        className={cellClassName}
-        style={this.props.bodyStyle || this.props.style}
-        onClick={this.onClick}
-        onKeyDown={this.onKeyDown}
         rowSpan={this.props.rowSpan}
-        onBlur={this.onBlur}>
+        style={this.props.bodyStyle || this.props.style}>
         {header}
         {editorKeyHelper}
         {content}

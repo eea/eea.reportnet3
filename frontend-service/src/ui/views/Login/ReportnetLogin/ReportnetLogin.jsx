@@ -79,7 +79,7 @@ const ReportnetLogin = ({ history }) => {
       <div className={`${styles.loginBoxContainer}`}>
         <div className={`${styles.loginBox}`}>
           <div className={styles.logo}>
-            <img src={logo} alt="Reportnet" />
+            <img alt="Reportnet" src={logo} />
             <h1>{resources.messages['appName']}</h1>
             {!isEmpty(loginError) && <div className={styles.error}>{loginError}</div>}
           </div>
@@ -88,22 +88,22 @@ const ReportnetLogin = ({ history }) => {
             <fieldset>
               <label htmlFor="userName">{resources.messages['loginUserName']}</label>
               <input
+                className={errors.userName !== '' ? styles.hasErrors : null}
                 id="userName"
                 name="userName"
-                type="text"
-                className={errors.userName !== '' ? styles.hasErrors : null}
-                value={userName}
-                placeholder={resources.messages['loginUserName']}
+                onBlur={() => checkIsEmptyUserName()}
                 onChange={e => {
                   setUserName(e.target.value);
                   setLoginError('');
                 }}
-                onBlur={() => checkIsEmptyUserName()}
                 onFocus={() =>
                   setErrors(previousErrors => {
                     return { ...previousErrors, userName: '' };
                   })
                 }
+                placeholder={resources.messages['loginUserName']}
+                type="text"
+                value={userName}
               />
               {errors['userName'] !== '' && <ErrorMessage message={errors['userName']} />}
             </fieldset>
@@ -111,23 +111,23 @@ const ReportnetLogin = ({ history }) => {
             <fieldset>
               <label htmlFor="password">{resources.messages['loginPassword']}</label>
               <input
+                autoComplete="password"
+                className={errors.password !== '' ? styles.hasErrors : null}
                 id="password"
                 name="password"
-                type="password"
-                className={errors.password !== '' ? styles.hasErrors : null}
-                placeholder={resources.messages['loginPassword']}
-                autoComplete="password"
-                value={password}
+                onBlur={() => checkIsEmptyPassword()}
                 onChange={e => {
                   setPassword(e.target.value);
                   setLoginError('');
                 }}
-                onBlur={() => checkIsEmptyPassword()}
                 onFocus={() =>
                   setErrors(previousErrors => {
                     return { ...previousErrors, password: '' };
                   })
                 }
+                placeholder={resources.messages['loginPassword']}
+                type="password"
+                value={password}
               />
               {errors['password'] !== '' && <ErrorMessage message={errors['password']} />}
             </fieldset>

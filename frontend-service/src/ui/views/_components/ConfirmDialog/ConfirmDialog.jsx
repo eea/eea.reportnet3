@@ -114,7 +114,7 @@ const ConfirmDialog = forwardRef((props, _) => {
   );
 
   return (
-    <div className="confirmDialog" onPaste={onPaste} ref={divRef} onKeyPress={!disabledConfirm ? onKeyPress : null}>
+    <div className="confirmDialog" onKeyPress={!disabledConfirm ? onKeyPress : null} onPaste={onPaste} ref={divRef}>
       <Dialog
         className={className}
         focusOnShow={true}

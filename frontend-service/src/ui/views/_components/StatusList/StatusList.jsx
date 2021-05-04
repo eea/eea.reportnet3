@@ -13,22 +13,22 @@ export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes })
     const labelLowerCase = label.toLowerCase();
 
     return (
-      <li key={i} className={styles.listItem}>
+      <li className={styles.listItem} key={labelLowerCase}>
         <input
-          id={`${labelLowerCase}_${i}`}
           className={styles.checkbox}
-          style={{ backgroundColor: colors[labelLowerCase] }}
-          type="checkbox"
           defaultChecked={!filteredStatusTypes.includes(label)}
+          id={`${labelLowerCase}_${i}`}
           onChange={e => {
             filterDispatch({
               type: e.target.checked ? 'CHECKBOX_ON' : 'CHECKBOX_OFF',
               payload: { label }
             });
           }}
+          style={{ backgroundColor: colors[labelLowerCase] }}
+          type="checkbox"
         />
 
-        <label htmlFor={`${labelLowerCase}_${i}`} className={styles.labelItem}>
+        <label className={styles.labelItem} htmlFor={`${labelLowerCase}_${i}`}>
           {resources.messages[labelLowerCase]}
         </label>
       </li>

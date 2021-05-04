@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, Fragment } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
@@ -253,12 +253,13 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           {rowData.publicFilesNames.map(publicFileName => (
             <span
               className={styles.filesIcon}
+              key={publicFileName}
               onClick={() => onFileDownload(rowData.id, publicFileName.dataProviderId, publicFileName.fileName)}>
               <FontAwesomeIcon
                 className={styles.cursorPointer}
-                icon={AwesomeIcons('7z')}
-                data-tip
                 data-for={publicFileName.fileName}
+                data-tip
+                icon={AwesomeIcons('7z')}
               />
               <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName.fileName} place="top">
                 <span>{getPublicFileName(publicFileName.fileName)}</span>
@@ -272,9 +273,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         <div className={styles.filesContainer}>
           <FontAwesomeIcon
             className={styles.restrictFromPublicIcon}
-            icon={AwesomeIcons('lock')}
-            data-tip
             data-for={'restrictFromPublicField'}
+            data-tip
+            icon={AwesomeIcons('lock')}
           />
           <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
             <span>{resources.messages['restrictFromPublicField']}</span>
@@ -319,7 +320,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const renderRedirectText = (text, url) => (
     <span>
       {text}{' '}
-      <a href={url} target="_blank" title={text}>
+      <a href={url} rel="noreferrer" target="_blank" title={text}>
         <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
       </a>
     </span>
@@ -331,45 +332,39 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
         {isLoading ? (
           <Spinner className={styles.isLoading} />
+        ) : isEmpty(dataflows) ? (
+          <div className={styles.noDataflowsWrapper}>
+            <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
+          </div>
         ) : (
-          <Fragment>
-            {isEmpty(dataflows) ? (
-              <div className={styles.noDataflowsWrapper}>
-                <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
-              </div>
-            ) : (
-              <Fragment>
-                <div className={styles.countriesList}>
-                  <DataTable
-                    autoLayout={true}
-                    first={firstRow}
-                    lazy={true}
-                    onPage={onChangePage}
-                    onSort={onSort}
-                    paginator={true}
-                    paginatorRight={
-                      <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
-                        'records'
-                      ].toLowerCase()}`}</span>
-                    }
-                    rows={numberRows}
-                    rowsPerPageOptions={[5, 10, 15]}
-                    sortable={true}
-                    sortField={sortField}
-                    sortOrder={sortOrder}
-                    totalRecords={totalRecords}
-                    value={dataflows}>
-                    {renderColumns(dataflows)}
-                  </DataTable>
-                  <div className={styles.tableLegendContainer}>
-                    <span>*</span>
-                    <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-                    <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-                  </div>
-                </div>
-              </Fragment>
-            )}
-          </Fragment>
+          <div className={styles.countriesList}>
+            <DataTable
+              autoLayout={true}
+              first={firstRow}
+              lazy={true}
+              onPage={onChangePage}
+              onSort={onSort}
+              paginator={true}
+              paginatorRight={
+                <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
+                  'records'
+                ].toLowerCase()}`}</span>
+              }
+              rows={numberRows}
+              rowsPerPageOptions={[5, 10, 15]}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              sortable={true}
+              totalRecords={totalRecords}
+              value={dataflows}>
+              {renderColumns(dataflows)}
+            </DataTable>
+            <div className={styles.tableLegendContainer}>
+              <span>*</span>
+              <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
+              <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
+            </div>
+          </div>
         )}
       </div>
     </PublicLayout>

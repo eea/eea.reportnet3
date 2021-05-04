@@ -50,25 +50,23 @@ export const Button = ({
   }
   if (isNull(layout)) {
     return visible ? (
-      <>
-        <PrimeButton
-          id={id}
-          className={`${className} ${helpClassName}`}
-          disabled={disabled}
-          icon={iconClassName}
-          iconPos={icon ? iconPos : null}
-          label={label}
-          onClick={onClick}
-          onMouseDown={onMouseDown}
-          style={style}
-          tabIndex={tabIndex}
-          title={title}
-          tooltip={tooltip}
-          type={type}
-          tooltipOptions={tooltipOptions}
-          value={value}
-        />
-      </>
+      <PrimeButton
+        className={`${className} ${helpClassName}`}
+        disabled={disabled}
+        icon={iconClassName}
+        iconPos={icon ? iconPos : null}
+        id={id}
+        label={label}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+        style={style}
+        tabIndex={tabIndex}
+        title={title}
+        tooltip={tooltip}
+        tooltipOptions={tooltipOptions}
+        type={type}
+        value={value}
+      />
     ) : null;
   }
 };
