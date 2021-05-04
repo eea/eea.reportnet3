@@ -10,7 +10,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return {
         ...state,
         isDeleteDialogVisible: payload.isDeleteDialogVisible,
-        userRightAccountToDelete: payload.userRightAccountToDelete
+        userRightToDelete: payload.userRightToDelete
       };
 
     case 'ON_SET_ACCOUNT':

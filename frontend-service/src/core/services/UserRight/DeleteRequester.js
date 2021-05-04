@@ -1,2 +1,2 @@
-export const DeleteRequester = ({ userRightRepository }) => async (account, dataflowId) =>
-  userRightRepository.deleteRequester(account, dataflowId);
+export const DeleteRequester = ({ userRightRepository }) => async (userRight, dataflowId) =>
+  userRightRepository.deleteRequester(userRight, dataflowId);
