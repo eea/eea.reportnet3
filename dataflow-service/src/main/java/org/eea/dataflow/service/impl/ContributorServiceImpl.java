@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +43,6 @@ public class ContributorServiceImpl implements ContributorService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant EDITOR: {@value}. */
-  private static final String EDITOR = "EDITOR";
-
-  /** The Constant REPORTER: {@value}. */
-  private static final String REPORTER = "REPORTER";
-
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
@@ -59,6 +54,8 @@ public class ContributorServiceImpl implements ContributorService {
   /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+
 
   /**
    * Find contributors by id dataflow.
@@ -73,43 +70,49 @@ public class ContributorServiceImpl implements ContributorService {
       String role) {
     List<ContributorVO> contributorVOList = new ArrayList<>();
 
-    if (EDITOR.equals(role) || REPORTER.equals(role)) {
-      Long referenceId = EDITOR.equals(role) ? dataflowId
-          : dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
-              .filter(
-                  reportingDatasetVO -> providerId.equals(reportingDatasetVO.getDataProviderId()))
-              .map(ReportingDatasetVO::getId).findFirst().orElse(null);
-      String resource = EDITOR.equals(role) ? "Dataflow-" : "Dataset-";
+    if (LiteralConstants.REPORTER.equals(role)) {
+      Long referenceId = dataSetMetabaseControllerZuul
+          .findReportingDataSetIdByDataflowId(dataflowId).stream()
+          .filter(reportingDatasetVO -> providerId.equals(reportingDatasetVO.getDataProviderId()))
+          .map(ReportingDatasetVO::getId).findFirst().orElse(null);
+      String resource = "Dataset-";
 
-      StringBuilder stringBuilder =
-          new StringBuilder(resource).append(referenceId).append("-").append(role).append("_WRITE");
-      List<UserRepresentationVO> listUserWrite =
-          userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      if (!CollectionUtils.isEmpty(listUserWrite)) {
-        listUserWrite.stream().forEach(userWrite -> {
-          ContributorVO contributorVO = new ContributorVO();
-          contributorVO.setAccount(userWrite.getEmail());
-          contributorVO.setWritePermission(true);
-          contributorVO.setRole(role);
-          contributorVOList.add(contributorVO);
-        });
-      }
-      stringBuilder =
-          new StringBuilder(resource).append(referenceId).append("-").append(role).append("_READ");
-      List<UserRepresentationVO> listUserRead =
-          userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
-      if (!CollectionUtils.isEmpty(listUserRead)) {
-        listUserRead.stream().forEach(userRead -> {
-          ContributorVO contributorVO = new ContributorVO();
-          contributorVO.setAccount(userRead.getEmail());
-          contributorVO.setWritePermission(false);
-          contributorVO.setRole(role);
-          contributorVOList.add(contributorVO);
-        });
-      }
+      getContributorList(SecurityRoleEnum.REPORTER_READ.toString(), contributorVOList, referenceId,
+          resource);
+      getContributorList(SecurityRoleEnum.REPORTER_WRITE.toString(), contributorVOList, referenceId,
+          resource);
+    }
+    if (LiteralConstants.REQUESTER.equals(role)) {
+      String resource = "Dataflow-";
+      getContributorList(SecurityRoleEnum.EDITOR_READ.toString(), contributorVOList, dataflowId,
+          resource);
+      getContributorList(SecurityRoleEnum.EDITOR_WRITE.toString(), contributorVOList, dataflowId,
+          resource);
+      getContributorList(SecurityRoleEnum.DATA_OBSERVER.toString(), contributorVOList, dataflowId,
+          resource);
+      getContributorList(SecurityRoleEnum.DATA_CUSTODIAN.toString(), contributorVOList, dataflowId,
+          resource);
+      getContributorList(SecurityRoleEnum.DATA_STEWARD.toString(), contributorVOList, dataflowId,
+          resource);
     }
 
     return contributorVOList;
+  }
+
+  private void getContributorList(String role, List<ContributorVO> contributorVOList,
+      Long referenceId, String resource) {
+    StringBuilder stringBuilder =
+        new StringBuilder(resource).append(referenceId).append("-").append(role);
+    List<UserRepresentationVO> listUserWrite =
+        userManagementControllerZull.getUsersByGroup(stringBuilder.toString());
+    if (!CollectionUtils.isEmpty(listUserWrite)) {
+      listUserWrite.stream().forEach(userWrite -> {
+        ContributorVO contributorVO = new ContributorVO();
+        contributorVO.setAccount(userWrite.getEmail());
+        contributorVO.setRole(role);
+        contributorVOList.add(contributorVO);
+      });
+    }
   }
 
   /**
@@ -131,15 +134,17 @@ public class ContributorServiceImpl implements ContributorService {
     ResourceGroupEnum resourceGroupEnumDataflowRead = null;
     ResourceGroupEnum resourceGroupEnumDataschemaRead = null;
 
-    switch (role) {
-      case EDITOR:
+    switch (SecurityRoleEnum.valueOf(role)) {
+      case EDITOR_READ:
+      case EDITOR_WRITE:
         resourceGroupEnumWrite = ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE;
         resourceGroupEnumRead = ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
         resourceGroupEnumDataflowWrite = ResourceGroupEnum.DATAFLOW_EDITOR_WRITE;
         resourceGroupEnumDataflowRead = ResourceGroupEnum.DATAFLOW_EDITOR_READ;
 
         break;
-      case REPORTER:
+      case REPORTER_READ:
+      case REPORTER_WRITE:
         resourceGroupEnumWrite = ResourceGroupEnum.DATASET_REPORTER_WRITE;
         resourceGroupEnumRead = ResourceGroupEnum.DATASET_REPORTER_READ;
         resourceGroupEnumDataschemaRead = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
@@ -149,28 +154,32 @@ public class ContributorServiceImpl implements ContributorService {
       default:
         break;
     }
-
+    // TODO CHECK THIS
     List<ResourceAssignationVO> resourcesProviders = new ArrayList<>();
     List<Long> ids = new ArrayList<>();
-    if (REPORTER.equals(role)) {
+    if (SecurityRoleEnum.REPORTER_READ.toString().equals(role)
+        || SecurityRoleEnum.REPORTER_WRITE.toString().equals(role)) {
       List<ContributorVO> contributors =
-          findContributorsByResourceId(dataflowId, dataProviderId, REPORTER);
+          findContributorsByResourceId(dataflowId, dataProviderId, LiteralConstants.REPORTER);
       if (contributors != null) {
-        resourcesProviders.add(fillResourceAssignation(dataflowId, account,
-            contributors.stream().filter(contributor -> account.equals(contributor.getAccount()))
-                .findFirst().map(ContributorVO::getWritePermission).orElse(false)
-                    ? resourceGroupEnumDataflowWrite
-                    : resourceGroupEnumDataflowRead));
+        if (SecurityRoleEnum.REPORTER_READ.toString().equals(role)) {
+          resourcesProviders
+              .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowRead));
+        } else if (SecurityRoleEnum.REPORTER_WRITE.toString().equals(role)) {
+          resourcesProviders
+              .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowWrite));
+        }
       }
-      resourcesProviders
-          .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataschemaRead));
-
-      ids = dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
-          .filter(
-              reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
-          .map(ReportingDatasetVO::getId).collect(Collectors.toList());
     }
-    if (EDITOR.equals(role)) {
+    resourcesProviders
+        .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataschemaRead));
+
+    ids = dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+        .filter(reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
+        .map(ReportingDatasetVO::getId).collect(Collectors.toList());
+
+    if (SecurityRoleEnum.EDITOR_READ.toString().equals(role)
+        || SecurityRoleEnum.EDITOR_WRITE.toString().equals(role)) {
       resourcesProviders
           .add(fillResourceAssignation(dataflowId, account, resourceGroupEnumDataflowWrite));
       resourcesProviders
@@ -199,43 +208,38 @@ public class ContributorServiceImpl implements ContributorService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void createContributor(Long dataflowId, ContributorVO contributorVO, String role,
-      Long dataProviderId, Boolean persistDataflowPermission) throws EEAException {
+  public void createContributor(Long dataflowId, ContributorVO contributorVO, Long dataProviderId,
+      Boolean persistDataflowPermission) throws EEAException {
     SecurityRoleEnum securityRoleEnum = null;
     ResourceGroupEnum resourceGroupEnum = null;
     ResourceGroupEnum resourceGroupEnumDataflow = null;
     ResourceGroupEnum resourceGroupEnumDataset = null;
 
     contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
-    switch (role) {
-      case EDITOR:
-        securityRoleEnum =
-            Boolean.TRUE.equals(contributorVO.getWritePermission()) ? SecurityRoleEnum.EDITOR_WRITE
-                : SecurityRoleEnum.EDITOR_READ;
-        resourceGroupEnum = Boolean.TRUE.equals(contributorVO.getWritePermission())
-            ? ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE
-            : ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
-        resourceGroupEnumDataflow = Boolean.TRUE.equals(contributorVO.getWritePermission())
-            ? ResourceGroupEnum.DATAFLOW_EDITOR_WRITE
-            : ResourceGroupEnum.DATAFLOW_EDITOR_READ;
+    switch (SecurityRoleEnum.valueOf(contributorVO.getRole())) {
+      case EDITOR_READ:
+        securityRoleEnum = SecurityRoleEnum.EDITOR_READ;
+        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_EDITOR_READ;
+        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_EDITOR_READ;
+      case EDITOR_WRITE:
+        securityRoleEnum = SecurityRoleEnum.EDITOR_WRITE;
+        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_EDITOR_WRITE;
+        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_EDITOR_WRITE;
         break;
-      case REPORTER:
-        securityRoleEnum = Boolean.TRUE.equals(contributorVO.getWritePermission())
-            ? SecurityRoleEnum.REPORTER_WRITE
-            : SecurityRoleEnum.REPORTER_READ;
+      case REPORTER_READ:
+        securityRoleEnum = SecurityRoleEnum.REPORTER_READ;
         resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
-        resourceGroupEnumDataflow = Boolean.TRUE.equals(contributorVO.getWritePermission())
-            ? ResourceGroupEnum.DATAFLOW_REPORTER_WRITE
-            : ResourceGroupEnum.DATAFLOW_REPORTER_READ;
-        resourceGroupEnumDataset = Boolean.TRUE.equals(contributorVO.getWritePermission())
-            ? ResourceGroupEnum.DATASET_REPORTER_WRITE
-            : ResourceGroupEnum.DATASET_REPORTER_READ;
+        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER_READ;
+      case REPORTER_WRITE:
+        securityRoleEnum = SecurityRoleEnum.REPORTER_WRITE;
+        resourceGroupEnum = ResourceGroupEnum.DATASCHEMA_REPORTER_READ;
+        resourceGroupEnumDataflow = ResourceGroupEnum.DATAFLOW_REPORTER_WRITE;
         break;
       default:
         break;
     }
     List<ResourceAssignationVO> resourceAssignationVOList = fillResourceAssignationList(dataflowId,
-        contributorVO, role, dataProviderId, persistDataflowPermission, securityRoleEnum,
+        contributorVO, dataProviderId, persistDataflowPermission, securityRoleEnum,
         resourceGroupEnum, resourceGroupEnumDataflow, resourceGroupEnumDataset);
 
     // we add data to contributor
@@ -257,13 +261,14 @@ public class ContributorServiceImpl implements ContributorService {
    * @return the list
    */
   private List<ResourceAssignationVO> fillResourceAssignationList(Long dataflowId,
-      ContributorVO contributorVO, String role, Long dataProviderId,
-      Boolean persistDataflowPermission, SecurityRoleEnum securityRoleEnum,
-      ResourceGroupEnum resourceGroupEnum, ResourceGroupEnum resourceGroupEnumDataflow,
-      ResourceGroupEnum resourceGroupEnumDataset) {
+      ContributorVO contributorVO, Long dataProviderId, Boolean persistDataflowPermission,
+      SecurityRoleEnum securityRoleEnum, ResourceGroupEnum resourceGroupEnum,
+      ResourceGroupEnum resourceGroupEnumDataflow, ResourceGroupEnum resourceGroupEnumDataset) {
     final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
     List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
-    if (EDITOR.equals(role)) {
+    if (SecurityRoleEnum.EDITOR_READ.toString().equals(contributorVO.getRole())
+        || SecurityRoleEnum.EDITOR_WRITE.toString().equals(contributorVO.getRole())) {
+
       resourceAssignationVOList.add(fillResourceAssignation(dataflowId, contributorVO.getAccount(),
           resourceGroupEnumDataflow));
       for (DesignDatasetVO designDatasetVO : dataSetMetabaseControllerZuul
@@ -272,7 +277,9 @@ public class ContributorServiceImpl implements ContributorService {
         resourceAssignationVOList.add(fillResourceAssignation(designDatasetVO.getId(),
             contributorVO.getAccount(), resourceGroupEnum));
       }
-    } else if (REPORTER.equals(role)) {
+    } else if (SecurityRoleEnum.REPORTER_READ.toString().equals(contributorVO.getRole())
+        || SecurityRoleEnum.REPORTER_WRITE.toString().equals(contributorVO.getRole())) {
+
       createReporterGroupsResources(dataflowId, contributorVO, dataProviderId, securityRoleEnum,
           resourceGroupEnum, resourceGroupEnumDataflow, resourceGroupEnumDataset,
           resourceAssignationVOList, resourceInfoVOs, persistDataflowPermission);
@@ -376,16 +383,18 @@ public class ContributorServiceImpl implements ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
-   * @param role the role
    * @param dataProviderId the data provider id
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateContributor(Long dataflowId, ContributorVO contributorVO, String role,
-      Long dataProviderId) throws EEAException {
+  public void updateContributor(Long dataflowId, ContributorVO contributorVO, Long dataProviderId)
+      throws EEAException {
 
     // we delete the contributor and after that we create it to update
-    if (EDITOR.equals(role) || REPORTER.equals(role)) {
+    if (SecurityRoleEnum.EDITOR_READ.toString().equals(contributorVO.getRole())
+        || SecurityRoleEnum.EDITOR_WRITE.toString().equals(contributorVO.getRole())
+        || SecurityRoleEnum.REPORTER_READ.toString().equals(contributorVO.getRole())
+        || SecurityRoleEnum.REPORTER_WRITE.toString().equals(contributorVO.getRole())) {
       contributorVO.setAccount(contributorVO.getAccount().toLowerCase());
       Boolean persistDataflowPermission = null;
       // avoid delete if it's a new contributor
@@ -399,12 +408,11 @@ public class ContributorServiceImpl implements ContributorService {
                 .findAny().orElse(null);
         if (resourceAccess != null) {
           persistDataflowPermission =
-              deleteContributor(dataflowId, contributorVO, role, dataProviderId, resourceAccess);
+              deleteContributor(dataflowId, contributorVO, dataProviderId, resourceAccess);
         }
       }
       try {
-        createContributor(dataflowId, contributorVO, role, dataProviderId,
-            persistDataflowPermission);
+        createContributor(dataflowId, contributorVO, dataProviderId, persistDataflowPermission);
       } catch (EEAException e) {
         LOG_ERROR.error("Error creating contributor with the account: {} in the dataflow {} ",
             contributorVO.getAccount(), dataflowId);
@@ -413,9 +421,9 @@ public class ContributorServiceImpl implements ContributorService {
     } else {
       LOG_ERROR.error(
           "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
-          contributorVO.getAccount(), dataflowId, role);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          new StringBuilder("Role ").append(role).append(" doesn't exist").toString());
+          contributorVO.getAccount(), dataflowId, contributorVO.getRole());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("Role ")
+          .append(contributorVO.getRole()).append(" doesn't exist").toString());
     }
 
   }
@@ -431,13 +439,14 @@ public class ContributorServiceImpl implements ContributorService {
    * @return the boolean
    * @throws EEAException the EEA exception
    */
-  private Boolean deleteContributor(Long dataflowId, ContributorVO contributorVO, String role,
+  private Boolean deleteContributor(Long dataflowId, ContributorVO contributorVO,
       Long dataProviderId, ResourceAccessVO resourceAccess) throws EEAException {
     Boolean persistDataflowPermission;
     persistDataflowPermission =
-        checkDataflowPrevPermission(role, contributorVO.getWritePermission(), resourceAccess);
+        checkDataflowPrevPermission(contributorVO.getRole(), resourceAccess);
     try {
-      deleteContributor(dataflowId, contributorVO.getAccount(), role, dataProviderId);
+      deleteContributor(dataflowId, contributorVO.getAccount(), contributorVO.getRole(),
+          dataProviderId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting contributor with the account: {} in the dataflow {} ",
           contributorVO.getAccount(), dataflowId);
@@ -454,13 +463,15 @@ public class ContributorServiceImpl implements ContributorService {
    * @param resourceAccess the resource access
    * @return the boolean
    */
-  private Boolean checkDataflowPrevPermission(String role, Boolean writePermission,
-      ResourceAccessVO resourceAccess) {
+  private Boolean checkDataflowPrevPermission(String role, ResourceAccessVO resourceAccess) {
     Boolean result = null;
-    if (REPORTER.equals(role)) {
-      SecurityRoleEnum roleEnumToCreate =
-          Boolean.TRUE.equals(writePermission) ? SecurityRoleEnum.REPORTER_WRITE
-              : SecurityRoleEnum.REPORTER_READ;
+    if (SecurityRoleEnum.REPORTER_READ.toString().equals(role)) {
+      SecurityRoleEnum roleEnumToCreate = SecurityRoleEnum.REPORTER_READ;
+      if (!resourceAccess.getRole().equals(roleEnumToCreate)) {
+        result = true;
+      }
+    } else if (SecurityRoleEnum.REPORTER_WRITE.toString().equals(role)) {
+      SecurityRoleEnum roleEnumToCreate = SecurityRoleEnum.REPORTER_WRITE;
       if (!resourceAccess.getRole().equals(roleEnumToCreate)) {
         result = true;
       }
