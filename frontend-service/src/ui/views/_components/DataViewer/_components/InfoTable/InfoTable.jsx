@@ -164,6 +164,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         <Column
           body={dataTemplate}
           field={column.field}
+          filterMaxLength={fieldMaxLength}
           header={
             <Fragment>
               {column.header}
@@ -177,15 +178,14 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
             </Fragment>
           }
           key={column.field}
-          filterMaxLength={fieldMaxLength}
         />
       );
     });
 
     const editCol = (
       <Column
-        key="delete"
         body={row => actionTemplate(row)}
+        key="delete"
         sortable={false}
         style={{ width: '150px', height: '45px' }}
       />

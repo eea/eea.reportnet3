@@ -318,10 +318,10 @@ export const CustomFileUpload = ({
     return (
       <span className={styles.chooseButton}>
         <input
-          id="file"
-          className={styles.chooseInput}
           accept={accept}
+          className={styles.chooseInput}
           disabled={disabled}
+          id="file"
           multiple={multiple}
           onBlur={onBlur}
           onChange={onFileSelect}
@@ -329,7 +329,7 @@ export const CustomFileUpload = ({
           ref={fileInput}
           type="file"
         />
-        <label htmlFor="file" className={className}>
+        <label className={className} htmlFor="file">
           <span className="pi pi-fw pi-plus" />
           <span>{chooseLabel}</span>
         </label>
@@ -400,7 +400,7 @@ export const CustomFileUpload = ({
     if (!auto) {
       uploadButton = (
         <Fragment>
-          <span data-tip data-for="inValidExtension">
+          <span data-for="inValidExtension" data-tip>
             <Button
               disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
               icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
@@ -420,20 +420,20 @@ export const CustomFileUpload = ({
 
     if (hasFiles()) {
       filesList = renderFiles();
-      progressBar = <ProgressBar value={state.progress} showValue={false} />;
+      progressBar = <ProgressBar showValue={false} value={state.progress} />;
     }
 
     return (
       <Fragment>
-        <div id={id} className={cClassName} style={style}>
+        <div className={cClassName} id={id} style={style}>
           <div className="p-fileupload-buttonbar">{renderChooseButton()}</div>
           <div
-            ref={content}
             className="p-fileupload-content"
             onDragEnter={onDragEnter}
-            onDragOver={onDragOver}
             onDragLeave={onDragLeave}
-            onDrop={onDrop}>
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            ref={content}>
             {progressBar}
             <Messages ref={messagesUI} />
             {filesList}
@@ -457,7 +457,7 @@ export const CustomFileUpload = ({
     if (!auto) {
       uploadButton = (
         <Fragment>
-          <span data-tip data-for="invalidExtension">
+          <span data-for="invalidExtension" data-tip>
             <Button
               disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
               icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
@@ -470,17 +470,17 @@ export const CustomFileUpload = ({
       cancelButton = (
         <Button
           className={'p-button-secondary'}
-          label={cancelLabel}
-          icon="undo"
-          onClick={clear}
           disabled={disabled || !hasFiles()}
+          icon="undo"
+          label={cancelLabel}
+          onClick={clear}
         />
       );
     }
 
     if (hasFiles()) {
       FileList = renderFiles();
-      progressBar = <ProgressBar value={state.progress} showValue={false} />;
+      progressBar = <ProgressBar showValue={false} value={state.progress} />;
     }
 
     return (
@@ -535,8 +535,8 @@ export const CustomFileUpload = ({
         footer={renderAdvancedFooter()}
         header={dialogHeader}
         onHide={dialogOnHide}
-        visible={dialogVisible}
-        style={{ width: '35vw' }}>
+        style={{ width: '35vw' }}
+        visible={dialogVisible}>
         {mode === 'advanced' && renderAdvanced()}
         {mode === 'basic' && renderBasic()}
       </Dialog>

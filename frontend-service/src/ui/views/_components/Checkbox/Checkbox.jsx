@@ -15,11 +15,7 @@ const Checkbox = ({
   onChange,
   style
 }) => {
-  return (
-    <>
-      <PrimeCheckbox onChange={onChange} checked={isChecked} disabled={disabled} id={id} inputId={inputId} />
-    </>
-  );
+  return <PrimeCheckbox checked={isChecked} disabled={disabled} id={id} inputId={inputId} onChange={onChange} />;
 };
 
 export { Checkbox };

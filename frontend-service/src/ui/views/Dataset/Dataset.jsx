@@ -20,7 +20,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'primereact/menu';
@@ -336,10 +335,6 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   };
 
-  const createFileName = (fileName, fileType) => {
-    return `${fileName}.${fileType}`;
-  };
-
   const getPosition = e => {
     const button = e.currentTarget;
     const left = `${button.offsetLeft}px`;
@@ -464,7 +459,7 @@ export const Dataset = withRouter(({ match, history }) => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification.content.datasetId == datasetId) {
+    if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
     }
   }, [notificationContext]);
@@ -673,8 +668,7 @@ export const Dataset = withRouter(({ match, history }) => {
       recordPositionId: -1,
       selectedRuleMessage: '',
       selectedRuleLevelError: '',
-      selectedRuleId: '',
-      selectedRuleMessage: ''
+      selectedRuleId: ''
     });
 
   const onSelectValidation = (
@@ -796,8 +790,8 @@ export const Dataset = withRouter(({ match, history }) => {
     <Fragment>
       <Button
         className="p-button-animated-blink"
-        label={resources.messages['import']}
         icon={'check'}
+        label={resources.messages['import']}
         onClick={() => onImportOtherSystems()}
       />
       <Button
@@ -844,11 +838,11 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        title={datasetSchemaName}
-        insideTitle={`${datasetInsideTitle()}`}
-        subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"
+        insideTitle={`${datasetInsideTitle()}`}
+        subtitle={`${dataflowName} - ${datasetName}`}
+        title={datasetSchemaName}
       />
       <div className={styles.ButtonsBar}>
         <Toolbar>
@@ -911,10 +905,10 @@ export const Dataset = withRouter(({ match, history }) => {
               }`}
               disabled={!hasWritePermissions}
               icon={'validate'}
+              iconClasses={null}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
               ownButtonClasses={null}
-              iconClasses={null}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
@@ -922,10 +916,10 @@ export const Dataset = withRouter(({ match, history }) => {
               }`}
               disabled={!datasetHasErrors}
               icon={'warning'}
+              iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
               ownButtonClasses={null}
-              iconClasses={datasetHasErrors ? 'warning' : ''}
             />
             <Button
               className={
@@ -982,10 +976,10 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
-          isReportingWebform={isReportingWebform}
           hasWritePermissions={hasWritePermissions}
-          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+          isReportingWebform={isReportingWebform}
           isValidationSelected={dataViewerOptions.isValidationSelected}
           levelErrorTypes={levelErrorTypes}
           onChangeIsValidationSelected={onChangeIsValidationSelected}
@@ -998,9 +992,9 @@ export const Dataset = withRouter(({ match, history }) => {
           selectedRuleId={dataViewerOptions.selectedRuleId}
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+          tableSchemaColumns={tableSchemaColumns}
           tableSchemaId={dataViewerOptions.tableSchemaId}
           tables={tableSchema}
-          tableSchemaColumns={tableSchemaColumns}
         />
       ) : (
         <Webforms
@@ -1057,17 +1051,17 @@ export const Dataset = withRouter(({ match, history }) => {
 
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
+          accept={getImportExtensions}
+          chooseLabel={resources.messages['selectFile']}
+          className={styles.FileUpload}
           dialogClassName={styles.Dialog}
           dialogHeader={`${resources.messages['uploadDataset']}${datasetName}`}
           dialogOnHide={() => setIsImportDatasetDialogVisible(false)}
           dialogVisible={isImportDatasetDialogVisible}
-          isDialog={true}
-          accept={getImportExtensions}
-          chooseLabel={resources.messages['selectFile']}
-          className={styles.FileUpload}
           fileLimit={1}
           infoTooltip={infoExtensionsTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          isDialog={true}
           mode="advanced"
           multiple={false}
           name="file"

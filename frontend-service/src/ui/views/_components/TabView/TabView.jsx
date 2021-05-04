@@ -168,8 +168,8 @@ const TabView = withRouter(
           aria-hidden={!selected}
           aria-labelledby={ariaLabelledBy}
           className={className}
-          key={id}
           id={id}
+          key={id}
           role="tabpanel"
           style={tab.props.contentStyle}>
           {!renderActiveOnly ? tab.props.children : selected && tab.props.children}
@@ -212,8 +212,8 @@ const TabView = withRouter(
             className={className}
             designMode={designMode}
             disabled={tab.props.disabled}
-            editable={tab.props.editable}
             divScrollTabsRef={divTabsRef.current}
+            editable={tab.props.editable}
             hasPKReferenced={tab.props.hasPKReferenced}
             header={tab.props.header}
             headerStyle={tab.props.headerStyle}
@@ -226,18 +226,18 @@ const TabView = withRouter(
             key={id}
             leftIcon={tab.props.leftIcon}
             newTab={tab.props.newTab}
-            onTabBlur={onTabBlur}
             onTabAddCancel={onTabAddCancel}
+            onTabBlur={onTabBlur}
             onTabDeleteClick={onTabDeleteClicked}
             onTabDragAndDrop={onTabDragAndDrop}
             onTabDragAndDropStart={onTabDragAndDropStart}
+            onTabEditingHeader={onTabEditingHeader}
             onTabHeaderClick={event => {
               onTabHeaderClick(event, tab, index);
               if (!isUndefined(onTabEditingHeader)) {
                 onTabEditingHeader(false);
               }
             }}
-            onTabEditingHeader={onTabEditingHeader}
             onTabMouseWheel={onTabMouseWheel}
             onTabNameError={onTabNameError}
             rightIcon={tab.props.rightIcon}
@@ -278,7 +278,7 @@ const TabView = withRouter(
             className={styles.scrollTab}
             ref={divTabsRef}
             style={{ marginBottom: totalTabs === 1 ? '-5px' : '-1px' }}>
-            <ul className="p-tabview-nav p-reset" role="tablist" style={{ display: 'inline-flex' }} ref={ulTabsRef}>
+            <ul className="p-tabview-nav p-reset" ref={ulTabsRef} role="tablist" style={{ display: 'inline-flex' }}>
               {headers}
             </ul>
           </div>
@@ -344,7 +344,7 @@ const TabView = withRouter(
     };
 
     return (
-      <div id={id} className={classNamed} style={style}>
+      <div className={classNamed} id={id} style={style}>
         {renderNavigator()}
         {renderContent()}
         {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}

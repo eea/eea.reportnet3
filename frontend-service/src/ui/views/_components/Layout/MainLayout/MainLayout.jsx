@@ -7,6 +7,7 @@ import { config } from 'conf';
 
 import styles from './MainLayout.module.scss';
 
+import { ErrorBoundaryFallback } from '../../ErrorBoundaryFallback/ErrorBoundaryFallback';
 import { EuFooter } from './_components/EuFooter';
 import { Footer } from './_components';
 import { GlobalNotifications } from './_components/GlobalNotifications';
@@ -16,14 +17,12 @@ import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { NotificationsList } from './_components/NotificationsList';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { UserService } from 'core/services/User';
 
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
-import { Button } from '../../Button/Button';
 
 export const MainLayout = ({ children, isPublic = false, history }) => {
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
@@ -173,7 +172,7 @@ export const MainLayout = ({ children, isPublic = false, history }) => {
 
   useSocket();
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={onResetErrorBoundary}>
+    <ErrorBoundary FallbackComponent={ErrorBoundaryFallback} onReset={onResetErrorBoundary}>
       <div id={styles.mainLayoutContainer}>
         {isNotificationVisible && (
           <NotificationsList
@@ -182,10 +181,10 @@ export const MainLayout = ({ children, isPublic = false, history }) => {
           />
         )}
         <Header isPublic={isPublic} onMainContentStyleChange={onMainContentStyleChange} />
-        <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
+        <div className={styles.mainContent} id="mainContent" style={mainContentStyle}>
           <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
 
-          <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
+          <div className={styles.pageContent} id="pageContent" style={pageContentStyle}>
             {children}
           </div>
         </div>
@@ -195,58 +194,5 @@ export const MainLayout = ({ children, isPublic = false, history }) => {
         <GlobalNotifications />
       </div>
     </ErrorBoundary>
-  );
-};
-
-const ErrorFallback = ({ error, resetErrorBoundary }) => {
-  const resources = useContext(ResourcesContext);
-  const onCopyErrorToClipboard = error => {
-    const stringError = JSON.stringify({
-      msg: error.message,
-      stack: error.stack
-    });
-
-    const tempTextArea = document.createElement('textarea');
-    tempTextArea.value = stringError;
-    tempTextArea.setAttribute('readonly', '');
-    tempTextArea.style = { position: 'absolute', left: '-9999px' };
-    document.body.appendChild(tempTextArea);
-    tempTextArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempTextArea);
-  };
-
-  return (
-    <MainLayout>
-      <div className="rep-container">
-        <div className={styles.boundaryWrap}>
-          <div>
-            <div>
-              <h2 className="warning">{resources.messages['errorBoundaryTitle']}</h2>
-            </div>
-            <div>
-              <p className="warning">{error.message}</p>
-              <p>Please copy the error information to the clipboard and send it to the helpdesk.</p>
-              <p>You have to press the Refresh button to continue.</p>
-            </div>
-
-            <div className={styles.boundaryButtonsWrap}>
-              <div>
-                <Button
-                  tooltip={resources.messages['copyToClipboardSuccess']}
-                  tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-                  icon={'copy'}
-                  label={'Copy to clipboard'}
-                  onClick={() => onCopyErrorToClipboard(error)}
-                />
-              </div>
-              <div>
-                <Button icon={'refresh'} label={'Refresh'} onClick={resetErrorBoundary} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </MainLayout>
   );
 };
