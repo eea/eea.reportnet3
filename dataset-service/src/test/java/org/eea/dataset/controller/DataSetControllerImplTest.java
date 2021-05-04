@@ -671,7 +671,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
     dataSetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
-    Mockito.verify(datasetService, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
+    Mockito.verify(fileTreatmentHelper, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 
@@ -700,8 +700,8 @@ public class DataSetControllerImplTest {
   public void etlImportDatasetExceptionTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
-    doThrow(new EEAException()).when(datasetService).etlImportDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doThrow(new EEAException()).when(fileTreatmentHelper).etlImportDataset(Mockito.any(),
+        Mockito.any(), Mockito.any());
     try {
       dataSetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
     } catch (ResponseStatusException e) {

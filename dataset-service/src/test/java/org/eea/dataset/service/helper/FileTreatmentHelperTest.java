@@ -1,5 +1,6 @@
 package org.eea.dataset.service.helper;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
@@ -21,33 +23,44 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
 import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ETLFieldVO;
+import org.eea.interfaces.vo.dataset.ETLRecordVO;
+import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -152,6 +165,22 @@ public class FileTreatmentHelperTest {
   /** The context export. */
   @Mock
   private IFileExportContext contextExport;
+
+  /** The dataset repository. */
+  @Mock
+  private DatasetRepository datasetRepository;
+
+  /** The schemas repository. */
+  @Mock
+  private SchemasRepository schemasRepository;
+
+  /** The representative controller zuul. */
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The partition data set metabase repository. */
+  @Mock
+  private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
   /**
    * Inits the mocks.
@@ -745,6 +774,109 @@ public class FileTreatmentHelperTest {
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
 
+  /**
+   * Etl import dataset schema not found test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void etlImportDatasetSchemaIdNotFoundTest() throws EEAException {
+    try {
+      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L);
+    } catch (EEAException e) {
+      assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Etl import dataset not found test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void etlImportDatasetNotFoundTest() throws EEAException {
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    try {
+      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L);
+    } catch (EEAException e) {
+      assertEquals(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, "5cf0e9b3b793310e9ceca190"),
+          e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Et import dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void etImportDatasetTest() throws EEAException {
+    ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
+    List<ETLTableVO> etlTableVOs = new ArrayList<>();
+    ETLTableVO etlTableVO = new ETLTableVO();
+    List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
+    ETLRecordVO etlRecordVO = new ETLRecordVO();
+    List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
+    ETLFieldVO etlFieldVO = new ETLFieldVO();
+    etlDatasetVO.setTables(etlTableVOs);
+    etlTableVOs.add(etlTableVO);
+    etlTableVO.setTableName("nameTableSchema");
+    etlTableVO.setRecords(etlRecordVOs);
+    etlRecordVOs.add(etlRecordVO);
+    etlRecordVO.setFields(etlFieldVOs);
+    etlFieldVOs.add(etlFieldVO);
+    etlFieldVO.setFieldName("headerName");
+    etlFieldVO.setValue("value");
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setReadOnly(Boolean.FALSE);
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId());
+    List<FieldSchema> fieldSchemas = new ArrayList<>();
+    FieldSchema fieldSchema = new FieldSchema();
+    FieldSchema fieldSchema2 = new FieldSchema();
+    List<RecordValue> recordValues = new ArrayList<>();
+    RecordValue recordValue = new RecordValue();
+    List<FieldValue> fieldValues = new ArrayList<>();
+    FieldValue fieldValue = new FieldValue();
+    datasetSchema.setTableSchemas(tableSchemas);
+    tableSchemas.add(tableSchema);
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchema.setNameTableSchema("nameTableSchema");
+    tableSchema.setRecordSchema(recordSchema);
+    recordSchema.setFieldSchema(fieldSchemas);
+    fieldSchema.setHeaderName("headerName");
+    fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    fieldSchema.setType(DataType.ATTACHMENT);
+    fieldSchema2.setHeaderName("headerName1");
+    fieldSchema2.setIdFieldSchema(new ObjectId());
+    fieldSchema2.setType(DataType.BOOLEAN);
+    fieldSchemas.add(fieldSchema);
+    fieldSchemas.add(fieldSchema2);
+    recordValues.add(recordValue);
+    recordValue.setFields(fieldValues);
+    fieldValues.add(fieldValue);
+    fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
+    fieldValue.setValue("value");
+
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn(new ObjectId().toString());
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(new DataProviderVO());
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L);
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
+  }
 
   @After
   public void afterTests() {
@@ -760,6 +892,9 @@ public class FileTreatmentHelperTest {
 }
 
 
+/**
+ * The Class CurrentThreadExecutor.
+ */
 class CurrentThreadExecutor extends AbstractExecutorService {
 
   @Override
