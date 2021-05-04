@@ -70,7 +70,7 @@ export const ShareRights = ({
 
     if (userType === 'requester') {
       if (method === 'getAll') {
-        return await UserRightService.allRequester(dataflowId);
+        return await UserRightService.allRequesters(dataflowId);
       } else if (method === 'delete') {
         return await UserRightService.deleteRequester(shareRightsState.userRightAccountToDelete, dataflowId);
       } else if (method === 'update') {
