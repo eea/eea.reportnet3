@@ -246,21 +246,21 @@ export const Feedback = withRouter(({ match, history }) => {
   return layout(
     <Fragment>
       <Title
-        title={`${resources.messages['technicalFeedback']} `}
-        subtitle={dataflowName}
         icon="comments"
         iconSize="3.5rem"
+        subtitle={dataflowName}
+        title={`${resources.messages['technicalFeedback']} `}
       />
       <div className={`${styles.feedbackWrapper} feedback-wrapper-help-step`}>
         {isCustodian && (
           <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
             <ListBox
               className={styles.dataProvider}
-              options={dataProviders}
               onChange={e => {
                 onChangeDataProvider(e.target.value);
               }}
               optionLabel="label"
+              options={dataProviders}
               title={resources.messages['feedbackDataProvider']}
               value={selectedDataProvider}></ListBox>
           </div>
@@ -309,9 +309,9 @@ export const Feedback = withRouter(({ match, history }) => {
               <Button
                 className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
                 disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
-                label={resources.messages['send']}
                 icon={'comment'}
                 iconPos="right"
+                label={resources.messages['send']}
                 onClick={() => onSendMessage(messageToSend)}
               />
             </div>

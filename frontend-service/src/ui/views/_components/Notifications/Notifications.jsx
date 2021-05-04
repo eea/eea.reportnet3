@@ -56,7 +56,7 @@ const Notifications = () => {
   }, [headerHeight]);
 
   useEffect(() => {
-    notificationContext.toShow.map(notification => {
+    notificationContext.toShow.forEach(notification => {
       let message;
       notification.onClick
         ? (message = (
@@ -65,8 +65,8 @@ const Notifications = () => {
               <Button
                 className={`p-button-animated-blink ${styles.downloadButton}`}
                 icon={'export'}
-                onClick={() => notification.onClick()}
                 label={resourcesContext.messages['downloadFile']}
+                onClick={() => notification.onClick()}
               />
             </div>
           ))

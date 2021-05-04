@@ -8,12 +8,10 @@ import { Spinner } from 'ui/views/_components/Spinner';
 export const GlobalLoading = () => {
   const { loadingCount } = useContext(LoadingContext);
   return (
-    <>
-      {loadingCount > 0 && (
-        <div className={styles.spinnerWrap}>
-          <Spinner className={styles.spinner} />
-        </div>
-      )}
-    </>
+    loadingCount > 0 && (
+      <div className={styles.spinnerWrap}>
+        <Spinner className={styles.spinner} />
+      </div>
+    )
   );
 };

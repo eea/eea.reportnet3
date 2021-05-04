@@ -11,35 +11,35 @@ import { CurrentPageReport } from './_components/CurrentPageReport';
 
 export class Paginator extends Component {
   static defaultProps = {
-    totalRecords: 0,
-    rows: 0,
+    alwaysShow: true,
+    className: null,
+    currentPageReportTemplate: '({currentPage} of {totalPages})',
     first: 0,
+    leftContent: null,
+    onPageChange: null,
     pageLinkSize: 5,
+    rightContent: null,
+    rows: 0,
     rowsPerPageOptions: null,
     style: null,
-    className: null,
     template: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown',
-    onPageChange: null,
-    leftContent: null,
-    rightContent: null,
-    currentPageReportTemplate: '({currentPage} of {totalPages})',
-    alwaysShow: true
+    totalRecords: 0
   };
 
   static propTypes = {
-    totalRecords: PropTypes.number,
-    rows: PropTypes.number,
+    alwaysShow: PropTypes.bool,
+    className: PropTypes.string,
+    currentPageReportTemplate: PropTypes.any,
     first: PropTypes.number,
+    leftContent: PropTypes.any,
+    onPageChange: PropTypes.func,
     pageLinkSize: PropTypes.number,
+    rightContent: PropTypes.any,
+    rows: PropTypes.number,
     rowsPerPageOptions: PropTypes.array,
     style: PropTypes.object,
-    className: PropTypes.string,
     template: PropTypes.string,
-    onPageChange: PropTypes.func,
-    leftContent: PropTypes.any,
-    rightContent: PropTypes.any,
-    currentPageReportTemplate: PropTypes.any,
-    alwaysShow: PropTypes.bool
+    totalRecords: PropTypes.number
   };
 
   constructor(props) {
@@ -164,28 +164,28 @@ export class Paginator extends Component {
 
         switch (key) {
           case 'FirstPageLink':
-            element = <FirstPageLink key={key} onClick={this.changePageToFirst} disabled={this.isFirstPage()} />;
+            element = <FirstPageLink disabled={this.isFirstPage()} key={key} onClick={this.changePageToFirst} />;
             break;
 
           case 'PrevPageLink':
-            element = <PrevPageLink key={key} onClick={this.changePageToPrev} disabled={this.isFirstPage()} />;
+            element = <PrevPageLink disabled={this.isFirstPage()} key={key} onClick={this.changePageToPrev} />;
             break;
 
           case 'NextPageLink':
-            element = <NextPageLink key={key} onClick={this.changePageToNext} disabled={this.isLastPage()} />;
+            element = <NextPageLink disabled={this.isLastPage()} key={key} onClick={this.changePageToNext} />;
             break;
 
           case 'LastPageLink':
-            element = <LastPageLink key={key} onClick={this.changePageToLast} disabled={this.isLastPage()} />;
+            element = <LastPageLink disabled={this.isLastPage()} key={key} onClick={this.changePageToLast} />;
             break;
 
           case 'PageLinks':
             element = (
               <PageLinks
                 key={key}
-                value={this.updatePageLinks()}
-                page={this.getPage()}
                 onClick={this.onPageLinkClick}
+                page={this.getPage()}
+                value={this.updatePageLinks()}
               />
             );
             break;
@@ -194,9 +194,9 @@ export class Paginator extends Component {
             element = (
               <RowsPerPageDropdown
                 key={key}
-                value={this.props.rows}
-                options={this.props.rowsPerPageOptions}
                 onChange={this.onRowsChange}
+                options={this.props.rowsPerPageOptions}
+                value={this.props.rows}
               />
             );
             break;
@@ -204,12 +204,12 @@ export class Paginator extends Component {
           case 'CurrentPageReport':
             element = (
               <CurrentPageReport
-                template={this.props.currentPageReportTemplate}
+                first={this.props.first}
                 key={key}
                 page={this.getPage()}
                 pageCount={this.getPageCount()}
-                first={this.props.first}
                 rows={this.props.rows}
+                template={this.props.currentPageReportTemplate}
                 totalRecords={this.props.totalRecords}
               />
             );

@@ -217,7 +217,7 @@ const GlobalNotifications = () => {
     notifyValidateDataInitDesign
   );
 
-  return <Fragment />;
+  return <div />;
 };
 
 export { GlobalNotifications };

@@ -1,4 +1,6 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+
+import uuid from 'uuid';
 
 import styles from './PropertiesDialog.module.scss';
 
@@ -43,43 +45,43 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     />
   );
 
-  return dataflowState.isPropertiesDialogVisible ? (
-    <Dialog
-      className={styles.propertiesDialog}
-      footer={dialogFooter}
-      header={resources.messages['properties']}
-      onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
-      visible={dataflowState.isPropertiesDialogVisible}>
-      <div className={styles.propertiesWrap} ref={propertiesRef} style={{ height: dialogHeight }}>
-        <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-          <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
-            <TreeView property={parsedDataflowData} propertyName={''} />
-          </TreeViewExpandableItem>
-        </div>
-        {parsedObligationsData.map((data, i) => (
-          <div key={i} style={{ marginTop: '2rem', marginBottom: '1rem' }}>
-            <TreeViewExpandableItem
-              items={[{ label: PropertiesUtils.camelCaseToNormal(data.label) }]}
-              buttons={[
-                {
-                  className: `p-button-secondary-transparent`,
-                  icon: 'externalLink',
-                  tooltip: resources.messages['viewMore'],
-                  onMouseDown: () =>
-                    window.open(
-                      data.label === 'obligation'
-                        ? `${RodUrl.obligations}${dataflowState.obligations.obligationId}`
-                        : `${RodUrl.instruments}${dataflowState.obligations.legalInstruments.id}`
-                    )
-                }
-              ]}>
-              <TreeView property={data.data} propertyName={''} />
+  return (
+    dataflowState.isPropertiesDialogVisible && (
+      <Dialog
+        className={styles.propertiesDialog}
+        footer={dialogFooter}
+        header={resources.messages['properties']}
+        onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
+        visible={dataflowState.isPropertiesDialogVisible}>
+        <div className={styles.propertiesWrap} ref={propertiesRef} style={{ height: dialogHeight }}>
+          <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+            <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
+              <TreeView property={parsedDataflowData} propertyName={''} />
             </TreeViewExpandableItem>
           </div>
-        ))}
-      </div>
-    </Dialog>
-  ) : (
-    <Fragment />
+          {parsedObligationsData.map((data, i) => (
+            <div key={uuid.v4()} style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+              <TreeViewExpandableItem
+                buttons={[
+                  {
+                    className: `p-button-secondary-transparent`,
+                    icon: 'externalLink',
+                    tooltip: resources.messages['viewMore'],
+                    onMouseDown: () =>
+                      window.open(
+                        data.label === 'obligation'
+                          ? `${RodUrl.obligations}${dataflowState.obligations.obligationId}`
+                          : `${RodUrl.instruments}${dataflowState.obligations.legalInstruments.id}`
+                      )
+                  }
+                ]}
+                items={[{ label: PropertiesUtils.camelCaseToNormal(data.label) }]}>
+                <TreeView property={data.data} propertyName={''} />
+              </TreeViewExpandableItem>
+            </div>
+          ))}
+        </div>
+      </Dialog>
+    )
   );
 };

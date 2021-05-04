@@ -53,7 +53,7 @@ const App = () => {
                         <Router>
                           <ScrollToTop>
                             <Switch>
-                              <PublicRoute exact path={routes.PUBLIC_COUNTRIES} component={PublicCountries} />
+                              <PublicRoute component={PublicCountries} exact path={routes.PUBLIC_COUNTRIES} />
                               <PublicRoute
                                 component={PublicCountryInformation}
                                 exact
@@ -65,7 +65,7 @@ const App = () => {
                                 parentPath={routes.PUBLIC_COUNTRY_INFORMATION}
                                 path={routes.PUBLIC_COUNTRY_INFORMATION_ID}
                               />
-                              <PublicRoute exact path={routes.PUBLIC_DATAFLOWS} component={PublicDataflows} />
+                              <PublicRoute component={PublicDataflows} exact path={routes.PUBLIC_DATAFLOWS} />
                               <PublicRoute
                                 component={PublicDataflowInformation}
                                 exact
@@ -77,29 +77,29 @@ const App = () => {
                                 parentPath={routes.PUBLIC_DATAFLOW_INFORMATION}
                                 path={routes.PUBLIC_DATAFLOW_INFORMATION_ID}
                               />
-                              <Route exact path={routes.ACCESS_POINT} component={PublicFrontpage} />
-                              <Route exact path={routes.LOGIN} component={ReportnetLogin} />
-                              <Route exact path={routes.EULOGIN} component={EULogin} />
-                              <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK} component={Feedback} />
-                              <PrivateRoute exact path={routes.DATAFLOW_FEEDBACK_CUSTODIAN} component={Feedback} />
-                              <PrivateRoute exact path={routes.DASHBOARDS} component={DataflowDashboards} />
-                              <PrivateRoute exact path={routes.DATA_COLLECTION} component={DataCollection} />
-                              <PrivateRoute exact path={routes.DATAFLOW_REPRESENTATIVE} component={Dataflow} />
-                              <PrivateRoute exact path={routes.DATAFLOW} component={Dataflow} />
+                              <Route component={PublicFrontpage} exact path={routes.ACCESS_POINT} />
+                              <Route component={ReportnetLogin} exact path={routes.LOGIN} />
+                              <Route component={EULogin} exact path={routes.EULOGIN} />
+                              <PrivateRoute component={Feedback} exact path={routes.DATAFLOW_FEEDBACK} />
+                              <PrivateRoute component={Feedback} exact path={routes.DATAFLOW_FEEDBACK_CUSTODIAN} />
+                              <PrivateRoute component={DataflowDashboards} exact path={routes.DASHBOARDS} />
+                              <PrivateRoute component={DataCollection} exact path={routes.DATA_COLLECTION} />
+                              <PrivateRoute component={Dataflow} exact path={routes.DATAFLOW_REPRESENTATIVE} />
+                              <PrivateRoute component={Dataflow} exact path={routes.DATAFLOW} />
                               <PrivateRoute
                                 component={Dataflow}
                                 exact
                                 parentPath={routes.DATAFLOW}
                                 path={routes.DATAFLOWS_ID}
                               />
-                              <PrivateRoute exact path={routes.DATAFLOWS} component={Dataflows} />
-                              <PrivateRoute exact path={routes.DATAFLOWS_ERROR} component={Dataflows} />
-                              <PrivateRoute exact path={routes.DATASET_SCHEMA} component={DatasetDesigner} />
-                              <PrivateRoute exact path={routes.DATASET} component={Dataset} />
-                              <PrivateRoute exact path={routes.DOCUMENTS} component={DataflowHelp} />
-                              <PrivateRoute exact path={routes.EU_DATASET} component={EUDataset} />
-                              <Route exact path={routes.PRIVACY_STATEMENT} component={PrivacyStatement} />
-                              <PrivateRoute exact path={routes.SETTINGS} component={Settings} />
+                              <PrivateRoute component={Dataflows} exact path={routes.DATAFLOWS} />
+                              <PrivateRoute component={Dataflows} exact path={routes.DATAFLOWS_ERROR} />
+                              <PrivateRoute component={DatasetDesigner} exact path={routes.DATASET_SCHEMA} />
+                              <PrivateRoute component={Dataset} exact path={routes.DATASET} />
+                              <PrivateRoute component={DataflowHelp} exact path={routes.DOCUMENTS} />
+                              <PrivateRoute component={EUDataset} exact path={routes.EU_DATASET} />
+                              <Route component={PrivacyStatement} exact path={routes.PRIVACY_STATEMENT} />
+                              <PrivateRoute component={Settings} exact path={routes.SETTINGS} />
                             </Switch>
                           </ScrollToTop>
                         </Router>
