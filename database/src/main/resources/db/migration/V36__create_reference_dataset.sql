@@ -1,4 +1,4 @@
-CREATE TABLE public.reference_dataset (
+CREATE TABLE IF NOT EXISTS public.reference_dataset (
 	id bigserial NOT NULL,
 	CONSTRAINT reference_dataset_pkey PRIMARY KEY (id),
 	CONSTRAINT reference_dataset_dataset_fkey FOREIGN KEY (id) REFERENCES dataset(id)
