@@ -2,6 +2,9 @@ import { Component } from 'react';
 import styles from './Menu.module.css';
 import { Icon } from 'ui/views/_components/Icon';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 class Menu extends Component {
   constructor(props) {
     super(props);
@@ -105,7 +108,8 @@ class Menu extends Component {
                         });
                     }}
                     disabled={item.disabled}>
-                    <Icon icon={item.icon} />
+                      {/* <Icon icon={item.icon} /> */}
+                    <FontAwesomeIcon icon={AwesomeIcons(item.icon)}/>
                     {item.label}
                   </a>
                 </li>

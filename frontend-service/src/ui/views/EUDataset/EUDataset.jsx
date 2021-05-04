@@ -133,11 +133,13 @@ export const EUDataset = withRouter(({ history, match }) => {
   };
 
   const getExportExtensionsList = () => {
-    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
+    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
+      const extensionsTypes = type.code.split('+');
+      return ({
       command: () => onExportDataInternalExtension(type.code),
-      icon: config.icons['archive'],
+      icon: extensionsTypes[extensionsTypes.length-1],
       label: type.text
-    }));
+    })}) 
 
     euDatasetDispatch({
       type: 'GET_EXPORT_EXTENSIONS_LIST',
