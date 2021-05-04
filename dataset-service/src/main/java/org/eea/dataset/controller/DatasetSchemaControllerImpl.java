@@ -725,6 +725,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         if (null != datasetSchemaVO.getWebform()) {
           dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
         }
+        dataschemaService.updateReferenceDataset(datasetSchemaId,
+            datasetSchemaVO.isReferenceDataset());
+
       }
     } catch (EEAException e) {
       LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId);

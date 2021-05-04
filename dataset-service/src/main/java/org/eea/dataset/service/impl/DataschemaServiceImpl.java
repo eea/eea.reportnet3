@@ -2312,6 +2312,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return tableSchemasVOList;
   }
 
+
+  /**
+   * Update reference dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceDataset the reference dataset
+   */
+  @Override
+  public void updateReferenceDataset(String datasetSchemaId, boolean referenceDataset) {
+    schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
+  }
+
+
   /**
    * Fill and update design dataset imported.
    *
