@@ -5,7 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { config } from 'conf';
 
-import styles from './MainLayout.module.css';
+import styles from './MainLayout.module.scss';
 
 import { EuFooter } from './_components/EuFooter';
 import { Footer } from './_components';
@@ -198,7 +198,7 @@ export const MainLayout = ({ children, isPublic = false, history }) => {
   );
 };
 
-function ErrorFallback({ error, resetErrorBoundary }) {
+const ErrorFallback = ({ error, resetErrorBoundary }) => {
   const resources = useContext(ResourcesContext);
   const onCopyErrorToClipboard = error => {
     const stringError = JSON.stringify({
@@ -219,28 +219,34 @@ function ErrorFallback({ error, resetErrorBoundary }) {
   return (
     <MainLayout>
       <div className="rep-container">
-        <div className="rep-col-sm-6">
-          <h3 className="warning">{resources.messages['errorBoundaryTitle']}</h3>
-        </div>
-        <div className="rep-col-sm-6">
-          <p>{error.message}</p>
-        </div>
+        <div className={styles.boundaryWrap}>
+          <div>
+            <div>
+              <h2 className="warning">{resources.messages['errorBoundaryTitle']}</h2>
+            </div>
+            <div>
+              <p className="warning">{error.message}</p>
+              <p>Please copy the error information to the clipboard and send it to the helpdesk.</p>
+              <p>You have to press the Refresh button to continue.</p>
+            </div>
 
-        <div className="rep-col-sm-12">
-          <div>
-            <Button
-              tooltip={resources.messages['copyToClipboardSuccess']}
-              tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-              icon={'copy'}
-              label={'Copy to clipboard'}
-              onClick={() => onCopyErrorToClipboard(error)}
-            />
-          </div>
-          <div>
-            <Button icon={'refresh'} label={'Refresh'} onClick={resetErrorBoundary} />
+            <div className={styles.boundaryButtonsWrap}>
+              <div>
+                <Button
+                  tooltip={resources.messages['copyToClipboardSuccess']}
+                  tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+                  icon={'copy'}
+                  label={'Copy to clipboard'}
+                  onClick={() => onCopyErrorToClipboard(error)}
+                />
+              </div>
+              <div>
+                <Button icon={'refresh'} label={'Refresh'} onClick={resetErrorBoundary} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </MainLayout>
   );
-}
+};
