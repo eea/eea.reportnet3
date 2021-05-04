@@ -271,7 +271,7 @@ export const WebformTable = ({
         return renderArticle13WebformRecords();
 
       default:
-        return <div></div>;
+        return <div />;
     }
   };
 

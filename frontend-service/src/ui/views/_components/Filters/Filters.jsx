@@ -380,30 +380,27 @@ export const Filters = ({
   };
 
   const matchModeCheckbox = () => (
-    <Fragment>
-      <span className={styles.checkboxWrap} data-for="checkboxTooltip" data-tip>
-        {resources.messages['strictModeCheckboxFilter']}
-        <Button
-          className={`${styles.strictModeInfoButton} p-button-rounded p-button-secondary-transparent`}
-          icon="infoCircle"
-          tooltip={resources.messages['strictModeTooltip']}
-          tooltipOptions={{ position: 'top' }}
+    <span className={styles.checkboxWrap} data-for="checkboxTooltip" data-tip>
+      {resources.messages['strictModeCheckboxFilter']}
+      <Button
+        className={`${styles.strictModeInfoButton} p-button-rounded p-button-secondary-transparent`}
+        icon="infoCircle"
+        tooltip={resources.messages['strictModeTooltip']}
+        tooltipOptions={{ position: 'top' }}
+      />
+      <span className={styles.checkbox}>
+        <Checkbox
+          id={`matchMode_checkbox`}
+          inputId={`matchMode_checkbox`}
+          isChecked={filterState.matchMode}
+          onChange={() => onToggleMatchMode()}
+          role="checkbox"
         />
-        <span className={styles.checkbox}>
-          <Checkbox
-            id={`matchMode_checkbox`}
-            inputId={`matchMode_checkbox`}
-            isChecked={filterState.matchMode}
-            onChange={() => onToggleMatchMode()}
-            role="checkbox"
-          />
-          <label className="srOnly" htmlFor={`matchMode_checkbox`}>
-            {resources.messages['strictModeCheckboxFilter']}
-          </label>
-        </span>
+        <label className="srOnly" htmlFor={`matchMode_checkbox`}>
+          {resources.messages['strictModeCheckboxFilter']}
+        </label>
       </span>
-      <div></div>
-    </Fragment>
+    </span>
   );
 
   const renderCheckboxFilter = (property, label, i) => {
