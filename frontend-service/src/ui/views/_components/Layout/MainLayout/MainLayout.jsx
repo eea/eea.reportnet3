@@ -173,9 +173,9 @@ const MainLayout = ({ children, isPublic = false }) => {
         />
       )}
       <Header isPublic={isPublic} onMainContentStyleChange={onMainContentStyleChange} />
-      <div id="mainContent" className={styles.mainContent} style={mainContentStyle}>
+      <div className={styles.mainContent} id="mainContent" style={mainContentStyle}>
         <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
-        <div id="pageContent" className={styles.pageContent} style={pageContentStyle}>
+        <div className={styles.pageContent} id="pageContent" style={pageContentStyle}>
           {children}
         </div>
       </div>

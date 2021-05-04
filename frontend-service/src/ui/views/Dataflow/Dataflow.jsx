@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
@@ -154,7 +155,7 @@ const Dataflow = withRouter(({ history, match }) => {
       ? null
       : uniq(
           map(
-            dataflowState.data?.datasets?.filter(d => d.dataProviderId == representativeId),
+            dataflowState.data?.datasets?.filter(d => d.dataProviderId?.toString() === representativeId),
             'datasetSchemaName'
           )
         );
@@ -889,8 +890,8 @@ const Dataflow = withRouter(({ history, match }) => {
       return (
         <BigButtonList
           className="dataflow-big-buttons-help-step"
-          dataflowState={dataflowState}
           dataProviderId={dataProviderId}
+          dataflowState={dataflowState}
           handleRedirect={handleRedirect}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           onCleanUpReceipt={onCleanUpReceipt}
@@ -907,8 +908,8 @@ const Dataflow = withRouter(({ history, match }) => {
     } else {
       return (
         <BigButtonListRepresentative
-          dataflowState={dataflowState}
           dataProviderId={dataProviderId}
+          dataflowState={dataflowState}
           handleRedirect={handleRedirect}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           match={match}
@@ -991,10 +992,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageEditorsDialogVisible', false)}
             visible={dataflowState.isManageEditorsDialogVisible}>
             <ShareRights
-              userType={'editor'}
-              roleOptions={editorRoleOptions}
               columnHeader={resources.messages['editorsAccountColumn']}
-              dataflowId={dataflowId}
               dataProviderId={dataProviderId}
               deleteColumnHeader={resources.messages['deleteEditorButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`editorsRightsDialogConfirmDeleteHeader`]}
@@ -1002,6 +1000,8 @@ const Dataflow = withRouter(({ history, match }) => {
               notificationKey={'DELETE_EDITOR_ERROR'}
               placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
               representativeId={representativeId}
+              roleOptions={editorRoleOptions}
+              userType={'editor'}
             />
           </Dialog>
         )}
@@ -1013,17 +1013,17 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
-              userType={'editor'}
-              roleOptions={requesterRoleOptions}
               columnHeader={resources.messages['requestersAccountColumn']}
-              dataflowId={dataflowId}
               dataProviderId={dataProviderId}
+              dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
               notificationKey={'DELETE_REQUESTER_ERROR'}
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
+              roleOptions={requesterRoleOptions}
+              userType={'editor'}
             />
           </Dialog>
         )}
@@ -1035,10 +1035,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
-              userType={'reporter'}
-              roleOptions={reporterRoleOptions}
               columnHeader={resources.messages['reportersAccountColumn']}
-              dataflowId={dataflowId}
               dataProviderId={dataProviderId}
               deleteColumnHeader={resources.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
@@ -1046,6 +1043,8 @@ const Dataflow = withRouter(({ history, match }) => {
               notificationKey={'DELETE_REPORTER_ERROR'}
               placeholder={resources.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
+              roleOptions={reporterRoleOptions}
+              userType={'reporter'}
             />
           </Dialog>
         )}
@@ -1068,8 +1067,8 @@ const Dataflow = withRouter(({ history, match }) => {
             disabledConfirm={
               dataflowState.data.isReleasable === dataflowState.isReleasable || dataflowState.isFetchingData
             }
-            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             header={resources.messages['isReleasableDataflowDialogHeader']}
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
             onConfirm={onConfirmUpdateIsReleaseable}
@@ -1082,7 +1081,7 @@ const Dataflow = withRouter(({ history, match }) => {
               onChange={() => setIsReleaseable(!dataflowState.isReleasable)}
               role="checkbox"
             />
-            <label htmlFor="isReleasableCheckbox" className={styles.isReleasableLabel}>
+            <label className={styles.isReleasableLabel} htmlFor="isReleasableCheckbox">
               <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
                 {resources.messages['isReleasableDataflowCheckboxLabel']}
               </a>
@@ -1095,8 +1094,8 @@ const Dataflow = withRouter(({ history, match }) => {
             disabledConfirm={
               dataflowState.data.showPublicInfo === dataflowState.showPublicInfo || dataflowState.isFetchingData
             }
-            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             header={resources.messages['showPublicInfoDataflowDialogHeader']}
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
             onConfirm={onConfirmUpdateShowPublicInfo}
@@ -1114,7 +1113,7 @@ const Dataflow = withRouter(({ history, match }) => {
               }
               role="checkbox"
             />
-            <label htmlFor="isReleasableCheckbox" className={styles.showPublicInfo}>
+            <label className={styles.showPublicInfo} htmlFor="isReleasableCheckbox">
               <a
                 onClick={() =>
                   dataflowDispatch({
@@ -1130,15 +1129,15 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isImportLeadReportersVisible && (
           <CustomFileUpload
+            accept={getImportExtensions}
+            chooseLabel={resources.messages['selectFile']}
             dialogHeader={`${resources.messages['importLeadReporters']}`}
             dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}
             dialogVisible={dataflowState.isImportLeadReportersVisible}
-            isDialog={true}
-            accept={getImportExtensions}
-            chooseLabel={resources.messages['selectFile']}
             fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            isDialog={true}
             mode="advanced"
             multiple={false}
             name="file"
@@ -1174,8 +1173,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog
-            dataflowId={dataflowId}
             dataProviderId={dataProviderId}
+            dataflowId={dataflowId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             isCustodian={dataflowState.isCustodian}
             manageDialogs={manageDialogs}

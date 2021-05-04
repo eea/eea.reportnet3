@@ -1,5 +1,7 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
+import uuid from 'uuid';
+
 import isNil from 'lodash/isNil';
 
 import styles from '../BigButtonList/BigButtonList.module.scss';
@@ -90,14 +92,12 @@ export const BigButtonListRepresentative = ({
   };
 
   const renderDialogFooter = (
-    <Fragment>
-      <Button
-        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => onCloseHistoricReleasesDialogVisible(false)}
-      />
-    </Fragment>
+    <Button
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onCloseHistoricReleasesDialogVisible(false)}
+    />
   );
 
   return (
@@ -116,7 +116,9 @@ export const BigButtonListRepresentative = ({
               onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
               uniqRepresentatives
-            }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
+            }).map((button, i) =>
+              button.visibility ? <BigButton key={uuid.v4()} {...button} /> : <Fragment key={uuid.v4()} />
+            )}
           </div>
         </div>
       </div>
@@ -131,8 +133,8 @@ export const BigButtonListRepresentative = ({
           onHide={() => onCloseHistoricReleasesDialogVisible(false)}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
-            datasetId={bigButtonListRepresentativeState.datasetId}
             dataProviderId={bigButtonListRepresentativeState.dataProviderId}
+            datasetId={bigButtonListRepresentativeState.datasetId}
             historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
           />
         </Dialog>

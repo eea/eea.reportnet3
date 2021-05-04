@@ -56,7 +56,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
 
   return (
     <>
-      <a className={className} href={href} onClick={onClick} style={style} data-tip data-for={title}>
+      <a className={className} data-for={title} data-tip href={href} onClick={onClick} style={style}>
         <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
       </a>
       {!leftSideBarContext.isLeftSideBarOpened ? (
