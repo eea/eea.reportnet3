@@ -40,7 +40,7 @@ export const ShareRights = ({
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
     accountNotFound: false,
-    userRightAccountToDelete: '',
+    userRightToDelete: '',
     userRightList: [],
     userRight: {},
     clonedUserRightList: [],
@@ -63,7 +63,7 @@ export const ShareRights = ({
         return await UserRightService.allEditors(dataflowId);
       }
       if (method === 'delete') {
-        return await UserRightService.deleteEditor(shareRightsState.userRightAccountToDelete, dataflowId);
+        return await UserRightService.deleteEditor(shareRightsState.userRightToDelete.account, dataflowId);
       }
       if (method === 'update') {
         return await UserRightService.updateEditor(userRight, dataflowId);
@@ -74,7 +74,7 @@ export const ShareRights = ({
       if (method === 'getAll') {
         return await UserRightService.allReporters(dataflowId, dataProvider);
       } else if (method === 'delete') {
-        return await UserRightService.deleteReporter(dataflowId, dataProvider);
+        return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
       } else if (method === 'update') {
         return await UserRightService.updateReporter(dataflowId, dataProvider);
       }
@@ -84,7 +84,7 @@ export const ShareRights = ({
       if (method === 'getAll') {
         return await UserRightService.allRequester(dataflowId);
       } else if (method === 'delete') {
-        return await UserRightService.deleteRequester(shareRightsState.userRightAccountToDelete, dataflowId);
+        return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
       } else if (method === 'update') {
         return await UserRightService.updateRequester(userRight, dataflowId);
       }
@@ -228,7 +228,7 @@ export const ShareRights = ({
         onDeleteClick={() =>
           shareRightsDispatch({
             type: 'ON_DELETE_USER',
-            payload: { isDeleteDialogVisible: true, userRightAccountToDelete: userRight.account }
+            payload: { isDeleteDialogVisible: true, userRightToDelete: userRight }
           })
         }
       />

@@ -36,18 +36,19 @@ const apiUserRight = {
     return response;
   },
 
-  deleteRequester: async (account, dataflowId) => {
+  deleteRequester: async (userRight, dataflowId) => {
     const response = await HTTPRequester.delete({
       url: getUrl(UserRightConfig.deleteRequester, { dataflowId }),
-      data: { account }
+      data: { account: userRight.account, role: userRight.role }
     });
 
     return response;
   },
 
-  deleteReporter: async (dataflowId, dataProviderId) => {
+  deleteReporter: async (userRight, dataflowId, dataProviderId) => {
     const response = await HTTPRequester.delete({
-      url: getUrl(UserRightConfig.deleteReporter, { dataflowId, dataProviderId })
+      url: getUrl(UserRightConfig.deleteReporter, { dataflowId, dataProviderId }),
+      data: { account: userRight.account, role: userRight.role }
     });
 
     return response;

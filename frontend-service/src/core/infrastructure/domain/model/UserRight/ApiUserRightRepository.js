@@ -39,11 +39,11 @@ const allRequesters = async (dataflowId, dataProviderId) => {
 const deleteEditor = async (account, dataflowId, dataProviderId) => {
   return await apiUserRight.deleteEditor(account, dataflowId, dataProviderId);
 };
-const deleteReporter = async (account, dataflowId, dataProviderId) => {
-  return await apiUserRight.deleteReporter(account, dataflowId, dataProviderId);
+const deleteReporter = async (userRight, dataflowId, dataProviderId) => {
+  return await apiUserRight.deleteReporter(userRight, dataflowId, dataProviderId);
 };
-const deleteRequester = async (account, dataflowId, dataProviderId) => {
-  return await apiUserRight.deleteRequester(account, dataflowId, dataProviderId);
+const deleteRequester = async (userRight, dataflowId, dataProviderId) => {
+  return await apiUserRight.deleteRequester(userRight, dataflowId, dataProviderId);
 };
 
 const updateEditor = async (userRight, dataflowId, dataProviderId) => {
