@@ -536,6 +536,7 @@ const parseDatasetDTO = datasetDTO =>
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
     publicFileName: datasetDTO.publicFileName,
+    referenceDataset: datasetDTO.referenceDataset,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
     restrictFromPublic: datasetDTO.restrictFromPublic,
     name: datasetDTO.nameDatasetSchema,
