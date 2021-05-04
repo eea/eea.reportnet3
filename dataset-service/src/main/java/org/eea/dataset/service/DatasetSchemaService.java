@@ -534,4 +534,14 @@ public interface DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   List<TableSchemaIdNameVO> getTableSchemasIds(Long datasetId) throws EEAException;
+
+
+  /**
+   * Update reference dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceDataset the reference dataset
+   */
+  void updateReferenceDataset(String datasetSchemaId, boolean referenceDataset);
+
 }
