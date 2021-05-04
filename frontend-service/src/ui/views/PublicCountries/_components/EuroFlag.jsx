@@ -2,15 +2,15 @@ import styles from './EuroFlag.module.scss';
 
 export const EuroFlag = ({ className }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className={className}>
+    <svg className={className} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
       <title>Flag_of_Europe</title>
-      <g id="Layer_2" data-name="Layer 2">
-        <rect className={styles.flagBg} width="32" height="32" />
+      <g data-name="Layer 2" id="Layer_2">
+        <rect className={styles.flagBg} height="32" width="32" />
       </g>
-      <g id="Layer_1" data-name="Layer 1">
+      <g data-name="Layer 1" id="Layer_1">
         <g id="s">
           <g id="c">
-            <path id="t" className={styles.stars} d="M16,7.11l-.4,1.23.61.2Z" />
+            <path className={styles.stars} d="M16,7.11l-.4,1.23.61.2Z" id="t" />
             <path className={styles.stars} d="M16,7.11l.4,1.23-.61.2Z" />
           </g>
           <g id="a">

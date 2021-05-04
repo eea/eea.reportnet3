@@ -98,6 +98,7 @@ export const ShareRights = ({
       return true;
     }
 
+    // eslint-disable-next-line no-useless-escape
     const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     return email.match(expression);
@@ -210,9 +211,7 @@ export const ShareRights = ({
   };
 
   const renderDeleteColumnTemplate = userRight =>
-    userRight.isNew ? (
-      <Fragment />
-    ) : (
+    userRight.isNew ? null : (
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
@@ -232,19 +231,19 @@ export const ShareRights = ({
       <>
         <select
           id={userType}
-          onKeyDown={event => onEnterKey(event.key, userRight)}
           onBlur={() => updateUser(userRight)}
           onChange={event => onWritePermissionChange(userRight, event.target.value)}
+          onKeyDown={event => onEnterKey(event.key, userRight)}
           value={userRight.role}>
           {userRightRoleOptions.map(option => {
             return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={option.role}>
+              <option className="p-dropdown-item" key={uuid.v4()} value={option.role}>
                 {option.label}
               </option>
             );
           })}
         </select>
-        <label htmlFor={userType} className="srOnly">
+        <label className="srOnly" htmlFor={userType}>
           {placeholder}
         </label>
       </>
@@ -258,15 +257,15 @@ export const ShareRights = ({
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
           autoFocus={userRight.isNew}
-          disabled={!userRight.isNew}
           className={!userRight.isNew ? styles.disabledInput : ''}
+          disabled={!userRight.isNew}
           id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
           onBlur={() => updateUser(userRight)}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={placeholder}
           value={userRight.account}
         />
-        <label htmlFor="emptyInput" className="srOnly">
+        <label className="srOnly" htmlFor="emptyInput">
           {placeholder}
         </label>
       </div>

@@ -115,26 +115,26 @@ const DataflowManagementForm = forwardRef(
             <input
               autoComplete="off"
               id="dataflowName"
-              ref={inputRef}
+              name="name"
               onBlur={() => checkIsCorrectInputValue(name, 'name')}
+              onChange={event => {
+                getData({ ...data, name: event.target.value });
+                setName(event.target.value);
+              }}
               onFocus={() => {
                 setErrors(previousErrors => {
-                  return { ...previousErrors, ['name']: { message: '', hasErrors: false } };
+                  return { ...previousErrors, name: { message: '', hasErrors: false } };
                 });
               }}
               onKeyPress={e => {
                 if (e.key === 'Enter' && !checkIsCorrectInputValue(name, 'name')) onConfirm();
               }}
-              name="name"
               placeholder={resources.messages['createDataflowName']}
-              onChange={event => {
-                getData({ ...data, name: event.target.value });
-                setName(event.target.value);
-              }}
+              ref={inputRef}
               type="text"
               value={name}
             />
-            <label htmlFor="dataflowName" className="srOnly">
+            <label className="srOnly" htmlFor="dataflowName">
               {resources.messages['createDataflowName']}
             </label>
             {errors.name.message !== '' && <ErrorMessage message={errors.name.message} />}
@@ -153,14 +153,14 @@ const DataflowManagementForm = forwardRef(
               }}
               onFocus={() => {
                 setErrors(previousErrors => {
-                  return { ...previousErrors, ['description']: { message: '', hasErrors: false } };
+                  return { ...previousErrors, description: { message: '', hasErrors: false } };
                 });
               }}
               placeholder={resources.messages['createDataflowDescription']}
               rows={10}
               value={description}
             />
-            <label htmlFor="dataflowDescription" className="srOnly">
+            <label className="srOnly" htmlFor="dataflowDescription">
               {resources.messages['createDataflowDescription']}
             </label>
             {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
@@ -169,8 +169,8 @@ const DataflowManagementForm = forwardRef(
           <div className={`${styles.search}`}>
             <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
             <input
-              id="searchObligation"
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
+              id="searchObligation"
               name="obligation.title"
               onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
               onKeyPress={e => {
@@ -181,7 +181,7 @@ const DataflowManagementForm = forwardRef(
               type="text"
               value={data.obligation.title}
             />
-            <label htmlFor="searchObligation" className="srOnly">
+            <label className="srOnly" htmlFor="searchObligation">
               {resources.messages['searchObligations']}
             </label>
           </div>

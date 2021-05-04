@@ -1,6 +1,6 @@
-import { useContext, Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { ReporterList } from './_components/ReporterList';
@@ -35,12 +35,12 @@ const FilterList = ({
         <ReporterList
           datasetSchemaId={datasetSchemaId}
           filterDispatch={filterDispatch}
-          reporterFilters={reporterFilters}
           labels={labels}
+          reporterFilters={reporterFilters}
         />
       </AccordionTab>
     ) : (
-      <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
+      <AccordionTab disabled={true} header={resources.messages['filterByTable']} />
     );
   };
 
@@ -55,7 +55,7 @@ const FilterList = ({
         />
       </AccordionTab>
     ) : (
-      <AccordionTab header={resources.messages['filterByTable']} disabled={true} />
+      <AccordionTab disabled={true} header={resources.messages['filterByTable']} />
     );
   };
 
@@ -66,11 +66,11 @@ const FilterList = ({
         {filterByTables()}
       </Accordion>
       <StatusList
-        datasetSchemaId={datasetSchemaId}
-        statusFilters={statusFilters}
         color={color}
-        levelErrors={levelErrors}
+        datasetSchemaId={datasetSchemaId}
         filterDispatch={filterDispatch}
+        levelErrors={levelErrors}
+        statusFilters={statusFilters}
       />
     </Fragment>
   );

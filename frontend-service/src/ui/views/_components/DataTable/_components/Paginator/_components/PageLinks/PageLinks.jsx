@@ -4,9 +4,9 @@ import classNames from 'classnames';
 
 export class PageLinks extends Component {
   static defaultProps = {
-    value: null,
+    links: null,
     page: null,
-    links: null
+    value: null
   };
 
   static propTypes = {
@@ -33,7 +33,7 @@ export class PageLinks extends Component {
       });
 
       return (
-        <button type="button" key={pageLink} className={pageClassName} onClick={e => this.onPageLinkClick(e, pageLink)}>
+        <button className={pageClassName} key={pageLink} onClick={e => this.onPageLinkClick(e, pageLink)} type="button">
           {pageLink}
         </button>
       );

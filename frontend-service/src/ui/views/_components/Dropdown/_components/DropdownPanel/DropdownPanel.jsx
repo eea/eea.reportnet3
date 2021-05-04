@@ -8,19 +8,20 @@ export class DropdownPanel extends Component {
   static defaultProps = {
     appendTo: null,
     filter: null,
-    scrollHeight: null,
+    onClick: null,
     panelClassName: null,
     panelStyle: null,
-    onClick: null
+    scrollHeight: null
   };
 
   static propTypes = {
     appendTo: PropTypes.object,
     filter: PropTypes.any,
-    scrollHeight: PropTypes.string,
+    onClick: PropTypes.func,
     panelClassName: PropTypes.string,
+    // eslint-disable-next-line react/no-unused-prop-types
     panelstyle: PropTypes.object,
-    onClick: PropTypes.func
+    scrollHeight: PropTypes.string
   };
 
   renderElement() {
@@ -28,14 +29,14 @@ export class DropdownPanel extends Component {
 
     return (
       <div
-        ref={el => (this.element = el)}
         className={className}
-        style={this.props.panelStyle}
-        onClick={this.props.onClick}>
+        onClick={this.props.onClick}
+        ref={el => (this.element = el)}
+        style={this.props.panelStyle}>
         {this.props.filter}
         <div
-          ref={el => (this.itemsWrapper = el)}
           className="p-dropdown-items-wrapper"
+          ref={el => (this.itemsWrapper = el)}
           style={{ maxHeight: this.props.scrollHeight || 'auto' }}>
           <ul className="p-dropdown-items p-dropdown-list p-component">{this.props.children}</ul>
         </div>

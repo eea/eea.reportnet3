@@ -250,21 +250,21 @@ export class BodyRow extends Component {
         <BodyCell
           key={i}
           {...column.props}
-          value={this.props.value}
-          rowSpan={rowSpan}
-          rowData={this.props.rowData}
-          rowIndex={this.props.rowIndex}
-          onRowToggle={this.props.onRowToggle}
-          expanded={this.props.expanded}
-          onRadioClick={this.props.onRadioClick}
-          onCheckboxClick={this.props.onCheckboxClick}
-          responsive={this.props.responsive}
-          selected={this.props.selected}
           editMode={this.props.editMode}
           editing={this.state.editing}
+          expanded={this.props.expanded}
+          onCheckboxClick={this.props.onCheckboxClick}
+          onRadioClick={this.props.onRadioClick}
+          onRowEditCancel={this.onRowEditCancel}
           onRowEditInit={this.onRowEditInit}
           onRowEditSave={this.onRowEditSave}
-          onRowEditCancel={this.onRowEditCancel}
+          onRowToggle={this.props.onRowToggle}
+          responsive={this.props.responsive}
+          rowData={this.props.rowData}
+          rowIndex={this.props.rowIndex}
+          rowSpan={rowSpan}
+          selected={this.props.selected}
+          value={this.props.value}
         />
       );
 
@@ -273,23 +273,23 @@ export class BodyRow extends Component {
 
     return (
       <tr
-        tabIndex={this.props.selectionMode ? '0' : null}
+        className={className}
+        onClick={this.onClick}
+        onContextMenu={this.onRightClick}
+        onDoubleClick={this.onDoubleClick}
+        onDragEnd={this.onDragEnd}
+        onDragLeave={this.onDragLeave}
+        onDragOver={this.onDragOver}
+        onDragStart={this.props.onDragStart}
+        onDrop={this.onDrop}
+        onKeyDown={this.onKeyDown}
+        onMouseDown={this.onMouseDown}
+        onTouchEnd={this.onTouchEnd}
         ref={el => {
           this.container = el;
         }}
-        className={className}
-        onClick={this.onClick}
-        onDoubleClick={this.onDoubleClick}
-        onTouchEnd={this.onTouchEnd}
-        onContextMenu={this.onRightClick}
-        onMouseDown={this.onMouseDown}
-        onDragStart={this.props.onDragStart}
-        onDragEnd={this.onDragEnd}
-        onDragOver={this.onDragOver}
-        onDragLeave={this.onDragLeave}
-        onDrop={this.onDrop}
         style={{ height: this.props.virtualRowHeight }}
-        onKeyDown={this.onKeyDown}>
+        tabIndex={this.props.selectionMode ? '0' : null}>
         {cells}
       </tr>
     );
