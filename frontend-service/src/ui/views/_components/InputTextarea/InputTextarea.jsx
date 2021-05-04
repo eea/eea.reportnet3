@@ -186,12 +186,12 @@ export class InputTextarea extends Component {
           className={className}
           id={this.props.id}
           maxLength={this.props.maxLength}
-          ref={input => (this.element = input)}
-          onFocus={this.onFocus}
           onBlur={this.onBlur}
+          onFocus={this.onFocus}
+          onInput={this.onInput}
           onKeyUp={this.onKeyUp}
-          onInput={this.onInput}></textarea>
-        <label htmlFor={this.props.id} className="srOnly">
+          ref={input => (this.element = input)}></textarea>
+        <label className="srOnly" htmlFor={this.props.id}>
           {this.props.placeholder}
         </label>
       </>

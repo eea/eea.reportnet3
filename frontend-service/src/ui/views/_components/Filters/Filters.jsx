@@ -339,7 +339,7 @@ export const Filters = ({
   const renderCalendarFilter = property => {
     const inputId = uuid.v4();
     return (
-      <span key={property} className={styles.input} ref={dateRef}>
+      <span className={styles.input} key={property} ref={dateRef}>
         {renderOrderFilter(property)}
         <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
           <Calendar
@@ -381,7 +381,7 @@ export const Filters = ({
 
   const matchModeCheckbox = () => (
     <Fragment>
-      <span className={styles.checkboxWrap} data-tip data-for="checkboxTooltip">
+      <span className={styles.checkboxWrap} data-for="checkboxTooltip" data-tip>
         {resources.messages['strictModeCheckboxFilter']}
         <Button
           className={`${styles.strictModeInfoButton} p-button-rounded p-button-secondary-transparent`}
@@ -397,7 +397,7 @@ export const Filters = ({
             onChange={() => onToggleMatchMode()}
             role="checkbox"
           />
-          <label htmlFor={`matchMode_checkbox`} className="srOnly">
+          <label className="srOnly" htmlFor={`matchMode_checkbox`}>
             {resources.messages['strictModeCheckboxFilter']}
           </label>
         </span>
@@ -408,7 +408,7 @@ export const Filters = ({
 
   const renderCheckboxFilter = (property, label, i) => {
     return (
-      <span key={i} className={styles.inputCheckbox}>
+      <span className={styles.inputCheckbox} key={i}>
         <div className={styles.flex}>
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
@@ -420,7 +420,7 @@ export const Filters = ({
               onChange={() => onChangeCheckboxFilter(property)}
               style={{ marginRight: '50px' }}
             />
-            <label htmlFor={property} className="srOnly">
+            <label className="srOnly" htmlFor={property}>
               {resources.messages[property]}
             </label>
           </span>
@@ -430,7 +430,7 @@ export const Filters = ({
   };
 
   const renderDropdown = property => (
-    <span key={property} className={`${styles.input}`}>
+    <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <Dropdown
         ariaLabel={property}
@@ -456,7 +456,7 @@ export const Filters = ({
   );
 
   const renderInputFilter = property => (
-    <span key={property} className={styles.input}>
+    <span className={styles.input} key={property}>
       {renderOrderFilter(property)}
       <span className={`p-float-label ${styles.label}`}>
         <InputText
@@ -480,35 +480,33 @@ export const Filters = ({
   );
 
   const renderOrderFilter = property =>
-    sortable ? (
+    sortable && (
       <Button
         className={`p-button-secondary-transparent ${styles.icon}`}
-        layout="simple"
         icon={SortUtils.getOrderIcon(filterState.orderBy[property])}
         id={`${property}_sort`}
+        layout="simple"
         onClick={() => onOrderData(filterState.orderBy[property], property)}
         style={{ fontSize: '12pt' }}
         tooltip={resources.messages['sort']}
         tooltipOptions={{ position: 'bottom' }}
         value={`${property}_sortOrder`}
       />
-    ) : (
-      <Fragment />
     );
 
   const renderMultiselectSelectFilter = (property, showInput) => (
-    <span key={property} className={`${styles.input}`}>
+    <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <MultiSelect
         ariaLabelledBy={property}
         checkAllHeader={resources.messages['checkAllFilter']}
         className={styles.multiselectFilter}
+        filter={showInput}
         headerClassName={styles.selectHeader}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
         isFilter
-        filter={showInput}
         itemTemplate={selectTemplate}
         label={resources.messages[property]}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
@@ -542,12 +540,12 @@ export const Filters = ({
 
       <label
         className={styles.label}
-        htmlFor={'searchInput'}
         dangerouslySetInnerHTML={{
           __html: TextUtils.parseText(resources.messages['searchAllLabel'], {
             searchData: !isEmpty(searchBy) ? `(${getSearchByLabelParams(searchBy).join(', ').toLowerCase()})` : ''
           })
-        }}></label>
+        }}
+        htmlFor={'searchInput'}></label>
     </span>
   );
 
@@ -596,15 +594,13 @@ export const Filters = ({
       {matchMode && matchModeCheckbox()}
 
       <div className={styles.buttonWrapper} style={{ width: sendData ? 'inherit' : '' }}>
-        {sendData ? (
+        {sendData && (
           <Button
             className={`p-button-animated-blink ${styles.sendButton}`}
             icon="filter"
             label={resources.messages['applyFilters']}
             onClick={() => sendData(filterState.filterBy)}
           />
-        ) : (
-          <Fragment />
         )}
 
         {(input || multiselect || date || checkbox) && (

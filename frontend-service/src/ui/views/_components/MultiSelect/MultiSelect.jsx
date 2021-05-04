@@ -484,8 +484,8 @@ export class MultiSelect extends Component {
     if (this.props.selectedItemTemplate) {
       if (!this.isEmpty()) {
         if (this.props.value.length <= this.props.maxSelectedLabels) {
-          return this.props.value.map((val, index) => {
-            return <Fragment key={index}>{this.props.selectedItemTemplate(val)}</Fragment>;
+          return this.props.value.map(val => {
+            return <Fragment key={val}>{this.props.selectedItemTemplate(val)}</Fragment>;
           });
         } else {
           return this.getSelectedItemsLabel();
@@ -572,13 +572,13 @@ export class MultiSelect extends Component {
         items = this.filterOptions(items);
       }
 
-      items = items.map((option, index) => {
+      items = items.map(option => {
         let optionLabel = this.getOptionLabel(option);
 
         return (
           <MultiSelectItem
             disabled={option.disabled}
-            key={optionLabel + '_' + index}
+            key={optionLabel}
             label={optionLabel}
             onClick={this.onOptionClick}
             onKeyDown={this.onOptionKeyDown}

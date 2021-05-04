@@ -6,28 +6,29 @@ export class TableHeader extends Component {
     let children = Children.toArray(root.props.children);
 
     return Children.map(children, (column, i) => {
+      console.log(column.key, this.props.value);
       return (
         <HeaderCell
-          key={i}
+          key={column.key}
           {...column.props}
-          value={this.props.value}
-          onSort={this.props.onSort}
           columnSortField={column.props.sortField}
-          sortField={this.props.sortField}
-          sortOrder={this.props.sortOrder}
+          filters={this.props.filters}
+          headerCheckboxSelected={this.props.headerCheckboxSelected}
           multiSortMeta={this.props.multiSortMeta}
-          resizableColumns={this.props.resizableColumns}
           onColumnResizeStart={this.props.onColumnResizeStart}
+          onDragLeave={this.props.onColumnDragLeave}
+          onDragOver={this.props.onColumnDragOver}
+          onDragStart={this.props.onColumnDragStart}
+          onDrop={this.props.onColumnDrop}
           onFilter={this.props.onFilter}
           onHeaderCheckboxClick={this.props.onHeaderCheckboxClick}
-          headerCheckboxSelected={this.props.headerCheckboxSelected}
+          onSort={this.props.onSort}
           reorderableColumns={this.props.reorderableColumns}
-          onDragStart={this.props.onColumnDragStart}
-          onDragOver={this.props.onColumnDragOver}
-          onDragLeave={this.props.onColumnDragLeave}
-          onDrop={this.props.onColumnDrop}
-          filters={this.props.filters}
+          resizableColumns={this.props.resizableColumns}
+          sortField={this.props.sortField}
+          sortOrder={this.props.sortOrder}
           tabIndex={this.props.tabIndex}
+          value={this.props.value}
         />
       );
     });
@@ -38,6 +39,7 @@ export class TableHeader extends Component {
     if (this.props.columnGroup) {
       let rows = Children.toArray(this.props.columnGroup.props.children);
       content = rows.map((row, i) => {
+        // eslint-disable-next-line react/no-array-index-key
         return <tr key={i}>{this.createHeaderCells(row)}</tr>;
       });
     } else {
