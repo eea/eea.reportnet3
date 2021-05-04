@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 class Menu extends Component {
   constructor(props) {
+    console.log('props :>> ', props);
     super(props);
     this.state = {
       style: {
@@ -46,7 +47,11 @@ class Menu extends Component {
     }
   }
   show(event) {
+    console.log('event :>> ', event.target);
+    // const menu = event.target.getBoundingClientRect();
     const menu = event.currentTarget.nextSibling;
+    const buttonPosition = event.target.getBoundingClientRect();
+    console.log('menu :>> ', menu);
 
     this.setState(
       state => {
@@ -66,7 +71,9 @@ class Menu extends Component {
               ...state,
               style: {
                 ...state.style,
-                bottom: `-${menu.offsetHeight}px`
+                bottom: `-${menu.offsetHeight}px`,
+                // bottom: `-${menu.bottom}px`,
+                left: `${buttonPosition.left}px`
               }
             };
           },

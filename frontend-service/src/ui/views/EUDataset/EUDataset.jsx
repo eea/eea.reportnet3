@@ -323,7 +323,8 @@ export const EUDataset = withRouter(({ history, match }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={euDatasetState.exportExtensionsList}
-              onShow={e => getPosition(e)}
+              // onShow={e => getPosition(e)}
+              show={e => {console.log('e :>> ', e) }}
               popup={true}
               ref={exportMenuRef}
             />
