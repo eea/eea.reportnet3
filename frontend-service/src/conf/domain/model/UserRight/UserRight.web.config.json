@@ -1,13 +1,8 @@
 {
-  "allEditors": "/contributor/editor/dataflow/{:dataflowId}",
   "allRequester": "/contributor/requester/dataflow/{:dataflowId}",
   "allReporters": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}",
-
-  "deleteEditor": "/contributor/editor/dataflow/{:dataflowId}",
   "deleteRequester": "/contributor/requester/dataflow/{:dataflowId}",
   "deleteReporter": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}",
-
-  "updateEditor": "/contributor/editor/dataflow/{:dataflowId}",
   "updateRequester": "/contributor/requester/dataflow/{:dataflowId}",
   "updateReporter": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}"
 }

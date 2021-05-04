@@ -3,17 +3,9 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 const apiUserRight = {
-  allEditors: async dataflowId => {
-    const response = await HTTPRequester.get({
-      url: getUrl(UserRightConfig.allEditors, { dataflowId })
-    });
-
-    return response;
-  },
-
   allRequesters: async dataflowId => {
     const response = await HTTPRequester.get({
-      url: getUrl(UserRightConfig.allEditors, { dataflowId })
+      url: getUrl(UserRightConfig.allRequesters, { dataflowId })
     });
 
     return response;
@@ -22,15 +14,6 @@ const apiUserRight = {
   allReporters: async (dataflowId, dataProviderId) => {
     const response = await HTTPRequester.get({
       url: getUrl(UserRightConfig.allReporters, { dataflowId, dataProviderId })
-    });
-
-    return response;
-  },
-
-  deleteEditor: async (account, dataflowId) => {
-    const response = await HTTPRequester.delete({
-      url: getUrl(UserRightConfig.deleteEditor, { dataflowId }),
-      data: { account }
     });
 
     return response;
@@ -53,17 +36,6 @@ const apiUserRight = {
     return response;
   },
 
-  updateEditor: async (userRight, dataflowId) => {
-    const response = await HTTPRequester.update({
-      url: getUrl(UserRightConfig.updateEditor, { dataflowId }),
-      data: {
-        account: userRight.account,
-        writePermission: userRight.writePermission
-      }
-    });
-    return response;
-  },
-
   updateRequester: async (userRight, dataflowId) => {
     const response = await HTTPRequester.update({
       url: getUrl(UserRightConfig.updateRequester, { dataflowId }),
@@ -75,9 +47,9 @@ const apiUserRight = {
     return response;
   },
 
-  updateReporter: async (dataflowId, dataProviderId) => {
+  updateReporter: async (userRight, dataflowId, dataProviderId) => {
     const response = await HTTPRequester.update({
-      url: getUrl(UserRightConfig.updateReporter, { dataflowId, dataProviderId })
+      url: getUrl(UserRightConfig.updateReporter, { dataflowId, dataProviderId, role: userRight.role })
     });
     return response;
   }

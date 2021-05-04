@@ -58,25 +58,13 @@ export const ShareRights = ({
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
 
   const callEndPoint = async (method, userRight) => {
-    if (userType === 'editor') {
-      if (method === 'getAll') {
-        return await UserRightService.allEditors(dataflowId);
-      }
-      if (method === 'delete') {
-        return await UserRightService.deleteEditor(shareRightsState.userRightAccountToDelete, dataflowId);
-      }
-      if (method === 'update') {
-        return await UserRightService.updateEditor(userRight, dataflowId);
-      }
-    }
-
     if (userType === 'reporter') {
       if (method === 'getAll') {
         return await UserRightService.allReporters(dataflowId, dataProvider);
       } else if (method === 'delete') {
         return await UserRightService.deleteReporter(dataflowId, dataProvider);
       } else if (method === 'update') {
-        return await UserRightService.updateReporter(dataflowId, dataProvider);
+        return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
       }
     }
 
