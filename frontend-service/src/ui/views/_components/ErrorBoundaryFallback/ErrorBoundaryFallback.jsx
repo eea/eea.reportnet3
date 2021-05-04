@@ -7,6 +7,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
 
+import { TooltipUtils } from 'ui/views/_functions/Utils/TooltipUtils';
+
 export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
   const resources = useContext(ResourcesContext);
   const onCopyErrorToClipboard = error => {
@@ -23,6 +25,10 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
     tempTextArea.select();
     document.execCommand('copy');
     document.body.removeChild(tempTextArea);
+
+    setTimeout(() => {
+      TooltipUtils.removeElementsByClass('p-tooltip');
+    }, 750);
   };
 
   return (
