@@ -15,16 +15,16 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 const Navigation = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
   return (
-    <div id="header" className={styles.header}>
+    <div className={styles.header} id="header">
       <a
-        href={getUrl(routes.ACCESS_POINT)}
         className={styles.appLogo}
-        title={resources.messages['titleHeader']}
+        href={getUrl(routes.ACCESS_POINT)}
         onClick={e => {
           e.preventDefault();
           history.push(getUrl(routes.ACCESS_POINT));
-        }}>
-        <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
+        }}
+        title={resources.messages['titleHeader']}>
+        <img alt="Reportnet" className={styles.appLogo} height="50px" src={logo} />
         <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
       </a>
       <UserCard />

@@ -371,7 +371,7 @@ const RepresentativesList = ({
 
     return (
       <>
-        <label htmlFor={labelId} className="srOnly">
+        <label className="srOnly" htmlFor={labelId}>
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
         <select
@@ -390,11 +390,11 @@ const RepresentativesList = ({
             }
           }}
           value={representative.dataProviderId}>
-          {remainingOptionsAndSelectedOption.map((provider, i) => {
+          {remainingOptionsAndSelectedOption.map(provider => {
             return (
               <option
-                key={`${provider.dataProviderId}${provider.label}${i}`}
                 className="p-dropdown-item"
+                key={`${provider.dataProviderId}${provider.label}`}
                 value={provider.dataProviderId}>
                 {provider.label}
               </option>
@@ -406,17 +406,18 @@ const RepresentativesList = ({
   };
 
   const renderDeleteBtnColumnTemplate = representative => {
-    return isNil(representative.representativeId) || representative.hasDatasets ? (
-      <></>
-    ) : (
-      <ActionsColumn
-        onDeleteClick={() => {
-          formDispatcher({
-            type: 'SHOW_CONFIRM_DIALOG',
-            payload: { representativeId: representative.representativeId }
-          });
-        }}
-      />
+    return (
+      !isNil(representative.representativeId) &&
+      !representative.hasDatasets && (
+        <ActionsColumn
+          onDeleteClick={() => {
+            formDispatcher({
+              type: 'SHOW_CONFIRM_DIALOG',
+              payload: { representativeId: representative.representativeId }
+            });
+          }}
+        />
+      )
     );
   };
 
@@ -430,13 +431,13 @@ const RepresentativesList = ({
           <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
             ariaLabel={'dataProviders'}
+            className={styles.dataProvidersDropdown}
             disabled={formState.representatives.length > 1}
             name="dataProvidersDropdown"
             onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
             optionLabel="label"
             options={formState.dataProvidersTypesList}
             placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-            className={styles.dataProvidersDropdown}
             value={formState.selectedDataProviderGroup}
           />
           <Button

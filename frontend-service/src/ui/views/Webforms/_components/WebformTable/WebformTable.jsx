@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -87,7 +87,7 @@ export const WebformTable = ({
 
   const getTableElements = obj => {
     const tableElements = [];
-    obj.elements.filter(element => {
+    obj.elements.forEach(element => {
       if (
         element.type === 'TABLE' &&
         !isNil(element.tableSchemaId) &&
@@ -240,8 +240,8 @@ export const WebformTable = ({
       onAddMultipleWebform={onAddMultipleWebform}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
-      onUpdateSinglesList={onUpdateSinglesList}
       onUpdatePamsValue={onUpdatePamsValue}
+      onUpdateSinglesList={onUpdateSinglesList}
       pamsRecords={pamsRecords}
       record={record}
       tableId={webformData.tableSchemaId}
@@ -271,7 +271,7 @@ export const WebformTable = ({
         return renderArticle13WebformRecords();
 
       default:
-        return <Fragment />;
+        return <div />;
     }
   };
 

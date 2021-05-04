@@ -18,13 +18,13 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
 
   return (
     <Fragment>
-      <div id="globan" style={globanElementStyle} className={styles.globan}>
+      <div className={styles.globan} id="globan" style={globanElementStyle}>
         <div className={styles.globanContent}>
           <span>{resources.messages['anOfficialWebsite']}</span>
           <a
-            href="#globan-dropdown-186d0fazrpn"
             aria-controls="globan-dropdown-186d0fazrpn"
             aria-expanded="false"
+            href="#globan-dropdown-186d0fazrpn"
             onClick={e => {
               e.preventDefault();
               setOpenGloban(!openGloban);
@@ -49,7 +49,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
         </div>
       </div>
       <CookiesDialog />
-      <div id="euHeader" style={euHeaderElementStyle} className={styles.euHeader}>
+      <div className={styles.euHeader} id="euHeader" style={euHeaderElementStyle}>
         <div className={styles.europeanUnionLogo}>
           <a
             className={`${
