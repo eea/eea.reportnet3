@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import styles from './Menu.module.scss';
-import { Icon } from 'ui/views/_components/Icon';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -128,7 +127,6 @@ class Menu extends Component {
                         });
                     }}
                     disabled={item.disabled}>
-                      {/* <Icon icon={item.icon} /> */}
                     {!isNil(item.icon) && <FontAwesomeIcon className={styles.userDataIcon} icon={AwesomeIcons(item.icon)}/>}
                     <span>{item.label}</span>
                   </a>                  
