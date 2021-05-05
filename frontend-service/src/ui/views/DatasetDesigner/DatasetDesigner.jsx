@@ -292,21 +292,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
-    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
+    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
+      const extensionsTypes = !isNil(type.code) && type.code.split('+');
+      return ({
       command: () => onExportDataInternalExtension(type.code),
-      icon: config.icons['archive'],
+      icon: extensionsTypes[extensionsTypes.length-1],
       label: type.text
-    }));
+    })}) ;
 
     const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
           {
             label: resources.messages['customExports'],
-            items: externalOperationsList.export.map(type => ({
-              command: () => onExportDataExternalIntegration(type.id),
-              icon: config.icons['archive'],
-              label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
-            }))
+            items: externalOperationsList.export.map(type => {
+              const extensionsTypes = !isNil(type.code) && type.code.split('+');
+              return (
+              ({
+                command: () => onExportDataExternalIntegration(type.id),
+                icon: extensionsTypes[extensionsTypes.length-1],
+                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+              }))
+              }) 
+              
           }
         ]
       : [];
