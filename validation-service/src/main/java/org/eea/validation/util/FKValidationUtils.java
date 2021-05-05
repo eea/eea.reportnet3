@@ -362,14 +362,14 @@ public class FKValidationUtils {
               new ArrayList<>(Arrays.asList(pkMapAux.get(fkList.get(i)[2]).split(",")));
           pksByOptionalValueAux.replaceAll(String::trim);
 
-          if (!pksByOptionalValue.contains("\"" + value.trim() + "\"")
-              && !pksByOptionalValue.contains(value.trim())) {
+          if (!pksByOptionalValue.contains("\"" + value + "\"")
+              && !pksByOptionalValue.contains(value)) {
             ifFKs.add(fkList.get(i)[0].toString());
           }
-          if (pksByOptionalValue.contains(value.trim())
-              || pksByOptionalValue.contains("\"" + value.trim() + "\"")) {
-            pksByOptionalValueAux.remove(value.trim());
-            pksByOptionalValueAux.remove("\"" + value.trim() + "\"");
+          if (pksByOptionalValue.contains(value)
+              || pksByOptionalValue.contains("\"" + value + "\"")) {
+            pksByOptionalValueAux.remove(value);
+            pksByOptionalValueAux.remove("\"" + value + "\"");
           }
           pkMapAux.put((fkList.get(i)[2]).toString(),
               pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());
