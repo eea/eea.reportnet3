@@ -99,6 +99,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The Constant NAME_TEST: {@value}. */
   private static final String NAME_TEST = "Test Dataset - %s";
 
+  /** The Constant NAME_REFERENCE: {@value}. */
+  private static final String NAME_REFERENCE = "Reference Dataset - %s";
+
   /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
@@ -399,9 +402,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
       if (schema.isReferenceDataset()) {
         referenceDatasets.add(dataset);
-        designs.remove(dataset);
       }
     });
+    designs.removeIf(design -> referenceDatasets.contains(design));
 
     if (rulesOk) {
       // 2. Get the representatives who are going to provide data
@@ -601,6 +604,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+  /**
+   * Persist test.
+   *
+   * @param metabaseStatement the metabase statement
+   * @param design the design
+   * @param time the time
+   * @param dataflowId the dataflow id
+   * @return the long
+   * @throws SQLException the SQL exception
+   */
   private Long persistTest(Statement metabaseStatement, DesignDatasetVO design, String time,
       Long dataflowId) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_TEST_INTO_DATASET, time,
@@ -919,7 +932,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private Long persistReferenceDataset(Statement metabaseStatement, DesignDatasetVO design,
       String time, Long dataflowId) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_REFERENCE_INTO_DATASET,
-        time, dataflowId, String.format(NAME_TEST, design.getDataSetName().replace("'", "''")),
+        time, dataflowId, String.format(NAME_REFERENCE, design.getDataSetName().replace("'", "''")),
         design.getDatasetSchema()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
