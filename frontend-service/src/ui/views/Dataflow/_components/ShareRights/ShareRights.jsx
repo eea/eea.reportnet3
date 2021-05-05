@@ -72,6 +72,7 @@ export const ShareRights = ({
       return true;
     }
 
+    // eslint-disable-next-line no-useless-escape
     const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     return email.match(expression);
@@ -192,9 +193,7 @@ export const ShareRights = ({
   };
 
   const renderDeleteColumnTemplate = contributor =>
-    contributor.isNew ? (
-      <Fragment />
-    ) : (
+    contributor.isNew ? null : (
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
@@ -221,19 +220,19 @@ export const ShareRights = ({
       <>
         <select
           id="dataProvider"
-          onKeyDown={event => onEnterKey(event.key, contributor)}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onWritePermissionChange(contributor, event.target.value)}
+          onKeyDown={event => onEnterKey(event.key, contributor)}
           value={contributor.writePermission}>
           {writePermissionsOptions.map(option => {
             return (
-              <option key={uuid.v4()} className="p-dropdown-item" value={option.writePermission}>
+              <option className="p-dropdown-item" key={uuid.v4()} value={option.writePermission}>
                 {option.label}
               </option>
             );
           })}
         </select>
-        <label htmlFor="dataProvider" className="srOnly">
+        <label className="srOnly" htmlFor="dataProvider">
           {resources.messages['manageRolesEditorDialogInputPlaceholder']}
         </label>
       </>
@@ -247,15 +246,15 @@ export const ShareRights = ({
       <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
         <input
           autoFocus={contributor.isNew}
-          disabled={!contributor.isNew}
           className={!contributor.isNew ? styles.disabledInput : ''}
+          disabled={!contributor.isNew}
           id={isEmpty(contributor.account) ? 'emptyInput' : contributor.account}
           onBlur={() => updateContributor(contributor)}
           onChange={event => onSetAccount(event.target.value)}
           placeholder={placeholder}
           value={contributor.account}
         />
-        <label htmlFor="emptyInput" className="srOnly">
+        <label className="srOnly" htmlFor="emptyInput">
           {resources.messages['manageRolesEditorDialogInputPlaceholder']}
         </label>
       </div>

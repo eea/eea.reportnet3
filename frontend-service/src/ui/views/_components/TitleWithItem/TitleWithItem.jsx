@@ -58,7 +58,7 @@ const TitleWithItem = memo(
         </div>
         <div className={styles.itemsContainer}>
           {items.map((item, i) => (
-            <div className={styles.itemContainer} key={i}>
+            <div className={styles.itemContainer} key={uuid.v4()}>
               {item}
             </div>
           ))}

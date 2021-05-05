@@ -54,5 +54,6 @@ export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns
     }
   };
 
-  return <Fragment>{!isUndefined(data) ? checkPastedColumnsErrors() : null}</Fragment>;
+  // eslint-disable-next-line react/jsx-no-useless-fragment
+  return <Fragment>{!isUndefined(data) && checkPastedColumnsErrors()}</Fragment>;
 };

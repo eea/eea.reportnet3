@@ -252,15 +252,15 @@ const ValidationExpression = ({
               disabled={isDisabled}
               onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
               placeholder={resourcesContext.messages.value}
-              value={expressionValues.expressionValue}
               ref={inputStringMatchRef}
+              value={expressionValues.expressionValue}
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label="CC"
+              onClick={() => onCCButtonClick(ccButtonValue)}
               tooltip={resourcesContext.messages['matchStringTooltip']}
               tooltipOptions={{ position: 'top' }}
-              onClick={() => onCCButtonClick(ccButtonValue)}
             />
           </span>
         );
@@ -282,9 +282,9 @@ const ValidationExpression = ({
       if (fieldType === 'NUMBER_DECIMAL') {
         return (
           <InputText
-            keyfilter={valueKeyFilter}
             disabled={isDisabled}
             format={false}
+            keyfilter={valueKeyFilter}
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
             placeholder={resourcesContext.messages.value}
@@ -342,8 +342,8 @@ const ValidationExpression = ({
       return (
         <InputNumber
           disabled={isDisabled}
-          min={-1}
           format={false}
+          min={-1}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
@@ -353,8 +353,8 @@ const ValidationExpression = ({
     }
     return (
       <InputText
-        keyfilter={valueKeyFilter}
         disabled={isDisabled}
+        keyfilter={valueKeyFilter}
         onChange={e => {
           onUpdateExpressionField('expressionValue', e.target.value);
         }}
@@ -374,8 +374,8 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        onBlur={() => onAddToClickedFields('union')}
-        className={`${styles.union} formField ${printRequiredFieldError('union')}`}>
+        className={`${styles.union} formField ${printRequiredFieldError('union')}`}
+        onBlur={() => onAddToClickedFields('union')}>
         <Dropdown
           appendTo={document.body}
           disabled={isDisabled || position === 0}
@@ -387,8 +387,8 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        onBlur={() => onAddToClickedFields('operatorType')}
-        className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
+        className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}
+        onBlur={() => onAddToClickedFields('operatorType')}>
         <Dropdown
           appendTo={document.body}
           disabled={isDisabled}
@@ -402,8 +402,8 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        onBlur={() => onAddToClickedFields('operatorValue')}
-        className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
+        className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}
+        onBlur={() => onAddToClickedFields('operatorValue')}>
         <Dropdown
           appendTo={document.body}
           disabled={isDisabled}
@@ -415,8 +415,8 @@ const ValidationExpression = ({
         />
       </span>
       <span
-        onBlur={() => onAddToClickedFields('expressionValue')}
-        className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}>
+        className={`${styles.expressionValue} formField ${printRequiredFieldError('expressionValue')}`}
+        onBlur={() => onAddToClickedFields('expressionValue')}>
         {buildValueInput()}
       </span>
       <span>

@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -114,6 +114,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
+          key="datasetValidationInfo"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
@@ -550,24 +551,21 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
     });
   };
 
-  const dialogLayout = children => (
-    <Fragment>
-      {validationContext.isVisible && (
-        <Dialog
-          className={styles.dialog}
-          header={
-            validationContext.ruleEdit
-              ? resourcesContext.messages.editTableConstraint
-              : resourcesContext.messages.createTableConstraint
-          }
-          visible={validationContext.isVisible}
-          style={{ width: '975px' }}
-          onHide={() => onHide()}>
-          {children}
-        </Dialog>
-      )}
-    </Fragment>
-  );
+  const dialogLayout = children =>
+    validationContext.isVisible && (
+      <Dialog
+        className={styles.dialog}
+        header={
+          validationContext.ruleEdit
+            ? resourcesContext.messages.editTableConstraint
+            : resourcesContext.messages.createTableConstraint
+        }
+        onHide={() => onHide()}
+        style={{ width: '975px' }}
+        visible={validationContext.isVisible}>
+        {children}
+      </Dialog>
+    );
 
   const getIsCreationDisabled = () => {
     if (creationFormState.candidateRule.expressionType === 'sqlSentence') {
@@ -584,69 +582,67 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
     );
   };
   return dialogLayout(
-    <>
-      <form>
-        <div id={styles.QCFormWrapper}>
-          <div className={styles.body}>
-            <TabView
-              activeIndex={tabMenuActiveItem}
-              className={styles.tabView}
-              onTabChange={e => onTabChange(e.index)}
-              renderActiveOnly={false}>
-              {tabContents}
-            </TabView>
-          </div>
-          <div className={styles.footer}>
-            <div className={`${styles.section} ${styles.footerToolBar}`}>
-              <div className={styles.subsection}>
-                {validationContext.ruleEdit ? (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      className="p-button-primary p-button-text-icon-left"
-                      disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      id={`${componentName}__update`}
-                      label={resourcesContext.messages['update']}
-                      onClick={() => onUpdateValidationRule()}
-                      type="button"
-                    />
-                  </span>
-                ) : (
-                  <span data-tip data-for="createTooltip">
-                    <Button
-                      className={`p-button-primary p-button-text-icon-left ${
-                        !creationFormState.isValidationCreationDisabled && !isSubmitDisabled
-                          ? 'p-button-animated-blink'
-                          : ''
-                      }`}
-                      disabled={getIsCreationDisabled()}
-                      icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                      id={`${componentName}__create`}
-                      label={resourcesContext.messages['create']}
-                      onClick={() => onCreateValidationRule()}
-                      type="button"
-                    />
-                  </span>
-                )}
-                {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-                  <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-                    <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
-                  </ReactTooltip>
-                )}
+    <form>
+      <div id={styles.QCFormWrapper}>
+        <div className={styles.body}>
+          <TabView
+            activeIndex={tabMenuActiveItem}
+            className={styles.tabView}
+            onTabChange={e => onTabChange(e.index)}
+            renderActiveOnly={false}>
+            {tabContents}
+          </TabView>
+        </div>
+        <div className={styles.footer}>
+          <div className={`${styles.section} ${styles.footerToolBar}`}>
+            <div className={styles.subsection}>
+              {validationContext.ruleEdit ? (
+                <span data-for="createTooltip" data-tip>
+                  <Button
+                    className="p-button-primary p-button-text-icon-left"
+                    disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+                    icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                    id={`${componentName}__update`}
+                    label={resourcesContext.messages['update']}
+                    onClick={() => onUpdateValidationRule()}
+                    type="button"
+                  />
+                </span>
+              ) : (
+                <span data-for="createTooltip" data-tip>
+                  <Button
+                    className={`p-button-primary p-button-text-icon-left ${
+                      !creationFormState.isValidationCreationDisabled && !isSubmitDisabled
+                        ? 'p-button-animated-blink'
+                        : ''
+                    }`}
+                    disabled={getIsCreationDisabled()}
+                    icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+                    id={`${componentName}__create`}
+                    label={resourcesContext.messages['create']}
+                    onClick={() => onCreateValidationRule()}
+                    type="button"
+                  />
+                </span>
+              )}
+              {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
+                <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+                  <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
+                </ReactTooltip>
+              )}
 
-                <Button
-                  className="p-button-secondary p-button-text-icon-left p-button-animated-blink button-right-aligned"
-                  icon="cancel"
-                  id={`${componentName}__cancel`}
-                  label={resourcesContext.messages['cancel']}
-                  onClick={() => onHide()}
-                  type="button"
-                />
-              </div>
+              <Button
+                className="p-button-secondary p-button-text-icon-left p-button-animated-blink button-right-aligned"
+                icon="cancel"
+                id={`${componentName}__cancel`}
+                label={resourcesContext.messages['cancel']}
+                onClick={() => onHide()}
+                type="button"
+              />
             </div>
           </div>
         </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 };
