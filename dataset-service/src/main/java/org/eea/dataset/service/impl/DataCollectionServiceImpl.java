@@ -1135,7 +1135,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Assign ReferenceDataset-%s-DATA_STEWARD
       for (UserRepresentationVO steward : stewards) {
         assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
-            ResourceGroupEnum.TESTDATASET_STEWARD));
+            ResourceGroupEnum.REFERENCEDATASET_STEWARD));
       }
 
       // Assign ReferenceDataset-%s-DATA_CUSTODIAN
@@ -1148,6 +1148,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (UserRepresentationVO custodian : custodians) {
         assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
             ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+      }
+
+      // OBSERVERS ????
+
+
+      // Assign reporters
+      for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
+        if (null != entry.getValue()) {
+          for (String email : entry.getValue()) {
+            assignments.add(createAssignments(referenceDatasetId, email,
+                ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+          }
+        }
       }
     }
 

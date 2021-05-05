@@ -123,6 +123,10 @@ public enum ResourceGroupEnum {
   /** The referencedataset custodian. */
   REFERENCEDATASET_CUSTODIAN("ReferenceDataset-%s-DATA_CUSTODIAN"),
 
+
+  /** The referencedataset steward. */
+  REFERENCEDATASET_STEWARD("ReferenceDataset-%s-DATA_STEWARD"),
+
   /** The provider national coordinator. */
   // DATAPROVIDER-%-NATIONAL_COORDINATOR
   PROVIDER_NATIONAL_COORDINATOR("Provider-%s-NATIONAL_COORDINATOR");
