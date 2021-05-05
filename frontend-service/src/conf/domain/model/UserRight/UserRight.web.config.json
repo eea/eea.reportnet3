@@ -1,8 +1,8 @@
 {
-  "allRequesters": "/contributor/requester/dataflow/{:dataflowId}",
   "allReporters": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}",
-  "deleteRequester": "/contributor/requester/dataflow/{:dataflowId}",
+  "allRequesters": "/contributor/requester/dataflow/{:dataflowId}",
   "deleteReporter": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}",
-  "updateRequester": "/contributor/requester/dataflow/{:dataflowId}",
-  "updateReporter": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}"
+  "deleteRequester": "/contributor/requester/dataflow/{:dataflowId}",
+  "updateReporter": "/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}",
+  "updateRequester": "/contributor/requester/dataflow/{:dataflowId}"
 }
