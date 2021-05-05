@@ -451,6 +451,7 @@ const parseDataflowDTO = dataflowDTO =>
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
+    referenceDatasets: parseDatasetListDTO(dataflowDTO.referenceDatasets),
     reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
@@ -708,6 +709,7 @@ const reporting = async dataflowId => {
   dataflow.testDatasets.sort(sortDatasetTypeByName);
   dataflow.datasets.sort(sortDatasetTypeByName);
   dataflow.designDatasets.sort(sortDatasetTypeByName);
+  dataflow.referenceDatasets.sort(sortDatasetTypeByName);
   reportingDataflowDTO.data = dataflow;
 
   return reportingDataflowDTO;

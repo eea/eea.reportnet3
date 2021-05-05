@@ -33,6 +33,7 @@ export const FieldsDesigner = ({
   isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
+  isReferenceDataset,
   isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
@@ -609,9 +610,9 @@ export const FieldsDesigner = ({
               {resources.messages['readOnlyTable']}
             </span>
             <Checkbox
-              checked={isReadOnlyTable}
+              checked={isReadOnlyTable || isReferenceDataset}
               className={styles.fieldDesignerItem}
-              disabled={isDataflowOpen || isDesignDatasetEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
               id={`${table.tableSchemaId}_check_readOnly`}
               inputId={`${table.tableSchemaId}_check_readOnly`}
               label="Default"
@@ -628,8 +629,10 @@ export const FieldsDesigner = ({
               {resources.messages['prefilled']}
             </span>
             <Checkbox
-              checked={toPrefill || fixedNumber}
-              disabled={isReadOnlyTable || fixedNumber || isDataflowOpen || isDesignDatasetEditorRead}
+              checked={toPrefill || fixedNumber || isReferenceDataset}
+              disabled={
+                isReadOnlyTable || fixedNumber || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset
+              }
               className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_to_prefill`}
               inputId={`${table.tableSchemaId}_check_to_prefill`}
@@ -649,7 +652,7 @@ export const FieldsDesigner = ({
             <Checkbox
               checked={fixedNumber}
               className={styles.fieldDesignerItem}
-              disabled={isDataflowOpen || isDesignDatasetEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
               id={`${table.tableSchemaId}_check_fixed_number`}
               inputId={`${table.tableSchemaId}_check_fixed_number`}
               label="Default"
@@ -668,7 +671,7 @@ export const FieldsDesigner = ({
             <Checkbox
               checked={notEmpty}
               className={styles.fieldDesignerItem}
-              disabled={isDataflowOpen || isDesignDatasetEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
               id={`${table.tableSchemaId}_check_not_empty`}
               inputId={`${table.tableSchemaId}_check_not_empty`}
               label="Default"
