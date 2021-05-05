@@ -360,7 +360,6 @@ const Dataflow = withRouter(({ history, match }) => {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
-      // manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isCustodian,
       propertiesBtn: true,
@@ -986,6 +985,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <ShareRights
               columnHeader={resources.messages['reportersAccountColumn']}
               dataProviderId={dataProviderId}
+              dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`reportersRightsDialogConfirmDeleteQuestion`]}

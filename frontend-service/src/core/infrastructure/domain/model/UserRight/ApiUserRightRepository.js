@@ -3,8 +3,8 @@ import { UserRight } from 'core/domain/model/UserRight/UserRight';
 
 import sortBy from 'lodash/sortBy';
 
-const allReporters = async dataflowId => {
-  const userRightListDTO = await apiUserRight.allReporters(dataflowId);
+const allReporters = async (dataflowId, dataProviderId) => {
+  const userRightListDTO = await apiUserRight.allReporters(dataflowId, dataProviderId);
 
   const userRightList = userRightListDTO.data.map((userRightDTO, i) => {
     userRightDTO.id = i + 1;
