@@ -305,7 +305,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           {
             label: resources.messages['customExports'],
             items: externalOperationsList.export.map(type => {
-              const extensionsTypes = !isNil(type.code) && type.code.split('+');
+              const extensionsTypes = !isNil(type.fileExtension) && type.fileExtension.split('+');
               return (
               ({
                 command: () => onExportDataExternalIntegration(type.id),
