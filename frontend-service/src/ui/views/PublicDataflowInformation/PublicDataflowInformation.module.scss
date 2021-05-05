@@ -49,6 +49,16 @@
   text-align: center;
 }
 
+.cellWrapper {
+  display: flex;
+  align-items: center;
+
+  .link {
+    color: var(--hyperlink-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+}
 .noDatasets {
   display: flex;
   align-items: center;

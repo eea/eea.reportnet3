@@ -421,14 +421,12 @@ export const FieldsDesigner = ({
           codelistItems={[]}
           datasetId={datasetId}
           datasetSchemaId={datasetSchemaId}
-          isDataflowOpen={isDataflowOpen}
-          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           fieldFileProperties={{}}
-          fieldId="-1"
-          fieldName=""
-          fieldLink={null}
           fieldHasMultipleValues={false}
+          fieldId="-1"
+          fieldLink={null}
           fieldMustBeUsed={false}
+          fieldName=""
           fieldReadOnly={false}
           fieldRequired={false}
           fieldType=""
@@ -437,6 +435,8 @@ export const FieldsDesigner = ({
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
           isCodelistOrLink={isCodelistOrLink}
+          isDataflowOpen={isDataflowOpen}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
@@ -463,9 +463,9 @@ export const FieldsDesigner = ({
                 datasetSchemaId={datasetSchemaId}
                 fieldDescription={field.description}
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
+                fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldId={field.fieldId}
                 fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
-                fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldLinkedTableConditional={
                   !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
                 }
@@ -565,8 +565,8 @@ export const FieldsDesigner = ({
           expandableOnClick={true}
           id="tableDescription"
           key="tableDescription"
-          onChange={e => setTableDescriptionValue(e.target.value)}
           onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
+          onChange={e => setTableDescriptionValue(e.target.value)}
           onFocus={e => {
             setInitialTableDescription(e.target.value);
           }}
@@ -618,7 +618,7 @@ export const FieldsDesigner = ({
               label="Default"
               onChange={e => onChangeIsReadOnly(e.checked)}
             />
-            <label htmlFor={`${table.tableSchemaId}_check_readOnly`} className="srOnly">
+            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_readOnly`}>
               {resources.messages['readOnlyTable']}
             </label>
           </div>
@@ -630,16 +630,16 @@ export const FieldsDesigner = ({
             </span>
             <Checkbox
               checked={toPrefill || fixedNumber || isReferenceDataset}
+              className={styles.fieldDesignerItem}
               disabled={
                 isReadOnlyTable || fixedNumber || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset
               }
-              className={styles.fieldDesignerItem}
               id={`${table.tableSchemaId}_check_to_prefill`}
               inputId={`${table.tableSchemaId}_check_to_prefill`}
               label="Default"
               onChange={e => onChangeToPrefill(e.checked)}
             />
-            <label htmlFor={`${table.tableSchemaId}_check_to_prefill`} className="srOnly">
+            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_to_prefill`}>
               {resources.messages['prefilled']}
             </label>
           </div>
@@ -658,7 +658,7 @@ export const FieldsDesigner = ({
               label="Default"
               onChange={e => onChangeFixedNumber(e.checked)}
             />
-            <label htmlFor={`${table.tableSchemaId}_check_fixed_number`} className="srOnly">
+            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_fixed_number`}>
               {resources.messages['fixedNumber']}
             </label>
           </div>
@@ -677,7 +677,7 @@ export const FieldsDesigner = ({
               label="Default"
               onChange={e => onChangeNotEmpty(e.checked)}
             />
-            <label htmlFor={`${table.tableSchemaId}_check_not_empty`} className="srOnly">
+            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_not_empty`}>
               {resources.messages['notEmpty']}
             </label>
           </div>
