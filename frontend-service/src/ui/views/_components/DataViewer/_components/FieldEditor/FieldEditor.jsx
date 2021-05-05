@@ -82,6 +82,7 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
+  const [dateTimeOpen, setDateTimeOpen] = useState(false);
   const [dateTime, setDateTime] = useState();
 
   const { areEquals } = TextUtils;
@@ -275,8 +276,13 @@ const FieldEditor = ({
 
   useEffect(() => {
     const buttonsBar = document.getElementsByClassName('p-datepicker-buttonbar');
-    buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
-  }, []);
+    if (!isNil(buttonsBar.item(0))) {
+      console.log(buttonsBar.item(0).childNodes[0].childNodes[0].innerText);
+      buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
+    } else {
+      console.log('NO LO PILLA');
+    }
+  }, [dateTimeOpen]);
 
   useEffect(() => {
     if (isCalendarVisible) {
@@ -613,9 +619,19 @@ const FieldEditor = ({
             appendTo={document.body}
             inputId={calendarWithDatetimeId}
             monthNavigator={true}
+            onBlur={e => {
+              console.log('CLOSE');
+              setDateTimeOpen(false);
+            }}
             onChange={e => setDateTime(e.value)}
-            // onBlur={e => onCalendarBlur(e, true)}
-            // onFocus={e => onCalendarFocus(e, true)}
+            //onCalendarBlur(e, true)}
+            onFocus={e => {
+              // const buttonsBar = document.getElementsByClassName('p-datepicker-buttonbar');
+              // buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
+              console.log('OPEN');
+              setDateTimeOpen(true);
+            }}
+            // onCalendarFocus(e, true)}
             // onHide={e => console.log('HIDE')}
             // onSelect={e => onSelectCalendar(e, true)}
             onTodayButtonClick={e => {
