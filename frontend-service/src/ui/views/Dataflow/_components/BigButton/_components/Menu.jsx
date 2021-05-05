@@ -1,9 +1,10 @@
 import { Component } from 'react';
-import styles from './Menu.module.css';
+import styles from './Menu.module.scss';
 import { Icon } from 'ui/views/_components/Icon';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { isNil } from 'lodash';
 
 class Menu extends Component {
   constructor(props) {
@@ -102,18 +103,22 @@ class Menu extends Component {
       }
     );
   }
-
+  
   render() {
     const { model } = this.props;
+    console.log('model :>> ', model);
     if (model) {
       return (
-        <div className={`${styles.dropDownMenu} p-menu-overlay-visible`} style={this.state.style}>
-          <ul>
+        <div className={`${styles.dropDownMenu} p-menu-overlay-visible p-menu`} style={this.state.style}>
+          <ul className={'p-menu-list p-reset'}>
             {model ? (
               model.map((item, i) => (
-                <li key={i}>
+                <li key={i} className={'p-menuitem'}>                 
+                  {/* {item.items ? item.items.forEach(subItem => {
+                    this.renderItem(subItem)
+                  }) : this.renderItem(item)} */}
                   <a
-                    className={item.disabled ? styles.menuItemDisabled : null}
+                    className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null} ${isNil(item.icon) && styles.separator}`}
                     onClick={e => {
                       e.preventDefault();
                       if (!item.disabled) item.command();

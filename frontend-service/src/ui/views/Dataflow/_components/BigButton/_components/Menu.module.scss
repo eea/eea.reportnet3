@@ -6,10 +6,9 @@
   font-size: 0.8rem;
   border: 1px solid var(--c-black-200);
   background-color: var(--white);
-  width: 170px;
+  width: 235px !important;
   border-radius: 2%;
   z-index: 3003;
-  padding: 0 0.8rem;
   color: var(--c-black-400);
   border: 1px solid var(--c-custom-gray);
   box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
@@ -23,15 +22,17 @@
 }
 
 .dropDownMenu ul li a {
-  color: var(--c-black-400);
+  padding: 0.85em 0.45em !important;
+  color: var(--main-font-color);
 }
 .dropDownMenu ul li a:hover {
-  color: var(--c-black-400);
+  color: var(--main-font-color);
   background-color: rgba(0, 0, 0, 0);
 }
 
 .dropDownMenu ul li a i {
-  margin-right: 0.5rem;
+  padding-left: 0px !important;
+  /* margin-right: 0.5rem; */
 }
 
 .menuItemDisabled {
@@ -39,4 +40,13 @@
 }
 .menuItemDisabled:hover {
   color: var(--c-black-300);
+}
+
+.separator {
+  font-weight: bolder !important;
+  background: var(--gray-25) !important;
+
+  > span {
+    margin-left: 0.5rem;
+  }
 }
