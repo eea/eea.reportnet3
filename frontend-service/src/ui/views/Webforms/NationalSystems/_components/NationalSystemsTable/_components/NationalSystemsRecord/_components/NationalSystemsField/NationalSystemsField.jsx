@@ -47,11 +47,10 @@ export const NationalSystemsField = ({
 
   const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
     field: nationalField,
-    isDialogVisible: { deleteAttachment: false, uploadFile: false },
-    selectedValidExtensions: []
+    isDialogVisible: { deleteAttachment: false, uploadFile: false }
   });
 
-  const { field, isDialogVisible, selectedValidExtensions } = nationalSystemsFieldState;
+  const { field, isDialogVisible } = nationalSystemsFieldState;
 
   useEffect(() => {
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));

@@ -1,7 +1,7 @@
 import { ProgressSpinner } from 'primereact/progressspinner';
 
 const Spinner = ({ className, style }) => {
-  return <ProgressSpinner style={style} className={className} />;
+  return <ProgressSpinner className={className} style={style} />;
 };
 
 export { Spinner };

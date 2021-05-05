@@ -85,6 +85,7 @@ const FieldEditor = ({
   const { areEquals } = TextUtils;
 
   const calendarId = uuid.v4();
+  const calendarWithDatetimeId = uuid.v4();
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(getCodelistItemsWithEmptyOption());
@@ -227,22 +228,32 @@ const FieldEditor = ({
     return codelistsItems;
   };
 
-  const onCalendarBlur = e => {
-    if (e.target.value != RecordUtils.getCellValue(cells, cells.field)) {
-      saveCalendarDate(e.target.value);
+  const onCalendarBlur = (e, withDatetime = false) => {
+    console.log('BLUR');
+    console.log(e.target.value, RecordUtils.getCellValue(cells, cells.field));
+    if (e.target.value !== RecordUtils.getCellValue(cells, cells.field)) {
+      saveCalendarDate(e.target.value, withDatetime);
       setIsCalendarVisible(false);
     }
   };
 
-  const onCalendarFocus = e => {
+  const onCalendarFocus = (e, withDatetime = false) => {
+    console.log(e.target.value);
     setIsCalendarVisible(true);
-    onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
+    onEditorValueFocus(
+      cells,
+      !withDatetime ? RecordUtils.formatDate(e.target.value, isNil(e.target.value)) : e.target.value
+    );
   };
 
-  const saveCalendarDate = inputDateValue => {
+  const saveCalendarDate = (inputDateValue, withDatetime) => {
+    // console.log({ inputDateValue });
     const formattedDateValue = isEmpty(inputDateValue)
       ? ''
-      : RecordUtils.formatDate(inputDateValue, isNil(inputDateValue));
+      : !withDatetime
+      ? RecordUtils.formatDate(inputDateValue, isNil(inputDateValue))
+      : inputDateValue;
+    // console.log({ formattedDateValue });
     const isCorrectDateFormattedValue = getIsCorrectDateFormatedValue(formattedDateValue);
     if (isCorrectDateFormattedValue || isEmpty(formattedDateValue)) {
       onEditorValueChange(cells, formattedDateValue, record);
@@ -250,13 +261,14 @@ const FieldEditor = ({
     }
   };
 
-  const saveCalendarFromKeys = inputDateValue => {
+  const saveCalendarFromKeys = (inputDateValue, withDatetime = false) => {
     setIsCalendarVisible(false);
-    saveCalendarDate(inputDateValue);
+    saveCalendarDate(inputDateValue, withDatetime);
   };
 
-  const onSelectCalendar = e => {
-    saveCalendarDate(dayjs(e.value).format('YYYY-MM-DD'));
+  const onSelectCalendar = (e, withDatetime = false) => {
+    console.log(e.value, dayjs(e.value).format());
+    saveCalendarDate(!withDatetime ? dayjs(e.value).format('YYYY-MM-DD') : dayjs(e.value).format(), withDatetime);
   };
 
   useEffect(() => {
@@ -272,6 +284,19 @@ const FieldEditor = ({
 
           if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
             saveCalendarFromKeys(inputValue);
+          }
+        });
+      const calendarWithDatetimeInput = document.getElementById(calendarWithDatetimeId);
+      !isNil(calendarWithDatetimeInput) &&
+        calendarWithDatetimeInput.addEventListener('keydown', event => {
+          const {
+            key,
+            target: { value: inputValue }
+          } = event;
+          const storedValue = RecordUtils.getCellValue(cells, cells.field);
+
+          if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
+            saveCalendarFromKeys(inputValue, true);
           }
         });
     }
@@ -296,6 +321,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={textCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -305,16 +331,15 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={textCharacters}
           />
         );
       case 'TEXTAREA':
         return (
           <InputTextarea
             collapsedHeight={75}
-            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             maxLength={textCharacters}
             moveCaretToEnd={true}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
@@ -328,6 +353,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={richTextCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -337,13 +363,13 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={richTextCharacters}
           />
         );
       case 'NUMBER_INTEGER':
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={longCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -351,7 +377,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={longCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -359,6 +384,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={decimalCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -366,7 +392,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={decimalCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -458,12 +483,10 @@ const FieldEditor = ({
               <label className={styles.epsg}>{resources.messages['epsg']}</label>
               <div>
                 <Dropdown
-                  ariaLabel={'crs'}
                   appendTo={document.body}
+                  ariaLabel={'crs'}
                   className={styles.epsgSwitcher}
                   disabled={isMapDisabled}
-                  options={crs}
-                  optionLabel="label"
                   onChange={e => {
                     onEditorSubmitValue(
                       cells,
@@ -490,6 +513,8 @@ const FieldEditor = ({
                     setCurrentCRS(e.target.value);
                     onChangePointCRS(e.target.value.value);
                   }}
+                  optionLabel="label"
+                  options={crs}
                   placeholder="Select a CRS"
                   value={currentCRS}
                 />
@@ -575,17 +600,17 @@ const FieldEditor = ({
             yearRange="1900:2100"
           />
         );
-      case 'PHONE':
       case 'DATETIME':
         return (
           <Calendar
             appendTo={document.body}
-            dateFormat="yy-mm-dd"
-            inputId={calendarId}
+            inputId={calendarWithDatetimeId}
             monthNavigator={true}
-            onBlur={onCalendarBlur}
-            onFocus={onCalendarFocus}
-            onSelect={onSelectCalendar}
+            // onChange={e => onSelectCalendar(e, true)}
+            onBlur={e => onCalendarBlur(e, true)}
+            onFocus={e => onCalendarFocus(e, true)}
+            onHide={e => console.log('HIDE')}
+            // onSelect={e => onSelectCalendar(e, true)}
             showSeconds={true}
             showTime={true}
             value={RecordUtils.getCellValue(cells, cells.field)}
@@ -659,8 +684,8 @@ const FieldEditor = ({
                   onEditorValueFocus(cells, codelistItemValue);
                 }
               }}
-              options={linkItemsOptions}
               optionLabel="itemType"
+              options={linkItemsOptions}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
               valuesSeparator=";"
             />
@@ -672,8 +697,8 @@ const FieldEditor = ({
               currentValue={RecordUtils.getCellValue(cells, cells.field)}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={e => {
                 setLinkItemsValue(e.target.value.value);
@@ -733,8 +758,8 @@ const FieldEditor = ({
                 onEditorValueFocus(cells, codelistItemValue);
               }
             }}
-            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             optionLabel="itemType"
+            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
             valuesSeparator=";"
           />

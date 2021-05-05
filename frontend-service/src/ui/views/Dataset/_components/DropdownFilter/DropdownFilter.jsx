@@ -268,13 +268,13 @@ class DropdownFilter extends Component {
     return (
       <div
         className={`${styles.dropdownFilter} p-menu-overlay-visible`}
-        style={this.state.style}
         onClick={e => {
           this.menuClick(e);
-        }}>
+        }}
+        style={this.state.style}>
         <ul>
           {fields.map((field, i) => (
-            <li key={i} className={styles.selectNone}>
+            <li className={styles.selectNone} key={`parent_${field.key}`}>
               <a
                 className={!field.checked ? styles.isNotChecked : ''}
                 onClick={e => {

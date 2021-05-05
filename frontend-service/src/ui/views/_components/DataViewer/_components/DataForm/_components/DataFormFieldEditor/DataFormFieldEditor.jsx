@@ -312,12 +312,12 @@ const DataFormFieldEditor = ({
         disabled={(column.readOnly && reporting) || isSaving}
         maxSelectedLabels={10}
         onChange={e => onChangeForm(field, e.value, isConditional)}
+        optionLabel="itemType"
         options={column.codelistItems
           .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
           .map(codelistItem => {
             return { itemType: codelistItem, value: codelistItem };
           })}
-        optionLabel="itemType"
         ref={multiDropdownRef}
         style={{ height: '34px' }}
         value={RecordUtils.getMultiselectValues(RecordUtils.getCodelistItemsInSingleColumn(column), fieldValue)}
@@ -373,7 +373,7 @@ const DataFormFieldEditor = ({
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
       renderCalendar(field, fieldValue)
-    ) : type === 'DATETIME' || type==='PHONE' ? (
+    ) : type === 'DATETIME' ? (
       renderDatetimeCalendar(field, fieldValue)
     ) : type === 'POINT' ? (
       renderMapType(field, fieldValue)
@@ -409,11 +409,11 @@ const DataFormFieldEditor = ({
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
         disabled={(column.readOnly && reporting) || isSaving}
+        inputRef={refCalendar}
         monthNavigator={true}
         onChange={e =>
           onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
         }
-        inputRef={refCalendar}
         style={{ width: '60px' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
@@ -429,9 +429,9 @@ const DataFormFieldEditor = ({
         baseZIndex={9999}
         dateFormat="yy-mm-dd"
         disabled={(column.readOnly && reporting) || isSaving}
+        inputRef={refCalendar}
         monthNavigator={true}
         onChange={e => onChangeForm(field, e.target.value, isConditional)}
-        inputRef={refCalendar}
         showSeconds={true}
         showTime={true}
         style={{ width: '60px' }}
@@ -464,8 +464,8 @@ const DataFormFieldEditor = ({
               onLoadColsSchema('');
             }
           }}
-          options={columnWithLinks.linkItems}
           optionLabel="itemType"
+          options={columnWithLinks.linkItems}
           ref={linkDropdownRef}
           value={RecordUtils.getMultiselectValues(
             columnWithLinks.linkItems,
@@ -481,8 +481,8 @@ const DataFormFieldEditor = ({
           currentValue={fieldValue}
           disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
           filter={true}
-          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           filterBy="itemType,value"
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           isLoadingData={isLoadingData}
           onChange={e => {
             onChangeForm(field, e.target.value.value, isConditional);
@@ -500,9 +500,9 @@ const DataFormFieldEditor = ({
 
   const renderMap = () => (
     <Map
-      hasLegend={true}
       geoJson={fieldValue}
       geometryType={'POINT'}
+      hasLegend={true}
       onSelectPoint={onSelectPoint}
       selectedCRS={map.currentCRS.value}></Map>
   );
@@ -547,12 +547,10 @@ const DataFormFieldEditor = ({
       <div className={styles.pointEpsgWrapper}>
         <label className={styles.epsg}>{resources.messages['epsg']}</label>
         <Dropdown
-          ariaLabel={'crs'}
           appendTo={document.body}
+          ariaLabel={'crs'}
           className={styles.epsgSwitcher}
           disabled={map.isMapDisabled}
-          options={crs}
-          optionLabel="label"
           onChange={e => {
             onChangeForm(
               field,
@@ -564,6 +562,8 @@ const DataFormFieldEditor = ({
             );
             dispatchMap({ type: 'SET_MAP_CRS', payload: { crs: e.target.value } });
           }}
+          optionLabel="label"
+          options={crs}
           placeholder="Select a CRS"
           value={map.currentCRS}
         />
@@ -596,8 +596,8 @@ const DataFormFieldEditor = ({
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
-        label={resources.messages['save']}
         icon={'check'}
+        label={resources.messages['save']}
         onClick={() => onSavePoint(map.newPoint, map.newPointCRS)}
       />
       <Button
@@ -619,8 +619,8 @@ const DataFormFieldEditor = ({
       {renderFieldEditor()}
       {map.isMapOpen && (
         <Dialog
-          className={'map-data'}
           blockScroll={false}
+          className={'map-data'}
           dismissableMask={false}
           footer={saveMapCoordinatesDialogFooter}
           header={resources.messages['geospatialData']}

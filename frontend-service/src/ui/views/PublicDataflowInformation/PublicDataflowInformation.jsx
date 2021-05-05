@@ -75,8 +75,9 @@ export const PublicDataflowInformation = withRouter(
             {rowData.publicsFileName.map(publicFileName => (
               <span
                 className={styles.downloadIcon}
+                key={publicFileName}
                 onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
-                <FontAwesomeIcon icon={AwesomeIcons('7z')} data-tip data-for={publicFileName} />
+                <FontAwesomeIcon data-for={publicFileName} data-tip icon={AwesomeIcons('7z')} />
                 <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
                   <span>{getPublicFileName(publicFileName)}</span>
                 </ReactTooltip>
@@ -89,9 +90,9 @@ export const PublicDataflowInformation = withRouter(
           <div className={styles.filesContainer}>
             <FontAwesomeIcon
               className={styles.restrictFromPublicIcon}
-              icon={AwesomeIcons('lock')}
-              data-tip
               data-for={'restrictFromPublicField'}
+              data-tip
+              icon={AwesomeIcons('lock')}
             />
             <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
               <span>{resources.messages['restrictFromPublicField']}</span>

@@ -115,42 +115,42 @@ const ValidationViewer = memo(
       ];
 
       let columnsArr = headers.map(col => (
-        <Column sortable={true} key={col.id} field={col.id} header={col.header} style={columnStyles(col.id)} />
+        <Column field={col.id} header={col.header} key={col.id} sortable={true} style={columnStyles(col.id)} />
       ));
 
       columnsArr.push(
         <Column
-          key="recordId"
+          className={styles.invisibleHeader}
           field="recordId"
           header={resources.messages['recordId']}
-          className={styles.invisibleHeader}
+          key="recordId"
         />
       );
       columnsArr.push(
         <Column
-          key="datasetPartitionId"
+          className={styles.invisibleHeader}
           field="datasetPartitionId"
           header={resources.messages['datasetPartitionId']}
-          className={styles.invisibleHeader}
+          key="datasetPartitionId"
         />
       );
       columnsArr.push(
         <Column
-          key="tableSchemaId"
-          field="tableSchemaId"
           className={styles.invisibleHeader}
+          field="tableSchemaId"
           header={resources.messages['tableSchemaId']}
+          key="tableSchemaId"
         />
       );
       columnsArr.push(
-        <Column key="ruleId" field="ruleId" className={styles.invisibleHeader} header={resources.messages['ruleId']} />
+        <Column className={styles.invisibleHeader} field="ruleId" header={resources.messages['ruleId']} key="ruleId" />
       );
       if (grouped) {
         columnsArr.push(
           <Column
-            key="numberOfRecords"
             field="numberOfRecords"
             header={resources.messages['numberOfRecords']}
+            key="numberOfRecords"
             sortable={true}
           />
         );
@@ -173,7 +173,7 @@ const ValidationViewer = memo(
           tablesFilter
         );
       } else {
-        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow != 0) {
+        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow.toString() !== '0') {
           resetFilters();
           setFirstRow(0);
           fetchData('', sortOrder, 0, numberRows, [], [], [], []);
@@ -567,42 +567,39 @@ const ValidationViewer = memo(
             </div>
           </Toolbar>
         )}
-        <>
-          {!isEmpty(fetchedData) ? (
-            <DataTable
-              autoLayout={true}
-              className={isWebformView ? styles.tableWebform : undefined}
-              first={firstRow}
-              lazy={true}
-              loading={isLoading}
-              onPage={onChangePage}
-              onRowSelect={isWebformView ? () => {} : onRowSelect}
-              onSort={onSort}
-              paginator={true}
-              paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
-              reorderableColumns={true}
-              resizableColumns={true}
-              rows={numberRows}
-              rowsPerPageOptions={[5, 10, 15]}
-              selectionMode="single"
-              sortable={true}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              totalRecords={totalFilteredRecords}
-              value={fetchedData}>
-              {columns}
-            </DataTable>
-          ) : (
-            <div className={styles.emptyFilteredData}>{resources.messages['noValidationsWithSelectedParameters']}</div>
-          )}
-        </>
+        {!isEmpty(fetchedData) ? (
+          <DataTable
+            autoLayout={true}
+            className={isWebformView ? styles.tableWebform : undefined}
+            first={firstRow}
+            lazy={true}
+            loading={isLoading}
+            onPage={onChangePage}
+            onRowSelect={isWebformView ? () => {} : onRowSelect}
+            onSort={onSort}
+            paginator={true}
+            paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
+            reorderableColumns={true}
+            resizableColumns={true}
+            rows={numberRows}
+            rowsPerPageOptions={[5, 10, 15]}
+            selectionMode="single"
+            sortField={sortField}
+            sortOrder={sortOrder}
+            sortable={true}
+            totalRecords={totalFilteredRecords}
+            value={fetchedData}>
+            {columns}
+          </DataTable>
+        ) : (
+          <div className={styles.emptyFilteredData}>{resources.messages['noValidationsWithSelectedParameters']}</div>
+        )}
       </div>
     );
   }
 );
 
 ValidationViewer.propTypes = {
-  id: PropTypes.string,
   buttonsList: PropTypes.array
 };
 

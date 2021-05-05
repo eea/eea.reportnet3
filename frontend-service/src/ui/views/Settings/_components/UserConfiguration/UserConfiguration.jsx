@@ -77,7 +77,6 @@ const UserConfiguration = () => {
         id={`basemapLayer`}
         itemTemplate={basemapTemplate}
         name="basemapLayer"
-        options={resources.userParameters['defaultBasemapLayer']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.basemapLayer = e.target.value;
@@ -86,10 +85,11 @@ const UserConfiguration = () => {
             userContext.onChangeBasemapLayer(e.target.value);
           }
         }}
+        options={resources.userParameters['defaultBasemapLayer']}
         placeholder="select"
         value={userContext.userProps.basemapLayer}
       />
-      <label htmlFor="basemapLayer" className="srOnly">
+      <label className="srOnly" htmlFor="basemapLayer">
         {resources.messages['userSettingsBasemapLayerSubtitle']}
       </label>
     </Fragment>
@@ -257,7 +257,6 @@ const UserConfiguration = () => {
       <Dropdown
         id={`rowsPage`}
         name="rowPerPage"
-        options={resources.userParameters['defaultRowsPage']}
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.rowsPerPage = e.target.value;
@@ -266,32 +265,31 @@ const UserConfiguration = () => {
             userContext.onChangeRowsPerPage(e.target.value);
           }
         }}
+        options={resources.userParameters['defaultRowsPage']}
         placeholder="select"
         value={userContext.userProps.rowsPerPage}
       />
-      <label htmlFor="rowsPage" className="srOnly">
+      <label className="srOnly" htmlFor="rowsPage">
         {resources.messages['userSettingsRowsPerPageSubtitle']}
       </label>
     </Fragment>
   );
 
   const dateFormatDropdown = (
-    <Fragment>
-      <Dropdown
-        name="dateFormat"
-        options={resources.userParameters['dateFormat']}
-        onChange={async e => {
-          const inmUserProperties = { ...userContext.userProps };
-          inmUserProperties.dateFormat = e.target.value;
-          const response = await changeUserProperties(inmUserProperties);
-          if (response.status >= 200 && response.status <= 299) {
-            userContext.onChangeDateFormat(e.target.value);
-          }
-        }}
-        placeholder="select"
-        value={userContext.userProps.dateFormat}
-      />
-    </Fragment>
+    <Dropdown
+      name="dateFormat"
+      onChange={async e => {
+        const inmUserProperties = { ...userContext.userProps };
+        inmUserProperties.dateFormat = e.target.value;
+        const response = await changeUserProperties(inmUserProperties);
+        if (response.status >= 200 && response.status <= 299) {
+          userContext.onChangeDateFormat(e.target.value);
+        }
+      }}
+      options={resources.userParameters['dateFormat']}
+      placeholder="select"
+      value={userContext.userProps.dateFormat}
+    />
   );
 
   const basemapLayerConfiguration = (
@@ -384,18 +382,16 @@ const UserConfiguration = () => {
   );
 
   return (
-    <Fragment>
-      <div className={styles.userConfiguration}>
-        {rowsInPaginationConfiguration}
-        {dateFormatConfiguration}
-        {themeConfiguration}
-        {viewConfiguration}
-        {logoutConfiguration}
-        {soundConfiguration}
-        {pushNotificationsConfiguration}
-        {basemapLayerConfiguration}
-      </div>
-    </Fragment>
+    <div className={styles.userConfiguration}>
+      {rowsInPaginationConfiguration}
+      {dateFormatConfiguration}
+      {themeConfiguration}
+      {viewConfiguration}
+      {logoutConfiguration}
+      {soundConfiguration}
+      {pushNotificationsConfiguration}
+      {basemapLayerConfiguration}
+    </div>
   );
 };
 

@@ -10,7 +10,6 @@ export const getDatasetSchemaTableFields = (candidateTable, tables) => {
       bannedTypes: { sqlFields, nonSql }
     }
   } = config;
-  let bannedFields;
 
   if (!isNil(selectedTable) && !isEmpty(selectedTable) && !isNil(selectedTable.records)) {
     const fields = { tableSqlFields: [], tableNonSqlFields: [] };
