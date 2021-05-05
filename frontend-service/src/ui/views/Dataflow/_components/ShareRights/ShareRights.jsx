@@ -222,7 +222,7 @@ export const ShareRights = ({
       />
     );
 
-  const renderRightsTypeColumnTemplate = userRight => {
+  const renderRoleColumnTemplate = userRight => {
     const userRightRoleOptions = userRight.isNew
       ? [{ label: resources.messages['selectRole'], role: '' }, ...roleOptions]
       : roleOptions;
@@ -282,7 +282,7 @@ export const ShareRights = ({
             {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
             <DataTable value={shareRightsState.userRightList}>
               <Column body={renderAccountTemplate} header={columnHeader} />
-              <Column body={renderRightsTypeColumnTemplate} header={resources.messages['rolesColumn']} />
+              <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
               <Column
                 body={renderDeleteColumnTemplate}
                 className={styles.emptyTableHeader}
