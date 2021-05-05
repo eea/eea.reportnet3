@@ -294,11 +294,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
       const extensionsTypes = !isNil(type.code) && type.code.split('+');
-      return ({
-      command: () => onExportDataInternalExtension(type.code),
-      icon: extensionsTypes[extensionsTypes.length-1],
-      label: type.text
-    })}) ;
+      return {
+        command: () => onExportDataInternalExtension(type.code),
+        icon: extensionsTypes[extensionsTypes.length - 1],
+        label: type.text
+      };
+    });
 
     const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
@@ -306,14 +307,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             label: resources.messages['customExports'],
             items: externalOperationsList.export.map(type => {
               const extensionsTypes = !isNil(type.fileExtension) && type.fileExtension.split('+');
-              return (
-              ({
+              return {
                 command: () => onExportDataExternalIntegration(type.id),
-                icon: extensionsTypes[extensionsTypes.length-1],
+                icon: extensionsTypes[extensionsTypes.length - 1],
                 label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
-              }))
-              }) 
-              
+              };
+            })
           }
         ]
       : [];
