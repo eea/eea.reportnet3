@@ -15,6 +15,7 @@ export class Dataset {
     levelErrorTypes,
     name,
     publicFileName,
+    referenceDataset,
     releaseDate,
     restrictFromPublic,
     tables,
@@ -40,6 +41,7 @@ export class Dataset {
     this.levelErrorTypes = levelErrorTypes;
     this.name = name;
     this.publicFileName = publicFileName;
+    this.referenceDataset = referenceDataset;
     this.releaseDate = releaseDate;
     this.restrictFromPublic = restrictFromPublic;
     this.tables = tables;

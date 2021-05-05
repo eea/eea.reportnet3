@@ -213,8 +213,10 @@ public class FKValidationUtils {
           idFieldSchemaPKString, datasetIdPK, fkConditionalLinkedFieldSchemaId, datasetIdPK);
 
       List<String> ifFKs = createAndExecuteQuery(query);
-      List<FieldValue> fieldsToValidate = fieldRepository.findByIds(ifFKs);
-
+      List<FieldValue> fieldsToValidate = new ArrayList<>();
+      if (!ifFKs.isEmpty()) {
+        fieldsToValidate = fieldRepository.findByIds(ifFKs);
+      }
       if (!pkMustBeUsed && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
         saveFieldValidations(errorFields);
@@ -351,18 +353,23 @@ public class FKValidationUtils {
       if (null != pkMap.get(fkList.get(i)[2])) {
         List<String> pksByOptionalValue = Arrays.asList(pkMap.get(fkList.get(i)[2]).split(","));
         List<String> fksByOptionalValue = Arrays.asList(fkList.get(i)[1].toString().split(";"));
-
+        pksByOptionalValue.replaceAll(String::trim);
+        fksByOptionalValue.replaceAll(String::trim);
 
         for (String value : fksByOptionalValue) {
 
           List<String> pksByOptionalValueAux =
               new ArrayList<>(Arrays.asList(pkMapAux.get(fkList.get(i)[2]).split(",")));
+          pksByOptionalValueAux.replaceAll(String::trim);
 
-          if (!pksByOptionalValue.contains(value.trim())) {
+          if (!pksByOptionalValue.contains("\"" + value + "\"")
+              && !pksByOptionalValue.contains(value)) {
             ifFKs.add(fkList.get(i)[0].toString());
           }
-          if (pksByOptionalValue.contains(value.trim())) {
-            pksByOptionalValueAux.remove(value.trim());
+          if (pksByOptionalValue.contains(value)
+              || pksByOptionalValue.contains("\"" + value + "\"")) {
+            pksByOptionalValueAux.remove(value);
+            pksByOptionalValueAux.remove("\"" + value + "\"");
           }
           pkMapAux.put((fkList.get(i)[2]).toString(),
               pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());

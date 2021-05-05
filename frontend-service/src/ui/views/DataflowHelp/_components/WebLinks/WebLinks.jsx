@@ -125,7 +125,7 @@ export const WebLinks = ({
   };
 
   const linkTemplate = rowData => (
-    <a href={getValidUrl(rowData.url)} target="_blank" rel="noopener noreferrer">
+    <a href={getValidUrl(rowData.url)} rel="noopener noreferrer" target="_blank">
       {rowData.url}
     </a>
   );
@@ -313,26 +313,24 @@ export const WebLinks = ({
   };
 
   const webLinkEditionColumn = (
-    <Column key={'buttonsUniqueId'} body={row => webLinkEditButtons(row)} style={{ width: '5em' }} />
+    <Column body={row => webLinkEditButtons(row)} key={'buttonsUniqueId'} style={{ width: '5em' }} />
   );
 
   return (
     <Fragment>
-      {isToolbarVisible ? (
+      {isToolbarVisible && (
         <Toolbar className={styles.weblinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              id="addWebLinkButton"
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-weblink-upload-help-step`}
               icon="add"
+              id="addWebLinkButton"
               label={resources.messages['add']}
               onClick={() => setIsAddOrEditWebLinkDialogVisible(true)}
               style={{ float: 'left' }}
             />
           </div>
         </Toolbar>
-      ) : (
-        <></>
       )}
       <DataTable
         autoLayout={true}
@@ -373,24 +371,24 @@ export const WebLinks = ({
               <div className={`formField ${webLinksState.errors.description.hasErrors ? 'error' : ''}`}>
                 <input
                   id={`descriptionWebLinks`}
-                  ref={inputRef}
                   maxLength={255}
+                  name="description"
+                  onBlur={() => checkIsCorrectInputValue('description')}
                   onChange={e => {
                     onDescriptionChange(e.target.value);
                   }}
-                  onBlur={() => checkIsCorrectInputValue('description')}
                   onFocus={() => setErrors('description', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('description')) {
                       onSaveRecord();
                     }
                   }}
-                  name="description"
                   placeholder={resources.messages['description']}
+                  ref={inputRef}
                   type="text"
                   value={webLinksState.webLink.description}
                 />
-                <label htmlFor="descriptionWebLinks" className="srOnly">
+                <label className="srOnly" htmlFor="descriptionWebLinks">
                   {resources.messages['description']}
                 </label>
                 {webLinksState.errors.description.message !== '' && (
@@ -402,8 +400,8 @@ export const WebLinks = ({
                 <input
                   id={`urlWebLinks`}
                   name="url"
-                  onChange={e => onWebLinkUrlChange(e.target.value)}
                   onBlur={() => checkIsCorrectInputValue('url')}
+                  onChange={e => onWebLinkUrlChange(e.target.value)}
                   onFocus={() => setErrors('url', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('url')) {
@@ -414,7 +412,7 @@ export const WebLinks = ({
                   type="text"
                   value={webLinksState.webLink.url}
                 />
-                <label htmlFor="urlWebLinks" className="srOnly">
+                <label className="srOnly" htmlFor="urlWebLinks">
                   {resources.messages['url']}
                 </label>
                 {webLinksState.errors.url.message !== '' && <ErrorMessage message={webLinksState.errors.url.message} />}
@@ -423,16 +421,16 @@ export const WebLinks = ({
             <fieldset>
               <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
                 <Button
-                  id="submitButton"
-                  onClick={() => onSaveRecord()}
-                  label={isNil(webLinksState.webLink.id) ? resources.messages['add'] : resources.messages['edit']}
                   disabled={webLinksState.isSubmitting}
                   icon={getButtonIcon(webLinksState.isSubmitting)}
+                  id="submitButton"
+                  label={isNil(webLinksState.webLink.id) ? resources.messages['add'] : resources.messages['edit']}
+                  onClick={() => onSaveRecord()}
                 />
                 <Button
                   className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-                  label={resources.messages['cancel']}
                   icon="cancel"
+                  label={resources.messages['cancel']}
                   onClick={() => onHideAddEditDialog()}
                 />
               </div>

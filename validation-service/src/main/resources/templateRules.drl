@@ -97,6 +97,27 @@ function boolean isDateYYYYMMDD( String value ){
     return true;
 }
 
+//////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
+function boolean isDateTime( String value ){
+	if(!isBlank(value)){
+		return true;
+	}	
+	
+ SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss'Z'");
+ 	if(!isBlank(value)){
+		return true;
+	}
+ 	Date dateDrools = null;
+    try {
+      sdf.setLenient(false);
+      dateDrools = sdf.parse(value);
+    } catch( Exception e ){
+        return false;
+    }
+    
+    return true;
+}
+
 //////////////////////////////////////////VALIDATION NUMBER_INTEGER///////////////////////////////////////////////////////////
 function boolean isNumberInteger(String value){
 	if(!isBlank(value)){

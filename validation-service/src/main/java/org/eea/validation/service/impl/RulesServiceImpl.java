@@ -458,6 +458,10 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
+        case DATETIME:
+          ruleList.add(AutomaticRules.createDateTimeAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
         case BOOLEAN:
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));

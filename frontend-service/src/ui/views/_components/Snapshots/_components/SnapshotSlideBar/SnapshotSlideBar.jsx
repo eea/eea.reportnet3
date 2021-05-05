@@ -48,7 +48,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
     if (isVisible) {
       bodySelector.style.overflow = 'hidden';
     } else {
-      if (dialogContext.open.length == 0) {
+      if (dialogContext.open.length === 0) {
         bodySelector.style.overflow = 'hidden auto';
       }
     }
@@ -98,8 +98,8 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
       className={styles.sidebar}
       onHide={() => setIsVisible()}
       position="right"
-      visible={isVisible}
-      style={slideBarStyle}>
+      style={slideBarStyle}
+      visible={isVisible}>
       <div className={styles.content}>
         <div className={styles.title}>
           <h3>{resources.messages.createSnapshotTitle}</h3>
@@ -119,21 +119,21 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                 onBlur={e => !hasCorrectDescriptionLength(e.target.value) && setHasError(true)}
                 onChange={e => setInputValue(e.target.value)}
                 onFocus={() => setHasError(false)}
+                onKeyDown={e => onPressEnter(e)}
                 placeholder={resources.messages.createSnapshotPlaceholder}
                 type="text"
-                onKeyDown={e => onPressEnter(e)}
                 value={inputValue}
               />
-              <label htmlFor="createSnapshotDescription" className="srOnly">
+              <label className="srOnly" htmlFor="createSnapshotDescription">
                 {resources.messages['createSnapshotPlaceholder']}
               </label>
               <div className={styles.createButtonWrapper}>
                 <Button
-                  onClick={() => onConfirmClick()}
                   className={`${styles.createSnapshotButton} rp-btn secondary`}
+                  icon="plus"
+                  onClick={() => onConfirmClick()}
                   tooltip={resources.messages.createSnapshotTooltip}
                   type="submit"
-                  icon="plus"
                 />
               </div>
             </div>

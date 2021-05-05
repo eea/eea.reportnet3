@@ -455,6 +455,7 @@ const schemaById = async datasetId => {
     datasetSchemaName: datasetSchemaDTO.data.nameDatasetSchema,
     levelErrorTypes:
       !isUndefined(rulesDTO.data) && rulesDTO.data !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO.data) : [],
+    referenceDataset: datasetSchemaDTO.data.referenceDataset,
     webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform.name : null
   });
 

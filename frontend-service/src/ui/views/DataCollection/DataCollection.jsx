@@ -239,9 +239,9 @@ export const DataCollection = withRouter(({ match, history }) => {
       levelErrorTypes={levelErrorTypes}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
-      tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}
+      tables={tableSchema}
     />
   );
 
@@ -262,7 +262,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   return layout(
     <Fragment>
-      <Title title={dataCollectionName} subtitle={dataflowName} icon="dataCollection" iconSize="3.5rem" />
+      <Title icon="dataCollection" iconSize="3.5rem" subtitle={dataflowName} title={dataCollectionName} />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
