@@ -82,6 +82,8 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
+  const [dateTime, setDateTime] = useState();
+
   const { areEquals } = TextUtils;
 
   const calendarId = uuid.v4();
@@ -270,6 +272,11 @@ const FieldEditor = ({
     console.log(e.value, dayjs(e.value).format());
     saveCalendarDate(!withDatetime ? dayjs(e.value).format('YYYY-MM-DD') : dayjs(e.value).format(), withDatetime);
   };
+
+  useEffect(() => {
+    const buttonsBar = document.getElementsByClassName('p-datepicker-buttonbar');
+    buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
+  }, []);
 
   useEffect(() => {
     if (isCalendarVisible) {
@@ -606,14 +613,22 @@ const FieldEditor = ({
             appendTo={document.body}
             inputId={calendarWithDatetimeId}
             monthNavigator={true}
-            // onChange={e => onSelectCalendar(e, true)}
-            onBlur={e => onCalendarBlur(e, true)}
-            onFocus={e => onCalendarFocus(e, true)}
-            onHide={e => console.log('HIDE')}
+            onChange={e => setDateTime(e.value)}
+            // onBlur={e => onCalendarBlur(e, true)}
+            // onFocus={e => onCalendarFocus(e, true)}
+            // onHide={e => console.log('HIDE')}
             // onSelect={e => onSelectCalendar(e, true)}
+            onTodayButtonClick={e => {
+              e.stopPropagation();
+              console.log(document.getElementsByClassName('p-datepicker-buttonbar'));
+              console.log('TODAY', dateTime);
+              saveCalendarDate(dayjs(dateTime).format(), true);
+            }}
+            showButtonBar={true}
             showSeconds={true}
             showTime={true}
-            value={RecordUtils.getCellValue(cells, cells.field)}
+            todayButtonClassName="p-button-primary"
+            value={dateTime}
             yearNavigator={true}
             yearRange="1900:2100"
           />
