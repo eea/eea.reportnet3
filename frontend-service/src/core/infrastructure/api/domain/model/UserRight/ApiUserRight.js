@@ -50,7 +50,11 @@ const apiUserRight = {
 
   updateReporter: async (userRight, dataflowId, dataProviderId) => {
     const response = await HTTPRequester.update({
-      url: getUrl(UserRightConfig.updateReporter, { dataflowId, dataProviderId, role: userRight.role })
+      url: getUrl(UserRightConfig.updateReporter, { dataflowId, dataProviderId }),
+      data: {
+        account: userRight.account,
+        role: userRight.role
+      }
     });
     return response;
   }
