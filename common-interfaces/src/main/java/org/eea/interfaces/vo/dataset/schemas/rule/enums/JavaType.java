@@ -26,6 +26,9 @@ public final class JavaType {
   /** The Constant UNSUPPORTED: {@value}. */
   public static final String UNSUPPORTED = "Unsupported";
 
+  /** The Constant TIMESTAMP: {@value}. */
+  public static final String TIMESTAMP = "Timestamp";
+
   /**
    * Instantiates a new java type.
    */
