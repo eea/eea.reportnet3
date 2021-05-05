@@ -991,29 +991,6 @@ public class DataflowServiceImpl implements DataflowService {
           .findReferenceDatasetByDataflowId(id).stream()
           .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
-      // DUMMY
-      // ReferenceDatasetVO reference1 = new ReferenceDatasetVO();
-      // reference1.setDataSetName("Reference Test 1");
-      // reference1.setCreationDate(new Date());
-      // reference1.setIdDataflow(id);
-      // reference1.setDatasetSchema("5ce524fad31fc52540abae73");
-      // reference1.setId(1000000L);
-      //
-      // ReferenceDatasetVO reference2 = new ReferenceDatasetVO();
-      // reference2.setDataSetName("Reference Test 2");
-      // reference2.setCreationDate(new Date());
-      // reference2.setIdDataflow(id);
-      // reference2.setDatasetSchema("5eb4269d06390651aced7c93");
-      // reference2.setId(1000001L);
-      //
-      // List<ReferenceDatasetVO> referenceDatasets = new ArrayList<>();
-      // referenceDatasets.add(reference1);
-      // if (dataflowVO.getReportingDatasets().size() > 1) {
-      // referenceDatasets.add(reference2);
-      // }
-      // dataflowVO.setReferenceDatasets(referenceDatasets);
-      // END DUMMY
-
     } else {
       dataflowVO.setReportingDatasets(new ArrayList<>());
       dataflowVO.setDataCollections(new ArrayList<>());
