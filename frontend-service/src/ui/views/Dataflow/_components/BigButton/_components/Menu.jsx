@@ -127,7 +127,7 @@ class Menu extends Component {
                         });
                     }}
                     disabled={item.disabled}>
-                    {!isNil(item.icon) && <FontAwesomeIcon className={styles.userDataIcon} icon={AwesomeIcons(item.icon)}/>}
+                    {!isNil(item.icon) && <FontAwesomeIcon icon={AwesomeIcons(item.icon)}/>}
                     <span>{item.label}</span>
                   </a>                  
                 </li>
