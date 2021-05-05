@@ -230,6 +230,7 @@ export const ShareRights = ({
     return (
       <Fragment>
         <select
+          // disabled={}
           id={userType}
           onBlur={() => updateUser(userRight)}
           onChange={event => onWritePermissionChange(userRight, event.target.value)}
@@ -262,6 +263,7 @@ export const ShareRights = ({
           id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
           onBlur={() => updateUser(userRight)}
           onChange={event => onSetAccount(event.target.value)}
+          onKeyDown={event => onEnterKey(event.key, userRight)}
           placeholder={placeholder}
           value={userRight.account}
         />
