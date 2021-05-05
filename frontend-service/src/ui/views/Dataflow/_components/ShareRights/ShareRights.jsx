@@ -228,7 +228,7 @@ export const ShareRights = ({
       : roleOptions;
 
     return (
-      <>
+      <Fragment>
         <select
           id={userType}
           onBlur={() => updateUser(userRight)}
@@ -246,7 +246,7 @@ export const ShareRights = ({
         <label className="srOnly" htmlFor={userType}>
           {placeholder}
         </label>
-      </>
+      </Fragment>
     );
   };
 
