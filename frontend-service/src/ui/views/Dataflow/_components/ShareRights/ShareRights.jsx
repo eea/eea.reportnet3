@@ -134,7 +134,7 @@ export const ShareRights = ({
     }
   };
 
-  const onDeleteUser = async () => {
+  const onDeleteUserRight = async () => {
     onToggleDeletingUser(true);
 
     try {
@@ -304,7 +304,7 @@ export const ShareRights = ({
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onDeleteUser()}
+          onConfirm={() => onDeleteUserRight()}
           onHide={() =>
             shareRightsDispatch({
               type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG',
