@@ -230,32 +230,24 @@ const FieldEditor = ({
     return codelistsItems;
   };
 
-  const onCalendarBlur = (e, withDatetime = false) => {
-    console.log('BLUR');
-    console.log(e.target.value, RecordUtils.getCellValue(cells, cells.field));
+  const onCalendarBlur = e => {
     if (e.target.value !== RecordUtils.getCellValue(cells, cells.field)) {
-      saveCalendarDate(e.target.value, withDatetime);
+      saveCalendarDate(e.target.value, false);
       setIsCalendarVisible(false);
     }
   };
 
-  const onCalendarFocus = (e, withDatetime = false) => {
-    console.log(e.target.value);
+  const onCalendarFocus = e => {
     setIsCalendarVisible(true);
-    onEditorValueFocus(
-      cells,
-      !withDatetime ? RecordUtils.formatDate(e.target.value, isNil(e.target.value)) : e.target.value
-    );
+    onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
   };
 
   const saveCalendarDate = (inputDateValue, withDatetime) => {
-    // console.log({ inputDateValue });
     const formattedDateValue = isEmpty(inputDateValue)
       ? ''
       : !withDatetime
       ? RecordUtils.formatDate(inputDateValue, isNil(inputDateValue))
       : inputDateValue;
-    // console.log({ formattedDateValue });
     const isCorrectDateFormattedValue = getIsCorrectDateFormatedValue(formattedDateValue);
     if (isCorrectDateFormattedValue || isEmpty(formattedDateValue)) {
       onEditorValueChange(cells, formattedDateValue, record);
@@ -298,6 +290,7 @@ const FieldEditor = ({
           const storedValue = RecordUtils.getCellValue(cells, cells.field);
 
           if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
+            console.log('LLEGO');
             saveCalendarFromKeys(inputValue, true);
           }
         });
@@ -632,28 +625,21 @@ const FieldEditor = ({
               weekHeader: 'Wk'
             }}
             monthNavigator={true}
-            // onBlur={e => {
-            //   onCalendarBlur(e, true)}
-            // }}
-            onChange={e => setDateTime(e.value)}
-            // onFocus={e => {
-            //   // const buttonsBar = document.getElementsByClassName('p-datepicker-buttonbar');
-            //   // buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
-            //   console.log('OPEN');
-            //   setDateTimeOpen(true);
-            // }}
-            // onCalendarFocus(e, true)}
-            // onHide={e => console.log('HIDE')}
-            // onSelect={e => onSelectCalendar(e, true)}
+            onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
+            onFocus={e => {
+              const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
+              setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
+              setIsCalendarVisible(true);
+            }}
             onTodayButtonClick={e => {
               e.stopPropagation();
-              saveCalendarDate(dayjs(dateTime).format(), true);
+              saveCalendarDate(dateTime === '' ? '' : dayjs(dateTime).format('YYYY-MM-DD HH:mm:ss'), true);
             }}
             showButtonBar={true}
             showSeconds={true}
             showTime={true}
             todayButtonClassName="p-button-primary"
-            value={dateTime}
+            value={!isNil(dateTime) ? dateTime : new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
             yearRange="1900:2100"
           />

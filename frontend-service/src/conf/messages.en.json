@@ -1068,6 +1068,8 @@
     "onlyReleasedCheckboxLabel": "Only released",
     "onlyReleasedDataCollectionCheckboxLabel": "Only released to Data Collection",
     "onlyReleasedEuDatasetCheckboxLabel": "Only released to EU dataset",
-    "referenceDataset": "Reference dataset"
+    "referenceDataset": "Reference dataset",
+    "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
+    "geomTypeHelpTooltip": "Check the type format"
   }
 }

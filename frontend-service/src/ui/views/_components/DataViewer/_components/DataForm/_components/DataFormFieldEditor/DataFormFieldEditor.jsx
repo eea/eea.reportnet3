@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
+import dayjs from 'dayjs';
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -61,6 +62,7 @@ const DataFormFieldEditor = ({
   const multiDropdownRef = useRef(null);
   const pointRef = useRef(null);
   const refCalendar = useRef(null);
+  const refDatetimeCalendar = useRef(null);
   const textAreaRef = useRef(null);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
@@ -117,6 +119,8 @@ const DataFormFieldEditor = ({
         textAreaRef.current.element.focus();
       } else if (refCalendar.current) {
         refCalendar.current.inputElement.focus();
+      } else if (refDatetimeCalendar.current) {
+        refDatetimeCalendar.current.inputElement.focus();
       } else if (dropdownRef.current) {
         dropdownRef.current.focusInput.focus();
       } else if (multiDropdownRef.current) {
@@ -133,6 +137,7 @@ const DataFormFieldEditor = ({
     pointRef.current,
     dropdownRef.current,
     refCalendar.current,
+    refDatetimeCalendar.current,
     textAreaRef.current,
     inputRef.current,
     isVisible,
@@ -390,7 +395,6 @@ const DataFormFieldEditor = ({
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value, isConditional)}
-        placeholder={type === 'DATE' ? 'YYYY-MM-DD' : ''}
         ref={inputRef}
         style={{ width: '35%' }}
         type="text"
@@ -427,15 +431,13 @@ const DataFormFieldEditor = ({
       <Calendar
         appendTo={document.body}
         baseZIndex={9999}
-        dateFormat="yy-mm-dd"
         disabled={(column.readOnly && reporting) || isSaving}
-        inputRef={refCalendar}
+        inputRef={refDatetimeCalendar}
         monthNavigator={true}
-        onChange={e => onChangeForm(field, e.target.value, isConditional)}
+        onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
         showSeconds={true}
         showTime={true}
-        style={{ width: '60px' }}
-        value={fieldValue}
+        value={new Date(fieldValue)}
         yearNavigator={true}
         yearRange="1900:2100"
       />
