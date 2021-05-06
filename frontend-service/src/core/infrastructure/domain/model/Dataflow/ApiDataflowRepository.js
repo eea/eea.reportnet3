@@ -439,7 +439,6 @@ const parseDataflowDTO = dataflowDTO =>
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
-    testDatasets: parseTestDatasetListDTO(dataflowDTO.testDatasets),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
@@ -457,6 +456,7 @@ const parseDataflowDTO = dataflowDTO =>
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
+    testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
@@ -511,16 +511,6 @@ const parseDatasetListDTO = datasetsDTO => {
   if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
     const datasets = [];
     datasetsDTO.forEach(datasetDTO => {
-      datasets.push(parseDatasetDTO(datasetDTO));
-    });
-    return datasets;
-  }
-  return;
-};
-const parseTestDatasetListDTO = testDatasetsDTO => {
-  if (!isNull(testDatasetsDTO) && !isUndefined(testDatasetsDTO)) {
-    const datasets = [];
-    testDatasetsDTO.forEach(datasetDTO => {
       datasets.push(parseDatasetDTO(datasetDTO));
     });
     return datasets;
