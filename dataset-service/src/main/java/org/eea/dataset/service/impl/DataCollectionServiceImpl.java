@@ -26,10 +26,8 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
-import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
-import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -52,6 +50,7 @@ import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -100,6 +99,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The Constant NAME_TEST: {@value}. */
   private static final String NAME_TEST = "Test Dataset - %s";
 
+  /** The Constant NAME_REFERENCE: {@value}. */
+  private static final String NAME_REFERENCE = "Reference Dataset - %s";
+
   /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
@@ -120,6 +122,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String INSERT_TEST_INTO_DATASET =
       "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
 
+  /** The Constant INSERT_REFERENCE_INTO_DATASET: {@value}. */
+  private static final String INSERT_REFERENCE_INTO_DATASET =
+      "insert into dataset (date_creation, dataflowid, dataset_name, dataset_schema) values ('%s', %d, '%s', '%s') returning id";
+
   /** The Constant INSERT_DC_INTO_DATA_COLLECTION: {@value}. */
   private static final String INSERT_DC_INTO_DATA_COLLECTION =
       "insert into data_collection (id, due_date) values (%d, '%s')";
@@ -130,6 +136,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The Constant INSERT_TEST_INTO_TEST_DATASET: {@value}. */
   private static final String INSERT_TEST_INTO_TEST_DATASET =
       "insert into test_dataset (id) values (%d)";
+
+  /** The Constant INSERT_REFERENCE_INTO_REFERENCE_DATASET: {@value}. */
+  private static final String INSERT_REFERENCE_INTO_REFERENCE_DATASET =
+      "insert into reference_dataset (id) values (%d)";
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
@@ -221,13 +231,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private TestDatasetRepository testDatasetRepository;
 
-  /** The reporting dataset repository. */
-  @Autowired
-  private ReportingDatasetRepository reportingDatasetRepository;
 
-  /** The schemas repository. */
-  @Autowired
-  private SchemasRepository schemasRepository;
 
   /**
    * Gets the dataflow status.
@@ -392,6 +396,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError);
       }
     }
+    // remove from the list of designs the ones that are going to be referenceDatasets
+    List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
+    designs.stream().forEach(dataset -> {
+      DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
+      if (schema.isReferenceDataset()) {
+        referenceDatasets.add(dataset);
+      }
+    });
+    designs.removeIf(design -> referenceDatasets.contains(design));
+
     if (rulesOk) {
       // 2. Get the representatives who are going to provide data
       List<RepresentativeVO> representatives = representativeControllerZuul
@@ -420,8 +434,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           Statement statement = connection.createStatement()) {
 
         processDataCollectionAndRoles(dataflowId, dueDate, isCreation, manualCheck, time, designs,
-            representatives, map, dataCollectionIds, datasetIdsEmails, datasetIdsAndSchemaIds,
-            euDatasetIds, connection, statement);
+            referenceDatasets, representatives, map, dataCollectionIds, datasetIdsEmails,
+            datasetIdsAndSchemaIds, euDatasetIds, connection, statement);
       } catch (SQLException e) {
         LOG_ERROR.error("Error rolling back: ", e);
       }
@@ -470,13 +484,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param manualCheck the manual check
    * @param time the time
    * @param designs the designs
+   * @param referenceDatasets the reference datasets
    * @param representatives the representatives
    * @param map the map
    * @param dataCollectionIds the data collection ids
    * @param datasetIdsEmails the dataset ids emails
    * @param datasetIdsAndSchemaIds the dataset ids and schema ids
-   * @param datasetIdsAndSchemaIdsFromDC the dataset ids and schema ids from DC
-   * @param datasetIdsAndSchemaIdsFromEU the dataset ids and schema ids from EU
    * @param euDatasetIds the eu dataset ids
    * @param connection the connection
    * @param statement the statement
@@ -484,9 +497,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void processDataCollectionAndRoles(Long dataflowId, Date dueDate, boolean isCreation,
       boolean manualCheck, String time, List<DesignDatasetVO> designs,
-      List<RepresentativeVO> representatives, Map<Long, String> map, List<Long> dataCollectionIds,
-      Map<Long, List<String>> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
-      List<Long> euDatasetIds, Connection connection, Statement statement) throws SQLException {
+      List<DesignDatasetVO> referenceDatasets, List<RepresentativeVO> representatives,
+      Map<Long, String> map, List<Long> dataCollectionIds, Map<Long, List<String>> datasetIdsEmails,
+      Map<Long, String> datasetIdsAndSchemaIds, List<Long> euDatasetIds, Connection connection,
+      Statement statement) throws SQLException {
     try {
       connection.setAutoCommit(false);
 
@@ -501,6 +515,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             String.format(UPDATE_REPRESENTATIVE_HAS_DATASETS, true, representative.getId()));
       }
       List<Long> testDatasetIds = new ArrayList<>();
+      List<Long> referenceDatasetIds = new ArrayList<>();
 
       List<FKDataCollection> newReportingDatasetsRegistry = new ArrayList<>();
       List<FKDataCollection> newDCsRegistry = new ArrayList<>();
@@ -544,10 +559,22 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
       }
 
+      // Reference datasets
+      for (DesignDatasetVO referenceDataset : referenceDatasets) {
+        if (isCreation) {
+          // 6d. Create Reference Dataset in metabase
+          Long referenceDatasetId =
+              persistReferenceDataset(statement, referenceDataset, time, dataflowId);
+          referenceDatasetIds.add(referenceDatasetId);
+          datasetIdsAndSchemaIds.put(referenceDatasetId, referenceDataset.getDatasetSchema());
+        }
+      }
+
+
       statement.executeBatch();
       // 8. Create permissions
       createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, testDatasetIds,
-          dataflowId);
+          referenceDatasetIds, dataflowId);
       // 9. Delete editors
       removePermissionEditors(dataflowId);
 
@@ -577,6 +604,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+  /**
+   * Persist test.
+   *
+   * @param metabaseStatement the metabase statement
+   * @param design the design
+   * @param time the time
+   * @param dataflowId the dataflow id
+   * @return the long
+   * @throws SQLException the SQL exception
+   */
   private Long persistTest(Statement metabaseStatement, DesignDatasetVO design, String time,
       Long dataflowId) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_TEST_INTO_DATASET, time,
@@ -881,24 +918,51 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+
+  /**
+   * Persist reference dataset.
+   *
+   * @param metabaseStatement the metabase statement
+   * @param design the design
+   * @param time the time
+   * @param dataflowId the dataflow id
+   * @return the long
+   * @throws SQLException the SQL exception
+   */
+  private Long persistReferenceDataset(Statement metabaseStatement, DesignDatasetVO design,
+      String time, Long dataflowId) throws SQLException {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_REFERENCE_INTO_DATASET,
+        time, dataflowId, String.format(NAME_REFERENCE, design.getDataSetName().replace("'", "''")),
+        design.getDatasetSchema()))) {
+      rs.next();
+      Long datasetId = rs.getLong(1);
+      metabaseStatement.addBatch(String.format(INSERT_REFERENCE_INTO_REFERENCE_DATASET, datasetId));
+      metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
+      return datasetId;
+    }
+  }
+
+
   /**
    * Creates the permissions.
    *
    * @param datasetIdsEmails the dataset ids emails
    * @param dataCollectionIds the data collection ids
    * @param euDatasetIds the eu dataset ids
+   * @param testDatasetIds the test dataset ids
+   * @param referenceDatasetIds the reference dataset ids
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
   private void createPermissions(Map<Long, List<String>> datasetIdsEmails,
       List<Long> dataCollectionIds, List<Long> euDatasetIds, List<Long> testDatasetIds,
-      Long dataflowId) throws EEAException {
+      List<Long> referenceDatasetIds, Long dataflowId) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> assignments = new ArrayList<>();
 
     createGroupsAndAssings(dataflowId, dataCollectionIds, euDatasetIds, testDatasetIds,
-        datasetIdsEmails, groups, assignments);
+        referenceDatasetIds, datasetIdsEmails, groups, assignments);
 
     // Persist changes in KeyCloak guaranteeing transactionality
     // Insert in chunks to prevent Hystrix timeout
@@ -963,13 +1027,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @param dataCollectionIds the data collection ids
    * @param euDatasetIds the eu dataset ids
+   * @param testDatasetIds the test dataset ids
+   * @param referenceDatasetIds the reference dataset ids
    * @param datasetIdsEmails the dataset ids emails
    * @param groups the groups
    * @param assignments the assignments
    */
   private void createGroupsAndAssings(Long dataflowId, List<Long> dataCollectionIds,
-      List<Long> euDatasetIds, List<Long> testDatasetIds, Map<Long, List<String>> datasetIdsEmails,
-      List<ResourceInfoVO> groups, List<ResourceAssignationVO> assignments) {
+      List<Long> euDatasetIds, List<Long> testDatasetIds, List<Long> referenceDatasetIds,
+      Map<Long, List<String>> datasetIdsEmails, List<ResourceInfoVO> groups,
+      List<ResourceAssignationVO> assignments) {
 
     List<UserRepresentationVO> stewards =
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
@@ -1067,6 +1134,49 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             ResourceGroupEnum.TESTDATASET_CUSTODIAN));
       }
     }
+
+    for (Long referenceDatasetId : referenceDatasetIds) {
+
+      // Create ReferenceDataset-%s-DATA_STEWARD
+      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+          SecurityRoleEnum.DATA_STEWARD));
+
+      // Create ReferenceDataset-%s-DATA_CUSTODIAN
+      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+          SecurityRoleEnum.DATA_CUSTODIAN));
+
+      // Assign ReferenceDataset-%s-DATA_STEWARD
+      for (UserRepresentationVO steward : stewards) {
+        assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
+            ResourceGroupEnum.REFERENCEDATASET_STEWARD));
+      }
+
+      // Assign ReferenceDataset-%s-DATA_CUSTODIAN
+      for (UserRepresentationVO custodian : custodians) {
+        assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
+            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+      }
+
+      // Assign ReferenceDataset-%s-LEAD_REPORTER
+      for (UserRepresentationVO custodian : custodians) {
+        assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
+            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+      }
+
+      // OBSERVERS ????
+
+
+      // Assign reporters
+      for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
+        if (null != entry.getValue()) {
+          for (String email : entry.getValue()) {
+            assignments.add(createAssignments(referenceDatasetId, email,
+                ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+          }
+        }
+      }
+    }
+
 
     for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
 
