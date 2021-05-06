@@ -137,8 +137,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String INSERT_TEST_INTO_TEST_DATASET =
       "insert into test_dataset (id) values (%d)";
 
-  /** The Constant INSERT_REFERENCE_INTO_TEST_DATASET: {@value}. */
-  private static final String INSERT_REFERENCE_INTO_TEST_DATASET =
+  /** The Constant INSERT_REFERENCE_INTO_REFERENCE_DATASET: {@value}. */
+  private static final String INSERT_REFERENCE_INTO_REFERENCE_DATASET =
       "insert into reference_dataset (id) values (%d)";
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
@@ -936,7 +936,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         design.getDatasetSchema()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
-      metabaseStatement.addBatch(String.format(INSERT_REFERENCE_INTO_TEST_DATASET, datasetId));
+      metabaseStatement.addBatch(String.format(INSERT_REFERENCE_INTO_REFERENCE_DATASET, datasetId));
       metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
       return datasetId;
     }
