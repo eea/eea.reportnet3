@@ -4,7 +4,7 @@ import { UserRight } from 'core/domain/model/UserRight/UserRight';
 import sortBy from 'lodash/sortBy';
 import uniqueId from 'lodash/uniqueId';
 
-const parseUserRightDTO = userRightListDTO => {
+const parseUserRightListDTO = userRightListDTO => {
   const userRightList = userRightListDTO.data.map(userRightDTO => {
     userRightDTO.id = uniqueId();
     return new UserRight(userRightDTO);
@@ -16,13 +16,13 @@ const parseUserRightDTO = userRightListDTO => {
 const allReporters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allReporters(dataflowId, dataProviderId);
 
-  return parseUserRightDTO(userRightListDTO);
+  return parseUserRightListDTO(userRightListDTO);
 };
 
 const allRequesters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allRequesters(dataflowId, dataProviderId);
 
-  return parseUserRightDTO(userRightListDTO);
+  return parseUserRightListDTO(userRightListDTO);
 };
 
 const deleteReporter = async (userRight, dataflowId, dataProviderId) => {
