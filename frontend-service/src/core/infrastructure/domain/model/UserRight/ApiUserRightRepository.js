@@ -3,13 +3,15 @@ import { UserRight } from 'core/domain/model/UserRight/UserRight';
 
 import sortBy from 'lodash/sortBy';
 
+const parseUserRightDTO = userRightListDTO =>
+  userRightListDTO.data.map(userRightDTO => {
+    return new UserRight(userRightDTO);
+  });
+
 const allReporters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allReporters(dataflowId, dataProviderId);
 
-  const userRightList = userRightListDTO.data.map((userRightDTO, i) => {
-    userRightDTO.id = i + 1;
-    return new UserRight(userRightDTO);
-  });
+  const userRightList = parseUserRightDTO(userRightListDTO);
 
   return sortBy(userRightList, ['account']);
 };
@@ -17,10 +19,7 @@ const allReporters = async (dataflowId, dataProviderId) => {
 const allRequesters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allRequesters(dataflowId, dataProviderId);
 
-  const userRightList = userRightListDTO.data.map((userRightDTO, i) => {
-    userRightDTO.id = i + 1;
-    return new UserRight(userRightDTO);
-  });
+  const userRightList = parseUserRightDTO(userRightListDTO);
 
   return sortBy(userRightList, ['account']);
 };
