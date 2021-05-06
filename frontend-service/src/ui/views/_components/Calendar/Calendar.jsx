@@ -16,6 +16,7 @@ export const Calendar = forwardRef((props, _) => {
     inputRef,
     keepInvalid,
     key,
+    locale,
     maxDate,
     minDate,
     monthNavigator,
@@ -50,6 +51,7 @@ export const Calendar = forwardRef((props, _) => {
       inputId={inputId}
       keepInvalid={keepInvalid}
       key={key}
+      locale={locale}
       maxDate={maxDate}
       minDate={minDate}
       monthNavigator={monthNavigator}

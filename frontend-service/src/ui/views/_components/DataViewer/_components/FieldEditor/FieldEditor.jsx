@@ -82,7 +82,6 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
-  const [dateTimeOpen, setDateTimeOpen] = useState(false);
   const [dateTime, setDateTime] = useState();
 
   const { areEquals } = TextUtils;
@@ -273,16 +272,6 @@ const FieldEditor = ({
     console.log(e.value, dayjs(e.value).format());
     saveCalendarDate(!withDatetime ? dayjs(e.value).format('YYYY-MM-DD') : dayjs(e.value).format(), withDatetime);
   };
-
-  useEffect(() => {
-    const buttonsBar = document.getElementsByClassName('p-datepicker-buttonbar');
-    if (!isNil(buttonsBar.item(0))) {
-      console.log(buttonsBar.item(0).childNodes[0].childNodes[0].innerText);
-      buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
-    } else {
-      console.log('NO LO PILLA');
-    }
-  }, [dateTimeOpen]);
 
   useEffect(() => {
     if (isCalendarVisible) {
@@ -618,26 +607,46 @@ const FieldEditor = ({
           <Calendar
             appendTo={document.body}
             inputId={calendarWithDatetimeId}
+            locale={{
+              firstDayOfWeek: 0,
+              dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+              dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+              dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+              monthNames: [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December'
+              ],
+              monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              today: 'Save',
+              clear: 'Clear',
+              weekHeader: 'Wk'
+            }}
             monthNavigator={true}
-            onBlur={e => {
-              console.log('CLOSE');
-              setDateTimeOpen(false);
-            }}
+            // onBlur={e => {
+            //   onCalendarBlur(e, true)}
+            // }}
             onChange={e => setDateTime(e.value)}
-            //onCalendarBlur(e, true)}
-            onFocus={e => {
-              // const buttonsBar = document.getElementsByClassName('p-datepicker-buttonbar');
-              // buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
-              console.log('OPEN');
-              setDateTimeOpen(true);
-            }}
+            // onFocus={e => {
+            //   // const buttonsBar = document.getElementsByClassName('p-datepicker-buttonbar');
+            //   // buttonsBar.item(0).childNodes[0].childNodes[0].innerText = 'Save';
+            //   console.log('OPEN');
+            //   setDateTimeOpen(true);
+            // }}
             // onCalendarFocus(e, true)}
             // onHide={e => console.log('HIDE')}
             // onSelect={e => onSelectCalendar(e, true)}
             onTodayButtonClick={e => {
               e.stopPropagation();
-              console.log(document.getElementsByClassName('p-datepicker-buttonbar'));
-              console.log('TODAY', dateTime);
               saveCalendarDate(dayjs(dateTime).format(), true);
             }}
             showButtonBar={true}
