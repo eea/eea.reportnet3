@@ -52,6 +52,17 @@
   }
 }
 
+.cellWrapper {
+  display: flex;
+  align-items: center;
+
+  .link {
+    color: var(--hyperlink-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+}
+
 .tableLegendContainer {
   margin-top: 0.4rem !important;
   margin-right: 0.4rem;

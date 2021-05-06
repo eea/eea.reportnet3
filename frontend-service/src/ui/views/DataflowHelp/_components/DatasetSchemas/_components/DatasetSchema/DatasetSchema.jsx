@@ -165,6 +165,7 @@ const DatasetSchema = ({
     const parsedDataset = {};
     parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
     parsedDataset.availableInPublic = design.availableInPublic;
+    parsedDataset.referenceDataset = design.referenceDataset;
     parsedDataset.levelErrorTypes = design.levelErrorTypes;
     parsedDataset.extensionsOperations = extensionsOperationsList;
     parsedDataset.uniques = uniqueList;
