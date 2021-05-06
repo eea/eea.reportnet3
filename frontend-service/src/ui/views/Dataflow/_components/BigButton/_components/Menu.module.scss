@@ -1,16 +1,13 @@
 .dropDownMenu {
-  // right: -52px;
   background-color: var(--white);
   border-radius: 2%;
-  border: 1px solid var(--c-black-200);
   border: 1px solid var(--c-custom-gray);
   bottom: 0px;
   box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
   color: var(--main-font-color);
   cursor: pointer;
-  font-size: 0.8rem;
   font-size: 0.9rem;
-  height: 100%;
+  height: fit-content;
   opacity: 0;
   position: absolute;
   user-select: none;
@@ -21,25 +18,12 @@
     padding: 0px;
 
     li span {
-      color: var(--main-font-color);
+      color: var(--gray-110);
       padding: 0.85em 0.45em !important;
-
-      &:hover {
-        // color: var(--main-font-color);
-        background-color: rgba(0, 0, 0, 0);
-      }
-
-      svg {
-        color: var(--main-font-color);
-      }
     }
   }
 
   .menuItemDisabled {
     color: var(--c-black-300) !important;
-
-    &:hover {
-      color: var(--c-black-300);
-    }
   }
 }
