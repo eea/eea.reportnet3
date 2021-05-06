@@ -168,20 +168,20 @@ export const BigButton = ({
         className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
           !enabled && styles.bigButtonDisabled
         }`}>
-        <span onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)} data-tip data-for={caption}>
-          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
+        <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
         </span>
         {model && !isEmpty(model) && (
           <DropdownButton
-            icon="caretDown"
-            model={designModel}
             buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+            icon="caretDown"
             iconStyle={{ fontSize: '1.8rem' }}
+            model={designModel}
           />
         )}
         {infoStatus &&
           (infoStatusIcon ? (
-            <Icon style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} icon="cloudUpload" />
+            <Icon icon="cloudUpload" style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} />
           ) : (
             <p
               style={{
@@ -224,16 +224,16 @@ export const BigButton = ({
       ) : (
         <>
           <p
-            data-tip
-            data-for={tooltipId}
             className={styles.caption}
+            data-for={tooltipId}
+            data-tip
             onDoubleClick={
               dataflowStatus === config.dataflowStatus.DESIGN && canEditName ? onEnableSchemaNameEdit : null
             }>
             {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
           </p>
-          {buttonsTitle.length > 60 && (
-            <ReactTooltip effect="solid" id={tooltipId} place="top" className={styles.tooltip}>
+          {!isUndefined(buttonsTitle) && buttonsTitle.length > 60 && (
+            <ReactTooltip className={styles.tooltip} effect="solid" id={tooltipId} place="top">
               {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
             </ReactTooltip>
           )}
@@ -246,9 +246,9 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <span onClick={event => menuBigButtonRef.current.show(event)}>
-          <FontAwesomeIcon icon={AwesomeIcons(buttonIcon)} className={styles[buttonIconClass]} />
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
         </span>
-        <DropDownMenu ref={menuBigButtonRef} model={model} />
+        <DropDownMenu model={model} ref={menuBigButtonRef} />
       </div>
       <p className={styles.caption}>{caption}</p>
     </>

@@ -344,8 +344,8 @@ export const ManageIntegrations = ({
   };
 
   const renderCheckboxLayout = options => {
-    return options.map((option, index) => (
-      <div className={`${styles.field} ${styles[option]} formField `} key={index}>
+    return options.map(option => (
+      <div className={`${styles.field} ${styles[option]} formField `} key={`${componentName}__${option}`}>
         <label htmlFor={`${componentName}__${option}`}>
           {resources.messages[option]}
           <Button
@@ -373,7 +373,7 @@ export const ManageIntegrations = ({
 
   const renderDialogFooter = (
     <Fragment>
-      <span data-tip data-for="integrationTooltip">
+      <span data-for="integrationTooltip" data-tip>
         <Button
           className="p-button-rounded p-button-animated-blink"
           disabled={
@@ -408,24 +408,21 @@ export const ManageIntegrations = ({
     </Fragment>
   );
 
-  const renderDialogLayout = children => (
-    <Fragment>
-      {isIntegrationManageDialogVisible && (
-        <Dialog
-          footer={renderDialogFooter}
-          header={
-            !isEmpty(updatedData)
-              ? resources.messages['editExternalIntegration']
-              : resources.messages['createExternalIntegration']
-          }
-          onHide={() => onCloseModal()}
-          style={{ width: '975px' }}
-          visible={isIntegrationManageDialogVisible}>
-          {children}
-        </Dialog>
-      )}
-    </Fragment>
-  );
+  const renderDialogLayout = children =>
+    isIntegrationManageDialogVisible && (
+      <Dialog
+        footer={renderDialogFooter}
+        header={
+          !isEmpty(updatedData)
+            ? resources.messages['editExternalIntegration']
+            : resources.messages['createExternalIntegration']
+        }
+        onHide={() => onCloseModal()}
+        style={{ width: '975px' }}
+        visible={isIntegrationManageDialogVisible}>
+        {children}
+      </Dialog>
+    );
 
   const renderDropdownLayout = (options = []) => {
     const optionList = {
@@ -441,16 +438,16 @@ export const ManageIntegrations = ({
       processName: manageIntegrationsState.processes
     };
 
-    return options.map((option, index) => (
+    return options.map(option => (
       <div
         className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
-        key={index}>
+        key={`${componentName}__${option}`}>
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <Dropdown
           appendTo={document.body}
           ariaLabel={'integrations'}
-          filter={optionList[option].length > 7}
           disabled={isEmpty(optionList[option])}
+          filter={optionList[option].length > 7}
           inputId={`${componentName}__${option}`}
           onChange={event => {
             if (option === 'repository') {
@@ -487,7 +484,7 @@ export const ManageIntegrations = ({
   );
 
   const renderInputLayout = (options = []) => {
-    return options.map((option, index) => {
+    return options.map(option => {
       return (
         <div
           className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
@@ -495,7 +492,7 @@ export const ManageIntegrations = ({
               ? styles.fileExtensionNotification
               : styles[option]
           }`}
-          key={index}>
+          key={`${componentName}__${option}`}>
           <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
           <InputText
             id={`${componentName}__${option}`}
@@ -576,7 +573,7 @@ export const ManageIntegrations = ({
         <div className={styles.group}>
           {renderInputLayout(['parameterKey', 'parameterValue'])}
           <span className={styles.buttonWrapper}>
-            <span data-tip data-for="addParameterTooltip">
+            <span data-for="addParameterTooltip" data-tip>
               <Button
                 className="p-button-rounded p-button-animated-blink"
                 disabled={isEmpty(parameterKey.trim()) || isKeyDuplicated}

@@ -213,6 +213,8 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                     unique.fieldName = uniqueTableAndField.fieldName;
                   }
                   return pick(unique, 'tableName', 'fieldName', 'datasetSchemaId');
+                } else {
+                  return [];
                 }
               })
             : []
@@ -308,20 +310,18 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const renderDatasetSchemas = () => {
     return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       <div className="dataflowHelp-datasetSchema-help-step">
-        {datasetsSchemas.map((designDataset, i) => {
-          return (
-            <DatasetSchema
-              designDataset={designDataset}
-              extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
-              index={i}
-              isCustodian={isCustodian}
-              key={i}
-              onGetReferencedFieldName={onGetReferencedFieldName}
-              uniqueList={filterData(designDataset, uniqueList)}
-              validationList={filterData(designDataset, validationList)}
-            />
-          );
-        })}
+        {datasetsSchemas.map((designDataset, i) => (
+          <DatasetSchema
+            designDataset={designDataset}
+            extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
+            index={i}
+            isCustodian={isCustodian}
+            key={designDataset.datasetSchemaId}
+            onGetReferencedFieldName={onGetReferencedFieldName}
+            uniqueList={filterData(designDataset, uniqueList)}
+            validationList={filterData(designDataset, validationList)}
+          />
+        ))}
       </div>
     ) : (
       <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
@@ -329,26 +329,26 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   };
 
   const renderToolbar = () => {
-    return isCustodian ? (
-      <Toolbar className={styles.datasetSchemasToolbar}>
-        <div className="p-toolbar-group-right">
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${
-              isLoading ? 'p-button-animated-spin' : ''
-            }`}
-            disabled={false}
-            icon={'refresh'}
-            label={resources.messages['refresh']}
-            onClick={async () => {
-              setIsLoading(true);
-              await onLoadDatasetsSchemas();
-              setIsLoading(false);
-            }}
-          />
-        </div>
-      </Toolbar>
-    ) : (
-      <></>
+    return (
+      isCustodian && (
+        <Toolbar className={styles.datasetSchemasToolbar}>
+          <div className="p-toolbar-group-right">
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${
+                isLoading ? 'p-button-animated-spin' : ''
+              }`}
+              disabled={false}
+              icon={'refresh'}
+              label={resources.messages['refresh']}
+              onClick={async () => {
+                setIsLoading(true);
+                await onLoadDatasetsSchemas();
+                setIsLoading(false);
+              }}
+            />
+          </div>
+        </Toolbar>
+      )
     );
   };
 

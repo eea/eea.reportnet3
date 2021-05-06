@@ -19,28 +19,28 @@ export class InputText extends Component {
     autoFocus: false,
     expandable: false,
     id: null,
-    onInput: null,
-    onKeyPress: null,
     keyfilter: null,
     maxLength: 10000,
+    onInput: null,
+    onKeyPress: null,
     required: false,
-    validateOnly: false,
     tooltip: null,
-    tooltipOptions: null
+    tooltipOptions: null,
+    validateOnly: false
   };
 
   static propTypes = {
     autoFocus: PropTypes.bool,
     expandable: PropTypes.bool,
     id: PropTypes.string,
+    keyfilter: PropTypes.any,
     maxLength: PropTypes.number,
     onInput: PropTypes.func,
     onKeyPress: PropTypes.func,
-    keyfilter: PropTypes.any,
     required: PropTypes.bool,
-    validateOnly: PropTypes.bool,
     tooltip: PropTypes.string,
-    tooltipOptions: PropTypes.object
+    tooltipOptions: PropTypes.object,
+    validateOnly: PropTypes.bool
   };
 
   constructor(props) {

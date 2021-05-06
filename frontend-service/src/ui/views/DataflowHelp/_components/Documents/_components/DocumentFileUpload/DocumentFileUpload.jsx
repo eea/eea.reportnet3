@@ -1,6 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
-import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
 
 import styles from './DocumentFileUpload.module.scss';
@@ -199,12 +198,8 @@ const DocumentFileUpload = ({
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
             id={'descriptionDocumentFileUpload'}
-            ref={inputRef}
             maxLength={255}
             name="description"
-            placeholder={resources.messages['fileDescription']}
-            type="text"
-            value={inputs.description}
             onBlur={() => checkInputForErrors('description')}
             onChange={e => {
               e.persist();
@@ -214,14 +209,18 @@ const DocumentFileUpload = ({
             }}
             onFocus={() =>
               setErrors(previousErrors => {
-                return { ...previousErrors, ['description']: { message: '', hasErrors: false } };
+                return { ...previousErrors, description: { message: '', hasErrors: false } };
               })
             }
             onKeyPress={e => {
               if (!checkInputForErrors('description') && e.key === 'Enter') onConfirm();
             }}
+            placeholder={resources.messages['fileDescription']}
+            ref={inputRef}
+            type="text"
+            value={inputs.description}
           />
-          <label htmlFor="descriptionDocumentFileUpload" className="srOnly">
+          <label className="srOnly" htmlFor="descriptionDocumentFileUpload">
             {resources.messages['description']}
           </label>
           {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
@@ -238,22 +237,22 @@ const DocumentFileUpload = ({
                 return { ...previousValues, lang: e.target.value };
               });
               setErrors(previousErrors => {
-                return { ...previousErrors, ['lang']: { message: '', hasErrors: false } };
+                return { ...previousErrors, lang: { message: '', hasErrors: false } };
               });
               setInputsChecked(previousInputsChecked => {
-                return { ...previousInputsChecked, ['lang']: true };
+                return { ...previousInputsChecked, lang: true };
               });
             }}
             onKeyPress={e => {
               if (e.which === 13 && !checkInputForErrors('lang')) onConfirm();
             }}
             optionLabel="label"
-            options={getOptionTypes()}
             optionValue="value"
+            options={getOptionTypes()}
             placeholder={resources.messages['selectLang']}
             value={inputs.lang}
           />
-          <label htmlFor="selectLanguage" className="srOnly">
+          <label className="srOnly" htmlFor="selectLanguage">
             {resources.messages['selectLang']}
           </label>
         </div>
@@ -266,9 +265,6 @@ const DocumentFileUpload = ({
               className="uploadFile"
               id="uploadFile"
               name="uploadFile"
-              onKeyPress={e => {
-                if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm();
-              }}
               onBlur={() => checkInputForErrors('uploadFile')}
               onChange={e => {
                 const eventTarget = e.currentTarget;
@@ -276,10 +272,13 @@ const DocumentFileUpload = ({
                   return { ...previousValues, uploadFile: eventTarget.files[0], isTouchedFileUpload: true };
                 });
               }}
+              onKeyPress={e => {
+                if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm();
+              }}
               placeholder="file upload"
               type="file"
             />
-            <label htmlFor="uploadFile" className="srOnly">
+            <label className="srOnly" htmlFor="uploadFile">
               {resources.messages['uploadDocument']}
             </label>
           </span>
@@ -290,14 +289,14 @@ const DocumentFileUpload = ({
       <fieldset>
         <div className={styles.checkboxIsPublic}>
           <input
-            id="isPublic"
-            type="checkbox"
             checked={inputs.isPublic}
+            id="isPublic"
             onChange={() => {
               setInputs(previousValues => {
                 return { ...previousValues, isPublic: !previousValues.isPublic };
               });
             }}
+            type="checkbox"
           />
           <label htmlFor="isPublic" style={{ display: 'block' }}>
             {resources.messages['documentUploadCheckboxIsPublic']}

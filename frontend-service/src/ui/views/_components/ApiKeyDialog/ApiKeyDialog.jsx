@@ -32,11 +32,22 @@ const ApiKeyDialog = ({
 
   const onCloseDialog = () => manageDialogs('isApiKeyDialogVisible', false);
 
+  const removeElementsByClass = className => {
+    const elements = document.getElementsByClassName(className);
+    while (elements.length > 0) {
+      elements[0].parentNode.removeChild(elements[0]);
+    }
+  };
+
   const onCopyToClipboard = () => {
     const textArea = textAreaRef;
     textArea.select();
     document.execCommand('copy');
     window.getSelection().removeAllRanges();
+
+    setTimeout(() => {
+      removeElementsByClass('p-tooltip');
+    }, 750);
   };
 
   const onGetApiKey = async () => {
@@ -103,44 +114,42 @@ const ApiKeyDialog = ({
             </div>
           )
         ) : (
-          <>
-            <div className={styles.row}>
-              <label className={styles.label}>{resources.messages['apiKeyDialogLabel']}</label>
+          <div className={styles.row}>
+            <label className={styles.label}>{resources.messages['apiKeyDialogLabel']}</label>
 
-              <div className={styles.input_api}>
-                <div className={styles.flex}>
-                  <textarea
-                    className={styles.textarea}
-                    id="apiKey"
-                    readOnly
-                    ref={textRef => setTextAreaRef(textRef)}
-                    rows={1}
-                    value={apiKey}
-                  />
-                  <label htmlFor="apiKey" className="srOnly">
-                    {apiKey}
-                  </label>
-                  <Button
-                    tooltip={resources.messages['copyToClipboardSuccess']}
-                    tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-                    showDelay="3000"
-                    className={`p-button-primary ${styles.copyBtn}`}
-                    icon={'copy'}
-                    onClick={() => onCopyToClipboard()}
-                  />
-                </div>
-                <p className={styles.ids_info}>
-                  <span className={styles.ids_label}>
-                    {resources.messages['dataflow']}: <b>{dataflowId} </b>
-                  </span>
-                  <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
-                    {resources.messages['apiKeyDataProviderIdLabel']}:{' '}
-                    <b>{representativeId ? representativeId : dataProviderId} </b>
-                  </span>
-                </p>
+            <div className={styles.input_api}>
+              <div className={styles.flex}>
+                <textarea
+                  className={styles.textarea}
+                  id="apiKey"
+                  readOnly
+                  ref={textRef => setTextAreaRef(textRef)}
+                  rows={1}
+                  value={apiKey}
+                />
+                <label className="srOnly" htmlFor="apiKey">
+                  {apiKey}
+                </label>
+                <Button
+                  className={`p-button-primary ${styles.copyBtn}`}
+                  icon={'copy'}
+                  onClick={() => onCopyToClipboard()}
+                  showDelay="3000"
+                  tooltip={resources.messages['copyToClipboardSuccess']}
+                  tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
+                />
               </div>
+              <p className={styles.ids_info}>
+                <span className={styles.ids_label}>
+                  {resources.messages['dataflow']}: <b>{dataflowId} </b>
+                </span>
+                <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
+                  {resources.messages['apiKeyDataProviderIdLabel']}:{' '}
+                  <b>{representativeId ? representativeId : dataProviderId} </b>
+                </span>
+              </p>
             </div>
-          </>
+          </div>
         )}
       </div>
     </Dialog>

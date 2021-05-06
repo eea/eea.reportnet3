@@ -47,10 +47,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     let columnsArray = headers.map(col => (
       <Column
         body={col.id === 'redirectionUrl' ? linkTemplate : null}
-        sortable={true}
-        key={col.id}
         field={col.id}
         header={col.header}
+        key={col.id}
+        sortable={true}
       />
     ));
 
@@ -77,8 +77,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             <Button
               className={`${styles.columnActionButton}`}
               icon={'export'}
-              onClick={() => notification.onClick()}
               label={resources.messages['downloadFile']}
+              onClick={() => notification.onClick()}
             />
           </span>
         ) : (
@@ -112,7 +112,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
     return (
       rowData.redirectionUrl !== '' && (
-        <a href={getValidUrl(rowData.redirectionUrl)} target="_self" rel="noopener noreferrer">
+        <a href={getValidUrl(rowData.redirectionUrl)} rel="noopener noreferrer" target="_self">
           {rowData.redirectionUrl}
         </a>
       )
@@ -122,8 +122,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   return (
     isNotificationVisible && (
       <Dialog
-        className="edit-table"
         blockScroll={false}
+        className="edit-table"
         contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
         header={resources.messages['notifications']}
         modal={true}

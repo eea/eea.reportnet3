@@ -363,10 +363,10 @@ const ValidationsList = withRouter(
 
     const deleteValidationDialog = () => (
       <ConfirmDialog
-        disabledConfirm={tabsValidationsState.isDeletingRule}
-        iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
         classNameConfirm={'p-button-danger'}
+        disabledConfirm={tabsValidationsState.isDeletingRule}
         header={resources.messages['deleteValidationHeader']}
+        iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => onDeleteValidation()}

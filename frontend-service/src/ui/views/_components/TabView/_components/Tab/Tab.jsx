@@ -273,12 +273,11 @@ const Tab = ({
             contextMenuRef.current.show(e);
           }
         }}
+        ref={tabRef}
         role="presentation"
         style={{ ...headerStyle, pointerEvents: 'fill' }}
-        ref={tabRef}
         tabIndex={index}>
         <a
-          draggable={designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (!addTab ? true : false) : false}
           aria-controls={ariaControls}
           aria-selected={selected}
           className={
@@ -288,9 +287,24 @@ const Tab = ({
               ? `${styles.p_tabview_design_add} datasetSchema-created-table-help-step`
               : styles.p_tabview_noDesign
           }
+          draggable={designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (!addTab ? true : false) : false}
           href={'#' + ariaControls}
           id={id}
           onAuxClick={e => e.preventDefault()}
+          onClick={e => {
+            if (!disabled) {
+              onTabHeaderClick(e);
+              scrollTo(tabRef.current.offsetLeft - 80, 0);
+            }
+          }}
+          onDoubleClick={onTabDoubleClick}
+          onDragEnd={e => {
+            onTabDragEnd(e);
+          }}
+          onDragLeave={onTabDragLeave}
+          onDragOver={onTabDragOver}
+          onDragStart={onTabDragStart}
+          onDrop={e => onTabDrop(e)}
           onMouseDownCapture={e => {
             if (e.button === 1) {
               e.preventDefault();
@@ -309,20 +323,6 @@ const Tab = ({
               onTabMouseWheel(e.deltaY);
             }
           }}
-          onClick={e => {
-            if (!disabled) {
-              onTabHeaderClick(e);
-              scrollTo(tabRef.current.offsetLeft - 80, 0);
-            }
-          }}
-          onDragEnd={e => {
-            onTabDragEnd(e);
-          }}
-          onDragOver={onTabDragOver}
-          onDragLeave={onTabDragLeave}
-          onDragStart={onTabDragStart}
-          onDrop={e => onTabDrop(e)}
-          onDoubleClick={onTabDoubleClick}
           role="tab"
           style={{
             pointerEvents: 'fill',
@@ -335,8 +335,8 @@ const Tab = ({
           {!isUndefined(editingHeader) && editingHeader ? (
             <InputText
               autoFocus={true}
-              key={index}
               className={`${styles.p_tabview_input_design} tabInput`}
+              key={index}
               keyfilter="schemaTableFields"
               maxLength={60}
               onBlur={e => {

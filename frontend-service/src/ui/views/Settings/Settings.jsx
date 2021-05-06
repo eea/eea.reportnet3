@@ -59,10 +59,10 @@ const Settings = withRouter(({ history }) => {
         <div className="rep-row">
           <div className={` rep-col-12 rep-col-sm-12`}>
             <Title
-              title={resources.messages['userSettingsTitle']}
               icon="userConfig"
               iconSize="4rem"
               subtitle={resources.messages['userSettingsSubtitle']}
+              title={resources.messages['userSettingsTitle']}
             />
           </div>
         </div>

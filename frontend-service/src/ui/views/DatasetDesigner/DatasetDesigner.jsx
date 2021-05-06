@@ -21,7 +21,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
@@ -134,6 +133,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     },
     metaData: {},
     previousWebform: null,
+    referenceDataset: false,
     refresh: false,
     replaceData: false,
     schemaTables: [],
@@ -286,8 +286,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     );
   };
 
-  const createFileName = (fileName, fileType) => `${fileName}.${fileType}`;
-
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
@@ -434,6 +432,15 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     }
   };
 
+  const onChangeReferenceDataset = async checked => {
+    try {
+      designerDispatch({ type: 'SET_REFERENCE_DATASET', payload: checked });
+      await DatasetService.updateDatasetSchemaDesign(datasetId, { referenceDataset: checked });
+    } catch (error) {
+      console.error('Error during datasetSchema reference dataset update: ', error);
+    }
+  };
+
   const onChangeIsValidationSelected = options =>
     designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: options });
 
@@ -554,7 +561,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification.content.datasetId == datasetId) {
+    if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
     }
   }, [notificationContext]);
@@ -628,6 +635,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             description: dataset.data.datasetSchemaDescription,
             levelErrorTypes: dataset.data.levelErrorTypes,
             previousWebform: WebformsConfig.filter(item => item.value === dataset.data.webform)[0],
+            referenceDataset: dataset.data.referenceDataset,
             schemaId: dataset.data.datasetSchemaId,
             tables: dataset.data.tables,
             schemaTables: tableSchemaList,
@@ -968,43 +976,40 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     );
   };
 
-  const renderUniqueConstraintsDialog = () => (
-    <Fragment>
-      {designerState.isUniqueConstraintsListDialogVisible && (
-        <Dialog
-          footer={renderUniqueConstraintsFooter}
-          header={resources.messages['uniqueConstraints']}
-          onHide={() => onCloseUniqueListModal()}
-          style={{ width: '70%' }}
-          visible={designerState.isUniqueConstraintsListDialogVisible}>
-          <UniqueConstraints
-            dataflowId={dataflowId}
-            designerState={designerState}
-            getManageUniqueConstraint={manageUniqueConstraint}
-            getUniques={getUniqueConstraintsList}
-            manageDialogs={manageDialogs}
-            needsRefresh={needsRefreshUnique}
-            refreshList={refreshUniqueList}
-            setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
-            setConstraintManagingId={setConstraintManagingId}
-            setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
-            setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
-          />
-        </Dialog>
-      )}
-    </Fragment>
-  );
+  const renderUniqueConstraintsDialog = () =>
+    designerState.isUniqueConstraintsListDialogVisible && (
+      <Dialog
+        footer={renderUniqueConstraintsFooter}
+        header={resources.messages['uniqueConstraints']}
+        onHide={() => onCloseUniqueListModal()}
+        style={{ width: '70%' }}
+        visible={designerState.isUniqueConstraintsListDialogVisible}>
+        <UniqueConstraints
+          dataflowId={dataflowId}
+          designerState={designerState}
+          getManageUniqueConstraint={manageUniqueConstraint}
+          getUniques={getUniqueConstraintsList}
+          manageDialogs={manageDialogs}
+          needsRefresh={needsRefreshUnique}
+          refreshList={refreshUniqueList}
+          setConstraintManagingId={setConstraintManagingId}
+          setIsDuplicatedToManageUnique={setIsDuplicatedToManageUnique}
+          setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
+          setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
+        />
+      </Dialog>
+    );
 
   const renderConfigureWebformFooter = (
     <Fragment>
       <Button
+        className={`p-button-animated-blink ${styles.saveButton}`}
         disabled={
           isUndefined(designerState.selectedWebform) ||
           designerState?.selectedWebform?.value === designerState?.webform?.value
         }
-        className={`p-button-animated-blink ${styles.saveButton}`}
-        label={resources.messages['save']}
         icon={'check'}
+        label={resources.messages['save']}
         onClick={() => {
           onUpdateWebform();
           if (isNil(designerState?.selectedWebform?.value)) {
@@ -1121,6 +1126,37 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               <div>
                 <Checkbox
                   disabled={isDesignDatasetEditorRead}
+                  id={`reference_dataset_checkbox`}
+                  inputId={`reference_dataset_checkbox`}
+                  isChecked={designerState.referenceDataset}
+                  onChange={e => onChangeReferenceDataset(e.checked)}
+                  role="checkbox"
+                />
+                <label
+                  onClick={() => {
+                    if (!isDesignDatasetEditorRead) {
+                      designerDispatch({
+                        type: 'SET_REFERENCE_DATASET',
+                        payload: !designerState.referenceDataset
+                      });
+                      onChangeReferenceDataset(!designerState.referenceDataset);
+                    }
+                  }}
+                  style={{
+                    color: 'var(--main-font-color)',
+                    cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
+                    fontSize: '11pt',
+                    fontWeight: 'bold',
+                    marginLeft: '6px',
+                    marginRight: '6px',
+                    opacity: isDesignDatasetEditorRead ? 0.5 : 1
+                  }}>
+                  {resources.messages['referenceDataset']}
+                </label>
+              </div>
+              <div>
+                <Checkbox
+                  disabled={isDesignDatasetEditorRead}
                   id={`available_in_public_view_checkbox`}
                   inputId={`available_in_public_view_checkbox`}
                   isChecked={designerState.availableInPublic}
@@ -1151,9 +1187,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               </div>
               <Button
                 className={`p-button-secondary ${
-                  !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+                  !isDataflowOpen && !isDesignDatasetEditorRead && !designerState.referenceDataset
+                    ? 'p-button-animated-blink'
+                    : null
                 } datasetSchema-uniques-help-step`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
+                disabled={isDataflowOpen || isDesignDatasetEditorRead || designerState.referenceDataset}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
@@ -1162,30 +1200,28 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           </div>
           <Toolbar>
             <div className="p-toolbar-group-left">
-              <Fragment>
-                <Button
-                  className={`p-button-rounded p-button-secondary ${
-                    !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
-                  }`}
-                  disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                  icon={'import'}
-                  label={resources.messages['importDataset']}
-                  onClick={
-                    !isEmpty(designerState.externalOperationsList.importOtherSystems)
-                      ? event => importMenuRef.current.show(event)
-                      : () => manageDialogs('isImportDatasetDialogVisible', true)
-                  }
+              <Button
+                className={`p-button-rounded p-button-secondary ${
+                  !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+                }`}
+                disabled={isDataflowOpen || isDesignDatasetEditorRead}
+                icon={'import'}
+                label={resources.messages['importDataset']}
+                onClick={
+                  !isEmpty(designerState.externalOperationsList.importOtherSystems)
+                    ? event => importMenuRef.current.show(event)
+                    : () => manageDialogs('isImportDatasetDialogVisible', true)
+                }
+              />
+              {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
+                <Menu
+                  id="importDataSetMenu"
+                  model={designerState.importButtonsList}
+                  onShow={e => getPosition(e)}
+                  popup={true}
+                  ref={importMenuRef}
                 />
-                {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                  <Menu
-                    id="importDataSetMenu"
-                    model={designerState.importButtonsList}
-                    onShow={e => getPosition(e)}
-                    popup={true}
-                    ref={importMenuRef}
-                  />
-                )}
-              </Fragment>
+              )}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
@@ -1264,9 +1300,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !isDesignDatasetEditorRead ? styles.integrationsButton : null
+                  !isDesignDatasetEditorRead && !designerState.referenceDataset ? styles.integrationsButton : null
                 }`}
-                disabled={isDesignDatasetEditorRead}
+                disabled={isDesignDatasetEditorRead || designerState.referenceDataset}
                 icon={'export'}
                 iconClasses={styles.integrationsButtonIcon}
                 label={resources.messages['externalIntegrations']}
@@ -1325,11 +1361,13 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             datasetStatistics={designerState.datasetStatistics}
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
+            getUpdatedTabs={onUpdateTabs}
             history={history}
             isDataflowOpen={isDataflowOpen}
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+            isReferenceDataset={designerState.referenceDataset}
             isValidationSelected={dataViewerOptions.isValidationSelected}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
@@ -1338,9 +1376,8 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
-            onUpdateTable={onUpdateTable}
             onUpdateSchema={onUpdateSchema}
-            getUpdatedTabs={onUpdateTabs}
+            onUpdateTable={onUpdateTable}
             recordPositionId={dataViewerOptions.recordPositionId}
             selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
             selectedRuleId={dataViewerOptions.selectedRuleId}

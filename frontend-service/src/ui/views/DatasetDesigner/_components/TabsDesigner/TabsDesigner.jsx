@@ -41,6 +41,7 @@ export const TabsDesigner = withRouter(
     isDesignDatasetEditorRead,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
+    isReferenceDataset,
     isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
@@ -328,7 +329,7 @@ export const TabsDesigner = withRouter(
 
     const errorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button label={resources.messages['ok']} icon="check" onClick={() => setIsErrorDialogVisible(false)} />
+        <Button icon="check" label={resources.messages['ok']} onClick={() => setIsErrorDialogVisible(false)} />
       </div>
     );
 
@@ -366,9 +367,9 @@ export const TabsDesigner = withRouter(
           designMode={true}
           history={history}
           initialTabIndexDrag={initialTabIndexDrag}
-          isErrorDialogVisible={isErrorDialogVisible}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isErrorDialogVisible={isErrorDialogVisible}
           onTabAdd={onTabAdd}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTableAdd}
@@ -407,11 +408,13 @@ export const TabsDesigner = withRouter(
                         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
+                        isReferenceDataset={isReferenceDataset}
                         isValidationSelected={isValidationSelected}
                         key={tab.index}
                         manageDialogs={manageDialogs}
                         manageUniqueConstraint={manageUniqueConstraint}
                         onChangeFields={onChangeFields}
+                        onChangeIsValidationSelected={onChangeIsValidationSelected}
                         onChangeReference={onChangeReference}
                         onChangeTableProperties={onChangeTableProperties}
                         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
@@ -421,7 +424,6 @@ export const TabsDesigner = withRouter(
                         selectedRuleId={selectedRuleId}
                         selectedRuleLevelError={selectedRuleLevelError}
                         selectedRuleMessage={selectedRuleMessage}
-                        onChangeIsValidationSelected={onChangeIsValidationSelected}
                         table={tabs[i]}
                         viewType={viewType}
                       />
