@@ -80,6 +80,7 @@ const Documents = ({
     <div className={`${styles.documentsEditButtons} dataflowHelp-document-edit-delete-help-step`}>
       <ActionsColumn
         isDeletingDocument={isDeletingDocument}
+        isUpdating={isUpdating}
         onDeleteClick={() => {
           setDocumentInitialValues(rowData);
           setDeleteDialogVisible(true);
@@ -96,7 +97,6 @@ const Documents = ({
         rowDataId={rowData.id}
         rowDeletingId={fileDeletingId}
         rowUpdatingId={fileUpdatingId}
-        isUpdating={isUpdating}
       />
     </div>
   );
@@ -215,7 +215,7 @@ const Documents = ({
 
   return (
     <Fragment>
-      {isToolbarVisible ? (
+      {isToolbarVisible && (
         <Toolbar className={styles.documentsToolbar}>
           <div className="p-toolbar-group-left">
             <Button
@@ -235,8 +235,6 @@ const Documents = ({
             />
           </div>
         </Toolbar>
-      ) : (
-        <Fragment />
       )}
 
       <DataTable
@@ -315,8 +313,8 @@ const Documents = ({
         />
         {isToolbarVisible && !isEmpty(documents) ? (
           <Column
-            className={styles.crudColumn}
             body={documentsEditButtons}
+            className={styles.crudColumn}
             header={resources.messages['documentsActionColumns']}
             style={{ width: '5em' }}
           />
@@ -345,9 +343,9 @@ const Documents = ({
             isEditForm={isEditForm}
             isUploadDialogVisible={isUploadDialogVisible}
             onUpload={onUploadDocument}
-            setIsUploadDialogVisible={setIsUploadDialogVisible}
             setFileUpdatingId={setFileUpdatingId}
             setIsUpdating={setIsUpdating}
+            setIsUploadDialogVisible={setIsUploadDialogVisible}
           />
         </Dialog>
       )}

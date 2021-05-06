@@ -193,12 +193,12 @@ const ActionsToolbar = ({
         )}
         {isExportable && (
           <Button
-            id="buttonExportTable"
             className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
               isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+            id="buttonExportTable"
             label={resources.messages['exportTable']}
             onClick={event => {
               onUpdateData();
@@ -245,13 +245,13 @@ const ActionsToolbar = ({
         <DropdownFilter
           className={`p-button-animated-blink`}
           filters={filter.visibilityDropdown}
-          popup={true}
-          ref={dropdownFilterRef}
           id="dropdownFilterMenu"
-          showFilters={showFilters}
           onShow={e => {
             getExportButtonPosition(e);
           }}
+          popup={true}
+          ref={dropdownFilterRef}
+          showFilters={showFilters}
         />
 
         {isFilterable && (
@@ -270,14 +270,14 @@ const ActionsToolbar = ({
               className={!isLoading ? 'p-button-animated-blink' : null}
               disabled={isLoading}
               filters={filter.validationDropdown}
-              popup={true}
-              ref={filterMenuRef}
               hide={hideValidationFilter}
               id="filterValidationDropdown"
-              showFilters={showValidationFilter}
               onShow={e => {
                 getExportButtonPosition(e);
               }}
+              popup={true}
+              ref={filterMenuRef}
+              showFilters={showValidationFilter}
               showLevelErrorIcons={true}
             />
             {filter.groupedFilter && selectedRuleMessage !== '' && (

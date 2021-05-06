@@ -27,7 +27,7 @@ export const DropdownItem = ({
   };
 
   return (
-    <li className={classNamed} onMouseDown={onItemClick} onClick={onItemClick} key={`_${option.label}`}>
+    <li className={classNamed} key={`_${option.label}`} onClick={onItemClick} onMouseDown={onItemClick}>
       {content}
     </li>
   );

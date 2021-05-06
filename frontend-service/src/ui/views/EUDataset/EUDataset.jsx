@@ -274,11 +274,10 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const renderTabsSchema = () => (
     <TabsSchema
+      hasCountryCode={true}
       hasWritePermissions={false}
-      showWriteButtons={false}
       isExportable={false}
       isFilterable={false}
-      hasCountryCode={true}
       isGroupedValidationSelected={isGroupedValidationSelected}
       isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
@@ -287,9 +286,10 @@ export const EUDataset = withRouter(({ history, match }) => {
       recordPositionId={dataViewerOptions.recordPositionId}
       selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
       setIsValidationSelected={onSetIsValidationSelected}
-      tables={tableSchema}
+      showWriteButtons={false}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}
+      tables={tableSchema}
     />
   );
 

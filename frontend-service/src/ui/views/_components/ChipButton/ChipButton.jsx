@@ -39,7 +39,7 @@ export const ChipButton = ({
   };
 
   return (
-    <div key={key} className={`${className} ${styles.chipButton}`} ref={listElement} style={style}>
+    <div className={`${className} ${styles.chipButton}`} key={key} ref={listElement} style={style}>
       {hasLevelErrorIcon && (
         <IconTooltip
           className={styles.chipButtonErrorIcon}

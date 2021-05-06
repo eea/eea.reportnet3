@@ -17,7 +17,7 @@ export class FirstPageLink extends Component {
     let className = classNames('p-paginator-first p-paginator-element p-link', { 'p-disabled': this.props.disabled });
 
     return (
-      <button type="button" className={className} onClick={this.props.onClick} disabled={this.props.disabled}>
+      <button className={className} disabled={this.props.disabled} onClick={this.props.onClick} type="button">
         <span className="p-paginator-icon pi pi-step-backward"></span>
         <span className="srOnly">First page</span>
       </button>

@@ -6,6 +6,7 @@ export class TableFooter extends Component {
     let children = Children.toArray(root.props.children);
 
     return Children.map(children, (column, i) => {
+      // eslint-disable-next-line react/no-array-index-key
       return <FooterCell key={i} {...column.props} />;
     });
   }
@@ -15,6 +16,7 @@ export class TableFooter extends Component {
     if (this.props.columnGroup) {
       let rows = Children.toArray(this.props.columnGroup.props.children);
       content = rows.map((row, i) => {
+        // eslint-disable-next-line react/no-array-index-key
         return <tr key={i}>{this.createFooterCells(row)}</tr>;
       });
     } else {

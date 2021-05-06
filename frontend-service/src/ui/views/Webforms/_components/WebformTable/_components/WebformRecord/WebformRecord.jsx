@@ -192,7 +192,7 @@ export const WebformRecord = ({
 
         if (isSubtable()) {
           return (
-            <div key={i} className={styles.fieldsBlock}>
+            <div className={styles.fieldsBlock} key={i}>
               {element.elementsRecords
                 .filter(record => elements[0].recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
@@ -201,7 +201,7 @@ export const WebformRecord = ({
         }
 
         return (
-          <div key={i} className={styles.fieldsBlock}>
+          <div className={styles.fieldsBlock} key={i}>
             {element.elementsRecords.map(record => renderElements(record.elements))}
           </div>
         );
@@ -219,7 +219,7 @@ export const WebformRecord = ({
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div key={i} className={styles.field} style={fieldStyle}>
+            <div className={styles.field} key={i} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -260,8 +260,8 @@ export const WebformRecord = ({
                       isConditionalChanged={isConditionalChanged}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
-                      onUpdateSinglesList={onUpdateSinglesList}
                       onUpdatePamsValue={onUpdatePamsValue}
+                      onUpdateSinglesList={onUpdateSinglesList}
                       pamsRecords={pamsRecords}
                       record={record}
                     />
@@ -305,7 +305,7 @@ export const WebformRecord = ({
         return (
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div key={i} className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}>
+            <div className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable} key={i}>
               {!element.showInsideParentTable && (
                 <div className={styles.title}>
                   <h3>
@@ -353,6 +353,7 @@ export const WebformRecord = ({
                 : filterRecords(element, elements).map(record => {
                     return (
                       <WebformRecord
+                        addingOnTableSchemaId={addingOnTableSchemaId}
                         calculateSingle={calculateSingle}
                         columnsSchema={columnsSchema}
                         dataflowId={dataflowId}
@@ -361,7 +362,6 @@ export const WebformRecord = ({
                         isAddingMultiple={isAddingMultiple}
                         isGroup={isGroup}
                         key={record.recordId}
-                        addingOnTableSchemaId={addingOnTableSchemaId}
                         multipleRecords={element.multipleRecords}
                         newRecord={webformRecordState.newRecord}
                         onAddMultipleWebform={onAddMultipleWebform}
@@ -425,7 +425,7 @@ export const WebformRecord = ({
         ) : (
           <ul className={styles.errorList}>
             {errorMessages.map(msg => (
-              <li key={msg} className={styles.errorItem}>
+              <li className={styles.errorItem} key={msg}>
                 {msg}
               </li>
             ))}
