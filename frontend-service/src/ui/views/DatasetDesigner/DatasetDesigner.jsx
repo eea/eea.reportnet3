@@ -1182,9 +1182,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
               </div>
               <Button
                 className={`p-button-secondary ${
-                  !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+                  !isDataflowOpen && !isDesignDatasetEditorRead && !designerState.referenceDataset
+                    ? 'p-button-animated-blink'
+                    : null
                 } datasetSchema-uniques-help-step`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
+                disabled={isDataflowOpen || isDesignDatasetEditorRead || designerState.referenceDataset}
                 icon={'table'}
                 label={resources.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
@@ -1291,9 +1293,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !isDesignDatasetEditorRead ? styles.integrationsButton : null
+                  !isDesignDatasetEditorRead && !designerState.referenceDataset ? styles.integrationsButton : null
                 }`}
-                disabled={isDesignDatasetEditorRead}
+                disabled={isDesignDatasetEditorRead || designerState.referenceDataset}
                 icon={'export'}
                 iconClasses={styles.integrationsButtonIcon}
                 label={resources.messages['externalIntegrations']}
@@ -1358,6 +1360,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+            isReferenceDataset={designerState.referenceDataset}
             isValidationSelected={dataViewerOptions.isValidationSelected}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
