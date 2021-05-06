@@ -14,6 +14,7 @@ export class Dataflow {
     manualAcceptance,
     name,
     obligation,
+    referenceDatasets,
     reportingDatasetsStatus,
     representatives,
     requestId,
@@ -37,6 +38,7 @@ export class Dataflow {
     this.manualAcceptance = manualAcceptance;
     this.name = name;
     this.obligation = obligation;
+    this.referenceDatasets = referenceDatasets;
     this.reportingDatasetsStatus = reportingDatasetsStatus;
     this.representatives = representatives;
     this.requestId = requestId;
