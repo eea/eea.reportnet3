@@ -103,7 +103,7 @@ function boolean isDateTime( String value ){
 		return true;
 	}	
 	
- SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss'Z'");
+ SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
  	if(!isBlank(value)){
 		return true;
 	}
