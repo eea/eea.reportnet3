@@ -16,19 +16,13 @@ const parseUserRightDTO = userRightListDTO => {
 const allReporters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allReporters(dataflowId, dataProviderId);
 
-  const userRightList = parseUserRightDTO(userRightListDTO);
-  console.log(`userRightList`, userRightList);
-
-  return userRightList;
+  return parseUserRightDTO(userRightListDTO);
 };
 
 const allRequesters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allRequesters(dataflowId, dataProviderId);
 
-  const userRightList = parseUserRightDTO(userRightListDTO);
-  console.log(`userRightList`, userRightList);
-
-  return userRightList;
+  return parseUserRightDTO(userRightListDTO);
 };
 
 const deleteReporter = async (userRight, dataflowId, dataProviderId) => {
