@@ -1,34 +1,34 @@
 export const shareRightsReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'ADD_CONTRIBUTOR':
-      return { ...state, account: payload.email };
-
-    case 'GET_ALL_CONTRIBUTORS':
-      return { ...state, contributors: payload.contributors, clonedContributors: payload.clonedContributors };
+    case 'GET_USER_RIGHT_LIST':
+      return { ...state, userRightList: payload.userRightList, clonedUserRightList: payload.clonedUserRightList };
 
     case 'ON_DATA_CHANGE':
       return { ...state, isDataUpdated: payload.isDataUpdated };
 
-    case 'ON_DELETE_CONTRIBUTOR':
+    case 'ON_DELETE_USER_RIGHT':
       return {
         ...state,
         isDeleteDialogVisible: payload.isDeleteDialogVisible,
-        contributorAccountToDelete: payload.contributorAccountToDelete
+        userRightToDelete: payload.userRightToDelete
       };
 
     case 'ON_SET_ACCOUNT':
       return {
         ...state,
-        contributors: payload.contributors,
+        userRightList: payload.userRightList,
         accountHasError: payload.accountHasError,
         accountNotFound: payload.accountNotFound
       };
 
-    case 'ON_WRITE_PERMISSION_CHANGE':
-      return { ...state, contributors: payload.contributors };
+    case 'ON_ROLE_CHANGE':
+      return { ...state, userRightList: payload.userRightList };
 
     case 'SET_ACCOUNT_HAS_ERROR':
       return { ...state, accountHasError: payload.accountHasError };
+
+    // case 'SET_USER_TO_UPDATE':
+    //   return { ...state, userRight: payload.userRight };
 
     case 'SET_ACCOUNT_NOT_FOUND':
       return { ...state, accountNotFound: payload.accountNotFound, accountHasError: payload.accountHasError };
@@ -36,8 +36,8 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG':
       return { ...state, isDeleteDialogVisible: payload.isDeleteDialogVisible };
 
-    case 'TOGGLE_DELETING_CONTRIBUTOR':
-      return { ...state, isContributorDeleting: payload.isDeleting };
+    case 'TOGGLE_DELETING_USER_RIGHT':
+      return { ...state, isDeletingUserRight: payload.isDeleting };
 
     default:
       return state;
