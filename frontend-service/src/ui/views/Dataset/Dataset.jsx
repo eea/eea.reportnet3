@@ -257,7 +257,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const importFromFile = [
     {
       label: resources.messages['importFromFile'],
-      icon: config.icons['import'],
+      icon: 'upload',
       command: () => setIsImportDatasetDialogVisible(true)
     }
   ];
@@ -267,7 +267,7 @@ export const Dataset = withRouter(({ match, history }) => {
       label: resources.messages['importPreviousData'],
       items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
         label: importOtherSystem.name,
-        icon: config.icons['import'],
+        icon: 'upload',
         command: () => {
           setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
           setIsImportOtherSystemsDialogVisible(true);
@@ -276,18 +276,20 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   ];
 
-  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
+    const extensionsTypes = !isNil(type.code) && type.code.split('+');
+    return ({
     label: type.text,
-    icon: config.icons['archive'],
+    icon: extensionsTypes[0],
     command: () => onExportDataInternalExtension(type.code)
-  }));
+  })});
 
   const externalIntegrationsNames = [
     {
       label: resources.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
         label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
-        icon: config.icons['archive'],
+        icon: type.fileExtension,
         command: () => onExportDataExternalIntegration(type.id)
       }))
     }

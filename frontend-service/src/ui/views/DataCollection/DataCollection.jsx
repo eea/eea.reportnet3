@@ -105,12 +105,13 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   };
 
-
-  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
+    const extensionsTypes = type.code.split('+');
+    return ({
     label: type.text,
-    icon: config.icons['archive'],
+    icon: extensionsTypes[0],
     command: () => onExportDataInternalExtension(type.code)
-  }));
+  })});
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);

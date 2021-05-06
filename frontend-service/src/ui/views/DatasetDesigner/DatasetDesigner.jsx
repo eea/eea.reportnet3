@@ -294,7 +294,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
       const extensionsTypes = !isNil(type.code) && type.code.split('+');
       return {
         command: () => onExportDataInternalExtension(type.code),
-        icon: extensionsTypes[extensionsTypes.length - 1],
+        icon: extensionsTypes[0],
         label: type.text
       };
     });
@@ -304,10 +304,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
           {
             label: resources.messages['customExports'],
             items: externalOperationsList.export.map(type => {
-              const extensionsTypes = !isNil(type.fileExtension) && type.fileExtension.split('+');
               return {
                 command: () => onExportDataExternalIntegration(type.id),
-                icon: extensionsTypes[extensionsTypes.length - 1],
+                icon: type.fileExtension,
                 label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
               };
             })
@@ -327,7 +326,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const importFromFile = [
       {
         command: () => manageDialogs('isImportDatasetDialogVisible', true),
-        icon: config.icons['import'],
+        icon: 'upload',
         label: resources.messages['importFromFile']
       }
     ];
@@ -339,7 +338,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
               id: importOtherSystem.id,
               label: importOtherSystem.name,
-              icon: config.icons['import'],
+              icon: 'upload',
               command: () => {
                 setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
                 manageDialogs('isImportOtherSystemsDialogVisible', true);

@@ -104,7 +104,7 @@ const ActionsToolbar = ({
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
     label: type.text,
-    icon: config.icons['archive'],
+    icon: type.code,
     command: () => onExportTableData(type.code)
   }));
 

@@ -136,7 +136,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       const extensionsTypes = type.code.split('+');
       return ({
       command: () => onExportDataInternalExtension(type.code),
-      icon: extensionsTypes[extensionsTypes.length-1],
+      icon: extensionsTypes[0],
       label: type.text
     })}) 
 
