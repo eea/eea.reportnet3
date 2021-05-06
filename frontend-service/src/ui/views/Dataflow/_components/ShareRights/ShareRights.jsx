@@ -44,7 +44,7 @@ export const ShareRights = ({
     userRightList: [],
     userRight: {},
     clonedUserRightList: [],
-    isUserDeleting: false,
+    isDeletingUserRight: false,
     isDataUpdated: false,
     isDeleteDialogVisible: false
   });
@@ -87,7 +87,7 @@ export const ShareRights = ({
       const clonedUserRightList = cloneDeep(userRightListWithNew);
 
       shareRightsDispatch({
-        type: 'GET_ALL_USERS',
+        type: 'GET_USER_RIGHT_LIST',
         payload: { userRightList: userRightListWithNew, clonedUserRightList }
       });
     } catch (error) {}
@@ -188,7 +188,7 @@ export const ShareRights = ({
     const [thisUser] = userRightList.filter(thisUser => thisUser.id === userRight.id);
     thisUser.role = newWritePermission;
 
-    shareRightsDispatch({ type: 'ON_WRITE_PERMISSION_CHANGE', payload: { userRightList } });
+    shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { userRightList } });
   };
 
   const onSetAccount = inputValue => {
@@ -207,7 +207,7 @@ export const ShareRights = ({
   };
 
   const onToggleDeletingUser = value => {
-    shareRightsDispatch({ type: 'TOGGLE_DELETING_USER', payload: { isDeleting: value } });
+    shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
 
   const renderDeleteColumnTemplate = userRight =>
@@ -215,7 +215,7 @@ export const ShareRights = ({
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
-            type: 'ON_DELETE_USER',
+            type: 'ON_DELETE_USER_RIGHT',
             payload: { isDeleteDialogVisible: true, userRightToDelete: userRight }
           })
         }
@@ -299,9 +299,9 @@ export const ShareRights = ({
       {shareRightsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={shareRightsState.isUserDeleting}
+          disabledConfirm={shareRightsState.isDeletingUserRight}
           header={deleteConfirmHeader}
-          iconConfirm={shareRightsState.isUserDeleting ? 'spinnerAnimate' : 'check'}
+          iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteUser()}
