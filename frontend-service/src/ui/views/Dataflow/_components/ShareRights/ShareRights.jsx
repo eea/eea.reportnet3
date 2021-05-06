@@ -161,7 +161,7 @@ export const ShareRights = ({
   };
 
   const onUpdateUser = async userRight => {
-    if (!isNil(userRight.role)) {
+    if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
       setIsLoading(true);
       try {
