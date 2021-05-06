@@ -14,7 +14,7 @@ import { routes } from 'ui/routes';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -105,15 +105,6 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   };
 
-  const getPosition = e => {
-    const button = e.currentTarget;
-    const left = `${button.offsetLeft}px`;
-    const topValue = button.offsetHeight + button.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = button.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
-  };
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
     label: type.text,
@@ -277,7 +268,6 @@ export const DataCollection = withRouter(({ match, history }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={exportButtonsList}
-              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
             />

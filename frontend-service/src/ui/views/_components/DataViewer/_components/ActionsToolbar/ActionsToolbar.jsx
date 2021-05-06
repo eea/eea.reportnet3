@@ -12,7 +12,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ChipButton } from 'ui/views/_components/ChipButton';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -210,7 +210,6 @@ const ActionsToolbar = ({
           className={styles.menu}
           id="exportTableMenu"
           model={exportExtensionItems}
-          onShow={e => getExportButtonPosition(e)}
           popup={true}
           ref={exportMenuRef}
         />

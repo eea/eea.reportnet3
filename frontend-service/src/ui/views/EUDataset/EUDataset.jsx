@@ -11,7 +11,6 @@ import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
-// import { Menu } from 'primereact/menu';
 import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
@@ -153,16 +152,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
-  };
-
-  const getPosition = e => {
-    const button = e.currentTarget;
-    const left = `${button.offsetLeft}px`;
-    const topValue = button.offsetHeight + button.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = button.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
   };
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
@@ -323,8 +312,6 @@ export const EUDataset = withRouter(({ history, match }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={euDatasetState.exportExtensionsList}
-              // onShow={e => getPosition(e)}
-              show={e => {console.log('e :>> ', e) }}
               popup={true}
               ref={exportMenuRef}
             />

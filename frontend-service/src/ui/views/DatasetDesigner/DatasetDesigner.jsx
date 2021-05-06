@@ -21,13 +21,11 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
-// import { Menu } from 'primereact/menu';
 import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -384,16 +382,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const getPosition = e => {
-    const exportButton = e.currentTarget;
-    const left = `${exportButton.offsetLeft}px`;
-    const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = exportButton.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
   };
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
@@ -1187,7 +1175,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                   <Menu
                     id="importDataSetMenu"
                     model={designerState.importButtonsList}
-                    onShow={e => getPosition(e)}
                     popup={true}
                     ref={importMenuRef}
                   />
@@ -1207,7 +1194,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={styles.exportSubmenu}
                 id="exportDataSetMenu"
                 model={designerState.exportButtonsList}
-                onShow={e => getPosition(e)}
                 popup={true}
                 ref={exportMenuRef}
               />

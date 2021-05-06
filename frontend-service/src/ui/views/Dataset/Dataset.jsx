@@ -20,10 +20,9 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -334,20 +333,6 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
-  };
-
-  const createFileName = (fileName, fileType) => {
-    return `${fileName}.${fileType}`;
-  };
-
-  const getPosition = e => {
-    const button = e.currentTarget;
-    const left = `${button.offsetLeft}px`;
-    const topValue = button.offsetHeight + button.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = button.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
   };
 
   const onChangeIsValidationSelected = options => {
@@ -872,7 +857,6 @@ export const Dataset = withRouter(({ match, history }) => {
                   <Menu
                     id="importDataSetMenu"
                     model={importButtonsList}
-                    onShow={e => getPosition(e)}
                     popup={true}
                     ref={importMenuRef}
                   />
@@ -890,7 +874,6 @@ export const Dataset = withRouter(({ match, history }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={exportButtonsList}
-              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
             />
