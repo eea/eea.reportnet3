@@ -390,11 +390,12 @@ const RepresentativesList = ({
             }
           }}
           value={representative.dataProviderId}>
-          {remainingOptionsAndSelectedOption.map(provider => {
+          {remainingOptionsAndSelectedOption.map((provider, i) => {
             return (
               <option
                 className="p-dropdown-item"
-                key={`${provider.dataProviderId}${provider.label}`}
+                // eslint-disable-next-line react/no-array-index-key
+                key={`${provider.dataProviderId}${provider.label}${i}`}
                 value={provider.dataProviderId}>
                 {provider.label}
               </option>
