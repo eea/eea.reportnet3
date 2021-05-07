@@ -579,7 +579,7 @@ export const FieldsDesigner = ({
             className={`p-button-secondary ${
               !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             } datasetSchema-uniques-help-step`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead}
+            disabled={isDesignDatasetEditorRead}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
