@@ -1078,6 +1078,8 @@
     "onlyReleasedEuDatasetCheckboxLabel": "Only released to EU dataset",
     "referenceDataset": "Reference dataset",
     "navigateToDataflow": "Navigate to the dataflow",
-    "navigateToCountry": "Navigate to the country"
+    "navigateToCountry": "Navigate to the country",
+    "wrongUrlCountryCode": "This country name is not correct",
+    "wrongUrlDataflowId": "This is not a public dataflow"
   }
 }
