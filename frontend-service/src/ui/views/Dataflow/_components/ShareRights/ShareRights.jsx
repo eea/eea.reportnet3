@@ -237,7 +237,7 @@ export const ShareRights = ({
     return (
       <Fragment>
         <select
-          // disabled={}
+          disabled={!userRight.isNew && notDeleteableRoles.includes(userRight?.role)}
           id={userType}
           onBlur={() => updateUser(userRight)}
           onChange={event => onWritePermissionChange(userRight, event.target.value)}
