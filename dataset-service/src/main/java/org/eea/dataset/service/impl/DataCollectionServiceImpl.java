@@ -400,8 +400,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
     designs.stream().forEach(dataset -> {
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
-      if (schema.isReferenceDataset()) {
+      if (schema.getReferenceDataset() != null && schema.getReferenceDataset()) {
         referenceDatasets.add(dataset);
+        datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
+            true, true);
       }
     });
     designs.removeIf(design -> referenceDatasets.contains(design));
