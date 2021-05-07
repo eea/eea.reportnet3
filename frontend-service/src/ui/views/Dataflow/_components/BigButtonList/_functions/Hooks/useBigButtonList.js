@@ -383,23 +383,29 @@ const useBigButtonList = ({
     }
   ];
 
-  const referenceDatasetModels = dataflowState.data.referenceDatasets?.map(referenceDataset => {
-    return {
-      layout: 'defaultBigButton',
-      buttonClass: 'dataset',
-      buttonIcon: 'dataset',
-      caption: referenceDataset.datasetSchemaName,
-      handleRedirect: () => {
-        handleRedirect(
-          getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true)
-        );
-      },
-      helpClassName: 'dataflow-dataset-container-help-step',
-      model: [],
-      onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true),
-      visibility: true
-    };
-  });
+  const referenceDatasetModels = isNil(dataflowState.data.dataCollections)
+    ? []
+    : dataflowState.data.referenceDatasets.map(referenceDataset => {
+        return {
+          layout: 'defaultBigButton',
+          buttonClass: 'dataset',
+          buttonIcon: 'dataset',
+          caption: referenceDataset.datasetSchemaName,
+          handleRedirect: () => {
+            handleRedirect(
+              getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true)
+            );
+          },
+          helpClassName: 'dataflow-dataset-container-help-step',
+          model: [],
+          onWheel: getUrl(
+            routes.DATASET,
+            { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId },
+            true
+          ),
+          visibility: true
+        };
+      });
 
   const dataCollectionModels = isNil(dataflowState.data.dataCollections)
     ? []
