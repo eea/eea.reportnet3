@@ -215,10 +215,10 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
 
-  const notDeleteableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
+  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
 
   const renderDeleteColumnTemplate = userRight =>
-    userRight.isNew || notDeleteableRoles.includes(userRight?.role) ? null : (
+    userRight.isNew || notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
