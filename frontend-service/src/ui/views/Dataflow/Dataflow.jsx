@@ -55,6 +55,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
+import { Fragment } from 'react';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
@@ -113,7 +114,8 @@ const Dataflow = withRouter(({ history, match }) => {
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
-    userRoles: []
+    userRoles: [],
+    isUserRightManagementDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -375,22 +377,42 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
+  const setIsUserRightManagementDialogVisible = isVisible => {
+    manageDialogs('isUserRightManagementDialogVisible', isVisible);
+  };
+
   const manageReportersDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageReportersDialogVisible', false)}
-    />
+    <Fragment>
+      <Button
+        className="p-button-primary p-button-animated-blink p-button-right-aligned"
+        icon={'check'}
+        label={resources.messages['add']}
+        onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isManageReportersDialogVisible', false)}
+      />
+    </Fragment>
   );
 
   const manageRequestersDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageRequestersDialogVisible', false)}
-    />
+    <Fragment>
+      <Button
+        className="p-button-primary p-button-animated-blink p-button-right-aligned"
+        icon={'check'}
+        label={resources.messages['add']}
+        onClick={() => manageDialogs('isManageRequestersDialogVisible', false)}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isManageRequestersDialogVisible', false)}
+      />
+    </Fragment>
   );
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
@@ -971,6 +993,9 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={requesterRoleOptions}
+              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
+              // isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
+              setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               userType={'requester'}
             />
           </Dialog>
@@ -994,6 +1019,8 @@ const Dataflow = withRouter(({ history, match }) => {
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
               userType={'reporter'}
+              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
+              setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
             />
           </Dialog>
         )}

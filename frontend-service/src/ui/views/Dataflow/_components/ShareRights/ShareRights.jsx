@@ -23,6 +23,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
 export const ShareRights = ({
+  isUserRightManagementDialogVisible,
+  setIsUserRightManagementDialogVisible,
   userType,
   roleOptions,
   columnHeader,
@@ -48,6 +50,7 @@ export const ShareRights = ({
     isDeletingUserRight: false,
     isDataUpdated: false,
     isDeleteDialogVisible: false
+    // isUserRightManagementDialogVisible
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -83,13 +86,13 @@ export const ShareRights = ({
   const getAllUsers = async () => {
     try {
       const userRightList = await callEndPoint('getAll');
-      const newUserRight = new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
-      const userRightListWithNew = [...userRightList, newUserRight];
-      const clonedUserRightList = cloneDeep(userRightListWithNew);
+      // const newUserRight = new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
+      // const userRightListWithNew = [...userRightList, newUserRight];
+      // const clonedUserRightList = cloneDeep(userRightList);
 
       shareRightsDispatch({
         type: 'GET_USER_RIGHT_LIST',
-        payload: { userRightList: userRightListWithNew, clonedUserRightList }
+        payload: { userRightList, clonedUserRightList: cloneDeep(userRightList) }
       });
     } catch (error) {}
   };
@@ -211,11 +214,14 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
 
-  const notDeleteableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
+  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
 
   const renderDeleteColumnTemplate = userRight =>
-    userRight.isNew || notDeleteableRoles.includes(userRight?.role) ? null : (
+    notDeletableRoles.includes(userRight?.role) ? (
+      <ActionsColumn onEditClick={() => {}} />
+    ) : (
       <ActionsColumn
+        onEditClick={() => {}}
         onDeleteClick={() =>
           shareRightsDispatch({
             type: 'ON_DELETE_USER_RIGHT',
@@ -253,6 +259,34 @@ export const ShareRights = ({
       </Fragment>
     );
   };
+  const renderRoleColumnTemplate2 = userRight => {
+    const [option] = roleOptions.filter(option => option.role === userRight.role);
+    return <div>{option.label}</div>;
+  };
+
+  const renderAccountTemplate2 = () => {
+    const userRight = new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
+    const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
+
+    return (
+      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+        <input
+          autoFocus={userRight.isNew}
+          className={!userRight.isNew ? styles.disabledInput : ''}
+          disabled={!userRight.isNew}
+          id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
+          onBlur={() => updateUser(userRight)}
+          onChange={event => onSetAccount(event.target.value)}
+          onKeyDown={event => onEnterKey(event.key, userRight)}
+          placeholder={placeholder}
+          value={userRight.account}
+        />
+        <label className="srOnly" htmlFor="emptyInput">
+          {placeholder}
+        </label>
+      </div>
+    );
+  };
 
   const renderAccountTemplate = userRight => {
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
@@ -277,6 +311,8 @@ export const ShareRights = ({
     );
   };
 
+  const renderAccountTemplate3 = userRight => <div>{userRight.account}</div>;
+
   return (
     <Fragment>
       <div>
@@ -286,13 +322,13 @@ export const ShareRights = ({
           <div className={styles.table}>
             {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
             <DataTable value={shareRightsState.userRightList}>
-              <Column body={renderAccountTemplate} header={columnHeader} />
-              <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
+              <Column body={renderAccountTemplate3} header={columnHeader} />
+              <Column body={renderRoleColumnTemplate2} header={resources.messages['rolesColumn']} />
               <Column
                 body={renderDeleteColumnTemplate}
                 className={styles.emptyTableHeader}
                 header={deleteColumnHeader}
-                style={{ width: '60px' }}
+                style={{ width: '100px' }}
               />
             </DataTable>
           </div>
@@ -316,6 +352,20 @@ export const ShareRights = ({
           }
           visible={shareRightsState.isDeleteDialogVisible}>
           {deleteConfirmMessage}
+        </ConfirmDialog>
+      )}
+
+      {isUserRightManagementDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          disabledConfirm={shareRightsState.isDeletingUserRight}
+          header={deleteConfirmHeader}
+          iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={() => onDeleteUserRight()}
+          onHide={() => setIsUserRightManagementDialogVisible(false)}>
+          {renderAccountTemplate2()}
         </ConfirmDialog>
       )}
     </Fragment>
