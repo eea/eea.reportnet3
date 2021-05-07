@@ -22,7 +22,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -257,7 +257,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const importFromFile = [
     {
       label: resources.messages['importFromFile'],
-      icon: config.icons['import'],
+      icon: 'upload',
       command: () => setIsImportDatasetDialogVisible(true)
     }
   ];
@@ -267,7 +267,7 @@ export const Dataset = withRouter(({ match, history }) => {
       label: resources.messages['importPreviousData'],
       items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
         label: importOtherSystem.name,
-        icon: config.icons['import'],
+        icon: 'upload',
         command: () => {
           setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
           setIsImportOtherSystemsDialogVisible(true);
@@ -276,18 +276,21 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   ];
 
-  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
-    label: type.text,
-    icon: config.icons['archive'],
-    command: () => onExportDataInternalExtension(type.code)
-  }));
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
+    const extensionsTypes = !isNil(type.code) && type.code.split('+');
+    return {
+      label: type.text,
+      icon: extensionsTypes[0],
+      command: () => onExportDataInternalExtension(type.code)
+    };
+  });
 
   const externalIntegrationsNames = [
     {
       label: resources.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
         label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
-        icon: config.icons['archive'],
+        icon: type.fileExtension,
         command: () => onExportDataExternalIntegration(type.id)
       }))
     }
@@ -333,16 +336,6 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
-  };
-
-  const getPosition = e => {
-    const button = e.currentTarget;
-    const left = `${button.offsetLeft}px`;
-    const topValue = button.offsetHeight + button.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = button.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
   };
 
   const onChangeIsValidationSelected = options => {
@@ -868,13 +861,7 @@ export const Dataset = withRouter(({ match, history }) => {
                   }
                 />
                 {!isEmpty(externalOperationsList.importOtherSystems) && (
-                  <Menu
-                    id="importDataSetMenu"
-                    model={importButtonsList}
-                    onShow={e => getPosition(e)}
-                    popup={true}
-                    ref={importMenuRef}
-                  />
+                  <Menu id="importDataSetMenu" model={importButtonsList} popup={true} ref={importMenuRef} />
                 )}
               </Fragment>
             )}
@@ -889,7 +876,6 @@ export const Dataset = withRouter(({ match, history }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={exportButtonsList}
-              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
             />
