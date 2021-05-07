@@ -383,7 +383,7 @@ const useBigButtonList = ({
     }
   ];
 
-  const referenceDatasetModels = isNil(dataflowState.data.dataCollections)
+  const referenceDatasetModels = isNil(dataflowState.data.referenceDatasets)
     ? []
     : dataflowState.data.referenceDatasets.map(referenceDataset => {
         return {
