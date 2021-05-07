@@ -651,6 +651,10 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowPublicVO.setReportingDatasets(
         datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
 
+    // FIX THIS, NOT FINISHED
+    dataflowPublicVO.setReferenceDatasets(
+        referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId));
+
     findObligationPublicDataflow(dataflowPublicVO);
     return dataflowPublicVO;
   }

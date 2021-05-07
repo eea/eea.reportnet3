@@ -713,8 +713,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
 
-      dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
-          datasetSchemaVO.isAvailableInPublic());
+      if (null != datasetSchemaVO.getAvailableInPublic()) {
+        dataschemaService.updateDatasetSchemaExportable(datasetSchemaId,
+            datasetSchemaVO.getAvailableInPublic());
+      }
 
       if (TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
           .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -725,9 +727,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         if (null != datasetSchemaVO.getWebform()) {
           dataschemaService.updateWebform(datasetSchemaId, datasetSchemaVO.getWebform());
         }
-        dataschemaService.updateReferenceDataset(datasetSchemaId,
-            datasetSchemaVO.isReferenceDataset());
-
+        if (null != datasetSchemaVO.getReferenceDataset()) {
+          dataschemaService.updateReferenceDataset(datasetId, datasetSchemaId,
+              datasetSchemaVO.getReferenceDataset(), false);
+        }
       }
     } catch (EEAException e) {
       LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId);
