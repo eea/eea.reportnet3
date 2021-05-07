@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 import uuid from 'uuid';
 
 import styles from './ShareRights.module.scss';
+import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
@@ -161,7 +162,7 @@ export const ShareRights = ({
   };
 
   const onUpdateUser = async userRight => {
-    if (!isNil(userRight.role)) {
+    if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
       setIsLoading(true);
       try {
@@ -210,8 +211,10 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
 
+  const notDeleteableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
+
   const renderDeleteColumnTemplate = userRight =>
-    userRight.isNew ? null : (
+    userRight.isNew || notDeleteableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
