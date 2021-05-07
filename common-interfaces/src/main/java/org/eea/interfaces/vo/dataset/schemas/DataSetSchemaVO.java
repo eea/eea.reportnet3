@@ -30,10 +30,10 @@ public class DataSetSchemaVO {
   private WebformVO webform;
 
   /** The available in public. */
-  private boolean availableInPublic;
+  private Boolean availableInPublic;
 
   /** The reference dataset. */
-  private boolean referenceDataset;
+  private Boolean referenceDataset;
 
   /**
    * Hash code.

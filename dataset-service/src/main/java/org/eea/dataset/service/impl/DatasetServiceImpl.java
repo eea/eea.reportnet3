@@ -60,6 +60,7 @@ import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
@@ -280,6 +281,11 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Test dataset repository. */
   @Autowired
   private TestDatasetRepository testDatasetRepository;
+
+
+  /** The reference dataset repository. */
+  @Autowired
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
   /**
    * Process file.
@@ -2722,6 +2728,8 @@ public class DatasetServiceImpl implements DatasetService {
       type = DatasetTypeEnum.DESIGN;
     } else if (testDatasetRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.TEST;
+    } else if (referenceDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.REFERENCE;
     } else if (dataCollectionRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.COLLECTION;
     } else if (dataSetMetabaseRepository.existsById(datasetId)) {
@@ -3282,7 +3290,8 @@ public class DatasetServiceImpl implements DatasetService {
 
       LOG.info("Statistics save to datasetId {}.", datasetId);
       DatasetTypeEnum type = getDatasetType(datasetId);
-      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)) {
+      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+          || DatasetTypeEnum.REFERENCE.equals(type)) {
         DesignDataset originDatasetDesign =
             designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
         if (null != originDatasetDesign) {

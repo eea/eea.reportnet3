@@ -1,0 +1,1 @@
+export { apiUserRight } from './ApiUserRight';
