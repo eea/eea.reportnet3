@@ -177,6 +177,16 @@ public class ContributorServiceImpl implements ContributorService {
     userManagementControllerZull.removeContributorsFromResources(resourcesProviders);
   }
 
+  /**
+   * Gets the resource reporters.
+   *
+   * @param dataflowId the dataflow id
+   * @param account the account
+   * @param role the role
+   * @param dataProviderId the data provider id
+   * @param resourcesProviders the resources providers
+   * @return the resource reporters
+   */
   private void getResourceReporters(Long dataflowId, String account, String role,
       Long dataProviderId, List<ResourceAssignationVO> resourcesProviders) {
     List<Long> ids = new ArrayList<>();
@@ -206,6 +216,14 @@ public class ContributorServiceImpl implements ContributorService {
     }
   }
 
+  /**
+   * Gets the resource editors.
+   *
+   * @param dataflowId the dataflow id
+   * @param account the account
+   * @param resourcesProviders the resources providers
+   * @return the resource editors
+   */
   private void getResourceEditors(Long dataflowId, String account,
       List<ResourceAssignationVO> resourcesProviders) {
     List<Long> ids = new ArrayList<>();
@@ -225,6 +243,14 @@ public class ContributorServiceImpl implements ContributorService {
     }
   }
 
+  /**
+   * Gets the resource observer.
+   *
+   * @param dataflowId the dataflow id
+   * @param account the account
+   * @param resourcesProviders the resources providers
+   * @return the resource observer
+   */
   private void getResourceObserver(Long dataflowId, String account,
       List<ResourceAssignationVO> resourcesProviders) {
     resourcesProviders
@@ -246,6 +272,14 @@ public class ContributorServiceImpl implements ContributorService {
         ResourceGroupEnum.EUDATASET_OBSERVER);
   }
 
+  /**
+   * Adds the resources.
+   *
+   * @param account the account
+   * @param resourcesProviders the resources providers
+   * @param ids the ids
+   * @param resourceGroup the resource group
+   */
   private void addResources(String account, List<ResourceAssignationVO> resourcesProviders,
       List<Long> ids, ResourceGroupEnum resourceGroup) {
     for (Long id : ids) {
