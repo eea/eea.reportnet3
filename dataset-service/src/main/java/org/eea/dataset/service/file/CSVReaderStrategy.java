@@ -129,7 +129,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     final List<TableVO> tables = new ArrayList<>();
     final DataSetVO dataset = new DataSetVO();
     tableVO.setIdTableSchema(idTableSchema);
-    tableVO.setRecords(new ArrayList<RecordVO>());
+    tableVO.setRecords(new ArrayList<>());
     tables.add(tableVO);
 
     // Get DataSetSchema
@@ -170,7 +170,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
       dataset.setTableVO(tables);
       // Set the dataSetSchemaId of MongoDB
-      dataset.setIdDatasetSchema(null != dataSetSchema ? dataSetSchema.getIdDataSetSchema() : null);
+      dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema());
     } catch (final IOException e) {
       LOG_ERROR.error(e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);

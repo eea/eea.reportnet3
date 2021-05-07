@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,15 +15,12 @@ export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, s
   const isCloneSchemasView = type === 'cloneSchemas';
   const isSelected = checked.id === id ? styles.checked : undefined;
 
-  const renderCardFooter = () => {
-    if (isCloneSchemasView) {
-      return (
-        <span>
-          {resources.messages['status']}: <span className={styles.dueDate}>{status}</span>
-        </span>
-      );
-    } else return <Fragment />;
-  };
+  const renderCardFooter = () =>
+    isCloneSchemasView && (
+      <span>
+        {resources.messages['status']}: <span className={styles.dueDate}>{status}</span>
+      </span>
+    );
 
   return (
     <div className={`${styles.card} ${isSelected} ${styles[status]}`} onClick={() => onCheck(card)}>

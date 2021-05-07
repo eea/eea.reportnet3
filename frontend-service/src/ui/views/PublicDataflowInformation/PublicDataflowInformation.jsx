@@ -11,6 +11,8 @@ import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
 
 import styles from './PublicDataflowInformation.module.scss';
 
@@ -63,6 +65,19 @@ export const PublicDataflowInformation = withRouter(
       }
     }, [themeContext.headerCollapse]);
 
+    const getCountryCode = datasetSchemaName => {
+      let country = {};
+      if (!isNil(config.countriesByGroup)) {
+        const countryFinded = Object.keys(config.countriesByGroup).some(countriesGroup => {
+          country = config.countriesByGroup[countriesGroup].find(
+            groupCountry => groupCountry.name === datasetSchemaName
+          );
+          return !isNil(country) ? country : false;
+        });
+        return countryFinded ? country.code : '';
+      }
+    };
+
     const getPublicFileName = fileName => {
       const splittedFileName = fileName.split('-');
       return splittedFileName[1];
@@ -75,8 +90,9 @@ export const PublicDataflowInformation = withRouter(
             {rowData.publicsFileName.map(publicFileName => (
               <span
                 className={styles.downloadIcon}
+                key={publicFileName}
                 onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
-                <FontAwesomeIcon icon={AwesomeIcons('7z')} data-tip data-for={publicFileName} />
+                <FontAwesomeIcon data-for={publicFileName} data-tip icon={AwesomeIcons('7z')} />
                 <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
                   <span>{getPublicFileName(publicFileName)}</span>
                 </ReactTooltip>
@@ -89,9 +105,9 @@ export const PublicDataflowInformation = withRouter(
           <div className={styles.filesContainer}>
             <FontAwesomeIcon
               className={styles.restrictFromPublicIcon}
-              icon={AwesomeIcons('lock')}
-              data-tip
               data-for={'restrictFromPublicField'}
+              data-tip
+              icon={AwesomeIcons('lock')}
             />
             <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
               <span>{resources.messages['restrictFromPublicField']}</span>
@@ -137,6 +153,34 @@ export const PublicDataflowInformation = withRouter(
         .sort((a, b) => a.index - b.index)
         .map(orderedField => orderedField.id);
     };
+
+    const countryBodyColumn = rowData => (
+      <div onClick={e => e.stopPropagation()}>
+        <span className={styles.cellWrapper}>
+          {rowData.datasetSchemaName}
+          <FontAwesomeIcon
+            aria-hidden={false}
+            className={`p-breadcrumb-home ${styles.link}`}
+            data-for="navigateTooltip"
+            data-tip
+            icon={AwesomeIcons('externalLink')}
+            onClick={e => {
+              e.preventDefault();
+              history.push(
+                getUrl(
+                  routes.PUBLIC_COUNTRY_INFORMATION,
+                  { countryCode: getCountryCode(rowData.datasetSchemaName) },
+                  true
+                )
+              );
+            }}
+          />
+          <ReactTooltip className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
+            <span>{resources.messages['navigateToCountry']}</span>
+          </ReactTooltip>
+        </span>
+      </div>
+    );
 
     const isReleasedBodyColumn = rowData => (
       <div className={styles.checkedValueColumn}>
@@ -217,6 +261,7 @@ export const PublicDataflowInformation = withRouter(
         )
         .map(field => {
           let template = null;
+          if (field === 'datasetSchemaName') template = countryBodyColumn;
           if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           return (

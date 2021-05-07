@@ -12,7 +12,6 @@ import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -372,19 +371,6 @@ public interface DatasetService {
    */
   void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName);
-
-
-  /**
-   * Etl import dataset.
-   *
-   * @param datasetId the dataset id
-   * @param etlDatasetVO the etl dataset VO
-   * @param providerId the provider id
-   *
-   * @throws EEAException the EEA exception
-   */
-  void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO, Long providerId)
-      throws EEAException;
 
   /**
    * Gets the table read only.

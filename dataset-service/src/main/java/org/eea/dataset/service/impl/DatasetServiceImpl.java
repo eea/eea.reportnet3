@@ -89,10 +89,6 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.ETLFieldVO;
-import org.eea.interfaces.vo.dataset.ETLRecordVO;
-import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -1449,174 +1445,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
-  /**
-   * Etl import dataset.
-   *
-   * @param datasetId the dataset id
-   * @param etlDatasetVO the etl dataset VO
-   * @param providerId the provider id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
-      Long providerId) throws EEAException {
-    // Get the datasetSchemaId by the datasetId
-    LOG.info("Import data into dataset {}", datasetId);
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-    if (null == datasetSchemaId) {
-      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
-    }
 
-    // Get the datasetSchema by the datasetSchemaId
-    DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    if (null == datasetSchema) {
-      throw new EEAException(
-          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
-    }
-
-    // Obtain the data provider code to insert into the record
-    DataProviderVO provider =
-        providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
-
-    // Get the partition for the partiton id
-    final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
-
-    // Construct Maps to relate ids
-    Map<String, TableSchema> tableMap = new HashMap<>();
-    Map<String, FieldSchema> fieldMap = new HashMap<>();
-    Set<String> tableWithAttachmentFieldSet = new HashSet<>();
-    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-      tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
-      // Match each fieldSchemaId with its headerName
-      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-        fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
-        if (DataType.ATTACHMENT.equals(field.getType())) {
-          LOG.warn("Table with id schema {} contains attachment field, processing",
-              tableSchema.getIdTableSchema());
-          tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
-        }
-      }
-    }
-
-    // Construct object to be save
-    DatasetValue dataset = new DatasetValue();
-    List<TableValue> tables = new ArrayList<>();
-    List<String> readOnlyTables = new ArrayList<>();
-    List<String> fixedNumberTables = new ArrayList<>();
-
-    // Loops to build the entity
-    dataset.setId(datasetId);
-    DatasetTypeEnum datasetType = getDatasetType(dataset.getId());
-
-    etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
-        readOnlyTables, fixedNumberTables, datasetType);
-    dataset.setTableValues(tables);
-    dataset.setIdDatasetSchema(datasetSchemaId);
-
-    List<RecordValue> allRecords = new ArrayList<>();
-
-    tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
-        tableWithAttachmentFieldSet);
-    recordRepository.saveAll(allRecords);
-    LOG.info("Data saved into dataset {}", datasetId);
-  }
-
-  /**
-   * Table value for.
-   *
-   * @param datasetId the dataset id
-   * @param dataset the dataset
-   * @param readOnlyTables the read only tables
-   * @param fixedNumberTables the fixed number tables
-   * @param allRecords the all records
-   * @param tableWithAttachmentFieldSet the table with attachment field set
-   */
-  private void tableValueFor(Long datasetId, DatasetValue dataset, List<String> readOnlyTables,
-      List<String> fixedNumberTables, List<RecordValue> allRecords,
-      Set<String> tableWithAttachmentFieldSet) {
-    for (TableValue tableValue : dataset.getTableValues()) {
-      // Check if the table with idTableSchema has been populated already
-      Long oldTableId = findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
-      fillTableId(tableValue.getIdTableSchema(), dataset.getTableValues(), oldTableId);
-      if (!readOnlyTables.contains(tableValue.getIdTableSchema())
-          && !fixedNumberTables.contains(tableValue.getIdTableSchema())) {
-        // Put an empty value to the field if it's an attachment type if and only if table has
-        // fields of this type
-        if (tableWithAttachmentFieldSet.contains(tableValue.getIdTableSchema())) {
-          LOG.warn("Table {} and id schema {} contains attachment field, processing",
-              tableValue.getId(), tableValue.getIdTableSchema());
-          tableValue.getRecords().stream().forEach(r -> {
-            r.getFields().stream().forEach(f -> {
-              switch (f.getType()) {
-                case ATTACHMENT:
-                  f.setValue("");
-                  break;
-                case POINT:
-                  break;
-                case LINESTRING:
-                  break;
-                case POLYGON:
-                  break;
-                case MULTIPOINT:
-                  break;
-                case MULTILINESTRING:
-                  break;
-                case MULTIPOLYGON:
-                  break;
-                case GEOMETRYCOLLECTION:
-                  break;
-                default:
-                  if (null != f.getValue() && f.getValue().length() >= fieldMaxLength) {
-                    f.setValue(f.getValue().substring(0, fieldMaxLength));
-                  } else {
-                    f.setValue(f.getValue());
-                  }
-              }
-            });
-          });
-        }
-        allRecords.addAll(tableValue.getRecords());
-      }
-      if (null == oldTableId) {
-        tableRepository.saveAndFlush(tableValue);
-      }
-    }
-  }
-
-  /**
-   * Etl table for.
-   *
-   * @param etlDatasetVO the etl dataset VO
-   * @param provider the provider
-   * @param partition the partition
-   * @param tableMap the table map
-   * @param fieldMap the field map
-   * @param dataset the dataset
-   * @param tables the tables
-   * @param readOnlyTables the read only tables
-   * @param fixedNumberTables the fixed number tables
-   * @param datasetType the dataset type
-   */
-  private void etlTableFor(ETLDatasetVO etlDatasetVO, DataProviderVO provider,
-      final PartitionDataSetMetabase partition, Map<String, TableSchema> tableMap,
-      Map<String, FieldSchema> fieldMap, DatasetValue dataset, List<TableValue> tables,
-      List<String> readOnlyTables, List<String> fixedNumberTables, DatasetTypeEnum datasetType) {
-    for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
-      etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable,
-          datasetType);
-      // Check if table is read Only and save into a list
-      TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
-      if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
-        readOnlyTables.add(tableSchema.getIdTableSchema().toString());
-      }
-      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchema != null
-          && Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
-        fixedNumberTables.add(tableSchema.getIdTableSchema().toString());
-      }
-    }
-  }
 
   /**
    * Gets the table read only. Receives by parameter the datasetId, the objectId and the type
@@ -2542,120 +2371,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Etl build entity.
-   *
-   * @param provider the provider
-   * @param partition the partition
-   * @param tableMap the table map
-   * @param fieldMap the field map
-   * @param dataset the dataset
-   * @param tables the tables
-   * @param etlTable the etl table
-   * @param datasetType the dataset type
-   */
-  private void etlBuildEntity(DataProviderVO provider, final PartitionDataSetMetabase partition,
-      Map<String, TableSchema> tableMap, Map<String, FieldSchema> fieldMap, DatasetValue dataset,
-      List<TableValue> tables, ETLTableVO etlTable, DatasetTypeEnum datasetType) {
-    TableValue table = new TableValue();
-    TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
-    if (tableSchema != null) {
-      table.setIdTableSchema(tableSchema.getIdTableSchema().toString());
-      List<RecordValue> records = new ArrayList<>();
-      for (ETLRecordVO etlRecord : etlTable.getRecords()) {
-        RecordValue recordValue = new RecordValue();
-        recordValue.setIdRecordSchema(tableMap.get(etlTable.getTableName().toLowerCase())
-            .getRecordSchema().getIdRecordSchema().toString());
-        recordValue.setTableValue(table);
-        List<FieldValue> fieldValues = new ArrayList<>();
-        List<String> idSchema = new ArrayList<>();
-        etlFieldBuildFor(fieldMap, dataset, tableSchema, etlRecord, recordValue, fieldValues,
-            idSchema, datasetType);
-        // set the fields if not declared in the records
-        setMissingField(
-            tableMap.get(etlTable.getTableName().toLowerCase()).getRecordSchema().getFieldSchema(),
-            fieldValues, idSchema, recordValue);
-        recordValue.setFields(fieldValues);
-        recordValue.setDatasetPartitionId(partition.getId());
-        recordValue.setDataProviderCode(provider != null ? provider.getCode() : null);
-        records.add(recordValue);
-      }
-      table.setRecords(records);
-      tables.add(table);
-      table.setDatasetId(dataset);
-    }
-  }
-
-  /**
-   * Etl field build for.
-   *
-   * @param fieldMap the field map
-   * @param dataset the dataset
-   * @param tableSchema the table schema
-   * @param etlRecord the etl record
-   * @param recordValue the record value
-   * @param fieldValues the field values
-   * @param idFieldSchemas the id schema
-   * @param datasetType the dataset type
-   */
-  private void etlFieldBuildFor(Map<String, FieldSchema> fieldMap, DatasetValue dataset,
-      TableSchema tableSchema, ETLRecordVO etlRecord, RecordValue recordValue,
-      List<FieldValue> fieldValues, List<String> idFieldSchemas, DatasetTypeEnum datasetType) {
-    for (ETLFieldVO etlField : etlRecord.getFields()) {
-      FieldValue field = new FieldValue();
-      FieldSchema fieldSchema =
-          fieldMap.get(etlField.getFieldName().toLowerCase() + tableSchema.getIdTableSchema());
-      // Fill if is a design dataset or if not readonly
-      if (fieldSchema != null && (DatasetTypeEnum.DESIGN.equals(datasetType)
-          || !Boolean.TRUE.equals(fieldSchema.getReadOnly()))) {
-        field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
-        field.setType(fieldSchema.getType());
-        field.setValue(etlField.getValue());
-        field.setRecord(recordValue);
-        fieldValues.add(field);
-        idFieldSchemas.add(field.getIdFieldSchema());
-      }
-    }
-  }
-
-  /**
-   * Fill table id.
-   *
-   * @param idTableSchema the id table schema
-   * @param listTableValues the list table values
-   * @param oldTableId the old table id
-   */
-  private void fillTableId(final String idTableSchema, final List<TableValue> listTableValues,
-      Long oldTableId) {
-    if (oldTableId != null) {
-      listTableValues.stream()
-          .filter(tableValue -> tableValue.getIdTableSchema().equals(idTableSchema))
-          .forEach(tableValue -> tableValue.setId(oldTableId));
-    }
-  }
-
-  /**
-   * Sets the missing field.
-   *
-   * @param headersSchema the headers schema
-   * @param fields the fields
-   * @param idSchema the id schema
-   * @param recordValue the record value
-   */
-  private void setMissingField(List<FieldSchema> headersSchema, final List<FieldValue> fields,
-      List<String> idSchema, RecordValue recordValue) {
-    headersSchema.stream().forEach(header -> {
-      if (!idSchema.contains(header.getIdFieldSchema().toString())) {
-        final FieldValue field = new FieldValue();
-        field.setIdFieldSchema(header.getIdFieldSchema().toString());
-        field.setType(header.getType());
-        field.setValue("");
-        field.setRecord(recordValue);
-        fields.add(field);
-      }
-    });
-  }
-
-  /**
    * Table for read only.
    *
    * @param objectId the object id
@@ -3401,54 +3116,54 @@ public class DatasetServiceImpl implements DatasetService {
             "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
 
     // create the context to add all files in a treemap inside to attachment and file information
-    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
-    // we get the dataschema and check every table to see if find any field attachemnt
-    DataSetSchema dataSetSchema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
-    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+    try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+      // we get the dataschema and check every table to see if find any field attachemnt
+      DataSetSchema dataSetSchema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
+      for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-      // we find if in any table have one field type ATTACHMENT
-      List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
-          .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
-          .collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+        // we find if in any table have one field type ATTACHMENT
+        List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+            .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+            .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
 
-        LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-            tableSchema.getIdTableSchema());
-        // We took every field for every table
-        for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-          List<AttachmentValue> attachmentValue = attachmentRepository
-              .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
+          LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+              tableSchema.getIdTableSchema());
+          // We took every field for every table
+          for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+            List<AttachmentValue> attachmentValue = attachmentRepository
+                .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
 
-          // if there are filled we create a folder and inside of any folder we create the fields
-          if (!CollectionUtils.isEmpty(attachmentValue)) {
-            LOG.info(
-                "We  are in tableSchema with id {}, checking field {} and we have attachments files",
-                tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+            // if there are filled we create a folder and inside of any folder we create the fields
+            if (!CollectionUtils.isEmpty(attachmentValue)) {
+              LOG.info(
+                  "We  are in tableSchema with id {}, checking field {} and we have attachments files",
+                  tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
 
-            for (AttachmentValue attachment : attachmentValue) {
-              try {
-                ZipEntry eFieldAttach =
-                    new ZipEntry(tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
-                out.putNextEntry(eFieldAttach);
-                out.write(attachment.getContent(), 0, attachment.getContent().length);
-              } catch (ZipException e) {
-                LOG.info("Error creating file {} because already exist", attachment.getFileName(),
-                    e);
+              for (AttachmentValue attachment : attachmentValue) {
+                try {
+                  ZipEntry eFieldAttach = new ZipEntry(
+                      tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                  out.putNextEntry(eFieldAttach);
+                  out.write(attachment.getContent(), 0, attachment.getContent().length);
+                } catch (ZipException e) {
+                  LOG.info("Error creating file {} because already exist", attachment.getFileName(),
+                      e);
+                }
+                out.closeEntry();
               }
-              out.closeEntry();
             }
           }
         }
       }
-    }
 
-    ZipEntry e = new ZipEntry(nameFileScape);
-    out.putNextEntry(e);
-    out.write(file, 0, file.length);
-    out.closeEntry();
-    out.close();
-    LOG.info("We create file {} in the route ", fileWriteZip.toString());
+      ZipEntry e = new ZipEntry(nameFileScape);
+      out.putNextEntry(e);
+      out.write(file, 0, file.length);
+      out.closeEntry();
+      LOG.info("We create file {} in the route ", fileWriteZip);
+    }
   }
 
 

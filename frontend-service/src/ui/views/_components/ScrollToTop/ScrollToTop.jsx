@@ -11,6 +11,7 @@ const ScrollToTop = withRouter(({ history, children }) => {
     };
   }, []);
 
+  // eslint-disable-next-line react/jsx-no-useless-fragment
   return <Fragment>{children}</Fragment>;
 });
 

@@ -81,8 +81,8 @@ export class Dropdown extends Component {
     inputId: PropTypes.string,
     isLoadingData: PropTypes.bool,
     itemTemplate: PropTypes.func,
+    // eslint-disable-next-line react/no-unused-prop-types
     label: PropTypes.string,
-    lazy: PropTypes.bool,
     maxLength: PropTypes.number,
     name: PropTypes.string,
     onChange: PropTypes.func,
@@ -94,6 +94,7 @@ export class Dropdown extends Component {
     optionLabel: PropTypes.string,
     options: PropTypes.array,
     panelClassName: PropTypes.string,
+    // eslint-disable-next-line react/no-unused-prop-types
     panelstyle: PropTypes.object,
     placeholder: PropTypes.string,
     required: PropTypes.bool,
@@ -582,7 +583,7 @@ export class Dropdown extends Component {
           {placeHolderOption}
           {option}
         </select>
-        <label htmlFor={this.props.name} className="srOnly">
+        <label className="srOnly" htmlFor={this.props.name}>
           {this.props.name}
         </label>
       </div>
@@ -826,14 +827,14 @@ export class Dropdown extends Component {
 
     return (
       <div
-        id={this.props.id}
-        ref={el => (this.container = el)}
         className={className}
-        style={this.props.style}
+        id={this.props.id}
         onClick={this.onClick}
-        onMouseDown={this.props.onMouseDown}
+        onContextMenu={this.props.onContextMenu}
         onKeyPress={this.props.onKeyPress}
-        onContextMenu={this.props.onContextMenu}>
+        onMouseDown={this.props.onMouseDown}
+        ref={el => (this.container = el)}
+        style={this.props.style}>
         {keyboardHelper}
         {hiddenSelect}
         {labelElement}

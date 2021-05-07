@@ -33,6 +33,7 @@ import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -294,6 +295,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.updateDataCollection(1L);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -363,6 +366,8 @@ public class DataCollectionServiceImplTest {
         Mockito.anyBoolean(), Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -386,6 +391,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(1);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
@@ -434,6 +441,8 @@ public class DataCollectionServiceImplTest {
     Mockito.doNothing().when(connection).rollback();
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -476,6 +485,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }

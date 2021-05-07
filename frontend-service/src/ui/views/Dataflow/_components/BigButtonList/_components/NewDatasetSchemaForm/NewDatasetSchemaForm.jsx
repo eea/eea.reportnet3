@@ -138,7 +138,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           type="text"
           value={datasetSchemaName}
         />
-        <label htmlFor="datasetSchemaName" className="srOnly">
+        <label className="srOnly" htmlFor="datasetSchemaName">
           {resources.messages['createDatasetSchemaName']}
         </label>
         {errorMessage['datasetSchemaName'] !== '' && <ErrorMessage message={errorMessage['datasetSchemaName']} />}

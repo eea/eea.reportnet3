@@ -60,7 +60,12 @@ export const TabsSchema = ({
                   onChangeIsValidationSelected={onChangeIsValidationSelected}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
+                  recordPositionId={table.id === tableSchemaId ? recordPositionId : -1}
                   reporting={reporting}
+                  selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
+                  selectedRuleId={selectedRuleId}
+                  selectedRuleLevelError={selectedRuleLevelError}
+                  selectedRuleMessage={selectedRuleMessage}
                   showWriteButtons={showWriteButtons}
                   tableFixedNumber={table.fixedNumber}
                   tableHasErrors={table.hasErrors}
@@ -74,11 +79,6 @@ export const TabsSchema = ({
                           .filter(f => f.length > 0)[0]
                       : []
                   }
-                  recordPositionId={table.id === tableSchemaId ? recordPositionId : -1}
-                  selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
-                  selectedRuleId={selectedRuleId}
-                  selectedRuleLevelError={selectedRuleLevelError}
-                  selectedRuleMessage={selectedRuleMessage}
                 />
               </div>
             </TabPanel>

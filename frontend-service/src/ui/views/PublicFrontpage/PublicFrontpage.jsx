@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { Button } from 'ui/views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { config } from 'conf';
@@ -63,7 +62,7 @@ export const PublicFrontpage = ({ history }) => {
                       </p>
                       <p>
                         Reportnet 2 can be accessed here: &nbsp;
-                        <a href="http://cdr.eionet.europa.eu/" target="_blank" rel="noopener noreferrer">
+                        <a href="http://cdr.eionet.europa.eu/" rel="noopener noreferrer" target="_blank">
                           http://cdr.eionet.europa.eu/
                         </a>
                       </p>
@@ -71,7 +70,7 @@ export const PublicFrontpage = ({ history }) => {
                   </div>
                 </div>
                 <div className={styles.illustration}>
-                  <img src={Illustration} />
+                  <img alt="Public illustration" src={Illustration} />
                 </div>
                 <div className={styles.sideBar}>
                   <div className={`${styles.contactBox} ${styles.sideBarItem}`}>
@@ -102,32 +101,32 @@ export const PublicFrontpage = ({ history }) => {
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3.0`}
-                          target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                          target="_blank">
                           Login
                         </a>
                       </li>
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3.0`}
-                          target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                          target="_blank">
                           Reporter
                         </a>
                       </li>
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3.0`}
-                          target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                          target="_blank">
                           Requester
                         </a>
                       </li>
                       <li>
                         <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
-                          target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                          target="_blank">
                           Webforms
                         </a>
                       </li>
@@ -166,15 +165,15 @@ export const PublicFrontpage = ({ history }) => {
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.dataflows.map(dataflow => (
                   <PublicCard
-                    key={dataflow.key}
                     card={dataflow}
                     dataflowId={dataflow.id}
                     dueDate={dataflow.targetDate}
+                    externalCard={true}
                     frequency={dataflow.reportingFrequency}
+                    key={dataflow.key}
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
-                    externalCard={true}
                   />
                 ))}
               </div>
@@ -182,11 +181,12 @@ export const PublicFrontpage = ({ history }) => {
               <div className={styles.dataflowsList}>
                 {config.publicFrontpage.voluntaryDataflows.map(dataflow => (
                   <PublicCard
-                    key={dataflow.key}
                     card={dataflow}
                     dataflowId={dataflow.id}
                     dueDate={dataflow.targetDate}
+                    externalCard={true}
                     frequency={dataflow.reportingFrequency}
+                    key={dataflow.key}
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
@@ -202,18 +202,18 @@ export const PublicFrontpage = ({ history }) => {
                 <a
                   className={styles.portalBox}
                   href="http://cdr.eionet.europa.eu/"
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  <img height="50px" src={logo} alt="Reportnet 2 Portal" />
+                  rel="noopener noreferrer"
+                  target="_blank">
+                  <img alt="Reportnet 2 Portal" height="50px" src={logo} />
                   <h4>Reportnet 2</h4>
                   <p>Reportnet is Eionet’s infrastructure for supporting and improving data and information flows.</p>
                 </a>
                 <a
                   className={styles.portalBox}
                   href="https://rod.eionet.europa.eu/"
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  <img height="50px" src={logo} alt="ROD 3 Portal" />
+                  rel="noopener noreferrer"
+                  target="_blank">
+                  <img alt="ROD 3 Portal" height="50px" src={logo} />
                   <h4>ROD 3</h4>
                   <p>EEA's reporting obligations database</p>
                 </a>

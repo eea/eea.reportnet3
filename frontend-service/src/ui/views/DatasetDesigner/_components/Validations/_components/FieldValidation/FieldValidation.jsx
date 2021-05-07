@@ -68,7 +68,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
   const componentName = 'createValidation';
 
   useEffect(() => {
-    if (!isEmpty(tabs)) {
+    if (!isEmpty(tabs) && isEmpty(creationFormState.candidateRule.expressionType)) {
       creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(tabs) });
     }
   }, [tabs]);
@@ -303,7 +303,6 @@ const FieldValidation = ({ datasetId, tabs }) => {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });
-      console.error('onUpdateValidationRule error', error);
     } finally {
       setIsSubmitDisabled(false);
     }

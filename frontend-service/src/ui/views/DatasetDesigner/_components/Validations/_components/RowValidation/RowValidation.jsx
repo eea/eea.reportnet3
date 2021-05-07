@@ -65,7 +65,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const componentName = 'createValidation';
 
   useEffect(() => {
-    if (!isEmpty(tabs)) {
+    if (!isEmpty(tabs) && isEmpty(creationFormState.candidateRule.expressionType)) {
       creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(tabs) });
     }
   }, [tabs]);

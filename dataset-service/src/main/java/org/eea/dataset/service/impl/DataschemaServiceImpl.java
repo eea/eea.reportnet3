@@ -2312,6 +2312,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return tableSchemasVOList;
   }
 
+
+  /**
+   * Update reference dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceDataset the reference dataset
+   */
+  @Override
+  public void updateReferenceDataset(String datasetSchemaId, boolean referenceDataset) {
+    schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
+  }
+
+
   /**
    * Fill and update design dataset imported.
    *
@@ -2337,6 +2350,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(schemaOrigin.getWebform());
     schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
+    schema.setReferenceDataset(schemaOrigin.isReferenceDataset());
     // table level
     for (TableSchema table : schemaOrigin.getTableSchemas()) {
       String nameTrimmed = table.getNameTableSchema().trim();

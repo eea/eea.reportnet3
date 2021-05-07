@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 
 import { config } from 'conf';
 
@@ -24,15 +24,13 @@ export const PublicLayout = ({ children }) => {
   }, []);
 
   return (
-    <Fragment>
-      <div className={styles.mainContainer}>
-        <Header isPublic={true} />
-        <div className={styles.mainContent} style={mainContentStyle}>
-          {children}
-        </div>
-        <Footer />
-        <EuFooter />
+    <div className={styles.mainContainer}>
+      <Header isPublic={true} />
+      <div className={styles.mainContent} style={mainContentStyle}>
+        {children}
       </div>
-    </Fragment>
+      <Footer />
+      <EuFooter />
+    </div>
   );
 };

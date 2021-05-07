@@ -10,18 +10,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
 
 export const PublicCard = ({
-  card,
   animation,
+  card,
   dataflowId,
   dueDate,
+  externalCard,
   frequency,
+  isReleasable,
   obligation,
   onCardClick,
-  isReleasable,
   pilotScenarioAmbition,
   subtitle,
-  title,
-  externalCard
+  title
 }) => {
   const idTooltip = uuid.v4();
   const baseRod3Url = 'https://rod.eionet.europa.eu';
@@ -35,7 +35,7 @@ export const PublicCard = ({
   const renderRedirectText = (text, url) => (
     <Fragment>
       <span>{text} </span>
-      <a href={url} target="_blank" rel="noreferrer" title={text} onClick={e => onOpenTab(e, url)}>
+      <a href={url} onClick={e => onOpenTab(e, url)} rel="noreferrer" target="_blank" title={text}>
         <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
       </a>
     </Fragment>
@@ -64,41 +64,45 @@ export const PublicCard = ({
           <h3 className={`${styles.title} ${styles.link}`} title={title.text}>
             {title.text}
           </h3>
-          <h4 className={styles.subtitle} data-tip data-for={idTooltip}>
+          <h4 className={styles.subtitle} data-for={idTooltip} data-tip>
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>
           <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">
             {subtitle.text}
           </ReactTooltip>
         </div>
-        <div className={styles.legalInstrumentAndObligation}>
-          <p>
-            <strong>Obligation: </strong>
-            {obligation?.obligationId
-              ? renderRedirectText(obligation?.title, `${baseRod3Url}/obligations/${obligation?.obligationId}`)
-              : obligation?.title}
-          </p>
-        </div>
-        <div className={styles.legalInstrumentAndObligation}>
-          <p>
-            <strong>Instrument: </strong>
-            {obligation?.legalInstruments?.id
-              ? renderRedirectText(
-                  obligation?.legalInstruments?.alias,
-                  `${baseRod3Url}/instruments/${obligation?.legalInstruments?.id}`
-                )
-              : obligation?.legalInstruments?.alias}
-          </p>
-        </div>
-        {pilotScenarioAmbition && (
+
+        {externalCard ? (
           <div className={styles.legalInstrumentAndObligation}>
             <p>
               <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
             </p>
           </div>
+        ) : (
+          <Fragment>
+            <div className={styles.legalInstrumentAndObligation}>
+              <p>
+                <strong>Obligation: </strong>
+                {obligation?.obligationId
+                  ? renderRedirectText(obligation?.title, `${baseRod3Url}/obligations/${obligation?.obligationId}`)
+                  : obligation?.title}
+              </p>
+            </div>
+            <div className={styles.legalInstrumentAndObligation}>
+              <p>
+                <strong>Instrument: </strong>
+                {obligation?.legalInstruments?.id
+                  ? renderRedirectText(
+                      obligation?.legalInstruments?.alias,
+                      `${baseRod3Url}/instruments/${obligation?.legalInstruments?.id}`
+                    )
+                  : obligation?.legalInstruments?.alias}
+              </p>
+            </div>
+          </Fragment>
         )}
         <div className={`${styles.footer}`}>
-          {frequency ? (
+          {externalCard ? (
             <span>
               {
                 <Fragment>
