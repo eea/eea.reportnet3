@@ -240,6 +240,130 @@ public enum RuleOperatorEnum {
   RECORD_LTEQ_DAY_RECORD_NUMBER(EntityTypeEnum.RECORD, "recordDayLessThanOrEqualsThanRecordNumber",
       JavaType.BOOLEAN, JavaType.DATE, JavaType.NUMBER),
 
+  /** The record eq day datetime. */
+  RECORD_EQ_DAY_DATETIME(EntityTypeEnum.RECORD, "recordDayEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record dist day datetime. */
+  RECORD_DIST_DAY_DATETIME(EntityTypeEnum.RECORD, "recordDayDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gt day datetime. */
+  RECORD_GT_DAY_DATETIME(EntityTypeEnum.RECORD, "recordDayGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lt day datetime. */
+  RECORD_LT_DAY_DATETIME(EntityTypeEnum.RECORD, "recordDayLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gteq day datetime. */
+  RECORD_GTEQ_DAY_DATETIME(EntityTypeEnum.RECORD, "recordDayGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lteq day datetime. */
+  RECORD_LTEQ_DAY_DATETIME(EntityTypeEnum.RECORD, "recordDayLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record eq day record datetime. */
+  RECORD_EQ_DAY_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordDayEqualsRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record dist day record datetime. */
+  RECORD_DIST_DAY_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordDayDistinctRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gt day record datetime. */
+  RECORD_GT_DAY_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordDayGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lt day record datetime. */
+  RECORD_LT_DAY_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordDayLessThanRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gteq day record datetime. */
+  RECORD_GTEQ_DAY_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordDayGreaterThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lteq day record datetime. */
+  RECORD_LTEQ_DAY_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordDayLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record eq day record date datetime. */
+  RECORD_EQ_DAY_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDayEqualsRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record dist day record date datetime. */
+  RECORD_DIST_DAY_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDayDistinctRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gt day record date datetime. */
+  RECORD_GT_DAY_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDayGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record lt day record date datetime. */
+  RECORD_LT_DAY_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDayLessThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gteq day record date datetime. */
+  RECORD_GTEQ_DAY_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD,
+      "recordDayGreaterThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.TIMESTAMP),
+
+  /** The record lteq day record date datetime. */
+  RECORD_LTEQ_DAY_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDayLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record eq day record datetime date. */
+  RECORD_EQ_DAY_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDayEqualsRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record dist day record datetime date. */
+  RECORD_DIST_DAY_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDayDistinctRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gt day record datetime date. */
+  RECORD_GT_DAY_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDayGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record lt day record datetime date. */
+  RECORD_LT_DAY_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDayLessThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gteq day record datetime date. */
+  RECORD_GTEQ_DAY_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD,
+      "recordDayGreaterThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.DATE),
+
+  /** The record lteq day record datetime date. */
+  RECORD_LTEQ_DAY_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDayLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record eq day record number datetime. */
+  RECORD_EQ_DAY_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordDayEqualsRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record dist day record number datetime. */
+  RECORD_DIST_DAY_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordDayDistinctRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gt day record number datetime. */
+  RECORD_GT_DAY_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordDayGreaterThanRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lt day record number datetime. */
+  RECORD_LT_DAY_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordDayLessThanRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gteq day record number datetime. */
+  RECORD_GTEQ_DAY_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD,
+      "recordDayGreaterThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.NUMBER),
+
+  /** The record lteq day record number datetime. */
+  RECORD_LTEQ_DAY_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD,
+      "recordDayLessThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.NUMBER),
+
   // Month operators
 
   /** The record eq month. */
@@ -314,6 +438,131 @@ public enum RuleOperatorEnum {
   /** The record lteq month record number. */
   RECORD_LTEQ_MONTH_RECORD_NUMBER(EntityTypeEnum.RECORD,
       "recordMonthLessThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.NUMBER),
+
+  /** The record eq month datetime. */
+  RECORD_EQ_MONTH_DATETIME(EntityTypeEnum.RECORD, "recordMonthEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record dist month datetime. */
+  RECORD_DIST_MONTH_DATETIME(EntityTypeEnum.RECORD, "recordMonthDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gt month datetime. */
+  RECORD_GT_MONTH_DATETIME(EntityTypeEnum.RECORD, "recordMonthGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lt month datetime. */
+  RECORD_LT_MONTH_DATETIME(EntityTypeEnum.RECORD, "recordMonthLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gteq month datetime. */
+  RECORD_GTEQ_MONTH_DATETIME(EntityTypeEnum.RECORD, "recordMonthGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lteq month datetime. */
+  RECORD_LTEQ_MONTH_DATETIME(EntityTypeEnum.RECORD, "recordMonthLessThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record eq month record datetime. */
+  RECORD_EQ_MONTH_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordMonthEqualsRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record dist month record datetime. */
+  RECORD_DIST_MONTH_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordMonthDistinctRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gt month record datetime. */
+  RECORD_GT_MONTH_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordMonthGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lt month record datetime. */
+  RECORD_LT_MONTH_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordMonthLessThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gteq month record datetime. */
+  RECORD_GTEQ_MONTH_RECORD_DATETIME(EntityTypeEnum.RECORD,
+      "recordMonthGreaterThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.TIMESTAMP),
+
+  /** The record lteq month record datetime. */
+  RECORD_LTEQ_MONTH_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordMonthLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record eq month record datetime date. */
+  RECORD_EQ_MONTH_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordMonthEqualsRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record dist month record datetime date. */
+  RECORD_DIST_MONTH_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordMonthDistinctRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gt month record datetime date. */
+  RECORD_GT_MONTH_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordMonthGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record lt month record datetime date. */
+  RECORD_LT_MONTH_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordMonthLessThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gteq month record datetime date. */
+  RECORD_GTEQ_MONTH_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD,
+      "recordMonthGreaterThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.DATE),
+
+  /** The record lteq month record datetime date. */
+  RECORD_LTEQ_MONTH_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD,
+      "recordMonthLessThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record eq month record date datetime. */
+  RECORD_EQ_MONTH_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordMonthEqualsRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record dist month record date datetime. */
+  RECORD_DIST_MONTH_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordMonthDistinctRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gt month record date datetime. */
+  RECORD_GT_MONTH_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordMonthGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record lt month record date datetime. */
+  RECORD_LT_MONTH_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordMonthLessThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gteq month record date datetime. */
+  RECORD_GTEQ_MONTH_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD,
+      "recordMonthGreaterThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.TIMESTAMP),
+
+  /** The record lteq month record date datetime. */
+  RECORD_LTEQ_MONTH_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD,
+      "recordMonthLessThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record eq month record number datetime. */
+  RECORD_EQ_MONTH_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordMonthEqualsRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record dist month record number datetime. */
+  RECORD_DIST_MONTH_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordMonthDistinctRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gt month record number datetime. */
+  RECORD_GT_MONTH_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD,
+      "recordMonthGreaterThanRecordNumber", JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lt month record number datetime. */
+  RECORD_LT_MONTH_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordMonthLessThanRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gteq month record number datetime. */
+  RECORD_GTEQ_MONTH_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD,
+      "recordMonthGreaterThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.NUMBER),
+
+  /** The record lteq month record number datetime. */
+  RECORD_LTEQ_MONTH_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD,
+      "recordMonthLessThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.TIMESTAMP,
       JavaType.NUMBER),
 
   // Year operators
@@ -392,6 +641,130 @@ public enum RuleOperatorEnum {
       "recordYearLessThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.DATE,
       JavaType.NUMBER),
 
+  /** The record eq year datetime. */
+  RECORD_EQ_YEAR_DATETIME(EntityTypeEnum.RECORD, "recordYearEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record dist year datetime. */
+  RECORD_DIST_YEAR_DATETIME(EntityTypeEnum.RECORD, "recordYearDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gt year datetime. */
+  RECORD_GT_YEAR_DATETIME(EntityTypeEnum.RECORD, "recordYearGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lt year datetime. */
+  RECORD_LT_YEAR_DATETIME(EntityTypeEnum.RECORD, "recordYearLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gteq year datetime. */
+  RECORD_GTEQ_YEAR_DATETIME(EntityTypeEnum.RECORD, "recordYearGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lteq year datetime. */
+  RECORD_LTEQ_YEAR_DATETIME(EntityTypeEnum.RECORD, "recordYearLessThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record eq year record datetime. */
+  RECORD_EQ_YEAR_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordYearEqualsRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record dist year record datetime. */
+  RECORD_DIST_YEAR_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordYearDistinctRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gt year record datetime. */
+  RECORD_GT_YEAR_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordYearGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lt year record datetime. */
+  RECORD_LT_YEAR_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordYearLessThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gteq year record datetime. */
+  RECORD_GTEQ_YEAR_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordYearGreaterThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lteq year record datetime. */
+  RECORD_LTEQ_YEAR_RECORD_DATETIME(EntityTypeEnum.RECORD, "recordYearLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record eq year record datetime date. */
+  RECORD_EQ_YEAR_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordYearEqualsRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record dist year record datetime date. */
+  RECORD_DIST_YEAR_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordYearDistinctRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gt year record datetime date. */
+  RECORD_GT_YEAR_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordYearGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record lt year record datetime date. */
+  RECORD_LT_YEAR_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD, "recordYearLessThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gteq year record datetime date. */
+  RECORD_GTEQ_YEAR_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD,
+      "recordYearGreaterThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.DATE),
+
+  /** The record lteq year record datetime date. */
+  RECORD_LTEQ_YEAR_RECORD_DATETIME_DATE(EntityTypeEnum.RECORD,
+      "recordYearLessThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record eq year record date datetime. */
+  RECORD_EQ_YEAR_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordYearEqualsRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record dist year record date datetime. */
+  RECORD_DIST_YEAR_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordYearDistinctRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gt year record date datetime. */
+  RECORD_GT_YEAR_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordYearGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record lt year record date datetime. */
+  RECORD_LT_YEAR_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD, "recordYearLessThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gteq year record date datetime. */
+  RECORD_GTEQ_YEAR_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD,
+      "recordYearGreaterThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.TIMESTAMP),
+
+  /** The record lteq year record date datetime. */
+  RECORD_LTEQ_YEAR_RECORD_DATE_DATETIME(EntityTypeEnum.RECORD,
+      "recordYearLessThanOrEqualsThanRecord", JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record eq year record number datetime. */
+  RECORD_EQ_YEAR_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordYearEqualsRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record dist year record number datetime. */
+  RECORD_DIST_YEAR_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordYearDistinctRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gt year record number datetime. */
+  RECORD_GT_YEAR_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordYearGreaterThanRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record lt year record number datetime. */
+  RECORD_LT_YEAR_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD, "recordYearLessThanRecordNumber",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The record gteq year record number datetime. */
+  RECORD_GTEQ_YEAR_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD,
+      "recordYearGreaterThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.NUMBER),
+
+  /** The record lteq year record number datetime. */
+  RECORD_LTEQ_YEAR_RECORD_NUMBER_DATETIME(EntityTypeEnum.RECORD,
+      "recordYearLessThanOrEqualsThanRecordNumber", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.NUMBER),
+
   // Date operators
 
   /** The record eq date. */
@@ -441,6 +814,156 @@ public enum RuleOperatorEnum {
   /** The record lteq date record. */
   RECORD_LTEQ_DATE_RECORD(EntityTypeEnum.RECORD, "recordDateLessThanOrEqualsThanRecord",
       JavaType.BOOLEAN, JavaType.DATE, JavaType.DATE),
+
+  // DATETIME operators
+
+  /** The record eq datetime. */
+  RECORD_EQ_DATETIME(EntityTypeEnum.RECORD, "recordDateEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record dist datetime. */
+  RECORD_DIST_DATETIME(EntityTypeEnum.RECORD, "recordDateDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gt datetime. */
+  RECORD_GT_DATETIME(EntityTypeEnum.RECORD, "recordDateGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lt datetime. */
+  RECORD_LT_DATETIME(EntityTypeEnum.RECORD, "recordDateLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gteq datetime. */
+  RECORD_GTEQ_DATETIME(EntityTypeEnum.RECORD, "recordDateGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lteq datetime. */
+  RECORD_LTEQ_DATETIME(EntityTypeEnum.RECORD, "recordDateLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record eq datetime record. */
+  RECORD_EQ_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateEqualsRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record dist datetime record. */
+  RECORD_DIST_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateDistinctRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gt datetime record. */
+  RECORD_GT_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateGreaterThanRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lt datetime record. */
+  RECORD_LT_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateLessThanRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record gteq datetime record. */
+  RECORD_GTEQ_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateGreaterThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The record lteq datetime record. */
+  RECORD_LTEQ_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  // Date to datetime operators
+
+  /** The record eq date datetime. */
+  RECORD_EQ_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDateEquals", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record dist date datetime. */
+  RECORD_DIST_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDateDistinct", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gt date datetime. */
+  RECORD_GT_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDateGreaterThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record lt date datetime. */
+  RECORD_LT_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDateLessThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gteq date datetime. */
+  RECORD_GTEQ_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDateGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record lteq date datetime. */
+  RECORD_LTEQ_DATE_DATETIME(EntityTypeEnum.RECORD, "recordDateLessThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record eq date datetime record. */
+  RECORD_EQ_DATE_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateEqualsRecord", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record dist date datetime record. */
+  RECORD_DIST_DATE_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateDistinctRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gt date datetime record. */
+  RECORD_GT_DATE_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record lt date datetime record. */
+  RECORD_LT_DATE_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateLessThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record gteq date datetime record. */
+  RECORD_GTEQ_DATE_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateGreaterThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The record lteq date datetime record. */
+  RECORD_LTEQ_DATE_DATETIME_RECORD(EntityTypeEnum.RECORD, "recordDateLessThanOrEqualsThanRecord",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  // Datetime to date operators
+
+  /** The record eq datetime date. */
+  RECORD_EQ_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDateEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record dist datetime date. */
+  RECORD_DIST_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDateDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gt datetime date. */
+  RECORD_GT_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDateGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record lt datetime date. */
+  RECORD_LT_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDateLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gteq datetime date. */
+  RECORD_GTEQ_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDateGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record lteq datetime date. */
+  RECORD_LTEQ_DATETIME_DATE(EntityTypeEnum.RECORD, "recordDateLessThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record eq datetime date record. */
+  RECORD_EQ_DATETIME_DATE_RECORD(EntityTypeEnum.RECORD, "recordDateEqualsRecord", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record dist datetime date record. */
+  RECORD_DIST_DATETIME_DATE_RECORD(EntityTypeEnum.RECORD, "recordDateDistinctRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gt datetime date record. */
+  RECORD_GT_DATETIME_DATE_RECORD(EntityTypeEnum.RECORD, "recordDateGreaterThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record lt datetime date record. */
+  RECORD_LT_DATETIME_DATE_RECORD(EntityTypeEnum.RECORD, "recordDateLessThanRecord",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The record gteq datetime date record. */
+  RECORD_GTEQ_DATETIME_DATE_RECORD(EntityTypeEnum.RECORD, "recordDateGreaterThanOrEqualsThanRecord",
+      JavaType.TIMESTAMP, JavaType.DATE, JavaType.DATE),
+
+  /** The record lteq datetime date record. */
+  RECORD_LTEQ_DATETIME_DATE_RECORD(EntityTypeEnum.RECORD, "recordDateLessThanOrEqualsThanRecord",
+      JavaType.TIMESTAMP, JavaType.DATE, JavaType.DATE),
 
   // ***************************
   // ***** FIELD OPERATORS *****
@@ -536,6 +1059,30 @@ public enum RuleOperatorEnum {
   FIELD_LTEQ_DAY(EntityTypeEnum.FIELD, "fieldDayLessThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.NUMBER),
 
+  /** The field eq day datetime. */
+  FIELD_EQ_DAY_DATETIME(EntityTypeEnum.FIELD, "fieldDayEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field dist day datetime. */
+  FIELD_DIST_DAY_DATETIME(EntityTypeEnum.FIELD, "fieldDayDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field gt day datetime. */
+  FIELD_GT_DAY_DATETIME(EntityTypeEnum.FIELD, "fieldDayGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field lt day datetime. */
+  FIELD_LT_DAY_DATETIME(EntityTypeEnum.FIELD, "fieldDayLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field gteq day datetime. */
+  FIELD_GTEQ_DAY_DATETIME(EntityTypeEnum.FIELD, "fieldDayGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field lteq day datetime. */
+  FIELD_LTEQ_DAY_DATETIME(EntityTypeEnum.FIELD, "fieldDayLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
   // Month operators
 
   /** The field eq month. */
@@ -561,6 +1108,30 @@ public enum RuleOperatorEnum {
   /** The field lteq month. */
   FIELD_LTEQ_MONTH(EntityTypeEnum.FIELD, "fieldMonthLessThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.NUMBER),
+
+  /** The field eq month datetime. */
+  FIELD_EQ_MONTH_DATETIME(EntityTypeEnum.FIELD, "fieldMonthEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field dist month datetime. */
+  FIELD_DIST_MONTH_DATETIME(EntityTypeEnum.FIELD, "fieldMonthDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field gt month datetime. */
+  FIELD_GT_MONTH_DATETIME(EntityTypeEnum.FIELD, "fieldMonthGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field lt month datetime. */
+  FIELD_LT_MONTH_DATETIME(EntityTypeEnum.FIELD, "fieldMonthLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field gteq month datetime. */
+  FIELD_GTEQ_MONTH_DATETIME(EntityTypeEnum.FIELD, "fieldMonthGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field lteq month datetime. */
+  FIELD_LTEQ_MONTH_DATETIME(EntityTypeEnum.FIELD, "fieldMonthLessThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
 
   // Year operators
 
@@ -588,6 +1159,30 @@ public enum RuleOperatorEnum {
   FIELD_LTEQ_YEAR(EntityTypeEnum.FIELD, "fieldYearLessThanOrEqualsThan", JavaType.BOOLEAN,
       JavaType.DATE, JavaType.NUMBER),
 
+  /** The field eq year datetime. */
+  FIELD_EQ_YEAR_DATETIME(EntityTypeEnum.FIELD, "fieldYearEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field dist year datetime. */
+  FIELD_DIST_YEAR_DATETIME(EntityTypeEnum.FIELD, "fieldYearDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field gt year datetime. */
+  FIELD_GT_YEAR_DATETIME(EntityTypeEnum.FIELD, "fieldYearGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field lt year datetime. */
+  FIELD_LT_YEAR_DATETIME(EntityTypeEnum.FIELD, "fieldYearLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field gteq year datetime. */
+  FIELD_GTEQ_YEAR_DATETIME(EntityTypeEnum.FIELD, "fieldYearGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.NUMBER),
+
+  /** The field lteq year datetime. */
+  FIELD_LTEQ_YEAR_DATETIME(EntityTypeEnum.FIELD, "fieldYearLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.NUMBER),
+
   // Date operators
 
   /** The field eq date. */
@@ -612,7 +1207,85 @@ public enum RuleOperatorEnum {
 
   /** The field lteq date. */
   FIELD_LTEQ_DATE(EntityTypeEnum.FIELD, "fieldDateLessThanOrEqualsThan", JavaType.BOOLEAN,
-      JavaType.DATE, JavaType.DATE);
+      JavaType.DATE, JavaType.DATE),
+
+  // Datetime operators
+
+  /** The field eq datetime. */
+  FIELD_EQ_DATETIME(EntityTypeEnum.FIELD, "fieldDateEquals", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.TIMESTAMP),
+
+  /** The field dist datetime. */
+  FIELD_DIST_DATETIME(EntityTypeEnum.FIELD, "fieldDateDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The field gt datetime. */
+  FIELD_GT_DATETIME(EntityTypeEnum.FIELD, "fieldDateGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The field lt datetime. */
+  FIELD_LT_DATETIME(EntityTypeEnum.FIELD, "fieldDateLessThan", JavaType.BOOLEAN, JavaType.TIMESTAMP,
+      JavaType.TIMESTAMP),
+
+  /** The field gteq datetime. */
+  FIELD_GTEQ_DATETIME(EntityTypeEnum.FIELD, "fieldDateGreaterThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  /** The field lteq datetime. */
+  FIELD_LTEQ_DATETIME(EntityTypeEnum.FIELD, "fieldDateLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.TIMESTAMP),
+
+  // Date to datetime operators
+
+  /** The field eq date datetime. */
+  FIELD_EQ_DATE_DATETIME(EntityTypeEnum.FIELD, "fieldDateEquals", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.TIMESTAMP),
+
+  /** The field dist date datetime. */
+  FIELD_DIST_DATE_DATETIME(EntityTypeEnum.FIELD, "fieldDateDistinct", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The field gt date datetime. */
+  FIELD_GT_DATE_DATETIME(EntityTypeEnum.FIELD, "fieldDateGreaterThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The field lt date datetime. */
+  FIELD_LT_DATE_DATETIME(EntityTypeEnum.FIELD, "fieldDateLessThan", JavaType.BOOLEAN, JavaType.DATE,
+      JavaType.TIMESTAMP),
+
+  /** The field gteq date datetime. */
+  FIELD_GTEQ_DATE_DATETIME(EntityTypeEnum.FIELD, "fieldDateGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.DATE, JavaType.TIMESTAMP),
+
+  /** The field lteq date datetime. */
+  FIELD_LTEQ_DATE_DATETIME(EntityTypeEnum.FIELD, "fieldDateLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.DATE, JavaType.TIMESTAMP),
+
+  // Datetime to date operators
+
+  /** The field eq datetime date. */
+  FIELD_EQ_DATETIME_DATE(EntityTypeEnum.FIELD, "fieldDateEquals", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The field dist datetime date. */
+  FIELD_DIST_DATETIME_DATE(EntityTypeEnum.FIELD, "fieldDateDistinct", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The field gt datetime date. */
+  FIELD_GT_DATETIME_DATE(EntityTypeEnum.FIELD, "fieldDateGreaterThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The field lt datetime date. */
+  FIELD_LT_DATETIME_DATE(EntityTypeEnum.FIELD, "fieldDateLessThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The field gteq datetime date. */
+  FIELD_GTEQ_DATETIME_DATE(EntityTypeEnum.FIELD, "fieldDateGreaterThanOrEqualsThan",
+      JavaType.BOOLEAN, JavaType.TIMESTAMP, JavaType.DATE),
+
+  /** The field lteq datetime date. */
+  FIELD_LTEQ_DATETIME_DATE(EntityTypeEnum.FIELD, "fieldDateLessThanOrEqualsThan", JavaType.BOOLEAN,
+      JavaType.TIMESTAMP, JavaType.DATE);
 
   /** The entity type. */
   private final EntityTypeEnum entityType;
@@ -632,7 +1305,7 @@ public enum RuleOperatorEnum {
   static {
     map = new HashMap<>();
     for (RuleOperatorEnum e : values()) {
-      map.put(e.getFunctionName(), e);
+      map.putIfAbsent(e.getFunctionName(), e);
     }
   }
 
