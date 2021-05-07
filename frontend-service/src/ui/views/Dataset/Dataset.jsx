@@ -517,16 +517,21 @@ export const Dataset = withRouter(({ match, history }) => {
     try {
       const { data } = await DataflowService.reporting(match.params.dataflowId);
       let dataset = [];
-
       if (isTestDataset) {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       } else {
         dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
-        setIsDatasetReleased(dataset[0].isReleased);
+        if (!isEmpty(dataset)) {
+          setIsDatasetReleased(dataset[0].isReleased);
+        } else {
+          dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+          setIsDatasetReleased(dataset[0]?.isReleased);
+        }
       }
 
       setDataset(dataset[0]);
     } catch (error) {
+      console.error(error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
