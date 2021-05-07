@@ -217,9 +217,7 @@ export const ShareRights = ({
   const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
 
   const renderDeleteColumnTemplate = userRight =>
-    notDeletableRoles.includes(userRight?.role) ? (
-      <ActionsColumn onEditClick={() => {}} />
-    ) : (
+    notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
         onEditClick={() => {}}
         onDeleteClick={() =>
