@@ -14,7 +14,7 @@ import { routes } from 'ui/routes';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -107,11 +107,12 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = type.code.split('+');
-    return ({
-    label: type.text,
-    icon: extensionsTypes[0],
-    command: () => onExportDataInternalExtension(type.code)
-  })});
+    return {
+      label: type.text,
+      icon: extensionsTypes[0],
+      command: () => onExportDataInternalExtension(type.code)
+    };
+  });
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);

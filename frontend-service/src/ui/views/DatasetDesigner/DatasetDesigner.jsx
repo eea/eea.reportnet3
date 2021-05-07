@@ -26,7 +26,7 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
-import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -1209,12 +1209,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 }
               />
               {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                <Menu
-                  id="importDataSetMenu"
-                  model={designerState.importButtonsList}
-                  popup={true}
-                  ref={importMenuRef}
-                />
+                <Menu id="importDataSetMenu" model={designerState.importButtonsList} popup={true} ref={importMenuRef} />
               )}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${

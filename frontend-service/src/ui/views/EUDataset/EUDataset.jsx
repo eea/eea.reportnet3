@@ -11,7 +11,7 @@ import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -134,11 +134,12 @@ export const EUDataset = withRouter(({ history, match }) => {
   const getExportExtensionsList = () => {
     const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
       const extensionsTypes = type.code.split('+');
-      return ({
-      command: () => onExportDataInternalExtension(type.code),
-      icon: extensionsTypes[0],
-      label: type.text
-    })}) 
+      return {
+        command: () => onExportDataInternalExtension(type.code),
+        icon: extensionsTypes[0],
+        label: type.text
+      };
+    });
 
     euDatasetDispatch({
       type: 'GET_EXPORT_EXTENSIONS_LIST',

@@ -12,7 +12,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ChipButton } from 'ui/views/_components/ChipButton';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
-import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';

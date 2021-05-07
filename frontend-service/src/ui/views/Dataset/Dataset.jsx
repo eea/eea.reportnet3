@@ -22,7 +22,7 @@ import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'ui/views/Dataflow/_components/BigButton/_components/Menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -278,11 +278,12 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = !isNil(type.code) && type.code.split('+');
-    return ({
-    label: type.text,
-    icon: extensionsTypes[0],
-    command: () => onExportDataInternalExtension(type.code)
-  })});
+    return {
+      label: type.text,
+      icon: extensionsTypes[0],
+      command: () => onExportDataInternalExtension(type.code)
+    };
+  });
 
   const externalIntegrationsNames = [
     {
@@ -855,12 +856,7 @@ export const Dataset = withRouter(({ match, history }) => {
                   }
                 />
                 {!isEmpty(externalOperationsList.importOtherSystems) && (
-                  <Menu
-                    id="importDataSetMenu"
-                    model={importButtonsList}
-                    popup={true}
-                    ref={importMenuRef}
-                  />
+                  <Menu id="importDataSetMenu" model={importButtonsList} popup={true} ref={importMenuRef} />
                 )}
               </Fragment>
             )}
