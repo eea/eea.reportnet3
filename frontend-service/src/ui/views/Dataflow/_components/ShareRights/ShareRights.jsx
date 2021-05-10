@@ -187,8 +187,8 @@ export const ShareRights = ({
 
   const onRoleChange = async (userRight, newWritePermission) => {
     const { userRightList } = shareRightsState;
-    const [thisUser] = userRightList.filter(thisUser => thisUser.id === userRight.id);
-    thisUser.role = newWritePermission;
+    const [currentUser] = userRightList.filter(currentUser => currentUser.id === userRight.id);
+    currentUser.role = newWritePermission;
 
     shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { userRightList } });
   };
