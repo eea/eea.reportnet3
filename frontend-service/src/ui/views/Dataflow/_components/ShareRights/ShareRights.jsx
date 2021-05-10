@@ -58,6 +58,7 @@ export const ShareRights = ({
     isLoading: false
   });
 
+  const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -65,6 +66,12 @@ export const ShareRights = ({
   }, [shareRightsState.isDataUpdated]);
 
   useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
+
+  useEffect(() => {
+    if (!shareRightsState.userRight.isNew && dropdownRef.current && isUserRightManagementDialogVisible) {
+      dropdownRef.current.focusInput.focus();
+    }
+  }, [dropdownRef.current, isUserRightManagementDialogVisible]);
 
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
 
@@ -284,6 +291,7 @@ export const ShareRights = ({
             optionLabel="label"
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
+            ref={dropdownRef}
             value={first(roleOptions.filter(option => option.role === userRight.role))}
           />
         </div>
