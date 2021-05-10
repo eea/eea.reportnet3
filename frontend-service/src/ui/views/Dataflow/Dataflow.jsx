@@ -966,21 +966,21 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
+              addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
               columnHeader={resources.messages['requestersAccountColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+              editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
+              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               notificationKey={'DELETE_REQUESTER_ERROR'}
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={requesterRoleOptions}
-              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               userType={'requester'}
-              editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
-              addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
             />
           </Dialog>
         )}

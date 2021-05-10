@@ -185,22 +185,15 @@ export const ShareRights = ({
     }
   };
 
-  const onRoleChange = async newRole => {
-    const { userRight } = shareRightsState;
-    userRight.role = newRole;
-
-    shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { userRight } });
+  const onRoleChange = newRole => {
+    shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { role: newRole } });
   };
 
   const onSetAccount = inputValue => {
-    const { userRightList } = shareRightsState;
-    const [newUser] = userRightList.filter(userRight => userRight.isNew);
-    newUser.account = inputValue;
-
     shareRightsDispatch({
       type: 'ON_SET_ACCOUNT',
       payload: {
-        userRightList,
+        account: inputValue,
         accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
         accountNotFound: false
       }
@@ -241,7 +234,7 @@ export const ShareRights = ({
       />
     );
 
-  const renderRoleColumnTemplate2 = userRight => {
+  const renderRoleColumnTemplate = userRight => {
     const [option] = roleOptions.filter(option => option.role === userRight.role);
     return <div>{option.label}</div>;
   };
@@ -249,7 +242,7 @@ export const ShareRights = ({
   const renderRightManagement = () => {
     const userRight = shareRightsState.isEditing
       ? shareRightsState.userRight
-      : new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
+      : new UserRight({ account: '', isNew: true, role: '' });
 
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
 
@@ -294,30 +287,7 @@ export const ShareRights = ({
     );
   };
 
-  const renderAccountTemplate = userRight => {
-    const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
-
-    return (
-      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
-        <input
-          autoFocus={userRight.isNew}
-          className={!userRight.isNew ? styles.disabledInput : ''}
-          disabled={!userRight.isNew}
-          id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
-          onBlur={() => updateUser(userRight)}
-          onChange={event => onSetAccount(event.target.value)}
-          onKeyDown={event => onEnterKey(event.key, userRight)}
-          placeholder={placeholder}
-          value={userRight.account}
-        />
-        <label className="srOnly" htmlFor="emptyInput">
-          {placeholder}
-        </label>
-      </div>
-    );
-  };
-
-  const renderAccountTemplate3 = userRight => <div>{userRight.account}</div>;
+  const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
 
   return (
     <Fragment>
@@ -328,8 +298,8 @@ export const ShareRights = ({
           <div className={styles.table}>
             {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
             <DataTable value={shareRightsState.userRightList}>
-              <Column body={renderAccountTemplate3} header={columnHeader} />
-              <Column body={renderRoleColumnTemplate2} header={resources.messages['rolesColumn']} />
+              <Column body={renderAccountTemplate} header={columnHeader} />
+              <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
               <Column
                 body={renderButtonsColumnTemplate}
                 className={styles.emptyTableHeader}
@@ -365,7 +335,7 @@ export const ShareRights = ({
         <ConfirmDialog
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
-          labelCancel={resources.messages['no']}
+          labelCancel={resources.messages['cancel']}
           labelConfirm={resources.messages['save']}
           onConfirm={() => onDeleteUserRight()}
           onHide={() => onCloseManagementDialog()}

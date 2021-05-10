@@ -16,21 +16,20 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'ON_CLOSE_MANAGEMENT_DIALOG':
       return {
         ...state,
-        userRightToEdit: null,
-        userRightToAdd: null,
+        userRight: {},
         isEditing: false
       };
 
     case 'ON_SET_ACCOUNT':
       return {
         ...state,
-        userRightList: payload.userRightList,
+        userRight: { ...state.userRight, account: payload.account },
         accountHasError: payload.accountHasError,
         accountNotFound: payload.accountNotFound
       };
 
     case 'ON_ROLE_CHANGE':
-      return { ...state, userRight: payload.userRight };
+      return { ...state, userRight: { ...state.userRight, role: payload.role } };
 
     case 'SET_ACCOUNT_HAS_ERROR':
       return { ...state, accountHasError: payload.accountHasError };
