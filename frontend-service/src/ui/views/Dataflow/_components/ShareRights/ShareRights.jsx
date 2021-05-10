@@ -3,7 +3,6 @@ import { Fragment, useContext, useEffect, useState, useReducer } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import uuid from 'uuid';
 
 import styles from './ShareRights.module.scss';
 import { config } from 'conf';
@@ -14,7 +13,6 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { UserRight } from 'core/domain/model/UserRight/UserRight';
 import { UserRightService } from 'core/services/UserRight';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -47,7 +45,7 @@ export const ShareRights = ({
     accountNotFound: false,
     userRightToDelete: '',
     userRightList: [],
-    userRight: {},
+    userRight: { account: '', isNew: true, role: '' },
     clonedUserRightList: [],
     isDeletingUserRight: false,
     isDataUpdated: false,
@@ -244,9 +242,7 @@ export const ShareRights = ({
   };
 
   const renderRightManagement = () => {
-    const userRight = shareRightsState.isEditing
-      ? shareRightsState.userRight
-      : new UserRight({ account: '', isNew: true, role: '' });
+    const { userRight } = shareRightsState;
 
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
 

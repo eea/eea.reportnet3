@@ -16,7 +16,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'ON_CLOSE_MANAGEMENT_DIALOG':
       return {
         ...state,
-        userRight: {},
+        userRight: { account: '', isNew: true, role: '' },
         isEditing: false
       };
 
