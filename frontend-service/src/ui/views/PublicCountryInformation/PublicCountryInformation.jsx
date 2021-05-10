@@ -360,13 +360,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         {isLoading ? (
           <Spinner className={styles.isLoading} />
         ) : isEmpty(countryName) ? (
-          <div className={styles.noDataflowsWrapper}>
-            <div className={styles.noDataflows}>{resources.messages['wrongUrlCountryCode']}</div>
-          </div>
+          <div className={styles.noDataflows}>{resources.messages['wrongUrlCountryCode']}</div>
         ) : isEmpty(dataflows) ? (
-          <div className={styles.noDataflowsWrapper}>
-            <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
-          </div>
+          <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
         ) : (
           <div className={styles.countriesList}>
             <DataTable
