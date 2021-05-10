@@ -230,6 +230,12 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'ON_CLOSE_MANAGEMENT_DIALOG' });
   };
 
+  const onEnterKey = (key, userRight) => {
+    if (key === 'Enter' && isValidEmail(userRight.account) && isRoleChanged(userRight)) {
+      onUpdateUser(userRight);
+    }
+  };
+
   const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
 
   const onEditUserRight = userRight => {
@@ -288,6 +294,7 @@ export const ShareRights = ({
             appendTo={document.body}
             id="rolesDropdown"
             onChange={event => onRoleChange(event.target.value.role)}
+            onKeyPress={event => onEnterKey(event.key, userRight)}
             optionLabel="label"
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
