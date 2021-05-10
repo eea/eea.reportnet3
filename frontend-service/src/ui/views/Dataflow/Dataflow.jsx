@@ -404,7 +404,7 @@ const Dataflow = withRouter(({ history, match }) => {
         className="p-button-primary p-button-animated-blink p-button-right-aligned"
         icon={'check'}
         label={resources.messages['add']}
-        onClick={() => manageDialogs('isManageRequestersDialogVisible', false)}
+        onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -994,9 +994,10 @@ const Dataflow = withRouter(({ history, match }) => {
               representativeId={representativeId}
               roleOptions={requesterRoleOptions}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
-              // isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               userType={'requester'}
+              editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
+              addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
             />
           </Dialog>
         )}
@@ -1021,6 +1022,8 @@ const Dataflow = withRouter(({ history, match }) => {
               userType={'reporter'}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              editConfirmHeader={resources.messages[`editReporterConfirmHeader`]}
+              addConfirmHeader={resources.messages[`addReporterConfirmHeader`]}
             />
           </Dialog>
         )}

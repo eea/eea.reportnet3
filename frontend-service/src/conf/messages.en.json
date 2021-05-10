@@ -1078,6 +1078,10 @@
     "onlyReleasedEuDatasetCheckboxLabel": "Only released to EU dataset",
     "referenceDataset": "Reference dataset",
     "navigateToDataflow": "Navigate to the dataflow",
-    "navigateToCountry": "Navigate to the country"
+    "navigateToCountry": "Navigate to the country",
+    "editRequesterConfirmHeader": "Edit requester",
+    "addRequesterConfirmHeader": "Add requester",
+    "editReporterConfirmHeader": "Edit reporter",
+    "addReporterConfirmHeader": "Add reporter"
   }
 }

@@ -35,7 +35,9 @@ export const ShareRights = ({
   deleteConfirmMessage,
   notificationKey,
   placeholder,
-  representativeId
+  representativeId,
+  editConfirmHeader,
+  addConfirmHeader
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -50,7 +52,6 @@ export const ShareRights = ({
     isDeletingUserRight: false,
     isDataUpdated: false,
     isDeleteDialogVisible: false
-    // isUserRightManagementDialogVisible
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -86,9 +87,6 @@ export const ShareRights = ({
   const getAllUsers = async () => {
     try {
       const userRightList = await callEndPoint('getAll');
-      // const newUserRight = new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
-      // const userRightListWithNew = [...userRightList, newUserRight];
-      // const clonedUserRightList = cloneDeep(userRightList);
 
       shareRightsDispatch({
         type: 'GET_USER_RIGHT_LIST',
@@ -187,7 +185,7 @@ export const ShareRights = ({
     }
   };
 
-  const onWritePermissionChange = async (userRight, newWritePermission) => {
+  const onRoleChange = async (userRight, newWritePermission) => {
     const { userRightList } = shareRightsState;
     const [thisUser] = userRightList.filter(thisUser => thisUser.id === userRight.id);
     thisUser.role = newWritePermission;
@@ -216,16 +214,22 @@ export const ShareRights = ({
 
   const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
 
+  const onEditUserRight = userRight => {
+    setIsUserRightManagementDialogVisible(true);
+  };
+
   const renderDeleteColumnTemplate = userRight =>
     notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
-        onEditClick={() => {}}
         onDeleteClick={() =>
           shareRightsDispatch({
             type: 'ON_DELETE_USER_RIGHT',
             payload: { isDeleteDialogVisible: true, userRightToDelete: userRight }
           })
         }
+        onEditClick={() => {
+          onEditUserRight(userRight);
+        }}
       />
     );
 
@@ -237,10 +241,9 @@ export const ShareRights = ({
     return (
       <Fragment>
         <select
-          // disabled={}
           id={userType}
           onBlur={() => updateUser(userRight)}
-          onChange={event => onWritePermissionChange(userRight, event.target.value)}
+          onChange={event => onRoleChange(userRight, event.target.value)}
           onKeyDown={event => onEnterKey(event.key, userRight)}
           value={userRight.role}>
           {userRightRoleOptions.map(option => {
@@ -262,27 +265,55 @@ export const ShareRights = ({
     return <div>{option.label}</div>;
   };
 
-  const renderAccountTemplate2 = () => {
-    const userRight = new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
+  const renderRightManagement = () => {
+    const userRight = shareRightsState.userRightToEdit
+      ? shareRightsState.userRightToEdit
+      : new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
+
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
 
+    const userRightRoleOptions = userRight.isNew
+      ? [{ label: resources.messages['selectRole'], role: '' }, ...roleOptions]
+      : roleOptions;
+
     return (
-      <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
-        <input
-          autoFocus={userRight.isNew}
-          className={!userRight.isNew ? styles.disabledInput : ''}
-          disabled={!userRight.isNew}
-          id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
-          onBlur={() => updateUser(userRight)}
-          onChange={event => onSetAccount(event.target.value)}
-          onKeyDown={event => onEnterKey(event.key, userRight)}
-          placeholder={placeholder}
-          value={userRight.account}
-        />
-        <label className="srOnly" htmlFor="emptyInput">
-          {placeholder}
-        </label>
-      </div>
+      <Fragment>
+        <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+          <input
+            autoFocus={userRight.isNew}
+            className={!userRight.isNew ? styles.disabledInput : ''}
+            disabled={!userRight.isNew}
+            id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
+            onBlur={() => updateUser(userRight)}
+            onChange={event => onSetAccount(event.target.value)}
+            onKeyDown={event => onEnterKey(event.key, userRight)}
+            placeholder={placeholder}
+            value={userRight.account}
+          />
+          <label className="srOnly" htmlFor="emptyInput">
+            {placeholder}
+          </label>
+        </div>
+        <div>
+          <select
+            id={userType}
+            onBlur={() => updateUser(userRight)}
+            onChange={event => onRoleChange(userRight, event.target.value)}
+            onKeyDown={event => onEnterKey(event.key, userRight)}
+            value={userRight.role}>
+            {userRightRoleOptions.map(option => {
+              return (
+                <option className="p-dropdown-item" key={option.role} value={option.role}>
+                  {option.label}
+                </option>
+              );
+            })}
+          </select>
+          <label className="srOnly" htmlFor={userType}>
+            {placeholder}
+          </label>
+        </div>
+      </Fragment>
     );
   };
 
@@ -355,15 +386,15 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
           disabledConfirm={shareRightsState.isDeletingUserRight}
-          header={deleteConfirmHeader}
+          header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteUserRight()}
-          onHide={() => setIsUserRightManagementDialogVisible(false)}>
-          {renderAccountTemplate2()}
+          onHide={() => setIsUserRightManagementDialogVisible(false)}
+          visible={isUserRightManagementDialogVisible}>
+          {renderRightManagement()}
         </ConfirmDialog>
       )}
     </Fragment>
