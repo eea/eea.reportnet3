@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
@@ -22,6 +22,8 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
+
+import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
 export const ShareRights = ({
   addConfirmHeader,
@@ -56,9 +58,13 @@ export const ShareRights = ({
     isLoading: false
   });
 
+  const inputRef = useRef(null);
+
   useEffect(() => {
     getAllUsers();
   }, [shareRightsState.isDataUpdated]);
+
+  useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
 
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
 
@@ -263,6 +269,7 @@ export const ShareRights = ({
             id={isEmpty(userRight.account) ? 'emptyInput' : placeholder}
             onChange={event => onSetAccount(event.target.value)}
             placeholder={placeholder}
+            ref={inputRef}
             value={userRight.account}
           />
           <label className="srOnly" htmlFor="emptyInput">
