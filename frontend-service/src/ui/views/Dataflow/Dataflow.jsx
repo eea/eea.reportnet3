@@ -992,21 +992,21 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
+              addConfirmHeader={resources.messages[`addReporterConfirmHeader`]}
               columnHeader={resources.messages['reportersAccountColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`reportersRightsDialogConfirmDeleteQuestion`]}
+              editConfirmHeader={resources.messages[`editReporterConfirmHeader`]}
+              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               notificationKey={'DELETE_REPORTER_ERROR'}
               placeholder={resources.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
-              userType={'reporter'}
-              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
-              editConfirmHeader={resources.messages[`editReporterConfirmHeader`]}
-              addConfirmHeader={resources.messages[`addReporterConfirmHeader`]}
+              userType={'reporter'}
             />
           </Dialog>
         )}
