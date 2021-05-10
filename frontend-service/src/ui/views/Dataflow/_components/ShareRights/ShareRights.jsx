@@ -125,7 +125,7 @@ export const ShareRights = ({
     return sameAccounts.length > 0;
   };
 
-  const isPermissionChanged = userRight => {
+  const isRoleChanged = userRight => {
     const [initialUser] = shareRightsState.clonedUserRightList.filter(fUserRight => fUserRight.id === userRight.id);
 
     return JSON.stringify(initialUser.role) !== JSON.stringify(userRight.role);
@@ -143,7 +143,7 @@ export const ShareRights = ({
       payload: { accountHasError }
     });
 
-    if (!userRight.isNew && isPermissionChanged(userRight)) {
+    if (!userRight.isNew && isRoleChanged(userRight)) {
       onUpdateUser(userRight);
     } else {
       if (isValidEmail(userRight.account) && !shareRightsState.accountHasError) {
@@ -344,7 +344,10 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
-          disabledConfirm={shareRightsState.isLoading}
+          disabledConfirm={
+            shareRightsState.isLoading ||
+            (!shareRightsState.userRight.isNew && !isRoleChanged(shareRightsState.userRight))
+          }
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
           iconConfirm={shareRightsState.isLoading ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
