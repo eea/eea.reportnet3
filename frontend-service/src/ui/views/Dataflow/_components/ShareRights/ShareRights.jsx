@@ -306,7 +306,7 @@ export const ShareRights = ({
                 body={renderButtonsColumnTemplate}
                 className={styles.emptyTableHeader}
                 header={deleteColumnHeader}
-                style={{ width: '80px' }}
+                style={{ width: '100px' }}
               />
             </DataTable>
           </div>
