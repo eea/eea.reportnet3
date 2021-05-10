@@ -23,21 +23,21 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
 export const ShareRights = ({
-  isUserRightManagementDialogVisible,
-  setIsUserRightManagementDialogVisible,
-  userType,
-  roleOptions,
+  addConfirmHeader,
   columnHeader,
   dataflowId,
   dataProviderId,
   deleteColumnHeader,
   deleteConfirmHeader,
   deleteConfirmMessage,
+  editConfirmHeader,
+  isUserRightManagementDialogVisible,
   notificationKey,
   placeholder,
   representativeId,
-  editConfirmHeader,
-  addConfirmHeader
+  roleOptions,
+  setIsUserRightManagementDialogVisible,
+  userType
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -285,8 +285,10 @@ export const ShareRights = ({
       : roleOptions;
 
     return (
-      <Fragment>
+      <div className={styles.manageDialog}>
         <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+          <p>{resources.messages['account']}</p>
+          {/* <InputText */}
           <input
             autoFocus={userRight.isNew}
             className={!userRight.isNew ? styles.disabledInput : ''}
@@ -301,6 +303,7 @@ export const ShareRights = ({
           </label>
         </div>
         <div>
+          <p>{resources.messages['role']}</p>
           <select id={userType} onChange={event => onRoleChange(event.target.value)} value={userRight.role}>
             {userRightRoleOptions.map(option => {
               return (
@@ -314,7 +317,7 @@ export const ShareRights = ({
             {placeholder}
           </label>
         </div>
-      </Fragment>
+      </div>
     );
   };
 
@@ -390,7 +393,7 @@ export const ShareRights = ({
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelConfirm={resources.messages['save']}
           onConfirm={() => onDeleteUserRight()}
           onHide={() => onCloseManagementDialog()}
           visible={isUserRightManagementDialogVisible}>

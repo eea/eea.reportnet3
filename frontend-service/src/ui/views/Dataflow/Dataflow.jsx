@@ -381,36 +381,19 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
 
-  const manageReportersDialogFooter = (
+  const shareRightsFooterDialogFooter = userType => (
     <Fragment>
       <Button
-        className="p-button-primary p-button-animated-blink p-button-right-aligned"
+        className={`p-button-primary p-button-animated-blink`}
         icon={'check'}
         label={resources.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => manageDialogs('isManageReportersDialogVisible', false)}
-      />
-    </Fragment>
-  );
-
-  const manageRequestersDialogFooter = (
-    <Fragment>
-      <Button
-        className="p-button-primary p-button-animated-blink p-button-right-aligned"
-        icon={'check'}
-        label={resources.messages['add']}
-        onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
-      />
-      <Button
-        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => manageDialogs('isManageRequestersDialogVisible', false)}
+        label={resources.messages['cancel']}
+        onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
       />
     </Fragment>
   );
@@ -978,7 +961,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isManageRequestersDialogVisible && (
           <Dialog
-            footer={manageRequestersDialogFooter}
+            footer={shareRightsFooterDialogFooter('Requesters')}
             header={resources.messages['manageRequestersRights']}
             onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
             visible={dataflowState.isManageRequestersDialogVisible}>
@@ -1004,7 +987,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isManageReportersDialogVisible && (
           <Dialog
-            footer={manageReportersDialogFooter}
+            footer={shareRightsFooterDialogFooter('Reporters')}
             header={resources.messages['manageReportersRights']}
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>

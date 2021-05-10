@@ -1082,6 +1082,7 @@
     "editRequesterConfirmHeader": "Edit requester",
     "addRequesterConfirmHeader": "Add requester",
     "editReporterConfirmHeader": "Edit reporter",
-    "addReporterConfirmHeader": "Add reporter"
+    "addReporterConfirmHeader": "Add reporter",
+    "account": "Account"
   }
 }

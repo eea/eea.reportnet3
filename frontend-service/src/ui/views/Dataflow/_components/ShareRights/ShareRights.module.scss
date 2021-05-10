@@ -21,3 +21,21 @@
     display: none;
   }
 }
+
+.manageDialog {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  div {
+    padding: 0 0.5rem;
+    width: 100%;
+
+    p {
+      font-size: 1rem;
+    }
+  }
+}
+.table tbody > tr {
+  height: 3rem !important;
+}
