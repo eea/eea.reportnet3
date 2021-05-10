@@ -261,35 +261,31 @@ export const ShareRights = ({
     return (
       <div className={styles.manageDialog}>
         <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
-          <p>{resources.messages['account']}</p>
-
+          <label className={styles.label} htmlFor="accountInput">
+            {resources.messages['account']}
+          </label>
           <InputText
-            autoFocus
             disabled={!userRight.isNew}
-            id={isEmpty(userRight.account) ? 'emptyInput' : placeholder}
+            id="accountInput"
             onChange={event => onSetAccount(event.target.value)}
             placeholder={placeholder}
             ref={inputRef}
             value={userRight.account}
           />
-          <label className="srOnly" htmlFor="emptyInput">
-            {placeholder}
-          </label>
         </div>
         <div>
-          <p>{resources.messages['role']}</p>
-
+          <label className={styles.label} htmlFor="rolesDropdown">
+            {resources.messages['role']}
+          </label>
           <Dropdown
             appendTo={document.body}
+            id="rolesDropdown"
             onChange={event => onRoleChange(event.target.value.role)}
             optionLabel="label"
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
             value={first(roleOptions.filter(option => option.role === userRight.role))}
           />
-          <label className="srOnly" htmlFor={userType}>
-            {placeholder}
-          </label>
         </div>
       </div>
     );
