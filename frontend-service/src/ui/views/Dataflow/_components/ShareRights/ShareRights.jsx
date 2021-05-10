@@ -1,6 +1,7 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -11,6 +12,8 @@ import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { Dropdown } from 'ui/views/_components/Dropdown';
+import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { UserRightService } from 'core/services/UserRight';
@@ -249,18 +252,13 @@ export const ShareRights = ({
 
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
 
-    const userRightRoleOptions = userRight.isNew
-      ? [{ label: resources.messages['selectRole'], role: '' }, ...roleOptions]
-      : roleOptions;
-
     return (
       <div className={styles.manageDialog}>
         <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
           <p>{resources.messages['account']}</p>
-          {/* <InputText */}
-          <input
-            autoFocus={userRight.isNew}
-            className={!userRight.isNew ? styles.disabledInput : ''}
+
+          <InputText
+            autoFocus
             disabled={!userRight.isNew}
             id={isEmpty(userRight.account) ? 'emptyInput' : placeholder}
             onChange={event => onSetAccount(event.target.value)}
@@ -273,15 +271,16 @@ export const ShareRights = ({
         </div>
         <div>
           <p>{resources.messages['role']}</p>
-          <select id={userType} onChange={event => onRoleChange(event.target.value)} value={userRight.role}>
-            {userRightRoleOptions.map(option => {
-              return (
-                <option className="p-dropdown-item" key={option.role} value={option.role}>
-                  {option.label}
-                </option>
-              );
-            })}
-          </select>
+
+          <Dropdown
+            appendTo={document.body}
+            onChange={event => onRoleChange(event.target.value.role)}
+            optionLabel="label"
+            optionValue="role"
+            options={roleOptions}
+            placeholder={resources.messages['selectRole']}
+            value={first(roleOptions.filter(option => option.role === userRight.role))}
+          />
           <label className="srOnly" htmlFor={userType}>
             {placeholder}
           </label>
