@@ -334,6 +334,7 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
+          disabledConfirm={shareRightsState.isLoading}
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
           iconConfirm={shareRightsState.isLoading ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
