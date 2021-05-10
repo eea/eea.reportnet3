@@ -30,7 +30,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       };
 
     case 'ON_ROLE_CHANGE':
-      return { ...state, userRightList: payload.userRightList };
+      return { ...state, userRight: payload.userRight };
 
     case 'SET_ACCOUNT_HAS_ERROR':
       return { ...state, accountHasError: payload.accountHasError };

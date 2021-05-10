@@ -185,12 +185,11 @@ export const ShareRights = ({
     }
   };
 
-  const onRoleChange = async (userRight, newWritePermission) => {
-    const { userRightList } = shareRightsState;
-    const [currentUser] = userRightList.filter(currentUser => currentUser.id === userRight.id);
-    currentUser.role = newWritePermission;
+  const onRoleChange = async newRole => {
+    const { userRight } = shareRightsState;
+    userRight.role = newRole;
 
-    shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { userRightList } });
+    shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { userRight } });
   };
 
   const onSetAccount = inputValue => {
@@ -242,33 +241,33 @@ export const ShareRights = ({
       />
     );
 
-  const renderRoleColumnTemplate = userRight => {
-    const userRightRoleOptions = userRight.isNew
-      ? [{ label: resources.messages['selectRole'], role: '' }, ...roleOptions]
-      : roleOptions;
+  // const renderRoleColumnTemplate = userRight => {
+  //   const userRightRoleOptions = userRight.isNew
+  //     ? [{ label: resources.messages['selectRole'], role: '' }, ...roleOptions]
+  //     : roleOptions;
 
-    return (
-      <Fragment>
-        <select
-          id={userType}
-          onBlur={() => updateUser(userRight)}
-          onChange={event => onRoleChange(userRight, event.target.value)}
-          onKeyDown={event => onEnterKey(event.key, userRight)}
-          value={userRight.role}>
-          {userRightRoleOptions.map(option => {
-            return (
-              <option className="p-dropdown-item" key={uuid.v4()} value={option.role}>
-                {option.label}
-              </option>
-            );
-          })}
-        </select>
-        <label className="srOnly" htmlFor={userType}>
-          {placeholder}
-        </label>
-      </Fragment>
-    );
-  };
+  //   return (
+  //     <Fragment>
+  //       <select
+  //         id={userType}
+  //         onChange={event => onRoleChange(userRight, event.target.value)}
+  //         onKeyDown={event => onEnterKey(event.key, userRight)}
+  //         value={userRight.role}>
+  //         {userRightRoleOptions.map(option => {
+  //           return (
+  //             <option className="p-dropdown-item" key={uuid.v4()} value={option.role}>
+  //               {option.label}
+  //             </option>
+  //           );
+  //         })}
+  //       </select>
+  //       <label className="srOnly" htmlFor={userType}>
+  //         {placeholder}
+  //       </label>
+  //     </Fragment>
+  //   );
+  // };
+
   const renderRoleColumnTemplate2 = userRight => {
     const [option] = roleOptions.filter(option => option.role === userRight.role);
     return <div>{option.label}</div>;
@@ -302,7 +301,7 @@ export const ShareRights = ({
           </label>
         </div>
         <div>
-          <select id={userType} onChange={event => onRoleChange(userRight, event.target.value)} value={userRight.role}>
+          <select id={userType} onChange={event => onRoleChange(event.target.value)} value={userRight.role}>
             {userRightRoleOptions.map(option => {
               return (
                 <option className="p-dropdown-item" key={option.role} value={option.role}>
