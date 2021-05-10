@@ -1164,8 +1164,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
             ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
       }
-
-      // OBSERVERS ????
+      // Observers
+      for (UserRepresentationVO observer : observers) {
+        assignments.add(createAssignments(referenceDatasetId, observer.getEmail(),
+            ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
+      }
 
 
       // Assign reporters

@@ -16,8 +16,6 @@ import lombok.ToString;
 @ToString
 public class ReferenceDatasetVO implements Serializable {
 
-
-
   /**
    * 
    */
@@ -40,5 +38,9 @@ public class ReferenceDatasetVO implements Serializable {
 
   /** The id dataflow. */
   private Long idDataflow;
+
+
+  /** The public file name. */
+  private String publicFileName;
 
 }

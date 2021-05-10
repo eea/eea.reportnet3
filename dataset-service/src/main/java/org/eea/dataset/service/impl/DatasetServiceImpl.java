@@ -150,6 +150,8 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
   private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
 
+
+
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -3000,8 +3002,13 @@ public class DatasetServiceImpl implements DatasetService {
   public File exportPublicFile(Long dataflowId, Long dataProviderId, String fileName)
       throws IOException, EEAException {
     // we compound the route and create the file
-    File file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-        "dataProvider-" + dataProviderId.toString()), fileName);
+    File file = null;
+    if (dataProviderId != null) {
+      file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+          "dataProvider-" + dataProviderId.toString()), fileName);
+    } else {
+      file = new File(new File(pathPublicFile, "dataflow-" + dataflowId), fileName);
+    }
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
@@ -3113,16 +3120,25 @@ public class DatasetServiceImpl implements DatasetService {
       throws IOException {
 
     // we create folder to save the file.zip
-    File fileFolderProvider =
-        new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
-            "dataProvider-" + dataProviderId.toString());
+    File fileFolderProvider = null;
+    if (dataProviderId != null) {
+      fileFolderProvider = new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
+          "dataProvider-" + dataProviderId.toString());
+    } else {
+      fileFolderProvider = new File(pathPublicFile, "dataflow-" + dataflowId.toString());
+    }
     fileFolderProvider.mkdirs();
 
     // we create the file.zip
-    File fileWriteZip =
-        new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-            "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
-
+    File fileWriteZip = null;
+    if (dataProviderId != null) {
+      fileWriteZip =
+          new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+              "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
+    } else {
+      fileWriteZip = new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+          nameFileUnique + ".zip");
+    }
     // create the context to add all files in a treemap inside to attachment and file information
     try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
       // we get the dataschema and check every table to see if find any field attachemnt
@@ -3299,6 +3315,12 @@ public class DatasetServiceImpl implements DatasetService {
           // with data to be copied into the
           // target dataset
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
+
+          // create zip to the reference
+          if (DatasetTypeEnum.REFERENCE.equals(type) && schema.isAvailableInPublic()) {
+            createReferenceDatasetFiles(datasetMb);
+          }
+
         }
       }
     } catch (Exception e) {
@@ -3518,6 +3540,49 @@ public class DatasetServiceImpl implements DatasetService {
     }
     query.append(" ) , ");
     return query.toString();
+  }
+
+
+  /**
+   * Creates the reference dataset files.
+   *
+   * @param dataset the dataset
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
+
+    List<DesignDataset> desingDataset =
+        designDatasetRepository.findByDataflowId(dataset.getDataflowId());
+    // look for the name of the design dataset to put the right name to the file
+    String datasetDesingName = "";
+    for (DesignDataset designDatasetVO : desingDataset) {
+      if (designDatasetVO.getDatasetSchema().equalsIgnoreCase(dataset.getDatasetSchema())) {
+        datasetDesingName = designDatasetVO.getDataSetName();
+      }
+    }
+
+    try {
+      // create the excel file
+      byte[] file = exportFile(dataset.getId(), "xlsx", null);
+      // we save the file in its files
+      if (null != file) {
+        String nameFileUnique = String.format("%s", datasetDesingName);
+        String nameFileScape = nameFileUnique + ".xlsx";
+
+        // we create the files and zip with the attachment if it is necessary
+        createFilesAndZip(dataset.getDataflowId(), null, dataset, file, nameFileUnique,
+            nameFileScape);
+
+        // we save the file in metabase with the name without the route
+        dataset.setPublicFileName(nameFileUnique + ".zip");
+        dataSetMetabaseRepository.save(dataset);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
+          e.getMessage(), e);
+    }
+    LOG.info("File created in dataflowId {}", dataset.getDataflowId());
+
   }
 
 }

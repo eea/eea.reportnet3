@@ -2,9 +2,11 @@ package org.eea.dataset.service.impl;
 
 import java.util.List;
 import org.eea.dataset.mapper.ReferenceDatasetMapper;
+import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,9 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   @Autowired
   private ReferenceDatasetMapper referenceDatasetMapper;
 
+  @Autowired
+  private ReferenceDatasetPublicMapper referenceDatasetPublicMapper;
+
 
   /**
    * Gets the reference dataset by dataflow id.
@@ -47,6 +52,19 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
     List<ReferenceDataset> referenceDatasets =
         referenceDatasetRepository.findByDataflowId(dataflowId);
     return referenceDatasetMapper.entityListToClass(referenceDatasets);
+  }
+
+
+  /**
+   * Gets the reference dataset public by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the reference dataset public by dataflow
+   */
+  @Override
+  public List<ReferenceDatasetPublicVO> getReferenceDatasetPublicByDataflow(Long dataflowId) {
+    return referenceDatasetPublicMapper
+        .entityListToClass(getReferenceDatasetByDataflowId(dataflowId));
   }
 
 
