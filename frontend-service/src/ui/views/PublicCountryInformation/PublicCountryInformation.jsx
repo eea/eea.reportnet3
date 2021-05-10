@@ -354,13 +354,15 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   return (
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
-        <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
+        {!isEmpty(countryName) && (
+          <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
+        )}
         {isLoading ? (
           <Spinner className={styles.isLoading} />
+        ) : isEmpty(countryName) ? (
+          <div className={styles.noDataflows}>{resources.messages['wrongUrlCountryCode']}</div>
         ) : isEmpty(dataflows) ? (
-          <div className={styles.noDataflowsWrapper}>
-            <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
-          </div>
+          <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
         ) : (
           <div className={styles.countriesList}>
             <DataTable

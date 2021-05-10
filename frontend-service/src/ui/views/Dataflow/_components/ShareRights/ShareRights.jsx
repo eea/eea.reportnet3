@@ -179,6 +179,10 @@ export const ShareRights = ({
             payload: { accountNotFound: true, accountHasError: true }
           });
         }
+        //change to 403
+        if (error?.response?.status === 500) {
+          getAllUsers();
+        }
       } finally {
         setIsLoading(false);
       }

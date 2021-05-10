@@ -1083,6 +1083,8 @@
     "addRequesterConfirmHeader": "Add requester",
     "editReporterConfirmHeader": "Edit reporter",
     "addReporterConfirmHeader": "Add reporter",
-    "account": "Account"
+    "account": "Account",
+    "wrongUrlCountryCode": "The country doesn't exist",
+    "wrongUrlDataflowId": "The dataflow doesn't exist"
   }
 }
