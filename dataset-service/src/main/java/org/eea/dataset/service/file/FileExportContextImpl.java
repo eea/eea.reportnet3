@@ -1,6 +1,8 @@
 package org.eea.dataset.service.file;
 
 import java.io.IOException;
+import java.util.List;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
@@ -34,8 +36,9 @@ public class FileExportContextImpl implements IFileExportContext {
    * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] fileWriter(Long dataflowId, Long partitionId, String tableSchemaId,
+  public List<byte[]> fileWriter(Long dataflowId, Long partitionId, String tableSchemaId,
       boolean includeCountryCode) throws IOException, EEAException {
-    return writerStrategy.writeFile(dataflowId, partitionId, tableSchemaId, includeCountryCode);
+    return writerStrategy.writeFileList(dataflowId, partitionId, tableSchemaId, includeCountryCode);
   }
+
 }

@@ -1002,14 +1002,14 @@ public class FileTreatmentHelper implements DisposableBean {
     final IFileExportContext context = fileExportFactory.createContext(extension);
 
     try {
-      byte[] content = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
+      List<byte[]> content = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
       Boolean includeZip = false;
       // If the length after splitting the file type arrives it's more than 1, then there's a
       // zip+xlsx type
       if (type.length > 1) {
         includeZip = true;
       }
-      generateFile(datasetId, extension, content, includeZip, datasetType);
+      generateFile(datasetId, extension, content.get(0), includeZip, datasetType);
       LOG.info("End of exportDatasetFile datasetId {}", datasetId);
     } catch (EEAException | IOException | NullPointerException e) {
       LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
