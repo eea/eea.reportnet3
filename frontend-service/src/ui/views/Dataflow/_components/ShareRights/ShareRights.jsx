@@ -276,7 +276,6 @@ export const ShareRights = ({
             appendTo={document.body}
             onChange={event => onRoleChange(event.target.value.role)}
             optionLabel="label"
-            optionValue="role"
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
             value={first(roleOptions.filter(option => option.role === userRight.role))}
