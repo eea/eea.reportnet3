@@ -114,6 +114,9 @@ public enum ResourceGroupEnum {
   /** The eudataset observer. */
   EUDATASET_OBSERVER("EUDataset-%s-DATA_OBSERVER"),
 
+  /** The referencedataset observer. */
+  REFERENCEDATASET_OBSERVER("ReferenceDataset-%s-DATA_OBSERVER"),
+
   /** The testdataset steward. */
   TESTDATASET_STEWARD("TestDataset-%s-DATA_STEWARD"),
 
