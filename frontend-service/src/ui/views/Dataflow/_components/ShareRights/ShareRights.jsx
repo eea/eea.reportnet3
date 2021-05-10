@@ -106,7 +106,7 @@ export const ShareRights = ({
   const isRepeatedAccount = account => {
     const sameAccounts = shareRightsState.userRightList.filter(userRight => userRight.account === account);
 
-    return sameAccounts.length > 1;
+    return sameAccounts.length > 0;
   };
 
   const isPermissionChanged = userRight => {
@@ -117,12 +117,14 @@ export const ShareRights = ({
 
   const updateUserRight = () => {
     const { userRight } = shareRightsState;
+
+    const isRepeated = userRight.isNew ? isRepeatedAccount(userRight.account) : false;
+
+    const accountHasError = !isValidEmail(userRight.account) || isRepeated || shareRightsState.accountNotFound;
+
     shareRightsDispatch({
       type: 'SET_ACCOUNT_HAS_ERROR',
-      payload: {
-        accountHasError:
-          !isValidEmail(userRight.account) || isRepeatedAccount(userRight.account) || shareRightsState.accountNotFound
-      }
+      payload: { accountHasError }
     });
 
     if (!userRight.isNew && isPermissionChanged(userRight)) {
@@ -153,12 +155,6 @@ export const ShareRights = ({
   const onDataChange = () => {
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
   };
-
-  // const onEnterKey = (key, userRight) => {
-  //   if (key === 'Enter' && isValidEmail(userRight.account) && isPermissionChanged(userRight)) {
-  //     onUpdateUser(userRight);
-  //   }
-  // };
 
   const onUpdateUser = async userRight => {
     if (userRight.role !== '') {
@@ -266,7 +262,7 @@ export const ShareRights = ({
             autoFocus={userRight.isNew}
             className={!userRight.isNew ? styles.disabledInput : ''}
             disabled={!userRight.isNew}
-            id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
+            id={isEmpty(userRight.account) ? 'emptyInput' : placeholder}
             onChange={event => onSetAccount(event.target.value)}
             placeholder={placeholder}
             value={userRight.account}
@@ -310,7 +306,7 @@ export const ShareRights = ({
                 body={renderButtonsColumnTemplate}
                 className={styles.emptyTableHeader}
                 header={deleteColumnHeader}
-                style={{ width: '100px' }}
+                style={{ width: '80px' }}
               />
             </DataTable>
           </div>
