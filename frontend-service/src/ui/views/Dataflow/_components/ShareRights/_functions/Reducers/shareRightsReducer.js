@@ -31,6 +31,9 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'ON_ROLE_CHANGE':
       return { ...state, userRight: { ...state.userRight, role: payload.role } };
 
+    case 'SET_IS_LOADING':
+      return { ...state, isLoading: payload.isLoading };
+
     case 'SET_ACCOUNT_HAS_ERROR':
       return { ...state, accountHasError: payload.accountHasError };
 

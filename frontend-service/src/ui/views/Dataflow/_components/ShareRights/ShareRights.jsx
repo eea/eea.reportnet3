@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -49,10 +49,9 @@ export const ShareRights = ({
     clonedUserRightList: [],
     isDeletingUserRight: false,
     isDataUpdated: false,
-    isDeleteDialogVisible: false
+    isDeleteDialogVisible: false,
+    isLoading: false
   });
-
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     getAllUsers();
@@ -116,7 +115,8 @@ export const ShareRights = ({
     return JSON.stringify(initialUser.role) !== JSON.stringify(userRight.role);
   };
 
-  const updateUser = userRight => {
+  const updateUserRight = () => {
+    const { userRight } = shareRightsState;
     shareRightsDispatch({
       type: 'SET_ACCOUNT_HAS_ERROR',
       payload: {
@@ -154,22 +154,26 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
   };
 
-  const onEnterKey = (key, userRight) => {
-    if (key === 'Enter' && isValidEmail(userRight.account) && isPermissionChanged(userRight)) {
-      onUpdateUser(userRight);
-    }
-  };
+  // const onEnterKey = (key, userRight) => {
+  //   if (key === 'Enter' && isValidEmail(userRight.account) && isPermissionChanged(userRight)) {
+  //     onUpdateUser(userRight);
+  //   }
+  // };
 
   const onUpdateUser = async userRight => {
     if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
-      setIsLoading(true);
+      shareRightsDispatch({
+        type: 'SET_IS_LOADING',
+        payload: { isLoading: true }
+      });
       try {
         const response = await callEndPoint('update', userRight);
 
         if (response.status >= 200 && response.status <= 299) {
           onDataChange();
         }
+        onCloseManagementDialog();
       } catch (error) {
         if (error?.response?.status === 404) {
           shareRightsDispatch({
@@ -182,7 +186,10 @@ export const ShareRights = ({
           getAllUsers();
         }
       } finally {
-        setIsLoading(false);
+        shareRightsDispatch({
+          type: 'SET_IS_LOADING',
+          payload: { isLoading: false }
+        });
       }
     }
   };
@@ -296,7 +303,6 @@ export const ShareRights = ({
           <Spinner style={{ top: 0 }} />
         ) : (
           <div className={styles.table}>
-            {isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
             <DataTable value={shareRightsState.userRightList}>
               <Column body={renderAccountTemplate} header={columnHeader} />
               <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
@@ -334,10 +340,10 @@ export const ShareRights = ({
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
-          iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
+          iconConfirm={shareRightsState.isLoading ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
           labelConfirm={resources.messages['save']}
-          onConfirm={() => onDeleteUserRight()}
+          onConfirm={() => updateUserRight()}
           onHide={() => onCloseManagementDialog()}
           visible={isUserRightManagementDialogVisible}>
           {renderRightManagement()}
