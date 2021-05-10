@@ -212,9 +212,18 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
 
+  const onCloseManagementDialog = () => {
+    setIsUserRightManagementDialogVisible(false);
+    shareRightsDispatch({ type: 'ON_CLOSE_MANAGEMENT_DIALOG' });
+  };
+
   const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
 
   const onEditUserRight = userRight => {
+    shareRightsDispatch({
+      type: 'ON_EDIT_USER_RIGHT',
+      payload: { isEditing: true, userRight }
+    });
     setIsUserRightManagementDialogVisible(true);
   };
 
@@ -266,8 +275,8 @@ export const ShareRights = ({
   };
 
   const renderRightManagement = () => {
-    const userRight = shareRightsState.userRightToEdit
-      ? shareRightsState.userRightToEdit
+    const userRight = shareRightsState.isEditing
+      ? shareRightsState.userRight
       : new UserRight({ account: '', dataProviderId: '', isNew: true, role: '' });
 
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
@@ -284,9 +293,7 @@ export const ShareRights = ({
             className={!userRight.isNew ? styles.disabledInput : ''}
             disabled={!userRight.isNew}
             id={isEmpty(userRight.account) ? 'emptyInput' : userRight.account}
-            onBlur={() => updateUser(userRight)}
             onChange={event => onSetAccount(event.target.value)}
-            onKeyDown={event => onEnterKey(event.key, userRight)}
             placeholder={placeholder}
             value={userRight.account}
           />
@@ -295,12 +302,7 @@ export const ShareRights = ({
           </label>
         </div>
         <div>
-          <select
-            id={userType}
-            onBlur={() => updateUser(userRight)}
-            onChange={event => onRoleChange(userRight, event.target.value)}
-            onKeyDown={event => onEnterKey(event.key, userRight)}
-            value={userRight.role}>
+          <select id={userType} onChange={event => onRoleChange(userRight, event.target.value)} value={userRight.role}>
             {userRightRoleOptions.map(option => {
               return (
                 <option className="p-dropdown-item" key={option.role} value={option.role}>
@@ -386,13 +388,12 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
-          disabledConfirm={shareRightsState.isDeletingUserRight}
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteUserRight()}
-          onHide={() => setIsUserRightManagementDialogVisible(false)}
+          onHide={() => onCloseManagementDialog()}
           visible={isUserRightManagementDialogVisible}>
           {renderRightManagement()}
         </ConfirmDialog>

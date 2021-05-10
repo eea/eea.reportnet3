@@ -13,6 +13,14 @@ export const shareRightsReducer = (state, { type, payload }) => {
         userRightToDelete: payload.userRightToDelete
       };
 
+    case 'ON_CLOSE_MANAGEMENT_DIALOG':
+      return {
+        ...state,
+        userRightToEdit: null,
+        userRightToAdd: null,
+        isEditing: false
+      };
+
     case 'ON_SET_ACCOUNT':
       return {
         ...state,
@@ -27,8 +35,8 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'SET_ACCOUNT_HAS_ERROR':
       return { ...state, accountHasError: payload.accountHasError };
 
-    // case 'SET_USER_TO_UPDATE':
-    //   return { ...state, userRight: payload.userRight };
+    case 'ON_EDIT_USER_RIGHT':
+      return { ...state, isEditing: payload.isEditing, userRight: payload.userRight };
 
     case 'SET_ACCOUNT_NOT_FOUND':
       return { ...state, accountNotFound: payload.accountNotFound, accountHasError: payload.accountHasError };
