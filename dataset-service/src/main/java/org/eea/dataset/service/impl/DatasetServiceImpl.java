@@ -964,7 +964,13 @@ public class DatasetServiceImpl implements DatasetService {
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode).get(0);
+    List<byte[]> file =
+        context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
+    if (file == null) {
+      return null;
+    } else {
+      return file.get(0);
+    }
   }
 
 
