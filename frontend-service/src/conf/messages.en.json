@@ -1093,6 +1093,8 @@
     "getReportersError": "Error getting reporters",
     "updateRequesterError": "Error editing requester",
     "addRequesterError": "Error editing requester",
-    "getRequestersError": "Error getting requesters"
+    "getRequestersError": "Error getting requesters",
+    "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
+    "geomTypeHelpTooltip": "Check the type format"
   }
 }
