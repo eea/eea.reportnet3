@@ -53,10 +53,13 @@ export const ShareRights = ({
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
     isLoading: true,
+    isLoadingButton: false,
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
     userRightToDelete: ''
   });
+
+  const { isLoadingButton } = shareRightsState;
 
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
@@ -99,7 +102,6 @@ export const ShareRights = ({
   };
 
   const getAllUsers = async () => {
-    setIsLoading(true);
     try {
       const userRightList = await callEndPoint('getAll');
 
@@ -180,7 +182,7 @@ export const ShareRights = ({
   const onUpdateUser = async userRight => {
     if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
-      setIsLoading(true);
+      setIsButtonLoading(true);
 
       try {
         const response = await callEndPoint('update', userRight);
@@ -200,7 +202,7 @@ export const ShareRights = ({
           getAllUsers();
         }
       } finally {
-        setIsLoading(false);
+        setIsButtonLoading(false);
       }
     }
   };
@@ -238,7 +240,11 @@ export const ShareRights = ({
     setIsUserRightManagementDialogVisible(true);
   };
 
-  const setIsLoading = value => shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isLoading: value } });
+  const setIsLoading = isLoading => shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isLoading } });
+
+  const setIsButtonLoading = isLoadingButton => {
+    shareRightsDispatch({ type: 'SET_IS_LOADING_BUTTON', payload: { isLoadingButton } });
+  };
 
   const renderButtonsColumnTemplate = userRight =>
     notDeletableRoles.includes(userRight?.role) ? null : (
@@ -346,11 +352,10 @@ export const ShareRights = ({
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
           disabledConfirm={
-            shareRightsState.isLoading ||
-            (!shareRightsState.userRight.isNew && !isRoleChanged(shareRightsState.userRight))
+            isLoadingButton || (!shareRightsState.userRight.isNew && !isRoleChanged(shareRightsState.userRight))
           }
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
-          iconConfirm={shareRightsState.isLoading ? 'spinnerAnimate' : 'check'}
+          iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
           labelConfirm={resources.messages['save']}
           onConfirm={() => updateUserRight()}

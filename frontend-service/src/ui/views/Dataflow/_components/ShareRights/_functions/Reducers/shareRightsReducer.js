@@ -45,6 +45,9 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'TOGGLE_DELETING_USER_RIGHT':
       return { ...state, isDeletingUserRight: payload.isDeleting };
 
+    case 'SET_IS_LOADING_BUTTON':
+      return { ...state, isLoadingButton: payload.isLoadingButton };
+
     default:
       return state;
   }
