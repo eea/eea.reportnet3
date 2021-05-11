@@ -384,10 +384,10 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const shareRightsFooterDialogFooter = userType => (
-    <Fragment>
+    <div className={styles.buttonsRolesFooter}>
       <Button
-        className={`p-button-primary p-button-animated-blink`}
-        icon={'check'}
+        className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
+        icon={'plus'}
         label={resources.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
@@ -397,7 +397,7 @@ const Dataflow = withRouter(({ history, match }) => {
         label={resources.messages['cancel']}
         onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
       />
-    </Fragment>
+    </div>
   );
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
