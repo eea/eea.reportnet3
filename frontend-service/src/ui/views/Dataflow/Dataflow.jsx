@@ -132,6 +132,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
 
+  const isOpenStatus = dataflowState.status === config.dataflowStatus.OPEN;
+
   const isLeadReporter = userContext.hasContextAccessPermission(
     config.permissions.prefixes.DATAFLOW,
     dataflowState.id,
@@ -192,7 +194,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (dataflowState.isCustodian) {
-      if (dataflowState.status === config.dataflowStatus.OPEN) {
+      if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
         leftSideBarContext.addHelpSteps(DataflowRequesterHelpConfig, 'dataflowRequesterDesignHelp');
@@ -851,10 +853,14 @@ const Dataflow = withRouter(({ history, match }) => {
     { label: config.permissions.roles.REPORTER_READ.label, role: config.permissions.roles.REPORTER_READ.key }
   ];
 
-  const requesterRoleOptions = [
+  const requesterRoleOptionsOpenStatus = [
     { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
-    { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key },
+    { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
+  ];
+
+  const requesterRoleOptions = [
+    ...requesterRoleOptionsOpenStatus,
     { label: config.permissions.roles.EDITOR_WRITE.label, role: config.permissions.roles.EDITOR_WRITE.key },
     { label: config.permissions.roles.EDITOR_READ.label, role: config.permissions.roles.EDITOR_READ.key }
   ];
@@ -978,7 +984,7 @@ const Dataflow = withRouter(({ history, match }) => {
               notificationKey={'DELETE_REQUESTER_ERROR'}
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
-              roleOptions={requesterRoleOptions}
+              roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               userType={'requester'}
             />
