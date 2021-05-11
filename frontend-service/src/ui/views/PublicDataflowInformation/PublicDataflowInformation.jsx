@@ -222,8 +222,13 @@ export const PublicDataflowInformation = withRouter(
 
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
-        const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+        let fileContent;
 
+        if (!isNil(dataProviderId)) {
+          fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+        } else {
+          fileContent = await DatasetService.downloadReferenceDatasetFileData(dataflowId, fileName);
+        }
         DownloadFile(fileContent.data, fileName);
       } catch (error) {
         if (error.response.status === 404) {
