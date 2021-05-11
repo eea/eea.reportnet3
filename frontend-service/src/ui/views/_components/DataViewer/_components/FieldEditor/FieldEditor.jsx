@@ -82,9 +82,12 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
+  const [dateTime, setDateTime] = useState();
+
   const { areEquals } = TextUtils;
 
   const calendarId = uuid.v4();
+  const calendarWithDatetimeId = uuid.v4();
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(getCodelistItemsWithEmptyOption());
@@ -229,7 +232,7 @@ const FieldEditor = ({
 
   const onCalendarBlur = e => {
     if (e.target.value !== RecordUtils.getCellValue(cells, cells.field)) {
-      saveCalendarDate(e.target.value);
+      saveCalendarDate(e.target.value, false);
       setIsCalendarVisible(false);
     }
   };
@@ -239,10 +242,12 @@ const FieldEditor = ({
     onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
   };
 
-  const saveCalendarDate = inputDateValue => {
+  const saveCalendarDate = (inputDateValue, withDatetime) => {
     const formattedDateValue = isEmpty(inputDateValue)
       ? ''
-      : RecordUtils.formatDate(inputDateValue, isNil(inputDateValue));
+      : !withDatetime
+      ? RecordUtils.formatDate(inputDateValue, isNil(inputDateValue))
+      : inputDateValue;
     const isCorrectDateFormattedValue = getIsCorrectDateFormatedValue(formattedDateValue);
     if (isCorrectDateFormattedValue || isEmpty(formattedDateValue)) {
       onEditorValueChange(cells, formattedDateValue, record);
@@ -250,13 +255,14 @@ const FieldEditor = ({
     }
   };
 
-  const saveCalendarFromKeys = inputDateValue => {
+  const saveCalendarFromKeys = (inputDateValue, withDatetime = false) => {
     setIsCalendarVisible(false);
-    saveCalendarDate(inputDateValue);
+    saveCalendarDate(inputDateValue, withDatetime);
   };
 
-  const onSelectCalendar = e => {
-    saveCalendarDate(dayjs(e.value).format('YYYY-MM-DD'));
+  const onSelectCalendar = (e, withDatetime = false) => {
+    console.log(e.value, dayjs(e.value).format());
+    saveCalendarDate(!withDatetime ? dayjs(e.value).format('YYYY-MM-DD') : dayjs(e.value).format(), withDatetime);
   };
 
   useEffect(() => {
@@ -272,6 +278,20 @@ const FieldEditor = ({
 
           if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
             saveCalendarFromKeys(inputValue);
+          }
+        });
+      const calendarWithDatetimeInput = document.getElementById(calendarWithDatetimeId);
+      !isNil(calendarWithDatetimeInput) &&
+        calendarWithDatetimeInput.addEventListener('keydown', event => {
+          const {
+            key,
+            target: { value: inputValue }
+          } = event;
+          const storedValue = RecordUtils.getCellValue(cells, cells.field);
+
+          if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
+            console.log('LLEGO');
+            saveCalendarFromKeys(inputValue, true);
           }
         });
     }
@@ -575,6 +595,56 @@ const FieldEditor = ({
             yearRange="1900:2100"
           />
         );
+      case 'DATETIME':
+        return (
+          <Calendar
+            appendTo={document.body}
+            inputId={calendarWithDatetimeId}
+            locale={{
+              firstDayOfWeek: 0,
+              dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+              dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+              dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+              monthNames: [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December'
+              ],
+              monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              today: 'Save',
+              clear: 'Clear',
+              weekHeader: 'Wk'
+            }}
+            monthNavigator={true}
+            onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
+            onFocus={e => {
+              const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
+              setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
+              setIsCalendarVisible(true);
+            }}
+            onTodayButtonClick={e => {
+              e.stopPropagation();
+              saveCalendarDate(dateTime === '' ? '' : dayjs(dateTime).format('YYYY-MM-DD HH:mm:ss'), true);
+            }}
+            showButtonBar={true}
+            showSeconds={true}
+            showTime={true}
+            todayButtonClassName="p-button-primary"
+            value={!isNil(dateTime) ? dateTime : new Date(RecordUtils.getCellValue(cells, cells.field))}
+            yearNavigator={true}
+            yearRange="1900:2100"
+          />
+        );
+
       case 'EMAIL':
         return (
           <InputText

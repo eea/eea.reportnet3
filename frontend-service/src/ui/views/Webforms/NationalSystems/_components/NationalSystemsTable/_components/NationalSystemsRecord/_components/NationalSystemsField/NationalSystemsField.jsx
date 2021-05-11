@@ -236,6 +236,23 @@ export const NationalSystemsField = ({
           />
         );
 
+      case 'DATETIME':
+        return (
+          <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
+            id={field.fieldId}
+            monthNavigator={true}
+            onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
+            onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
+            showSeconds={true}
+            showTime={true}
+            value={field.value}
+            yearNavigator={true}
+            yearRange="1900:2100"
+          />
+        );
+
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
