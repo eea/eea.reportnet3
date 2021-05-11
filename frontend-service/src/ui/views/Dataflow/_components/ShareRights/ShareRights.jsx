@@ -48,14 +48,14 @@ export const ShareRights = ({
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
     accountNotFound: false,
-    userRightToDelete: '',
-    userRightList: [],
-    userRight: { account: '', isNew: true, role: '' },
     clonedUserRightList: [],
-    isDeletingUserRight: false,
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isLoading: false
+    isDeletingUserRight: false,
+    isLoading: true,
+    userRight: { account: '', isNew: true, role: '' },
+    userRightList: [],
+    userRightToDelete: ''
   });
 
   const dropdownRef = useRef(null);
@@ -65,15 +65,16 @@ export const ShareRights = ({
     getAllUsers();
   }, [shareRightsState.isDataUpdated]);
 
-  useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
-
   useEffect(() => {
     if (!shareRightsState.userRight.isNew && dropdownRef.current && isUserRightManagementDialogVisible) {
       dropdownRef.current.focusInput.focus();
     }
   }, [dropdownRef.current, isUserRightManagementDialogVisible]);
 
+  useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
+
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
 
   const callEndPoint = async (method, userRight) => {
     if (userType === 'reporter') {
@@ -98,6 +99,7 @@ export const ShareRights = ({
   };
 
   const getAllUsers = async () => {
+    setIsLoading(true);
     try {
       const userRightList = await callEndPoint('getAll');
 
@@ -105,7 +107,10 @@ export const ShareRights = ({
         type: 'GET_USER_RIGHT_LIST',
         payload: { userRightList, clonedUserRightList: cloneDeep(userRightList) }
       });
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isValidEmail = email => {
@@ -121,7 +126,6 @@ export const ShareRights = ({
 
   const isRepeatedAccount = account => {
     const sameAccounts = shareRightsState.userRightList.filter(userRight => userRight.account === account);
-
     return sameAccounts.length > 0;
   };
 
@@ -142,10 +146,7 @@ export const ShareRights = ({
 
     const accountHasError = !isValidEmail(userRight.account) || isRepeated || shareRightsState.accountNotFound;
 
-    shareRightsDispatch({
-      type: 'SET_ACCOUNT_HAS_ERROR',
-      payload: { accountHasError }
-    });
+    shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError } });
 
     if (!userRight.isNew && isRoleChanged(userRight)) {
       onUpdateUser(userRight);
@@ -179,13 +180,10 @@ export const ShareRights = ({
   const onUpdateUser = async userRight => {
     if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
-      shareRightsDispatch({
-        type: 'SET_IS_LOADING',
-        payload: { isLoading: true }
-      });
+      setIsLoading(true);
+
       try {
         const response = await callEndPoint('update', userRight);
-
         if (response.status >= 200 && response.status <= 299) {
           onDataChange();
         }
@@ -202,17 +200,12 @@ export const ShareRights = ({
           getAllUsers();
         }
       } finally {
-        shareRightsDispatch({
-          type: 'SET_IS_LOADING',
-          payload: { isLoading: false }
-        });
+        setIsLoading(false);
       }
     }
   };
 
-  const onRoleChange = newRole => {
-    shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { role: newRole } });
-  };
+  const onRoleChange = newRole => shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { role: newRole } });
 
   const onSetAccount = inputValue => {
     shareRightsDispatch({
@@ -240,15 +233,12 @@ export const ShareRights = ({
     }
   };
 
-  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
-
   const onEditUserRight = userRight => {
-    shareRightsDispatch({
-      type: 'ON_EDIT_USER_RIGHT',
-      payload: { isEditing: true, userRight }
-    });
+    shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditing: true, userRight } });
     setIsUserRightManagementDialogVisible(true);
   };
+
+  const setIsLoading = value => shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isLoading: value } });
 
   const renderButtonsColumnTemplate = userRight =>
     notDeletableRoles.includes(userRight?.role) ? null : (
@@ -259,9 +249,7 @@ export const ShareRights = ({
             payload: { isDeleteDialogVisible: true, userRightToDelete: userRight }
           })
         }
-        onEditClick={() => {
-          onEditUserRight(userRight);
-        }}
+        onEditClick={() => onEditUserRight(userRight)}
       />
     );
 
@@ -312,11 +300,13 @@ export const ShareRights = ({
 
   const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
 
+  if (shareRightsState.isLoading) return <Spinner style={{ top: 0 }} />;
+
   return (
     <Fragment>
       <div>
         {isEmpty(shareRightsState.userRightList) ? (
-          <Spinner style={{ top: 0 }} />
+          <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : (
           <div className={styles.table}>
             <DataTable value={shareRightsState.userRightList}>

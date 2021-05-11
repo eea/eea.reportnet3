@@ -1085,6 +1085,8 @@
     "addReporterConfirmHeader": "Add reporter",
     "account": "Account",
     "wrongUrlCountryCode": "The country doesn't exist",
-    "wrongUrlDataflowId": "The dataflow doesn't exist"
+    "wrongUrlDataflowId": "The dataflow doesn't exist",
+    "reporterEmptyUserRightList": "There are no reporters created for the dataflow.",
+    "requesterEmptyUserRightList": "There are no requesters created for the dataflow."
   }
 }
