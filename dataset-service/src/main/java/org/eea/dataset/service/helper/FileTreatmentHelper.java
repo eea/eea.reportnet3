@@ -1007,13 +1007,14 @@ public class FileTreatmentHelper implements DisposableBean {
       if (extension.equalsIgnoreCase("csv")) {
         List<TableSchema> tablesSchema = getTables(datasetId);
         for (TableSchema table : tablesSchema) {
-          byte[] dataFile = context.fileWriter(dataflowId, datasetId,
+          List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId,
               table.getIdTableSchema().toString(), includeCountryCode);
-          contents.put(table.getIdTableSchema() + "_" + table.getNameTableSchema(), dataFile);
+          contents.put(table.getIdTableSchema() + "_" + table.getNameTableSchema(),
+              dataFile.get(0));
         }
       } else {
-        byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
-        contents.put(null, dataFile);
+        List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
+        contents.put(null, dataFile.get(0));
       }
 
       Boolean includeZip = false;

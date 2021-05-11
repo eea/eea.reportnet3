@@ -1268,7 +1268,8 @@ public class DatasetServiceTest {
    */
   @Test
   public void exportFileTest() throws EEAException, IOException {
-    byte[] expectedResult = "".getBytes();
+    List<byte[]> expectedResult = new ArrayList<>();
+    expectedResult.add("".getBytes());
     ReportingDataset dataset = new ReportingDataset();
     dataset.setDataflowId(1L);
     // partition.setId(1L);
@@ -2789,7 +2790,7 @@ public class DatasetServiceTest {
         .thenReturn(true);
     DataSetSchema dataSetSchema = new DataSetSchema();
     dataSetSchema.setAvailableInPublic(true);
-    byte[] expectedResult = null;
+    List<byte[]> expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))

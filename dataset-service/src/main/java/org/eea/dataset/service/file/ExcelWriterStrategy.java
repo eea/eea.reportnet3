@@ -118,6 +118,48 @@ public class ExcelWriterStrategy implements WriterStrategy {
     return out.toByteArray();
   }
 
+  @Override
+  public List<byte[]> writeFileList(Long dataflowId, Long datasetId, String tableSchemaId,
+      boolean includeCountryCode) throws EEAException {
+
+    List<byte[]> byteList = new ArrayList<>();
+
+    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+    // Get all tablesSchemas for the case the given idTableSchema doesn't exist
+    List<TableSchemaVO> tables =
+        dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
+    TableSchemaVO table = fileCommon.findTableSchema(tableSchemaId, dataset);
+
+    // If the given idTableSchema exists, replace all tables with it
+    if (null != table) {
+      tables.clear();
+      tables.add(table);
+    }
+
+    try (Workbook workbook = createWorkbook()) {
+
+      LOG.info("Starting writing Excel({}) file", mimeType);
+
+      // Add one sheet per table
+      for (TableSchemaVO tableSchema : tables) {
+        writeSheet(workbook, tableSchema, datasetId, includeCountryCode);
+      }
+
+      workbook.write(out);
+
+      LOG.info("Finishing writing Excel({}) file", mimeType);
+
+    } catch (IOException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    byteList.add(out.toByteArray());
+
+    return byteList;
+  }
+
   /**
    * Creates the correct Workbook object according to the file extension.
    *
