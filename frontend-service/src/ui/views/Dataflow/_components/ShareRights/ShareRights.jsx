@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 import uuid from 'uuid';
 
 import styles from './ShareRights.module.scss';
+import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
@@ -161,7 +162,7 @@ export const ShareRights = ({
   };
 
   const onUpdateUser = async userRight => {
-    if (!isNil(userRight.role)) {
+    if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
       setIsLoading(true);
       try {
@@ -176,6 +177,10 @@ export const ShareRights = ({
             type: 'SET_ACCOUNT_NOT_FOUND',
             payload: { accountNotFound: true, accountHasError: true }
           });
+        }
+        //change to 403
+        if (error?.response?.status === 500) {
+          getAllUsers();
         }
       } finally {
         setIsLoading(false);
@@ -210,8 +215,10 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
 
+  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
+
   const renderDeleteColumnTemplate = userRight =>
-    userRight.isNew ? null : (
+    userRight.isNew || notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
         onDeleteClick={() =>
           shareRightsDispatch({
@@ -230,7 +237,7 @@ export const ShareRights = ({
     return (
       <Fragment>
         <select
-          // disabled={}
+          disabled={!userRight.isNew && notDeletableRoles.includes(userRight?.role)}
           id={userType}
           onBlur={() => updateUser(userRight)}
           onChange={event => onWritePermissionChange(userRight, event.target.value)}
