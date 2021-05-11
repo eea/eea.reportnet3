@@ -16,6 +16,10 @@
 
 .downloadFile {
   max-width: 35rem;
+
+.downloadReferenceDatasetFile {
+  width: 12.8% !important;
+  text-align: center;
 }
 
 .filesContainer {
@@ -46,7 +50,6 @@
   font-size: 1.5rem;
   cursor: pointer;
   color: var(--documenticon-color);
-  text-align: center;
 }
 
 .cellWrapper {

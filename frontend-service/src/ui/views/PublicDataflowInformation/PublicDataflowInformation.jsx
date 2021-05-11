@@ -328,7 +328,7 @@ export const PublicDataflowInformation = withRouter(
           return (
             <Column
               body={template}
-              className={field === 'publicFileName' && styles.downloadFile}
+              className={field === 'publicFileName' && styles.downloadReferenceDatasetFile}
               field={field}
               header={getReferenceDatasetsHeader(field)}
               key={field}
