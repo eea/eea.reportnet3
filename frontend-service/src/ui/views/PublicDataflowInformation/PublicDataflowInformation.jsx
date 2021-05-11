@@ -102,17 +102,19 @@ export const PublicDataflowInformation = withRouter(
     };
 
     const downloadReferenceDatasetFileBodyColumn = rowData => {
-      !isNil(rowData.publucFileName) && (
-        <span
-          className={styles.downloadIcon}
-          key={rowData.publicFileName}
-          onClick={() => onFileDownload(null, rowData.publicFileName)}>
-          <FontAwesomeIcon data-for={rowData.publicFileName} data-tip icon={AwesomeIcons('7z')} />
-          <ReactTooltip className={styles.tooltipClass} effect="solid" id={rowData.publicFileName} place="top">
-            <span>{rowData.publicFileName}</span>
-          </ReactTooltip>
-        </span>
-      );
+      if (!isNil(rowData.publicFileName)) {
+        return (
+          <span
+            className={styles.downloadIcon}
+            key={rowData.publicFileName}
+            onClick={() => onFileDownload(null, rowData.publicFileName)}>
+            <FontAwesomeIcon data-for={rowData.publicFileName} data-tip icon={AwesomeIcons('7z')} />
+            <ReactTooltip className={styles.tooltipClass} effect="solid" id={rowData.publicFileName} place="top">
+              <span>{rowData.publicFileName}</span>
+            </ReactTooltip>
+          </span>
+        );
+      }
     };
 
     const getCountryCode = datasetSchemaName => {
@@ -155,7 +157,6 @@ export const PublicDataflowInformation = withRouter(
     };
 
     const getReferenceDatasetsHeader = fieldHeader => {
-      console.log(`fieldHeader`, fieldHeader);
       let header;
       switch (fieldHeader) {
         case 'datasetSchemaName':
