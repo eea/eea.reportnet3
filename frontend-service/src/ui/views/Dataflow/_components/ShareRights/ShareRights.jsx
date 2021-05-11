@@ -128,6 +128,10 @@ export const ShareRights = ({
   const isRoleChanged = userRight => {
     const [initialUser] = shareRightsState.clonedUserRightList.filter(fUserRight => fUserRight.id === userRight.id);
 
+    if (userRight.isNew) {
+      return true;
+    }
+
     return JSON.stringify(initialUser.role) !== JSON.stringify(userRight.role);
   };
 
