@@ -973,19 +973,22 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
               addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
+              addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
               columnHeader={resources.messages['requestersAccountColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+              deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
               editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
+              getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
-              notificationKey={'DELETE_REQUESTER_ERROR'}
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
             />
           </Dialog>
@@ -999,19 +1002,22 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
               addConfirmHeader={resources.messages[`addReporterConfirmHeader`]}
+              addErrorNotificationKey={'ADD_REPORTER_ERROR'}
               columnHeader={resources.messages['reportersAccountColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`reportersRightsDialogConfirmDeleteQuestion`]}
+              deleteErrorNotificationKey={'DELETE_REPORTER_ERROR'}
               editConfirmHeader={resources.messages[`editReporterConfirmHeader`]}
+              getErrorNotificationKey={'GET_REPORTERS_ERROR'}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
-              notificationKey={'DELETE_REPORTER_ERROR'}
               placeholder={resources.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
               userType={'reporter'}
             />
           </Dialog>

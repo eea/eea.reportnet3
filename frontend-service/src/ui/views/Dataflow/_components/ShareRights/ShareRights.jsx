@@ -27,19 +27,22 @@ import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
 export const ShareRights = ({
   addConfirmHeader,
+  addErrorNotificationKey,
   columnHeader,
   dataflowId,
   dataProviderId,
   deleteColumnHeader,
   deleteConfirmHeader,
   deleteConfirmMessage,
+  deleteErrorNotificationKey,
   editConfirmHeader,
+  getErrorNotificationKey,
   isUserRightManagementDialogVisible,
-  notificationKey,
   placeholder,
   representativeId,
   roleOptions,
   setIsUserRightManagementDialogVisible,
+  updateErrorNotificationKey,
   userType
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -108,6 +111,7 @@ export const ShareRights = ({
         payload: { userRightList, clonedUserRightList: cloneDeep(userRightList) }
       });
     } catch (error) {
+      notificationContext.add({ type: getErrorNotificationKey });
     } finally {
       setIsLoading(false);
     }
@@ -166,7 +170,7 @@ export const ShareRights = ({
         onDataChange();
       }
     } catch (error) {
-      notificationContext.add({ type: notificationKey });
+      notificationContext.add({ type: deleteErrorNotificationKey });
     } finally {
       onToggleDeletingUser(false);
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
@@ -196,8 +200,10 @@ export const ShareRights = ({
           });
         }
         //change to 403
-        if (error?.response?.status === 500) {
+        else if (error?.response?.status === 500) {
           getAllUsers();
+        } else {
+          notificationContext.add({ type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey });
         }
       } finally {
         setIsLoading(false);
