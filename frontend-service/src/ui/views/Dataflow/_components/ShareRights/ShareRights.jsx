@@ -286,16 +286,18 @@ export const ShareRights = ({
 
     return (
       <div className={styles.manageDialog}>
-        <div className={`formField ${hasError ? 'error' : ''}`} style={{ marginBottom: '0rem' }}>
+        <div>
           <label className={styles.label} htmlFor="accountInput">
             {resources.messages['account']}
           </label>
           <InputText
+            className={`formField ${hasError ? styles.error : ''}`}
             disabled={!userRight.isNew}
             id="accountInput"
             onChange={event => onSetAccount(event.target.value)}
             placeholder={placeholder}
             ref={inputRef}
+            style={{ marginBottom: '0rem' }}
             value={userRight.account}
           />
         </div>
