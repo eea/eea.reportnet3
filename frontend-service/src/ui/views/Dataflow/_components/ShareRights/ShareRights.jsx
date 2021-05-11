@@ -237,7 +237,12 @@ export const ShareRights = ({
   };
 
   const onEnterKey = (key, userRight) => {
-    if (key === 'Enter' && isValidEmail(userRight.account) && isRoleChanged(userRight)) {
+    if (
+      key === 'Enter' &&
+      isValidEmail(userRight.account) &&
+      !shareRightsState.accountHasError &&
+      isRoleChanged(userRight)
+    ) {
       onUpdateUser(userRight);
     }
   };
