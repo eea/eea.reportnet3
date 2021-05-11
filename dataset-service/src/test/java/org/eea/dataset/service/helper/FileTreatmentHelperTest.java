@@ -768,8 +768,6 @@ public class FileTreatmentHelperTest {
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
             .thenReturn(expectedResult);
-    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
-        .thenReturn(dataSetMetabase);
     fileTreatmentHelper.exportDatasetFile(1L, "xslx");
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }

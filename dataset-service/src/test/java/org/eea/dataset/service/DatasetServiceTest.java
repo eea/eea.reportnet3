@@ -1284,7 +1284,7 @@ public class DatasetServiceTest {
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
             .thenReturn(expectedResult);
-    assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
+    assertEquals("not equals", expectedResult.get(0), datasetService.exportFile(1L, "csv", ""));
   }
 
   /**
