@@ -6,39 +6,39 @@ import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 
 export class ScrollableView extends Component {
   static defaultProps = {
-    header: null,
     body: null,
-    footer: null,
     columns: null,
+    footer: null,
     frozen: null,
-    frozenWidth: null,
     frozenBody: null,
-    virtualScroll: false,
-    virtualRowHeight: null,
-    rows: null,
-    totalRecords: null,
+    frozenWidth: null,
+    header: null,
     loading: false,
-    tableStyle: null,
+    onVirtualScroll: null,
+    rows: null,
     tableClassName: null,
-    onVirtualScroll: null
+    tableStyle: null,
+    totalRecords: null,
+    virtualRowHeight: null,
+    virtualScroll: false
   };
 
   static propTypes = {
-    header: PropTypes.any,
     body: PropTypes.any,
-    footer: PropTypes.any,
     columns: PropTypes.array,
+    footer: PropTypes.any,
     frozen: PropTypes.bool,
-    frozenWidth: PropTypes.string,
     frozenBody: PropTypes.any,
-    virtualScroll: PropTypes.bool,
-    virtualRowHeight: PropTypes.number,
-    rows: PropTypes.number,
-    totalRcords: PropTypes.number,
+    frozenWidth: PropTypes.string,
+    header: PropTypes.any,
     loading: PropTypes.bool,
-    tableStyle: PropTypes.any,
+    onVirtualScroll: PropTypes.func,
+    rows: PropTypes.number,
     tableClassName: PropTypes.string,
-    onVirtualScroll: PropTypes.func
+    tableStyle: PropTypes.any,
+    totalRecords: PropTypes.number,
+    virtualRowHeight: PropTypes.number,
+    virtualScroll: PropTypes.bool
   };
 
   constructor(props) {
@@ -182,8 +182,8 @@ export class ScrollableView extends Component {
     if (this.props.columns && this.props.columns.length) {
       return (
         <colgroup className="p-datatable-scrollable-colgroup">
-          {this.props.columns.map((col, i) => (
-            <col key={col.props.field + '_' + i} style={col.props.headerStyle || col.props.style} />
+          {this.props.columns.map(col => (
+            <col key={col.props.field} style={col.props.headerStyle || col.props.style} />
           ))}
         </colgroup>
       );
@@ -196,9 +196,9 @@ export class ScrollableView extends Component {
     if (this.props.virtualScroll) {
       return (
         <table
+          className="p-datatable-scrollable-body-table p-datatable-loading-virtual-table p-datatable-virtual-table"
           ref={el => (this.loadingTable = el)}
-          style={{ top: '0', display: 'none' }}
-          className="p-datatable-scrollable-body-table p-datatable-loading-virtual-table p-datatable-virtual-table">
+          style={{ top: '0', display: 'none' }}>
           {colGroup}
           {this.props.loadingBody}
         </table>
@@ -227,16 +227,16 @@ export class ScrollableView extends Component {
     return (
       <div
         className={className}
-        style={{ width: width, left: left }}
         ref={el => {
           this.container = el;
-        }}>
+        }}
+        style={{ width: width, left: left }}>
         <div
           className="p-datatable-scrollable-header"
+          onScroll={this.onHeaderScroll}
           ref={el => {
             this.scrollHeader = el;
-          }}
-          onScroll={this.onHeaderScroll}>
+          }}>
           <div
             className="p-datatable-scrollable-header-box"
             ref={el => {
@@ -254,11 +254,11 @@ export class ScrollableView extends Component {
         </div>
         <div
           className="p-datatable-scrollable-body"
+          onScroll={this.onBodyScroll}
           ref={el => {
             this.scrollBody = el;
-          }}
-          onScroll={this.onBodyScroll}>
-          <table ref={el => (this.scrollTable = el)} style={tableBodyStyle} className={tableBodyClassName}>
+          }}>
+          <table className={tableBodyClassName} ref={el => (this.scrollTable = el)} style={tableBodyStyle}>
             {colGroup}
             {this.props.body}
           </table>

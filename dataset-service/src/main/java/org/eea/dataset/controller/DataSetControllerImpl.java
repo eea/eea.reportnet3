@@ -128,7 +128,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping("TableValueDataset/{id}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))")
   public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
       @RequestParam("idTableSchema") String idTableSchema,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
@@ -516,7 +516,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATASET_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN')")
   public ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType) {
@@ -552,7 +552,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping("/exportFileThroughIntegration")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN')")
   public void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
       @RequestParam("integrationId") Long integrationId) {
     try {
@@ -871,6 +871,28 @@ public class DataSetControllerImpl implements DatasetController {
 
 
   /**
+   * Export reference dataset file.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the response entity
+   */
+  @Override
+  @GetMapping("/exportPublicFile/dataflow/{dataflowId}")
+  public ResponseEntity<InputStreamResource> exportReferenceDatasetFile(
+      @PathVariable Long dataflowId, @RequestParam String fileName) {
+
+    try {
+      File zipContent = datasetService.exportPublicFile(dataflowId, null, fileName);
+      return createResponseEntity(fileName, zipContent);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+
+  /**
    * Validate attachment.
    *
    * @param datasetId the dataset id
@@ -932,7 +954,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/exportDatasetFile")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','REFERENCEDATASET_CUSTODIAN')")
   public void exportDatasetFile(@PathVariable("datasetId") Long datasetId,
       @RequestParam("mimeType") String mimeType) {
     LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
@@ -952,7 +974,7 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @GetMapping(value = "/{datasetId}/downloadFile",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','REFERENCEDATASET_CUSTODIAN')")
   public void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response) {
     try {

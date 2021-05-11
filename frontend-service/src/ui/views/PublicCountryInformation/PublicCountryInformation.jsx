@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, Fragment } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
@@ -9,6 +9,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
 
 import styles from './PublicCountryInformation.module.scss';
 
@@ -178,9 +180,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const parseDataflows = dataflows => {
     const parsedDataflows = [];
     dataflows.forEach(dataflow => {
-      const isReleased = dataflow.datasets.some(dataset => dataset.isReleased);
+      const isReleased = dataflow.datasets?.some(dataset => dataset.isReleased);
       const publicFilesNames = [];
-      dataflow.datasets.forEach(dataset => {
+      dataflow.datasets?.forEach(dataset => {
         if (!isNil(dataset.publicFileName)) {
           publicFilesNames.push({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName });
         }
@@ -194,7 +196,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         isReleased: isReleased,
         isReleasable: dataflow.isReleasable,
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
-        restrictFromPublic: dataflow.datasets[0].restrictFromPublic,
+        restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
         publicFilesNames: publicFilesNames
       };
       parsedDataflows.push(parsedDataflow);
@@ -227,6 +229,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       .filter(key => !key.includes('id'))
       .map(field => {
         let template = null;
+        if (field === 'name') template = renderDataflowNameBodyColumn;
         if (field === 'isReleasable') template = renderIsReleasableBodyColumn;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
@@ -253,12 +256,13 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           {rowData.publicFilesNames.map(publicFileName => (
             <span
               className={styles.filesIcon}
+              key={publicFileName}
               onClick={() => onFileDownload(rowData.id, publicFileName.dataProviderId, publicFileName.fileName)}>
               <FontAwesomeIcon
                 className={styles.cursorPointer}
-                icon={AwesomeIcons('7z')}
-                data-tip
                 data-for={publicFileName.fileName}
+                data-tip
+                icon={AwesomeIcons('7z')}
               />
               <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName.fileName} place="top">
                 <span>{getPublicFileName(publicFileName.fileName)}</span>
@@ -272,9 +276,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         <div className={styles.filesContainer}>
           <FontAwesomeIcon
             className={styles.restrictFromPublicIcon}
-            icon={AwesomeIcons('lock')}
-            data-tip
             data-for={'restrictFromPublicField'}
+            data-tip
+            icon={AwesomeIcons('lock')}
           />
           <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
             <span>{resources.messages['restrictFromPublicField']}</span>
@@ -305,6 +309,28 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     </div>
   );
 
+  const renderDataflowNameBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      <span className={styles.cellWrapper}>
+        {rowData.name}{' '}
+        <FontAwesomeIcon
+          aria-hidden={false}
+          className={`p-breadcrumb-home ${styles.link}`}
+          data-for="navigateTooltip"
+          data-tip
+          icon={AwesomeIcons('externalLink')}
+          onClick={e => {
+            e.preventDefault();
+            history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true));
+          }}
+        />
+        <ReactTooltip className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
+          <span>{resources.messages['navigateToDataflow']}</span>
+        </ReactTooltip>
+      </span>
+    </div>
+  );
+
   const renderObligationBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
       {rowData.obligation?.obligationId
@@ -319,7 +345,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const renderRedirectText = (text, url) => (
     <span>
       {text}{' '}
-      <a href={url} target="_blank" title={text}>
+      <a href={url} rel="noreferrer" target="_blank" title={text}>
         <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
       </a>
     </span>
@@ -328,48 +354,44 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   return (
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
-        <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
+        {!isEmpty(countryName) && (
+          <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
+        )}
         {isLoading ? (
           <Spinner className={styles.isLoading} />
+        ) : isEmpty(countryName) ? (
+          <div className={styles.noDataflows}>{resources.messages['wrongUrlCountryCode']}</div>
+        ) : isEmpty(dataflows) ? (
+          <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
         ) : (
-          <Fragment>
-            {isEmpty(dataflows) ? (
-              <div className={styles.noDataflowsWrapper}>
-                <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
-              </div>
-            ) : (
-              <Fragment>
-                <div className={styles.countriesList}>
-                  <DataTable
-                    autoLayout={true}
-                    first={firstRow}
-                    lazy={true}
-                    onPage={onChangePage}
-                    onSort={onSort}
-                    paginator={true}
-                    paginatorRight={
-                      <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
-                        'records'
-                      ].toLowerCase()}`}</span>
-                    }
-                    rows={numberRows}
-                    rowsPerPageOptions={[5, 10, 15]}
-                    sortable={true}
-                    sortField={sortField}
-                    sortOrder={sortOrder}
-                    totalRecords={totalRecords}
-                    value={dataflows}>
-                    {renderColumns(dataflows)}
-                  </DataTable>
-                  <div className={styles.tableLegendContainer}>
-                    <span>*</span>
-                    <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-                    <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-                  </div>
-                </div>
-              </Fragment>
-            )}
-          </Fragment>
+          <div className={styles.countriesList}>
+            <DataTable
+              autoLayout={true}
+              first={firstRow}
+              lazy={true}
+              onPage={onChangePage}
+              onSort={onSort}
+              paginator={true}
+              paginatorRight={
+                <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
+                  'records'
+                ].toLowerCase()}`}</span>
+              }
+              rows={numberRows}
+              rowsPerPageOptions={[5, 10, 15]}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              sortable={true}
+              totalRecords={totalRecords}
+              value={dataflows}>
+              {renderColumns(dataflows)}
+            </DataTable>
+            <div className={styles.tableLegendContainer}>
+              <span>*</span>
+              <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
+              <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
+            </div>
+          </div>
         )}
       </div>
     </PublicLayout>

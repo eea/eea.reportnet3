@@ -135,19 +135,19 @@ export class HeaderCell extends Component {
       filterElement = this.props.filterElement || (
         <>
           <InputText
-            id={`${this.props.field}_${id}_filter`}
-            onInput={this.onFilterInput}
-            type={this.props.filterType}
+            className="p-column-filter"
             defaultValue={
               this.props.filters && this.props.filters[this.props.field]
                 ? this.props.filters[this.props.field].value
                 : null
             }
-            className="p-column-filter"
-            placeholder={this.props.filterPlaceholder}
+            id={`${this.props.field}_${id}_filter`}
             maxLength={this.props.filterMaxLength}
+            onInput={this.onFilterInput}
+            placeholder={this.props.filterPlaceholder}
+            type={this.props.filterType}
           />
-          <label htmlFor={`${this.props.field}_${id}_filter`} className="srOnly">
+          <label className="srOnly" htmlFor={`${this.props.field}_${id}_filter`}>
             {`${this.props.field}_filter`}
           </label>
         </>
@@ -157,28 +157,28 @@ export class HeaderCell extends Component {
     if (this.props.selectionMode === 'multiple') {
       headerCheckbox = (
         <RowCheckbox
+          disabled={!this.props.value || this.props.value.length === 0}
           onClick={this.props.onHeaderCheckboxClick}
           selected={this.props.headerCheckboxSelected}
-          disabled={!this.props.value || this.props.value.length === 0}
         />
       );
     }
 
     return (
       <th
-        ref={el => (this.el = el)}
-        tabIndex={this.props.sortable ? this.props.tabIndex : null}
         className={className}
-        style={this.props.headerStyle || this.props.style}
-        onClick={this.onClick}
-        onMouseDown={this.onMouseDown}
-        onKeyDown={this.onKeyDown}
         colSpan={this.props.colSpan}
-        rowSpan={this.props.rowSpan}
-        onDragStart={this.props.onDragStart}
-        onDragOver={this.props.onDragOver}
+        onClick={this.onClick}
         onDragLeave={this.props.onDragLeave}
-        onDrop={this.props.onDrop}>
+        onDragOver={this.props.onDragOver}
+        onDragStart={this.props.onDragStart}
+        onDrop={this.props.onDrop}
+        onKeyDown={this.onKeyDown}
+        onMouseDown={this.onMouseDown}
+        ref={el => (this.el = el)}
+        rowSpan={this.props.rowSpan}
+        style={this.props.headerStyle || this.props.style}
+        tabIndex={this.props.sortable ? this.props.tabIndex : null}>
         {resizer}
         <span className="p-column-title">{this.props.header}</span>
         {sortIconElement}

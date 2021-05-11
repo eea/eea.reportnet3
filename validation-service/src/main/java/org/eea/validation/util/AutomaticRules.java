@@ -93,6 +93,23 @@ public class AutomaticRules {
         description);
   }
 
+  /**
+   * Creates the date time automatic rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createDateTimeAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isDateTime(value)",
+        "The value is not a valid dateTime (YYYY-MM-DD HH:MM:SS) ", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, description);
+  }
+
 
   /**
    * Creates the automatic boolean rule.

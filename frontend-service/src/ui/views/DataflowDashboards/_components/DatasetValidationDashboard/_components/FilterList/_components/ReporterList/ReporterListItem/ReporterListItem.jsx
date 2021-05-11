@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import styles from './ReporterListItem.module.scss';
 
@@ -10,12 +10,11 @@ const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterF
   }, [reporterFilters]);
 
   return (
-    <>
+    <Fragment>
       <input
-        id={`${reporter}_${datasetSchemaId}`}
-        className={styles.checkbox}
-        type="checkbox"
         checked={isChecked}
+        className={styles.checkbox}
+        id={`${reporter}_${datasetSchemaId}`}
         onChange={e => {
           setIsChecked(e.target.checked);
           filterDispatch({
@@ -23,11 +22,12 @@ const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterF
             payload: { label: reporter }
           });
         }}
+        type="checkbox"
       />
-      <label htmlFor={`${reporter}_${datasetSchemaId}`} className={styles.labelItem}>
+      <label className={styles.labelItem} htmlFor={`${reporter}_${datasetSchemaId}`}>
         {reporter}
       </label>
-    </>
+    </Fragment>
   );
 };
 

@@ -439,7 +439,6 @@ const parseDataflowDTO = dataflowDTO =>
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
-    testDatasets: parseTestDatasetListDTO(dataflowDTO.testDatasets),
     datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
@@ -451,11 +450,13 @@ const parseDataflowDTO = dataflowDTO =>
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
     obligation: parseObligationDTO(dataflowDTO.obligation),
+    referenceDatasets: parseDatasetListDTO(dataflowDTO.referenceDatasets),
     reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
+    testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
@@ -516,16 +517,6 @@ const parseDatasetListDTO = datasetsDTO => {
   }
   return;
 };
-const parseTestDatasetListDTO = testDatasetsDTO => {
-  if (!isNull(testDatasetsDTO) && !isUndefined(testDatasetsDTO)) {
-    const datasets = [];
-    testDatasetsDTO.forEach(datasetDTO => {
-      datasets.push(parseDatasetDTO(datasetDTO));
-    });
-    return datasets;
-  }
-  return;
-};
 
 const parseDatasetDTO = datasetDTO =>
   new Dataset({
@@ -536,6 +527,7 @@ const parseDatasetDTO = datasetDTO =>
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
     publicFileName: datasetDTO.publicFileName,
+    referenceDataset: datasetDTO.referenceDataset,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
     restrictFromPublic: datasetDTO.restrictFromPublic,
     name: datasetDTO.nameDatasetSchema,
@@ -707,6 +699,7 @@ const reporting = async dataflowId => {
   dataflow.testDatasets.sort(sortDatasetTypeByName);
   dataflow.datasets.sort(sortDatasetTypeByName);
   dataflow.designDatasets.sort(sortDatasetTypeByName);
+  dataflow.referenceDatasets.sort(sortDatasetTypeByName);
   reportingDataflowDTO.data = dataflow;
 
   return reportingDataflowDTO;

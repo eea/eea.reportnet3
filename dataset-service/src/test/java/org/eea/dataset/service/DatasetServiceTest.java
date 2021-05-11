@@ -53,6 +53,7 @@ import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
@@ -299,6 +300,9 @@ public class DatasetServiceTest {
 
   @Mock
   private TestDatasetRepository testDatasetRepository;
+
+  @Mock
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
   @Mock
   private OutputStream outputStream;

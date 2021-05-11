@@ -45,51 +45,51 @@ const PrivacyStatement = withRouter(() => {
     <div className="rep-row">
       <div className={` rep-col-12 rep-col-sm-12`}>
         <Title
-          title={resources.messages['privacyPolicyTitle']}
           icon="info"
           iconSize="4rem"
           subtitle={resources.messages['privacyPolicySubtitle']}
+          title={resources.messages['privacyPolicyTitle']}
         />
         <div className={styles.contentMain}>
           <aside>
             <ul>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprIntroduction">
+                <a className={styles.anchorLink} href="#gdprIntroduction" onClick={e => onClickAnchorLink(e)}>
                   Introduction
                 </a>
               </li>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprDataCollectedTitle">
+                <a className={styles.anchorLink} href="#gdprDataCollectedTitle" onClick={e => onClickAnchorLink(e)}>
                   What personal data do we collect and for what purpose
                 </a>
               </li>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprWhoCanSee">
+                <a className={styles.anchorLink} href="#gdprWhoCanSee" onClick={e => onClickAnchorLink(e)}>
                   Who can see your personal data
                 </a>
               </li>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowCanAccess">
+                <a className={styles.anchorLink} href="#gdprHowCanAccess" onClick={e => onClickAnchorLink(e)}>
                   How can you access or rectify your information
                 </a>
               </li>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprSiteUsage">
+                <a className={styles.anchorLink} href="#gdprSiteUsage" onClick={e => onClickAnchorLink(e)}>
                   Site usage statistics and personalised experience settings
                 </a>
               </li>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowLongStore">
+                <a className={styles.anchorLink} href="#gdprHowLongStore" onClick={e => onClickAnchorLink(e)}>
                   How long do we store your personal data
                 </a>
               </li>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowSecure">
+                <a className={styles.anchorLink} href="#gdprHowSecure" onClick={e => onClickAnchorLink(e)}>
                   How do we secure your personal data
                 </a>
               </li>
               <li>
-                <a className={styles.anchorLink} onClick={e => onClickAnchorLink(e)} href="#gdprHowContact">
+                <a className={styles.anchorLink} href="#gdprHowContact" onClick={e => onClickAnchorLink(e)}>
                   How to contact us and right to appeal
                 </a>
               </li>
@@ -122,8 +122,8 @@ const PrivacyStatement = withRouter(() => {
                 the name, surname and e-mail address of the registrant. For further information, please refer to the{' '}
                 <a
                   href="https://webgate.ec.europa.eu/cas/privacyStatementPopup.html"
-                  target="_blank"
-                  rel="noopener noreferrer">
+                  rel="noopener noreferrer"
+                  target="_blank">
                   privacy statement of ‘EU Login’
                 </a>
                 .
@@ -161,12 +161,12 @@ const PrivacyStatement = withRouter(() => {
                 We process personal data (transactional data) such as anonymized IP-address, browser version and other
                 device information that is necessary to securely deliver web pages to your internet client. This
                 transactional data is also processed by personnel at EEA and at CERT-EU (
-                <a href="https://cert.europa.eu/" target="_blank" rel="noopener noreferrer">
+                <a href="https://cert.europa.eu/" rel="noopener noreferrer" target="_blank">
                   https://cert.europa.eu/
                 </a>
                 ) which provides security services for EEA. This transactional data is also available to our Internet
                 Service Provider and our cloud provider Amazon in EU (
-                <a href="https://aws.amazon.com/es/privacy/" target="_blank" rel="noopener noreferrer">
+                <a href="https://aws.amazon.com/es/privacy/" rel="noopener noreferrer" target="_blank">
                   see their privacy statement
                 </a>
                 ).
@@ -254,7 +254,7 @@ const PrivacyStatement = withRouter(() => {
               </p>
               <p>
                 You are entitled to have recourse at any time to the European Data Protection Supervisor (
-                <a href="https://edps.europa.eu" target="_blank" rel="noopener noreferrer">
+                <a href="https://edps.europa.eu" rel="noopener noreferrer" target="_blank">
                   https://edps.europa.eu
                 </a>
                 ; <a href="mailto:edps@edps.europa.eu">edps@edps.europa.eu</a>) if you consider that your rights under

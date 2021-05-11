@@ -533,7 +533,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           schemasRepository.findTableSchema(datasetSchemaId, tableSchemaVO.getIdTableSchema());
 
       if (tableSchema != null) {
-        tableShemaAddAtributes(datasetId, tableSchemaVO, datasetSchemaId, tableSchema);
+        tableSchemaAddAtributes(datasetId, tableSchemaVO, datasetSchemaId, tableSchema);
       } else {
         LOG.error("Table with schema {} from the datasetId {} not found",
             tableSchemaVO.getIdTableSchema(), datasetId);
@@ -550,7 +550,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Table shema add atributes.
+   * Table schema add atributes.
    *
    * @param datasetId the dataset id
    * @param tableSchemaVO the table schema VO
@@ -559,7 +559,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @throws EEAException the EEA exception
    */
-  private void tableShemaAddAtributes(Long datasetId, TableSchemaVO tableSchemaVO,
+  private void tableSchemaAddAtributes(Long datasetId, TableSchemaVO tableSchemaVO,
       String datasetSchemaId, Document tableSchema) throws EEAException {
     if (tableSchemaVO.getDescription() != null) {
       tableSchema.put("description", tableSchemaVO.getDescription());
@@ -2312,6 +2312,38 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     return tableSchemasVOList;
   }
 
+
+  /**
+   * Update reference dataset.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceDataset the reference dataset
+   * @param updateTables the update tables
+   */
+  @Override
+  public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
+      boolean referenceDataset, boolean updateTables) {
+    schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
+    if (referenceDataset && updateTables) {
+      DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
+      // Reference dataset -> readOnly=true, prefilled=true on all the tables
+      // mark prefill and readOnly of all tables of the dataset
+      for (TableSchemaVO table : schema.getTableSchemas()) {
+        table.setToPrefill(true);
+        table.setReadOnly(true);
+        try {
+          updateTableSchema(datasetId, table);
+        } catch (EEAException e) {
+          LOG_ERROR.error(
+              "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
+              datasetId, e.getMessage(), e);
+        }
+      }
+    }
+  }
+
+
   /**
    * Fill and update design dataset imported.
    *
@@ -2337,6 +2369,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(schemaOrigin.getWebform());
     schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
+    schema.setReferenceDataset(schemaOrigin.isReferenceDataset());
     // table level
     for (TableSchema table : schemaOrigin.getTableSchemas()) {
       String nameTrimmed = table.getNameTableSchema().trim();
@@ -2612,6 +2645,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+
+  /**
+   * Validate names.
+   *
+   * @param schemas the schemas
+   */
   private void validateNames(ImportSchemas schemas) {
     for (DataSetSchema schema : schemas.getSchemas()) {
       Map<String, String> schemasNames = schemas.getSchemaNames();

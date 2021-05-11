@@ -29,6 +29,7 @@ export const designerReducer = (state, { type, payload }) => {
         },
         levelErrorTypes: payload.levelErrorTypes,
         previousWebform: payload.previousWebform,
+        referenceDataset: payload.referenceDataset,
         schemaTables: payload.schemaTables,
         webform: payload.webform
       };
@@ -62,6 +63,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'INITIAL_DATASET_DESCRIPTION':
       return { ...state, initialDatasetDescription: payload.value };
+
+    case 'SET_REFERENCE_DATASET':
+      return { ...state, referenceDataset: payload };
 
     case 'SET_CONSTRAINT_MANAGING_ID':
       return { ...state, constraintManagingId: payload.constraintManagingId };

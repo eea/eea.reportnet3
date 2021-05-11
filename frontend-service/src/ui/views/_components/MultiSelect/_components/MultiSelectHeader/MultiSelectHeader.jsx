@@ -57,7 +57,7 @@ export const MultiSelectHeader = ({
       );
     } else
       return (
-        <span id="selectAll" className={headerClassName} onClick={event => onToggleAll(event)}>
+        <span className={headerClassName} id="selectAll" onClick={event => onToggleAll(event)}>
           {allChecked ? notCheckAllHeader : checkAllHeader}
         </span>
       );
@@ -76,7 +76,7 @@ export const MultiSelectHeader = ({
       {renderFilterElement()}
 
       {clearButton && (
-        <button type="button" className="p-multiselect-close p-link" onClick={event => onClose(event)}>
+        <button className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
           <span className="p-multiselect-close-icon pi pi-times" />
           <span className="srOnly">{resources.messages['clearFilter']}</span>
         </button>

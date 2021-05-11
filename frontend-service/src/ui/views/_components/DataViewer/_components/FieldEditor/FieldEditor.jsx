@@ -228,7 +228,7 @@ const FieldEditor = ({
   };
 
   const onCalendarBlur = e => {
-    if (e.target.value != RecordUtils.getCellValue(cells, cells.field)) {
+    if (e.target.value !== RecordUtils.getCellValue(cells, cells.field)) {
       saveCalendarDate(e.target.value);
       setIsCalendarVisible(false);
     }
@@ -296,6 +296,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={textCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -305,16 +306,15 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={textCharacters}
           />
         );
       case 'TEXTAREA':
         return (
           <InputTextarea
             collapsedHeight={75}
-            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             maxLength={textCharacters}
             moveCaretToEnd={true}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
@@ -328,6 +328,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={richTextCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -337,13 +338,13 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={richTextCharacters}
           />
         );
       case 'NUMBER_INTEGER':
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={longCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -351,7 +352,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={longCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -359,6 +359,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={decimalCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -366,7 +367,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={decimalCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -458,12 +458,10 @@ const FieldEditor = ({
               <label className={styles.epsg}>{resources.messages['epsg']}</label>
               <div>
                 <Dropdown
-                  ariaLabel={'crs'}
                   appendTo={document.body}
+                  ariaLabel={'crs'}
                   className={styles.epsgSwitcher}
                   disabled={isMapDisabled}
-                  options={crs}
-                  optionLabel="label"
                   onChange={e => {
                     onEditorSubmitValue(
                       cells,
@@ -490,6 +488,8 @@ const FieldEditor = ({
                     setCurrentCRS(e.target.value);
                     onChangePointCRS(e.target.value.value);
                   }}
+                  optionLabel="label"
+                  options={crs}
                   placeholder="Select a CRS"
                   value={currentCRS}
                 />
@@ -563,13 +563,13 @@ const FieldEditor = ({
       case 'DATE':
         return (
           <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
             inputId={calendarId}
+            monthNavigator={true}
             onBlur={onCalendarBlur}
             onFocus={onCalendarFocus}
             onSelect={onSelectCalendar}
-            appendTo={document.body}
-            dateFormat="yy-mm-dd"
-            monthNavigator={true}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
             yearRange="1900:2100"
@@ -579,6 +579,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={emailCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -586,7 +587,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={emailCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -640,8 +640,8 @@ const FieldEditor = ({
                   onEditorValueFocus(cells, codelistItemValue);
                 }
               }}
-              options={linkItemsOptions}
               optionLabel="itemType"
+              options={linkItemsOptions}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
               valuesSeparator=";"
             />
@@ -653,8 +653,8 @@ const FieldEditor = ({
               currentValue={RecordUtils.getCellValue(cells, cells.field)}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={e => {
                 setLinkItemsValue(e.target.value.value);
@@ -714,8 +714,8 @@ const FieldEditor = ({
                 onEditorValueFocus(cells, codelistItemValue);
               }
             }}
-            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             optionLabel="itemType"
+            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
             valuesSeparator=";"
           />

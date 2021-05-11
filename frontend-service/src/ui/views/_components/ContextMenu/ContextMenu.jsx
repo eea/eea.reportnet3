@@ -7,18 +7,16 @@ import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
 class ContextMenuSub extends Component {
   static defaultProps = {
     model: null,
-    root: false,
-    className: null,
+    onLeafClick: null,
     resetMenu: false,
-    onLeafClick: null
+    root: false
   };
 
   static propTypes = {
     model: PropTypes.any,
-    root: PropTypes.bool,
-    className: PropTypes.string,
+    onLeafClick: PropTypes.func,
     resetMenu: PropTypes.bool,
-    onLeafClick: PropTypes.func
+    root: PropTypes.bool
   };
 
   constructor(props) {
@@ -98,7 +96,7 @@ class ContextMenuSub extends Component {
   }
 
   renderSeparator(index) {
-    return <li key={'separator_' + index} className="p-menu-separator"></li>;
+    return <li className="p-menu-separator" key={'separator_' + index}></li>;
   }
 
   renderIcon(item) {
@@ -123,8 +121,8 @@ class ContextMenuSub extends Component {
       return (
         <ContextMenuSub
           model={item.items}
-          resetMenu={item !== this.state.activeItem}
           onLeafClick={this.props.onLeafClick}
+          resetMenu={item !== this.state.activeItem}
         />
       );
     } else {
@@ -144,15 +142,15 @@ class ContextMenuSub extends Component {
 
     return (
       <li
-        key={item.label + '_' + index}
         className={className}
-        style={item.style}
-        onMouseEnter={event => this.onItemMouseEnter(event, item)}>
+        key={item.label + '_' + index}
+        onMouseEnter={event => this.onItemMouseEnter(event, item)}
+        style={item.style}>
         <a
-          href={item.url || '#'}
           className="p-menuitem-link"
-          target={item.target}
-          onClick={event => this.onItemClick(event, item, index)}>
+          href={item.url || '#'}
+          onClick={event => this.onItemClick(event, item, index)}
+          target={item.target}>
           {icon}
           <span className="p-menuitem-text">{item.label}</span>
           {submenuIcon}
@@ -182,38 +180,39 @@ class ContextMenuSub extends Component {
     const submenu = this.renderMenu();
 
     return (
-      <ul ref={el => (this.element = el)} className={className}>
+      <ul className={className} ref={el => (this.element = el)}>
         {submenu}
       </ul>
     );
   }
 }
 
+// eslint-disable-next-line react/no-multi-comp
 export class ContextMenu extends Component {
   static defaultProps = {
-    id: null,
-    model: null,
-    style: null,
-    className: null,
-    global: false,
+    appendTo: null,
     autoZIndex: true,
     baseZIndex: 0,
-    appendTo: null,
+    className: null,
+    global: false,
+    id: null,
+    model: null,
+    onHide: null,
     onShow: null,
-    onHide: null
+    style: null
   };
 
   static propTypes = {
-    id: PropTypes.string,
-    model: PropTypes.array,
-    style: PropTypes.object,
-    className: PropTypes.string,
-    global: PropTypes.bool,
+    appendTo: PropTypes.any,
     autoZIndex: PropTypes.bool,
     baseZIndex: PropTypes.number,
-    appendTo: PropTypes.any,
+    className: PropTypes.string,
+    global: PropTypes.bool,
+    id: PropTypes.string,
+    model: PropTypes.array,
+    onHide: PropTypes.func,
     onShow: PropTypes.func,
-    onHide: PropTypes.func
+    style: PropTypes.object
   };
 
   constructor(props) {
@@ -393,17 +392,17 @@ export class ContextMenu extends Component {
 
     return (
       <div
-        id={this.props.id}
         className={className}
-        style={this.props.style}
-        ref={el => (this.container = el)}
+        id={this.props.id}
         onClick={this.onMenuClick}
-        onMouseEnter={this.onMenuMouseEnter}>
+        onMouseEnter={this.onMenuMouseEnter}
+        ref={el => (this.container = el)}
+        style={this.props.style}>
         <ContextMenuSub
           model={this.props.model}
-          root={true}
-          resetMenu={this.state.resetMenu}
           onLeafClick={this.onLeafClick}
+          resetMenu={this.state.resetMenu}
+          root={true}
         />
       </div>
     );

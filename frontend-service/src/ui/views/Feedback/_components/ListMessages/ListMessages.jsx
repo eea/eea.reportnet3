@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import last from 'lodash/last';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './ListMessages.module.scss';
 
@@ -125,11 +126,11 @@ export const ListMessages = ({
         )}
         {messages.map((message, i) => (
           <Message
-            key={i}
-            message={message}
             hasSeparator={
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
+            key={uniqueId('message_')}
+            message={message}
           />
         ))}
       </div>

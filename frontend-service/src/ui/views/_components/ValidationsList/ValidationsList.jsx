@@ -2,6 +2,8 @@ import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -361,10 +363,10 @@ const ValidationsList = withRouter(
 
     const deleteValidationDialog = () => (
       <ConfirmDialog
-        disabledConfirm={tabsValidationsState.isDeletingRule}
-        iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
         classNameConfirm={'p-button-danger'}
+        disabledConfirm={tabsValidationsState.isDeletingRule}
         header={resources.messages['deleteValidationHeader']}
+        iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
         labelCancel={resources.messages['no']}
         labelConfirm={resources.messages['yes']}
         onConfirm={() => onDeleteValidation()}
@@ -502,7 +504,7 @@ const ValidationsList = withRouter(
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={tabsValidationsState.validationList.validations.length}
-              value={tabsValidationsState.filteredData}>
+              value={cloneDeep(tabsValidationsState.filteredData)}>
               {renderColumns(tabsValidationsState.validationList.validations)}
             </DataTable>
           ) : (
