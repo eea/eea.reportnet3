@@ -49,24 +49,24 @@ export const ShareRights = ({
     accountHasError: false,
     accountNotFound: false,
     clonedUserRightList: [],
-    isDataUpdated: false,
+    dataUpdatedCount: 0,
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
-    isLoading: true,
+    loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
     isLoadingButton: false,
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
     userRightToDelete: ''
   });
 
-  const { isLoadingButton } = shareRightsState;
+  const { loadingStatus, isLoadingButton } = shareRightsState;
 
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
     getAllUsers();
-  }, [shareRightsState.isDataUpdated]);
+  }, [shareRightsState.dataUpdatedCount]);
 
   useEffect(() => {
     if (!shareRightsState.userRight.isNew && dropdownRef.current && isUserRightManagementDialogVisible) {
@@ -102,6 +102,8 @@ export const ShareRights = ({
   };
 
   const getAllUsers = async () => {
+    if (shareRightsState.dataUpdatedCount !== 0) setLoadingStatus(true, false);
+
     try {
       const userRightList = await callEndPoint('getAll');
 
@@ -111,7 +113,7 @@ export const ShareRights = ({
       });
     } catch (error) {
     } finally {
-      setIsLoading(false);
+      setLoadingStatus(false, false);
     }
   };
 
@@ -138,7 +140,7 @@ export const ShareRights = ({
       return true;
     }
 
-    return JSON.stringify(initialUser.role) !== JSON.stringify(userRight.role);
+    return JSON.stringify(initialUser?.role) !== JSON.stringify(userRight?.role);
   };
 
   const updateUserRight = () => {
@@ -175,14 +177,13 @@ export const ShareRights = ({
     }
   };
 
-  const onDataChange = () => {
-    shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: !shareRightsState.isDataUpdated } });
-  };
+  const onDataChange = () => shareRightsDispatch({ type: 'ON_DATA_CHANGE' });
 
   const onUpdateUser = async userRight => {
     if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
       setIsButtonLoading(true);
+      setLoadingStatus(true, false);
 
       try {
         const response = await callEndPoint('update', userRight);
@@ -240,7 +241,9 @@ export const ShareRights = ({
     setIsUserRightManagementDialogVisible(true);
   };
 
-  const setIsLoading = isLoading => shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isLoading } });
+  const setLoadingStatus = (isActionButtonsLoading, isInitialLoading) => {
+    shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isActionButtonsLoading, isInitialLoading } });
+  };
 
   const setIsButtonLoading = isLoadingButton => {
     shareRightsDispatch({ type: 'SET_IS_LOADING_BUTTON', payload: { isLoadingButton } });
@@ -249,6 +252,7 @@ export const ShareRights = ({
   const renderButtonsColumnTemplate = userRight =>
     notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
+        disabledButtons={loadingStatus.isActionButtonsLoading}
         onDeleteClick={() =>
           shareRightsDispatch({
             type: 'ON_DELETE_USER_RIGHT',
@@ -306,7 +310,7 @@ export const ShareRights = ({
 
   const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
 
-  if (shareRightsState.isLoading) return <Spinner style={{ top: 0 }} />;
+  if (loadingStatus.isInitialLoading) return <Spinner style={{ top: 0 }} />;
 
   return (
     <Fragment>

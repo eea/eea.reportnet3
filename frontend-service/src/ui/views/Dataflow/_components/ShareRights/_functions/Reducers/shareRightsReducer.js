@@ -7,7 +7,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return { ...state, userRight: { account: '', isNew: true, role: '' }, isEditing: false };
 
     case 'ON_DATA_CHANGE':
-      return { ...state, isDataUpdated: payload.isDataUpdated };
+      return { ...state, dataUpdatedCount: state.dataUpdatedCount + 1 };
 
     case 'ON_DELETE_USER_RIGHT':
       return {
@@ -37,7 +37,14 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return { ...state, accountNotFound: payload.accountNotFound, accountHasError: payload.accountHasError };
 
     case 'SET_IS_LOADING':
-      return { ...state, isLoading: payload.isLoading };
+      return {
+        ...state,
+        loadingStatus: {
+          ...state.loadingStatus,
+          isActionButtonsLoading: payload.isActionButtonsLoading,
+          isInitialLoading: payload.isInitialLoading
+        }
+      };
 
     case 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG':
       return { ...state, isDeleteDialogVisible: payload.isDeleteDialogVisible };
