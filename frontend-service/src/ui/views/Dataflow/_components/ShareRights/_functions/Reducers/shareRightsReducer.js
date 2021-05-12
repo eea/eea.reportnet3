@@ -55,6 +55,15 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'SET_IS_LOADING_BUTTON':
       return { ...state, isLoadingButton: payload.isLoadingButton };
 
+    case 'GET_ROW_ID':
+      return { ...state, actionsButtons: { ...state.actionsButtons, rowId: payload.rowId } };
+
+    case 'SET_ACTIONS':
+      return {
+        ...state,
+        actionsButtons: { ...state.actionsButtons, isDeleting: payload.isDeleting, isEditing: payload.isEditing }
+      };
+
     default:
       return state;
   }

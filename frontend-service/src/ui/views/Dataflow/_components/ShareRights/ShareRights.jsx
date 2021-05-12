@@ -6,6 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './ShareRights.module.scss';
+
 import { config } from 'conf';
 
 import { ActionsColumn } from 'ui/views/_components/ActionsColumn';
@@ -51,18 +52,19 @@ export const ShareRights = ({
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
     accountNotFound: false,
+    actionsButtons: { rowId: null, isEditing: false, isDeleting: false },
     clonedUserRightList: [],
     dataUpdatedCount: 0,
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
-    loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
     isLoadingButton: false,
+    loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
     userRightToDelete: ''
   });
 
-  const { loadingStatus, isLoadingButton } = shareRightsState;
+  const { isLoadingButton, loadingStatus, userRight } = shareRightsState;
 
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
@@ -72,7 +74,7 @@ export const ShareRights = ({
   }, [shareRightsState.dataUpdatedCount]);
 
   useEffect(() => {
-    if (!shareRightsState.userRight.isNew && dropdownRef.current && isUserRightManagementDialogVisible) {
+    if (!userRight.isNew && dropdownRef.current && isUserRightManagementDialogVisible) {
       dropdownRef.current.focusInput.focus();
     }
   }, [dropdownRef.current, isUserRightManagementDialogVisible]);
@@ -117,7 +119,9 @@ export const ShareRights = ({
     } catch (error) {
       notificationContext.add({ type: getErrorNotificationKey });
     } finally {
+      setActions(false, false);
       setLoadingStatus(false, false);
+      setRowId(null);
     }
   };
 
@@ -148,10 +152,7 @@ export const ShareRights = ({
   };
 
   const updateUserRight = () => {
-    const { userRight } = shareRightsState;
-
     const isRepeated = userRight.isNew ? isRepeatedAccount(userRight.account) : false;
-
     const accountHasError = !isValidEmail(userRight.account) || isRepeated || shareRightsState.accountNotFound;
 
     shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError } });
@@ -167,6 +168,7 @@ export const ShareRights = ({
 
   const onDeleteUserRight = async () => {
     onToggleDeletingUser(true);
+    setActions(true, false);
 
     try {
       const response = await callEndPoint('delete');
@@ -184,6 +186,7 @@ export const ShareRights = ({
   const onDataChange = () => shareRightsDispatch({ type: 'ON_DATA_CHANGE' });
 
   const onUpdateUser = async userRight => {
+    setActions(false, true);
     if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
       setIsButtonLoading(true);
@@ -248,18 +251,26 @@ export const ShareRights = ({
     setIsUserRightManagementDialogVisible(true);
   };
 
-  const setLoadingStatus = (isActionButtonsLoading, isInitialLoading) => {
-    shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isActionButtonsLoading, isInitialLoading } });
+  const setActions = (isDeleting, isEditing) => {
+    shareRightsDispatch({ type: 'SET_ACTIONS', payload: { isDeleting, isEditing } });
   };
 
   const setIsButtonLoading = isLoadingButton => {
     shareRightsDispatch({ type: 'SET_IS_LOADING_BUTTON', payload: { isLoadingButton } });
   };
 
+  const setLoadingStatus = (isActionButtonsLoading, isInitialLoading) => {
+    shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isActionButtonsLoading, isInitialLoading } });
+  };
+
+  const setRowId = rowId => shareRightsDispatch({ type: 'GET_ROW_ID', payload: { rowId } });
+
   const renderButtonsColumnTemplate = userRight =>
     notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
-        disabledButtons={loadingStatus.isActionButtonsLoading}
+        disabledButtons={isNil(shareRightsState.actionsButtons.rowId) && loadingStatus.isActionButtonsLoading}
+        isDeletingDocument={shareRightsState.actionsButtons.isDeleting}
+        isUpdating={shareRightsState.actionsButtons.isEditing}
         onDeleteClick={() =>
           shareRightsDispatch({
             type: 'ON_DELETE_USER_RIGHT',
@@ -267,6 +278,9 @@ export const ShareRights = ({
           })
         }
         onEditClick={() => onEditUserRight(userRight)}
+        rowDataId={userRight.id}
+        rowDeletingId={shareRightsState.actionsButtons.rowId}
+        rowUpdatingId={shareRightsState.actionsButtons.rowId}
       />
     );
 
@@ -276,8 +290,6 @@ export const ShareRights = ({
   };
 
   const renderRightManagement = () => {
-    const { userRight } = shareRightsState;
-
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
 
     return (
@@ -328,7 +340,7 @@ export const ShareRights = ({
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : (
           <div className={styles.table}>
-            <DataTable value={shareRightsState.userRightList}>
+            <DataTable onRowClick={event => setRowId(event.data.id)} value={shareRightsState.userRightList}>
               <Column body={renderAccountTemplate} header={columnHeader} />
               <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
               <Column
@@ -364,9 +376,7 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
-          disabledConfirm={
-            isLoadingButton || (!shareRightsState.userRight.isNew && !isRoleChanged(shareRightsState.userRight))
-          }
+          disabledConfirm={isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight))}
           header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
