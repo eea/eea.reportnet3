@@ -26,7 +26,6 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
 
   const [dataToFilter, setDataToFilter] = useState(content);
   const [filteredData, setFilteredData] = useState(dataToFilter);
-  const [filteredState, setFilteredState] = useState(false);
   const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
 
   useEffect(() => {
@@ -60,8 +59,6 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
       notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });
     }
   };
-
-  const getFilteredSearched = value => setFilteredState(value);
 
   const isFilteredByPinned = () =>
     filteredData.filter(dataflow => dataflow.pinned === 'pinned').length === filteredData.length ||
@@ -136,25 +133,19 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
       <p>{description}</p>
       <div className="dataflowList-filters-help-step">
         <Filters
-          options={filterOptions}
           data={dataToFilter}
           getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredSearched}
-          sortable={true}
+          options={filterOptions}
           sortCategory={'pinned'}
+          sortable={true}
         />
       </div>
 
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
           filteredData.map((dataflow, i) => (
-            <Fragment>
-              <DataflowsItem
-                isCustodian={isCustodian}
-                itemContent={dataflow}
-                key={dataflow.id}
-                reorderDataflows={reorderDataflows}
-              />
+            <Fragment key={dataflow.id}>
+              <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />
               {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
             </Fragment>
           ))
@@ -162,7 +153,7 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
           <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
         )
       ) : (
-        <div className={styles.noDataflows}>{resources.messages['thereAreNoDatalows']}</div>
+        <div className={styles.noDataflows}>{resources.messages['thereAreNoDataflows']}</div>
       )}
     </div>
   );
