@@ -173,7 +173,8 @@ public class ContributorServiceImpl implements ContributorService {
       default:
         break;
     }
-
+    LOG.info("For the account:{} in Dataflow {} the following resources are going to be deleted:{}",
+        account, dataflowId, resourcesProviders);
     userManagementControllerZull.removeContributorsFromResources(resourcesProviders);
   }
 
@@ -212,7 +213,7 @@ public class ContributorServiceImpl implements ContributorService {
       resourcesProviders
           .add(fillResourceAssignation(id, account, ResourceGroupEnum.DATASET_REPORTER_WRITE));
       resourcesProviders
-          .add(fillResourceAssignation(id, account, ResourceGroupEnum.DATASET_REPORTER_WRITE));
+          .add(fillResourceAssignation(id, account, ResourceGroupEnum.DATASET_REPORTER_READ));
     }
   }
 
@@ -302,7 +303,8 @@ public class ContributorServiceImpl implements ContributorService {
   @Override
   public void createContributor(Long dataflowId, ContributorVO contributorVO, Long dataProviderId,
       Boolean persistDataflowPermission) throws EEAException {
-
+    LOG.info("Initiating the creation of a contributing user for the following account:{}",
+        contributorVO.getAccount());
     final List<ResourceAssignationVO> resourceAssignationVOList = new ArrayList<>();
     List<ResourceInfoVO> resourceInfoVOs = new ArrayList<>();
 
@@ -405,8 +407,11 @@ public class ContributorServiceImpl implements ContributorService {
 
     ResourceInfoVO resourceDataflow =
         resourceManagementControllerZull.getResourceDetail(dataflowId, resourceGroupEnumDataflow);
+    LOG.info("Dataflow {} resources:¨{}", dataflowId, resourceDataflow);
     if (null == resourceDataflow.getName()) {
       resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, securityRoleEnum));
+      LOG.info("Do dataflow {} permissions need to persist?: {}", dataflowId,
+          persistDataflowPermission);
       if (Boolean.TRUE.equals(persistDataflowPermission)) {
         resourceInfoVOs.add(createGroup(dataflowId, ResourceTypeEnum.DATAFLOW,
             SecurityRoleEnum.REPORTER_READ.equals(securityRoleEnum) ? SecurityRoleEnum.REPORTER_READ
@@ -565,6 +570,7 @@ public class ContributorServiceImpl implements ContributorService {
     resourceInfoVO.setResourceId(datasetId);
     resourceInfoVO.setResourceTypeEnum(type);
     resourceInfoVO.setSecurityRoleEnum(role);
+    LOG.info("Group created with the following resources:{}", resourceInfoVO);
     return resourceInfoVO;
   }
 
@@ -593,13 +599,18 @@ public class ContributorServiceImpl implements ContributorService {
       // avoid delete if it's a new contributor
       List<ResourceAccessVO> resourceAccessVOs =
           userManagementControllerZull.getResourcesByUserEmail(contributorVO.getAccount());
-      if (resourceAccessVOs != null && !resourceAccessVOs.isEmpty()) {
-        ResourceAccessVO resourceAccess =
-            resourceAccessVOs.stream()
-                .filter(resource -> resource.getId().equals(dataflowId)
-                    && ResourceTypeEnum.DATAFLOW.equals(resource.getResource()))
-                .findAny().orElse(null);
-        if (resourceAccess != null) {
+      if (null != resourceAccessVOs && !resourceAccessVOs.isEmpty()) {
+        ResourceAccessVO resourceAccess = null;
+        for (ResourceAccessVO resource : resourceAccessVOs) {
+          if (resource.getId().equals(dataflowId)
+              && resource.getResource().equals(ResourceTypeEnum.DATAFLOW)) {
+            resourceAccess = resource;
+            break;
+          }
+        }
+        LOG.info("Checking for account:{} in Dataflow {} and Role:{}, Access resources:{}",
+            contributorVO.getAccount(), dataflowId, contributorVO.getRole(), resourceAccess);
+        if (null != resourceAccess) {
           persistDataflowPermission =
               deleteContributor(dataflowId, contributorVO, dataProviderId, resourceAccess);
         }
@@ -636,6 +647,8 @@ public class ContributorServiceImpl implements ContributorService {
     Boolean persistDataflowPermission;
     persistDataflowPermission =
         checkDataflowPrevPermission(contributorVO.getRole(), resourceAccess);
+    LOG.info("Permissions to be maintained:{} for the user:{} in Dataflow {}.",
+        persistDataflowPermission, contributorVO.getAccount(), dataflowId);
     try {
       deleteContributor(dataflowId, contributorVO.getAccount(), resourceAccess.getRole().toString(),
           dataProviderId);
