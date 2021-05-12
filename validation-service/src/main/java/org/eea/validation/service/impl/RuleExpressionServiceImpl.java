@@ -194,6 +194,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
 
     loop: while (index < length) {
       switch (ruleExpressionString.charAt(index)) {
+        case '-':
         case '0':
         case '1':
         case '2':

@@ -37,6 +37,7 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   @Autowired
   private ReferenceDatasetMapper referenceDatasetMapper;
 
+  /** The reference dataset public mapper. */
   @Autowired
   private ReferenceDatasetPublicMapper referenceDatasetPublicMapper;
 
