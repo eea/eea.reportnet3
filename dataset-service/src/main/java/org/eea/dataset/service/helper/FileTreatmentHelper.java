@@ -1235,8 +1235,8 @@ public class FileTreatmentHelper implements DisposableBean {
       datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
           .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
     } catch (EEAException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
+          datasetSchemaId, e.getMessage(), e);
     }
     List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
 
