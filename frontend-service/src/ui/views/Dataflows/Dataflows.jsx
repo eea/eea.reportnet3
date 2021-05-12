@@ -184,7 +184,7 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
+        <TabMenu activeItem={tabMenuActiveItem} model={tabMenuItems} onTabChange={e => setTabMenuActiveItem(e.value)} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={dataflowsState.allDataflows}
@@ -204,8 +204,8 @@ const Dataflows = withRouter(({ history, match }) => {
 
       <DataflowManagement
         isEditForm={false}
-        onCreateDataflow={onCreateDataflow}
         manageDialogs={manageDialogs}
+        onCreateDataflow={onCreateDataflow}
         state={dataflowsState}
       />
     </div>

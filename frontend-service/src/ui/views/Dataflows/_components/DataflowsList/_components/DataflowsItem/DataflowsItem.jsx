@@ -76,7 +76,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`} data-tip data-for={idTooltip}>
+        <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
           {itemContent.name}
         </h3>
         <p>{itemContent.description}</p>
