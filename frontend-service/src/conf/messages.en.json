@@ -1079,9 +1079,23 @@
     "referenceDataset": "Reference dataset",
     "navigateToDataflow": "Navigate to the dataflow",
     "navigateToCountry": "Navigate to the country",
+    "editRequesterConfirmHeader": "Edit requester",
+    "addRequesterConfirmHeader": "Add requester",
+    "editReporterConfirmHeader": "Edit reporter",
+    "addReporterConfirmHeader": "Add reporter",
+    "account": "Account",
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
+    "reporterEmptyUserRightList": "There are no reporters created for the dataflow.",
+    "requesterEmptyUserRightList": "There are no requesters created for the dataflow.",
+    "updateReporterError": "Error editing reporter",
+    "addReporterError": "Error editing reporter",
+    "getReportersError": "Error getting reporters",
+    "updateRequesterError": "Error editing requester",
+    "addRequesterError": "Error editing requester",
+    "getRequestersError": "Error getting requesters",
     "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
-    "geomTypeHelpTooltip": "Check the type format"
+    "geomTypeHelpTooltip": "Check the type format",
+    "notFoundError": "Page not found error. The requested page does not exist"
   }
 }
