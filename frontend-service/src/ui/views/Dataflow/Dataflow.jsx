@@ -55,7 +55,6 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { Fragment } from 'react';
 
 const Dataflow = withRouter(({ history, match }) => {
   const {
