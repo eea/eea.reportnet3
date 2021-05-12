@@ -48,6 +48,7 @@ export const PublicDataflowInformation = withRouter(
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [representatives, setRepresentatives] = useState({});
+    const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
 
     const notificationContext = useContext(NotificationContext);
 
@@ -213,6 +214,7 @@ export const PublicDataflowInformation = withRouter(
         parseDataflowData(data.datasets);
       } catch (error) {
         console.error('error', error);
+        setIsWrongUrlDataflowId(true);
         notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
       } finally {
         setIsLoading(false);
@@ -283,23 +285,27 @@ export const PublicDataflowInformation = withRouter(
       <PublicLayout>
         <div className={`${styles.container} rep-container`} style={contentStyles}>
           {!isLoading ? (
-            <Fragment>
-              <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-              {!isEmpty(representatives) ? (
-                <Fragment>
-                  <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                    {renderColumns(representatives)}
-                  </DataTable>
-                  <div className={styles.tableLegendContainer}>
-                    <span>*</span>
-                    <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-                    <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-                  </div>
-                </Fragment>
-              ) : (
-                <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
-              )}
-            </Fragment>
+            isWrongUrlDataflowId ? (
+              <div className={styles.noDatasets}>{resources.messages['wrongUrlDataflowId']}</div>
+            ) : (
+              <Fragment>
+                <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+                {!isEmpty(representatives) ? (
+                  <Fragment>
+                    <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
+                      {renderColumns(representatives)}
+                    </DataTable>
+                    <div className={styles.tableLegendContainer}>
+                      <span>*</span>
+                      <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
+                      <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
+                    </div>
+                  </Fragment>
+                ) : (
+                  <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+                )}
+              </Fragment>
+            )
           ) : (
             <Spinner className={styles.isLoading} />
           )}

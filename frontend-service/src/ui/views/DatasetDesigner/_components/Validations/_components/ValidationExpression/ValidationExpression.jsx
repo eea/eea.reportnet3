@@ -39,7 +39,6 @@ const ValidationExpression = ({
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
-  const [previousValue, setPreviousValue] = useState();
   const [valueInputProps, setValueInputProps] = useState();
   const [valueKeyFilter, setValueKeyFilter] = useState();
 
@@ -78,6 +77,10 @@ const ValidationExpression = ({
 
     if (operatorType === 'number' || operatorType === 'LEN') {
       setValueKeyFilter('num');
+    }
+
+    if (operatorType === 'number' && fieldType === 'NUMBER_INTEGER') {
+      setValueKeyFilter('int');
     }
 
     if (operatorType === 'string') {
@@ -126,13 +129,6 @@ const ValidationExpression = ({
       onExpressionsErrors(expressionId, false);
     }
   }, [clickedFields, showRequiredFields]);
-
-  useEffect(() => {
-    setPreviousValue(expressionValues.expressionValue);
-    return () => {
-      setPreviousValue('');
-    };
-  }, []);
 
   const printRequiredFieldError = field => {
     let conditions = false;
@@ -197,9 +193,7 @@ const ValidationExpression = ({
 
     if ((expressionValues.operatorType === 'LEN' || expressionValues.operatorType === 'number') && field === 'number') {
       if (!Number(fieldValue) && Number(fieldValue) !== 0) {
-        onUpdateExpressionField('expressionValue', previousValue);
-      } else {
-        setPreviousValue(fieldValue);
+        onUpdateExpressionField('expressionValue', '');
       }
     }
   };
@@ -283,7 +277,7 @@ const ValidationExpression = ({
         return (
           <InputText
             disabled={isDisabled}
-            format={false}
+            format="false"
             keyfilter={valueKeyFilter}
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
@@ -293,15 +287,13 @@ const ValidationExpression = ({
         );
       }
       return (
-        <InputNumber
+        <InputText
           disabled={isDisabled}
-          format={false}
-          mode="decimal"
+          format="false"
+          keyfilter={valueKeyFilter}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder={resourcesContext.messages.value}
-          steps={0}
-          useGrouping={false}
           value={expressionValues.expressionValue}
         />
       );

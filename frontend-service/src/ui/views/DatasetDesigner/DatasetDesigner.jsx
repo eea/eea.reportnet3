@@ -26,7 +26,7 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Snapshots } from 'ui/views/_components/Snapshots';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -289,21 +289,26 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
-    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
-      command: () => onExportDataInternalExtension(type.code),
-      icon: config.icons['archive'],
-      label: type.text
-    }));
+    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
+      const extensionsTypes = !isNil(type.code) && type.code.split('+');
+      return {
+        command: () => onExportDataInternalExtension(type.code),
+        icon: extensionsTypes[0],
+        label: type.text
+      };
+    });
 
     const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [
           {
             label: resources.messages['customExports'],
-            items: externalOperationsList.export.map(type => ({
-              command: () => onExportDataExternalIntegration(type.id),
-              icon: config.icons['archive'],
-              label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
-            }))
+            items: externalOperationsList.export.map(type => {
+              return {
+                command: () => onExportDataExternalIntegration(type.id),
+                icon: type.fileExtension,
+                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+              };
+            })
           }
         ]
       : [];
@@ -320,7 +325,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     const importFromFile = [
       {
         command: () => manageDialogs('isImportDatasetDialogVisible', true),
-        icon: config.icons['import'],
+        icon: 'upload',
         label: resources.messages['importFromFile']
       }
     ];
@@ -332,7 +337,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
               id: importOtherSystem.id,
               label: importOtherSystem.name,
-              icon: config.icons['import'],
+              icon: 'upload',
               command: () => {
                 setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
                 manageDialogs('isImportOtherSystemsDialogVisible', true);
@@ -375,16 +380,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const getPosition = e => {
-    const exportButton = e.currentTarget;
-    const left = `${exportButton.offsetLeft}px`;
-    const topValue = exportButton.offsetHeight + exportButton.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = exportButton.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
   };
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
@@ -1214,13 +1209,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 }
               />
               {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                <Menu
-                  id="importDataSetMenu"
-                  model={designerState.importButtonsList}
-                  onShow={e => getPosition(e)}
-                  popup={true}
-                  ref={importMenuRef}
-                />
+                <Menu id="importDataSetMenu" model={designerState.importButtonsList} popup={true} ref={importMenuRef} />
               )}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
@@ -1236,7 +1225,6 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 className={styles.exportSubmenu}
                 id="exportDataSetMenu"
                 model={designerState.exportButtonsList}
-                onShow={e => getPosition(e)}
                 popup={true}
                 ref={exportMenuRef}
               />

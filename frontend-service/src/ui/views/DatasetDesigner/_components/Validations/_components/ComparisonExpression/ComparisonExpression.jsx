@@ -3,7 +3,6 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
-import uuid from 'uuid';
 
 import styles from './ComparisonExpression.module.scss';
 
@@ -48,7 +47,6 @@ const ComparisonExpression = ({
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
-  const [previousValue, setPreviousValue] = useState();
   const [secondFieldOptions, setSecondFieldOptions] = useState();
   const [tableFields, setTableFields] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
@@ -133,6 +131,9 @@ const ComparisonExpression = ({
     if (expressionValues.operatorType === 'LEN') {
       setValueKeyFilter('num');
     }
+    if (expressionValues.operatorType === 'number' && fieldType === 'NUMBER_INTEGER') {
+      setValueKeyFilter('int');
+    }
   }, [expressionValues.operatorType]);
 
   useEffect(() => {
@@ -204,13 +205,6 @@ const ComparisonExpression = ({
       onExpressionsErrors(expressionId, false);
     }
   }, [clickedFields, showRequiredFields]);
-
-  useEffect(() => {
-    setPreviousValue(expressionValues.field2);
-    return () => {
-      setPreviousValue('');
-    };
-  }, []);
 
   const printRequiredFieldError = field => {
     let conditions = false;
@@ -304,9 +298,7 @@ const ComparisonExpression = ({
         field === 'number'
       ) {
         if (!Number(fieldValue) && Number(fieldValue) !== 0) {
-          onUpdateExpressionField('field2', previousValue);
-        } else {
-          setPreviousValue(fieldValue);
+          onUpdateExpressionField('field2', '');
         }
       }
     }
@@ -444,16 +436,13 @@ const ComparisonExpression = ({
       }
 
       return (
-        <InputNumber
+        <InputText
           disabled={isDisabled}
-          format={false}
+          format="false"
           id={uniqueId(componentName)}
-          mode="decimal"
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
-          steps={0}
-          useGrouping={false}
           value={field2}
         />
       );
