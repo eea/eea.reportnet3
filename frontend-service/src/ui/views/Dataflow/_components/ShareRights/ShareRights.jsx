@@ -291,7 +291,7 @@ export const ShareRights = ({
             {resources.messages['account']}
           </label>
           <InputText
-            className={`formField ${hasError ? styles.error : ''}`}
+            className={hasError ? styles.error : ''}
             disabled={!userRight.isNew}
             id="accountInput"
             onChange={event => onSetAccount(event.target.value)}
