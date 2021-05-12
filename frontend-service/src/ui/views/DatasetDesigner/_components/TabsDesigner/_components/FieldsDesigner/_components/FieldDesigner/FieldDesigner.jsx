@@ -74,6 +74,7 @@ export const FieldDesigner = ({
     { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
     { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
+    { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
     { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
