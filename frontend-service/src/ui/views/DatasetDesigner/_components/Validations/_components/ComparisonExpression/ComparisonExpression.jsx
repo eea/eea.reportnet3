@@ -440,6 +440,7 @@ const ComparisonExpression = ({
           disabled={isDisabled}
           format="false"
           id={uniqueId(componentName)}
+          keyfilter={valueKeyFilter}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
