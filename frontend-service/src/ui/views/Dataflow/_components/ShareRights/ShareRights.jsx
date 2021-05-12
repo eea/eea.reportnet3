@@ -61,7 +61,8 @@ export const ShareRights = ({
     loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
-    userRightToDelete: ''
+    userRightToDelete: '',
+    isEditing: false
   });
 
   const { isLoadingButton, loadingStatus, userRight } = shareRightsState;
@@ -271,13 +272,17 @@ export const ShareRights = ({
         disabledButtons={isNil(shareRightsState.actionsButtons.rowId) && loadingStatus.isActionButtonsLoading}
         isDeletingDocument={shareRightsState.actionsButtons.isDeleting}
         isUpdating={shareRightsState.actionsButtons.isEditing}
-        onDeleteClick={() =>
+        onDeleteClick={() => {
+          setRowId(userRight.id);
           shareRightsDispatch({
             type: 'ON_DELETE_USER_RIGHT',
             payload: { isDeleteDialogVisible: true, userRightToDelete: userRight }
-          })
-        }
-        onEditClick={() => onEditUserRight(userRight)}
+          });
+        }}
+        onEditClick={() => {
+          setRowId(userRight.id);
+          onEditUserRight(userRight);
+        }}
         rowDataId={userRight.id}
         rowDeletingId={shareRightsState.actionsButtons.rowId}
         rowUpdatingId={shareRightsState.actionsButtons.rowId}
@@ -340,7 +345,7 @@ export const ShareRights = ({
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : (
           <div className={styles.table}>
-            <DataTable onRowClick={event => setRowId(event.data.id)} value={shareRightsState.userRightList}>
+            <DataTable value={shareRightsState.userRightList}>
               <Column body={renderAccountTemplate} header={columnHeader} />
               <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
               <Column
