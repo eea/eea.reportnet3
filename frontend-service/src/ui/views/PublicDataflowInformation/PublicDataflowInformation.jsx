@@ -216,7 +216,7 @@ export const PublicDataflowInformation = withRouter(
     );
 
     const isReleasedBodyColumn = rowData => (
-      <div className={styles.checkedValueColumn}>
+      <div className={styles.cellContentPosition}>
         {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
       </div>
     );
@@ -290,6 +290,10 @@ export const PublicDataflowInformation = withRouter(
       setRepresentatives(uniqParsedDatasets);
     };
 
+    const releaseDateBodyColumn = rowData => {
+      return <div className={styles.cellContentPosition}>{rowData.releaseDate}</div>;
+    };
+
     const renderColumns = representatives => {
       const fieldColumns = getOrderedColumns(Object.keys(representatives[0]))
         .filter(
@@ -304,6 +308,7 @@ export const PublicDataflowInformation = withRouter(
           if (field === 'datasetSchemaName') template = countryBodyColumn;
           if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
+          if (field === 'releaseDate') template = releaseDateBodyColumn;
           return (
             <Column
               body={template}
