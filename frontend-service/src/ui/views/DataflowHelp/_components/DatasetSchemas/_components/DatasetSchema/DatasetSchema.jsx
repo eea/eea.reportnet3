@@ -4,9 +4,11 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
-
 import styles from './DatasetSchema.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ReactTooltip from 'react-tooltip';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
 
@@ -134,6 +136,8 @@ const DatasetSchema = ({
     switch (field.type.toUpperCase()) {
       case 'DATE':
         return resources.messages['dateFieldFormatRestriction'];
+      case 'DATETIME':
+        return resources.messages['datetimeFieldFormatRestriction'];
       case 'TEXT':
       case 'TEXTAREA':
         return resources.messages['textFieldFormatRestriction'];
@@ -156,6 +160,30 @@ const DatasetSchema = ({
             ? `${field.maxSize} ${resources.messages['MB']}`
             : resources.messages['maxSizeNotDefined']
         }`;
+      case 'POINT':
+      case 'MULTIPOINT':
+      case 'LINESTRING':
+      case 'MULTILINESTRING':
+      case 'POLYGON':
+      case 'MULTIPOLYGON':
+        return (
+          <a
+            href="https://geojsonlint.com/"
+            rel="noreferrer"
+            target="_blank"
+            title={resources.messages['geomTypeHelpTooltip']}>
+            <FontAwesomeIcon
+              aria-hidden={false}
+              className="p-breadcrumb-home"
+              data-for="geometricTypeTooltip"
+              data-tip
+              icon={AwesomeIcons('externalLink')}
+            />
+            <ReactTooltip className={styles.tooltipClass} effect="solid" id="geometricTypeTooltip" place="top">
+              <span>{resources.messages['geomTypeHelpTooltip']}</span>
+            </ReactTooltip>
+          </a>
+        );
       default:
         return '';
     }

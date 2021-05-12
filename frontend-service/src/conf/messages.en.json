@@ -1078,6 +1078,10 @@
     "onlyReleasedEuDatasetCheckboxLabel": "Only released to EU dataset",
     "referenceDataset": "Reference dataset",
     "navigateToDataflow": "Navigate to the dataflow",
-    "navigateToCountry": "Navigate to the country"
+    "navigateToCountry": "Navigate to the country",
+    "wrongUrlCountryCode": "The country doesn't exist",
+    "wrongUrlDataflowId": "The dataflow doesn't exist",
+    "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
+    "geomTypeHelpTooltip": "Check the type format"
   }
 }

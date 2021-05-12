@@ -19,6 +19,10 @@ public class RuleOperators {
   /** The Constant DATE_FORMAT. */
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+  /** The Constant DATETIME_FORMAT. */
+  private static final DateTimeFormatter DATETIME_FORMAT =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
   /**
    * Instantiates a new rule operators.
    */

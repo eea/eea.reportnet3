@@ -16,6 +16,7 @@ export const Calendar = forwardRef((props, _) => {
     inputRef,
     keepInvalid,
     key,
+    locale,
     maxDate,
     minDate,
     monthNavigator,
@@ -23,11 +24,16 @@ export const Calendar = forwardRef((props, _) => {
     onChange,
     onFocus,
     onSelect,
+    onTodayButtonClick,
     placeholder,
     readOnlyInput,
     selectionMode,
+    showButtonBar,
+    showSeconds = false,
+    showTime = false,
     showWeek,
     style,
+    todayButtonClassName,
     value,
     yearNavigator,
     yearRange
@@ -45,6 +51,7 @@ export const Calendar = forwardRef((props, _) => {
       inputId={inputId}
       keepInvalid={keepInvalid}
       key={key}
+      locale={locale}
       maxDate={maxDate}
       minDate={minDate}
       monthNavigator={monthNavigator}
@@ -52,12 +59,17 @@ export const Calendar = forwardRef((props, _) => {
       onChange={onChange}
       onFocus={onFocus}
       onSelect={onSelect}
+      onTodayButtonClick={onTodayButtonClick}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
       ref={inputRef}
       selectionMode={selectionMode}
+      showButtonBar={showButtonBar}
+      showSeconds={showSeconds}
+      showTime={showTime}
       showWeek={showWeek}
       style={style}
+      todayButtonClassName={todayButtonClassName}
       value={value}
       yearNavigator={yearNavigator}
       yearRange={yearRange}

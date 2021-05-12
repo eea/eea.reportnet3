@@ -99,7 +99,9 @@ const DataForm = ({
                       ].includes(column.type)
                         ? '.5em'
                         : '0',
-                      width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''
+                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type)
+                        ? '30%'
+                        : ''
                     }}>
                     <DataFormFieldEditor
                       autoFocus={column.field === first(nonAttachmentsOrComplexGeomTypes).field}
@@ -162,7 +164,11 @@ const DataForm = ({
                   ) && (
                     <div className="p-col-4" style={{ padding: '.75em' }}>
                       <label htmlFor={column.field}>{`${column.header}${
-                        TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
+                        TextUtils.areEquals(column.type, 'DATE')
+                          ? ' (YYYY-MM-DD)'
+                          : TextUtils.areEquals(column.type, 'DATETIME')
+                          ? ' (YYYY-MM-DD HH:mm:ss)'
+                          : ''
                       }`}</label>
                       <Button
                         className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
@@ -189,7 +195,9 @@ const DataForm = ({
                       ].includes(column.type)
                         ? '.5em'
                         : '0',
-                      width: ['DATE', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type) ? '30%' : ''
+                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type)
+                        ? '30%'
+                        : ''
                     }}>
                     <DataFormFieldEditor
                       autoFocus={column.field === first(nonAttachmentsOrComplexGeomTypes).field}

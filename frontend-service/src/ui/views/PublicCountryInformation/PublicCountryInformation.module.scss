@@ -34,22 +34,14 @@
   }
 }
 
-.noDataflowsWrapper {
+.noDataflows {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
   height: 40vh;
-
-  .noDataflows {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 2rem;
-    font-size: 1.4rem;
-    font-weight: bold;
-    height: 100%;
-  }
 }
 
 .cellWrapper {
