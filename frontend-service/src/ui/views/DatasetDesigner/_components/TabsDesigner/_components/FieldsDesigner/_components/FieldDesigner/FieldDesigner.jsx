@@ -1227,6 +1227,7 @@ export const FieldDesigner = ({
           datasetSchemaId={datasetSchemaId}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          isReferenceDataset={isReferenceDataset}
           linkedTableConditional={fieldLinkedTableConditional}
           linkedTableLabel={fieldLinkedTableLabel}
           masterTableConditional={fieldMasterTableConditional}
