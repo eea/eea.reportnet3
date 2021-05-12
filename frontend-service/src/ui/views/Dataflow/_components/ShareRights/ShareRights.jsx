@@ -201,10 +201,6 @@ export const ShareRights = ({
             type: 'SET_ACCOUNT_NOT_FOUND',
             payload: { accountNotFound: true, accountHasError: true }
           });
-        }
-        //change to 403
-        else if (error?.response?.status === 500) {
-          getAllUsers();
         } else {
           notificationContext.add({ type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey });
         }
