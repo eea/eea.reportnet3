@@ -211,7 +211,7 @@ const ValidationExpression = ({
       return;
     }
 
-    if (operatorType === 'date') {
+    if (operatorType === 'date' || operatorType === 'dateTime') {
       return (
         <Calendar
           appendTo={document.body}

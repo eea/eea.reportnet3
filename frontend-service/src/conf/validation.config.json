@@ -2,6 +2,7 @@
   "operatorByType": {
     "CODELIST": ["LEN", "string"],
     "DATE": ["date", "day", "month", "year"],
+    "DATETIME": ["dateTime", "day", "month", "year"],
     "EMAIL": ["LEN", "string"],
     "LINK": ["LEN", "string"],
     "RICH_TEXT": ["LEN", "string"],
@@ -22,6 +23,7 @@
     "stringMatch": ["TEXT", "TEXTAREA"],
     "numberMatch": ["TEXT", "TEXTAREA"],
     "date": ["DATE"],
+    "dateTime": ["DATETIME"],
     "month": ["DATE", "NUMBER_INTEGER"],
     "year": ["DATE", "NUMBER_INTEGER"],
     "day": ["DATE", "NUMBER_INTEGER"]
@@ -76,6 +78,19 @@
         { "label": "IS NOT NULL", "value": "IS NOT NULL" }
       ]
     },
+    "dateTime": {
+      "option": { "label": "Date time", "value": "dateTime" },
+      "values": [
+        { "label": ">", "value": ">" },
+        { "label": "<", "value": "<" },
+        { "label": ">=", "value": ">=" },
+        { "label": "<=", "value": "<=" },
+        { "label": "=", "value": "=" },
+        { "label": "!=", "value": "!=" },
+        { "label": "IS NULL", "value": "IS NULL" },
+        { "label": "IS NOT NULL", "value": "IS NOT NULL" }
+      ]
+    },
     "year": {
       "option": { "label": "Year (Date)", "value": "year" },
       "values": [
@@ -111,7 +126,7 @@
     }
   },
 
-  "nonNumericOperators": ["string", "date"],
+  "nonNumericOperators": ["string", "date", "dateTime"],
 
   "operatorEquivalences": {
     "logicalOperators": {
@@ -152,6 +167,16 @@
       "<=": "FIELD_LTEQ_DATE",
       "=": "FIELD_EQ_DATE",
       "!=": "FIELD_DIST_DATE",
+      "IS NULL": "FIELD_NULL",
+      "IS NOT NULL": "FIELD_NOT_NULL"
+    },
+    "dateTime": {
+      ">": "FIELD_GT_DATETIME",
+      "<": "FIELD_LT_DATETIME",
+      ">=": "FIELD_GTEQ_DATETIME",
+      "<=": "FIELD_LTEQ_DATETIME",
+      "=": "FIELD_EQ_DATETIME",
+      "!=": "FIELD_DIST_DATETIME",
       "IS NULL": "FIELD_NULL",
       "IS NOT NULL": "FIELD_NOT_NULL"
     },
@@ -220,6 +245,16 @@
       "<=": "RECORD_LTEQ_DATE_RECORD",
       "=": "RECORD_EQ_DATE_RECORD",
       "!=": "RECORD_DIST_DATE_RECORD",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
+    },
+    "dateTime": {
+      ">": "RECORD_GT_DATETIME_RECORD",
+      "<": "RECORD_LT_DATETIME_RECORD",
+      ">=": "RECORD_GTEQ_DATETIME_RECORD",
+      "<=": "RECORD_LTEQ_DATETIME_RECORD",
+      "=": "RECORD_EQ_DATETIME_RECORD",
+      "!=": "RECORD_DIST_DATETIME_RECORD",
       "IS NULL": "RECORD_NULL",
       "IS NOT NULL": "RECORD_NOT_NULL"
     },
@@ -312,6 +347,16 @@
       "<=": "RECORD_LTEQ_DATE",
       "=": "RECORD_EQ_DATE",
       "!=": "RECORD_DIST_DATE",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
+    },
+    "dateTime": {
+      ">": "RECORD_GT_DATETIME",
+      "<": "RECORD_LT_DATETIME",
+      ">=": "RECORD_GTEQ_DATETIME",
+      "<=": "RECORD_LTEQ_DATETIME",
+      "=": "RECORD_EQ_DATETIME",
+      "!=": "RECORD_DIST_DATETIME",
       "IS NULL": "RECORD_NULL",
       "IS NOT NULL": "RECORD_NOT_NULL"
     },
@@ -408,6 +453,16 @@
       "IS NULL": "RECORD_NULL",
       "IS NOT NULL": "RECORD_NOT_NULL"
     },
+    "dateTime": {
+      ">": "RECORD_GT_DATETIME",
+      "<": "RECORD_LT_DATETIME",
+      ">=": "RECORD_GTEQ_DATETIME",
+      "<=": "RECORD_LTEQ_DATETIME",
+      "=": "RECORD_EQ_DATETIME",
+      "!=": "RECORD_DIST_DATETIME",
+      "IS NULL": "RECORD_NULL",
+      "IS NOT NULL": "RECORD_NOT_NULL"
+    },
     "day": {
       ">": "RECORD_GT_DAY",
       "<": "RECORD_LT_DAY",
@@ -484,6 +539,19 @@
         "FIELD_LTEQ_DATE",
         "FIELD_EQ_DATE",
         "FIELD_DIST_DATE",
+        "FIELD_NULL",
+        "FIELD_NOT_NULL"
+      ]
+    },
+    {
+      "operatorType": "dateTime",
+      "operators": [
+        "FIELD_GT_DATETIME",
+        "FIELD_LT_DATETIME",
+        "FIELD_GTEQ_DATETIME",
+        "FIELD_LTEQ_DATETIME",
+        "FIELD_EQ_DATETIME",
+        "FIELD_DIST_DATETIME",
         "FIELD_NULL",
         "FIELD_NOT_NULL"
       ]
@@ -595,6 +663,25 @@
       ]
     },
     {
+      "operatorType": "dateTime",
+      "operators": [
+        "RECORD_GT_DATETIME_RECORD",
+        "RECORD_LT_DATETIME_RECORD",
+        "RECORD_GTEQ_DATETIME_RECORD",
+        "RECORD_LTEQ_DATETIME_RECORD",
+        "RECORD_EQ_DATETIME_RECORD",
+        "RECORD_DIST_DATETIME_RECORD",
+        "RECORD_GT_DATETIME",
+        "RECORD_LT_DATETIME",
+        "RECORD_GTEQ_DATETIME",
+        "RECORD_LTEQ_DATETIME",
+        "RECORD_EQ_DATETIME",
+        "RECORD_DIST_DATETIME",
+        "RECORD_NULL",
+        "RECORD_NOT_NULL"
+      ]
+    },
+    {
       "operatorType": "day",
       "operators": [
         "RECORD_GT_DAY_RECORD",
@@ -700,6 +787,12 @@
     "FIELD_LTEQ_DATE": "<=",
     "FIELD_EQ_DATE": "=",
     "FIELD_DIST_DATE": "!=",
+    "FIELD_GT_DATETIME": ">",
+    "FIELD_LT_DATETIME": "<",
+    "FIELD_GTEQ_DATETIME": ">=",
+    "FIELD_LTEQ_DATETIME": "<=",
+    "FIELD_EQ_DATETIME": "=",
+    "FIELD_DIST_DATETIME": "!=",
     "FIELD_NUM_MATCH": "MATCH",
     "FIELD_GT_DAY": ">",
     "FIELD_LT_DAY": "<",
@@ -756,6 +849,12 @@
     "RECORD_LTEQ_DATE_RECORD": "<=",
     "RECORD_EQ_DATE_RECORD": "=",
     "RECORD_DIST_DATE_RECORD": "!=",
+    "RECORD_GT_DATETIME_RECORD": ">",
+    "RECORD_LT_DATETIME_RECORD": "<",
+    "RECORD_GTEQ_DATETIME_RECORD": ">=",
+    "RECORD_LTEQ_DATETIME_RECORD": "<=",
+    "RECORD_EQ_DATETIME_RECORD": "=",
+    "RECORD_DIST_DATETIME_RECORD": "!=",
     "RECORD_GT_DAY_RECORD": ">",
     "RECORD_LT_DAY_RECORD": "<",
     "RECORD_GTEQ_DAY_RECORD": ">=",
@@ -801,6 +900,12 @@
     "RECORD_LTEQ_DATE": "<=",
     "RECORD_EQ_DATE": "=",
     "RECORD_DIST_DATE": "!=",
+    "RECORD_GT_DATETIME": ">",
+    "RECORD_LT_DATETIME": "<",
+    "RECORD_GTEQ_DATETIME": ">=",
+    "RECORD_LTEQ_DATETIME": "<=",
+    "RECORD_EQ_DATETIME": "=",
+    "RECORD_DIST_DATETIME": "!=",
     "RECORD_GT_DAY": ">",
     "RECORD_LT_DAY": "<",
     "RECORD_GTEQ_DAY": ">=",
