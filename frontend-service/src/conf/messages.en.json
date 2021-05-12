@@ -1081,6 +1081,8 @@
     "navigateToCountry": "Navigate to the country",
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
-    "referenceDatasets": "Reference datasets"
+    "referenceDatasets": "Reference datasets",
+    "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
+    "geomTypeHelpTooltip": "Check the type format"
   }
 }
