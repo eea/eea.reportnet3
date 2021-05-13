@@ -46,18 +46,23 @@ export const ShareRights = ({
   updateErrorNotificationKey,
   userType
 }) => {
+  const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
+  const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
+  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
+  const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
+
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
     accountNotFound: false,
-    actionsButtons: { rowId: null, isEditing: false, isDeleting: false },
+    actionsButtons: { id: null, isDeleting: false, isEditing: false },
     clonedUserRightList: [],
     dataUpdatedCount: 0,
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
-    isEditing: false,
+    isEditingModal: false,
     isLoadingButton: false,
     loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
     userRight: { account: '', isNew: true, role: '' },
@@ -82,36 +87,47 @@ export const ShareRights = ({
 
   useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
 
-  const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
-  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
-
   const callEndPoint = async (method, userRight) => {
-    if (userType === 'reporter') {
-      if (method === 'getAll') {
-        return await UserRightService.allReporters(dataflowId, dataProvider);
-      } else if (method === 'delete') {
-        return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
-      } else if (method === 'update') {
-        return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
+    if (userType === userTypes.REPORTER) {
+      switch (method) {
+        case methodTypes.DELETE:
+          return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
+
+        case methodTypes.GET_ALL:
+          return await UserRightService.allReporters(dataflowId, dataProvider);
+
+        case methodTypes.UPDATE:
+          return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
+
+        default:
+          break;
       }
     }
 
-    if (userType === 'requester') {
-      if (method === 'getAll') {
-        return await UserRightService.allRequesters(dataflowId);
-      } else if (method === 'delete') {
-        return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
-      } else if (method === 'update') {
-        return await UserRightService.updateRequester(userRight, dataflowId);
+    if (userType === userTypes.REQUESTER) {
+      switch (method) {
+        case methodTypes.DELETE:
+          return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
+
+        case methodTypes.GET_ALL:
+          return await UserRightService.allRequesters(dataflowId);
+
+        case methodTypes.UPDATE:
+          return await UserRightService.updateRequester(userRight, dataflowId);
+
+        default:
+          break;
       }
     }
   };
 
   const getAllUsers = async () => {
-    if (shareRightsState.dataUpdatedCount !== 0) setLoadingStatus(true, false);
+    if (shareRightsState.dataUpdatedCount !== 0) {
+      setLoadingStatus({ isActionButtonsLoading: true, isInitialLoading: false });
+    }
 
     try {
-      const userRightList = await callEndPoint('getAll');
+      const userRightList = await callEndPoint(methodTypes.GET_ALL);
 
       shareRightsDispatch({
         type: 'GET_USER_RIGHT_LIST',
@@ -172,7 +188,7 @@ export const ShareRights = ({
     setActions({ isDeleting: true, isEditing: false });
 
     try {
-      const response = await callEndPoint('delete');
+      const response = await callEndPoint(methodTypes.DELETE);
       if (response.status >= 200 && response.status <= 299) {
         onDataChange();
       }
@@ -192,10 +208,10 @@ export const ShareRights = ({
     if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
       setIsButtonLoading(true);
-      setLoadingStatus(true, false);
+      setLoadingStatus({ isActionButtonsLoading: true, isInitialLoading: false });
 
       try {
-        const response = await callEndPoint('update', userRight);
+        const response = await callEndPoint(methodTypes.UPDATE, userRight);
         if (response.status >= 200 && response.status <= 299) {
           onDataChange();
         }
@@ -251,7 +267,7 @@ export const ShareRights = ({
   };
 
   const onEditUserRight = userRight => {
-    shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditing: true, userRight } });
+    shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditingModal: true, userRight } });
     setIsUserRightManagementDialogVisible(true);
   };
 
@@ -263,32 +279,32 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'SET_IS_LOADING_BUTTON', payload: { isLoadingButton } });
   };
 
-  const setLoadingStatus = (isActionButtonsLoading, isInitialLoading) => {
+  const setLoadingStatus = ({ isActionButtonsLoading, isInitialLoading }) => {
     shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isActionButtonsLoading, isInitialLoading } });
   };
 
-  const setRowId = rowId => shareRightsDispatch({ type: 'GET_ROW_ID', payload: { rowId } });
+  const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
 
   const renderButtonsColumnTemplate = userRight => {
     return notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
-        disabledButtons={isNil(actionsButtons.rowId) && loadingStatus.isActionButtonsLoading}
+        disabledButtons={isNil(actionsButtons.id) && loadingStatus.isActionButtonsLoading}
         isDeletingDocument={actionsButtons.isDeleting}
         isUpdating={actionsButtons.isEditing}
         onDeleteClick={() => {
-          setRowId(userRight.id);
+          setUserRightId(userRight.id);
           shareRightsDispatch({
             type: 'ON_DELETE_USER_RIGHT',
             payload: { isDeleteDialogVisible: true, userRightToDelete: userRight }
           });
         }}
         onEditClick={() => {
-          setRowId(userRight.id);
+          setUserRightId(userRight.id);
           onEditUserRight(userRight);
         }}
         rowDataId={userRight.id}
-        rowDeletingId={actionsButtons.rowId}
-        rowUpdatingId={actionsButtons.rowId}
+        rowDeletingId={actionsButtons.id}
+        rowUpdatingId={actionsButtons.id}
       />
     );
   };
@@ -387,7 +403,7 @@ export const ShareRights = ({
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
           disabledConfirm={isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight))}
-          header={shareRightsState.isEditing ? editConfirmHeader : addConfirmHeader}
+          header={shareRightsState.isEditingModal ? editConfirmHeader : addConfirmHeader}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
           labelConfirm={resources.messages['save']}
