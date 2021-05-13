@@ -88,9 +88,7 @@ export const ShareRights = ({
 
   useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
 
-  const isValidEmail = email => {
-    return RegularExpressions['email'].test(email);
-  };
+  const isValidEmail = email => RegularExpressions['email'].test(email);
 
   const isRepeatedAccount = account => {
     const sameAccounts = shareRightsState.userRightList.filter(userRight => userRight.account === account);
