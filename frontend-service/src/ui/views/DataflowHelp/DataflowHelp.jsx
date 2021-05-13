@@ -147,7 +147,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       const { data } = await DataflowService.reporting(dataflowId);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
-          const uniqueDatasetSchemas = data.datasets.filter((dataset, pos, arr) => {
+          const allDatasets = [...data.referenceDatasets, ...data.datasets];
+          const uniqueDatasetSchemas = allDatasets.filter((dataset, pos, arr) => {
             return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
           });
           const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
