@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 
 import styles from './App.module.css';
 
@@ -100,6 +100,9 @@ const App = () => {
                               <PrivateRoute component={EUDataset} exact path={routes.EU_DATASET} />
                               <Route component={PrivacyStatement} exact path={routes.PRIVACY_STATEMENT} />
                               <PrivateRoute component={Settings} exact path={routes.SETTINGS} />
+                              <Route>
+                                <Redirect to={'/dataflows/error/notFound'} />
+                              </Route>
                             </Switch>
                           </ScrollToTop>
                         </Router>

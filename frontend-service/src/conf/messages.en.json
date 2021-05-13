@@ -1096,6 +1096,7 @@
     "addRequesterError": "Error editing requester",
     "getRequestersError": "Error getting requesters",
     "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
-    "geomTypeHelpTooltip": "Check the type format"
+    "geomTypeHelpTooltip": "Check the type format",
+    "notFoundError": "Page not found error. The requested page does not exist"
   }
 }
