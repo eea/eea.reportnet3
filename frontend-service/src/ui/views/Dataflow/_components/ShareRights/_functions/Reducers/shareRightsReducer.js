@@ -64,6 +64,15 @@ export const shareRightsReducer = (state, { type, payload }) => {
         actionsButtons: { ...state.actionsButtons, isDeleting: payload.isDeleting, isEditing: payload.isEditing }
       };
 
+    case 'ON_RESET_ALL':
+      return {
+        ...state,
+        actionsButtons: { rowId: null, isEditing: false, isDeleting: false },
+        loadingStatus: { isActionButtonsLoading: false, isInitialLoading: false },
+        userRight: { account: '', isNew: true, role: '' },
+        userRightToDelete: {}
+      };
+
     default:
       return state;
   }

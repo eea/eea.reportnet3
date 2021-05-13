@@ -61,11 +61,12 @@ export const ShareRights = ({
     loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
-    userRightToDelete: '',
+    userRightToDelete: {},
     isEditing: false
   });
 
-  const { isLoadingButton, loadingStatus, userRight } = shareRightsState;
+  const { actionsButtons, isLoadingButton, loadingStatus, userRight } = shareRightsState;
+  console.log('actionsButtons :>> ', actionsButtons);
 
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
@@ -120,9 +121,7 @@ export const ShareRights = ({
     } catch (error) {
       notificationContext.add({ type: getErrorNotificationKey });
     } finally {
-      setActions(false, false);
-      setLoadingStatus(false, false);
-      setRowId(null);
+      onResetAll();
     }
   };
 
@@ -167,9 +166,11 @@ export const ShareRights = ({
     }
   };
 
+  const onResetAll = () => shareRightsDispatch({ type: 'ON_RESET_ALL' });
+
   const onDeleteUserRight = async () => {
     onToggleDeletingUser(true);
-    setActions(true, false);
+    setActions({ isDeleting: true, isEditing: false });
 
     try {
       const response = await callEndPoint('delete');
@@ -178,6 +179,7 @@ export const ShareRights = ({
       }
     } catch (error) {
       notificationContext.add({ type: deleteErrorNotificationKey });
+      onResetAll();
     } finally {
       onToggleDeletingUser(false);
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
@@ -187,7 +189,7 @@ export const ShareRights = ({
   const onDataChange = () => shareRightsDispatch({ type: 'ON_DATA_CHANGE' });
 
   const onUpdateUser = async userRight => {
-    setActions(false, true);
+    setActions({ isDeleting: false, isEditing: true });
     if (userRight.role !== '') {
       userRight.account = userRight.account.toLowerCase();
       setIsButtonLoading(true);
@@ -206,10 +208,7 @@ export const ShareRights = ({
             payload: { accountNotFound: true, accountHasError: true }
           });
         } else if (error?.response?.status === 403) {
-          shareRightsDispatch({
-            type: 'SET_ACCOUNT_HAS_ERROR',
-            payload: { accountHasError: true }
-          });
+          shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
         } else {
           notificationContext.add({ type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey });
         }
@@ -257,7 +256,7 @@ export const ShareRights = ({
     setIsUserRightManagementDialogVisible(true);
   };
 
-  const setActions = (isDeleting, isEditing) => {
+  const setActions = ({ isDeleting, isEditing }) => {
     shareRightsDispatch({ type: 'SET_ACTIONS', payload: { isDeleting, isEditing } });
   };
 
@@ -271,12 +270,12 @@ export const ShareRights = ({
 
   const setRowId = rowId => shareRightsDispatch({ type: 'GET_ROW_ID', payload: { rowId } });
 
-  const renderButtonsColumnTemplate = userRight =>
-    notDeletableRoles.includes(userRight?.role) ? null : (
+  const renderButtonsColumnTemplate = userRight => {
+    return notDeletableRoles.includes(userRight?.role) ? null : (
       <ActionsColumn
-        disabledButtons={isNil(shareRightsState.actionsButtons.rowId) && loadingStatus.isActionButtonsLoading}
-        isDeletingDocument={shareRightsState.actionsButtons.isDeleting}
-        isUpdating={shareRightsState.actionsButtons.isEditing}
+        disabledButtons={isNil(actionsButtons.rowId) && loadingStatus.isActionButtonsLoading}
+        isDeletingDocument={actionsButtons.isDeleting}
+        isUpdating={actionsButtons.isEditing}
         onDeleteClick={() => {
           setRowId(userRight.id);
           shareRightsDispatch({
@@ -289,10 +288,11 @@ export const ShareRights = ({
           onEditUserRight(userRight);
         }}
         rowDataId={userRight.id}
-        rowDeletingId={shareRightsState.actionsButtons.rowId}
-        rowUpdatingId={shareRightsState.actionsButtons.rowId}
+        rowDeletingId={actionsButtons.rowId}
+        rowUpdatingId={actionsButtons.rowId}
       />
     );
+  };
 
   const renderRoleColumnTemplate = userRight => {
     const [option] = roleOptions.filter(option => option.role === userRight.role);
@@ -373,12 +373,13 @@ export const ShareRights = ({
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteUserRight()}
-          onHide={() =>
+          onHide={() => {
+            onResetAll();
             shareRightsDispatch({
               type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG',
               payload: { isDeleteDialogVisible: false }
-            })
-          }
+            });
+          }}
           visible={shareRightsState.isDeleteDialogVisible}>
           {deleteConfirmMessage}
         </ConfirmDialog>
@@ -392,7 +393,10 @@ export const ShareRights = ({
           labelCancel={resources.messages['cancel']}
           labelConfirm={resources.messages['save']}
           onConfirm={() => updateUserRight()}
-          onHide={() => onCloseManagementDialog()}
+          onHide={() => {
+            onResetAll();
+            onCloseManagementDialog();
+          }}
           visible={isUserRightManagementDialogVisible}>
           {renderRightManagement()}
         </ConfirmDialog>
