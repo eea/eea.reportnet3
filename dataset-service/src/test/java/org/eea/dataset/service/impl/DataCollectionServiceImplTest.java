@@ -16,6 +16,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
@@ -132,6 +133,10 @@ public class DataCollectionServiceImplTest {
   /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
+
+  /** The reference dataset repository. */
+  @Mock
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;

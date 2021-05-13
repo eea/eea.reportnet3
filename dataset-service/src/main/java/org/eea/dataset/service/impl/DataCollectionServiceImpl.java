@@ -20,12 +20,14 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.domain.TestDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DataCollectionService;
@@ -232,6 +234,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private TestDatasetRepository testDatasetRepository;
 
 
+  /** The reference dataset repository. */
+  @Autowired
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
   /**
    * Gets the dataflow status.
@@ -523,6 +528,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<FKDataCollection> newDCsRegistry = new ArrayList<>();
       List<FKDataCollection> newEUsRegistry = new ArrayList<>();
       List<FKDataCollection> newTESTsRegistry = new ArrayList<>();
+
       List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
       for (DesignDatasetVO design : designs) {
         RulesSchemaVO rulesSchemaVO =
@@ -1147,6 +1153,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
           SecurityRoleEnum.DATA_CUSTODIAN));
 
+      // Create ReferenceDataset-%s-DATA_OBSERVER
+      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+          SecurityRoleEnum.DATA_OBSERVER));
+
       // Assign ReferenceDataset-%s-DATA_STEWARD
       for (UserRepresentationVO steward : stewards) {
         assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
@@ -1314,8 +1324,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             dsOrigin.setId(fkData.getIdDatasetOrigin());
             foreign.setIdDatasetOrigin(dsOrigin);
             DataSetMetabase dsDestination = new DataSetMetabase();
-            dsDestination.setId(
-                findIdDatasetDestination(referenced.getIdDatasetSchema().toString(), listFkData));
+            // check if the FK points to a reference dataset
+            ReferenceDataset referenceDataset = referenceDatasetRepository
+                .findFirstByDatasetSchema(referenced.getIdDatasetSchema().toString()).orElse(null);
+            if (referenceDataset != null) {
+              dsDestination.setId(referenceDataset.getId());
+            } else {
+              dsDestination.setId(
+                  findIdDatasetDestination(referenced.getIdDatasetSchema().toString(), listFkData));
+            }
             foreign.setIdDatasetDestination(dsDestination);
             foreignRelations.add(foreign);
           }
@@ -1347,8 +1364,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           dsOrigin.setId(fkData.getIdDatasetOrigin());
           foreign.setIdDatasetOrigin(dsOrigin);
           DataSetMetabase dsDestination = new DataSetMetabase();
-          dsDestination.setId(findIdDatasetDestination(referenced.getIdDatasetSchema().toString(),
-              newDCandEUsRegistry));
+          // check if the FK points to a reference dataset
+          ReferenceDataset referenceDataset = referenceDatasetRepository
+              .findFirstByDatasetSchema(referenced.getIdDatasetSchema().toString()).orElse(null);
+          if (referenceDataset != null) {
+            dsDestination.setId(referenceDataset.getId());
+          } else {
+            dsDestination.setId(findIdDatasetDestination(referenced.getIdDatasetSchema().toString(),
+                newDCandEUsRegistry));
+          }
           foreign.setIdDatasetDestination(dsDestination);
           foreignRelations.add(foreign);
         }
