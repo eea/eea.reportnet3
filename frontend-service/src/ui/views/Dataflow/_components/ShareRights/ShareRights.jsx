@@ -17,8 +17,6 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
-import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 import { UserRightService } from 'core/services/UserRight';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -27,6 +25,9 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
+
+import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 export const ShareRights = ({
   addConfirmHeader,
