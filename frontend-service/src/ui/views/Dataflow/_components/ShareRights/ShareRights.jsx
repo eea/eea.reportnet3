@@ -17,8 +17,9 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
-import { UserRightService } from 'core/services/UserRight';
 import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+import { UserRightService } from 'core/services/UserRight';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -91,7 +92,9 @@ export const ShareRights = ({
   const isValidEmail = email => RegularExpressions['email'].test(email);
 
   const isRepeatedAccount = account => {
-    const sameAccounts = shareRightsState.userRightList.filter(userRight => userRight.account === account);
+    const sameAccounts = shareRightsState.userRightList.filter(userRight =>
+      TextUtils.areEquals(userRight.account, account)
+    );
     return sameAccounts.length > 0;
   };
 
@@ -102,7 +105,7 @@ export const ShareRights = ({
       return true;
     }
 
-    return JSON.stringify(initialUser?.role) !== JSON.stringify(userRight?.role);
+    return !TextUtils.areEquals(JSON.stringify(initialUser?.role), JSON.stringify(userRight?.role));
   };
 
   const onCloseManagementDialog = () => {
