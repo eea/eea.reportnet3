@@ -57,16 +57,15 @@ export const ShareRights = ({
     dataUpdatedCount: 0,
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
+    isEditing: false,
     isLoadingButton: false,
     loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
-    userRightToDelete: {},
-    isEditing: false
+    userRightToDelete: {}
   });
 
   const { actionsButtons, isLoadingButton, loadingStatus, userRight } = shareRightsState;
-  console.log('actionsButtons :>> ', actionsButtons);
 
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
