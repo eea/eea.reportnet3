@@ -908,6 +908,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
 
+  /**
+   * Gets the reference dataset id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the reference dataset id
+   */
   private Long getReferenceDatasetId(String datasetSchemaId) {
     Long id = null;
     Optional<ReferenceDataset> referenceDataset =
