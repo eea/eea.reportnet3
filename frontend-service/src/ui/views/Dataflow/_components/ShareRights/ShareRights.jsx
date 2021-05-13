@@ -18,6 +18,7 @@ import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { UserRightService } from 'core/services/UserRight';
+import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -141,14 +142,7 @@ export const ShareRights = ({
   };
 
   const isValidEmail = email => {
-    if (isNil(email)) {
-      return true;
-    }
-
-    // eslint-disable-next-line no-useless-escape
-    const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-    return email.match(expression);
+    return RegularExpressions['email'].test(email);
   };
 
   const isRepeatedAccount = account => {
