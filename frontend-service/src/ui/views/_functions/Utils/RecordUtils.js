@@ -173,6 +173,7 @@ const getFieldTypeValue = fieldType => {
     { fieldType: 'Number_Integer', value: 'Number - Integer' },
     { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
     { fieldType: 'Date', value: 'Date' },
+    { fieldType: 'Datetime', value: 'Datetime' },
     { fieldType: 'Text', value: 'Text' },
     // { fieldType: 'Rich_Text', value: 'Rich text' },
     { fieldType: 'Textarea', value: 'Multiline text' },

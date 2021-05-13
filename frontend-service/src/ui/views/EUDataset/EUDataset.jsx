@@ -11,7 +11,7 @@ import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -132,11 +132,14 @@ export const EUDataset = withRouter(({ history, match }) => {
   };
 
   const getExportExtensionsList = () => {
-    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => ({
-      command: () => onExportDataInternalExtension(type.code),
-      icon: config.icons['archive'],
-      label: type.text
-    }));
+    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
+      const extensionsTypes = type.code.split('+');
+      return {
+        command: () => onExportDataInternalExtension(type.code),
+        icon: extensionsTypes[0],
+        label: type.text
+      };
+    });
 
     euDatasetDispatch({
       type: 'GET_EXPORT_EXTENSIONS_LIST',
@@ -150,16 +153,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
-  };
-
-  const getPosition = e => {
-    const button = e.currentTarget;
-    const left = `${button.offsetLeft}px`;
-    const topValue = button.offsetHeight + button.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = button.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
   };
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
@@ -320,7 +313,6 @@ export const EUDataset = withRouter(({ history, match }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={euDatasetState.exportExtensionsList}
-              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
             />

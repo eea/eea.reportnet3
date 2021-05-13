@@ -11,6 +11,8 @@ import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
 
 import styles from './PublicDataflowInformation.module.scss';
 
@@ -46,6 +48,7 @@ export const PublicDataflowInformation = withRouter(
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [representatives, setRepresentatives] = useState({});
+    const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
 
     const notificationContext = useContext(NotificationContext);
 
@@ -62,6 +65,19 @@ export const PublicDataflowInformation = withRouter(
         setContentStyles({});
       }
     }, [themeContext.headerCollapse]);
+
+    const getCountryCode = datasetSchemaName => {
+      let country = {};
+      if (!isNil(config.countriesByGroup)) {
+        const countryFinded = Object.keys(config.countriesByGroup).some(countriesGroup => {
+          country = config.countriesByGroup[countriesGroup].find(
+            groupCountry => groupCountry.name === datasetSchemaName
+          );
+          return !isNil(country) ? country : false;
+        });
+        return countryFinded ? country.code : '';
+      }
+    };
 
     const getPublicFileName = fileName => {
       const splittedFileName = fileName.split('-');
@@ -139,6 +155,34 @@ export const PublicDataflowInformation = withRouter(
         .map(orderedField => orderedField.id);
     };
 
+    const countryBodyColumn = rowData => (
+      <div onClick={e => e.stopPropagation()}>
+        <span className={styles.cellWrapper}>
+          {rowData.datasetSchemaName}
+          <FontAwesomeIcon
+            aria-hidden={false}
+            className={`p-breadcrumb-home ${styles.link}`}
+            data-for="navigateTooltip"
+            data-tip
+            icon={AwesomeIcons('externalLink')}
+            onClick={e => {
+              e.preventDefault();
+              history.push(
+                getUrl(
+                  routes.PUBLIC_COUNTRY_INFORMATION,
+                  { countryCode: getCountryCode(rowData.datasetSchemaName) },
+                  true
+                )
+              );
+            }}
+          />
+          <ReactTooltip className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
+            <span>{resources.messages['navigateToCountry']}</span>
+          </ReactTooltip>
+        </span>
+      </div>
+    );
+
     const isReleasedBodyColumn = rowData => (
       <div className={styles.checkedValueColumn}>
         {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
@@ -170,6 +214,7 @@ export const PublicDataflowInformation = withRouter(
         parseDataflowData(data.datasets);
       } catch (error) {
         console.error('error', error);
+        setIsWrongUrlDataflowId(true);
         notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
       } finally {
         setIsLoading(false);
@@ -218,6 +263,7 @@ export const PublicDataflowInformation = withRouter(
         )
         .map(field => {
           let template = null;
+          if (field === 'datasetSchemaName') template = countryBodyColumn;
           if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           return (
@@ -239,23 +285,27 @@ export const PublicDataflowInformation = withRouter(
       <PublicLayout>
         <div className={`${styles.container} rep-container`} style={contentStyles}>
           {!isLoading ? (
-            <Fragment>
-              <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-              {!isEmpty(representatives) ? (
-                <Fragment>
-                  <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                    {renderColumns(representatives)}
-                  </DataTable>
-                  <div className={styles.tableLegendContainer}>
-                    <span>*</span>
-                    <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-                    <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-                  </div>
-                </Fragment>
-              ) : (
-                <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
-              )}
-            </Fragment>
+            isWrongUrlDataflowId ? (
+              <div className={styles.noDatasets}>{resources.messages['wrongUrlDataflowId']}</div>
+            ) : (
+              <Fragment>
+                <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+                {!isEmpty(representatives) ? (
+                  <Fragment>
+                    <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
+                      {renderColumns(representatives)}
+                    </DataTable>
+                    <div className={styles.tableLegendContainer}>
+                      <span>*</span>
+                      <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
+                      <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
+                    </div>
+                  </Fragment>
+                ) : (
+                  <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+                )}
+              </Fragment>
+            )
           ) : (
             <Spinner className={styles.isLoading} />
           )}

@@ -91,7 +91,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isExporting: false,
     isFetchingData: false,
     isImportLeadReportersVisible: false,
-    isManageEditorsDialogVisible: false,
+    isManageRequestersDialogVisible: false,
     isManageReportersDialogVisible: false,
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
@@ -113,7 +113,8 @@ const Dataflow = withRouter(({ history, match }) => {
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
-    userRoles: []
+    userRoles: [],
+    isUserRightManagementDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -129,6 +130,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
 
   const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
+
+  const isOpenStatus = dataflowState.status === config.dataflowStatus.OPEN;
 
   const isLeadReporter = userContext.hasContextAccessPermission(
     config.permissions.prefixes.DATAFLOW,
@@ -190,7 +193,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (dataflowState.isCustodian) {
-      if (dataflowState.status === config.dataflowStatus.OPEN) {
+      if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
         leftSideBarContext.addHelpSteps(DataflowRequesterHelpConfig, 'dataflowRequesterDesignHelp');
@@ -231,13 +234,13 @@ const Dataflow = withRouter(({ history, match }) => {
         title: 'exportSchema'
       };
 
-      const manageEditorsBtn = {
+      const manageRequestersBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
-        isVisible: buttonsVisibility.manageEditorsBtn,
-        label: 'manageEditorsRights',
-        onClick: () => manageDialogs('isManageEditorsDialogVisible', true),
-        title: 'manageEditorsRights'
+        isVisible: buttonsVisibility.manageRequestersBtn,
+        label: 'manageRequestersRights',
+        onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
+        title: 'manageRequestersRights'
       };
 
       const manageReportersBtn = {
@@ -293,7 +296,7 @@ const Dataflow = withRouter(({ history, match }) => {
         exportSchemaBtn,
         apiKeyBtn,
         manageReportersBtn,
-        manageEditorsBtn,
+        manageRequestersBtn,
         userListBtn
       ];
 
@@ -348,10 +351,10 @@ const Dataflow = withRouter(({ history, match }) => {
         apiKeyBtn: false,
         editBtn: false,
         exportBtn: false,
-        releaseableBtn: false,
-        manageEditorsBtn: false,
         manageReportersBtn: false,
+        manageRequestersBtn: false,
         propertiesBtn: false,
+        releaseableBtn: false,
         usersListBtn: false
       };
     }
@@ -360,10 +363,10 @@ const Dataflow = withRouter(({ history, match }) => {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
-      releaseableBtn: !isDesign && isLeadDesigner,
-      manageEditorsBtn: isDesign && isLeadDesigner,
       manageReportersBtn: isLeadReporterOfCountry,
+      manageRequestersBtn: dataflowState.isCustodian,
       propertiesBtn: true,
+      releaseableBtn: !isDesign && isLeadDesigner,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry ||
@@ -375,21 +378,25 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const manageReportersDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageReportersDialogVisible', false)}
-    />
-  );
-  const manageEditorsDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isManageEditorsDialogVisible', false)}
-    />
+  const setIsUserRightManagementDialogVisible = isVisible => {
+    manageDialogs('isUserRightManagementDialogVisible', isVisible);
+  };
+
+  const shareRightsFooterDialogFooter = userType => (
+    <div className={styles.buttonsRolesFooter}>
+      <Button
+        className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
+        icon={'plus'}
+        label={resources.messages['add']}
+        onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
+      />
+      <Button
+        className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
+        icon={'cancel'}
+        label={resources.messages['cancel']}
+        onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
+      />
+    </div>
   );
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
@@ -840,6 +847,23 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const reporterRoleOptions = [
+    { label: config.permissions.roles.REPORTER_WRITE.label, role: config.permissions.roles.REPORTER_WRITE.key },
+    { label: config.permissions.roles.REPORTER_READ.label, role: config.permissions.roles.REPORTER_READ.key }
+  ];
+
+  const requesterRoleOptionsOpenStatus = [
+    { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
+    { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
+    { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
+  ];
+
+  const requesterRoleOptions = [
+    ...requesterRoleOptionsOpenStatus,
+    { label: config.permissions.roles.EDITOR_WRITE.label, role: config.permissions.roles.EDITOR_WRITE.key },
+    { label: config.permissions.roles.EDITOR_READ.label, role: config.permissions.roles.EDITOR_READ.key }
+  ];
+
   const getBigButtonList = () => {
     if (isNil(representativeId)) {
       return (
@@ -940,40 +964,60 @@ const Dataflow = withRouter(({ history, match }) => {
           </Dialog>
         )}
 
-        {dataflowState.isManageEditorsDialogVisible && (
+        {dataflowState.isManageRequestersDialogVisible && (
           <Dialog
-            footer={manageEditorsDialogFooter}
-            header={resources.messages['manageEditorsRights']}
-            onHide={() => manageDialogs('isManageEditorsDialogVisible', false)}
-            visible={dataflowState.isManageEditorsDialogVisible}>
+            footer={shareRightsFooterDialogFooter('Requesters')}
+            header={resources.messages['manageRequestersRights']}
+            onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+            visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
-              columnHeader={resources.messages['editorsAccountColumn']}
+              addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
+              addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
+              columnHeader={resources.messages['requestersAccountColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
-              deleteConfirmHeader={resources.messages[`editorsRightsDialogConfirmDeleteHeader`]}
-              deleteConfirmMessage={resources.messages[`editorsRightsDialogConfirmDeleteQuestion`]}
-              notificationKey={'DELETE_EDITOR_ERROR'}
-              placeholder={resources.messages['manageRolesEditorDialogInputPlaceholder']}
+              deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
+              deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
+              deleteConfirmMessage={resources.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+              deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
+              editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
+              getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
+              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
+              placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
+              roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
+              userType={'requester'}
             />
           </Dialog>
         )}
 
         {dataflowState.isManageReportersDialogVisible && (
           <Dialog
-            footer={manageReportersDialogFooter}
+            footer={shareRightsFooterDialogFooter('Reporters')}
             header={resources.messages['manageReportersRights']}
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
+              addConfirmHeader={resources.messages[`addReporterConfirmHeader`]}
+              addErrorNotificationKey={'ADD_REPORTER_ERROR'}
               columnHeader={resources.messages['reportersAccountColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
+              deleteColumnHeader={resources.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resources.messages[`reportersRightsDialogConfirmDeleteHeader`]}
               deleteConfirmMessage={resources.messages[`reportersRightsDialogConfirmDeleteQuestion`]}
-              notificationKey={'DELETE_REPORTER_ERROR'}
+              deleteErrorNotificationKey={'DELETE_REPORTER_ERROR'}
+              editConfirmHeader={resources.messages[`editReporterConfirmHeader`]}
+              getErrorNotificationKey={'GET_REPORTERS_ERROR'}
+              isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               placeholder={resources.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
+              roleOptions={reporterRoleOptions}
+              setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
+              userType={'reporter'}
             />
           </Dialog>
         )}

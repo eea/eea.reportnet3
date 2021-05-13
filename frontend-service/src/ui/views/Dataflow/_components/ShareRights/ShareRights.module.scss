@@ -21,3 +21,27 @@
     display: none;
   }
 }
+
+.manageDialog {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  div {
+    padding: 0 0.5rem;
+    width: 100%;
+
+    .label {
+      font-size: 1rem;
+    }
+  }
+}
+.table tbody > tr {
+  height: 3rem !important;
+}
+.error {
+  border-color: var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors) !important;
+  outline: none;
+  overflow: hidden;
+}

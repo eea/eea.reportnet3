@@ -9,6 +9,8 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { getUrl } from 'core/infrastructure/CoreUtils';
+import { routes } from 'ui/routes';
 
 import styles from './PublicCountryInformation.module.scss';
 
@@ -178,9 +180,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const parseDataflows = dataflows => {
     const parsedDataflows = [];
     dataflows.forEach(dataflow => {
-      const isReleased = dataflow.datasets.some(dataset => dataset.isReleased);
+      const isReleased = dataflow.datasets?.some(dataset => dataset.isReleased);
       const publicFilesNames = [];
-      dataflow.datasets.forEach(dataset => {
+      dataflow.datasets?.forEach(dataset => {
         if (!isNil(dataset.publicFileName)) {
           publicFilesNames.push({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName });
         }
@@ -194,7 +196,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         isReleased: isReleased,
         isReleasable: dataflow.isReleasable,
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
-        restrictFromPublic: dataflow.datasets[0].restrictFromPublic,
+        restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
         publicFilesNames: publicFilesNames
       };
       parsedDataflows.push(parsedDataflow);
@@ -227,6 +229,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       .filter(key => !key.includes('id'))
       .map(field => {
         let template = null;
+        if (field === 'name') template = renderDataflowNameBodyColumn;
         if (field === 'isReleasable') template = renderIsReleasableBodyColumn;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
@@ -306,6 +309,28 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     </div>
   );
 
+  const renderDataflowNameBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      <span className={styles.cellWrapper}>
+        {rowData.name}{' '}
+        <FontAwesomeIcon
+          aria-hidden={false}
+          className={`p-breadcrumb-home ${styles.link}`}
+          data-for="navigateTooltip"
+          data-tip
+          icon={AwesomeIcons('externalLink')}
+          onClick={e => {
+            e.preventDefault();
+            history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true));
+          }}
+        />
+        <ReactTooltip className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
+          <span>{resources.messages['navigateToDataflow']}</span>
+        </ReactTooltip>
+      </span>
+    </div>
+  );
+
   const renderObligationBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
       {rowData.obligation?.obligationId
@@ -329,13 +354,15 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   return (
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
-        <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
+        {!isEmpty(countryName) && (
+          <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
+        )}
         {isLoading ? (
           <Spinner className={styles.isLoading} />
+        ) : isEmpty(countryName) ? (
+          <div className={styles.noDataflows}>{resources.messages['wrongUrlCountryCode']}</div>
         ) : isEmpty(dataflows) ? (
-          <div className={styles.noDataflowsWrapper}>
-            <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
-          </div>
+          <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
         ) : (
           <div className={styles.countriesList}>
             <DataTable

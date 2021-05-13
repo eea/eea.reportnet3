@@ -18,5 +18,10 @@
       "text": "ZIP (XLSX + attachments)",
       "code": "zip+xlsx"
     }
+    ,
+    {
+      "text": "ZIP (CSV for each table)",
+      "code": "zip+csv"
+    }
   ]
 }
