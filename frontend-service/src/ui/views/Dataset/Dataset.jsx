@@ -1082,7 +1082,9 @@ export const Dataset = withRouter(({ match, history }) => {
               role="checkbox"
             />
             <label htmlFor="replaceCheckbox">
-              <a onClick={() => setReplaceData(!replaceData)}>{resources.messages['replaceData']}</a>
+              <span className={styles.replaceDataLabel} onClick={() => setReplaceData(!replaceData)}>
+                {resources.messages['replaceData']}
+              </span>
             </label>
           </div>
         </Dialog>
