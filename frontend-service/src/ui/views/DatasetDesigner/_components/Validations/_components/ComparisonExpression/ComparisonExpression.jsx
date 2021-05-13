@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
@@ -12,7 +13,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'ui/views/_components/InputText';
 
@@ -47,7 +48,7 @@ const ComparisonExpression = ({
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
-  const [secondFieldOptions, setSecondFieldOptions] = useState();
+  const [secondFieldOptions, setSecondFieldOptions] = useState([]);
   const [tableFields, setTableFields] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
@@ -313,13 +314,14 @@ const ComparisonExpression = ({
         className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}
         onBlur={() => onAddToClickedFields('valueTypeSelector')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.valueTypeSelector}
-          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value)}
+          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value.value)}
           optionLabel="label"
           optionValue="value"
           options={valueTypeSelectorOptions}
           placeholder={resourcesContext.messages.comparisonValueFieldSelector}
-          value={expressionValues.valueTypeSelector}
+          value={first(valueTypeSelectorOptions.filter(option => option.value === expressionValues.valueTypeSelector))}
         />
       </span>
     );
@@ -333,14 +335,15 @@ const ComparisonExpression = ({
     } else {
       return (
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.field2}
           filterPlaceholder={resourcesContext.messages.selectField}
           id={`${componentName}__field2`}
-          onChange={e => onUpdateExpressionField('field2', e.value)}
+          onChange={e => onUpdateExpressionField('field2', e.value.value)}
           optionLabel="label"
           options={secondFieldOptions}
           placeholder={resourcesContext.messages.selectField}
-          value={expressionValues.field2}
+          value={first(secondFieldOptions.filter(option => option.value === expressionValues.field2))}
         />
       );
     }
@@ -527,12 +530,13 @@ const ComparisonExpression = ({
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}
         onBlur={() => onAddToClickedFields('union')}>
         <Dropdown
+          appendTo={document.body}
           disabled={position === 0}
-          onChange={e => onUpdateExpressionField('union', e.value)}
+          onChange={e => onUpdateExpressionField('union', e.value.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
           placeholder={resourcesContext.messages.union}
-          value={expressionValues.union}
+          value={first(config.validations.logicalOperators.filter(option => option.value === expressionValues.union))}
         />
       </span>
 
@@ -540,15 +544,16 @@ const ComparisonExpression = ({
         className={`${styles.operatorType} formField ${printRequiredFieldError('field1')}`}
         onBlur={() => onAddToClickedFields('field1')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.field1}
           id={`${componentName}__field1`}
           onChange={e => {
-            onUpdateExpressionField('field1', e.value);
+            onUpdateExpressionField('field1', e.value.value);
           }}
           optionLabel={'label'}
           options={tableFields}
           placeholder={resourcesContext.messages.selectField}
-          value={expressionValues.field1}
+          value={first(tableFields.filter(option => option.value === expressionValues.field1))}
         />
       </span>
 
@@ -556,25 +561,27 @@ const ComparisonExpression = ({
         className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}
         onBlur={() => onAddToClickedFields('operatorType')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.operatorType}
-          onChange={e => onUpdateExpressionField('operatorType', e.value)}
+          onChange={e => onUpdateExpressionField('operatorType', e.value.value)}
           optionLabel="label"
           options={operatorTypes}
           placeholder={resourcesContext.messages.operatorType}
-          value={expressionValues.operatorType}
+          value={first(operatorTypes.filter(option => option.value === expressionValues.operatorType))}
         />
       </span>
       <span
         className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}
         onBlur={() => onAddToClickedFields('operatorValue')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.operatorValue}
-          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
+          onChange={e => onUpdateExpressionField('operatorValue', e.value.value)}
           optionLabel="label"
           optionValue="value"
           options={operatorValues}
           placeholder={resourcesContext.messages.operator}
-          value={expressionValues.operatorValue}
+          value={first(operatorValues.filter(option => option.value === expressionValues.operatorValue))}
         />
       </span>
       {getTypeField()}
