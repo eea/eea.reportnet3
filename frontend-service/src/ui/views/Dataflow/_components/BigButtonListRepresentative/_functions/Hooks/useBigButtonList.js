@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useLayoutEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -25,7 +25,7 @@ const useBigButtonList = ({
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
