@@ -42,8 +42,8 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        label={resources.messages['save']}
         icon="check"
+        label={resources.messages['save']}
         onClick={() => {
           setIsSaved(true);
         }}
