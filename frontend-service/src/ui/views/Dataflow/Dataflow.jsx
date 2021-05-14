@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
@@ -196,7 +196,7 @@ const Dataflow = withRouter(({ history, match }) => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
   }, [userContext, dataflowState.data]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (dataflowState.isCustodian) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
@@ -208,7 +208,7 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   }, [userContext, dataflowState]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEmpty(dataflowState.userRoles)) {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
