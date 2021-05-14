@@ -2848,7 +2848,7 @@ public class RuleOperators {
       return fieldDate.getYear() > number.longValue();
     } catch (DateTimeParseException e) {
       try {
-        LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
         return fieldDate.getYear() > number.longValue();
       } catch (Exception ex) {
         return true;
