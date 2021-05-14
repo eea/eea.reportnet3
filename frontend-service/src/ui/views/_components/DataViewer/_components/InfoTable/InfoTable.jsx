@@ -54,6 +54,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
     const longCharacters = 20;
     const decimalCharacters = 40;
     const dateCharacters = 10;
+    const datetimeCharacters = 20;
     const textCharacters = 10000;
     const richTextCharacters = 10000;
     const emailCharacters = 256;
@@ -72,6 +73,8 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         return textCharacters;
       case 'DATE':
         return dateCharacters;
+      case 'DATETIME':
+        return datetimeCharacters;
       case 'TEXT':
       case 'TEXTAREA':
         return textCharacters;

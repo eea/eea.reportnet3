@@ -3323,7 +3323,7 @@ public class DatasetServiceImpl implements DatasetService {
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
 
           // create zip to the reference
-          if (DatasetTypeEnum.REFERENCE.equals(type) && schema.isAvailableInPublic()) {
+          if (DatasetTypeEnum.REFERENCE.equals(type)) {
             createReferenceDatasetFiles(datasetMb);
           }
 

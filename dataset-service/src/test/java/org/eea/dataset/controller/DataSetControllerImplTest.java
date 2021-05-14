@@ -45,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -1170,6 +1171,17 @@ public class DataSetControllerImplTest {
         .thenReturn(new File(""));
     dataSetControllerImpl.downloadFile(0L, recordId, httpServletResponse);
     Mockito.verify(httpServletResponse, times(1)).getOutputStream();
+  }
+
+  @Test
+  public void exportReferenceDatasetFileTest() throws EEAException, IOException {
+    Mockito.when(datasetService.exportPublicFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new File(""));
+    ResponseEntity<InputStreamResource> value =
+        dataSetControllerImpl.exportReferenceDatasetFile(1L, "file.zip");
+    assertEquals(null, value.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
+
   }
 
 }
