@@ -255,11 +255,10 @@ const LinkSelector = withRouter(
           <div className={styles.schemaWrapper}>
             {!isUndefined(datasetSchemas) &&
               !isEmpty(datasetSchemas) &&
-              datasetSchemas.map((datasetSchema, i) => {
+              datasetSchemas.map(datasetSchema => {
                 return (
                   <ListBox
-                    key={`datasetSchema_${i}`}
-                    options={getOptions(datasetSchema)}
+                    key={`datasetSchema_${datasetSchema.datasetSchemaId}`}
                     onChange={e => {
                       if (!isNil(e.value)) {
                         dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
@@ -268,6 +267,7 @@ const LinkSelector = withRouter(
                     }}
                     optionLabel="name"
                     optionValue="value"
+                    options={getOptions(datasetSchema)}
                     title={datasetSchema.datasetSchemaName}
                     value={link}></ListBox>
                 );
