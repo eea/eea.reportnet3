@@ -5,7 +5,6 @@ import { withRouter } from 'react-router-dom';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 import map from 'lodash/map';
 import uniq from 'lodash/uniq';
 
@@ -51,6 +50,7 @@ import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -178,6 +178,12 @@ const Dataflow = withRouter(({ history, match }) => {
       : uniqDataProviders[0]
     : null;
 
+  useEffect(() => {
+    if (!Number(dataflowId)) {
+      window.location.href = '/dataflows/error/loadDataflowData';
+    }
+  }, []);
+
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
     dataflowId,
@@ -203,112 +209,44 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   }, [userContext, dataflowState]);
 
-  useLayoutEffect(() => {
-    if (!isEmpty(dataflowState.userRoles)) {
-      const buttonsVisibility = getLeftSidebarButtonsVisibility();
+  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
+    dataflowDispatch({
+      type: 'MANAGE_DIALOGS',
+      payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
+    });
 
-      const apiKeyBtn = {
-        className: 'dataflow-api-key-help-step',
-        icon: 'settings',
-        isVisible: buttonsVisibility.apiKeyBtn,
-        label: 'sidebarApiKeyBtn',
-        onClick: () => manageDialogs('isApiKeyDialogVisible', true),
-        title: 'sidebarApiKeyBtn'
+  const getLeftSidebarButtonsVisibility = () => {
+    if (isEmpty(dataflowState.data)) {
+      return {
+        apiKeyBtn: false,
+        editBtn: false,
+        exportBtn: false,
+        manageReportersBtn: false,
+        manageRequestersBtn: false,
+        propertiesBtn: false,
+        releaseableBtn: false,
+        usersListBtn: false
       };
-
-      const editBtn = {
-        className: 'dataflow-edit-help-step',
-        icon: 'edit',
-        isVisible: buttonsVisibility.editBtn,
-        label: 'edit',
-        onClick: () => manageDialogs('isEditDialogVisible', true),
-        title: 'edit'
-      };
-
-      const exportSchemaBtn = {
-        className: 'dataflow-export-schema-help-step',
-        icon: 'download',
-        isVisible: buttonsVisibility.exportBtn,
-        label: 'exportSchema',
-        onClick: () => manageDialogs('isExportDialogVisible', true),
-        title: 'exportSchema'
-      };
-
-      const manageRequestersBtn = {
-        className: 'dataflow-manage-rights-help-step',
-        icon: 'userConfig',
-        isVisible: buttonsVisibility.manageRequestersBtn,
-        label: 'manageRequestersRights',
-        onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
-        title: 'manageRequestersRights'
-      };
-
-      const manageReportersBtn = {
-        className: 'dataflow-manage-rights-help-step',
-        icon: 'userConfig',
-        isVisible: buttonsVisibility.manageReportersBtn,
-        label: 'manageReportersRights',
-        onClick: () => manageDialogs('isManageReportersDialogVisible', true),
-        title: 'manageReportersRights'
-      };
-
-      const propertiesBtn = {
-        className: 'dataflow-properties-help-step',
-        icon: 'infoCircle',
-        isVisible: buttonsVisibility.propertiesBtn,
-        label: 'properties',
-        onClick: () => manageDialogs('isPropertiesDialogVisible', true),
-        title: 'properties'
-      };
-
-      const releaseableBtn = {
-        className: 'dataflow-releasable-help-step',
-        icon: 'released',
-        isVisible: buttonsVisibility.releaseableBtn,
-        label: 'releasingLeftSideBarButton',
-        onClick: () => manageDialogs('isReleaseableDialogVisible', true),
-        title: 'releasingLeftSideBarButton'
-      };
-
-      const showPublicInfoBtn = {
-        className: 'dataflow-showPublicInfo-help-step',
-        icon: 'lock',
-        isVisible: buttonsVisibility.showPublicInfoBtn,
-        label: 'publicStatusLeftSideBarButton',
-        onClick: () => manageDialogs('isShowPublicInfoDialogVisible', true),
-        title: 'publicStatusLeftSideBarButton'
-      };
-
-      const userListBtn = {
-        className: 'dataflow-properties-help-step',
-        icon: 'users',
-        isVisible: buttonsVisibility.usersListBtn,
-        label: 'dataflowUsersList',
-        onClick: () => manageDialogs('isUserListVisible', true),
-        title: 'dataflowUsersList'
-      };
-
-      const allButtons = [
-        propertiesBtn,
-        editBtn,
-        releaseableBtn,
-        showPublicInfoBtn,
-        exportSchemaBtn,
-        apiKeyBtn,
-        manageReportersBtn,
-        manageRequestersBtn,
-        userListBtn
-      ];
-
-      leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     }
-  }, [
-    dataflowState.userRoles,
-    dataflowState.status,
-    representativeId,
-    dataflowState.datasetId,
-    dataflowState.designDatasetSchemas.length
-  ]);
+
+    return {
+      apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
+      editBtn: isDesign && isLeadDesigner,
+      exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
+      manageReportersBtn: isLeadReporterOfCountry,
+      manageRequestersBtn: dataflowState.isCustodian,
+      propertiesBtn: true,
+      releaseableBtn: !isDesign && isLeadDesigner,
+      showPublicInfoBtn: !isDesign && isLeadDesigner,
+      usersListBtn:
+        isLeadReporterOfCountry ||
+        isNationalCoordinatorOfCountry ||
+        isReporterOfCountry ||
+        ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
+    };
+  };
+
+  useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs, representativeId);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
@@ -345,37 +283,6 @@ const Dataflow = withRouter(({ history, match }) => {
     </div>
   );
 
-  const getLeftSidebarButtonsVisibility = () => {
-    if (isEmpty(dataflowState.data)) {
-      return {
-        apiKeyBtn: false,
-        editBtn: false,
-        exportBtn: false,
-        manageReportersBtn: false,
-        manageRequestersBtn: false,
-        propertiesBtn: false,
-        releaseableBtn: false,
-        usersListBtn: false
-      };
-    }
-
-    return {
-      apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner,
-      exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
-      manageReportersBtn: isLeadReporterOfCountry,
-      manageRequestersBtn: dataflowState.isCustodian,
-      propertiesBtn: true,
-      releaseableBtn: !isDesign && isLeadDesigner,
-      showPublicInfoBtn: !isDesign && isLeadDesigner,
-      usersListBtn:
-        isLeadReporterOfCountry ||
-        isNationalCoordinatorOfCountry ||
-        isReporterOfCountry ||
-        ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
-    };
-  };
-
   const handleRedirect = target => history.push(target);
 
   const setIsUserRightManagementDialogVisible = isVisible => {
@@ -398,12 +305,6 @@ const Dataflow = withRouter(({ history, match }) => {
       />
     </div>
   );
-
-  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
-    dataflowDispatch({
-      type: 'MANAGE_DIALOGS',
-      payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
-    });
 
   const setDataProviderSelected = value => dataflowDispatch({ type: 'SET_DATA_PROVIDER_SELECTED', payload: value });
 
@@ -624,13 +525,7 @@ const Dataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
-
-      if (
-        !isUndefined(error.response) &&
-        (error.response.status === 401 || error.response.status === 403 || error.response.status === 500)
-      ) {
-        history.push(getUrl(routes.DATAFLOWS));
-      }
+      history.push(getUrl(routes.DATAFLOWS));
     } finally {
       setIsPageLoading(false);
     }

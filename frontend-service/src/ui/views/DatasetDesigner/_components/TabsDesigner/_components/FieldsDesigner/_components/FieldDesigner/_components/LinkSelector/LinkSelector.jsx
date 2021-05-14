@@ -26,6 +26,7 @@ const LinkSelector = withRouter(
     datasetSchemaId,
     hasMultipleValues = false,
     isLinkSelectorVisible,
+    isReferenceDataset,
     linkedTableConditional,
     linkedTableLabel,
     masterTableConditional,
@@ -77,7 +78,12 @@ const LinkSelector = withRouter(
         setIsLoading(true);
         const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
         setIsLoading(false);
-        setDatasetSchemas(datasetSchemasDTO.data);
+        if (isReferenceDataset) {
+          const filteredDatasets = datasetSchemasDTO.data.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
+          setDatasetSchemas(filteredDatasets);
+        } else {
+          setDatasetSchemas(datasetSchemasDTO.data);
+        }
       };
 
       getDatasetSchemas();

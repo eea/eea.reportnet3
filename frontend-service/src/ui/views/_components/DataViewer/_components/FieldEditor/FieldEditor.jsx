@@ -261,7 +261,6 @@ const FieldEditor = ({
   };
 
   const onSelectCalendar = (e, withDatetime = false) => {
-    console.log(e.value, dayjs(e.value).format());
     saveCalendarDate(!withDatetime ? dayjs(e.value).format('YYYY-MM-DD') : dayjs(e.value).format(), withDatetime);
   };
 
@@ -290,7 +289,6 @@ const FieldEditor = ({
           const storedValue = RecordUtils.getCellValue(cells, cells.field);
 
           if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
-            console.log('LLEGO');
             saveCalendarFromKeys(inputValue, true);
           }
         });
