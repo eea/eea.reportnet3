@@ -47,6 +47,7 @@ export const PublicDataflowInformation = withRouter(
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
 
@@ -65,24 +66,6 @@ export const PublicDataflowInformation = withRouter(
         setContentStyles({});
       }
     }, [themeContext.headerCollapse]);
-
-    const getCountryCode = datasetSchemaName => {
-      let country = {};
-      if (!isNil(config.countriesByGroup)) {
-        const countryFinded = Object.keys(config.countriesByGroup).some(countriesGroup => {
-          country = config.countriesByGroup[countriesGroup].find(
-            groupCountry => groupCountry.name === datasetSchemaName
-          );
-          return !isNil(country) ? country : false;
-        });
-        return countryFinded ? country.code : '';
-      }
-    };
-
-    const getPublicFileName = fileName => {
-      const splittedFileName = fileName.split('-');
-      return splittedFileName[1];
-    };
 
     const downloadFileBodyColumn = rowData => {
       if (!rowData.restrictFromPublic) {
@@ -118,6 +101,40 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
+    const downloadReferenceDatasetFileBodyColumn = rowData => {
+      if (!isNil(rowData.publicFileName)) {
+        return (
+          <span
+            className={styles.downloadIcon}
+            key={rowData.publicFileName}
+            onClick={() => onFileDownload(null, rowData.publicFileName)}>
+            <FontAwesomeIcon data-for={rowData.publicFileName} data-tip icon={AwesomeIcons('7z')} />
+            <ReactTooltip className={styles.tooltipClass} effect="solid" id={rowData.publicFileName} place="top">
+              <span>{rowData.publicFileName}</span>
+            </ReactTooltip>
+          </span>
+        );
+      }
+    };
+
+    const getCountryCode = datasetSchemaName => {
+      let country = {};
+      if (!isNil(config.countriesByGroup)) {
+        const countryFinded = Object.keys(config.countriesByGroup).some(countriesGroup => {
+          country = config.countriesByGroup[countriesGroup].find(
+            groupCountry => groupCountry.name === datasetSchemaName
+          );
+          return !isNil(country) ? country : false;
+        });
+        return countryFinded ? country.code : '';
+      }
+    };
+
+    const getPublicFileName = fileName => {
+      const splittedFileName = fileName.split('-');
+      return splittedFileName[1];
+    };
+
     const getHeader = fieldHeader => {
       let header;
       switch (fieldHeader) {
@@ -132,6 +149,21 @@ export const PublicDataflowInformation = withRouter(
           break;
         case 'publicsFileName':
           header = resources.messages['files'];
+          break;
+        default:
+          break;
+      }
+      return header;
+    };
+
+    const getReferenceDatasetsHeader = fieldHeader => {
+      let header;
+      switch (fieldHeader) {
+        case 'datasetSchemaName':
+          header = resources.messages['name'];
+          break;
+        case 'publicFileName':
+          header = resources.messages['file'];
           break;
         default:
           break;
@@ -184,15 +216,20 @@ export const PublicDataflowInformation = withRouter(
     );
 
     const isReleasedBodyColumn = rowData => (
-      <div className={styles.checkedValueColumn}>
+      <div className={styles.cellContentPosition}>
         {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
       </div>
     );
 
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
-        const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+        let fileContent;
 
+        if (!isNil(dataProviderId)) {
+          fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+        } else {
+          fileContent = await DatasetService.downloadReferenceDatasetFileData(dataflowId, fileName);
+        }
         DownloadFile(fileContent.data, fileName);
       } catch (error) {
         if (error.response.status === 404) {
@@ -212,6 +249,7 @@ export const PublicDataflowInformation = withRouter(
         const { data } = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
         parseDataflowData(data.datasets);
+        setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('error', error);
         setIsWrongUrlDataflowId(true);
@@ -252,6 +290,10 @@ export const PublicDataflowInformation = withRouter(
       setRepresentatives(uniqParsedDatasets);
     };
 
+    const releaseDateBodyColumn = rowData => {
+      return <div className={styles.cellContentPosition}>{rowData.releaseDate}</div>;
+    };
+
     const renderColumns = representatives => {
       const fieldColumns = getOrderedColumns(Object.keys(representatives[0]))
         .filter(
@@ -266,6 +308,7 @@ export const PublicDataflowInformation = withRouter(
           if (field === 'datasetSchemaName') template = countryBodyColumn;
           if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
+          if (field === 'releaseDate') template = releaseDateBodyColumn;
           return (
             <Column
               body={template}
@@ -274,6 +317,27 @@ export const PublicDataflowInformation = withRouter(
               header={getHeader(field)}
               key={field}
               sortable={field === 'publicsFileName' ? false : true}
+            />
+          );
+        });
+
+      return fieldColumns;
+    };
+
+    const renderReferenceDatasetsColumns = referenceDatasets => {
+      const fieldColumns = Object.keys(referenceDatasets[0])
+        .filter(key => key.includes('datasetSchemaName') || key.includes('publicFileName'))
+        .map(field => {
+          let template = null;
+          if (field === 'publicFileName') template = downloadReferenceDatasetFileBodyColumn;
+          return (
+            <Column
+              body={template}
+              className={field === 'publicFileName' && styles.downloadReferenceDatasetFile}
+              field={field}
+              header={getReferenceDatasetsHeader(field)}
+              key={field}
+              sortable={field === 'publicFileName' ? false : true}
             />
           );
         });
@@ -300,6 +364,18 @@ export const PublicDataflowInformation = withRouter(
                       <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
                       <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
                     </div>
+                    {!isEmpty(referenceDatasets) && (
+                      <div className={styles.referenceDatasetsWrapper}>
+                        <div className={styles.referenceDatasetsTitle}>{resources.messages['referenceDatasets']}</div>
+                        <DataTable
+                          autoLayout={true}
+                          className={styles.referenceDatasetsTable}
+                          totalRecords={referenceDatasets.length}
+                          value={referenceDatasets}>
+                          {renderReferenceDatasetsColumns(referenceDatasets)}
+                        </DataTable>
+                      </div>
+                    )}
                   </Fragment>
                 ) : (
                   <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
