@@ -14,39 +14,8 @@
   }
 }
 
-.downloadFile {
-  max-width: 35rem;
-}
-
-.filesContainer {
-  display: flex;
-  align-items: center;
-
-  .filesIcon {
-    font-size: 1.4rem;
-    color: var(--documenticon-color);
-
-    .cursorPointer {
-      cursor: pointer;
-    }
-  }
-
-  .restrictFromPublicIcon {
-    font-size: 1.3rem;
-    color: var(--gray-75);
-    cursor: pointer;
-  }
-}
-
-.checkedValueColumn {
-  text-align: center;
-}
-
-.downloadIcon {
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--documenticon-color);
-  text-align: center;
+.cellContentPosition {
+  text-align: center !important;
 }
 
 .cellWrapper {
@@ -67,6 +36,50 @@
   font-size: 1.4rem;
   font-weight: bold;
   height: 40vh;
+}
+
+.downloadFile {
+  max-width: 35rem;
+}
+
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--documenticon-color);
+}
+
+.downloadReferenceDatasetFile {
+  width: 12.8% !important;
+  text-align: center;
+}
+
+.filesContainer {
+  display: flex;
+  justify-content: center !important;
+
+  .filesIcon {
+    font-size: 1.4rem;
+    color: var(--documenticon-color);
+
+    .cursorPointer {
+      cursor: pointer;
+    }
+  }
+
+  .restrictFromPublicIcon {
+    font-size: 1.3rem;
+    color: var(--gray-75);
+    cursor: pointer;
+  }
+}
+
+.referenceDatasetsWrapper {
+  margin: 3rem 0rem 2rem 0rem;
+
+  .referenceDatasetsTitle {
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
 }
 
 .tableLegendContainer {
