@@ -1121,7 +1121,8 @@ public class FileTreatmentHelper implements DisposableBean {
           if (entry.getKey() == null) {
             nameFileXlsxCsv = nameDataset;
           } else {
-            nameFileXlsxCsv = entry.getKey().split("_")[1];
+            nameFileXlsxCsv =
+                entry.getKey().substring(entry.getKey().indexOf("_") + 1, entry.getKey().length());
           }
 
           // Adding the xlsx/csv file to the zip

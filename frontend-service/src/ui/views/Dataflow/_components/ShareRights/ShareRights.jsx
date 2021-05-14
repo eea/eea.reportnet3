@@ -26,6 +26,9 @@ import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
+import { RegularExpressions } from 'ui/views/_functions/Utils/RegularExpressions';
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 export const ShareRights = ({
   addConfirmHeader,
   addErrorNotificationKey,
@@ -87,6 +90,80 @@ export const ShareRights = ({
 
   useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
 
+  const isValidEmail = email => RegularExpressions['email'].test(email);
+
+  const isRepeatedAccount = account => {
+    const sameAccounts = shareRightsState.userRightList.filter(userRight =>
+      TextUtils.areEquals(userRight.account, account)
+    );
+    return sameAccounts.length > 0;
+  };
+
+  const isRoleChanged = userRight => {
+    const [initialUser] = shareRightsState.clonedUserRightList.filter(fUserRight => fUserRight.id === userRight.id);
+
+    if (userRight.isNew) {
+      return true;
+    }
+
+    return !TextUtils.areEquals(JSON.stringify(initialUser?.role), JSON.stringify(userRight?.role));
+  };
+
+  const onCloseManagementDialog = () => {
+    setIsUserRightManagementDialogVisible(false);
+    shareRightsDispatch({ type: 'ON_CLOSE_MANAGEMENT_DIALOG' });
+  };
+
+  const onDataChange = () => shareRightsDispatch({ type: 'ON_DATA_CHANGE' });
+
+  const onEditUserRight = userRight => {
+    shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditingModal: true, userRight } });
+    setIsUserRightManagementDialogVisible(true);
+  };
+
+  const onEnterKey = (key, userRight) => {
+    if (
+      key === 'Enter' &&
+      isValidEmail(userRight.account) &&
+      !shareRightsState.accountHasError &&
+      isRoleChanged(userRight)
+    ) {
+      onUpdateUser(userRight);
+    }
+  };
+
+  const onResetAll = () => shareRightsDispatch({ type: 'ON_RESET_ALL' });
+
+  const onRoleChange = newRole => shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { role: newRole } });
+
+  const onSetAccount = inputValue => {
+    shareRightsDispatch({
+      type: 'ON_SET_ACCOUNT',
+      payload: {
+        account: inputValue,
+        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
+        accountNotFound: false
+      }
+    });
+  };
+  const onToggleDeletingUser = value => {
+    shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
+  };
+
+  const setActions = ({ isDeleting, isEditing }) => {
+    shareRightsDispatch({ type: 'SET_ACTIONS', payload: { isDeleting, isEditing } });
+  };
+
+  const setIsButtonLoading = isLoadingButton => {
+    shareRightsDispatch({ type: 'SET_IS_LOADING_BUTTON', payload: { isLoadingButton } });
+  };
+
+  const setLoadingStatus = ({ isActionButtonsLoading, isInitialLoading }) => {
+    shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isActionButtonsLoading, isInitialLoading } });
+  };
+
+  const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
+
   const callEndPoint = async (method, userRight) => {
     if (userType === userTypes.REPORTER) {
       switch (method) {
@@ -140,32 +217,6 @@ export const ShareRights = ({
     }
   };
 
-  const isValidEmail = email => {
-    if (isNil(email)) {
-      return true;
-    }
-
-    // eslint-disable-next-line no-useless-escape
-    const expression = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-    return email.match(expression);
-  };
-
-  const isRepeatedAccount = account => {
-    const sameAccounts = shareRightsState.userRightList.filter(userRight => userRight.account === account);
-    return sameAccounts.length > 0;
-  };
-
-  const isRoleChanged = userRight => {
-    const [initialUser] = shareRightsState.clonedUserRightList.filter(fUserRight => fUserRight.id === userRight.id);
-
-    if (userRight.isNew) {
-      return true;
-    }
-
-    return JSON.stringify(initialUser?.role) !== JSON.stringify(userRight?.role);
-  };
-
   const updateUserRight = () => {
     const isRepeated = userRight.isNew ? isRepeatedAccount(userRight.account) : false;
     const accountHasError = !isValidEmail(userRight.account) || isRepeated || shareRightsState.accountNotFound;
@@ -180,8 +231,6 @@ export const ShareRights = ({
       }
     }
   };
-
-  const onResetAll = () => shareRightsDispatch({ type: 'ON_RESET_ALL' });
 
   const onDeleteUserRight = async () => {
     onToggleDeletingUser(true);
@@ -200,8 +249,6 @@ export const ShareRights = ({
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
     }
   };
-
-  const onDataChange = () => shareRightsDispatch({ type: 'ON_DATA_CHANGE' });
 
   const onUpdateUser = async userRight => {
     setActions({ isDeleting: false, isEditing: true });
@@ -232,58 +279,6 @@ export const ShareRights = ({
       }
     }
   };
-
-  const onRoleChange = newRole => shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { role: newRole } });
-
-  const onSetAccount = inputValue => {
-    shareRightsDispatch({
-      type: 'ON_SET_ACCOUNT',
-      payload: {
-        account: inputValue,
-        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
-        accountNotFound: false
-      }
-    });
-  };
-
-  const onToggleDeletingUser = value => {
-    shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
-  };
-
-  const onCloseManagementDialog = () => {
-    setIsUserRightManagementDialogVisible(false);
-    shareRightsDispatch({ type: 'ON_CLOSE_MANAGEMENT_DIALOG' });
-  };
-
-  const onEnterKey = (key, userRight) => {
-    if (
-      key === 'Enter' &&
-      isValidEmail(userRight.account) &&
-      !shareRightsState.accountHasError &&
-      isRoleChanged(userRight)
-    ) {
-      onUpdateUser(userRight);
-    }
-  };
-
-  const onEditUserRight = userRight => {
-    shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditingModal: true, userRight } });
-    setIsUserRightManagementDialogVisible(true);
-  };
-
-  const setActions = ({ isDeleting, isEditing }) => {
-    shareRightsDispatch({ type: 'SET_ACTIONS', payload: { isDeleting, isEditing } });
-  };
-
-  const setIsButtonLoading = isLoadingButton => {
-    shareRightsDispatch({ type: 'SET_IS_LOADING_BUTTON', payload: { isLoadingButton } });
-  };
-
-  const setLoadingStatus = ({ isActionButtonsLoading, isInitialLoading }) => {
-    shareRightsDispatch({ type: 'SET_IS_LOADING', payload: { isActionButtonsLoading, isInitialLoading } });
-  };
-
-  const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
 
   const renderButtonsColumnTemplate = userRight => {
     return notDeletableRoles.includes(userRight?.role) ? null : (
