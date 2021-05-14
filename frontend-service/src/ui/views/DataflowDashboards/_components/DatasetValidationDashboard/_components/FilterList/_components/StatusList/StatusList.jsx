@@ -1,7 +1,8 @@
 import { useContext } from 'react';
 
-import styles from './StatusList.module.scss';
 import colors from 'conf/colors.json';
+
+import styles from './StatusList.module.scss';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 

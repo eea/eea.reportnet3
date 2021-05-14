@@ -1,15 +1,15 @@
-import styles from './TableList.module.css';
-
 import uuid from 'uuid';
 
-import { TableListItem } from './TableListItem';
+import styles from './TableList.module.css';
+
 import { SelectAllFilters } from 'ui/views/DataflowDashboards/_components/DatasetValidationDashboard/_components/FilterList/_components/SelectAllFilters';
+import { TableListItem } from './TableListItem';
 
 const TableList = ({ datasetSchemaId, filterDispatch, tableFilters, tables }) => {
   return (
     <ul className={styles.list}>
       {tables.map(table => (
-        <li key={uuid.v4()} className={styles.listItem}>
+        <li className={styles.listItem} key={uuid.v4()}>
           <TableListItem
             datasetSchemaId={datasetSchemaId}
             filterDispatch={filterDispatch}
