@@ -9,22 +9,16 @@ src\ui\views\DataflowDashboards\_components\ReleasedDatasetsDashboard\ReleasedDa
 
 
 (Miriam)
-src\ui\views\DatasetDesigner\DatasetDesigner.jsx
-src\ui\views\DatasetDesigner\_components\ListBox\ListBox.jsx
-src\ui\views\DatasetDesigner\_components\ListBox\_components\ListBoxHeader\ListBoxHeader.jsx
-src\ui\views\DatasetDesigner\_components\ListBox\_components\ListBoxItem\ListBoxItem.jsx
-src\ui\views\DatasetDesigner\_components\ManageUniqueConstraint\ManageUniqueConstraint.jsx
 src\ui\views\DatasetDesigner\_components\TabsDesigner\TabsDesigner.jsx
-src\ui\views\Dataset\Dataset.jsx
-src\ui\views\Dataset\_components\DropdownFilter\DropdownFilter.jsx
-
-
-# Rest
 src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\FieldsDesigner.jsx
 src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\FieldDesigner.jsx
 src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\_components\AttachmentEditor\AttachmentEditor.jsx
 src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\_components\CodelistEditor\CodelistEditor.jsx
 src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\_components\LinkSelector\LinkSelector.jsx
+src\ui\views\Dataset\_components\DropdownFilter\DropdownFilter.jsx
+
+
+# Rest
 src\ui\views\DatasetDesigner\_components\Validations\Validations.jsx
 src\ui\views\DatasetDesigner\_components\Validations\_components\ComparisonExpression\ComparisonExpression.jsx
 src\ui\views\DatasetDesigner\_components\Validations\_components\ExpressionSelector\ExpressionSelector.jsx
