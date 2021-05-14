@@ -13,16 +13,6 @@ src\ui\views\Webforms\_components\WebformTable\_components\WebformRecord\Webform
 
 
 (Miriam)
-src\ui\views\DatasetDesigner\_components\TabsDesigner\TabsDesigner.jsx
-src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\FieldsDesigner.jsx
-src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\FieldDesigner.jsx
-src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\_components\AttachmentEditor\AttachmentEditor.jsx
-src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\_components\CodelistEditor\CodelistEditor.jsx
-src\ui\views\DatasetDesigner\_components\TabsDesigner\_components\FieldsDesigner\_components\FieldDesigner\_components\LinkSelector\LinkSelector.jsx
-src\ui\views\Dataset\_components\DropdownFilter\DropdownFilter.jsx
-
-
-# Rest
 src\ui\views\DatasetDesigner\_components\Validations\Validations.jsx
 src\ui\views\DatasetDesigner\_components\Validations\_components\ComparisonExpression\ComparisonExpression.jsx
 src\ui\views\DatasetDesigner\_components\Validations\_components\ExpressionSelector\ExpressionSelector.jsx
@@ -35,6 +25,9 @@ src\ui\views\DatasetDesigner\_components\Validations\_components\SQLsentence\_co
 src\ui\views\DatasetDesigner\_components\Validations\_components\SQLsentence\_components\SqlHelp\_components\SqlHelpListBox\SqlHelpListBox.jsx
 src\ui\views\DatasetDesigner\_components\Validations\_components\TableRelationsSelector\TableRelationsSelector.jsx
 src\ui\views\DatasetDesigner\_components\Validations\_components\TableRelationsSelector\_components\FieldRelations\FieldRelations.jsx
+
+
+# Rest
 src\ui\views\_components\BreadCrumb\BreadCrumb.jsx
 src\ui\views\_components\CustomFileUpload\CustomFileUpload.jsx
 src\ui\views\_components\DropdownButton\_components\DropDownMenu\DropDownMenu.jsx
