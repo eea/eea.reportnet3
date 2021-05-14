@@ -1,11 +1,10 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isUndefined from 'lodash/isUndefined';
 import map from 'lodash/map';
 import uniq from 'lodash/uniq';
 
@@ -178,6 +177,12 @@ const Dataflow = withRouter(({ history, match }) => {
       : uniqDataProviders[0]
     : null;
 
+  useEffect(() => {
+    if (!Number(dataflowId)) {
+      window.location.href = '/dataflows/error/loadDataflowData';
+    }
+  }, []);
+
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
     dataflowId,
@@ -191,7 +196,7 @@ const Dataflow = withRouter(({ history, match }) => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
   }, [userContext, dataflowState.data]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (dataflowState.isCustodian) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
@@ -203,7 +208,7 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   }, [userContext, dataflowState]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEmpty(dataflowState.userRoles)) {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
@@ -624,13 +629,7 @@ const Dataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
-
-      if (
-        !isUndefined(error.response) &&
-        (error.response.status === 401 || error.response.status === 403 || error.response.status === 500)
-      ) {
-        history.push(getUrl(routes.DATAFLOWS));
-      }
+      history.push(getUrl(routes.DATAFLOWS));
     } finally {
       setIsPageLoading(false);
     }
