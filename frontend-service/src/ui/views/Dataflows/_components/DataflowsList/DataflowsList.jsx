@@ -136,10 +136,10 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
       <p>{description}</p>
       <div className="dataflowList-filters-help-step">
         <Filters
-          options={filterOptions}
           data={dataToFilter}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredSearched}
+          options={filterOptions}
           sortable={true}
           sortCategory={'pinned'}
         />
@@ -148,13 +148,8 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
           filteredData.map((dataflow, i) => (
-            <Fragment>
-              <DataflowsItem
-                isCustodian={isCustodian}
-                itemContent={dataflow}
-                key={dataflow.id}
-                reorderDataflows={reorderDataflows}
-              />
+            <Fragment key={dataflow.id}>
+              <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />
               {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
             </Fragment>
           ))
