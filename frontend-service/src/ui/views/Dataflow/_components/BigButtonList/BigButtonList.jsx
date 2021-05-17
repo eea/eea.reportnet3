@@ -508,7 +508,7 @@ export const BigButtonList = ({
   const refreshManualAcceptanceDatasets = value => setIsUpdatedManualAcceptanceDatasets(value);
 
   const renderRadioButtonsCreateDC = () => {
-    return Object.keys(manualTechnicalAcceptanceOptions).map((value, index) => (
+    return Object.keys(manualTechnicalAcceptanceOptions).map(value => (
       <div className={styles.radioButton} key={`technicalAcceptance${value}`}>
         <RadioButton
           checked={manualTechnicalAcceptanceOptions[value]}
@@ -554,7 +554,7 @@ export const BigButtonList = ({
     setErrorDialogData
   })
     .filter(button => button.visibility)
-    .map((button, i) => <BigButton key={button.caption} {...button} />);
+    .map(button => <BigButton key={button.caption} {...button} />);
 
   const getManageAcceptanceDataset = data => setDatasetFeedbackStatusToEdit(data);
 
