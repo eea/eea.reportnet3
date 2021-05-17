@@ -12,7 +12,7 @@ import { Button } from 'ui/views/_components/Button';
 import { ChipButton } from 'ui/views/_components/ChipButton';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -104,7 +104,7 @@ const ActionsToolbar = ({
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
     label: type.text,
-    icon: config.icons['archive'],
+    icon: type.code,
     command: () => onExportTableData(type.code)
   }));
 
@@ -193,12 +193,12 @@ const ActionsToolbar = ({
         )}
         {isExportable && (
           <Button
-            id="buttonExportTable"
             className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
               isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+            id="buttonExportTable"
             label={resources.messages['exportTable']}
             onClick={event => {
               onUpdateData();
@@ -210,7 +210,6 @@ const ActionsToolbar = ({
           className={styles.menu}
           id="exportTableMenu"
           model={exportExtensionItems}
-          onShow={e => getExportButtonPosition(e)}
           popup={true}
           ref={exportMenuRef}
         />
@@ -246,13 +245,13 @@ const ActionsToolbar = ({
         <DropdownFilter
           className={`p-button-animated-blink`}
           filters={filter.visibilityDropdown}
-          popup={true}
-          ref={dropdownFilterRef}
           id="dropdownFilterMenu"
-          showFilters={showFilters}
           onShow={e => {
             getExportButtonPosition(e);
           }}
+          popup={true}
+          ref={dropdownFilterRef}
+          showFilters={showFilters}
         />
 
         {isFilterable && (
@@ -271,14 +270,14 @@ const ActionsToolbar = ({
               className={!isLoading ? 'p-button-animated-blink' : null}
               disabled={isLoading}
               filters={filter.validationDropdown}
-              popup={true}
-              ref={filterMenuRef}
               hide={hideValidationFilter}
               id="filterValidationDropdown"
-              showFilters={showValidationFilter}
               onShow={e => {
                 getExportButtonPosition(e);
               }}
+              popup={true}
+              ref={filterMenuRef}
+              showFilters={showValidationFilter}
               showLevelErrorIcons={true}
             />
             {filter.groupedFilter && selectedRuleMessage !== '' && (

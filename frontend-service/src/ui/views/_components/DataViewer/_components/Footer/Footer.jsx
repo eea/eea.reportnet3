@@ -9,8 +9,8 @@ const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
       <Button
         className={`p-button-secondary ${isDataflowOpen ? null : 'p-button-animated-blink'}`}
-        icon="add"
         disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
+        icon="add"
         label={resources.messages['addRecord']}
         onClick={() => onAddClick()}
         style={{ float: 'left' }}

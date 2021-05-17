@@ -1,5 +1,7 @@
 import { Fragment, useReducer, useRef } from 'react';
 
+import uuid from 'uuid';
+
 import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';
 import isNil from 'lodash/isNil';
@@ -59,7 +61,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             value={treeViewState.filters[field]}
             valuesSeparator=";"
           />
-          <label id={propertyName} className="srOnly">
+          <label className="srOnly" id={propertyName}>
             {propertyName}
           </label>
         </>
@@ -178,7 +180,6 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             ? referencedFieldTemplate
             : null
         }
-        key={field}
         columnResizeMode="expand"
         field={field}
         filter={
@@ -197,6 +198,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
             ? columnOptions[propertyName]['names'][field]
             : capitalize(field)
         }
+        key={field}
         sortable={true}
         style={{
           width: TextUtils.areEquals(field, 'DESCRIPTION')
@@ -223,63 +225,62 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
   };
 
   return (
-    <Fragment>
-      {!isUndefined(property) && !isNull(property) ? (
-        <div
-          style={{
-            paddingTop: '12px',
-            paddingLeft: '3px',
-            marginLeft: '10px'
-          }}>
-          {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
-            <Fragment>
-              <span className={styles.propertyTitle}>
-                {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
+    !isUndefined(property) &&
+    !isNull(property) && (
+      <div
+        style={{
+          paddingTop: '12px',
+          paddingLeft: '3px',
+          marginLeft: '10px'
+        }}>
+        {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
+          <Fragment>
+            <span className={styles.propertyTitle}>
+              {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
+            </span>
+            {property !== '' ? (
+              <span
+                className={`${styles.propertyValue} ${className} ${
+                  propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
+                }`}>
+                {property.toString()}
               </span>
-              {property !== '' ? (
-                <span
-                  className={`${styles.propertyValue} ${className} ${
-                    propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
-                  }`}>
-                  {property.toString()}
-                </span>
-              ) : (
-                '-'
-              )}
-            </Fragment>
-          ) : (
-            <TreeViewExpandableItem
-              items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}
-              expanded={true}>
-              {!isUndefined(columnOptions[propertyName]) &&
-              !isUndefined(columnOptions[propertyName]['groupable']) &&
-              columnOptions[propertyName]['groupable']
-                ? groupFields(property)
-                : !isUndefined(property)
-                ? Object.values(property).map((proper, index, { length }) => (
-                    <TreeView
-                      className={
-                        !isUndefined(columnOptions[propertyName]) &&
-                        columnOptions[propertyName]['hasClass'] &&
-                        columnOptions[propertyName]['subClasses']
-                          ? `${columnOptions[propertyName]['class']} ${columnOptions[propertyName]['subClasses']
-                              .filter(cl => cl.toUpperCase().includes(proper.toString().toUpperCase()))
-                              .join(' ')}`
-                          : ''
-                      }
-                      columnOptions={columnOptions}
-                      excludeBottomBorder={index === length - 1}
-                      key={index}
-                      property={proper}
-                      propertyName={Object.getOwnPropertyNames(property)[index]}
-                    />
-                  ))
-                : null}
-            </TreeViewExpandableItem>
-          )}
-        </div>
-      ) : null}
-    </Fragment>
+            ) : (
+              '-'
+            )}
+          </Fragment>
+        ) : (
+          <TreeViewExpandableItem
+            expanded={true}
+            items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}>
+            {!isUndefined(columnOptions[propertyName]) &&
+            !isUndefined(columnOptions[propertyName]['groupable']) &&
+            columnOptions[propertyName]['groupable']
+              ? groupFields(property)
+              : !isUndefined(property)
+              ? Object.values(property).map((proper, index, { length }) => (
+                  <TreeView
+                    className={
+                      !isUndefined(columnOptions[propertyName]) &&
+                      columnOptions[propertyName]['hasClass'] &&
+                      columnOptions[propertyName]['subClasses']
+                        ? `${columnOptions[propertyName]['class']} ${columnOptions[propertyName]['subClasses']
+                            .filter(cl => cl.toUpperCase().includes(proper.toString().toUpperCase()))
+                            .join(' ')}`
+                        : ''
+                    }
+                    columnOptions={columnOptions}
+                    excludeBottomBorder={index === length - 1}
+                    key={uuid.v4()}
+                    property={proper}
+                    propertyName={Object.getOwnPropertyNames(property)[index]}
+                  />
+                ))
+              : null}
+          </TreeViewExpandableItem>
+        )}
+      </div>
+    )
   );
 };
 
@@ -292,6 +293,7 @@ const getFieldTypeValue = value => {
     { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
     { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
+    { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
     // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },

@@ -62,8 +62,7 @@ export const WebformField = ({
     sectorAffectedValue: null,
     selectedFieldId: '',
     selectedFieldSchemaId: '',
-    selectedMaxSize: '',
-    selectedValidExtensions: []
+    selectedMaxSize: ''
   });
 
   const {
@@ -75,8 +74,7 @@ export const WebformField = ({
     linkItemsOptions,
     sectorAffectedValue,
     selectedFieldId,
-    selectedFieldSchemaId,
-    selectedValidExtensions
+    selectedFieldSchemaId
   } = webformFieldState;
 
   const { formatDate, getInputMaxLength, getMultiselectValues } = WebformRecordUtils;
@@ -322,6 +320,33 @@ export const WebformField = ({
             yearRange="1900:2100"
           />
         );
+        case 'DATETIME':
+          return (
+            <Calendar
+              appendTo={document.body}
+              dateFormat="yy-mm-dd"
+              id={field.fieldId}
+              monthNavigator={true}
+              onBlur={event => {
+                if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
+                else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+              }}
+              onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
+              onFocus={event => {
+                changeDatePickerPosition(event.target.getBoundingClientRect().left);
+                onFocusField(event.target.value);
+              }}
+              onSelect={event => {
+                onFillField(field, option, formatDate(event.value, isNil(event.value)));
+                onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
+              }}
+              showSeconds={true}
+              showTime={true}
+              value={field.value}
+              yearNavigator={true}
+              yearRange="1900:2100"
+            />
+          );
 
       case 'LINK':
         if (field.pkHasMultipleValues) {
@@ -341,8 +366,8 @@ export const WebformField = ({
                 else onEditorSubmitValue(field, option, event.target.value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
-              options={linkItemsOptions}
               optionLabel="itemType"
+              options={linkItemsOptions}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
               valuesSeparator=";"
             />
@@ -355,8 +380,8 @@ export const WebformField = ({
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={event => {
                 const value =
@@ -428,8 +453,8 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            keyfilter={RecordUtils.getFilter(type)}
             id={field.fieldId}
+            keyfilter={RecordUtils.getFilter(type)}
             maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -447,9 +472,9 @@ export const WebformField = ({
         return (
           <InputTextarea
             className={field.required ? styles.required : undefined}
+            collapsedHeight={150}
             id={field.fieldId}
             maxLength={getInputMaxLength[type]}
-            collapsedHeight={150}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value);

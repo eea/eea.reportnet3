@@ -26,6 +26,7 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -989,8 +990,8 @@ public class FileTreatmentHelper implements DisposableBean {
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    // Extension arrive with zip+xlsx or xlsx, but to the backend arrives with empty space. Split
-    // the extensions to know
+    // Extension arrive with zip+xlsx, zip+csv or xlsx, but to the backend arrives with empty space.
+    // Split the extensions to know
     // if its a zip or only xlsx
     String[] type = mimeType.split(" ");
     String extension = "";
@@ -1002,14 +1003,27 @@ public class FileTreatmentHelper implements DisposableBean {
     final IFileExportContext context = fileExportFactory.createContext(extension);
 
     try {
-      byte[] content = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
+      Map<String, byte[]> contents = new HashMap<>();
+      if (extension.equalsIgnoreCase("csv")) {
+        List<TableSchema> tablesSchema = getTables(datasetId);
+        for (TableSchema table : tablesSchema) {
+          List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId,
+              table.getIdTableSchema().toString(), includeCountryCode);
+          contents.put(table.getIdTableSchema() + "_" + table.getNameTableSchema(),
+              dataFile.get(0));
+        }
+      } else {
+        List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
+        contents.put(null, dataFile.get(0));
+      }
+
       Boolean includeZip = false;
       // If the length after splitting the file type arrives it's more than 1, then there's a
       // zip+xlsx type
       if (type.length > 1) {
         includeZip = true;
       }
-      generateFile(datasetId, extension, content, includeZip, datasetType);
+      generateFile(datasetId, extension, contents, includeZip, datasetType);
       LOG.info("End of exportDatasetFile datasetId {}", datasetId);
     } catch (EEAException | IOException | NullPointerException e) {
       LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
@@ -1036,14 +1050,14 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param mimeType the mime type
-   * @param file the file
+   * @param files the files
    * @param includeZip the include zip
    * @param datasetType the dataset type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  private void generateFile(Long datasetId, String mimeType, byte[] file, boolean includeZip,
-      DatasetTypeEnum datasetType) throws IOException, EEAException {
+  private void generateFile(Long datasetId, String mimeType, Map<String, byte[]> files,
+      boolean includeZip, DatasetTypeEnum datasetType) throws IOException, EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String nameDataset = dataset.getDataSetName();
@@ -1100,11 +1114,23 @@ public class FileTreatmentHelper implements DisposableBean {
             }
           }
         }
-        // Adding the xlsx/csv file to the zip
-        ZipEntry e = new ZipEntry(nameDataset + "." + mimeType);
-        out.putNextEntry(e);
-        out.write(file, 0, file.length);
-        out.closeEntry();
+
+        for (Map.Entry<String, byte[]> entry : files.entrySet()) {
+          // Creating the name of the files inside the zip
+          String nameFileXlsxCsv = "";
+          if (entry.getKey() == null) {
+            nameFileXlsxCsv = nameDataset;
+          } else {
+            nameFileXlsxCsv =
+                entry.getKey().substring(entry.getKey().indexOf("_") + 1, entry.getKey().length());
+          }
+
+          // Adding the xlsx/csv file to the zip
+          ZipEntry e = new ZipEntry(nameFileXlsxCsv + "." + mimeType);
+          out.putNextEntry(e);
+          out.write(entry.getValue(), 0, entry.getValue().length);
+          out.closeEntry();
+        }
         LOG.info("Creating file {} in the route ", fileWriteZip);
       }
     }
@@ -1113,7 +1139,9 @@ public class FileTreatmentHelper implements DisposableBean {
       nameFile = nameDataset + "." + mimeType;
       File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
       try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
-        out.write(file, 0, file.length);
+        for (Map.Entry<String, byte[]> entry : files.entrySet()) {
+          out.write(entry.getValue(), 0, entry.getValue().length);
+        }
       }
     }
     // Send notification
@@ -1197,6 +1225,23 @@ public class FileTreatmentHelper implements DisposableBean {
         tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
     recordRepository.saveAll(allRecords);
     LOG.info("Data saved into dataset {}", datasetId);
+  }
+
+  @Transactional
+  public List<TableSchema> getTables(Long datasetId) {
+
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    DataSetSchema datasetSchema = null;
+    try {
+      datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+          .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
+          datasetSchemaId, e.getMessage(), e);
+    }
+    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+
+    return tableSchemaList;
   }
 
   /**

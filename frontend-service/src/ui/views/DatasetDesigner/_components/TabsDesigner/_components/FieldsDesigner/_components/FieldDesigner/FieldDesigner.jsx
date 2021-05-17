@@ -58,6 +58,7 @@ export const FieldDesigner = ({
   isCodelistOrLink,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isReferenceDataset,
   onCodelistAndLinkShow,
   onFieldDelete,
   onFieldDragAndDrop,
@@ -73,6 +74,7 @@ export const FieldDesigner = ({
     { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
     { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
     { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
+    { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
     { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
     { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
     { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
@@ -1176,13 +1178,23 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton} ${
               fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+            } ${
+              !isUndefined(fieldDesignerState.fieldTypeValue) &&
+              !config.validations.bannedFieldsNames.sqlFields.includes(
+                fieldDesignerState.fieldTypeValue.value.toLowerCase()
+              ) &&
+              !isDesignDatasetEditorRead &&
+              !(isDataflowOpen && isReferenceDataset)
+                ? 'p-button-animated-blink'
+                : null
             }`}
             disabled={
               (!isUndefined(fieldDesignerState.fieldTypeValue) &&
                 config.validations.bannedFieldsNames.sqlFields.includes(
                   fieldDesignerState.fieldTypeValue.value.toLowerCase()
                 )) ||
-              isDesignDatasetEditorRead
+              isDesignDatasetEditorRead ||
+              (isDataflowOpen && isReferenceDataset)
             }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}
@@ -1215,6 +1227,7 @@ export const FieldDesigner = ({
           datasetSchemaId={datasetSchemaId}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          isReferenceDataset={isReferenceDataset}
           linkedTableConditional={fieldLinkedTableConditional}
           linkedTableLabel={fieldLinkedTableLabel}
           masterTableConditional={fieldMasterTableConditional}

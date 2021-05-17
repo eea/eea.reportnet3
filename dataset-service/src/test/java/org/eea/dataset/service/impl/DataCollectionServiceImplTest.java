@@ -16,6 +16,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
@@ -33,6 +34,12 @@ import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -131,6 +138,10 @@ public class DataCollectionServiceImplTest {
   /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
+
+  /** The reference dataset repository. */
+  @Mock
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;
@@ -294,6 +305,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.updateDataCollection(1L);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -363,7 +376,89 @@ public class DataCollectionServiceImplTest {
         Mockito.anyBoolean(), Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
+    Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.anyBoolean());
+  }
+
+
+  @Test
+  public void createEmptyDataCollectionWithReferenceDatasetTest() throws SQLException {
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    List<DesignDataset> designsValue = new ArrayList<>();
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    List<DataProviderVO> dataProviders = new ArrayList<>();
+    List<RuleVO> rulesSql = new ArrayList<>();
+    List<UserRepresentationVO> userRepresentationVOs = new ArrayList<>();
+    DesignDataset designDataset = new DesignDataset();
+    DesignDatasetVO design = new DesignDatasetVO();
+    RepresentativeVO representative = new RepresentativeVO();
+    DataProviderVO dataProvider = new DataProviderVO();
+    RuleVO ruleVO = new RuleVO();
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setEmail("email@reportnet.net");
+    design.setDataSetName("datasetName_");
+    design.setDatasetSchema(new ObjectId().toString());
+    representative.setId(1L);
+    representative.setLeadReporters(leadReportersVO);
+    representative.setDataProviderId(1L);
+    representative.setHasDatasets(false);
+    dataProvider.setId(1L);
+    dataProvider.setLabel("label");
+    designs.add(design);
+    representatives.add(representative);
+    dataProviders.add(dataProvider);
+    designsValue.add(designDataset);
+    rulesSql.add(ruleVO);
+    userRepresentationVOs.add(userRepresentationVO);
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(designs);
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+        .thenReturn(representatives);
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(dataProviders);
+    Mockito.when(rulesControllerZuul.validateSqlRuleDataCollection(Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(true);
+    Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
+    Mockito.when(connection.createStatement()).thenReturn(statement);
+    Mockito.doNothing().when(connection).setAutoCommit(Mockito.anyBoolean());
+    Mockito.doNothing().when(statement).addBatch(Mockito.any());
+    Mockito.when(statement.executeQuery(Mockito.any())).thenReturn(resultSet);
+    Mockito.when(resultSet.next()).thenReturn(true);
+    Mockito.when(statement.executeBatch()).thenReturn(null);
+    Mockito.when(rulesControllerZuul.findSqlSentencesByDatasetSchemaId(Mockito.any()))
+        .thenReturn(rulesSql);
+    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
+    Mockito.when(userManagementControllerZuul.getUsersByGroup(Mockito.anyString()))
+        .thenReturn(userRepresentationVOs);
+    Mockito.doNothing().when(userManagementControllerZuul)
+        .addContributorsToResources(Mockito.any());
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(designsValue);
+    Mockito.when(resourceManagementControllerZuul.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.anyBoolean());
+
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    schema.setReferenceDataset(true);
+    schema.setIdDataSetSchema(new ObjectId().toString());
+    TableSchemaVO tableSchema = new TableSchemaVO();
+    RecordSchemaVO recordSchema = new RecordSchemaVO();
+    recordSchema.setIdRecordSchema(new ObjectId().toString());
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setType(DataType.LINK);
+    fieldSchemaVO.setId(new ObjectId().toString());
+    ReferencedFieldSchemaVO referencedField = new ReferencedFieldSchemaVO();
+    referencedField.setIdDatasetSchema(new ObjectId().toString());
+    referencedField.setIdPk(new ObjectId().toString());
+    fieldSchemaVO.setReferencedField(referencedField);
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    tableSchema.setRecordSchema(recordSchema);
+    schema.setTableSchemas(Arrays.asList(tableSchema));
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), false, false, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -386,6 +481,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(1);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
@@ -434,6 +531,8 @@ public class DataCollectionServiceImplTest {
     Mockito.doNothing().when(connection).rollback();
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -476,6 +575,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
+        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }

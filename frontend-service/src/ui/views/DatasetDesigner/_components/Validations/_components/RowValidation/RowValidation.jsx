@@ -65,7 +65,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
   const componentName = 'createValidation';
 
   useEffect(() => {
-    if (!isEmpty(tabs)) {
+    if (!isEmpty(tabs) && isEmpty(creationFormState.candidateRule.expressionType)) {
       creationFormDispatch({ type: 'INIT_FORM', payload: initValidationRuleCreation(tabs) });
     }
   }, [tabs]);
@@ -301,13 +301,13 @@ export const RowValidation = ({ datasetId, tabs }) => {
       }
 
       await ValidationService.createRowRule(datasetId, candidateRule);
+      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
       console.error('onCreateValidationRule error', error);
     } finally {
-      onHide();
       setIsSubmitDisabled(false);
     }
   };
@@ -328,13 +328,13 @@ export const RowValidation = ({ datasetId, tabs }) => {
       }
 
       await ValidationService.updateRowRule(datasetId, candidateRule);
+      onHide();
     } catch (error) {
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });
       console.error('onUpdateValidationRule error', error);
     } finally {
-      onHide();
       setIsSubmitDisabled(false);
     }
   };

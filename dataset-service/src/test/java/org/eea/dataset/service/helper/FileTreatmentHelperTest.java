@@ -763,13 +763,11 @@ public class FileTreatmentHelperTest {
     dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
     dataSetMetabase.setDataSetName("file");
 
-    byte[] expectedResult = null;
+    List<byte[]> expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
             .thenReturn(expectedResult);
-    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
-        .thenReturn(dataSetMetabase);
     fileTreatmentHelper.exportDatasetFile(1L, "xslx");
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }

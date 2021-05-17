@@ -30,7 +30,10 @@ public class DataSetSchemaVO {
   private WebformVO webform;
 
   /** The available in public. */
-  private boolean availableInPublic;
+  private Boolean availableInPublic;
+
+  /** The reference dataset. */
+  private Boolean referenceDataset;
 
   /**
    * Hash code.
@@ -40,7 +43,7 @@ public class DataSetSchemaVO {
   @Override
   public int hashCode() {
     return Objects.hash(idDataSetSchema, description, nameDatasetSchema, tableSchemas, webform,
-        availableInPublic);
+        availableInPublic, referenceDataset);
   }
 
   /**
@@ -63,6 +66,7 @@ public class DataSetSchemaVO {
         && Objects.equals(nameDatasetSchema, other.nameDatasetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas)
         && Objects.equals(webform, other.webform)
-        && Objects.equals(availableInPublic, other.availableInPublic);
+        && Objects.equals(availableInPublic, other.availableInPublic)
+        && Objects.equals(referenceDataset, other.referenceDataset);
   }
 }

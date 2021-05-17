@@ -131,17 +131,17 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
 
   const loadTitle = () => (
     <a
-      href={getUrl(routes.ACCESS_POINT)}
       className={styles.title}
-      title={resources.messages['titleHeader']}
+      href={getUrl(routes.ACCESS_POINT)}
       onClick={e => {
         e.preventDefault();
         history.push(getUrl(routes.ACCESS_POINT));
-      }}>
+      }}
+      title={resources.messages['titleHeader']}>
       {isPublic ? (
-        <img height="50px" src={ReportnetPublicLogo} alt="Reportnet 3" className={styles.appLogo} />
+        <img alt="Reportnet 3" className={styles.appLogo} height="50px" src={ReportnetPublicLogo} />
       ) : (
-        <img height="50px" src={logo} alt="Reportnet 3" className={styles.appLogo} />
+        <img alt="Reportnet 3" className={styles.appLogo} height="50px" src={logo} />
       )}
     </a>
   );
@@ -207,16 +207,16 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     <a
       className="userSettingsBtn"
       href={getUrl(routes.SETTINGS)}
-      title="User profile details"
       onClick={async e => {
         e.preventDefault();
         history.push(getUrl(routes.SETTINGS));
-      }}>
+      }}
+      title="User profile details">
       <img
         alt="User avatar"
         className={styles.userAvatar}
         icon={
-          <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />
+          <FontAwesomeIcon aria-hidden={false} className={styles.userDataIcon} icon={AwesomeIcons('user-profile')} />
         }
         ref={avatarImage}
         src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
@@ -262,14 +262,14 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       <Button
         className="p-button-primary"
         label={resources.messages.login}
-        style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}
         onClick={() => {
-          if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
+          if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
             window.location.href = AccessPointWebConfig.euloginUrl;
           } else {
             history.push(getUrl(routes.LOGIN));
           }
-        }}></Button>
+        }}
+        style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}></Button>
     </div>
   );
 
@@ -286,31 +286,29 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   };
 
   return (
-    <Fragment>
-      <div id="header" style={headerElementStyle} className={`${styles.header} ${isPublic ? styles.public : ''}`}>
-        <EuHeader globanElementStyle={globanElementStyle} euHeaderElementStyle={euHeaderElementStyle} />
-        <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
-          {loadTitle()}
-          {<BreadCrumb isPublic={isPublic} />}
-          {!isPublic && loadUser()}
-          {isPublic && loadLogin()}
-          {!isPublic && userContext.userProps.showLogoutConfirmation && confirmvisible && (
-            <ConfirmDialog
-              footerAddon={checkDoNotRemember}
-              header={resources.messages['logout']}
-              labelCancel={resources.messages['no']}
-              labelConfirm={resources.messages['yes']}
-              onHide={() => setConfirmVisible(false)}
-              onConfirm={() => {
-                userLogout();
-              }}
-              visible={confirmvisible}>
-              {resources.messages['userLogout']}
-            </ConfirmDialog>
-          )}
-        </div>
+    <div className={`${styles.header} ${isPublic ? styles.public : ''}`} id="header" style={headerElementStyle}>
+      <EuHeader euHeaderElementStyle={euHeaderElementStyle} globanElementStyle={globanElementStyle} />
+      <div className={`${styles.customHeader} ${isPublic ? styles.public : ''}`}>
+        {loadTitle()}
+        {<BreadCrumb isPublic={isPublic} />}
+        {!isPublic && loadUser()}
+        {isPublic && loadLogin()}
+        {!isPublic && userContext.userProps.showLogoutConfirmation && confirmvisible && (
+          <ConfirmDialog
+            footerAddon={checkDoNotRemember}
+            header={resources.messages['logout']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={() => {
+              userLogout();
+            }}
+            onHide={() => setConfirmVisible(false)}
+            visible={confirmvisible}>
+            {resources.messages['userLogout']}
+          </ConfirmDialog>
+        )}
       </div>
-    </Fragment>
+    </div>
   );
 });
 export { Header };
