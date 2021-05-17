@@ -1097,6 +1097,7 @@
     "getRequestersError": "Error getting requesters",
     "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
     "geomTypeHelpTooltip": "Check the type format",
-    "notFoundError": "Page not found error. The requested page does not exist"
+    "notFoundError": "Page not found error. The requested page does not exist",
+    "sqlSentenceSpatialTypesNote": "Note: The POSTGIS spatial functions are exposed to the SQL interface – the revenant ones are <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>here</a>"
   }
 }
