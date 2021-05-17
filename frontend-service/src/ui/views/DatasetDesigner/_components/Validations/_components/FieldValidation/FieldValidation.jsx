@@ -517,8 +517,6 @@ const FieldValidation = ({ datasetId, tabs }) => {
     </div>
   );
 
-  console.log('validationContext.isVisible :>> ', validationContext.isVisible);
-
   const dialogLayout = children =>
     validationContext.isVisible && (
       <Dialog
