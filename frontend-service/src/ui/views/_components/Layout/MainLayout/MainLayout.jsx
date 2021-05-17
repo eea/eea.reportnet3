@@ -14,7 +14,7 @@ import { GlobalNotifications } from './_components/GlobalNotifications';
 import { Header } from './_components/Header';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
-import { ErrorBoundaryFallback } from 'ui/views/_components/ErrorBoundaryFallback/ErrorBoundaryFallback';
+import { ErrorBoundaryFallback } from 'ui/views/_components/ErrorBoundaryFallback';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { NotificationsList } from './_components/NotificationsList';

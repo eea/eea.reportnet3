@@ -41,8 +41,8 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
             </div>
             <div>
               <p className="warning">{error.message}</p>
-              <p>Please copy the error information to the clipboard and send it to the helpdesk.</p>
-              <p>You have to press the Refresh button to continue.</p>
+              <p>{resources.messages['errorBoundaryMessageCopy']}</p>
+              <p>{resources.messages['errorBoundaryMessageRefresh']}</p>
             </div>
 
             <div className={styles.boundaryButtonsWrap}>
