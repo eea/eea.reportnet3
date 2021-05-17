@@ -3,6 +3,7 @@ package org.eea.dataset.persistence.data.repository;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.data.domain.Pageable;
@@ -77,4 +78,14 @@ public interface RecordExtendedQueriesRepository {
    * @return the stream
    */
   String findAndGenerateETLJson(String stringQuery);
+
+  /**
+   * Query RS execution.
+   *
+   * @param idTable the id table
+   * @param datasetId the dataset id
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
+  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId) throws EEAException;
 }

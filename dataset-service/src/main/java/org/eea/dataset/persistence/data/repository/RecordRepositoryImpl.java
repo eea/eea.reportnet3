@@ -1,6 +1,11 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,20 +14,27 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import org.bson.Document;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class RecordRepositoryImpl.
@@ -513,6 +525,54 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       result = "";
     }
     return result.toString();
+  }
+
+  private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId)
+      throws SQLException {
+    String stringQuery =
+        "select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
+            + "            from ( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value  from dataset_"
+            + datasetId + ".field_value fv " + "                    where fv.id_record = rv.id "
+            + "                    order by fv.data_position ) as fieldsAux) "
+            + "            from dataset_" + datasetId + ".record_value rv where rv.id_table= "
+            + tableId + " order by rv.data_position";
+    conn.setSchema("dataset_" + datasetId);
+    List<RecordValue> records = new ArrayList<>();
+    try (PreparedStatement stmt = conn.prepareStatement(stringQuery);
+        ResultSet rs = stmt.executeQuery()) {
+      ObjectMapper mapper = new ObjectMapper();
+      while (rs.next()) {
+        RecordValue record = new RecordValue();
+        record.setId(rs.getString("id"));
+        record.setIdRecordSchema(rs.getString("id_Record_Schema"));
+        record.setDatasetPartitionId(rs.getLong("dataset_Partition_Id"));
+        record.setDataProviderCode(rs.getString("data_Provider_Code"));
+        String fieldsSerieazlie = rs.getString("fields");
+        LOG.info(fieldsSerieazlie);
+        try {
+          if (fieldsSerieazlie != null) {
+            record.setFields(Arrays.asList(mapper.readValue(fieldsSerieazlie, FieldValue[].class)));
+          }
+        } catch (JsonProcessingException e) {
+          LOG.error("Json cannot be proccessed for the dataset {} with the error: ", datasetId, e);
+        }
+        records.add(record);
+      }
+    }
+    return records;
+  }
+
+
+  @Override
+  @Transactional
+  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId)
+      throws EEAException {
+    try {
+      Session session = (Session) entityManager.getDelegate();
+      return session.doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId));
+    } catch (HibernateException e) {
+      throw new EEAException("SQL can't be executed: ", e);
+    }
   }
 
 }
