@@ -79,6 +79,12 @@ export const apiDataset = {
     return await HTTPRequester.download({ url: getUrl(DatasetConfig.downloadFileData, { datasetId, fieldId }) });
   },
 
+  downloadReferenceDatasetFileData: async (dataflowId, fileName) => {
+    return await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadReferenceDatasetFileData, { dataflowId, fileName })
+    });
+  },
+
   errorPositionByObjectId: async (objectId, datasetId, entityType) => {
     return await HTTPRequester.get({
       url: getUrl(DatasetConfig.validationViewer, { datasetId, entityType, objectId })

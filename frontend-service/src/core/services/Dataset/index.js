@@ -15,6 +15,7 @@ import { DownloadDatasetFileData } from './DownloadDatasetFileData';
 import { DownloadExportDatasetFile } from './DownloadExportDatasetFile';
 import { DownloadExportFile } from './DownloadExportFile';
 import { DownloadFileData } from './DownloadFileData';
+import { DownloadReferenceDatasetFileData } from './DownloadReferenceDatasetFileData';
 import { ExportData } from './ExportData';
 import { ExportDatasetDataExternal } from './ExportDatasetDataExternal';
 import { ExportTableData } from './ExportTableData';
@@ -55,6 +56,7 @@ export const DatasetService = {
   downloadExportDatasetFile: DownloadExportDatasetFile({ datasetRepository }),
   downloadExportFile: DownloadExportFile({ datasetRepository }),
   downloadFileData: DownloadFileData({ datasetRepository }),
+  downloadReferenceDatasetFileData: DownloadReferenceDatasetFileData({ datasetRepository }),
   errorPositionByObjectId: GetErrorPosition({ datasetRepository }),
   errorsById: GetErrors({ datasetRepository }),
   errorStatisticsById: GetStatistics({ datasetRepository }),

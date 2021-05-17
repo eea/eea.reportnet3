@@ -24,7 +24,4 @@ public class ReferenceDatasetPublicVO implements Serializable {
   /** The public file name. */
   private String publicFileName;
 
-  /** The restrict from public. */
-  private boolean restrictFromPublic;
-
 }

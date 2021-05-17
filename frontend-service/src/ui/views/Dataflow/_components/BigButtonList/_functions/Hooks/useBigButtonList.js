@@ -388,8 +388,8 @@ const useBigButtonList = ({
     : dataflowState.data.referenceDatasets.map(referenceDataset => {
         return {
           layout: 'defaultBigButton',
-          buttonClass: 'dataset',
-          buttonIcon: 'dataset',
+          buttonClass: 'referenceDataset',
+          buttonIcon: 'howTo',
           caption: referenceDataset.datasetSchemaName,
           handleRedirect: () => {
             handleRedirect(
@@ -573,12 +573,12 @@ const useBigButtonList = ({
     ...feedbackBigButton,
     ...dashboardBigButton,
     ...referenceDatasetModels,
-    ...testDatasetBigButton,
     ...dataCollectionModels,
     ...manualTechnicalAcceptanceBigButton,
     ...copyDataCollectionToEuDatasetBigButton,
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
+    ...testDatasetBigButton,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,
