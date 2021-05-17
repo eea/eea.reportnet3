@@ -1099,8 +1099,8 @@
     "geomTypeHelpTooltip": "Check the type format",
     "notFoundError": "Page not found error. The requested page does not exist",
     "sqlSentenceSpatialTypesNote": "Note: You can see the different GIS operations with the following <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>link</a>",
-    "errorBoundaryTitle": "Sorry... An unexpected Error occurred",
-    "errorBoundaryMessageCopy": "Please copy the error information to the clipboard and send it to the helpdesk.",
-    "errorBoundaryMessageRefresh": "You have to press the Refresh button to continue."
+    "errorBoundaryTitle": "Sorry... An unexpected error occurred",
+    "errorBoundaryMessageCopy": "Please click Copy to clipboard and submit this information to the helpdesk.",
+    "errorBoundaryMessageRefresh": "Press the Refresh button to continue."
   }
 }
