@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -74,9 +74,9 @@ export const RowValidation = ({ datasetId, tabs }) => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
-          key="tab1"
           header={resourcesContext.messages.tabMenuConstraintData}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
+          key="tab1"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
@@ -88,9 +88,9 @@ export const RowValidation = ({ datasetId, tabs }) => {
           />
         </TabPanel>,
         <TabPanel
-          key="tab2"
           header={resourcesContext.messages.tabMenuExpression}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}
+          key="tab2"
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
           <ExpressionSelector
             componentName={componentName}
@@ -106,12 +106,12 @@ export const RowValidation = ({ datasetId, tabs }) => {
             onExpressionIfGroup={onExpressionIfGroup}
             onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
-            onExpressionsErrors={onExpressionsErrors}
             onExpressionThenDelete={onExpressionThenDelete}
             onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
             onExpressionThenGroup={onExpressionThenGroup}
             onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
             onExpressionTypeToggle={onExpressionTypeToggle}
+            onExpressionsErrors={onExpressionsErrors}
             onGetFieldType={onGetFieldType}
             onSetSQLsentence={onSetSQLsentence}
             tabsChanges={tabsChanges}
@@ -122,6 +122,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
+          key="tab1"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
@@ -669,7 +670,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
     }
 
     return (
-      <span data-tip data-for="createTooltip">
+      <span data-for="createTooltip" data-tip>
         <Button
           className={`p-button-primary p-button-text-icon-left ${
             !creationFormState.isValidationCreationDisabled && !isSubmitDisabled ? 'p-button-animated-blink' : ''
@@ -709,41 +710,36 @@ export const RowValidation = ({ datasetId, tabs }) => {
     </div>
   );
 
-  const dialogLayout = children => (
-    <Fragment>
-      {validationContext.isVisible && (
-        <Dialog
-          className={styles.dialog}
-          footer={renderRowQCsFooter}
-          header={
-            validationContext.ruleEdit
-              ? resourcesContext.messages.editRowConstraint
-              : resourcesContext.messages.createRowConstraint
-          }
-          visible={validationContext.isVisible}
-          style={{ width: '975px' }}
-          onHide={() => onHide()}>
-          {children}
-        </Dialog>
-      )}
-    </Fragment>
-  );
+  const dialogLayout = children =>
+    validationContext.isVisible && (
+      <Dialog
+        className={styles.dialog}
+        footer={renderRowQCsFooter}
+        header={
+          validationContext.ruleEdit
+            ? resourcesContext.messages.editRowConstraint
+            : resourcesContext.messages.createRowConstraint
+        }
+        onHide={() => onHide()}
+        style={{ width: '975px' }}
+        visible={validationContext.isVisible}>
+        {children}
+      </Dialog>
+    );
 
   return dialogLayout(
-    <>
-      <form>
-        <div id={styles.QCFormWrapper}>
-          <div className={styles.body}>
-            <TabView
-              activeIndex={tabMenuActiveItem}
-              className={styles.tabView}
-              onTabChange={e => onTabChange(e.index)}
-              renderActiveOnly={false}>
-              {tabContents}
-            </TabView>
-          </div>
+    <form>
+      <div id={styles.QCFormWrapper}>
+        <div className={styles.body}>
+          <TabView
+            activeIndex={tabMenuActiveItem}
+            className={styles.tabView}
+            onTabChange={e => onTabChange(e.index)}
+            renderActiveOnly={false}>
+            {tabContents}
+          </TabView>
         </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 };
