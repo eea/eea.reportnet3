@@ -628,11 +628,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       }
 
-
       statement.executeBatch();
       // 8. Create permissions
+
+      // add the reference datasets to the permission code block if we are updating the
+      // datacollection, adding new reporters
+      if (!isCreation) {
+        List<ReferenceDataset> references = referenceDatasetRepository.findByDataflowId(dataflowId);
+        references.stream().forEach(r -> {
+          referenceDatasetIds.add(r.getId());
+        });
+      }
       createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, testDatasetIds,
-          referenceDatasetIds, dataflowId);
+          referenceDatasetIds, dataflowId, isCreation);
       // 9. Delete editors
       removePermissionEditors(dataflowId);
 
@@ -1046,17 +1054,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param testDatasetIds the test dataset ids
    * @param referenceDatasetIds the reference dataset ids
    * @param dataflowId the dataflow id
+   * @param isCreation the is creation
    * @throws EEAException the EEA exception
    */
   private void createPermissions(Map<Long, List<String>> datasetIdsEmails,
       List<Long> dataCollectionIds, List<Long> euDatasetIds, List<Long> testDatasetIds,
-      List<Long> referenceDatasetIds, Long dataflowId) throws EEAException {
+      List<Long> referenceDatasetIds, Long dataflowId, boolean isCreation) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> assignments = new ArrayList<>();
 
     createGroupsAndAssings(dataflowId, dataCollectionIds, euDatasetIds, testDatasetIds,
-        referenceDatasetIds, datasetIdsEmails, groups, assignments);
+        referenceDatasetIds, datasetIdsEmails, groups, assignments, isCreation);
 
     // Persist changes in KeyCloak guaranteeing transactionality
     // Insert in chunks to prevent Hystrix timeout
@@ -1126,11 +1135,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param datasetIdsEmails the dataset ids emails
    * @param groups the groups
    * @param assignments the assignments
+   * @param isCreation the is creation
    */
   private void createGroupsAndAssings(Long dataflowId, List<Long> dataCollectionIds,
       List<Long> euDatasetIds, List<Long> testDatasetIds, List<Long> referenceDatasetIds,
       Map<Long, List<String>> datasetIdsEmails, List<ResourceInfoVO> groups,
-      List<ResourceAssignationVO> assignments) {
+      List<ResourceAssignationVO> assignments, boolean isCreation) {
 
     List<UserRepresentationVO> stewards =
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
@@ -1231,46 +1241,44 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     for (Long referenceDatasetId : referenceDatasetIds) {
 
-      // Create ReferenceDataset-%s-DATA_STEWARD
-      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
-          SecurityRoleEnum.DATA_STEWARD));
+      if (isCreation) {
+        // Create ReferenceDataset-%s-DATA_STEWARD
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.DATA_STEWARD));
 
-      // Create ReferenceDataset-%s-DATA_CUSTODIAN
-      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
-          SecurityRoleEnum.DATA_CUSTODIAN));
+        // Create ReferenceDataset-%s-DATA_CUSTODIAN
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.DATA_CUSTODIAN));
 
-      // Create ReferenceDataset-%s-DATA_OBSERVER
-      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
-          SecurityRoleEnum.DATA_OBSERVER));
+        // Create ReferenceDataset-%s-DATA_OBSERVER
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.DATA_OBSERVER));
 
-      // Assign ReferenceDataset-%s-DATA_STEWARD
-      for (UserRepresentationVO steward : stewards) {
-        assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_STEWARD));
+        // Assign ReferenceDataset-%s-DATA_STEWARD
+        for (UserRepresentationVO steward : stewards) {
+          assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
+              ResourceGroupEnum.REFERENCEDATASET_STEWARD));
+        }
+
+
+        // Assign ReferenceDataset-%s-DATA_CUSTODIAN
+        for (UserRepresentationVO custodian : custodians) {
+          assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
+              ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+        }
+
+        // Observers
+        for (UserRepresentationVO observer : observers) {
+          assignments.add(createAssignments(referenceDatasetId, observer.getEmail(),
+              ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
+        }
       }
-
-      // Assign ReferenceDataset-%s-DATA_CUSTODIAN
-      for (UserRepresentationVO custodian : custodians) {
-        assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
-      }
-
-      // Assign ReferenceDataset-%s-LEAD_REPORTER
-      for (UserRepresentationVO custodian : custodians) {
-        assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
-      }
-      // Observers
-      for (UserRepresentationVO observer : observers) {
-        assignments.add(createAssignments(referenceDatasetId, observer.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
-      }
-
 
       // Assign reporters
       for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
         if (null != entry.getValue()) {
           for (String email : entry.getValue()) {
+            LOG.info("Se asigna al usuario {} el reference {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
                 ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
           }

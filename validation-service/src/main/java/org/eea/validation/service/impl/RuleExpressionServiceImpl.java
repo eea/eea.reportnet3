@@ -433,7 +433,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
       return superInputType.equals(dataTypeMap.get(string).getJavaType());
     }
 
-    if (superInputType.equals(JavaType.DATE)) {
+    if (superInputType.equals(JavaType.DATE) || superInputType.equals(JavaType.TIMESTAMP)) {
       // check date and timestamp
       return string.matches(REGEX_DATE) || string.matches(REGEX_DATETIME);
     }

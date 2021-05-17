@@ -597,8 +597,12 @@ public class DataflowServiceImpl implements DataflowService {
     // get the entity
     List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
         .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
+
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
+
+    dataflowPublicList.stream().forEach(dataflow -> dataflow.setReferenceDatasets(
+        referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId())));
 
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
