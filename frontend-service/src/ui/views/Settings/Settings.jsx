@@ -42,11 +42,7 @@ const Settings = withRouter(({ history }) => {
 
   const layout = children => {
     return (
-      <MainLayout
-        leftSideBarConfig={{
-          buttons: []
-        }}
-        history={history}>
+      <MainLayout leftSideBarConfig={{ buttons: [] }}>
         <div>
           <div className="rep-container">{children}</div>
         </div>

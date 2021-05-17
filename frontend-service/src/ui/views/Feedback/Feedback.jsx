@@ -237,7 +237,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const layout = children => {
     return (
-      <MainLayout history={history}>
+      <MainLayout>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

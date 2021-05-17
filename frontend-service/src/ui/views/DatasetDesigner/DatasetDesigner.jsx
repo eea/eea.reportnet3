@@ -1075,7 +1075,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   };
 
   const layout = children => (
-    <MainLayout history={history}>
+    <MainLayout>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );

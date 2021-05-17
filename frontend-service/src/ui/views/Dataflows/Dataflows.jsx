@@ -178,7 +178,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const RenderDistruction = ({ vitalArrayProp }) => vitalArrayProp.map(element => <div>{element.name}</div>);
 
   const renderLayout = children => (
-    <MainLayout history={history}>
+    <MainLayout>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
