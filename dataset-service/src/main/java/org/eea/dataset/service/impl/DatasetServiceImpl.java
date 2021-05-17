@@ -2719,8 +2719,6 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-    // Force last database pointer position
-    recordRepository.findLastRecord();
     return recordValues;
   }
 

@@ -48,9 +48,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Autowired
   private RecordNoValidationMapper recordNoValidationMapper;
 
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
@@ -178,6 +180,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * Find by table value with order.
    *
+   * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param levelErrorList the level error list
    * @param pageable the pageable
@@ -264,7 +267,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param idTableSchema the id table schema
    * @param result the result
    * @param filter the filter
-   * @param containsCorrect the contains correct
    * @param errorList the error list
    * @param idRules the id rules
    * @param fieldSchema the field schema
@@ -302,7 +304,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param directionQueryBuilder the direction query builder
    * @param result the result
    * @param filter the filter
-   * @param containsCorrect the contains correct
    * @param errorList the error list
    * @param idRules the id rules
    * @param fieldSchema the field schema
@@ -484,29 +485,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   /**
-   * Find last record in the db table.
-   *
-   * @return the record value
-   */
-  @Override
-  public RecordValue findLastRecord() {
-    RecordValue result = null;
-    Query query2 = entityManager.createQuery("SELECT count(rv) from RecordValue rv");
-
-    int recordsCount = Integer.parseInt(query2.getResultList().get(0).toString());
-    recordsCount = recordsCount == 0 ? 0 : recordsCount - 1;
-    try {
-      Query query = entityManager.createQuery("select rv from RecordValue rv ");
-      query.setMaxResults(1);
-      query.setFirstResult(recordsCount);
-      result = (RecordValue) query.getSingleResult();
-    } catch (NoResultException e) {
-      LOG.info("no result, ignore message");
-    }
-    return result;
-  }
-
-  /**
    * Find and generate ETL json.
    *
    * @param stringQuery the string query
@@ -527,6 +505,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return result.toString();
   }
 
+  /**
+   * Find by table value ordered.
+   *
+   * @param conn the conn
+   * @param tableId the table id
+   * @param datasetId the dataset id
+   * @return the list
+   * @throws SQLException the SQL exception
+   */
   private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId)
       throws SQLException {
     String stringQuery =
@@ -563,6 +550,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
 
+  /**
+   * Find ordered native record.
+   *
+   * @param idTable the id table
+   * @param datasetId the dataset id
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
   @Override
   @Transactional
   public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId)

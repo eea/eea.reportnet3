@@ -54,15 +54,6 @@ public interface RecordExtendedQueriesRepository {
   List<RecordValue> findByTableValueAllRecords(String idTableSchema);
 
   /**
-   * Find last record in the db table.
-   *
-   * @return the record value
-   */
-  RecordValue findLastRecord();
-
-
-
-  /**
    * Find by table value no order optimized.
    *
    * @param idTableSchema the id table schema
@@ -80,7 +71,7 @@ public interface RecordExtendedQueriesRepository {
   String findAndGenerateETLJson(String stringQuery);
 
   /**
-   * Query RS execution.
+   * Find ordered native record.
    *
    * @param idTable the id table
    * @param datasetId the dataset id
