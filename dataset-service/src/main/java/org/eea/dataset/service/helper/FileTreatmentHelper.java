@@ -415,8 +415,8 @@ public class FileTreatmentHelper implements DisposableBean {
       String filePath = file.getCanonicalPath();
 
       // Prevent Zip Slip attack or skip if the entry is a directory
-      if (!"csv".equalsIgnoreCase(mimeType) || entry.isDirectory()
-          || !filePath.startsWith(saveLocationPath + File.separator)) {
+      if ((entryName.split("/").length > 1) || !"csv".equalsIgnoreCase(mimeType)
+          || entry.isDirectory() || !filePath.startsWith(saveLocationPath + File.separator)) {
         LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
         entry = zip.getNextEntry();
         continue;
