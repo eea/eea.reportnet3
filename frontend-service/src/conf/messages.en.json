@@ -899,7 +899,7 @@
     "technicalFeedback": "Technical feedback",
     "technicallyAccepted": "Technically accepted",
     "technicalStatus": "Technical status",
-    "testDatasetBigButton": "TEST",
+    "testDatasetBigButton": "Test Dataset",
     "testDatasetBreadcrumbs": "Test Datasets",
     "text": "Text",
     "textFieldFormatRestriction": "Maximum of 10000 characters",
@@ -1097,6 +1097,7 @@
     "getRequestersError": "Error getting requesters",
     "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
     "geomTypeHelpTooltip": "Check the type format",
-    "notFoundError": "Page not found error. The requested page does not exist"
+    "notFoundError": "Page not found error. The requested page does not exist",
+    "sqlSentenceSpatialTypesNote": "Note: You can see the different GIS operations with the following <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>link</a>"
   }
 }
