@@ -114,9 +114,11 @@ export const BigButtonListRepresentative = ({
               onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
               uniqRepresentatives
-            }).map(button =>
-              button.visibility ? <BigButton key={button?.caption} {...button} /> : <Fragment key={button?.caption} />
-            )}
+            })
+              .filter(button => button.visibility)
+              .map(button => (
+                <BigButton key={button.caption} {...button} />
+              ))}
           </div>
         </div>
       </div>
