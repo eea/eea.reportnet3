@@ -601,18 +601,40 @@ public class ContributorServiceImpl implements ContributorService {
           userManagementControllerZull.getResourcesByUserEmail(contributorVO.getAccount());
       if (null != resourceAccessVOs && !resourceAccessVOs.isEmpty()) {
         ResourceAccessVO resourceAccess = null;
+        List<Long> reportings = dataSetMetabaseControllerZuul
+            .findReportingDataSetIdByDataflowId(dataflowId).stream()
+            .filter(
+                reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
+            .map(ReportingDatasetVO::getId).collect(Collectors.toList());
         for (ResourceAccessVO resource : resourceAccessVOs) {
+          if (contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")) {
+            if (resource.getId().equals(reportings.get(0))
+                && resource.getResource().equals(ResourceTypeEnum.DATASET)
+                && SecurityRoleEnum.LEAD_REPORTER.equals(resource.getRole())) {
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("Role ")
+                  .append(contributorVO.getRole()).append(" doesn't add to this user").toString());
+            }
+          }
           if (resource.getId().equals(dataflowId)
               && resource.getResource().equals(ResourceTypeEnum.DATAFLOW)) {
-            resourceAccess = resource;
-            break;
+            if (contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")
+                && resource.getRole().toString().contains(LiteralConstants.REPORTER + "_")) {
+              resourceAccess = resource;
+            } else if (!contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")) {
+              resourceAccess = resource;
+              break;
+            }
           }
         }
         LOG.info("Checking for account:{} in Dataflow {} and Role:{}, Access resources:{}",
             contributorVO.getAccount(), dataflowId, contributorVO.getRole(), resourceAccess);
         if (null != resourceAccess) {
-          persistDataflowPermission =
-              deleteContributor(dataflowId, contributorVO, dataProviderId, resourceAccess);
+          try {
+            persistDataflowPermission =
+                deleteContributor(dataflowId, contributorVO, dataProviderId, resourceAccess);
+          } catch (EEAException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+          }
         }
       }
       try {
@@ -650,8 +672,10 @@ public class ContributorServiceImpl implements ContributorService {
     LOG.info("Permissions to be maintained:{} for the user:{} in Dataflow {}.",
         persistDataflowPermission, contributorVO.getAccount(), dataflowId);
     try {
-      deleteContributor(dataflowId, contributorVO.getAccount(), resourceAccess.getRole().toString(),
-          dataProviderId);
+      if (checkReporterDelete(contributorVO.getRole(), resourceAccess)) {
+        deleteContributor(dataflowId, contributorVO.getAccount(),
+            resourceAccess.getRole().toString(), dataProviderId);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error deleting contributor with the account: {} in the dataflow {} with role {} ",
@@ -659,6 +683,23 @@ public class ContributorServiceImpl implements ContributorService {
       throw new EEAException(e);
     }
     return persistDataflowPermission;
+  }
+
+  /**
+   * Check reporter delete.
+   *
+   * @param role the role
+   * @param resourceAccess the resource access
+   * @return true, if successful
+   */
+  private boolean checkReporterDelete(String role, ResourceAccessVO resourceAccess) {
+    boolean delete = true;
+    if ((SecurityRoleEnum.REPORTER_READ.toString().equals(role)
+        || SecurityRoleEnum.REPORTER_WRITE.toString().equals(role))
+        && !resourceAccess.toString().contains(LiteralConstants.REPORTER)) {
+      delete = false;
+    }
+    return delete;
   }
 
   /**
