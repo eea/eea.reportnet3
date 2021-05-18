@@ -164,11 +164,11 @@
   label {
     margin-left: 0.5rem !important;
     user-select: none;
-    a {
-      cursor: pointer;
+    cursor: pointer;
+    span {
       color: var(--main-font-color);
     }
-    a:hover {
+    span:hover {
       color: var(--main-font-color);
     }
   }
