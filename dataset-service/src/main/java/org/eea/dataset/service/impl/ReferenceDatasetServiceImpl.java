@@ -1,10 +1,12 @@
 package org.eea.dataset.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.mapper.ReferenceDatasetMapper;
 import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.ReferenceDatasetService;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
@@ -41,6 +43,10 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   @Autowired
   private ReferenceDatasetPublicMapper referenceDatasetPublicMapper;
 
+  /** The dataset schema service. */
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
+
 
   /**
    * Gets the reference dataset by dataflow id.
@@ -64,8 +70,15 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
    */
   @Override
   public List<ReferenceDatasetPublicVO> getReferenceDatasetPublicByDataflow(Long dataflowId) {
-    return referenceDatasetPublicMapper
-        .entityListToClass(getReferenceDatasetByDataflowId(dataflowId));
+    List<ReferenceDatasetVO> referenceDatasets = getReferenceDatasetByDataflowId(dataflowId);
+    List<ReferenceDatasetVO> references = new ArrayList<>();
+    referenceDatasets.stream().forEach(reference -> {
+      if (Boolean.TRUE.equals(datasetSchemaService.getDataSchemaById(reference.getDatasetSchema())
+          .getAvailableInPublic())) {
+        references.add(reference);
+      }
+    });
+    return referenceDatasetPublicMapper.entityListToClass(references);
   }
 
 

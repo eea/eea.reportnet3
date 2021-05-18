@@ -101,6 +101,9 @@ const downloadFileData = async (datasetId, fieldId) => await apiDataset.download
 const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
   await apiDataset.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
 
+const downloadReferenceDatasetFileData = async (dataflowId, fileName) =>
+  await apiDataset.downloadReferenceDatasetFileData(dataflowId, fileName);
+
 const errorsById = async (
   datasetId,
   pageNum,
@@ -721,6 +724,7 @@ export const ApiDatasetRepository = {
   downloadExportDatasetFile,
   downloadExportFile,
   downloadFileData,
+  downloadReferenceDatasetFileData,
   errorPositionByObjectId,
   errorsById,
   errorStatisticsById,

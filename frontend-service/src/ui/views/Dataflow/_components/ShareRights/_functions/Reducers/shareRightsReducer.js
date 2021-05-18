@@ -4,7 +4,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return { ...state, userRightList: payload.userRightList, clonedUserRightList: payload.clonedUserRightList };
 
     case 'ON_CLOSE_MANAGEMENT_DIALOG':
-      return { ...state, userRight: { account: '', isNew: true, role: '' }, isEditing: false };
+      return { ...state, userRight: { account: '', isNew: true, role: '' }, isEditingModal: false };
 
     case 'ON_DATA_CHANGE':
       return { ...state, dataUpdatedCount: state.dataUpdatedCount + 1 };
@@ -17,7 +17,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       };
 
     case 'ON_EDIT_USER_RIGHT':
-      return { ...state, isEditing: payload.isEditing, userRight: payload.userRight };
+      return { ...state, isEditingModal: payload.isEditingModal, userRight: payload.userRight };
 
     case 'ON_ROLE_CHANGE':
       return { ...state, userRight: { ...state.userRight, role: payload.role } };
@@ -55,13 +55,22 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'SET_IS_LOADING_BUTTON':
       return { ...state, isLoadingButton: payload.isLoadingButton };
 
-    case 'GET_ROW_ID':
-      return { ...state, actionsButtons: { ...state.actionsButtons, rowId: payload.rowId } };
+    case 'SET_USER_RIGHT_ID':
+      return { ...state, actionsButtons: { ...state.actionsButtons, id: payload.id } };
 
     case 'SET_ACTIONS':
       return {
         ...state,
         actionsButtons: { ...state.actionsButtons, isDeleting: payload.isDeleting, isEditing: payload.isEditing }
+      };
+
+    case 'ON_RESET_ALL':
+      return {
+        ...state,
+        actionsButtons: { id: null, isEditing: false, isDeleting: false },
+        loadingStatus: { isActionButtonsLoading: false, isInitialLoading: false },
+        userRight: { account: '', isNew: true, role: '' },
+        userRightToDelete: {}
       };
 
     default:

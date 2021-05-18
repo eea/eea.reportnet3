@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 

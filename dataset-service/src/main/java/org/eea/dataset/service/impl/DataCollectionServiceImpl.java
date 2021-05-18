@@ -50,9 +50,12 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -403,15 +406,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
     // remove from the list of designs the ones that are going to be referenceDatasets
     List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
+    List<String> referenceSchemasId = new ArrayList<>();
     designs.stream().forEach(dataset -> {
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
       if (schema.getReferenceDataset() != null && schema.getReferenceDataset()) {
         referenceDatasets.add(dataset);
-        datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
-            true, true);
+        referenceSchemasId.add(dataset.getDatasetSchema());
+        if (isCreation) {
+          datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
+              true, true);
+        }
       }
     });
     designs.removeIf(design -> referenceDatasets.contains(design));
+
+    // Now we have splitted the schemas between designs ("normal") schemas and schemas that are
+    // reference,
+    // we have to check if there are links on reference datasets. If it is the case, then the links
+    // can't point to
+    // normal schemas. If this happens, convert the type Link to Text
+    checkLinksInReferenceDatasets(referenceDatasets, referenceSchemasId);
 
     if (rulesOk) {
       // 2. Get the representatives who are going to provide data
@@ -448,6 +462,42 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
     }
   }
+
+
+  /**
+   * Check links in reference datasets.
+   *
+   * @param referenceDatasets the reference datasets
+   * @param referenceSchemasId the reference schemas id
+   */
+  private void checkLinksInReferenceDatasets(List<DesignDatasetVO> referenceDatasets,
+      List<String> referenceSchemasId) {
+    referenceDatasets.stream().forEach(reference -> {
+      DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(reference.getDatasetSchema());
+      for (TableSchemaVO table : schema.getTableSchemas()) {
+        for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
+          if (DataType.LINK.equals(field.getType()) && field.getReferencedField() != null
+              && !referenceSchemasId.contains(field.getReferencedField().getIdDatasetSchema())) {
+            // change type to Text and update
+            field.setType(DataType.TEXT);
+            try {
+              datasetSchemaService.updateForeignRelation(reference.getId(), field,
+                  reference.getDatasetSchema());
+              DataType type =
+                  datasetSchemaService.updateFieldSchema(reference.getDatasetSchema(), field);
+              datasetSchemaService.propagateRulesAfterUpdateSchema(reference.getDatasetSchema(),
+                  field, type, reference.getId());
+            } catch (EEAException e) {
+              LOG_ERROR.error(
+                  "Link from reference dataset to regular schema detected. Error trying to change the field to Text type. DatasetId {}.Message {}",
+                  reference.getId(), e.getMessage(), e);
+            }
+          }
+        }
+      }
+    });
+  }
+
 
   /**
    * Check SQL rules errors.
@@ -578,11 +628,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       }
 
-
       statement.executeBatch();
       // 8. Create permissions
+
+      // add the reference datasets to the permission code block if we are updating the
+      // datacollection, adding new reporters
+      if (!isCreation) {
+        List<ReferenceDataset> references = referenceDatasetRepository.findByDataflowId(dataflowId);
+        references.stream().forEach(r -> {
+          referenceDatasetIds.add(r.getId());
+        });
+      }
       createPermissions(datasetIdsEmails, dataCollectionIds, euDatasetIds, testDatasetIds,
-          referenceDatasetIds, dataflowId);
+          referenceDatasetIds, dataflowId, isCreation);
       // 9. Delete editors
       removePermissionEditors(dataflowId);
 
@@ -778,8 +836,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   List<IntegrityVO> findIntegrityVO(RulesSchemaVO rulesSchemaVO) {
     List<IntegrityVO> integritiesVO = new ArrayList<>();
     if (rulesSchemaVO != null && rulesSchemaVO.getRules() != null) {
-      integritiesVO = rulesSchemaVO.getRules().stream().filter(
-          rule -> EntityTypeEnum.DATASET.equals(rule.getType()) && rule.getIntegrityVO() != null)
+      integritiesVO = rulesSchemaVO.getRules().stream()
+          .filter(
+              rule -> EntityTypeEnum.TABLE.equals(rule.getType()) && rule.getIntegrityVO() != null)
           .map(RuleVO::getIntegrityVO).collect(Collectors.toList());
     }
     return integritiesVO;
@@ -807,24 +866,42 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 integrityDataCollection.getDataProviderId());
         if (datasetMetabase.isPresent()) {
           datasetDestination.setId(datasetMetabase.get().getId());
+        } else {
+          datasetDestination
+              .setId(getReferenceDatasetId(integrityDataCollection.getIdDatasetSchemaReferenced()));
         }
       } else if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
         Optional<DataCollection> datasetCollection = dataCollectionRepository
             .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
         if (datasetCollection.isPresent()) {
           datasetDestination.setId(datasetCollection.get().getId());
+        } else {
+          datasetDestination
+              .setId(getReferenceDatasetId(integrityDataCollection.getIdDatasetSchemaReferenced()));
         }
       } else if (DatasetTypeEnum.EUDATASET.equals(typeDataset)) {
         Optional<EUDataset> euDataset = euDatasetRepository
             .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
         if (euDataset.isPresent()) {
           datasetDestination.setId(euDataset.get().getId());
+        } else {
+          datasetDestination
+              .setId(getReferenceDatasetId(integrityDataCollection.getIdDatasetSchemaReferenced()));
         }
       } else if (DatasetTypeEnum.TEST.equals(typeDataset)) {
         Optional<TestDataset> testDataset = testDatasetRepository
             .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
         if (testDataset.isPresent()) {
           datasetDestination.setId(testDataset.get().getId());
+        } else {
+          datasetDestination
+              .setId(getReferenceDatasetId(integrityDataCollection.getIdDatasetSchemaReferenced()));
+        }
+      } else if (DatasetTypeEnum.REFERENCE.equals(typeDataset)) {
+        Optional<ReferenceDataset> referenceDataset = referenceDatasetRepository
+            .findFirstByDatasetSchema(integrityDataCollection.getIdDatasetSchemaReferenced());
+        if (referenceDataset.isPresent()) {
+          datasetDestination.setId(referenceDataset.get().getId());
         }
       }
       foreignRelation.setIdDatasetDestination(datasetDestination);
@@ -836,6 +913,23 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     if (!foreignRelationsList.isEmpty()) {
       foreignRelationsRepository.saveAll(foreignRelationsList);
     }
+  }
+
+
+  /**
+   * Gets the reference dataset id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the reference dataset id
+   */
+  private Long getReferenceDatasetId(String datasetSchemaId) {
+    Long id = null;
+    Optional<ReferenceDataset> referenceDataset =
+        referenceDatasetRepository.findFirstByDatasetSchema(datasetSchemaId);
+    if (referenceDataset.isPresent()) {
+      id = referenceDataset.get().getId();
+    }
+    return id;
   }
 
   /**
@@ -960,17 +1054,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param testDatasetIds the test dataset ids
    * @param referenceDatasetIds the reference dataset ids
    * @param dataflowId the dataflow id
+   * @param isCreation the is creation
    * @throws EEAException the EEA exception
    */
   private void createPermissions(Map<Long, List<String>> datasetIdsEmails,
       List<Long> dataCollectionIds, List<Long> euDatasetIds, List<Long> testDatasetIds,
-      List<Long> referenceDatasetIds, Long dataflowId) throws EEAException {
+      List<Long> referenceDatasetIds, Long dataflowId, boolean isCreation) throws EEAException {
 
     List<ResourceInfoVO> groups = new ArrayList<>();
     List<ResourceAssignationVO> assignments = new ArrayList<>();
 
     createGroupsAndAssings(dataflowId, dataCollectionIds, euDatasetIds, testDatasetIds,
-        referenceDatasetIds, datasetIdsEmails, groups, assignments);
+        referenceDatasetIds, datasetIdsEmails, groups, assignments, isCreation);
 
     // Persist changes in KeyCloak guaranteeing transactionality
     // Insert in chunks to prevent Hystrix timeout
@@ -1040,11 +1135,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param datasetIdsEmails the dataset ids emails
    * @param groups the groups
    * @param assignments the assignments
+   * @param isCreation the is creation
    */
   private void createGroupsAndAssings(Long dataflowId, List<Long> dataCollectionIds,
       List<Long> euDatasetIds, List<Long> testDatasetIds, List<Long> referenceDatasetIds,
       Map<Long, List<String>> datasetIdsEmails, List<ResourceInfoVO> groups,
-      List<ResourceAssignationVO> assignments) {
+      List<ResourceAssignationVO> assignments, boolean isCreation) {
 
     List<UserRepresentationVO> stewards =
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId));
@@ -1145,46 +1241,44 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     for (Long referenceDatasetId : referenceDatasetIds) {
 
-      // Create ReferenceDataset-%s-DATA_STEWARD
-      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
-          SecurityRoleEnum.DATA_STEWARD));
+      if (isCreation) {
+        // Create ReferenceDataset-%s-DATA_STEWARD
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.DATA_STEWARD));
 
-      // Create ReferenceDataset-%s-DATA_CUSTODIAN
-      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
-          SecurityRoleEnum.DATA_CUSTODIAN));
+        // Create ReferenceDataset-%s-DATA_CUSTODIAN
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.DATA_CUSTODIAN));
 
-      // Create ReferenceDataset-%s-DATA_OBSERVER
-      groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
-          SecurityRoleEnum.DATA_OBSERVER));
+        // Create ReferenceDataset-%s-DATA_OBSERVER
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.DATA_OBSERVER));
 
-      // Assign ReferenceDataset-%s-DATA_STEWARD
-      for (UserRepresentationVO steward : stewards) {
-        assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_STEWARD));
+        // Assign ReferenceDataset-%s-DATA_STEWARD
+        for (UserRepresentationVO steward : stewards) {
+          assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
+              ResourceGroupEnum.REFERENCEDATASET_STEWARD));
+        }
+
+
+        // Assign ReferenceDataset-%s-DATA_CUSTODIAN
+        for (UserRepresentationVO custodian : custodians) {
+          assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
+              ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+        }
+
+        // Observers
+        for (UserRepresentationVO observer : observers) {
+          assignments.add(createAssignments(referenceDatasetId, observer.getEmail(),
+              ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
+        }
       }
-
-      // Assign ReferenceDataset-%s-DATA_CUSTODIAN
-      for (UserRepresentationVO custodian : custodians) {
-        assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
-      }
-
-      // Assign ReferenceDataset-%s-LEAD_REPORTER
-      for (UserRepresentationVO custodian : custodians) {
-        assignments.add(createAssignments(referenceDatasetId, custodian.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
-      }
-      // Observers
-      for (UserRepresentationVO observer : observers) {
-        assignments.add(createAssignments(referenceDatasetId, observer.getEmail(),
-            ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
-      }
-
 
       // Assign reporters
       for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
         if (null != entry.getValue()) {
           for (String email : entry.getValue()) {
+            LOG.info("Se asigna al usuario {} el reference {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
                 ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
           }

@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 import javax.transaction.Transactional;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -1549,17 +1551,19 @@ public class DatasetServiceImpl implements DatasetService {
 
       DesignDataset originDesign =
           designDatasetRepository.findById(originDataset).orElse(new DesignDataset());
+      DataSetSchema schema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(originDesign.getDatasetSchema()));
       if (StringUtils.isNoneBlank(originDesign.getDatasetSchema())) {
 
-        List<TableSchema> listOfTablesFiltered = getTableFromSchema(originDesign);
+        List<TableSchema> listOfTablesFiltered = getTablesFromSchema(schema);
         // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
           LOG.info("There are data to copy. Copy data from datasetId {} to datasetId {}",
               originDataset, targetDataset);
           List<RecordValue> recordDesignValuesList = new ArrayList<>();
           List<AttachmentValue> attachments = new ArrayList<>();
-          recordDesignValuesList = replaceData(originDataset, targetDataset, listOfTablesFiltered,
-              dictionaryOriginTargetObjectId, attachments);
+          recordDesignValuesList = replaceData(schema, originDataset, targetDataset,
+              listOfTablesFiltered, dictionaryOriginTargetObjectId, attachments);
 
           if (!recordDesignValuesList.isEmpty()) {
             // save values
@@ -1842,27 +1846,41 @@ public class DatasetServiceImpl implements DatasetService {
         null != dataProviderId ? representativeControllerZuul.findDataProviderById(dataProviderId)
             : new DataProviderVO();
 
-    listOfTablesFiltered.stream().forEach(tableSchema -> {
-      Integer numberOfFieldsInRecord = tableSchema.getRecordSchema().getFieldSchema().size();
+    for (TableSchema tableSchema : listOfTablesFiltered) {
+      TenantResolver.setTenantName(
+          String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.getId()));
 
-      Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord);
-
-      List<FieldValue> pagedFieldValues;
-      Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
-      TenantResolver.setTenantName(String.format(DATASET_ID, originId));
       TableValue targetTable =
           tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-      while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
-          tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .isEmpty()) {
 
-        processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
-            dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
-            datasetPartitionId, null);
-        fieldValuePage = fieldValuePage.next();
+      TenantResolver
+          .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, originId.toString()));
+      if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        LOG.info("Processing Table {} with table schema {} from Dataset {} and Target Dataset {} ",
+            tableSchema.getNameTableSchema(), tableSchema.getIdTableSchema(), originId,
+            targetDataset.getId());
+        processRecordPageWithFixedRecords(dictionaryIdFieldAttachment, targetTable,
+            datasetPartitionId, null, targetDataset.getId(), originId);
+      } else {
+        Integer numberOfFieldsInRecord = tableSchema.getRecordSchema().getFieldSchema().size();
+
+        Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord);
+
+        List<FieldValue> pagedFieldValues;
+        Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
+        while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+            tableSchema.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
+                .isEmpty()) {
+
+          processRecordPage(pagedFieldValues, targetRecords, mapTargetRecordValues,
+              dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, dataproviderVO,
+              datasetPartitionId, null);
+          fieldValuePage = fieldValuePage.next();
+        }
       }
 
-    });
+
+    }
 
   }
 
@@ -2491,40 +2509,19 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Gets the table from schema.
-   *
-   * @param originDesign the origin design
-   *
-   * @return the table from schema
-   */
-  private List<TableSchema> getTableFromSchema(DesignDataset originDesign) {
-    // get tables from schema
-    DataSetSchema schema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(originDesign.getDatasetSchema()));
-    List<TableSchema> listOfTables = schema.getTableSchemas();
-    List<TableSchema> listOfTablesFiltered = new ArrayList<>();
-    for (TableSchema desingTableToPrefill : listOfTables) {
-      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
-        listOfTablesFiltered.add(desingTableToPrefill);
-      }
-    }
-    return listOfTablesFiltered;
-  }
-
-  /**
    * Replace data.
    *
+   * @param schema the schema
    * @param originDataset the origin dataset
    * @param targetDataset the target dataset
    * @param listOfTablesFiltered the list of tables filtered
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param attachments the attachments
-   *
    * @return the list
    */
-  private List<RecordValue> replaceData(Long originDataset, Long targetDataset,
-      List<TableSchema> listOfTablesFiltered, Map<String, String> dictionaryOriginTargetObjectId,
-      List<AttachmentValue> attachments) {
+  private List<RecordValue> replaceData(DataSetSchema schema, Long originDataset,
+      Long targetDataset, List<TableSchema> listOfTablesFiltered,
+      Map<String, String> dictionaryOriginTargetObjectId, List<AttachmentValue> attachments) {
     List<RecordValue> result = new ArrayList<>();
     TenantResolver.setTenantName(
         String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
@@ -2565,38 +2562,112 @@ public class DatasetServiceImpl implements DatasetService {
 
       // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
 
-      Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord);
+      if (Boolean.TRUE.equals(desingTable.getFixedNumber())) {
+        LOG.info("Processing Table {} with table schema {} from Dataset {} and Target Dataset {} ",
+            desingTable.getNameTableSchema(), desingTable.getIdTableSchema(), originDataset,
+            targetDataset);
+        processRecordPageWithFixedRecords(dictionaryIdFieldAttachment, targetTable,
+            datasetPartitionId, dictionaryOriginTargetObjectId, targetDataset, originDataset);
+      } else {
+        // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
 
-      List<FieldValue> pagedFieldValues;
+        Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord);
 
-      // run through the origin table, getting its records and fields and translating them into the
-      // new schema
-      while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
-          desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-              .isEmpty()) {
-        LOG.info(
-            "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
-            fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
-            numberOfFieldsInRecord, desingTable.getNameTableSchema(),
-            desingTable.getIdTableSchema(), originDataset, targetDataset);
-        // For this, the best is getting fields in big completed sets and assign them to the records
-        // to avoid excessive queries to bd
+        List<FieldValue> pagedFieldValues;
 
-        processRecordPage(pagedFieldValues, result, mapTargetRecordValues,
-            dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, null,
-            datasetPartitionId, dictionaryOriginTargetObjectId);
+        // run through the origin table, getting its records and fields and translating them into
+        // the
+        // new schema
+        while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
+            desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
+                .isEmpty()) {
+          LOG.info(
+              "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
+              fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
+              numberOfFieldsInRecord, desingTable.getNameTableSchema(),
+              desingTable.getIdTableSchema(), originDataset, targetDataset);
+          // For this, the best is getting fields in big completed sets and assign them to the
+          // records
+          // to avoid excessive queries to bd
 
-        fieldValuePage = fieldValuePage.next();
-        TenantResolver.setTenantName(
-            String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+          processRecordPage(pagedFieldValues, result, mapTargetRecordValues,
+              dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, null,
+              datasetPartitionId, dictionaryOriginTargetObjectId);
+
+          fieldValuePage = fieldValuePage.next();
+          TenantResolver.setTenantName(
+              String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
+        }
       }
-
     }
 
     attachments.addAll(dictionaryIdFieldAttachment.values());
     return result;
   }
 
+  /**
+   * Process record page with fixed records.
+   *
+   * @param dictionaryIdFieldAttachment the dictionary id field attachment
+   * @param targetTable the target table
+   * @param datasetPartitionId the dataset partition id
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param targetDatasetId the target dataset id
+   * @param originDatasetId the origin dataset id
+   */
+  private void processRecordPageWithFixedRecords(
+      Map<String, AttachmentValue> dictionaryIdFieldAttachment, TableValue targetTable,
+      Long datasetPartitionId, Map<String, String> dictionaryOriginTargetObjectId,
+      Long targetDatasetId, Long originDatasetId) {
+    try {
+      List<RecordValue> auxRecords = new ArrayList<>();
+      for (RecordValue record : recordRepository.findOrderedNativeRecord(targetTable.getId(),
+          originDatasetId)) {
+        RecordValue recordAux = new RecordValue();
+        BeanUtils.copyProperties(recordAux, record);
+        recordAux.setId(null);
+        recordAux.setTableValue(targetTable);
+        recordAux.setDatasetPartitionId(datasetPartitionId);
+        if (dictionaryOriginTargetObjectId != null) {
+          recordAux
+              .setIdRecordSchema(dictionaryOriginTargetObjectId.get(recordAux.getIdRecordSchema()));
+        }
+        List<FieldValue> fields = new ArrayList<>();
+        for (FieldValue field : record.getFields()) {
+          FieldValue fieldAux = new FieldValue();
+          BeanUtils.copyProperties(fieldAux, field);
+          if (dictionaryOriginTargetObjectId != null) {
+            fieldAux.setIdFieldSchema(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema()));
+          }
+          if (DataType.ATTACHMENT.equals(field.getType())
+              && dictionaryIdFieldAttachment.containsKey(field.getId())) {
+            dictionaryIdFieldAttachment.get(field.getId()).setFieldValue(field);
+            dictionaryIdFieldAttachment.get(field.getId()).setId(null);
+          }
+          fieldAux.setId(null);
+          fieldAux.setRecord(recordAux);
+          fields.add(fieldAux);
+        }
+        recordAux.setFields(fields);
+        auxRecords.add(recordAux);
+      }
+      TenantResolver
+          .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDatasetId));
+      saveAllRecords(auxRecords);
+    } catch (IllegalAccessException | InvocationTargetException | EEAException e) {
+    }
+
+  }
+
+  /**
+   * Save all records.
+   *
+   * @param auxRecords the aux records
+   */
+  @Transactional
+  public void saveAllRecords(List<RecordValue> auxRecords) {
+    recordRepository.saveAll(auxRecords);
+  }
 
   /**
    * Creates the records.
@@ -2648,8 +2719,6 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-    // Force last database pointer position
-    recordRepository.findLastRecord();
     return recordValues;
   }
 
@@ -3323,7 +3392,7 @@ public class DatasetServiceImpl implements DatasetService {
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
 
           // create zip to the reference
-          if (DatasetTypeEnum.REFERENCE.equals(type) && schema.isAvailableInPublic()) {
+          if (DatasetTypeEnum.REFERENCE.equals(type)) {
             createReferenceDatasetFiles(datasetMb);
           }
 

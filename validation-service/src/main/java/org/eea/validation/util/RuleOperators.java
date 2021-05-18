@@ -2,6 +2,7 @@ package org.eea.validation.util;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.eea.validation.persistence.data.domain.FieldValue;
@@ -653,6 +654,8 @@ public class RuleOperators {
     return recordStringMatches(fieldSchemaId1, getValue(fieldSchemaId2));
   }
 
+
+
   /**
    * Record day equals.
    *
@@ -664,10 +667,18 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getDayOfMonth() == day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() == day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day distinct.
@@ -680,10 +691,18 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getDayOfMonth() != day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() != day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day greater than.
@@ -696,10 +715,18 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getDayOfMonth() > day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() > day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day less than.
@@ -712,10 +739,18 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getDayOfMonth() < day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() < day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day greater than or equals than.
@@ -728,10 +763,18 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getDayOfMonth() >= day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() >= day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day less than or equals than.
@@ -744,10 +787,18 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getDayOfMonth() <= day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() <= day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day equals record.
@@ -761,10 +812,19 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getDayOfMonth() == date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() == date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day distinct record.
@@ -778,10 +838,19 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getDayOfMonth() != date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() != date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
 
   /**
    * Record day greater than record.
@@ -795,6 +864,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getDayOfMonth() > date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() > date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -812,6 +889,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getDayOfMonth() < date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() < date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -830,6 +915,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getDayOfMonth() >= date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() >= date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -848,6 +941,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getDayOfMonth() <= date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() <= date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -865,6 +966,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getDayOfMonth() == number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() == number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -883,6 +992,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getDayOfMonth() != number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() != number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -901,6 +1018,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getDayOfMonth() > number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() > number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -919,6 +1044,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getDayOfMonth() < number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() < number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -937,6 +1070,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getDayOfMonth() >= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() >= number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -955,6 +1096,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getDayOfMonth() <= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() <= number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -971,6 +1120,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getMonthValue() == month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() == month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -987,6 +1143,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getMonthValue() != month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() != month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1003,6 +1166,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getMonthValue() > month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() > month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1019,6 +1189,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getMonthValue() < month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() < month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1035,6 +1212,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getMonthValue() >= month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() >= month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1051,6 +1235,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getMonthValue() <= month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() <= month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1068,6 +1259,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getMonthValue() == date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() == date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1085,6 +1284,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getMonthValue() != date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() != date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1102,6 +1309,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getMonthValue() > date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() > date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1119,6 +1334,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getMonthValue() < date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() < date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1137,6 +1360,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getMonthValue() >= date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() >= date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1155,6 +1386,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getMonthValue() <= date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() <= date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1173,6 +1412,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getMonthValue() == number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() == number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1191,6 +1438,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getMonthValue() != number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() != number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1210,6 +1465,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getMonthValue() > number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() > number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1228,6 +1491,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getMonthValue() < number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() < number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1246,6 +1517,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getMonthValue() >= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() >= number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1264,6 +1543,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getMonthValue() <= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() <= number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1280,6 +1567,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getYear() == year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() == year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1296,6 +1590,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getYear() != year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() != year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1312,6 +1613,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getYear() > year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() > year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1328,6 +1636,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getYear() < year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() < year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1344,6 +1659,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getYear() >= year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() >= year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1360,6 +1682,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.getYear() <= year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() <= year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1377,6 +1706,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getYear() == date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() == date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1394,6 +1731,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getYear() != date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() != date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1411,6 +1756,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getYear() > date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() > date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1428,6 +1781,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getYear() < date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() < date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1446,6 +1807,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getYear() >= date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() >= date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1464,6 +1833,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.getYear() <= date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() <= date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1481,6 +1858,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getYear() == number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() == number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1499,6 +1884,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getYear() != number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() != number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1517,6 +1910,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getYear() > number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() > number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1535,6 +1936,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getYear() < number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() < number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1553,6 +1962,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getYear() >= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() >= number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1571,6 +1988,14 @@ public class RuleOperators {
       LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       int number = Integer.parseInt(getValue(fieldSchemaId2));
       return date.getYear() <= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() <= number;
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1588,6 +2013,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1605,6 +2038,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return !fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return !fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1622,6 +2063,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.isAfter(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1639,6 +2088,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.isBefore(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1656,6 +2113,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1673,6 +2138,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
       return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1690,6 +2163,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1707,6 +2188,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return !date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return !date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1724,6 +2213,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.isAfter(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isAfter(date2);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1741,6 +2238,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.isBefore(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isBefore(date2);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1759,6 +2264,14 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.isAfter(date2) || date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isAfter(date2) || date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -1777,10 +2290,1730 @@ public class RuleOperators {
       LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
       LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
       return date1.isBefore(date2) || date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isBefore(date2) || date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
+
+  /**
+   * Record daytime equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param day the day
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeEquals(String fieldSchemaId, Number day) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getDayOfMonth() == day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() == day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param day the day
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeDistinct(String fieldSchemaId, Number day) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getDayOfMonth() != day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() != day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param day the day
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeGreaterThan(String fieldSchemaId, Number day) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getDayOfMonth() > day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() > day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param day the day
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeLessThan(String fieldSchemaId, Number day) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getDayOfMonth() < day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() < day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param day the day
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeGreaterThanOrEqualsThan(String fieldSchemaId, Number day) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getDayOfMonth() >= day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() >= day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param day the day
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeLessThanOrEqualsThan(String fieldSchemaId, Number day) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getDayOfMonth() <= day.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() <= day.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime equals record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getDayOfMonth() == date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() == date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime distinct record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeDistinctRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getDayOfMonth() != date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() != date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime greater than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeGreaterThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getDayOfMonth() > date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() > date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime less than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeLessThanRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getDayOfMonth() < date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() < date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime greater than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeGreaterThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getDayOfMonth() >= date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() >= date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime less than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeLessThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getDayOfMonth() <= date2.getDayOfMonth();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getDayOfMonth() <= date2.getDayOfMonth();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime equals record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeEqualsRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getDayOfMonth() == number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() == number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime distinct record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeDistinctRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getDayOfMonth() != number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() != number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime greater than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeGreaterThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getDayOfMonth() > number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() > number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime less than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeLessThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getDayOfMonth() < number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() < number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime greater than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeGreaterThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getDayOfMonth() >= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() >= number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record daytime less than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDaytimeLessThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getDayOfMonth() <= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getDayOfMonth() <= number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param month the month
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeEquals(String fieldSchemaId, Number month) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getMonthValue() == month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() == month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param month the month
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeDistinct(String fieldSchemaId, Number month) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getMonthValue() != month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() != month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param month the month
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeGreaterThan(String fieldSchemaId, Number month) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getMonthValue() > month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() > month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param month the month
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeLessThan(String fieldSchemaId, Number month) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getMonthValue() < month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() < month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param month the month
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeGreaterThanOrEqualsThan(String fieldSchemaId, Number month) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getMonthValue() >= month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() >= month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param month the month
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeLessThanOrEqualsThan(String fieldSchemaId, Number month) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getMonthValue() <= month.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getMonthValue() <= month.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime equals record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getMonthValue() == date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() == date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime distinct record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeDistinctRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getMonthValue() != date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() != date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime greater than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeGreaterThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getMonthValue() > date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() > date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime less than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeLessThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getMonthValue() < date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() < date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime greater than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeGreaterThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getMonthValue() >= date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() >= date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime less than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeLessThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getMonthValue() <= date2.getMonthValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getMonthValue() <= date2.getMonthValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime equals record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeEqualsRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getMonthValue() == number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() == number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime distinct record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeDistinctRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getMonthValue() != number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() != number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+
+  /**
+   * Record monthtime greater than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeGreaterThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getMonthValue() > number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() > number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime less than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeLessThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getMonthValue() < number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() < number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime greater than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeGreaterThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getMonthValue() >= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() >= number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record monthtime less than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordMonthtimeLessThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getMonthValue() <= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getMonthValue() <= number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param year the year
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeEquals(String fieldSchemaId, Number year) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getYear() == year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() == year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param year the year
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeDistinct(String fieldSchemaId, Number year) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getYear() != year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() != year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param year the year
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeGreaterThan(String fieldSchemaId, Number year) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getYear() > year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() > year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param year the year
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeLessThan(String fieldSchemaId, Number year) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getYear() < year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() < year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param year the year
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeGreaterThanOrEqualsThan(String fieldSchemaId, Number year) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getYear() >= year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() >= year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param year the year
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeLessThanOrEqualsThan(String fieldSchemaId, Number year) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.getYear() <= year.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.getYear() <= year.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime equals record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getYear() == date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() == date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime distinct record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeDistinctRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getYear() != date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() != date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime greater than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeGreaterThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getYear() > date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() > date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime less than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeLessThanRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getYear() < date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() < date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime greater than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeGreaterThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getYear() >= date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() >= date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime less than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeLessThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.getYear() <= date2.getYear();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.getYear() <= date2.getYear();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime equals record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeEqualsRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getYear() == number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() == number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime distinct record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeDistinctRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getYear() != number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() != number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime greater than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeGreaterThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getYear() > number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() > number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime less than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeLessThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getYear() < number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() < number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime greater than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeGreaterThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getYear() >= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() >= number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record yeartime less than or equals than record number.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordYeartimeLessThanOrEqualsThanRecordNumber(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      int number = Integer.parseInt(getValue(fieldSchemaId2));
+      return date.getYear() <= number;
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        int number = Integer.parseInt(getValue(fieldSchemaId2));
+        return date.getYear() <= number;
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime equals.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeEquals(String fieldSchemaId, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime distinct.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeDistinct(String fieldSchemaId, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return !fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return !fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record datetime greater than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeGreaterThan(String fieldSchemaId, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime less than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeLessThan(String fieldSchemaId, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime less than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeLessThanOrEqualsThan(String fieldSchemaId, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime greater than or equals than.
+   *
+   * @param fieldSchemaId the field schema id
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeGreaterThanOrEqualsThan(String fieldSchemaId, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(getValue(fieldSchemaId), DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime equals record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeEqualsRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime distinct record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeDistinctRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return !date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return !date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+  /**
+   * Record datetime greater than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeGreaterThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.isAfter(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isAfter(date2);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime less than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeLessThanRecord(String fieldSchemaId1, String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.isBefore(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isBefore(date2);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime greater than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeGreaterThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.isAfter(date2) || date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isAfter(date2) || date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Record datetime less than or equals than record.
+   *
+   * @param fieldSchemaId1 the field schema id 1
+   * @param fieldSchemaId2 the field schema id 2
+   * @return true, if successful
+   */
+  public static boolean recordDatetimeLessThanOrEqualsThanRecord(String fieldSchemaId1,
+      String fieldSchemaId2) {
+    try {
+      LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATE_FORMAT);
+      LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATE_FORMAT);
+      return date1.isBefore(date2) || date1.equals(date2);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate date1 = LocalDate.parse(getValue(fieldSchemaId1), DATETIME_FORMAT);
+        LocalDate date2 = LocalDate.parse(getValue(fieldSchemaId2), DATETIME_FORMAT);
+        return date1.isBefore(date2) || date1.equals(date2);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
 
   // **********************************************************************
   // ******************************* FIELDS *******************************
@@ -2013,6 +4246,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getDayOfMonth() == number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() == number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2029,6 +4269,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getDayOfMonth() != number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() != number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2045,6 +4292,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getDayOfMonth() > number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() > number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2061,6 +4315,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getDayOfMonth() < number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() < number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2077,6 +4338,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getDayOfMonth() >= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() >= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2093,6 +4361,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getDayOfMonth() <= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() <= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2109,6 +4384,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getMonthValue() == number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() == number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2125,6 +4407,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getMonthValue() != number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() != number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2141,6 +4430,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getMonthValue() > number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() > number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2157,6 +4453,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getMonthValue() < number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() < number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2173,6 +4476,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getMonthValue() >= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() >= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2189,6 +4499,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getMonthValue() <= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() <= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2205,6 +4522,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getYear() == number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() == number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2221,6 +4545,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getYear() != number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() != number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2237,6 +4568,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getYear() > number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() > number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2253,6 +4591,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getYear() < number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() < number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2269,6 +4614,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getYear() >= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() >= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2285,6 +4637,13 @@ public class RuleOperators {
     try {
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.getYear() <= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() <= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2302,6 +4661,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2319,6 +4686,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return !fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return !fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2336,10 +4711,20 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.isAfter(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
+
 
   /**
    * Field date less than.
@@ -2353,6 +4738,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.isBefore(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2370,6 +4763,14 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
@@ -2387,8 +4788,609 @@ public class RuleOperators {
       LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
       LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
       return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
     } catch (Exception e) {
       return true;
     }
   }
+
+  //
+  // FIELD DATETIME
+  //
+
+  /**
+   * Field daytime equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldDaytimeEquals(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() == number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() == number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field daytime distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldDaytimeDistinct(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() != number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() != number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field daytime greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldDaytimeGreaterThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() > number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() > number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field daytime less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldDaytimeLessThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() < number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() < number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field daytime greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldDaytimeGreaterThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() >= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() >= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field daytime less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldDaytimeLessThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getDayOfMonth() <= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getDayOfMonth() <= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field monthtime equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldMonthtimeEquals(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() == number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() == number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field monthtime distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldMonthtimeDistinct(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() != number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() != number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field monthtime greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldMonthtimeGreaterThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() > number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() > number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field monthtime less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldMonthtimeLessThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() < number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() < number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field monthtime greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldMonthtimeGreaterThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() >= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() >= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field monthtime less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldMonthtimeLessThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getMonthValue() <= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getMonthValue() <= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field yeartime equals.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldYeartimeEquals(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() == number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() == number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field yeartime distinct.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldYeartimeDistinct(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() != number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() != number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field yeartime greater than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldYeartimeGreaterThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() > number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() > number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field yeartime less than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldYeartimeLessThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() < number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() < number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field yeartime greater than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldYeartimeGreaterThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() >= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() >= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field yeartime less than or equals than.
+   *
+   * @param value the value
+   * @param number the number
+   * @return true, if successful
+   */
+  public static boolean fieldYeartimeLessThanOrEqualsThan(String value, Number number) {
+    try {
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.getYear() <= number.longValue();
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.getYear() <= number.longValue();
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field datetime equals.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean fieldDatetimeEquals(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field datetime distinct.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean fieldDatetimeDistinct(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return !fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return !fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+
+  /**
+   * Field datetime greater than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean fieldDatetimeGreaterThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field datetime less than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean fieldDatetimeLessThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field datetime greater than or equals than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean fieldDatetimeGreaterThanOrEqualsThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
+
+  /**
+   * Field datetime less than or equals than.
+   *
+   * @param value the value
+   * @param date the date
+   * @return true, if successful
+   */
+  public static boolean fieldDatetimeLessThanOrEqualsThan(String value, String date) {
+    try {
+      LocalDate ruleDate = LocalDate.parse(date, DATE_FORMAT);
+      LocalDate fieldDate = LocalDate.parse(value, DATE_FORMAT);
+      return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+    } catch (DateTimeParseException e) {
+      try {
+        LocalDate ruleDate = LocalDate.parse(date, DATETIME_FORMAT);
+        LocalDate fieldDate = LocalDate.parse(value, DATETIME_FORMAT);
+        return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
+      } catch (Exception ex) {
+        return true;
+      }
+    } catch (Exception e) {
+      return true;
+    }
+  }
+
 }
