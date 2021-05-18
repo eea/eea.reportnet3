@@ -353,6 +353,8 @@ const ComparisonExpression = ({
     const { operatorType, operatorValue, field2 } = expressionValues;
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
+      const showSeconds = operatorType === 'dateTime';
+      const showTime = operatorType === 'dateTime';
       return (
         <Calendar
           appendTo={document.body}
@@ -363,6 +365,8 @@ const ComparisonExpression = ({
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          showSeconds={showSeconds}
+          showTime={showTime}
           value={field2}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
