@@ -1098,6 +1098,8 @@
     "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
     "geomTypeHelpTooltip": "Check the type format",
     "notFoundError": "Page not found error. The requested page does not exist",
-    "sqlSentenceSpatialTypesNote": "Note: You can see the different GIS operations with the following <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>link</a>"
+    "sqlSentenceSpatialTypesNote": "Note: You can see the different GIS operations with the following <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>link</a>",
+    "accountNotFoundError": "The account doesn't exist",
+    "impossibleRoleError": "This role could not be assigned to the user"
   }
 }

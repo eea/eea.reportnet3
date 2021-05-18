@@ -285,8 +285,10 @@ export const ShareRights = ({
             type: 'SET_ACCOUNT_NOT_FOUND',
             payload: { accountNotFound: true, accountHasError: true }
           });
+          notificationContext.add({ type: 'ACCOUNT_NOT_FOUND_ERROR' });
         } else if (error?.response?.status === 400) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+          notificationContext.add({ type: 'IMPOSSIBLE_ROLE_ERROR' });
         } else {
           notificationContext.add({ type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey });
         }
