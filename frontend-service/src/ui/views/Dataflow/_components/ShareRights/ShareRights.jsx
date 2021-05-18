@@ -381,8 +381,9 @@ export const ShareRights = ({
       return 'This is not a valid email';
     } else if (shareRightsState.accountHasError) {
       return 'There is some error with account';
+    } else {
+      return null;
     }
-    return null;
   };
 
   if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
