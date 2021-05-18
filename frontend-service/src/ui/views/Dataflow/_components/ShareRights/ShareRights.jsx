@@ -411,7 +411,9 @@ export const ShareRights = ({
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
           dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
-          disabledConfirm={isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight))}
+          disabledConfirm={
+            isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight)) || shareRightsState.accountHasError
+          }
           header={shareRightsState.isEditingModal ? editConfirmHeader : addConfirmHeader}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
