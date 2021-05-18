@@ -601,18 +601,23 @@ public class ContributorServiceImpl implements ContributorService {
           userManagementControllerZull.getResourcesByUserEmail(contributorVO.getAccount());
       if (null != resourceAccessVOs && !resourceAccessVOs.isEmpty()) {
         ResourceAccessVO resourceAccess = null;
-        List<Long> reportings = dataSetMetabaseControllerZuul
-            .findReportingDataSetIdByDataflowId(dataflowId).stream()
-            .filter(
-                reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
-            .map(ReportingDatasetVO::getId).collect(Collectors.toList());
+        List<Long> reportings = new ArrayList<>();
+        if (null != dataProviderId) {
+          reportings =
+              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+                  .filter(reportingDatasetVO -> dataProviderId
+                      .equals(reportingDatasetVO.getDataProviderId()))
+                  .map(ReportingDatasetVO::getId).collect(Collectors.toList());
+        }
         for (ResourceAccessVO resource : resourceAccessVOs) {
-          if (contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")
+          if (reportings != null && !reportings.isEmpty()
+              && contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")
               && resource.getId().equals(reportings.get(0))
               && resource.getResource().equals(ResourceTypeEnum.DATASET)
               && SecurityRoleEnum.LEAD_REPORTER.equals(resource.getRole())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("Role ")
-                .append(contributorVO.getRole()).append(" doesn't add to this user").toString());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                new StringBuilder("Role ").append(contributorVO.getRole())
+                    .append(" cannot be added to that user").toString());
           }
           if (resource.getId().equals(dataflowId)
               && resource.getResource().equals(ResourceTypeEnum.DATAFLOW)) {
