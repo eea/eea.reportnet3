@@ -321,7 +321,8 @@ export const ShareRights = ({
   };
 
   const renderRoleColumnTemplate = userRight => {
-    const [option] = roleOptions.filter(option => option.role === userRight.role);
+    const [option] = roleOptions.filter(option => option.label === userRight.role);
+
     return <div>{option.label}</div>;
   };
 

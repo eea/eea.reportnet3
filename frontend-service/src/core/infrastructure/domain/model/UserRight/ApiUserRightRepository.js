@@ -4,10 +4,22 @@ import { UserRight } from 'core/domain/model/UserRight/UserRight';
 import sortBy from 'lodash/sortBy';
 import uniqueId from 'lodash/uniqueId';
 
+import { config } from 'conf';
+
+const getUserRoleLabel = role => {
+  const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
+  return userRole?.label;
+};
+
 const parseUserRightListDTO = userRightListDTO => {
   const userRightList = userRightListDTO.data.map(userRightDTO => {
     userRightDTO.id = uniqueId();
-    return new UserRight(userRightDTO);
+    return new UserRight({
+      account: userRightDTO.account,
+      dataProviderId: userRightDTO.dataProviderId,
+      id: userRightDTO.id,
+      role: getUserRoleLabel(userRightDTO.role)
+    });
   });
 
   return sortBy(userRightList, ['account']);
