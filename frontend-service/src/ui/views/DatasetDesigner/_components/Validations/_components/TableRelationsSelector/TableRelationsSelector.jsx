@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -51,25 +51,23 @@ export const TableRelationsSelector = ({
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldRelations') {
       return (
-        <>
-          <FieldRelations
-            componentName={componentName}
-            creationFormState={creationFormState}
-            onAddNewRelation={onAddNewRelation}
-            onRelationDelete={onRelationDelete}
-            onRelationFieldUpdate={onRelationFieldUpdate}
-            onRelationsErrors={onRelationsErrors}
-            tabsChanges={tabsChanges}
-            onGetFieldType={onGetFieldType}
-          />
-        </>
+        <FieldRelations
+          componentName={componentName}
+          creationFormState={creationFormState}
+          onAddNewRelation={onAddNewRelation}
+          onGetFieldType={onGetFieldType}
+          onRelationDelete={onRelationDelete}
+          onRelationFieldUpdate={onRelationFieldUpdate}
+          onRelationsErrors={onRelationsErrors}
+          tabsChanges={tabsChanges}
+        />
       );
     }
-    return <></>;
+    return <div />;
   };
 
   return (
-    <>
+    <Fragment>
       <p className={styles.title}>{resources.messages['tableRelationsTitle']}</p>
       <div className={styles.section}>
         <div className={styles.fieldsGroup}>
@@ -113,13 +111,13 @@ export const TableRelationsSelector = ({
               onChange={e => onDoubleReferencedChange(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem', marginTop: '5px' }}
             />
-            <label htmlFor={'isDoubleReferenced_check'} className="srOnly">
+            <label className="srOnly" htmlFor={'isDoubleReferenced_check'}>
               {resources.messages['datasetReferenceMustBeUsed']}
             </label>
           </div>
         </div>
       </div>
       <div className={styles.section}>{expressionsTypeView()} </div>
-    </>
+    </Fragment>
   );
 };
