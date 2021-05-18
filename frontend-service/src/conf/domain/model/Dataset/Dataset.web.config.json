@@ -18,6 +18,7 @@
   "downloadExportFile": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}",
   "downloadExportFileNoProviderId": "/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}",
   "downloadFileData": "/dataset/{:datasetId}/field/{:fieldId}/attachment",
+  "downloadReferenceDatasetFileData": "/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}",
   "exportDatasetData": "/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}",
   "exportDatasetDataExternal": "/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}",
   "exportDatasetTableData": "/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}",

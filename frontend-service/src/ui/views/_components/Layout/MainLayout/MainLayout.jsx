@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -40,7 +40,7 @@ const MainLayout = ({ children, isPublic = false }) => {
     maxWidth: `${element.clientWidth - 50}px`
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!themeContext.headerCollapse) {
       setMainContentStyle({
         ...mainContentStyle,
@@ -54,7 +54,7 @@ const MainLayout = ({ children, isPublic = false }) => {
     }
   }, [themeContext.headerCollapse]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.addEventListener('resize', calculateMainContentWidth);
     return () => {
       window.removeEventListener('resize', calculateMainContentWidth);
@@ -71,7 +71,7 @@ const MainLayout = ({ children, isPublic = false }) => {
     setPageContentStyle({ ...maxWidth });
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     calculateMainContentWidth();
   }, [leftSideBarContext.isLeftSideBarOpened]);
 
@@ -125,7 +125,7 @@ const MainLayout = ({ children, isPublic = false }) => {
     }
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     async function fetchData() {
       if (isUndefined(userContext.id)) {
         try {
@@ -147,7 +147,7 @@ const MainLayout = ({ children, isPublic = false }) => {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (leftSideBarContext.isLeftSideBarOpened) {
       setMargin('200px');
     } else {

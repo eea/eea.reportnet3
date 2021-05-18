@@ -80,6 +80,14 @@
     }
   }
 
+  .referenceDataset {
+    background-color: var(--c-corporate-blue-lighter);
+
+    span:hover {
+      background-color: var(--c-blue-300);
+    }
+  }
+
   .schemaDataset,
   .manageReporters {
     background-color: var(--c-blue-green);
