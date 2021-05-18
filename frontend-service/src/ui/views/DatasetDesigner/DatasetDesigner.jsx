@@ -1120,7 +1120,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
-                  disabled={isDesignDatasetEditorRead}
+                  disabled={isDesignDatasetEditorRead || isDataflowOpen}
                   id={`reference_dataset_checkbox`}
                   inputId={`reference_dataset_checkbox`}
                   isChecked={designerState.referenceDataset}
@@ -1129,7 +1129,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 />
                 <label
                   onClick={() => {
-                    if (!isDesignDatasetEditorRead) {
+                    if (!isDesignDatasetEditorRead && !isDataflowOpen) {
                       designerDispatch({
                         type: 'SET_REFERENCE_DATASET',
                         payload: !designerState.referenceDataset
@@ -1139,12 +1139,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                   }}
                   style={{
                     color: 'var(--main-font-color)',
-                    cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
+                    cursor: isDesignDatasetEditorRead || isDataflowOpen ? 'default' : 'pointer',
                     fontSize: '11pt',
                     fontWeight: 'bold',
                     marginLeft: '6px',
                     marginRight: '6px',
-                    opacity: isDesignDatasetEditorRead ? 0.5 : 1
+                    opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1
                   }}>
                   {resources.messages['referenceDataset']}
                 </label>
@@ -1266,9 +1266,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+                  !isDesignDatasetEditorRead && (!isDataflowOpen || !designerState.referenceDataset)
+                    ? 'p-button-animated-blink'
+                    : null
                 } datasetSchema-qcRules-help-step`}
-                disabled={isDesignDatasetEditorRead}
+                disabled={isDesignDatasetEditorRead || (isDataflowOpen && designerState.referenceDataset)}
                 icon={'horizontalSliders'}
                 iconClasses={null}
                 label={resources.messages['qcRules']}
@@ -1278,9 +1280,11 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
 
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+                  !isDesignDatasetEditorRead && (!isDataflowOpen || !designerState.referenceDataset)
+                    ? 'p-button-animated-blink'
+                    : null
                 }`}
-                disabled={isDesignDatasetEditorRead}
+                disabled={isDesignDatasetEditorRead || (isDataflowOpen && designerState.referenceDataset)}
                 icon={'key'}
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}

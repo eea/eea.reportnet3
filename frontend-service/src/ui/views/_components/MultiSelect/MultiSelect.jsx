@@ -409,11 +409,11 @@ export class MultiSelect extends Component {
   }
 
   isAllChecked(visibleOptions) {
-    if (this.hasFilter())
-      return (
-        this.props.value && visibleOptions && visibleOptions.length && this.props.value.length === visibleOptions.length
-      );
-    else return this.props.value && this.props.options && this.props.value.length === this.props.options.length;
+    if (this.hasFilter()) {
+      return this.props?.value?.length === visibleOptions?.length;
+    } else {
+      return this.props?.value?.length === this.props?.options?.length;
+    }
   }
 
   filterOptions(options) {

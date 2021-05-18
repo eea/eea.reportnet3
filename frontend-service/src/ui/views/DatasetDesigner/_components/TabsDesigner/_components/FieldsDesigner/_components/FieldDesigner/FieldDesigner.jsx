@@ -58,6 +58,7 @@ export const FieldDesigner = ({
   isCodelistOrLink,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isReferenceDataset,
   onCodelistAndLinkShow,
   onFieldDelete,
   onFieldDragAndDrop,
@@ -1177,13 +1178,23 @@ export const FieldDesigner = ({
           <Button
             className={`p-button-secondary-transparent button ${styles.qcButton} ${
               fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+            } ${
+              !isUndefined(fieldDesignerState.fieldTypeValue) &&
+              !config.validations.bannedFieldsNames.sqlFields.includes(
+                fieldDesignerState.fieldTypeValue.value.toLowerCase()
+              ) &&
+              !isDesignDatasetEditorRead &&
+              !(isDataflowOpen && isReferenceDataset)
+                ? 'p-button-animated-blink'
+                : null
             }`}
             disabled={
               (!isUndefined(fieldDesignerState.fieldTypeValue) &&
                 config.validations.bannedFieldsNames.sqlFields.includes(
                   fieldDesignerState.fieldTypeValue.value.toLowerCase()
                 )) ||
-              isDesignDatasetEditorRead
+              isDesignDatasetEditorRead ||
+              (isDataflowOpen && isReferenceDataset)
             }
             icon="horizontalSliders"
             label={resources.messages['createFieldQC']}
@@ -1216,6 +1227,7 @@ export const FieldDesigner = ({
           datasetSchemaId={datasetSchemaId}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
+          isReferenceDataset={isReferenceDataset}
           linkedTableConditional={fieldLinkedTableConditional}
           linkedTableLabel={fieldLinkedTableLabel}
           masterTableConditional={fieldMasterTableConditional}

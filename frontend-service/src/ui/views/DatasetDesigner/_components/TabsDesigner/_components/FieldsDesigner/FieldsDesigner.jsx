@@ -429,6 +429,7 @@ export const FieldsDesigner = ({
           isCodelistOrLink={isCodelistOrLink}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isReferenceDataset={isReferenceDataset}
           onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
@@ -479,6 +480,7 @@ export const FieldsDesigner = ({
                 isCodelistOrLink={isCodelistOrLink}
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isReferenceDataset={isReferenceDataset}
                 key={field.fieldId}
                 onCodelistAndLinkShow={onCodelistAndLinkShow}
                 onFieldDelete={onFieldDelete}
@@ -569,9 +571,9 @@ export const FieldsDesigner = ({
         <div className={styles.constraintsButtons}>
           <Button
             className={`p-button-secondary ${
-              !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
             } datasetSchema-uniques-help-step`}
-            disabled={isDesignDatasetEditorRead}
+            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
             icon={'key'}
             label={resources.messages['addUniqueConstraint']}
             onClick={() => {
@@ -586,9 +588,9 @@ export const FieldsDesigner = ({
 
           <Button
             className={`p-button-secondary ${
-              !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
             } datasetSchema-rowConstraint-help-step`}
-            disabled={isDesignDatasetEditorRead}
+            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
             icon={'horizontalSliders'}
             label={resources.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
