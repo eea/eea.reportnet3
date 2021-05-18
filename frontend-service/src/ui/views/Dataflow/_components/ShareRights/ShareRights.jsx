@@ -68,6 +68,7 @@ export const ShareRights = ({
     actionsButtons: { id: null, isDeleting: false, isEditing: false },
     clonedUserRightList: [],
     dataUpdatedCount: 0,
+    filteredData: [],
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
     isEditingModal: false,
@@ -255,6 +256,10 @@ export const ShareRights = ({
     }
   };
 
+  const onLoadFilteredData = userRightList => {
+    shareRightsDispatch({ type: 'ON_LOAD_FILTERED_DATA', payload: { userRightList } });
+  };
+
   const onUpdateUser = async userRight => {
     setActions({ isDeleting: false, isEditing: true });
     if (userRight.role !== '') {
@@ -354,27 +359,21 @@ export const ShareRights = ({
     );
   };
 
-  const onLoadFilteredData = userRightList =>
-    shareRightsDispatch({
-      type: 'ON_LOAD_FILTERED_DATA',
-      payload: { userRightList }
-    });
-
   const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
 
-  if (loadingStatus.isInitialLoading) return <Spinner style={{ top: 0 }} />;
+  const renderDialogLayout = children => <div className={styles.shareRightsModal}>{children}</div>;
 
-  console.log(`shareRightsState.userRightList`, shareRightsState.userRightList);
+  if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
 
-  return (
-    <div className={styles.shareRightsModal}>
-      <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} option={filterOptions} />
+  return renderDialogLayout(
+    <Fragment>
+      <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
       <div>
-        {isEmpty(shareRightsState.userRightList) ? (
+        {isEmpty(shareRightsState.filteredData) ? (
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : (
           <div className={styles.table}>
-            <DataTable value={shareRightsState.userRightList} paginator>
+            <DataTable paginator value={shareRightsState.filteredData}>
               <Column body={renderAccountTemplate} header={columnHeader} />
               <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
               <Column
@@ -426,6 +425,6 @@ export const ShareRights = ({
           {renderRightManagement()}
         </ConfirmDialog>
       )}
-    </div>
+    </Fragment>
   );
 };
