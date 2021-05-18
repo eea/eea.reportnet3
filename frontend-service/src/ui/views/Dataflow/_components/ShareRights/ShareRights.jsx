@@ -153,7 +153,7 @@ export const ShareRights = ({
       type: 'ON_SET_ACCOUNT',
       payload: {
         account: inputValue,
-        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
+        accountHasError: !isValidEmail(inputValue) /* || isRepeatedAccount(inputValue) */,
         accountNotFound: false
       }
     });
@@ -230,8 +230,8 @@ export const ShareRights = ({
   };
 
   const updateUserRight = () => {
-    const isRepeated = userRight.isNew ? isRepeatedAccount(userRight.account) : false;
-    const accountHasError = !isValidEmail(userRight.account) || isRepeated || shareRightsState.accountNotFound;
+    // const isRepeated = userRight.isNew ? isRepeatedAccount(userRight.account) : false;
+    const accountHasError = !isValidEmail(userRight.account) /* || isRepeated  */ || shareRightsState.accountNotFound;
 
     shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError } });
 
