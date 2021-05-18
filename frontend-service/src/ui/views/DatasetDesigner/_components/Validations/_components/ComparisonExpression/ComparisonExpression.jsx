@@ -157,8 +157,8 @@ const ComparisonExpression = ({
 
       const allFields = tableFields.filter(field => {
         const cFieldType = onGetFieldType(field.value);
-        const result = compatibleFieldTypes.includes(cFieldType);
-        return result;
+        const result = compatibleFieldTypes?.includes(cFieldType);
+        return result || [];
       });
 
       setSecondFieldOptions(allFields.filter(cField => cField.value !== expressionValues.field1));
