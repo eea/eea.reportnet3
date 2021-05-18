@@ -87,8 +87,8 @@ const RelationExpression = ({
   return (
     <li className={styles.expression}>
       <span
-        onBlur={() => onAddToClickedFields('originField')}
-        className={`${styles.tableField} formField ${printRequiredFieldError('originField')}`}>
+        className={`${styles.tableField} formField ${printRequiredFieldError('originField')}`}
+        onBlur={() => onAddToClickedFields('originField')}>
         <label htmlFor="originField">{resourcesContext.messages['originField']}</label>
         <Dropdown
           appendTo={document.body}
@@ -101,8 +101,8 @@ const RelationExpression = ({
         />
       </span>
       <span
-        onBlur={() => onAddToClickedFields('referencedField')}
-        className={`${styles.tableField} formField ${printRequiredFieldError('referencedField')}`}>
+        className={`${styles.tableField} formField ${printRequiredFieldError('referencedField')}`}
+        onBlur={() => onAddToClickedFields('referencedField')}>
         <label htmlFor="referencedField">{resourcesContext.messages['referencedField']}</label>
         <Dropdown
           appendTo={document.body}
