@@ -153,7 +153,7 @@ export const ShareRights = ({
       type: 'ON_SET_ACCOUNT',
       payload: {
         account: inputValue,
-        accountHasError: !isValidEmail(inputValue) /* || isRepeatedAccount(inputValue) */,
+        accountHasError: !isValidEmail(inputValue) || isRepeatedAccount(inputValue),
         accountNotFound: false
       }
     });
@@ -230,8 +230,8 @@ export const ShareRights = ({
   };
 
   const updateUserRight = () => {
-    // const isRepeated = userRight.isNew ? isRepeatedAccount(userRight.account) : false;
-    const accountHasError = !isValidEmail(userRight.account) /* || isRepeated  */ || shareRightsState.accountNotFound;
+    const isRepeated = userRight.isNew ? isRepeatedAccount(userRight.account) : false;
+    const accountHasError = !isValidEmail(userRight.account) || isRepeated || shareRightsState.accountNotFound;
 
     shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError } });
 
@@ -372,6 +372,19 @@ export const ShareRights = ({
 
   const renderDialogLayout = children => <div className={styles.shareRightsModal}>{children}</div>;
 
+  const getTooltipMessage = userRight => {
+    if (userRight.isNew && isRepeatedAccount(userRight.account)) {
+      return 'User has an assigned role';
+    } else if (!userRight.isNew && !isRoleChanged(userRight)) {
+      return 'The role is note changed';
+    } else if (!isValidEmail(userRight.account)) {
+      return 'This is not a valid email';
+    } else if (shareRightsState.accountHasError) {
+      return 'There is some error with account';
+    }
+    return null;
+  };
+
   if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
 
   return renderDialogLayout(
@@ -426,6 +439,7 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
+          confirmTooltip={getTooltipMessage(userRight)}
           dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
           disabledConfirm={
             isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight)) || shareRightsState.accountHasError
