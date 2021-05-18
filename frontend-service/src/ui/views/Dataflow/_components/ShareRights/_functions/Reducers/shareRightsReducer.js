@@ -1,5 +1,8 @@
 export const shareRightsReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ON_LOAD_FILTERED_DATA':
+      return { ...state, userRightList: payload.userRightList };
+
     case 'GET_USER_RIGHT_LIST':
       return { ...state, userRightList: payload.userRightList, clonedUserRightList: payload.clonedUserRightList };
 

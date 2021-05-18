@@ -14,9 +14,9 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Filters } from 'ui/views/_components/Filters';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
-
 import { UserRightService } from 'core/services/UserRight';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -53,6 +53,11 @@ export const ShareRights = ({
   const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
   const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
+
+  const filterOptions = [
+    { type: 'input', properties: [{ name: 'account' }] },
+    { type: 'multiselect', properties: [{ name: 'role' }] }
+  ];
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -314,7 +319,7 @@ export const ShareRights = ({
 
     return (
       <div className={styles.manageDialog}>
-        <div>
+        <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="accountInput">
             {resources.messages['account']}
           </label>
@@ -329,7 +334,7 @@ export const ShareRights = ({
             value={userRight.account}
           />
         </div>
-        <div>
+        <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="rolesDropdown">
             {resources.messages['role']}
           </label>
@@ -349,18 +354,27 @@ export const ShareRights = ({
     );
   };
 
+  const onLoadFilteredData = userRightList =>
+    shareRightsDispatch({
+      type: 'ON_LOAD_FILTERED_DATA',
+      payload: { userRightList }
+    });
+
   const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
 
   if (loadingStatus.isInitialLoading) return <Spinner style={{ top: 0 }} />;
 
+  console.log(`shareRightsState.userRightList`, shareRightsState.userRightList);
+
   return (
-    <Fragment>
+    <div className={styles.shareRightsModal}>
+      <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} option={filterOptions} />
       <div>
         {isEmpty(shareRightsState.userRightList) ? (
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : (
           <div className={styles.table}>
-            <DataTable value={shareRightsState.userRightList}>
+            <DataTable value={shareRightsState.userRightList} paginator>
               <Column body={renderAccountTemplate} header={columnHeader} />
               <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
               <Column
@@ -397,6 +411,7 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
+          dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
           disabledConfirm={isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight))}
           header={shareRightsState.isEditingModal ? editConfirmHeader : addConfirmHeader}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
@@ -411,6 +426,6 @@ export const ShareRights = ({
           {renderRightManagement()}
         </ConfirmDialog>
       )}
-    </Fragment>
+    </div>
   );
 };
