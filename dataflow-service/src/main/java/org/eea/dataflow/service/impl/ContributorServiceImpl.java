@@ -607,13 +607,12 @@ public class ContributorServiceImpl implements ContributorService {
                 reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
             .map(ReportingDatasetVO::getId).collect(Collectors.toList());
         for (ResourceAccessVO resource : resourceAccessVOs) {
-          if (contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")) {
-            if (resource.getId().equals(reportings.get(0))
-                && resource.getResource().equals(ResourceTypeEnum.DATASET)
-                && SecurityRoleEnum.LEAD_REPORTER.equals(resource.getRole())) {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("Role ")
-                  .append(contributorVO.getRole()).append(" doesn't add to this user").toString());
-            }
+          if (contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")
+              && resource.getId().equals(reportings.get(0))
+              && resource.getResource().equals(ResourceTypeEnum.DATASET)
+              && SecurityRoleEnum.LEAD_REPORTER.equals(resource.getRole())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("Role ")
+                .append(contributorVO.getRole()).append(" doesn't add to this user").toString());
           }
           if (resource.getId().equals(dataflowId)
               && resource.getResource().equals(ResourceTypeEnum.DATAFLOW)) {
