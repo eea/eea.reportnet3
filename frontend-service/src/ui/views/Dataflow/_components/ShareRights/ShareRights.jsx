@@ -51,7 +51,7 @@ export const ShareRights = ({
 }) => {
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
   const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
-  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
+  const notDeletableRoles = [config.permissions.roles.STEWARD.label, config.permissions.roles.CUSTODIAN.label];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
   const filterOptions = [
