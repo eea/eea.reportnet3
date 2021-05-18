@@ -206,6 +206,8 @@ const ValidationExpression = ({
     }
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
+      const showSeconds = operatorType === 'dateTime';
+      const showTime = operatorType === 'dateTime';
       return (
         <Calendar
           appendTo={document.body}
@@ -215,6 +217,8 @@ const ValidationExpression = ({
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          showSeconds={showSeconds}
+          showTime={showTime}
           value={expressionValues.expressionValue}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
