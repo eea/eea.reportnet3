@@ -5,10 +5,11 @@ import isEmpty from 'lodash/isEmpty';
 import styles from './TableRelationsSelector.module.scss';
 
 import { Checkbox } from 'ui/views/_components/Checkbox';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { FieldRelations } from './_components/FieldRelations';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { first } from 'lodash';
 
 export const TableRelationsSelector = ({
   componentName,
@@ -33,6 +34,7 @@ export const TableRelationsSelector = ({
     candidateRule: { relations }
   } = creationFormState;
   const [clickedFields, setClickedFields] = useState([]);
+  const [referenceTableOptions, setReferenceTableOptions] = useState([]);
 
   useEffect(() => {
     onExpressionTypeToggle('fieldRelations');
@@ -47,6 +49,15 @@ export const TableRelationsSelector = ({
       setClickedFields([...clickedFields, ...fieldsToAdd]);
     }
   }, [showRequiredFields]);
+
+  useEffect(() => {
+    setReferenceTableOptions(
+      creationFormState.candidateRule.relations.referencedDatasetSchema.code ===
+        creationFormState.candidateRule.relations.originDatasetSchema
+        ? creationFormState.schemaTables
+        : relations.referencedTables
+    );
+  }, []);
 
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldRelations') {
@@ -74,32 +85,33 @@ export const TableRelationsSelector = ({
           <div className={styles.field}>
             <label htmlFor="dataset">{resources.messages['targetDatasetSchema']}</label>
             <Dropdown
+              appendTo={document.body}
               disabled={relations.links.length > 1}
               filterPlaceholder={resources.messages['referenceSchemaPlaceholder']}
               id={`${componentName}__dataset`}
-              onChange={e => onDatasetSchemaChange(e.target.value)}
+              onChange={e => onDatasetSchemaChange(e.target.value.value)}
               optionLabel="label"
               options={creationFormState.datasetSchemas}
               placeholder={resources.messages['referenceSchemaPlaceholder']}
-              value={creationFormState.candidateRule.relations.referencedDatasetSchema}
+              value={first(
+                creationFormState.datasetSchemas.filter(
+                  option => option.value === creationFormState.candidateRule.relations.referencedDatasetSchema
+                )
+              )}
             />
           </div>
           <div className={styles.field}>
             <label htmlFor="table">{resources.messages['targetTable']}</label>
             <Dropdown
+              appendTo={document.body}
               disabled={relations.links.length > 1}
               filterPlaceholder={resources.messages['referenceTablePlaceholder']}
               id={`${componentName}__table`}
               onChange={e => onReferencedTableChange(e.target.value)}
               optionLabel="label"
-              options={
-                creationFormState.candidateRule.relations.referencedDatasetSchema.code ===
-                creationFormState.candidateRule.relations.originDatasetSchema
-                  ? creationFormState.schemaTables
-                  : relations.referencedTables
-              }
+              options={referenceTableOptions}
               placeholder={resources.messages['referenceTablePlaceholder']}
-              value={relations.referencedTable}
+              value={first(referenceTableOptions.filter(option => option.value === relations.referencedTable))}
             />
           </div>
           <div className={styles.checkbox}>
