@@ -426,8 +426,10 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
       // this check between Date and Timestamp is forced to maintain compatibility using the same
       // rule
       // like FIELD_DAY_GT... in Date and Timestamp
-      if (JavaType.TIMESTAMP.equals(dataTypeMap.get(string).getJavaType())
-          && JavaType.DATE.equals(superInputType)) {
+      if ((JavaType.TIMESTAMP.equals(dataTypeMap.get(string).getJavaType())
+          && JavaType.DATE.equals(superInputType))
+          || (JavaType.DATE.equals(dataTypeMap.get(string).getJavaType())
+              && JavaType.TIMESTAMP.equals(superInputType))) {
         return true;
       }
       return superInputType.equals(dataTypeMap.get(string).getJavaType());
