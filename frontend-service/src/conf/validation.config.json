@@ -24,9 +24,12 @@
     "numberMatch": ["TEXT", "TEXTAREA"],
     "date": ["DATE"],
     "dateTime": ["DATETIME"],
-    "month": ["DATE", "NUMBER_INTEGER"],
-    "year": ["DATE", "NUMBER_INTEGER"],
-    "day": ["DATE", "NUMBER_INTEGER"]
+    "month": ["DATE", "DATETIME", "NUMBER_INTEGER"],
+    "year": ["DATE", "DATETIME", "NUMBER_INTEGER"],
+    "day": ["DATE", "DATETIME", "NUMBER_INTEGER"],
+    "monthDateTime": ["DATE", "DATETIME", "NUMBER_INTEGER"],
+    "yearDateTime": ["DATE", "DATETIME", "NUMBER_INTEGER"],
+    "dayDateTime": ["DATE", "DATETIME", "NUMBER_INTEGER"]
   },
 
   "operatorTypes": {
@@ -387,7 +390,7 @@
       "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
       "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
     },
-    "dayNumberDateTime": {
+    "dayDateTimeNumber": {
       ">": "RECORD_GT_DAY_RECORD_NUMBER_DATETIME",
       "<": "RECORD_LT_DAY_RECORD_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER_DATETIME",
@@ -395,7 +398,7 @@
       "=": "RECORD_EQ_DAY_RECORD_NUMBER_DATETIME",
       "!=": "RECORD_DIST_DAY_RECORD_NUMBER_DATETIME"
     },
-    "monthNumberDateTime": {
+    "monthDateTimeNumber": {
       ">": "RECORD_GT_MONTH_RECORD_NUMBER_DATETIME",
       "<": "RECORD_LT_MONTH_RECORD_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER_DATETIME",
@@ -403,7 +406,7 @@
       "=": "RECORD_EQ_MONTH_RECORD_NUMBER_DATETIME",
       "!=": "RECORD_DIST_MONTH_RECORD_NUMBER_DATETIME"
     },
-    "yearNumberDateTime": {
+    "yearDateTimeNumber": {
       ">": "RECORD_GT_YEAR_RECORD_NUMBER_DATETIME",
       "<": "RECORD_LT_YEAR_RECORD_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER_DATETIME",
@@ -537,7 +540,7 @@
       "=": "RECORD_EQ_YEAR_NUMBER",
       "!=": "RECORD_DIST_YEAR_NUMBER"
     },
-    "dayNumberDateTime": {
+    "dayDateTimeNumber": {
       ">": "RECORD_GT_DAY_NUMBER_DATETIME",
       "<": "RECORD_LT_DAY_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_DAY_NUMBER_DATETIME",
@@ -545,7 +548,7 @@
       "=": "RECORD_EQ_DAY_NUMBER_DATETIME",
       "!=": "RECORD_DIST_DAY_NUMBER_DATETIME"
     },
-    "monthNumberDateTime": {
+    "monthDateTimeNumber": {
       ">": "RECORD_GT_MONTH_NUMBER_DATETIME",
       "<": "RECORD_LT_MONTH_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_MONTH_NUMBER_DATETIME",
@@ -553,7 +556,7 @@
       "=": "RECORD_EQ_MONTH_NUMBER_DATETIME",
       "!=": "RECORD_DIST_MONTH_NUMBER_DATETIME"
     },
-    "yearNumberDateTime": {
+    "yearDateTimeNumber": {
       ">": "RECORD_GT_YEAR_NUMBER_DATETIME",
       "<": "RECORD_LT_YEAR_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_YEAR_NUMBER_DATETIME",
@@ -688,7 +691,7 @@
       "=": "RECORD_EQ_YEAR_RECORD_NUMBER",
       "!=": "RECORD_DIST_YEAR_RECORD_NUMBER"
     },
-    "dayNumberDateTime": {
+    "dayDateTimeNumber": {
       ">": "RECORD_GT_DAY_RECORD_NUMBER_DATETIME",
       "<": "RECORD_LT_DAY_RECORD_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_DAY_RECORD_NUMBER_DATETIME",
@@ -696,7 +699,7 @@
       "=": "RECORD_EQ_DAY_RECORD_NUMBER_DATETIME",
       "!=": "RECORD_DIST_DAY_RECORD_NUMBER_DATETIME"
     },
-    "monthNumberDateTime": {
+    "monthDateTimeNumber": {
       ">": "RECORD_GT_MONTH_RECORD_NUMBER_DATETIME",
       "<": "RECORD_LT_MONTH_RECORD_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_MONTH_RECORD_NUMBER_DATETIME",
@@ -704,7 +707,7 @@
       "=": "RECORD_EQ_MONTH_RECORD_NUMBER_DATETIME",
       "!=": "RECORD_DIST_MONTH_RECORD_NUMBER_DATETIME"
     },
-    "yearNumberDateTime": {
+    "yearDateTimeNumber": {
       ">": "RECORD_GT_YEAR_RECORD_NUMBER_DATETIME",
       "<": "RECORD_LT_YEAR_RECORD_NUMBER_DATETIME",
       ">=": "RECORD_GTEQ_YEAR_RECORD_NUMBER_DATETIME",
