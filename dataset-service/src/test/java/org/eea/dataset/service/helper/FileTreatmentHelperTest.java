@@ -643,7 +643,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
-    Mockito.when(recordRepository.findByTableValueNoOrderOptimized(Mockito.any(), Mockito.any()))
+    Mockito.when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
     FileUtils
@@ -743,7 +743,7 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-    Mockito.when(recordRepository.findByTableValueNoOrderOptimized(Mockito.any(), Mockito.any()))
+    Mockito.when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true);

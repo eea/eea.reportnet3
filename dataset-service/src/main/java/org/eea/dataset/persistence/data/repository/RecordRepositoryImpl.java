@@ -535,7 +535,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         record.setDatasetPartitionId(rs.getLong("dataset_Partition_Id"));
         record.setDataProviderCode(rs.getString("data_Provider_Code"));
         String fieldsSerieazlie = rs.getString("fields");
-        LOG.info(fieldsSerieazlie);
         try {
           if (fieldsSerieazlie != null) {
             record.setFields(Arrays.asList(mapper.readValue(fieldsSerieazlie, FieldValue[].class)));
@@ -561,13 +560,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   @Transactional
   public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId)
-      throws EEAException {
-    try {
-      Session session = (Session) entityManager.getDelegate();
-      return session.doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId));
-    } catch (HibernateException e) {
-      throw new EEAException("SQL can't be executed: ", e);
-    }
+      throws HibernateException {
+    Session session = (Session) entityManager.getDelegate();
+    return session.doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId));
   }
 
 }
