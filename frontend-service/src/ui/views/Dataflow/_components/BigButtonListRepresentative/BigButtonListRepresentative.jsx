@@ -1,7 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
-import uuid from 'uuid';
-
 import isNil from 'lodash/isNil';
 
 import styles from '../BigButtonList/BigButtonList.module.scss';
@@ -101,7 +99,7 @@ export const BigButtonListRepresentative = ({
   );
 
   return (
-    <>
+    <Fragment>
       <div className={styles.buttonsWrapper}>
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
@@ -116,9 +114,11 @@ export const BigButtonListRepresentative = ({
               onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
               uniqRepresentatives
-            }).map((button, i) =>
-              button.visibility ? <BigButton key={uuid.v4()} {...button} /> : <Fragment key={uuid.v4()} />
-            )}
+            })
+              .filter(button => button.visibility)
+              .map(button => (
+                <BigButton key={button.caption} {...button} />
+              ))}
           </div>
         </div>
       </div>
@@ -139,6 +139,6 @@ export const BigButtonListRepresentative = ({
           />
         </Dialog>
       )}
-    </>
+    </Fragment>
   );
 };

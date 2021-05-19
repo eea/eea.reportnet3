@@ -290,11 +290,12 @@ const downloadById = async dataflowId => await apiDataflow.downloadById(dataflow
 
 const getAllSchemas = async dataflowId => {
   const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
-  const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {
+  const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {    
     const dataset = new Dataset({
       datasetSchemaDescription: datasetSchemaDTO.description,
       datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
-      datasetSchemaName: datasetSchemaDTO.nameDatasetSchema
+      datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
+      referenceDataset: datasetSchemaDTO.referenceDataset
       // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
     });
 
