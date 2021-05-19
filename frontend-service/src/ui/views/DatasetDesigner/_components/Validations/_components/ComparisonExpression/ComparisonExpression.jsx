@@ -372,7 +372,7 @@ const ComparisonExpression = ({
           yearRange="1900:2500"></Calendar>
       );
     }
-    if (operatorType === 'day') {
+    if (operatorType === 'day' || operatorType === 'dayDateTime') {
       return (
         <InputNumber
           disabled={isDisabled}
