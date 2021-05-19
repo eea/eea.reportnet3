@@ -4774,7 +4774,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearEqualsFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
     assertFalse(RuleOperators.recordYearEquals("1", 2020));
   }
 
@@ -4795,7 +4795,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearDistinctFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2020-01-01");
     assertFalse(RuleOperators.recordYearDistinct("1", 2020));
   }
 
@@ -4816,7 +4816,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearGreaterThanFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
     assertFalse(RuleOperators.recordYearGreaterThan("1", 2020));
   }
 
@@ -4836,7 +4836,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearLessThanFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2020-01-01");
     assertFalse(RuleOperators.recordYearLessThan("1", 2020));
   }
 
@@ -4857,7 +4857,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearGreaterThanOrEqualsThanFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
     assertFalse(RuleOperators.recordYearGreaterThanOrEqualsThan("1", 2020));
   }
 
@@ -4878,7 +4878,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearLessThanOrEqualsThanFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
+    fieldValue1.setValue("2021-01-01");
     assertFalse(RuleOperators.recordYearLessThanOrEqualsThan("1", 2020));
   }
 
@@ -4900,8 +4900,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearEqualsRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
-    fieldValue2.setValue("2021-01-01 00:00:00");
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2021-01-01");
     assertFalse(RuleOperators.recordYearEqualsRecord("1", "2"));
   }
 
@@ -4924,8 +4924,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearDistinctRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordYearDistinctRecord("1", "2"));
   }
 
@@ -4948,8 +4948,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearGreaterThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordYearGreaterThanRecord("1", "2"));
   }
 
@@ -4972,8 +4972,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearLessThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2021-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordYearLessThanRecord("1", "2"));
   }
 
@@ -4996,8 +4996,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearGreaterThanOrEqualsThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordYearGreaterThanOrEqualsThanRecord("1", "2"));
   }
 
@@ -5019,8 +5019,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearLessThanOrEqualsThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2021-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordYearLessThanOrEqualsThanRecord("1", "2"));
   }
 
@@ -5043,7 +5043,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearEqualsRecordNumberFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2020-01-01");
     fieldValue2.setValue("2021");
     assertFalse(RuleOperators.recordYearEqualsRecordNumber("1", "2"));
   }
@@ -5067,7 +5067,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearDistinctRecordNumberFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2020-01-01");
     fieldValue2.setValue("2020");
     assertFalse(RuleOperators.recordYearDistinctRecordNumber("1", "2"));
   }
@@ -5091,7 +5091,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearGreaterThanRecordNumberFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
     fieldValue2.setValue("2020");
     assertFalse(RuleOperators.recordYearGreaterThanRecordNumber("1", "2"));
   }
@@ -5115,7 +5115,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearLessThanRecordNumberFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
+    fieldValue1.setValue("2021-01-01");
     fieldValue2.setValue("2020");
     assertFalse(RuleOperators.recordYearLessThanRecordNumber("1", "2"));
   }
@@ -5139,7 +5139,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearGreaterThanOrEqualsThanRecordNumberFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
     fieldValue2.setValue("2020");
     assertFalse(RuleOperators.recordYearGreaterThanOrEqualsThanRecordNumber("1", "2"));
   }
@@ -5163,7 +5163,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordYearLessThanOrEqualsThanRecordNumberFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
+    fieldValue1.setValue("2021-01-01");
     fieldValue2.setValue("2020");
     assertFalse(RuleOperators.recordYearLessThanOrEqualsThanRecordNumber("1", "2"));
   }
@@ -5185,8 +5185,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateEqualsFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
-    assertFalse(RuleOperators.recordDateEquals("1", "2021-01-01 00:00:00"));
+    fieldValue1.setValue("2020-01-01");
+    assertFalse(RuleOperators.recordDateEquals("1", "2021-01-01"));
   }
 
   @Test
@@ -5205,8 +5205,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateDistinctFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
-    assertFalse(RuleOperators.recordDateDistinct("1", "2020-01-01 00:00:00"));
+    fieldValue1.setValue("2020-01-01");
+    assertFalse(RuleOperators.recordDateDistinct("1", "2020-01-01"));
   }
 
   @Test
@@ -5226,8 +5226,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateGreaterThanFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
-    assertFalse(RuleOperators.recordDateGreaterThan("1", "2021-01-01 00:00:00"));
+    fieldValue1.setValue("2020-01-01");
+    assertFalse(RuleOperators.recordDateGreaterThan("1", "2021-01-01"));
   }
 
 
@@ -5248,8 +5248,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateLessThanFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
-    assertFalse(RuleOperators.recordDateLessThan("1", "2020-01-01 00:00:00"));
+    fieldValue1.setValue("2021-01-01");
+    assertFalse(RuleOperators.recordDateLessThan("1", "2020-01-01"));
   }
 
 
@@ -5277,8 +5277,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateLessThanOrEqualsThanFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
-    assertFalse(RuleOperators.recordDateLessThanOrEqualsThan("1", "2020-01-01 00:00:00"));
+    fieldValue1.setValue("2021-01-01");
+    assertFalse(RuleOperators.recordDateLessThanOrEqualsThan("1", "2020-01-01"));
   }
 
 
@@ -5306,8 +5306,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateGreaterThanOrEqualsThanFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
-    assertFalse(RuleOperators.recordDateGreaterThanOrEqualsThan("1", "2020-01-01 00:00:00"));
+    fieldValue1.setValue("2019-01-01");
+    assertFalse(RuleOperators.recordDateGreaterThanOrEqualsThan("1", "2020-01-01"));
   }
 
 
@@ -5327,9 +5327,9 @@ public class RuleOperatorsTest {
 
 
   @Test
-  public void rrecordDateEqualsRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+  public void recordDateEqualsRecordFalseDatetimeTest() {
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordDateEqualsRecord("1", "2"));
   }
 
@@ -5352,8 +5352,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateDistinctRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2020-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordDateDistinctRecord("1", "2"));
   }
 
@@ -5376,8 +5376,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateGreaterThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordDateGreaterThanRecord("1", "2"));
   }
 
@@ -5400,8 +5400,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateLessThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2021-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordDateLessThanRecord("1", "2"));
   }
 
@@ -5432,8 +5432,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateGreaterThanOrEqualsThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2019-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordDateGreaterThanOrEqualsThanRecord("1", "2"));
   }
 
@@ -5463,8 +5463,8 @@ public class RuleOperatorsTest {
 
   @Test
   public void recordDateLessThanOrEqualsThanRecordFalseDatetimeTest() {
-    fieldValue1.setValue("2021-01-01 00:00:00");
-    fieldValue2.setValue("2020-01-01 00:00:00");
+    fieldValue1.setValue("2021-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertFalse(RuleOperators.recordDateLessThanOrEqualsThanRecord("1", "2"));
   }
 
@@ -5484,7 +5484,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDayEqualsFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDayEquals("2020-01-01 00:00:00", 2));
+    assertFalse(RuleOperators.fieldDayEquals("2020-01-01", 2));
   }
 
 
@@ -5502,7 +5502,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDayDistinctFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDayDistinct("2020-01-01 00:00:00", 1));
+    assertFalse(RuleOperators.fieldDayDistinct("2020-01-01", 1));
   }
 
 
@@ -5520,7 +5520,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDayGreaterThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDayGreaterThan("2020-01-01 00:00:00", 2));
+    assertFalse(RuleOperators.fieldDayGreaterThan("2020-01-01", 2));
   }
 
 
@@ -5538,7 +5538,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDayLessThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDayLessThan("2020-01-02 00:00:00", 1));
+    assertFalse(RuleOperators.fieldDayLessThan("2020-01-02", 1));
   }
 
 
@@ -5556,7 +5556,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDayGreaterThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDayGreaterThanOrEqualsThan("2020-01-01 00:00:00", 2));
+    assertFalse(RuleOperators.fieldDayGreaterThanOrEqualsThan("2020-01-01", 2));
   }
 
 
@@ -5574,7 +5574,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDayLessThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDayLessThanOrEqualsThan("2020-01-02 00:00:00", 1));
+    assertFalse(RuleOperators.fieldDayLessThanOrEqualsThan("2020-01-02", 1));
   }
 
 
@@ -5592,7 +5592,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldMonthEqualsFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldMonthEquals("2020-01-01 00:00:00", 2));
+    assertFalse(RuleOperators.fieldMonthEquals("2020-01-01", 2));
   }
 
 
@@ -5610,7 +5610,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldMonthDistinctFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldMonthDistinct("2020-01-01 00:00:00", 1));
+    assertFalse(RuleOperators.fieldMonthDistinct("2020-01-01", 1));
   }
 
 
@@ -5628,7 +5628,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldMonthGreaterThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldMonthGreaterThan("2020-01-01 00:00:00", 2));
+    assertFalse(RuleOperators.fieldMonthGreaterThan("2020-01-01", 2));
   }
 
 
@@ -5646,7 +5646,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldMonthLessThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldMonthLessThan("2020-02-01 00:00:00", 1));
+    assertFalse(RuleOperators.fieldMonthLessThan("2020-02-01", 1));
   }
 
 
@@ -5664,7 +5664,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldMonthGreaterThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldMonthGreaterThanOrEqualsThan("2020-01-01 00:00:00", 2));
+    assertFalse(RuleOperators.fieldMonthGreaterThanOrEqualsThan("2020-01-01", 2));
   }
 
 
@@ -5682,7 +5682,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldMonthLessThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldMonthLessThanOrEqualsThan("2020-02-01 00:00:00", 1));
+    assertFalse(RuleOperators.fieldMonthLessThanOrEqualsThan("2020-02-01", 1));
   }
 
 
@@ -5700,7 +5700,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYearEqualsFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearEquals("2020-02-01 00:00:00", 2021));
+    assertFalse(RuleOperators.fieldYearEquals("2020-02-01", 2021));
   }
 
 
@@ -5718,7 +5718,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYearDistinctFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearDistinct("2020-02-01 00:00:00", 2020));
+    assertFalse(RuleOperators.fieldYearDistinct("2020-02-01", 2020));
   }
 
 
@@ -5736,7 +5736,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYearGreaterThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearGreaterThan("2020-02-01 00:00:00", 2021));
+    assertFalse(RuleOperators.fieldYearGreaterThan("2020-02-01", 2021));
   }
 
 
@@ -5754,7 +5754,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYearLessThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearLessThan("2020-02-01 00:00:00", 2019));
+    assertFalse(RuleOperators.fieldYearLessThan("2020-02-01", 2019));
   }
 
 
@@ -5772,7 +5772,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYearGreaterThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearGreaterThanOrEqualsThan("2020-02-01 00:00:00", 2021));
+    assertFalse(RuleOperators.fieldYearGreaterThanOrEqualsThan("2020-02-01", 2021));
   }
 
 
@@ -5790,7 +5790,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYearLessThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearLessThanOrEqualsThan("2020-02-01 00:00:00", 2019));
+    assertFalse(RuleOperators.fieldYearLessThanOrEqualsThan("2020-02-01", 2019));
   }
 
 
@@ -5808,7 +5808,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDateEqualsFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDateEquals("2020-01-01 00:00:00", "2020-01-02 00:00:00"));
+    assertFalse(RuleOperators.fieldDateEquals("2020-01-01", "2020-01-02"));
   }
 
 
@@ -5826,7 +5826,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDateDistinctFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDateDistinct("2020-01-01 00:00:00", "2020-01-01 00:00:00"));
+    assertFalse(RuleOperators.fieldDateDistinct("2020-01-01", "2020-01-01"));
   }
 
 
@@ -5844,7 +5844,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDateGreaterThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDateGreaterThan("2020-01-01 00:00:00", "2020-01-02 00:00:00"));
+    assertFalse(RuleOperators.fieldDateGreaterThan("2020-01-01", "2020-01-02"));
   }
 
 
@@ -5862,7 +5862,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDateLessThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDateLessThan("2020-01-02 00:00:00", "2020-01-01 00:00:00"));
+    assertFalse(RuleOperators.fieldDateLessThan("2020-01-02", "2020-01-01"));
   }
 
 
@@ -5888,8 +5888,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDateGreaterThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldDateGreaterThanOrEqualsThan("2020-01-01 00:00:00",
-        "2020-01-02 00:00:00"));
+    assertFalse(RuleOperators.fieldDateGreaterThanOrEqualsThan("2020-01-01", "2020-01-02"));
   }
 
 
@@ -5915,8 +5914,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldDateLessThanOrEqualsThanFalseDatetimeTest() {
-    assertFalse(
-        RuleOperators.fieldDateLessThanOrEqualsThan("2020-01-02 00:00:00", "2020-01-01 00:00:00"));
+    assertFalse(RuleOperators.fieldDateLessThanOrEqualsThan("2020-01-02", "2020-01-01"));
   }
 
 
@@ -6187,7 +6185,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYeartimeGreaterThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearGreaterThan("2020-02-01 00:00:00", 2021));
+    assertFalse(RuleOperators.fieldYearGreaterThan("2020-02-01", 2021));
   }
 
 
