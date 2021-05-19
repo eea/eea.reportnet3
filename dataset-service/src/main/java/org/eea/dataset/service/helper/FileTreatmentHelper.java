@@ -833,10 +833,11 @@ public class FileTreatmentHelper implements DisposableBean {
 
     LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
     try (
-        PostgresBulkImporter recordsImporter =
-            new PostgresBulkImporter(connectionDataVO, schema, "record_value", importPath);
-        PostgresBulkImporter fieldsImporter =
-            new PostgresBulkImporter(connectionDataVO, schema, "field_value", importPath)) {
+        PostgresBulkImporter recordsImporter = new PostgresBulkImporter(connectionDataVO, schema,
+            "record_value (ID, ID_RECORD_SCHEMA,ID_TABLE,DATASET_PARTITION_ID,DATA_PROVIDER_CODE) ",
+            importPath);
+        PostgresBulkImporter fieldsImporter = new PostgresBulkImporter(connectionDataVO, schema,
+            "field_value (ID, TYPE, VALUE, ID_FIELD_SCHEMA, ID_RECORD, GEOMETRY) ", importPath)) {
 
       LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
 
