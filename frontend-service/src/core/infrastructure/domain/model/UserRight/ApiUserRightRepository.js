@@ -7,11 +7,7 @@ import uniqueId from 'lodash/uniqueId';
 const parseUserRightListDTO = userRightListDTO => {
   const userRightList = userRightListDTO.data.map(userRightDTO => {
     userRightDTO.id = uniqueId();
-    return new UserRight({
-      account: userRightDTO.account,
-      id: userRightDTO.id,
-      role: userRightDTO.role
-    });
+    return new UserRight(userRightDTO);
   });
 
   return sortBy(userRightList, ['account']);
