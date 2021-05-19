@@ -4,11 +4,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return { ...state, userRightList: payload.userRightList, clonedUserRightList: payload.clonedUserRightList };
 
     case 'ON_CLOSE_MANAGEMENT_DIALOG':
-      return {
-        ...state,
-        userRight: { account: '', isNew: true, role: '' },
-        isEditingModal: false
-      };
+      return { ...state, userRight: { account: '', isNew: true, role: '' }, isEditingModal: false };
 
     case 'ON_DATA_CHANGE':
       return { ...state, dataUpdatedCount: state.dataUpdatedCount + 1 };
