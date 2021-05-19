@@ -7,9 +7,16 @@ import { config } from 'conf';
 import { getExpressionOperatorType } from './getExpressionOperatorType';
 
 const getValueTypeSelector = operator => {
-  const [lastChunk] = operator.split('_').reverse();
-  if (lastChunk !== 'RECORD') return 'value';
-  return 'field';
+  const operatorsChunks = operator.split('_');
+  const [thirdToLastChunk, secondToLastChunk, lastChunk] = operatorsChunks.slice(-3);
+  if (
+    lastChunk === 'RECORD' ||
+    secondToLastChunk === 'RECORD' ||
+    (thirdToLastChunk === 'RECORD' && operatorsChunks.length > 3)
+  ) {
+    return 'field';
+  }
+  return 'value';
 };
 
 export const getRowExpressionFromDTO = (expression, allExpressions, parentUnion) => {

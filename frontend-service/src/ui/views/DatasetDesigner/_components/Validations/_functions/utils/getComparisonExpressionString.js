@@ -1,6 +1,8 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import dayjs from 'dayjs';
+
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const printExpression = (expression, tabs) => {
@@ -27,9 +29,14 @@ const printExpression = (expression, tabs) => {
       } )`;
     }
 
-    return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
-      expression.field2
-    } )`;
+    let field2Value = expression.field2;
+    if (expression.operatorType === 'date') {
+      field2Value = dayjs(expression.field2).format('YYYY-MM-DD');
+    } else if (expression.operatorType === 'dateTime') {
+      field2Value = dayjs(expression.field2).format('YYYY-MM-DD HH:mm:ss');
+    }
+
+    return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${field2Value} )`;
   } else if (
     !isNil(expression.operatorValue) &&
     !isEmpty(expression.operatorValue) &&
