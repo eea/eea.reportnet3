@@ -57,6 +57,11 @@ public class RecordValue {
   @Column(name = "DATA_PROVIDER_CODE")
   private String dataProviderCode;
 
+
+  /** The data position. */
+  @Column(name = "DATA_POSITION", insertable = false, updatable = false)
+  private Long dataPosition;
+
   /**
    * The table value.
    */
