@@ -1033,7 +1033,7 @@ export const FieldDesigner = ({
 
   const renderDeleteButton = () =>
     !addField ? (
-      <a
+      <div
         className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
@@ -1049,7 +1049,7 @@ export const FieldDesigner = ({
         }}>
         <FontAwesomeIcon icon={AwesomeIcons('delete')} />
         <span className="srOnly">{resources.messages['deleteFieldLabel']}</span>
-      </a>
+      </div>
     ) : null;
 
   const renderInputs = () => (
