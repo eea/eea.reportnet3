@@ -39,7 +39,6 @@ const ValidationExpression = ({
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
-  const [valueInputProps, setValueInputProps] = useState();
   const [valueKeyFilter, setValueKeyFilter] = useState();
 
   useEffect(() => {
@@ -73,7 +72,6 @@ const ValidationExpression = ({
 
   useEffect(() => {
     const { operatorType } = expressionValues;
-    const cValueProps = { steps: 0, format: false, useGrouping: false };
 
     if (operatorType === 'number' || operatorType === 'LEN') {
       setValueKeyFilter('num');
@@ -85,24 +83,6 @@ const ValidationExpression = ({
 
     if (operatorType === 'string') {
       setValueKeyFilter('');
-    }
-
-    if (fieldType === 'DATE') {
-      if (operatorType === 'year') {
-        cValueProps.min = 1900;
-        cValueProps.max = 2500;
-      }
-
-      if (operatorType === 'month') {
-        cValueProps.min = 1;
-        cValueProps.max = 12;
-      }
-
-      if (operatorType === 'day') {
-        cValueProps.min = 1;
-        cValueProps.max = 31;
-      }
-      setValueInputProps(cValueProps);
     }
   }, [expressionValues.operatorType]);
 
@@ -303,7 +283,7 @@ const ValidationExpression = ({
       );
     }
 
-    if (operatorType === 'year') {
+    if (operatorType === 'year' || operatorType === 'yearDateTime') {
       return (
         <InputNumber
           disabled={isDisabled}
@@ -318,7 +298,7 @@ const ValidationExpression = ({
       );
     }
 
-    if (operatorType === 'month') {
+    if (operatorType === 'month' || operatorType === 'monthDateTime') {
       return (
         <InputNumber
           disabled={isDisabled}

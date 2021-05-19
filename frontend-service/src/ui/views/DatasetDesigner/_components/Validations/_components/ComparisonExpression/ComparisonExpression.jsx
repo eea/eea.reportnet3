@@ -456,7 +456,7 @@ const ComparisonExpression = ({
       );
     }
 
-    if (operatorType === 'year') {
+    if (operatorType === 'year' || operatorType === 'yearDateTime') {
       return (
         <InputNumber
           disabled={isDisabled}
@@ -472,7 +472,7 @@ const ComparisonExpression = ({
       );
     }
 
-    if (operatorType === 'month') {
+    if (operatorType === 'month' || operatorType === 'monthDateTime') {
       return (
         <InputNumber
           disabled={isDisabled}
