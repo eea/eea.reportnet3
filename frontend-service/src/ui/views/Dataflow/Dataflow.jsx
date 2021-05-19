@@ -868,7 +868,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <ShareRights
               addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
               addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
-              columnHeader={resources.messages['requestersAccountColumn']}
+              columnHeader={resources.messages['requestersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
@@ -897,7 +897,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <ShareRights
               addConfirmHeader={resources.messages[`addReporterConfirmHeader`]}
               addErrorNotificationKey={'ADD_REPORTER_ERROR'}
-              columnHeader={resources.messages['reportersAccountColumn']}
+              columnHeader={resources.messages['reportersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resources.messages['deleteReporterButtonTableHeader']}

@@ -14,9 +14,9 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Dropdown } from 'ui/views/_components/Dropdown';
+import { Filters } from 'ui/views/_components/Filters';
 import { InputText } from 'ui/views/_components/InputText';
 import { Spinner } from 'ui/views/_components/Spinner';
-
 import { UserRightService } from 'core/services/UserRight';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -54,6 +54,11 @@ export const ShareRights = ({
   const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
+  const filterOptions = [
+    { type: 'input', properties: [{ name: 'account' }] },
+    { type: 'multiselect', properties: [{ name: 'role' }] }
+  ];
+
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -63,11 +68,13 @@ export const ShareRights = ({
     actionsButtons: { id: null, isDeleting: false, isEditing: false },
     clonedUserRightList: [],
     dataUpdatedCount: 0,
+    filteredData: [],
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
     isEditingModal: false,
     isLoadingButton: false,
     loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
+    pagination: { first: 0, page: 0, rows: 10 },
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
     userRightToDelete: {}
@@ -98,6 +105,8 @@ export const ShareRights = ({
     );
     return sameAccounts.length > 0;
   };
+
+  const hasEmptyData = userRight => isEmpty(userRight.account) || isEmpty(userRight.role);
 
   const isRoleChanged = userRight => {
     const [initialUser] = shareRightsState.clonedUserRightList.filter(fUserRight => fUserRight.id === userRight.id);
@@ -132,6 +141,11 @@ export const ShareRights = ({
     }
   };
 
+  const onPaginate = event => {
+    const pagination = { first: event.first, page: event.page, rows: event.rows };
+    shareRightsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+  };
+
   const onResetAll = () => shareRightsDispatch({ type: 'ON_RESET_ALL' });
 
   const onRoleChange = newRole => shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { role: newRole } });
@@ -146,6 +160,7 @@ export const ShareRights = ({
       }
     });
   };
+
   const onToggleDeletingUser = value => {
     shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
@@ -250,6 +265,10 @@ export const ShareRights = ({
     }
   };
 
+  const onLoadFilteredData = userRightList => {
+    shareRightsDispatch({ type: 'ON_LOAD_FILTERED_DATA', payload: { userRightList } });
+  };
+
   const onUpdateUser = async userRight => {
     setActions({ isDeleting: false, isEditing: true });
     if (userRight.role !== '') {
@@ -269,8 +288,10 @@ export const ShareRights = ({
             type: 'SET_ACCOUNT_NOT_FOUND',
             payload: { accountNotFound: true, accountHasError: true }
           });
+          notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' });
         } else if (error?.response?.status === 400) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
+          notificationContext.add({ type: 'IMPOSSIBLE_ROLE_ERROR' });
         } else {
           notificationContext.add({ type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey });
         }
@@ -306,6 +327,7 @@ export const ShareRights = ({
 
   const renderRoleColumnTemplate = userRight => {
     const [option] = roleOptions.filter(option => option.role === userRight.role);
+
     return <div>{option.label}</div>;
   };
 
@@ -314,9 +336,11 @@ export const ShareRights = ({
 
     return (
       <div className={styles.manageDialog}>
-        <div>
+        <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="accountInput">
-            {resources.messages['account']}
+            {userType === userTypes.REQUESTER
+              ? resources.messages['userRolesRequesterInputLabel']
+              : resources.messages['userRolesReporterInputLabel']}
           </label>
           <InputText
             className={hasError ? styles.error : ''}
@@ -325,11 +349,11 @@ export const ShareRights = ({
             onChange={event => onSetAccount(event.target.value)}
             placeholder={placeholder}
             ref={inputRef}
-            style={{ marginBottom: '0rem' }}
+            style={{ margin: '0.3rem 0' }}
             value={userRight.account}
           />
         </div>
-        <div>
+        <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="rolesDropdown">
             {resources.messages['role']}
           </label>
@@ -342,6 +366,7 @@ export const ShareRights = ({
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
             ref={dropdownRef}
+            style={{ margin: '0.3rem 0' }}
             value={first(roleOptions.filter(option => option.role === userRight.role))}
           />
         </div>
@@ -351,16 +376,39 @@ export const ShareRights = ({
 
   const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
 
-  if (loadingStatus.isInitialLoading) return <Spinner style={{ top: 0 }} />;
+  const renderDialogLayout = children => <div className={styles.shareRightsModal}>{children}</div>;
 
-  return (
+  const getTooltipMessage = userRight => {
+    if (hasEmptyData(userRight)) {
+      return resources.messages['incompleteDataTooltip'];
+    } else if (userRight.isNew && isRepeatedAccount(userRight.account)) {
+      return resources.messages['emailAlreadyAssignedTooltip'];
+    } else if (!isValidEmail(userRight.account)) {
+      return resources.messages['notValidEmailTooltip'];
+    } else if (shareRightsState.accountHasError) {
+      return resources.messages['emailHasErrorTooltip'];
+    } else {
+      return null;
+    }
+  };
+
+  if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
+
+  return renderDialogLayout(
     <Fragment>
+      <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
       <div>
-        {isEmpty(shareRightsState.userRightList) ? (
+        {isEmpty(shareRightsState.filteredData) ? (
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : (
           <div className={styles.table}>
-            <DataTable value={shareRightsState.userRightList}>
+            <DataTable
+              first={shareRightsState.pagination.first}
+              getPageChange={onPaginate}
+              paginator={true}
+              rows={shareRightsState.pagination.rows}
+              rowsPerPageOptions={[5, 10, 15]}
+              value={shareRightsState.filteredData}>
               <Column body={renderAccountTemplate} header={columnHeader} />
               <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
               <Column
@@ -373,7 +421,6 @@ export const ShareRights = ({
           </div>
         )}
       </div>
-
       {shareRightsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -397,7 +444,14 @@ export const ShareRights = ({
 
       {isUserRightManagementDialogVisible && (
         <ConfirmDialog
-          disabledConfirm={isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight))}
+          confirmTooltip={getTooltipMessage(userRight)}
+          dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
+          disabledConfirm={
+            hasEmptyData(userRight) ||
+            isLoadingButton ||
+            (!userRight.isNew && !isRoleChanged(userRight)) ||
+            shareRightsState.accountHasError
+          }
           header={shareRightsState.isEditingModal ? editConfirmHeader : addConfirmHeader}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resources.messages['cancel']}
