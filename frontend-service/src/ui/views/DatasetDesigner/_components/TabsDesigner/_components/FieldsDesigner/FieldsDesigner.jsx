@@ -228,7 +228,7 @@ export const FieldsDesigner = ({
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setTableDescriptionValue(initialTableDescription);
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
       updateTableDesign(isReadOnlyTable);
     }
