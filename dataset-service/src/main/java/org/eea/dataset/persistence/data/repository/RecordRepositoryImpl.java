@@ -531,9 +531,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       while (rs.next()) {
         RecordValue record = new RecordValue();
         record.setId(rs.getString("id"));
-        record.setIdRecordSchema(rs.getString("id_Record_Schema"));
-        record.setDatasetPartitionId(rs.getLong("dataset_Partition_Id"));
-        record.setDataProviderCode(rs.getString("data_Provider_Code"));
+        record.setIdRecordSchema(rs.getString("id_record_schema"));
+        record.setDatasetPartitionId(rs.getLong("dataset_partition_id"));
+        record.setDataProviderCode(rs.getString("data_provider_code"));
         String fieldsSerieazlie = rs.getString("fields");
         try {
           if (fieldsSerieazlie != null) {
