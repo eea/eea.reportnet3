@@ -7,7 +7,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
@@ -51,6 +54,18 @@ public class ContributorServiceImplTest {
   /** The data set metabase controller zuul. */
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /** The data collection controller zuul. */
+  @Mock
+  private DataCollectionControllerZuul dataCollectionControllerZuul;
+
+  /** The EU dataset controller zuul. */
+  @Mock
+  private EUDatasetControllerZuul eUDatasetControllerZuul;
+
+  /** The test dataset controller zuul. */
+  @Mock
+  private TestDatasetControllerZuul testDatasetControllerZuul;
 
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
@@ -114,6 +129,14 @@ public class ContributorServiceImplTest {
 
   }
 
+  @Test
+  public void deleteContributorObserver() throws EEAException {
+    contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "DATA_OBSERVER", 1L);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .removeContributorsFromResources(Mockito.any());
+
+  }
+
   /**
    * Delete contributor report.
    *
@@ -162,10 +185,55 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void createContributorReportRead() throws EEAException {
-    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, null);
+    contributorVORead.setRole("REPORTER_READ");
+    Mockito.when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, false);
     Mockito.verify(userManagementControllerZull, times(1))
         .addContributorsToResources(Mockito.any());
   }
+
+  @Test
+  public void createContributorReportWrite() throws EEAException {
+    contributorVORead.setRole("REPORTER_WRITE");
+    Mockito.when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, false);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .addContributorsToResources(Mockito.any());
+  }
+
+  @Test
+  public void createContributorReporterCustodian() throws EEAException {
+    contributorVORead.setRole("DATA_CUSTODIAN");
+    Mockito.when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, false);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .addContributorsToResources(Mockito.any());
+  }
+
+  @Test
+  public void createContributorReporterSteward() throws EEAException {
+    contributorVORead.setRole("DATA_STEWARD");
+    Mockito.when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, false);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .addContributorsToResources(Mockito.any());
+  }
+
+  @Test
+  public void createContributorReporterObserver() throws EEAException {
+    contributorVORead.setRole("DATA_OBSERVER");
+    Mockito.when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, false);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .addContributorsToResources(Mockito.any());
+  }
+
+
 
   /**
    * Update contributor.
@@ -218,7 +286,7 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void findContributorsByResourceIdEditorTest() {
-    assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "EDITOR"));
+    assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "REQUESTER"));
   }
 
   /**
