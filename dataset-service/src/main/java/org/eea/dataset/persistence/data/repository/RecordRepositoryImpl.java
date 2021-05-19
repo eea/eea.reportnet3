@@ -155,12 +155,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /** The Constant QUERY_UNSORTERED: {@value}. */
   private static final String QUERY_UNSORTERED =
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv  "
-          + "WHERE tv.idTableSchema = :idTableSchema";
+          + "WHERE tv.idTableSchema = :idTableSchema order by rv.dataPosition";
 
   /** The Constant QUERY_UNSORTERED_FIELDS: {@value}. */
   private static final String QUERY_UNSORTERED_FIELDS =
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields  "
-          + "WHERE tv.idTableSchema = :idTableSchema";
+          + "WHERE tv.idTableSchema = :idTableSchema order by rv.dataPosition";
 
   /** The Constant ID_TABLE_SCHEMA: {@value}. */
   private static final String ID_TABLE_SCHEMA = "idTableSchema";
@@ -316,9 +316,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       SortField... sortFields) {
 
     // Query without order or with it
-    Query query = entityManager.createQuery(null == sortFields ? MASTER_QUERY_NO_ORDER + filter
-        : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
-            directionQueryBuilder.toString().substring(1)));
+    Query query = entityManager.createQuery(
+        null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition"
+            : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
+                directionQueryBuilder.toString().substring(1)));
+
 
     query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
     if (null != idRules && !idRules.isEmpty()) {
