@@ -54,6 +54,13 @@ export const getExpression = expression => {
       };
     }
 
+    if (operatorType === 'dateTime') {
+      return {
+        operator: operatorEquivalence,
+        params: ['VALUE', dayjs(expressionValue).format('YYYY-MM-DD HH:mm:ss')]
+      };
+    }
+
     if (operatorEquivalence === 'FIELD_NUM_MATCH') {
       return {
         operator: operatorEquivalence,
