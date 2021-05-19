@@ -158,6 +158,7 @@ export const ShareRights = ({
       }
     });
   };
+
   const onToggleDeletingUser = value => {
     shareRightsDispatch({ type: 'TOGGLE_DELETING_USER_RIGHT', payload: { isDeleting: value } });
   };
@@ -355,13 +356,13 @@ export const ShareRights = ({
           <Dropdown
             appendTo={document.body}
             id="rolesDropdown"
-            onChange={event => onRoleChange(event.target.value.role)}
+            onChange={event => onRoleChange(event.target.value.label)}
             onKeyPress={event => onEnterKey(event.key, userRight)}
             optionLabel="label"
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
             ref={dropdownRef}
-            value={first(roleOptions.filter(option => option.role === userRight.role))}
+            value={first(roleOptions.filter(option => option.label === userRight.role))}
           />
         </div>
       </div>
@@ -397,7 +398,6 @@ export const ShareRights = ({
         ) : (
           <div className={styles.table}>
             <DataTable
-              autoLayout={true}
               first={shareRightsState.pagination.first}
               getPageChange={onPaginate}
               paginator={true}
@@ -416,7 +416,6 @@ export const ShareRights = ({
           </div>
         )}
       </div>
-
       {shareRightsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
