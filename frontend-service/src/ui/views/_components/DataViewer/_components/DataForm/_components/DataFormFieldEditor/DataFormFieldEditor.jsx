@@ -437,7 +437,7 @@ const DataFormFieldEditor = ({
         onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
         showSeconds={true}
         showTime={true}
-        value={new Date(fieldValue)}
+        value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
         yearNavigator={true}
         yearRange="1900:2100"
       />

@@ -12,6 +12,11 @@ const printExpression = (expression, field) => {
     if (expression.operatorType === 'date') {
       return `( ${field} ${expression.operatorValue} ${dayjs(expression.expressionValue).format('YYYY-MM-DD')} )`;
     }
+    if (expression.operatorType === 'dateTime') {
+      return `( ${field} ${expression.operatorValue} ${dayjs(expression.expressionValue).format(
+        'YYYY-MM-DD HH:mm:ss'
+      )} )`;
+    }
 
     if (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL') {
       return `( ${field} ${expression.operatorValue} )`;
