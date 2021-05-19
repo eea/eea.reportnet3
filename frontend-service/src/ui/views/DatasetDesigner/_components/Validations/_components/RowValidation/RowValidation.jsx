@@ -319,7 +319,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
 
-      if (candidateRule.expressionType == 'ifThenClause') {
+      if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
         setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
       }
