@@ -349,7 +349,7 @@ export const ShareRights = ({
             onChange={event => onSetAccount(event.target.value)}
             placeholder={placeholder}
             ref={inputRef}
-            style={{ marginBottom: '0rem' }}
+            style={{ margin: '0.3rem 0' }}
             value={userRight.account}
           />
         </div>
@@ -366,6 +366,7 @@ export const ShareRights = ({
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
             ref={dropdownRef}
+            style={{ margin: '0.3rem 0' }}
             value={first(roleOptions.filter(option => option.role === userRight.role))}
           />
         </div>
