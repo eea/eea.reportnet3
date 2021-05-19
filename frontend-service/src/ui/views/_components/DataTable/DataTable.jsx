@@ -839,7 +839,7 @@ export class DataTable extends Component {
   }
 
   onColumnDragStart(event) {
-    if (this.columnResizing) {
+    if (this.columnResizing || !this.reorderIndicatorUp) {
       event.preventDefault();
       return;
     }
