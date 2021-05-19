@@ -51,7 +51,8 @@ export const ShareRights = ({
 }) => {
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
   const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
-  const notDeletableRoles = [config.permissions.roles.STEWARD.label, config.permissions.roles.CUSTODIAN.label];
+  // const notDeletableRoles = [config.permissions.roles.STEWARD.label, config.permissions.roles.CUSTODIAN.label];
+  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
   const filterOptions = [
@@ -324,13 +325,17 @@ export const ShareRights = ({
   };
 
   const renderRoleColumnTemplate = userRight => {
-    const [option] = roleOptions.filter(option => option.label === userRight.role);
+    // const [option] = roleOptions.filter(option => option.label === userRight.role);
+    const [option] = roleOptions.filter(option => option.role === userRight.role);
 
     return <div>{option.label}</div>;
   };
 
   const renderRightManagement = () => {
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
+
+    console.log(`roleOptions`, roleOptions);
+    console.log(`userRight.role`, userRight.role);
 
     return (
       <div className={styles.manageDialog}>
@@ -356,13 +361,13 @@ export const ShareRights = ({
           <Dropdown
             appendTo={document.body}
             id="rolesDropdown"
-            onChange={event => onRoleChange(event.target.value.label)}
+            onChange={event => onRoleChange(event.target.value.role)}
             onKeyPress={event => onEnterKey(event.key, userRight)}
             optionLabel="label"
             options={roleOptions}
             placeholder={resources.messages['selectRole']}
             ref={dropdownRef}
-            value={first(roleOptions.filter(option => option.label === userRight.role))}
+            value={first(roleOptions.filter(option => option.role === userRight.role))}
           />
         </div>
       </div>
