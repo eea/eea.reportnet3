@@ -87,7 +87,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -874,12 +873,13 @@ public class FileTreatmentHelper implements DisposableBean {
     LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
     boolean readOnly =
         tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
-    Long totalRecords =
-        tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
+    tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
 
     // get list paginated of old records to modify
-    List<RecordValue> oldRecords = recordRepository.findByTableValueNoOrderOptimized(
-        tableSchema.getIdTableSchema().toString(), PageRequest.of(0, totalRecords.intValue()));
+    TableValue targetTable =
+        tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+    List<RecordValue> oldRecords =
+        recordRepository.findOrderedNativeRecord(targetTable.getId(), datasetId);
     // sublist records to insert
     List<RecordValue> recordsToSave = new ArrayList<>();
 
@@ -897,11 +897,13 @@ public class FileTreatmentHelper implements DisposableBean {
       List<ObjectId> readOnlyFields =
           tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
               .map(FieldSchema::getIdFieldSchema).collect(Collectors.toList());
-      if (readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
-        Map<Integer, Integer> mapPosition = mapPositionReadOnlyFieldsForReference(readOnlyFields,
-            oldRecords.get(0), recordList.get(0));
+      if (!CollectionUtils.isEmpty(oldRecords)
+          && readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
         for (RecordValue oldRecord : oldRecords) {
+          Map<Integer, Integer> mapPosition =
+              mapPositionReadOnlyFieldsForReference(readOnlyFields, oldRecord, recordList.get(0));
           findByReadOnlyRecords(mapPosition, oldRecord, recordList);
+          oldRecord.setTableValue(targetTable);
           recordsToSave.add(oldRecord);
         }
       }
@@ -921,15 +923,16 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void refillFields(RecordValue oldRecord, List<FieldValue> fieldValues) {
     if (fieldValues != null) {
-      oldRecord.getFields().stream()
-          .forEach(oldField -> oldField.setValue(fieldValues.stream()
-              .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
-              .map(FieldValue::getValue).findFirst().orElse("")));
+      oldRecord.getFields().stream().forEach(oldField -> {
+        oldField.setValue(fieldValues.stream()
+            .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
+            .map(FieldValue::getValue).findFirst().orElse(""));
+        oldField.setRecord(oldRecord);
+      });
     } else {
       oldRecord.getFields().forEach(field -> field.setValue(""));
     }
   }
-
 
   /**
    * Map position read only fields for reference.
