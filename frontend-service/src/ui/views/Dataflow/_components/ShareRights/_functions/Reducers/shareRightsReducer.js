@@ -7,8 +7,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
       return {
         ...state,
         userRight: { account: '', isNew: true, role: '' },
-        isEditingModal: false,
-        accountHasError: false
+        isEditingModal: false
       };
 
     case 'ON_DATA_CHANGE':
@@ -78,6 +77,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'ON_RESET_ALL':
       return {
         ...state,
+        accountHasError: false,
         actionsButtons: { id: null, isEditing: false, isDeleting: false },
         loadingStatus: { isActionButtonsLoading: false, isInitialLoading: false },
         userRight: { account: '', isNew: true, role: '' },

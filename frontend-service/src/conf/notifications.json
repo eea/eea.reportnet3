@@ -437,7 +437,7 @@
           "key": "DELETE_REPORTER_ERROR"
         },
         {
-          "key": "ACCOUNT_NOT_FOUND_ERROR"
+          "key": "EMAIL_NOT_FOUND_ERROR"
         },
         {
           "key": "IMPOSSIBLE_ROLE_ERROR"

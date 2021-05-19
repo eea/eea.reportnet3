@@ -51,7 +51,6 @@ export const ShareRights = ({
 }) => {
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
   const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
-  // const notDeletableRoles = [config.permissions.roles.STEWARD.label, config.permissions.roles.CUSTODIAN.label];
   const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
@@ -106,6 +105,8 @@ export const ShareRights = ({
     );
     return sameAccounts.length > 0;
   };
+
+  const hasEmptyData = userRight => isEmpty(userRight.account) || isEmpty(userRight.role);
 
   const isRoleChanged = userRight => {
     const [initialUser] = shareRightsState.clonedUserRightList.filter(fUserRight => fUserRight.id === userRight.id);
@@ -287,7 +288,7 @@ export const ShareRights = ({
             type: 'SET_ACCOUNT_NOT_FOUND',
             payload: { accountNotFound: true, accountHasError: true }
           });
-          notificationContext.add({ type: 'ACCOUNT_NOT_FOUND_ERROR' });
+          notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' });
         } else if (error?.response?.status === 400) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
           notificationContext.add({ type: 'IMPOSSIBLE_ROLE_ERROR' });
@@ -325,7 +326,6 @@ export const ShareRights = ({
   };
 
   const renderRoleColumnTemplate = userRight => {
-    // const [option] = roleOptions.filter(option => option.label === userRight.role);
     const [option] = roleOptions.filter(option => option.role === userRight.role);
 
     return <div>{option.label}</div>;
@@ -334,14 +334,13 @@ export const ShareRights = ({
   const renderRightManagement = () => {
     const hasError = !isEmpty(userRight.account) && userRight.isNew && shareRightsState.accountHasError;
 
-    console.log(`roleOptions`, roleOptions);
-    console.log(`userRight.role`, userRight.role);
-
     return (
       <div className={styles.manageDialog}>
         <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="accountInput">
-            {resources.messages['account']}
+            {userType === userTypes.REQUESTER
+              ? resources.messages['userRolesRequesterInputLabel']
+              : resources.messages['userRolesReporterInputLabel']}
           </label>
           <InputText
             className={hasError ? styles.error : ''}
@@ -379,14 +378,14 @@ export const ShareRights = ({
   const renderDialogLayout = children => <div className={styles.shareRightsModal}>{children}</div>;
 
   const getTooltipMessage = userRight => {
-    if (userRight.isNew && isRepeatedAccount(userRight.account)) {
-      return 'User has an assigned role';
-    } else if (!userRight.isNew && !isRoleChanged(userRight)) {
-      return 'The role is note changed';
+    if (hasEmptyData(userRight)) {
+      return resources.messages['incompleteDataTooltip'];
+    } else if (userRight.isNew && isRepeatedAccount(userRight.account)) {
+      return resources.messages['emailAlreadyAssignedTooltip'];
     } else if (!isValidEmail(userRight.account)) {
-      return 'This is not a valid email';
+      return resources.messages['notValidEmailTooltip'];
     } else if (shareRightsState.accountHasError) {
-      return 'There is some error with account';
+      return resources.messages['emailHasErrorTooltip'];
     } else {
       return null;
     }
@@ -447,7 +446,10 @@ export const ShareRights = ({
           confirmTooltip={getTooltipMessage(userRight)}
           dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
           disabledConfirm={
-            isLoadingButton || (!userRight.isNew && !isRoleChanged(userRight)) || shareRightsState.accountHasError
+            hasEmptyData(userRight) ||
+            isLoadingButton ||
+            (!userRight.isNew && !isRoleChanged(userRight)) ||
+            shareRightsState.accountHasError
           }
           header={shareRightsState.isEditingModal ? editConfirmHeader : addConfirmHeader}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
