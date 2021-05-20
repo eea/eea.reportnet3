@@ -399,6 +399,14 @@ export const ShareRights = ({
       {!isEmpty(shareRightsState.userRightList) && (
         <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
       )}
+      <div
+        className={
+          isEmpty(shareRightsState.userRightList)
+            ? styles.wrapperNoUserRoles
+            : isEmpty(shareRightsState.filteredData)
+            ? styles.wrapperEmptyFilter
+            : ''
+        }>
         {isEmpty(shareRightsState.userRightList) ? (
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : isEmpty(shareRightsState.filteredData) ? (
