@@ -35,9 +35,9 @@ export class MultiSelect extends Component {
     inputClassName: null,
     inputId: null,
     isFilter: false,
+    isLoadingData: false,
     itemTemplate: null,
     label: null,
-    isLoadingData: false,
     maxSelectedLabels: 3,
     notCheckAllHeader: null,
     onBlur: null,
@@ -45,12 +45,12 @@ export class MultiSelect extends Component {
     onFilterInputChangeBackend: null,
     onFocus: null,
     optionLabel: null,
-    options: null,
     optionValue: null,
+    options: null,
     placeholder: null,
     scrollHeight: '200px',
-    selectedItemsLabel: '{0} items selected',
     selectedItemTemplate: null,
+    selectedItemsLabel: '{0} items selected',
     style: null,
     tabIndex: '0',
     tooltip: null,
@@ -409,11 +409,11 @@ export class MultiSelect extends Component {
   }
 
   isAllChecked(visibleOptions) {
-    if (this.hasFilter())
-      return (
-        this.props.value && visibleOptions && visibleOptions.length && this.props.value.length === visibleOptions.length
-      );
-    else return this.props.value && this.props.options && this.props.value.length === this.props.options.length;
+    if (this.hasFilter()) {
+      return this.props?.value?.length === visibleOptions?.length;
+    } else {
+      return this.props?.value?.length === this.props?.options?.length;
+    }
   }
 
   filterOptions(options) {
@@ -484,8 +484,8 @@ export class MultiSelect extends Component {
     if (this.props.selectedItemTemplate) {
       if (!this.isEmpty()) {
         if (this.props.value.length <= this.props.maxSelectedLabels) {
-          return this.props.value.map((val, index) => {
-            return <Fragment key={index}>{this.props.selectedItemTemplate(val)}</Fragment>;
+          return this.props.value.map(val => {
+            return <Fragment key={val}>{this.props.selectedItemTemplate(val)}</Fragment>;
           });
         } else {
           return this.getSelectedItemsLabel();
@@ -572,20 +572,20 @@ export class MultiSelect extends Component {
         items = this.filterOptions(items);
       }
 
-      items = items.map((option, index) => {
+      items = items.map(option => {
         let optionLabel = this.getOptionLabel(option);
 
         return (
           <MultiSelectItem
             disabled={option.disabled}
-            key={optionLabel + '_' + index}
+            key={optionLabel}
             label={optionLabel}
-            option={option}
-            template={this.props.itemTemplate}
-            selected={this.isSelected(option)}
             onClick={this.onOptionClick}
             onKeyDown={this.onOptionKeyDown}
+            option={option}
+            selected={this.isSelected(option)}
             tabIndex={this.props.tabIndex}
+            template={this.props.itemTemplate}
           />
         );
       });
@@ -596,8 +596,8 @@ export class MultiSelect extends Component {
 
     return (
       <div
-        id={this.props.id}
         className={className}
+        id={this.props.id}
         onClick={this.onClick}
         ref={el => (this.container = el)}
         style={this.props.style}>
@@ -619,10 +619,10 @@ export class MultiSelect extends Component {
           <span className="p-multiselect-trigger-icon pi pi-chevron-down p-c"></span>
         </div>
         <MultiSelectPanel
-          ref={el => (this.panel = el)}
-          header={header}
           appendTo={this.props.appendTo}
+          header={header}
           onClick={this.onPanelClick}
+          ref={el => (this.panel = el)}
           scrollHeight={this.props.scrollHeight}>
           {items}
         </MultiSelectPanel>

@@ -413,10 +413,34 @@
           "key": "COPY_DATASET_SCHEMA_NOT_FOUND_EVENT"
         },
         {
-          "key": "DELETE_EDITOR_ERROR"
+          "key": "ADD_REQUESTER_ERROR"
+        },
+        {
+          "key": "GET_REQUESTERS_ERROR"
+        },
+        {
+          "key": "UPDATE_REQUESTER_ERROR"
+        },
+        {
+          "key": "DELETE_REQUESTER_ERROR"
+        },
+        {
+          "key": "ADD_REPORTER_ERROR"
+        },
+        {
+          "key": "GET_REPORTERS_ERROR"
+        },
+        {
+          "key": "UPDATE_REPORTER_ERROR"
         },
         {
           "key": "DELETE_REPORTER_ERROR"
+        },
+        {
+          "key": "EMAIL_NOT_FOUND_ERROR"
+        },
+        {
+          "key": "IMPOSSIBLE_ROLE_ERROR"
         },
         {
           "key": "ERROR_LOADING_EU_DATASET_SCHEMA"
@@ -505,6 +529,10 @@
         },
         {
           "key": "NOT_ALLOWED_ERROR",
+          "lifeTime": 5000
+        },
+        {
+          "key": "NOT_FOUND_ERROR",
           "lifeTime": 5000
         },
         {

@@ -913,8 +913,8 @@ const DataViewer = withRouter(
         <Button
           className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
           disabled={isSaving || records.isSaveDisabled}
-          label={resources.messages['save']}
           icon={!isSaving ? 'check' : 'spinnerAnimate'}
+          label={resources.messages['save']}
           onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
@@ -963,8 +963,8 @@ const DataViewer = withRouter(
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
-          label={areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']}
           icon={'check'}
+          label={areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']}
           onClick={
             areEquals(records.geometryType, 'POINT')
               ? () => onSavePoint(records.newPoint)
@@ -1017,9 +1017,9 @@ const DataViewer = withRouter(
     const mapRender = () => (
       <Map
         enabledDrawElements={records.drawElements}
+        geoJson={records.mapGeoJson}
         geometryType={records.geometryType}
         hasLegend={true}
-        geoJson={records.mapGeoJson}
         onSelectPoint={onSelectPoint}
         selectedCRS={records.crs}></Map>
     );
@@ -1102,10 +1102,10 @@ const DataViewer = withRouter(
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={isExportable}
-          isFilterable={isFilterable}
           isFilterValidationsActive={isFilterValidationsActive}
-          isLoading={isLoading}
+          isFilterable={isFilterable}
           isGroupedValidationSelected={isGroupedValidationSelected}
+          isLoading={isLoading}
           isValidationSelected={isValidationSelected}
           levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
@@ -1132,7 +1132,6 @@ const DataViewer = withRouter(
           <DataTable
             contextMenuSelection={records.selectedRecord}
             editable={hasWritePermissions && !tableReadOnly}
-            id={tableId}
             first={records.firstPageRecord}
             footer={
               hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
@@ -1148,6 +1147,7 @@ const DataViewer = withRouter(
                 />
               ) : null
             }
+            id={tableId}
             lazy={true}
             loading={isLoading}
             onContextMenu={
@@ -1176,12 +1176,12 @@ const DataViewer = withRouter(
             rowClassName={rowClassName}
             rows={records.recordsPerPage}
             rowsPerPageOptions={[5, 10, 20, 100]}
-            scrollable={true}
             scrollHeight="70vh"
+            scrollable={true}
             selectionMode="single"
-            sortable={true}
             sortField={sort.sortField}
             sortOrder={sort.sortOrder}
+            sortable={true}
             totalRecords={
               !isNull(records.totalFilteredRecords) &&
               !isUndefined(records.totalFilteredRecords) &&
@@ -1235,7 +1235,7 @@ const DataViewer = withRouter(
                   className={column === 'field' ? styles.fieldColumn : ''}
                   field={column}
                   headerStyle={{ display: 'none' }}
-                  key={i}
+                  key={column}
                 />
               ))}
             </DataTable>
@@ -1244,17 +1244,17 @@ const DataViewer = withRouter(
 
         {importTableDialogVisible && (
           <CustomFileUpload
+            accept=".csv"
+            chooseLabel={resources.messages['selectFile']}
+            className={styles.FileUpload}
             dialogClassName={styles.Dialog}
             dialogHeader={`${resources.messages['uploadTable']}${tableName}`}
-            dialogOnHide={() => setImportTableDialogVisible(false)}
+            dialogOnHide={() => setImportTableDialogVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
             dialogVisible={importTableDialogVisible}
-            accept=".csv"
-            chooseLabel={resources.messages['selectFile']} //allowTypes="/(\.|\/)(csv)$/"
-            className={styles.FileUpload}
-            isDialog={true}
             fileLimit={1}
             infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            isDialog={true}
             mode="advanced"
             multiple={false}
             name="file"
@@ -1270,24 +1270,24 @@ const DataViewer = withRouter(
 
         {isAttachFileVisible && (
           <CustomFileUpload
+            accept={getAttachExtensions || '*'}
+            chooseLabel={resources.messages['selectFile']}
+            className={styles.FileUpload}
             dialogClassName={styles.Dialog}
             dialogHeader={`${resources.messages['uploadAttachment']}`}
             dialogOnHide={() => setIsAttachFileVisible(false)}
             dialogVisible={isAttachFileVisible}
-            accept={getAttachExtensions || '*'}
-            chooseLabel={resources.messages['selectFile']}
-            className={styles.FileUpload}
             fileLimit={1}
-            isDialog={true}
             infoTooltip={infoAttachTooltip}
-            mode="advanced"
-            multiple={false}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+            isDialog={true}
             maxFileSize={
               !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
                 ? records.selectedMaxSize * 1000 * 1024
                 : config.MAX_ATTACHMENT_SIZE
             }
+            mode="advanced"
+            multiple={false}
             name="file"
             onUpload={onAttach}
             operation="PUT"
@@ -1321,8 +1321,8 @@ const DataViewer = withRouter(
                   isSaving={isSaving}
                   onChangeForm={onEditAddFormInput}
                   onConditionalChange={onConditionalChange}
-                  onShowFieldInfo={onShowFieldInfo}
                   onShowCoordinateError={onShowCoordinateError}
+                  onShowFieldInfo={onShowFieldInfo}
                   records={records}
                   reporting={reporting}
                 />
@@ -1405,8 +1405,8 @@ const DataViewer = withRouter(
             className="edit-table"
             disabledConfirm={isEmpty(records.pastedRecords)}
             divRef={divRef}
-            header={resources.messages['pasteRecords']}
             hasPasteOption={true}
+            header={resources.messages['pasteRecords']}
             isPasting={isPasting}
             labelCancel={resources.messages['cancel']}
             labelConfirm={resources.messages['save']}
@@ -1432,8 +1432,8 @@ const DataViewer = withRouter(
         )}
         {records.isMapOpen && (
           <Dialog
-            className={'map-data'}
             blockScroll={false}
+            className={'map-data'}
             footer={saveMapGeoJsonDialogFooter}
             header={resources.messages['geospatialData']}
             modal={true}

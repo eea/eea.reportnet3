@@ -1,5 +1,7 @@
 import { useContext, forwardRef } from 'react';
 
+import ReactTooltip from 'react-tooltip';
+
 import { isUndefined } from 'lodash';
 
 import { Button } from 'ui/views/_components/Button';
@@ -12,7 +14,9 @@ const ConfirmDialog = forwardRef((props, _) => {
     className,
     classNameCancel,
     classNameConfirm,
+    confirmTooltip,
     dialogStyle,
+    disabledConfirm,
     divRef,
     footerAddon = null,
     hasPasteOption = false,
@@ -20,7 +24,6 @@ const ConfirmDialog = forwardRef((props, _) => {
     iconCancel,
     iconConfirm,
     isPasting,
-    disabledConfirm,
     labelCancel,
     labelConfirm,
     onConfirm,
@@ -90,17 +93,24 @@ const ConfirmDialog = forwardRef((props, _) => {
       ) : (
         <>
           {footerAddon}
-          <Button
-            className={`${
-              !isUndefined(classNameConfirm)
-                ? classNameConfirm
-                : `p-button-primary ${!disabledConfirm ? 'p-button-animated-blink' : ''}`
-            } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
-            disabled={disabledConfirm}
-            icon={iconConfirm ? iconConfirm : 'check'}
-            label={labelConfirm}
-            onClick={onConfirm}
-          />
+          <span data-for="confirmTooltipId" data-tip>
+            <Button
+              className={`${
+                !isUndefined(classNameConfirm)
+                  ? classNameConfirm
+                  : `p-button-primary ${!disabledConfirm ? 'p-button-animated-blink' : ''}`
+              } ${!disabledConfirm ? 'p-button-animated-blink' : null}`}
+              disabled={disabledConfirm}
+              icon={iconConfirm ? iconConfirm : 'check'}
+              label={labelConfirm}
+              onClick={onConfirm}
+            />
+          </span>
+          {confirmTooltip && (
+            <ReactTooltip effect="solid" id="confirmTooltipId" place="top">
+              {confirmTooltip}
+            </ReactTooltip>
+          )}
         </>
       )}
       <Button
@@ -114,7 +124,7 @@ const ConfirmDialog = forwardRef((props, _) => {
   );
 
   return (
-    <div className="confirmDialog" onPaste={onPaste} ref={divRef} onKeyPress={!disabledConfirm ? onKeyPress : null}>
+    <div className="confirmDialog" onKeyPress={!disabledConfirm ? onKeyPress : null} onPaste={onPaste} ref={divRef}>
       <Dialog
         className={className}
         focusOnShow={true}

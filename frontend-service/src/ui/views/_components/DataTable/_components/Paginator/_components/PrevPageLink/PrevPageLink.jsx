@@ -17,7 +17,7 @@ export class PrevPageLink extends Component {
     let className = classNames('p-paginator-prev p-paginator-element p-link', { 'p-disabled': this.props.disabled });
 
     return (
-      <button type="button" className={className} onClick={this.props.onClick} disabled={this.props.disabled}>
+      <button className={className} disabled={this.props.disabled} onClick={this.props.onClick} type="button">
         <span className="p-paginator-icon pi pi-caret-left"></span>
         <span className="srOnly">Previous page</span>
       </button>

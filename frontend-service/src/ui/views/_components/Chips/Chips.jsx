@@ -209,8 +209,8 @@ const Chips = ({
     return (
       <li className="p-chips-input-token">
         <InputText
-          aria-labelledby={ariaLabelledBy}
           aria-hidden={disabled || isMaxedOut()}
+          aria-labelledby={ariaLabelledBy}
           className={hasErrors ? styles.chipsTokenError : ''}
           disabled={disabled || isMaxedOut()}
           id={name}
@@ -226,7 +226,7 @@ const Chips = ({
           ref={inputElement}
           type="text"
         />
-        <label htmlFor={name} className="srOnly">
+        <label className="srOnly" htmlFor={name}>
           {name}
         </label>
       </li>
@@ -241,8 +241,8 @@ const Chips = ({
 
     return (
       <li
-        key={index}
         className="p-chips-token p-highlight"
+        key={index}
         onMouseDownCapture={e => {
           if (e.button === 1) {
             e.preventDefault();
@@ -271,7 +271,7 @@ const Chips = ({
     const inputElement = renderInputElement();
     if (value) {
       return (
-        <ul ref={listElement} className={className} onClick={focusInput}>
+        <ul className={className} onClick={focusInput} ref={listElement}>
           {items}
           {!disabled && inputElement}
           {hasErrors && showErrorMessage && renderErrorMessage()}
@@ -292,7 +292,7 @@ const Chips = ({
   };
 
   return (
-    <div id={id} className={`p-chips p-component ${className}`} style={style}>
+    <div className={`p-chips p-component ${className}`} id={id} style={style}>
       {renderList()}
     </div>
   );

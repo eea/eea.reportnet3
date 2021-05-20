@@ -14,7 +14,7 @@ import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
 
 import { Dropdown } from 'ui/views/_components/Dropdown';
-import { Map as MapComponent, FeatureGroup, GeoJSON, Marker, Popup } from 'react-leaflet';
+import { Map as MapComponent, GeoJSON, Marker, Popup } from 'react-leaflet';
 // import { EditControl } from 'react-leaflet-draw';
 // import ReactTooltip from 'react-tooltip';
 
@@ -253,9 +253,9 @@ export const Map = ({
         if (MapUtils.checkValidJSONCoordinates(geoJson)) {
           return (
             <GeoJSON
+              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
-              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
             />
           );
         }
@@ -268,9 +268,9 @@ export const Map = ({
         if (MapUtils.checkValidJSONMultipleCoordinates(geoJson)) {
           return (
             <GeoJSON
+              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
-              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
             />
           );
         }
@@ -355,7 +355,7 @@ export const Map = ({
                   : resources.messages['geometryCoordinates']}
                 :{' '}
               </label>
-              <label data-tip data-for="coordinatesTooltip">
+              <label data-for="coordinatesTooltip" data-tip>
                 {MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)
                   ? MapUtils.printCoordinates(mapGeoJson, true, geometryType)
                   : `{Latitude: , Longitude: }`}
@@ -398,8 +398,8 @@ export const Map = ({
           optionLabel="label"
           options={themes}
           placeholder="Select a theme"
-          value={currentTheme}
           style={{ width: '20%' }}
+          value={currentTheme}
         />
         <Dropdown
           ariaLabel={'crs'}
@@ -421,17 +421,14 @@ export const Map = ({
           optionLabel="label"
           options={crs}
           placeholder="Select a CRS"
-          value={currentCRS}
           style={{ width: '20%' }}
+          value={currentCRS}
         />
       </div>
       <div>
         <MapComponent
-          style={{ height: '60vh', marginTop: '6px' }}
-          doubleClickZoom={false}
           center={projectGeoJsonCoordinates(getCenter(), true)}
-          zoom="4"
-          ref={mapRef}
+          doubleClickZoom={false}
           onDblclick={
             TextUtils.areEquals(geometryType, 'POINT')
               ? e => {
@@ -443,19 +440,22 @@ export const Map = ({
                   mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
                 }
               : null
-          }>
+          }
+          ref={mapRef}
+          style={{ height: '60vh', marginTop: '6px' }}
+          zoom="4">
           {getGeoJson()}
           {isNewPositionMarkerVisible && (
             <Marker
               draggable={false}
               icon={NewMarkerIcon}
-              position={projectPointCoordinates(newPositionMarker)}
               onClick={e => {
                 if (!popUpVisible) {
                   setPopUpVisible(true);
                 }
                 mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
-              }}>
+              }}
+              position={projectPointCoordinates(newPositionMarker)}>
               <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
             </Marker>
           )}

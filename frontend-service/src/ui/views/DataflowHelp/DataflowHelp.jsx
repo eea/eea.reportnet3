@@ -34,7 +34,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const DataflowHelp = withRouter(({ match, history }) => {
+export const DataflowHelp = withRouter(({ history, match }) => {
   const {
     params: { dataflowId }
   } = match;
@@ -147,7 +147,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       const { data } = await DataflowService.reporting(dataflowId);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
-          const uniqueDatasetSchemas = data.datasets.filter((dataset, pos, arr) => {
+          const allDatasets = [...data.referenceDatasets, ...data.datasets];
+          const uniqueDatasetSchemas = allDatasets.filter((dataset, pos, arr) => {
             return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
           });
           const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
@@ -219,11 +220,11 @@ export const DataflowHelp = withRouter(({ match, history }) => {
   if (documents) {
     return renderLayout(
       <Fragment>
-        <Title title={`${resources.messages['dataflowHelp']} `} subtitle={dataflowName} icon="info" iconSize="3.5rem" />
+        <Title icon="info" iconSize="3.5rem" subtitle={dataflowName} title={`${resources.messages['dataflowHelp']} `} />
         <TabView activeIndex={0} hasQueryString={false} onTabClick={e => setSelectedIndex(e)}>
           <TabPanel
-            headerClassName="dataflowHelp-documents-help-step"
-            header={resources.messages['supportingDocuments']}>
+            header={resources.messages['supportingDocuments']}
+            headerClassName="dataflowHelp-documents-help-step">
             <Documents
               dataflowId={dataflowId}
               documents={documents}
@@ -238,7 +239,7 @@ export const DataflowHelp = withRouter(({ match, history }) => {
               sortOrderDocuments={sortOrderDocuments}
             />
           </TabPanel>
-          <TabPanel headerClassName="dataflowHelp-weblinks-help-step" header={resources.messages['webLinks']}>
+          <TabPanel header={resources.messages['webLinks']} headerClassName="dataflowHelp-weblinks-help-step">
             <WebLinks
               dataflowId={dataflowId}
               isLoading={isLoadingWebLinks}
@@ -253,8 +254,8 @@ export const DataflowHelp = withRouter(({ match, history }) => {
           </TabPanel>
           <TabPanel
             disabled={isEmpty(datasetsSchemas)}
-            headerClassName="dataflowHelp-schemas-help-step"
             header={resources.messages['datasetSchemas']}
+            headerClassName="dataflowHelp-schemas-help-step"
             rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
@@ -267,6 +268,6 @@ export const DataflowHelp = withRouter(({ match, history }) => {
       </Fragment>
     );
   } else {
-    return <Fragment />;
+    return null;
   }
 });

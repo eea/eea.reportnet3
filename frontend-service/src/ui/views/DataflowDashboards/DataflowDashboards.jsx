@@ -87,9 +87,9 @@ export const DataflowDashboards = withRouter(
               className={`p-button-rounded ${
                 chartState[schema.datasetSchemaId] ? 'p-button-primary' : 'p-button-secondary'
               } ${styles.dashboardsButton}`}
+              icon={chartState[schema.datasetSchemaId] ? 'eye' : 'eye-slash'}
               key={schema.datasetSchemaId}
               label={schema.datasetSchemaName}
-              icon={chartState[schema.datasetSchemaId] ? 'eye' : 'eye-slash'}
               onClick={() => chartDispatch({ type: 'TOGGLE_SCHEMA_CHART', payload: schema.datasetSchemaId })}
             />
           );
@@ -116,7 +116,8 @@ export const DataflowDashboards = withRouter(
 
     return layout(
       <Fragment>
-        <Title title={resources.messages['dashboards']} subtitle={dataflowName} icon="barChart" iconSize="4.5rem" />
+        <Title icon="barChart" iconSize="4.5rem" subtitle={dataflowName} title={resources.messages['dashboards']} />
+
         <div className={styles.validationChartWrap}>
           <h2 className={styles.dashboardType}>
             {resources.messages['validationDashboards']}{' '}

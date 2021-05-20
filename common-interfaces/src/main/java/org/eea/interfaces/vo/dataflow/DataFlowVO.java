@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
@@ -47,6 +48,9 @@ public class DataFlowVO implements Serializable {
 
   /** The test dataset. */
   private List<TestDatasetVO> testDatasets;
+
+  /** The reference datasets. */
+  private List<ReferenceDatasetVO> referenceDatasets;
 
   /** The description. */
   private String description;

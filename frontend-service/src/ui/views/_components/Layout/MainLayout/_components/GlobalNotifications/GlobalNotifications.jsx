@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
@@ -53,7 +53,9 @@ const GlobalNotifications = () => {
         notification.content.datasetName
       );
 
-      DownloadFile(data, notification.content.datasetName);
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.datasetName);
+      }
     } catch (error) {
       console.error(error);
       notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
@@ -95,7 +97,7 @@ const GlobalNotifications = () => {
 
         notificationContext.add({
           type: 'EXPORT_DATASET_FILE_DOWNLOAD',
-          onClick: () => DownloadFile(datasetData, getFileName())
+          onClick: () => datasetData.size !== 0 && DownloadFile(datasetData, getFileName())
         });
       }
     } catch (error) {
@@ -217,7 +219,7 @@ const GlobalNotifications = () => {
     notifyValidateDataInitDesign
   );
 
-  return <Fragment />;
+  return <div />;
 };
 
 export { GlobalNotifications };

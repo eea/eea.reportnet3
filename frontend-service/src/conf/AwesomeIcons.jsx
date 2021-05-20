@@ -92,7 +92,10 @@ import {
   faTable,
   faDownload,
   faVolumeUp,
-  faFlagCheckered
+  faFlagCheckered,
+  faUpload,
+  faFile,
+  faClock
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -329,6 +332,8 @@ export const AwesomeIcons = icon => {
       return faDrawPolygon;
     case 'power-off':
       return faPowerOff;
+    case 'file':
+      return faFile;
     case 'pps':
       return faFilePowerpoint;
     case 'ppt':
@@ -369,6 +374,8 @@ export const AwesomeIcons = icon => {
       return faFileImage;
     case 'tiff':
       return faFileImage;
+    case 'upload':
+        return faUpload;
     case 'url':
       return faGlobeEurope;
     case 'users':
@@ -403,6 +410,8 @@ export const AwesomeIcons = icon => {
       return faVolumeUp;
     case 'flag':
       return faFlagCheckered;
+    case 'clock':
+      return faClock;
     default:
       return faFileAlt;
   }

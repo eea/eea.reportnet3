@@ -27,8 +27,8 @@ export const RowRadioButton = props => {
 };
 
 RowRadioButton.defaultProps = {
-  rowData: null,
   onClick: null,
+  rowData: null,
   selected: false
 };
 

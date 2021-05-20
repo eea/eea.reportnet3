@@ -106,12 +106,12 @@ export const UserList = ({ dataflowId, representativeId }) => {
 
           {!isEmpty(filteredData) ? (
             <DataTable
-              value={filteredData}
-              paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
               paginator={true}
+              paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
-              totalRecords={userListData.length}>
+              totalRecords={userListData.length}
+              value={filteredData}>
               {isNil(representativeId) && (
                 <Column field="dataflowName" header={resources.messages['dataflowName']} sortable={true} />
               )}

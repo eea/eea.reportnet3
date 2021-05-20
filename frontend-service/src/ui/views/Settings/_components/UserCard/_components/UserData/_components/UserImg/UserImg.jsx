@@ -65,15 +65,15 @@ const UserImg = () => {
 
   const listOfImages = () =>
     config.avatars.map((avatar, i) => (
-      <div className={styles.gridItem} key={i}>
+      <div className={styles.gridItem} key={avatar.name}>
         <img
-          alt="Image to choose"
+          alt="Avatar to choose"
           className={styles.gridItem}
-          src={avatar.base64}
           onClick={() => {
             updateImage(splitBase64Image(avatar.base64));
             setIsAvatarDialogVisible(false);
           }}
+          src={avatar.base64}
         />
       </div>
     ));
@@ -118,27 +118,27 @@ const UserImg = () => {
           }}
           type="file"
         />
-        <label htmlFor="userIcon" className="srOnly">
+        <label className="srOnly" htmlFor="userIcon">
           {resources.messages['selectImage']}
         </label>
         <img
-          alt="User profile image"
+          alt="User profile avatar"
           className={styles.userDataIcon}
-          data-tip
-          data-for="addAvatar"
           data-event="click"
+          data-for="addAvatar"
+          data-tip
+          icon={<FontAwesomeIcon className={styles.userDataIcon} icon={AwesomeIcons('user-profile')} />}
           ref={uploadedImage}
-          icon={<FontAwesomeIcon icon={AwesomeIcons('user-profile')} className={styles.userDataIcon} />}
           src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
         />
-        <Icon icon="edit" className={styles.editIcon} />
+        <Icon className={styles.editIcon} icon="edit" />
       </div>
       {isAvatarDialogVisible && (
         <Dialog
           header={resources.messages['selectImage']}
-          visible={isAvatarDialogVisible}
+          onHide={e => setIsAvatarDialogVisible(false)}
           style={{ width: '80%' }}
-          onHide={e => setIsAvatarDialogVisible(false)}>
+          visible={isAvatarDialogVisible}>
           <div className={styles.gridContainer}>{listOfImages()}</div>
         </Dialog>
       )}

@@ -90,8 +90,6 @@ RadioButton.propTypes = {
   required: PropTypes.bool,
   style: PropTypes.object,
   tabIndex: PropTypes.number,
-  tooltip: PropTypes.string,
-  tooltipOptions: PropTypes.object,
   value: PropTypes.any
 };
 
@@ -107,7 +105,5 @@ RadioButton.defaultProps = {
   required: false,
   style: null,
   tabIndex: null,
-  tooltip: null,
-  tooltipOptions: null,
   value: null
 };

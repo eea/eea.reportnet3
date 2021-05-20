@@ -1,4 +1,4 @@
-import { useState, useContext, Fragment } from 'react';
+import { useState, useContext } from 'react';
 
 import styles from './ValidationExpressionGroup.module.scss';
 
@@ -6,10 +6,11 @@ import { config } from 'conf/';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import isEmpty from 'lodash/isEmpty';
+import first from 'lodash/first';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 
@@ -45,16 +46,16 @@ const ValidationExpressionGroup = ({
       return (
         <FontAwesomeIcon
           icon={AwesomeIcons('expanded')}
-          style={btnStyle}
           onClick={e => expressionsVisibilityToggle()}
+          style={btnStyle}
         />
       );
     } else {
       return (
         <FontAwesomeIcon
           icon={AwesomeIcons('collapsed')}
-          style={btnStyle}
           onClick={e => expressionsVisibilityToggle()}
+          style={btnStyle}
         />
       );
     }
@@ -67,6 +68,7 @@ const ValidationExpressionGroup = ({
           expressionValues={expression}
           fieldType={fieldType}
           isDisabled={false}
+          key={expression.expressionId}
           onExpressionDelete={onExpressionDelete}
           onExpressionFieldUpdate={onExpressionFieldUpdate}
           onExpressionGroup={onExpressionGroup}
@@ -77,7 +79,7 @@ const ValidationExpressionGroup = ({
         />
       ));
     }
-    return <Fragment></Fragment>;
+    return <div />;
   };
 
   // layouts
@@ -88,9 +90,9 @@ const ValidationExpressionGroup = ({
           <div className={styles.groupRow}>
             <span className={styles.group}>
               <Checkbox
-                onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
-                isChecked={expressionValues.group}
                 disabled={isDisabled}
+                isChecked={expressionValues.group}
+                onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
               />
             </span>
             <span
@@ -98,14 +100,17 @@ const ValidationExpressionGroup = ({
                 showRequiredFields && position > 0 && isEmpty(expressionValues.union) ? 'error' : ''
               }`}>
               <Dropdown
+                appendTo={document.body}
                 disabled={isDisabled || position === 0}
-                placeholder={resourcesContext.messages.union}
+                onChange={e => {
+                  onExpressionFieldUpdate(expressionId, { key: 'union', value: e.target.value.value });
+                }}
                 optionLabel="label"
                 options={config.validations.logicalOperators}
-                onChange={e => {
-                  onExpressionFieldUpdate(expressionId, { key: 'union', value: e.value });
-                }}
-                value={expressionValues.union}
+                placeholder={resourcesContext.messages.union}
+                value={first(
+                  config.validations.logicalOperators.filter(option => option.value === expressionValues.union)
+                )}
               />
             </span>
             <span className={styles.groupToggler}>
@@ -116,11 +121,11 @@ const ValidationExpressionGroup = ({
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
                 disabled={isDisabled}
-                type="button"
                 icon="trash"
                 onClick={e => {
                   onExpressionDelete(expressionId);
                 }}
+                type="button"
               />
             </span>
           </div>

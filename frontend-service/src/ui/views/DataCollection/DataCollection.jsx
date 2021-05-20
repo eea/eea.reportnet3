@@ -14,7 +14,7 @@ import { routes } from 'ui/routes';
 import { Button } from 'ui/views/_components/Button';
 import { Growl } from 'primereact/growl';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { TabsSchema } from 'ui/views/_components/TabsSchema';
 import { Title } from 'ui/views/_components/Title';
@@ -105,21 +105,14 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   };
 
-  const getPosition = e => {
-    const button = e.currentTarget;
-    const left = `${button.offsetLeft}px`;
-    const topValue = button.offsetHeight + button.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = button.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
-  };
-
-  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
-    label: type.text,
-    icon: config.icons['archive'],
-    command: () => onExportDataInternalExtension(type.code)
-  }));
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
+    const extensionsTypes = type.code.split('+');
+    return {
+      label: type.text,
+      icon: extensionsTypes[0],
+      command: () => onExportDataInternalExtension(type.code)
+    };
+  });
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
@@ -239,9 +232,9 @@ export const DataCollection = withRouter(({ match, history }) => {
       levelErrorTypes={levelErrorTypes}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
-      tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}
+      tables={tableSchema}
     />
   );
 
@@ -262,7 +255,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   return layout(
     <Fragment>
-      <Title title={dataCollectionName} subtitle={dataflowName} icon="dataCollection" iconSize="3.5rem" />
+      <Title icon="dataCollection" iconSize="3.5rem" subtitle={dataflowName} title={dataCollectionName} />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
@@ -277,7 +270,6 @@ export const DataCollection = withRouter(({ match, history }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={exportButtonsList}
-              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
             />

@@ -119,8 +119,8 @@ export const DataflowManagement = ({
 
   const renderCancelButton = action => (
     <Button
+      className="p-button-secondary button-right-aligned p-button-animated-blink"
       icon="cancel"
-      className="p-button-secondary button-right-aligned"
       label={resources.messages['cancel']}
       onClick={() => action()}
     />
@@ -139,6 +139,7 @@ export const DataflowManagement = ({
         )}
       </div>
       <Button
+        className={`p-button-primary ${!dataflowManagementState.isSubmitting ? 'p-button-animated-blink' : ''}`}
         disabled={dataflowManagementState.isSubmitting}
         icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
         label={isEditForm ? resources.messages['save'] : resources.messages['create']}
@@ -200,10 +201,10 @@ export const DataflowManagement = ({
       {state.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
           onConfirm={() => onDeleteDataflow()}
           onHide={() => manageDialogs('isDeleteDialogVisible', false)}
           visible={state.isDeleteDialogVisible}>
@@ -217,14 +218,14 @@ export const DataflowManagement = ({
           <p>
             <InputText
               autoFocus={true}
-              id={'deleteDataflow'}
               className={`${styles.inputText}`}
+              id={'deleteDataflow'}
               maxLength={255}
               onChange={event => onConfirmDeleteDataflow(event)}
               ref={deleteInputRef}
               value={state.deleteInput}
             />
-            <label htmlFor="deleteDataflow" className="srOnly">
+            <label className="srOnly" htmlFor="deleteDataflow">
               {resources.messages['deleteDataflowButton']}
             </label>
           </p>

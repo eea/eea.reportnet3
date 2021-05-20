@@ -53,11 +53,11 @@ const Snapshots = ({
         <ConfirmDialog
           className={styles.snapshotDialog}
           classNameConfirm={getConfirmBtnClassnames()}
+          disabledConfirm={snapshotContext.snapshotState.isConfirmDisabled}
           header={snapshotContext.snapshotState.dialogMessage}
+          iconConfirm={snapshotContext.snapshotState.isConfirmDisabled && 'spinnerAnimate'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          iconConfirm={snapshotContext.snapshotState.isConfirmDisabled && 'spinnerAnimate'}
-          disabledConfirm={snapshotContext.snapshotState.isConfirmDisabled}
           onConfirm={onSnapshotAction}
           onHide={() => setIsSnapshotDialogVisible(false)}
           showHeader={false}

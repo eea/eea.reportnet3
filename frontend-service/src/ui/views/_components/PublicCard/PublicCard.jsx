@@ -35,7 +35,7 @@ export const PublicCard = ({
   const renderRedirectText = (text, url) => (
     <Fragment>
       <span>{text} </span>
-      <a href={url} target="_blank" rel="noreferrer" title={text} onClick={e => onOpenTab(e, url)}>
+      <a href={url} onClick={e => onOpenTab(e, url)} rel="noreferrer" target="_blank" title={text}>
         <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
       </a>
     </Fragment>
@@ -64,7 +64,7 @@ export const PublicCard = ({
           <h3 className={`${styles.title} ${styles.link}`} title={title.text}>
             {title.text}
           </h3>
-          <h4 className={styles.subtitle} data-tip data-for={idTooltip}>
+          <h4 className={styles.subtitle} data-for={idTooltip} data-tip>
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>
           <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">

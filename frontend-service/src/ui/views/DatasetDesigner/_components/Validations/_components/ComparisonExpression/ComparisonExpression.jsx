@@ -1,8 +1,9 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
+import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './ComparisonExpression.module.scss';
 
@@ -12,7 +13,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'ui/views/_components/InputText';
 
@@ -47,8 +48,7 @@ const ComparisonExpression = ({
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
-  const [previousValue, setPreviousValue] = useState();
-  const [secondFieldOptions, setSecondFieldOptions] = useState();
+  const [secondFieldOptions, setSecondFieldOptions] = useState([]);
   const [tableFields, setTableFields] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
@@ -132,6 +132,9 @@ const ComparisonExpression = ({
     if (expressionValues.operatorType === 'LEN') {
       setValueKeyFilter('num');
     }
+    if (expressionValues.operatorType === 'number' && fieldType === 'NUMBER_INTEGER') {
+      setValueKeyFilter('int');
+    }
   }, [expressionValues.operatorType]);
 
   useEffect(() => {
@@ -154,7 +157,7 @@ const ComparisonExpression = ({
 
       const allFields = tableFields.filter(field => {
         const cFieldType = onGetFieldType(field.value);
-        const result = compatibleFieldTypes.includes(cFieldType);
+        const result = compatibleFieldTypes?.includes(cFieldType);
         return result;
       });
 
@@ -204,13 +207,6 @@ const ComparisonExpression = ({
     }
   }, [clickedFields, showRequiredFields]);
 
-  useEffect(() => {
-    setPreviousValue(expressionValues.field2);
-    return () => {
-      setPreviousValue('');
-    };
-  }, []);
-
   const printRequiredFieldError = field => {
     let conditions = false;
 
@@ -242,6 +238,13 @@ const ComparisonExpression = ({
           key: field,
           value: ''
         });
+      });
+    }
+
+    if (key === 'operatorType' && value !== expressionValues.operatorType) {
+      onExpressionFieldUpdate(expressionId, {
+        key: 'field2',
+        value: ''
       });
     }
 
@@ -285,7 +288,7 @@ const ComparisonExpression = ({
 
   const checkField = (field, fieldValue) => {
     if (expressionValues.valueTypeSelector === 'value') {
-      if (field === 'year') {
+      if (field === 'year' || field === 'yearDateTime') {
         const yearInt = parseInt(fieldValue);
 
         if (yearInt < 1000 || yearInt > 9999) {
@@ -303,9 +306,7 @@ const ComparisonExpression = ({
         field === 'number'
       ) {
         if (!Number(fieldValue) && Number(fieldValue) !== 0) {
-          onUpdateExpressionField('field2', previousValue);
-        } else {
-          setPreviousValue(fieldValue);
+          onUpdateExpressionField('field2', '');
         }
       }
     }
@@ -317,16 +318,17 @@ const ComparisonExpression = ({
     }
     return (
       <span
-        onBlur={() => onAddToClickedFields('valueTypeSelector')}
-        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}>
+        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}
+        onBlur={() => onAddToClickedFields('valueTypeSelector')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.valueTypeSelector}
-          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value)}
+          onChange={e => onUpdateExpressionField('valueTypeSelector', e.value.value)}
           optionLabel="label"
-          options={valueTypeSelectorOptions}
           optionValue="value"
+          options={valueTypeSelectorOptions}
           placeholder={resourcesContext.messages.comparisonValueFieldSelector}
-          value={expressionValues.valueTypeSelector}
+          value={first(valueTypeSelectorOptions.filter(option => option.value === expressionValues.valueTypeSelector))}
         />
       </span>
     );
@@ -340,14 +342,15 @@ const ComparisonExpression = ({
     } else {
       return (
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.field2}
           filterPlaceholder={resourcesContext.messages.selectField}
           id={`${componentName}__field2`}
-          onChange={e => onUpdateExpressionField('field2', e.value)}
+          onChange={e => onUpdateExpressionField('field2', e.value.value)}
           optionLabel="label"
           options={secondFieldOptions}
           placeholder={resourcesContext.messages.selectField}
-          value={expressionValues.field2}
+          value={first(secondFieldOptions.filter(option => option.value === expressionValues.field2))}
         />
       );
     }
@@ -356,28 +359,32 @@ const ComparisonExpression = ({
   const buildValueInput = () => {
     const { operatorType, operatorValue, field2 } = expressionValues;
 
-    if (operatorType === 'date') {
+    if (operatorType === 'date' || operatorType === 'dateTime') {
+      const showSeconds = operatorType === 'dateTime';
+      const showTime = operatorType === 'dateTime';
       return (
         <Calendar
-          id={uuid.v4()}
           appendTo={document.body}
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
+          id={uniqueId(componentName)}
           monthNavigator={true}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          showSeconds={showSeconds}
+          showTime={showTime}
           value={field2}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
       );
     }
-    if (operatorType === 'day') {
+    if (operatorType === 'day' || operatorType === 'dayDateTime') {
       return (
         <InputNumber
-          id={uuid.v4()}
           disabled={isDisabled}
           format={false}
+          id={uniqueId(componentName)}
           max={32}
           min={0}
           mode="decimal"
@@ -395,19 +402,19 @@ const ComparisonExpression = ({
         return (
           <span className={styles.inputStringMatch}>
             <InputText
-              id={uuid.v4()}
               disabled={isDisabled}
+              id={uniqueId(componentName)}
               onChange={e => onUpdateExpressionField('field2', e.target.value)}
               placeholder={resourcesContext.messages.value}
-              value={field2}
               ref={inputStringMatchRef}
+              value={field2}
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label="CC"
+              onClick={() => onCCButtonClick(ccButtonValue)}
               tooltip={resourcesContext.messages['matchStringTooltip']}
               tooltipOptions={{ position: 'top' }}
-              onClick={() => onCCButtonClick(ccButtonValue)}
             />
           </span>
         );
@@ -418,8 +425,8 @@ const ComparisonExpression = ({
       if (operatorValue === 'MATCH') {
         return (
           <InputText
-            id={uuid.v4()}
             disabled={isDisabled}
+            id={uniqueId(componentName)}
             onChange={e => onUpdateExpressionField('field2', e.target.value)}
             placeholder={resourcesContext.messages.value}
             value={field2}
@@ -430,10 +437,10 @@ const ComparisonExpression = ({
       if (fieldType === 'NUMBER_DECIMAL') {
         return (
           <InputText
-            id={uuid.v4()}
-            keyfilter="num"
             disabled={isDisabled}
             format={false}
+            id={uniqueId(componentName)}
+            keyfilter="num"
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('field2', e.target.value)}
             placeholder={resourcesContext.messages.value}
@@ -443,26 +450,24 @@ const ComparisonExpression = ({
       }
 
       return (
-        <InputNumber
-          id={uuid.v4()}
+        <InputText
           disabled={isDisabled}
-          format={false}
-          mode="decimal"
+          format="false"
+          id={uniqueId(componentName)}
+          keyfilter={valueKeyFilter}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
-          steps={0}
-          useGrouping={false}
           value={field2}
         />
       );
     }
 
-    if (operatorType === 'year') {
+    if (operatorType === 'year' || operatorType === 'yearDateTime') {
       return (
         <InputNumber
-          id={uuid.v4()}
           disabled={isDisabled}
+          id={uniqueId(componentName)}
           mode="decimal"
           onBlur={e => checkField('year', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
@@ -474,12 +479,12 @@ const ComparisonExpression = ({
       );
     }
 
-    if (operatorType === 'month') {
+    if (operatorType === 'month' || operatorType === 'monthDateTime') {
       return (
         <InputNumber
-          id={uuid.v4()}
           disabled={isDisabled}
           format={false}
+          id={uniqueId(componentName)}
           max={13}
           min={0}
           mode="decimal"
@@ -495,10 +500,10 @@ const ComparisonExpression = ({
     if (operatorType === 'LEN') {
       return (
         <InputNumber
-          id={uuid.v4()}
-          min={-1}
           disabled={isDisabled}
           format={false}
+          id={uniqueId(componentName)}
+          min={-1}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
           placeholder={resourcesContext.messages.value}
@@ -509,9 +514,9 @@ const ComparisonExpression = ({
 
     return (
       <InputText
-        id={uuid.v4()}
-        keyfilter={valueKeyFilter}
         disabled={isDisabled}
+        id={uniqueId(componentName)}
+        keyfilter={valueKeyFilter}
         onChange={e => {
           onUpdateExpressionField('field2', e.target.value);
         }}
@@ -536,60 +541,64 @@ const ComparisonExpression = ({
         className={`${styles.union} formField ${printRequiredFieldError('union')}`}
         onBlur={() => onAddToClickedFields('union')}>
         <Dropdown
+          appendTo={document.body}
           disabled={position === 0}
-          onChange={e => onUpdateExpressionField('union', e.value)}
+          onChange={e => onUpdateExpressionField('union', e.value.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
           placeholder={resourcesContext.messages.union}
-          value={expressionValues.union}
+          value={first(config.validations.logicalOperators.filter(option => option.value === expressionValues.union))}
         />
       </span>
 
       <span
-        onBlur={() => onAddToClickedFields('field1')}
-        className={`${styles.operatorType} formField ${printRequiredFieldError('field1')}`}>
+        className={`${styles.operatorType} formField ${printRequiredFieldError('field1')}`}
+        onBlur={() => onAddToClickedFields('field1')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.field1}
           id={`${componentName}__field1`}
           onChange={e => {
-            onUpdateExpressionField('field1', e.value);
+            onUpdateExpressionField('field1', e.value.value);
           }}
           optionLabel={'label'}
           options={tableFields}
           placeholder={resourcesContext.messages.selectField}
-          value={expressionValues.field1}
+          value={first(tableFields.filter(option => option.value === expressionValues.field1))}
         />
       </span>
 
       <span
-        onBlur={() => onAddToClickedFields('operatorType')}
-        className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}>
+        className={`${styles.operatorType} formField ${printRequiredFieldError('operatorType')}`}
+        onBlur={() => onAddToClickedFields('operatorType')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.operatorType}
-          onChange={e => onUpdateExpressionField('operatorType', e.value)}
+          onChange={e => onUpdateExpressionField('operatorType', e.value.value)}
           optionLabel="label"
           options={operatorTypes}
           placeholder={resourcesContext.messages.operatorType}
-          value={expressionValues.operatorType}
+          value={first(operatorTypes.filter(option => option.value === expressionValues.operatorType))}
         />
       </span>
       <span
-        onBlur={() => onAddToClickedFields('operatorValue')}
-        className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}>
+        className={`${styles.operatorValue} formField ${printRequiredFieldError('operatorValue')}`}
+        onBlur={() => onAddToClickedFields('operatorValue')}>
         <Dropdown
+          appendTo={document.body}
           disabled={disabledFields.operatorValue}
-          onChange={e => onUpdateExpressionField('operatorValue', e.value)}
+          onChange={e => onUpdateExpressionField('operatorValue', e.value.value)}
           optionLabel="label"
-          options={operatorValues}
           optionValue="value"
+          options={operatorValues}
           placeholder={resourcesContext.messages.operator}
-          value={expressionValues.operatorValue}
+          value={first(operatorValues.filter(option => option.value === expressionValues.operatorValue))}
         />
       </span>
       {getTypeField()}
       <span
-        onBlur={() => onAddToClickedFields('field2')}
-        className={`formField ${styles.expressionValue} ${printRequiredFieldError('field2')}`}>
+        className={`formField ${styles.expressionValue} ${printRequiredFieldError('field2')}`}
+        onBlur={() => onAddToClickedFields('field2')}>
         {getValueField()}
       </span>
 

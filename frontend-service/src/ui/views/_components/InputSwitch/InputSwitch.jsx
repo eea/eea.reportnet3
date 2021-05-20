@@ -10,36 +10,36 @@ import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 
 export class InputSwitch extends Component {
   static defaultProps = {
-    id: null,
-    style: null,
+    ariaLabelledBy: null,
+    checked: false,
     className: null,
+    disabled: false,
+    id: null,
     inputId: null,
     name: null,
-    checked: false,
-    disabled: false,
-    tooltip: null,
-    tooltipOptions: null,
-    ariaLabelledBy: null,
+    onBlur: null,
     onChange: null,
     onFocus: null,
-    onBlur: null,
-    sliderCheckedClassName: null
+    sliderCheckedClassName: null,
+    style: null,
+    tooltip: null,
+    tooltipOptions: null
   };
 
   static propTypes = {
-    id: PropTypes.string,
-    style: PropTypes.object,
+    ariaLabelledBy: PropTypes.string,
+    checked: PropTypes.bool,
     className: PropTypes.string,
+    disabled: PropTypes.bool,
+    id: PropTypes.string,
     inputId: PropTypes.string,
     name: PropTypes.string,
-    checked: PropTypes.bool,
-    disabled: PropTypes.bool,
-    tooltip: PropTypes.string,
-    tooltipOptions: PropTypes.object,
-    ariaLabelledBy: PropTypes.string,
+    onBlur: PropTypes.func,
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
-    onBlur: PropTypes.func,
+    style: PropTypes.object,
+    tooltip: PropTypes.string,
+    tooltipOptions: PropTypes.object,
     sliderCheckedClassName: PropTypes.string
   };
 
@@ -139,13 +139,13 @@ export class InputSwitch extends Component {
 
     return (
       <div
-        ref={el => (this.container = el)}
-        id={this.props.id}
-        className={className}
-        style={this.props.style}
-        onClick={this.onClick}
-        role="checkbox"
         aria-checked={this.props.checked}
+        className={className}
+        id={this.props.id}
+        onClick={this.onClick}
+        ref={el => (this.container = el)}
+        role="checkbox"
+        style={this.props.style}
         {...inputSwitchProps}>
         <div className="p-hidden-accessible">
           <input
