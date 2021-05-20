@@ -399,7 +399,10 @@ export const ShareRights = ({
       {!isEmpty(shareRightsState.userRightList) && (
         <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
       )}
+        {isEmpty(shareRightsState.userRightList) ? (
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
+        ) : isEmpty(shareRightsState.filteredData) ? (
+          <h3>{resources.messages[`${userType}NotMatchingFilter`]}</h3>
         ) : (
           <div className={styles.table}>
             <DataTable
