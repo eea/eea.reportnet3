@@ -59,8 +59,11 @@
 
   .noObligations {
     color: var(--button-secondary-transparent-color-hover);
-    font-weight: 450;
-    margin: 3rem 1.5rem;
+    display: flex;
+    flex: auto;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
   }
 
   :global .p-datatable-row {
