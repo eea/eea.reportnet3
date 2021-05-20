@@ -15,13 +15,11 @@ const parseUserRightListDTO = userRightListDTO => {
 
 const allReporters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allReporters(dataflowId, dataProviderId);
-
   return parseUserRightListDTO(userRightListDTO);
 };
 
 const allRequesters = async (dataflowId, dataProviderId) => {
   const userRightListDTO = await apiUserRight.allRequesters(dataflowId, dataProviderId);
-
   return parseUserRightListDTO(userRightListDTO);
 };
 

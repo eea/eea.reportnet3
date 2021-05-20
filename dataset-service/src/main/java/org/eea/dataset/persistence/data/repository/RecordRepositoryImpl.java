@@ -155,12 +155,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /** The Constant QUERY_UNSORTERED: {@value}. */
   private static final String QUERY_UNSORTERED =
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv  "
-          + "WHERE tv.idTableSchema = :idTableSchema";
+          + "WHERE tv.idTableSchema = :idTableSchema order by rv.dataPosition";
 
   /** The Constant QUERY_UNSORTERED_FIELDS: {@value}. */
   private static final String QUERY_UNSORTERED_FIELDS =
       "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv INNER JOIN FETCH  rv.fields  "
-          + "WHERE tv.idTableSchema = :idTableSchema";
+          + "WHERE tv.idTableSchema = :idTableSchema order by rv.dataPosition";
 
   /** The Constant ID_TABLE_SCHEMA: {@value}. */
   private static final String ID_TABLE_SCHEMA = "idTableSchema";
@@ -316,9 +316,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       SortField... sortFields) {
 
     // Query without order or with it
-    Query query = entityManager.createQuery(null == sortFields ? MASTER_QUERY_NO_ORDER + filter
-        : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
-            directionQueryBuilder.toString().substring(1)));
+    Query query = entityManager.createQuery(
+        null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition"
+            : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
+                directionQueryBuilder.toString().substring(1)));
+
 
     query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
     if (null != idRules && !idRules.isEmpty()) {
@@ -531,11 +533,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       while (rs.next()) {
         RecordValue record = new RecordValue();
         record.setId(rs.getString("id"));
-        record.setIdRecordSchema(rs.getString("id_Record_Schema"));
-        record.setDatasetPartitionId(rs.getLong("dataset_Partition_Id"));
-        record.setDataProviderCode(rs.getString("data_Provider_Code"));
+        record.setIdRecordSchema(rs.getString("id_record_schema"));
+        record.setDatasetPartitionId(rs.getLong("dataset_partition_id"));
+        record.setDataProviderCode(rs.getString("data_provider_code"));
         String fieldsSerieazlie = rs.getString("fields");
-        LOG.info(fieldsSerieazlie);
         try {
           if (fieldsSerieazlie != null) {
             record.setFields(Arrays.asList(mapper.readValue(fieldsSerieazlie, FieldValue[].class)));
@@ -561,13 +562,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   @Transactional
   public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId)
-      throws EEAException {
-    try {
-      Session session = (Session) entityManager.getDelegate();
-      return session.doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId));
-    } catch (HibernateException e) {
-      throw new EEAException("SQL can't be executed: ", e);
-    }
+      throws HibernateException {
+    Session session = (Session) entityManager.getDelegate();
+    return session.doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId));
   }
 
 }

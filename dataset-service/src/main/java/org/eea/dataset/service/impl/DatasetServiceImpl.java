@@ -2654,7 +2654,8 @@ public class DatasetServiceImpl implements DatasetService {
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDatasetId));
       saveAllRecords(auxRecords);
-    } catch (IllegalAccessException | InvocationTargetException | EEAException e) {
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      LOG.error("error processing records with dataset origin: {}", originDatasetId, e);
     }
 
   }

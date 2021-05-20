@@ -6,10 +6,11 @@ import { config } from 'conf/';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import isEmpty from 'lodash/isEmpty';
+import first from 'lodash/first';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
-import { Dropdown } from 'primereact/dropdown';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 
@@ -78,7 +79,7 @@ const ValidationExpressionGroup = ({
         />
       ));
     }
-    return <div/>;
+    return <div />;
   };
 
   // layouts
@@ -99,14 +100,17 @@ const ValidationExpressionGroup = ({
                 showRequiredFields && position > 0 && isEmpty(expressionValues.union) ? 'error' : ''
               }`}>
               <Dropdown
+                appendTo={document.body}
                 disabled={isDisabled || position === 0}
                 onChange={e => {
-                  onExpressionFieldUpdate(expressionId, { key: 'union', value: e.value });
+                  onExpressionFieldUpdate(expressionId, { key: 'union', value: e.target.value.value });
                 }}
                 optionLabel="label"
                 options={config.validations.logicalOperators}
                 placeholder={resourcesContext.messages.union}
-                value={expressionValues.union}
+                value={first(
+                  config.validations.logicalOperators.filter(option => option.value === expressionValues.union)
+                )}
               />
             </span>
             <span className={styles.groupToggler}>

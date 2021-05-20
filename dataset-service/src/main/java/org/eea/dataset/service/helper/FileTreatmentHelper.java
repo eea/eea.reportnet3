@@ -87,7 +87,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -310,7 +309,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      MultipartFile multipartFile, boolean delete) throws EEAException {
+      MultipartFile multipartFile, boolean replace) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
@@ -342,9 +341,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
           // Queue import tasks for stored files
           if (!files.isEmpty()) {
-            wipeData(datasetId, null, delete);
+            wipeData(datasetId, null, replace);
             IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-            queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO);
+            queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO,
+                replace);
           } else {
             releaseLock(datasetId);
             throw new EEAException("Empty zip file");
@@ -377,9 +377,9 @@ public class FileTreatmentHelper implements DisposableBean {
         }
 
         // Queue import task for the stored file
-        wipeData(datasetId, tableSchemaId, delete);
-        queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName,
-            integrationVO);
+        wipeData(datasetId, tableSchemaId, replace);
+        queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
+            replace);
       }
 
     } catch (FeignException | IOException e) {
@@ -450,14 +450,14 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws FeignException the feign exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      List<File> files, String originalFileName, IntegrationVO integrationVO)
+      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace)
       throws IOException, EEAException {
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
       importExecutorService.submit(() -> {
         try {
-          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName);
+          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace);
         } catch (Exception e) {
           LOG_ERROR.error("RN3-Import: Unexpected error", e);
         }
@@ -533,7 +533,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param originalFileName the original file name
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
-      List<File> files, String originalFileName) {
+      List<File> files, String originalFileName, boolean replace) {
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
     String error = null;
@@ -569,13 +569,15 @@ public class FileTreatmentHelper implements DisposableBean {
         }
 
         if (schemaContainsFixedRecords(datasetId, datasetSchema, tableSchemaId)) {
-          ObjectId tableSchemaIdTemp = new ObjectId(tableSchemaId);
-          TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
-              .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
-              .findFirst().orElse(null);
-          if (tableSchema != null) {
-            updateRecordsWithConditions(dataset.getTableValues().get(0).getRecords(), datasetId,
-                tableSchema);
+          if (replace) {
+            ObjectId tableSchemaIdTemp = new ObjectId(tableSchemaId);
+            TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
+                .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
+                .findFirst().orElse(null);
+            if (tableSchema != null) {
+              updateRecordsWithConditions(dataset.getTableValues().get(0).getRecords(), datasetId,
+                  tableSchema);
+            }
           }
         } else {
           storeRecords(datasetId, dataset.getTableValues().get(0).getRecords());
@@ -874,12 +876,13 @@ public class FileTreatmentHelper implements DisposableBean {
     LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
     boolean readOnly =
         tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
-    Long totalRecords =
-        tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
+    tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
 
     // get list paginated of old records to modify
-    List<RecordValue> oldRecords = recordRepository.findByTableValueNoOrderOptimized(
-        tableSchema.getIdTableSchema().toString(), PageRequest.of(0, totalRecords.intValue()));
+    TableValue targetTable =
+        tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+    List<RecordValue> oldRecords =
+        recordRepository.findOrderedNativeRecord(targetTable.getId(), datasetId);
     // sublist records to insert
     List<RecordValue> recordsToSave = new ArrayList<>();
 
@@ -897,11 +900,13 @@ public class FileTreatmentHelper implements DisposableBean {
       List<ObjectId> readOnlyFields =
           tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
               .map(FieldSchema::getIdFieldSchema).collect(Collectors.toList());
-      if (readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
-        Map<Integer, Integer> mapPosition = mapPositionReadOnlyFieldsForReference(readOnlyFields,
-            oldRecords.get(0), recordList.get(0));
+      if (!CollectionUtils.isEmpty(oldRecords)
+          && readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
         for (RecordValue oldRecord : oldRecords) {
+          Map<Integer, Integer> mapPosition =
+              mapPositionReadOnlyFieldsForReference(readOnlyFields, oldRecord, recordList.get(0));
           findByReadOnlyRecords(mapPosition, oldRecord, recordList);
+          oldRecord.setTableValue(targetTable);
           recordsToSave.add(oldRecord);
         }
       }
@@ -921,15 +926,16 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void refillFields(RecordValue oldRecord, List<FieldValue> fieldValues) {
     if (fieldValues != null) {
-      oldRecord.getFields().stream()
-          .forEach(oldField -> oldField.setValue(fieldValues.stream()
-              .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
-              .map(FieldValue::getValue).findFirst().orElse("")));
+      oldRecord.getFields().stream().forEach(oldField -> {
+        oldField.setValue(fieldValues.stream()
+            .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
+            .map(FieldValue::getValue).findFirst().orElse(""));
+        oldField.setRecord(oldRecord);
+      });
     } else {
       oldRecord.getFields().forEach(field -> field.setValue(""));
     }
   }
-
 
   /**
    * Map position read only fields for reference.
