@@ -50,15 +50,15 @@
   height: 50vh;
 }
 
-.wrapperNoUserRoles {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
+.wrapperNoUserRoles,
 .wrapperEmptyFilter {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.wrapperNoUserRoles {
+  height: 100%;
+}
+.wrapperEmptyFilter {
   height: 80%;
 }
