@@ -309,7 +309,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      MultipartFile multipartFile, boolean delete) throws EEAException {
+      MultipartFile multipartFile, boolean replace) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
@@ -341,9 +341,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
           // Queue import tasks for stored files
           if (!files.isEmpty()) {
-            wipeData(datasetId, null, delete);
+            wipeData(datasetId, null, replace);
             IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-            queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO);
+            queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO,
+                replace);
           } else {
             releaseLock(datasetId);
             throw new EEAException("Empty zip file");
@@ -376,9 +377,9 @@ public class FileTreatmentHelper implements DisposableBean {
         }
 
         // Queue import task for the stored file
-        wipeData(datasetId, tableSchemaId, delete);
-        queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName,
-            integrationVO);
+        wipeData(datasetId, tableSchemaId, replace);
+        queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
+            replace);
       }
 
     } catch (FeignException | IOException e) {
@@ -449,14 +450,14 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws FeignException the feign exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      List<File> files, String originalFileName, IntegrationVO integrationVO)
+      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace)
       throws IOException, EEAException {
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
       importExecutorService.submit(() -> {
         try {
-          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName);
+          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace);
         } catch (Exception e) {
           LOG_ERROR.error("RN3-Import: Unexpected error", e);
         }
@@ -532,7 +533,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param originalFileName the original file name
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
-      List<File> files, String originalFileName) {
+      List<File> files, String originalFileName, boolean replace) {
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
     String error = null;
@@ -568,13 +569,15 @@ public class FileTreatmentHelper implements DisposableBean {
         }
 
         if (schemaContainsFixedRecords(datasetId, datasetSchema, tableSchemaId)) {
-          ObjectId tableSchemaIdTemp = new ObjectId(tableSchemaId);
-          TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
-              .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
-              .findFirst().orElse(null);
-          if (tableSchema != null) {
-            updateRecordsWithConditions(dataset.getTableValues().get(0).getRecords(), datasetId,
-                tableSchema);
+          if (replace) {
+            ObjectId tableSchemaIdTemp = new ObjectId(tableSchemaId);
+            TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
+                .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
+                .findFirst().orElse(null);
+            if (tableSchema != null) {
+              updateRecordsWithConditions(dataset.getTableValues().get(0).getRecords(), datasetId,
+                  tableSchema);
+            }
           }
         } else {
           storeRecords(datasetId, dataset.getTableValues().get(0).getRecords());
