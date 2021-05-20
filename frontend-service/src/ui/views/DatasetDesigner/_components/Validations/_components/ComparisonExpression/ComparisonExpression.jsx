@@ -288,7 +288,7 @@ const ComparisonExpression = ({
 
   const checkField = (field, fieldValue) => {
     if (expressionValues.valueTypeSelector === 'value') {
-      if (field === 'year') {
+      if (field === 'year' || field === 'yearDateTime') {
         const yearInt = parseInt(fieldValue);
 
         if (yearInt < 1000 || yearInt > 9999) {
