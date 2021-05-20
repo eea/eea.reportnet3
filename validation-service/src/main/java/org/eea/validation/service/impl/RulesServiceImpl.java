@@ -458,6 +458,10 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
+        case DATETIME:
+          ruleList.add(AutomaticRules.createDateTimeAutomaticRule(referenceId, typeEntityEnum,
+              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          break;
         case BOOLEAN:
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
@@ -1439,7 +1443,7 @@ public class RulesServiceImpl implements RulesService {
         && rule.getWhenCondition().contains("isSQLSentence")
         && StringUtils.isNotBlank(rule.getSqlSentence())) {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
-        String newSqlSentence = rule.getSqlSentence().toLowerCase();
+        String newSqlSentence = rule.getSqlSentence();
         newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
         rule.setSqlSentence(newSqlSentence);
       });
