@@ -396,9 +396,9 @@ export const ShareRights = ({
 
   return renderDialogLayout(
     <Fragment>
-      <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
-      <div>
-        {isEmpty(shareRightsState.filteredData) ? (
+      {!isEmpty(shareRightsState.userRightList) && (
+        <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
+      )}
           <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : (
           <div className={styles.table}>
