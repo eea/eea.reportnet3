@@ -1,2 +1,2 @@
-export const GetProviderTypes = ({ representativeRepository }) => async () =>
-  representativeRepository.getProviderTypes();
+export const GetProviderTypes = ({ representativeRepository }) => async dataflowId =>
+  representativeRepository.getProviderTypes(dataflowId);
