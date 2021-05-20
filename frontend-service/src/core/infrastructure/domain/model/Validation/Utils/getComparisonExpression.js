@@ -49,6 +49,12 @@ export const getComparisonExpression = expression => {
         params: [field1, dayjs(transField2).format('YYYY-MM-DD')]
       };
     }
+    if (operatorType === 'dateTime' && valueTypeSelector === 'value') {
+      return {
+        operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
+        params: [field1, dayjs(transField2).format('YYYY-MM-DD HH:mm:ss')]
+      };
+    }
 
     if (operatorType === 'LEN' && valueTypeSelector === 'value') {
       return {
