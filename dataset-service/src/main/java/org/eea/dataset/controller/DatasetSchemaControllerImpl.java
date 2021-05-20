@@ -1017,7 +1017,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<byte[]> exportSchemas(@RequestParam("dataflowId") final Long dataflowId) {
     try {
