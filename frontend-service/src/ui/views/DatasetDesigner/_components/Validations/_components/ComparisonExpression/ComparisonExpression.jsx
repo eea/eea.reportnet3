@@ -241,6 +241,13 @@ const ComparisonExpression = ({
       });
     }
 
+    if (key === 'operatorType' && value !== expressionValues.operatorType) {
+      onExpressionFieldUpdate(expressionId, {
+        key: 'field2',
+        value: ''
+      });
+    }
+
     if (key === 'valueTypeSelector' && value !== expressionValues.valueTypeSelector) {
       onExpressionFieldUpdate(expressionId, {
         key: 'field2',
