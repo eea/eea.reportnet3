@@ -241,6 +241,13 @@ const ComparisonExpression = ({
       });
     }
 
+    if (key === 'operatorType' && value !== expressionValues.operatorType) {
+      onExpressionFieldUpdate(expressionId, {
+        key: 'field2',
+        value: ''
+      });
+    }
+
     if (key === 'valueTypeSelector' && value !== expressionValues.valueTypeSelector) {
       onExpressionFieldUpdate(expressionId, {
         key: 'field2',
@@ -281,7 +288,7 @@ const ComparisonExpression = ({
 
   const checkField = (field, fieldValue) => {
     if (expressionValues.valueTypeSelector === 'value') {
-      if (field === 'year') {
+      if (field === 'year' || field === 'yearDateTime') {
         const yearInt = parseInt(fieldValue);
 
         if (yearInt < 1000 || yearInt > 9999) {
