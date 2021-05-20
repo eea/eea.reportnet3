@@ -46,9 +46,9 @@ const apiRepresentative = {
     await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentativesTemplate, { dataProviderGroupId })
     }),
-  getProviderTypes: async () =>
+  getProviderTypes: async dataflowId =>
     await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.getProviderTypes, {})
+      url: getUrl(RepresentativeConfig.getProviderTypes, { dataflowId })
     }),
   updateDataProviderId: async (representativeId, dataProviderId) =>
     await HTTPRequester.update({
