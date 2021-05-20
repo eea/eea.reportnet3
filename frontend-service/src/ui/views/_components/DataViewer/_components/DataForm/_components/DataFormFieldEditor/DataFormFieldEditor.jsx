@@ -442,9 +442,6 @@ const DataFormFieldEditor = ({
         inputRef={refDatetimeCalendar}
         monthNavigator={true}
         onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
-        onClick={e => {
-          console.log('click');
-        }}
         onFocus={e => {
           calculateCalendarPanelPosition();
         }}
