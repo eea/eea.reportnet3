@@ -27,14 +27,29 @@ export const getRowExpressionFromDTO = (expression, allExpressions, parentUnion)
   newExpression.union = union;
   newExpression.operatorValue = config.validations.reverseEquivalences[expression.operator];
   newExpression.field1 = expression.params[0];
-  newExpression.field2 = expression.params[1];
   newExpression.expressions = [];
-  newExpression.operatorType = getExpressionOperatorType(expression.operator, 'row');
   newExpression.valueTypeSelector = getValueTypeSelector(expression.operator);
+
   if (isObject(expression.params[1])) {
     newExpression.operatorType = getExpressionOperatorType(expression.params[1].operator, 'row');
-    newExpression.field1 = expression.params[0];
-    newExpression.field2 = expression.params[1].params[0];
+    if (
+      newExpression.operatorType === 'date' ||
+      (newExpression.operatorType === 'dateTime' && newExpression.valueTypeSelector === 'value')
+    ) {
+      newExpression.field2 = new Date(expression.params[1].params[0]);
+    } else {
+      newExpression.field2 = expression.params[1].params[0];
+    }
+  } else {
+    newExpression.operatorType = getExpressionOperatorType(expression.operator, 'row');
+    if (
+      newExpression.operatorType === 'date' ||
+      (newExpression.operatorType === 'dateTime' && newExpression.valueTypeSelector === 'value')
+    ) {
+      newExpression.field2 = new Date(expression.params[1]);
+    } else {
+      newExpression.field2 = expression.params[1];
+    }
   }
   allExpressions.push(newExpression);
 
