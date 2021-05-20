@@ -69,7 +69,7 @@ const downloadById = async dataflowId => {
 const downloadTemplateById = async dataProviderGroupId =>
   await apiRepresentative.downloadTemplateById(dataProviderGroupId);
 
-const getProviderTypes = async () => await apiRepresentative.getProviderTypes();
+const getProviderTypes = async dataflowId => await apiRepresentative.getProviderTypes(dataflowId);
 
 const updateDataProviderId = async (representativeId, dataProviderId) =>
   await apiRepresentative.updateDataProviderId(representativeId, dataProviderId);
