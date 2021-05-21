@@ -129,7 +129,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/createEmptyDatasetSchema")
-  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') AND hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
+  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
   public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
       @RequestParam("datasetSchemaName") String datasetSchemaName) {
 
