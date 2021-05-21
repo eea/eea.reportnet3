@@ -58,7 +58,8 @@ const parseLeadReporters = (leadReporters = []) =>
       })
   );
 
-const deleteById = async representativeId => await apiRepresentative.deleteById(representativeId);
+const deleteById = async (representativeId, dataflowId) =>
+  await apiRepresentative.deleteById(representativeId, dataflowId);
 
 const deleteLeadReporter = async (leadReporterId, dataflowId) =>
   await apiRepresentative.deleteLeadReporter(leadReporterId, dataflowId);
