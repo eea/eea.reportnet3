@@ -231,7 +231,7 @@ const RepresentativesList = ({
   const onDeleteConfirm = async () => {
     setIsDeleting(true);
     try {
-      await RepresentativeService.deleteById(formState.representativeIdToDelete);
+      await RepresentativeService.deleteById(formState.representativeIdToDelete, dataflowId);
 
       const updatedList = formState.representatives.filter(
         representative => representative.representativeId !== formState.representativeIdToDelete

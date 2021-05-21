@@ -3,7 +3,7 @@
   "addLeadReporter": "/representative/{:representativeId}/leadReporter/dataflow/{:dataflowId}",
   "allDataProviders": "/representative/dataProvider/{:dataProviderGroupId}",
   "allRepresentatives": "/representative/dataflow/{:dataflowId}",
-  "deleteById": "/representative/{:representativeId}",
+  "deleteById": "/representative/{:representativeId}/dataflow/{:dataflowId}",
   "deleteLeadReporter": "/representative/leadReporter/{:leadReporterId}/dataflow/{:dataflowId}",
   "exportRepresentatives": "/representative/export/{:dataflowId}",
   "exportRepresentativesTemplate": "/representative/exportTemplateReportersFile/{:dataProviderGroupId}",

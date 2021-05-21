@@ -30,10 +30,11 @@ const apiRepresentative = {
         dataflowId: dataflowId
       })
     }),
-  deleteById: async representativeId =>
+  deleteById: async (representativeId, dataflowId) =>
     await HTTPRequester.delete({
       url: getUrl(RepresentativeConfig.deleteById, {
-        representativeId
+        representativeId,
+        dataflowId
       })
     }),
   deleteLeadReporter: async (leadReporterId, dataflowId) =>

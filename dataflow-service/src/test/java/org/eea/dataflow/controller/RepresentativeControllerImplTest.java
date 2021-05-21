@@ -366,7 +366,7 @@ public class RepresentativeControllerImplTest {
         .thenReturn(true);
     Mockito.when(representativeService.updateLeadReporter(Mockito.any())).thenReturn(1L);
     Assert.assertEquals(1L,
-        representativeControllerImpl.updateLeadReporter(leadReporterVO).longValue());
+        representativeControllerImpl.updateLeadReporter(leadReporterVO, 0l).longValue());
   }
 
   @Test(expected = ResponseStatusException.class)
@@ -380,7 +380,7 @@ public class RepresentativeControllerImplTest {
     Mockito.when(representativeService.updateLeadReporter(Mockito.any()))
         .thenThrow(EEAException.class);
     try {
-      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+      representativeControllerImpl.updateLeadReporter(leadReporterVO, 0L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
@@ -396,7 +396,7 @@ public class RepresentativeControllerImplTest {
     Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
         .thenReturn(true);
     try {
-      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+      representativeControllerImpl.updateLeadReporter(leadReporterVO, 0L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -411,7 +411,7 @@ public class RepresentativeControllerImplTest {
     Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
         .thenReturn(true);
     try {
-      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+      representativeControllerImpl.updateLeadReporter(leadReporterVO, 0L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -426,7 +426,7 @@ public class RepresentativeControllerImplTest {
     Mockito.when(representativeService.authorizeByRepresentativeId(Mockito.anyLong()))
         .thenReturn(false);
     try {
-      representativeControllerImpl.updateLeadReporter(leadReporterVO);
+      representativeControllerImpl.updateLeadReporter(leadReporterVO, 0L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
@@ -491,13 +491,14 @@ public class RepresentativeControllerImplTest {
   public void createLeadReporterTest() {
     LeadReporterVO leadReporter = new LeadReporterVO();
     leadReporter.setEmail("test@test.com");
-    assertEquals(0L, representativeControllerImpl.createLeadReporter(1L, leadReporter).longValue());
+    assertEquals(0L,
+        representativeControllerImpl.createLeadReporter(1L, leadReporter, 0L).longValue());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void createLeadReporterNullTest() {
     try {
-      representativeControllerImpl.createLeadReporter(null, null);
+      representativeControllerImpl.createLeadReporter(null, null, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getReason());
@@ -510,7 +511,7 @@ public class RepresentativeControllerImplTest {
     LeadReporterVO leadReporter = new LeadReporterVO();
     leadReporter.setEmail("");
     try {
-      representativeControllerImpl.createLeadReporter(null, leadReporter);
+      representativeControllerImpl.createLeadReporter(null, leadReporter, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, ""), e.getReason());
@@ -525,7 +526,7 @@ public class RepresentativeControllerImplTest {
     Mockito.when(representativeService.createLeadReporter(Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     try {
-      representativeControllerImpl.createLeadReporter(1L, leadReporter);
+      representativeControllerImpl.createLeadReporter(1L, leadReporter, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -534,7 +535,7 @@ public class RepresentativeControllerImplTest {
 
   @Test
   public void deleteLeadReporterTest() throws EEAException {
-    representativeControllerImpl.deleteLeadReporter(0L);
+    representativeControllerImpl.deleteLeadReporter(0L, 0L);
     Mockito.verify(representativeService, times(1)).deleteLeadReporter(Mockito.any());
   }
 
@@ -542,7 +543,7 @@ public class RepresentativeControllerImplTest {
   public void deleteLeadReporterExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(representativeService).deleteLeadReporter(Mockito.any());
     try {
-      representativeControllerImpl.deleteLeadReporter(1L);
+      representativeControllerImpl.deleteLeadReporter(1L, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
