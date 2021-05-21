@@ -1,2 +1,2 @@
-export const DeleteLeadReporter = ({ representativeRepository }) => async leadReporterId =>
-  representativeRepository.deleteLeadReporter(leadReporterId);
+export const DeleteLeadReporter = ({ representativeRepository }) => async (leadReporterId, dataflowId) =>
+  representativeRepository.deleteLeadReporter(leadReporterId, dataflowId);
