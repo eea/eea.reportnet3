@@ -242,7 +242,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
     let errors = false;
 
     clickedFields.forEach(clickedField => {
-      if (printError(clickedField) == 'error') errors = true;
+      if (printError(clickedField) === 'error') errors = true;
     });
 
     if (errors) {
@@ -340,7 +340,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
       candidateRule: { allExpressions }
     } = creationFormState;
 
-    const [currentExpression] = allExpressions.filter(expression => expression.expressionId == expressionId);
+    const [currentExpression] = allExpressions.filter(expression => expression.expressionId === expressionId);
     currentExpression[field.key] = field.value;
 
     if (field.value) {
@@ -364,8 +364,8 @@ const FieldValidation = ({ datasetId, tabs }) => {
   };
 
   const onTabChange = tabIndex => {
-    if (tabIndex != tabMenuActiveItem) {
-      if (tabIndex == 1) {
+    if (tabIndex !== tabMenuActiveItem) {
+      if (tabIndex === 1) {
         setClickedFields([...config.validations.requiredFields[validationContext.level]]);
       } else {
         setTabsChanges({
