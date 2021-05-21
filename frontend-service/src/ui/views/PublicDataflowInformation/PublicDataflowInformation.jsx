@@ -359,11 +359,6 @@ export const PublicDataflowInformation = withRouter(
                     <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
                       {renderColumns(representatives)}
                     </DataTable>
-                    <div className={styles.tableLegendContainer}>
-                      <span>*</span>
-                      <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-                      <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-                    </div>
                     {!isEmpty(referenceDatasets) && (
                       <div className={styles.referenceDatasetsWrapper}>
                         <div className={styles.referenceDatasetsTitle}>{resources.messages['referenceDatasets']}</div>
