@@ -3533,6 +3533,7 @@ public class DatasetServiceImpl implements DatasetService {
             .append(null != filterValue ? String.format(" value like '%s' and ", filterValue) : "");
         query.delete(query.lastIndexOf("and "), query.length() - 1);
       }
+      query.append(") records group by id_table_schema,id_record,data_provider_code ");
       String paginationPart = " offset %s limit %s ";
       if (null != offset && null != limit) {
         Integer offsetAux = (limit * offset) - limit;
@@ -3541,8 +3542,8 @@ public class DatasetServiceImpl implements DatasetService {
         }
         query.append(String.format(paginationPart, offsetAux, limit));
       }
-      query.append(
-          ") records group by id_table_schema,id_record,data_provider_code ) tablesAux group by id_table_schema ) as json ");
+      query.append(" ) tablesAux group by id_table_schema ) as json ");
+
       LOG.info("Query: {} ", query);
       // Delete the query log and the timestamp part later, once the tests are finished.
       outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
