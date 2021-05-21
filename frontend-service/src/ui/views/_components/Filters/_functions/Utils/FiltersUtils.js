@@ -7,7 +7,7 @@ import { config } from 'conf';
 
 const getUserRoleLabel = role => {
   const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
-  return userRole?.label;
+  return userRole?.label || role;
 };
 
 const getCheckboxFilterInitialState = checkboxOptions => {

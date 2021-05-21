@@ -732,7 +732,7 @@
     "publicCountriesBreadcrumbs": "Countries",
     "publicCountryBreadcrumbs": "Country",
     "publicDataflowBreadcrumbs": "Dataflow",
-    "publicDataflowsBreadcrumbs": "Public dataflows",
+    "publicDataflowsBreadcrumbs": "Dataflows",
     "publicStatusLeftSideBarButton": "Public status",
     "pushNotifications": "Push notifications",
     "qcDescription": "Description (optional)",
@@ -1106,6 +1106,8 @@
     "emailAlreadyAssignedTooltip": "The email is already assigned",
     "notValidEmailTooltip": "The email is not valid",
     "emailHasErrorTooltip": "The email has an error",
-    "incompleteDataTooltip": "Incomplete data"
+    "incompleteDataTooltip": "Incomplete data",
+    "requesterNotMatchingFilter": "There are no requesters with the selected parameters",
+    "reporterNotMatchingFilter": "There are no reporters with the selected parameters"
   }
 }
