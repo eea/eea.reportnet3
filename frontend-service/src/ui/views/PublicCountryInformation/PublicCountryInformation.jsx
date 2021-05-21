@@ -434,11 +434,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               value={dataflows}>
               {renderColumns(dataflows)}
             </DataTable>
-            <div className={styles.tableLegendContainer}>
-              <span>*</span>
-              <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-              <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-            </div>
           </div>
         )}
       </div>

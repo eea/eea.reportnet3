@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
@@ -44,6 +44,7 @@ const FieldEditor = ({
   record,
   reporting
 }) => {
+  const refDatetimeCalendar = useRef(null);
   const crs = [
     { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
@@ -190,6 +191,15 @@ const FieldEditor = ({
       });
     } finally {
       setIsLoadingData(false);
+    }
+  };
+
+  const calculateCalendarPanelPosition = () => {
+    if (record.dataRow?.length === 3 && !isCalendarVisible) {
+      const {
+        current: { panel }
+      } = refDatetimeCalendar;
+      panel.style.left = `${panel.offsetLeft - panel.offsetWidth / 2}px`;
     }
   };
 
@@ -598,6 +608,7 @@ const FieldEditor = ({
           <Calendar
             appendTo={document.body}
             inputId={calendarWithDatetimeId}
+            inputRef={refDatetimeCalendar}
             locale={{
               firstDayOfWeek: 0,
               dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -625,6 +636,7 @@ const FieldEditor = ({
             monthNavigator={true}
             onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
             onFocus={e => {
+              calculateCalendarPanelPosition();
               const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
               setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
               setIsCalendarVisible(true);
