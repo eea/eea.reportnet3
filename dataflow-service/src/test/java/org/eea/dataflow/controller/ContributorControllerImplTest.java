@@ -56,12 +56,10 @@ public class ContributorControllerImplTest {
     contributorVOWrite = new ContributorVO();
     contributorVOWrite.setAccount("write@reportnet.net");
     contributorVOWrite.setRole("EDITOR");
-    contributorVOWrite.setWritePermission(true);
 
     contributorVORead = new ContributorVO();
     contributorVORead.setAccount("read@reportnet.net");
     contributorVORead.setRole("EDITOR");
-    contributorVORead.setWritePermission(false);
 
     userRepresentationVO = new UserRepresentationVO();
     userRepresentationVO.setEmail("write@reportnet.net");
@@ -79,9 +77,8 @@ public class ContributorControllerImplTest {
         .thenReturn(new UserRepresentationVO());
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
-    contributorControllerImpl.updateEditor(1L, contributorVOWrite);
-    Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite, "EDITOR",
-        null);
+    contributorControllerImpl.updateRequester(1L, contributorVOWrite);
+    Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVOWrite, null);
   }
 
   /**
@@ -94,10 +91,10 @@ public class ContributorControllerImplTest {
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
     Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
-        contributorVOWrite, "EDITOR", null);
+        contributorVOWrite, null);
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
-    ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
+    ResponseEntity<?> value = contributorControllerImpl.updateRequester(1L, contributorVOWrite);
     assertEquals(null, value.getBody());
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
   }
@@ -107,8 +104,9 @@ public class ContributorControllerImplTest {
    */
   @Test
   public void findContributorsByGroup() {
-    contributorControllerImpl.findEditorsByGroup(1L);
-    Mockito.verify(contributorService, times(1)).findContributorsByResourceId(1L, null, "EDITOR");
+    contributorControllerImpl.findRequestersByGroup(1L);
+    Mockito.verify(contributorService, times(1)).findContributorsByResourceId(1L, null,
+        "REQUESTER");
   }
 
   /**
@@ -123,7 +121,7 @@ public class ContributorControllerImplTest {
 
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
-    contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
+    contributorControllerImpl.deleteRequester(1L, contributorVOWrite);
     Mockito.verify(contributorService, times(1)).deleteContributor(1L, "write@reportnet.net",
         "EDITOR", null);
   }
@@ -140,7 +138,7 @@ public class ContributorControllerImplTest {
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
     try {
-      contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
+      contributorControllerImpl.deleteRequester(1L, contributorVOWrite);
     } catch (ResponseStatusException ex) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
       throw ex;
@@ -158,7 +156,7 @@ public class ContributorControllerImplTest {
 
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
     try {
-      contributorControllerImpl.deleteEditor(1L, contributorVOWrite);
+      contributorControllerImpl.deleteRequester(1L, contributorVOWrite);
     } catch (ResponseStatusException ex) {
       assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
       assertEquals("The email write@reportnet.net doesn't exist in repornet", ex.getReason());
@@ -227,7 +225,7 @@ public class ContributorControllerImplTest {
         .thenReturn(userRepresentationVO);
     contributorControllerImpl.deleteReporter(1L, 1L, contributorVORead);
     Mockito.verify(contributorService, times(1)).deleteContributor(1L, "read@reportnet.net",
-        "REPORTER", 1L);
+        "EDITOR", 1L);
   }
 
   /**
@@ -240,8 +238,8 @@ public class ContributorControllerImplTest {
     userRepresentationVO.setEmail("read@reportnet.net");
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
-    Mockito.doThrow(EEAException.class).when(contributorService).deleteContributor(1L,
-        "read@reportnet.net", "REPORTER", 1L);
+    Mockito.doThrow(EEAException.class).when(contributorService).deleteContributor(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
     try {
       contributorControllerImpl.deleteReporter(1L, 1L, contributorVORead);
     } catch (ResponseStatusException ex) {
@@ -275,8 +273,7 @@ public class ContributorControllerImplTest {
         .thenReturn(userRepresentationVO);
     contributorVORead.setRole("REPORTER");
     contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
-    Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVORead,
-        "REPORTER", 1L);
+    Mockito.verify(contributorService, times(1)).updateContributor(1L, contributorVORead, 1L);
   }
 
 
@@ -291,7 +288,7 @@ public class ContributorControllerImplTest {
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(userRepresentationVO);
     Mockito.doThrow(EEAException.class).when(contributorService).updateContributor(1L,
-        contributorVORead, "REPORTER", 1L);
+        contributorVORead, 1L);
     contributorVORead.setRole("REPORTER");
     ResponseEntity<?> value = contributorControllerImpl.updateReporter(1L, 1L, contributorVORead);
     assertEquals(null, value.getBody());
@@ -307,7 +304,7 @@ public class ContributorControllerImplTest {
   @Test
   public void updateEditorEmailNullTest() throws EEAException {
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
-    ResponseEntity<?> value = contributorControllerImpl.updateEditor(1L, contributorVOWrite);
+    ResponseEntity<?> value = contributorControllerImpl.updateRequester(1L, contributorVOWrite);
     assertEquals("The email write@reportnet.net doesn't exist in repornet", value.getBody());
     assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
   }

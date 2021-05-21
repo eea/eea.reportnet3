@@ -3,6 +3,8 @@ package org.eea.dataset.service.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
 import org.junit.Before;
@@ -53,10 +55,10 @@ public class FileExportContextImplTest {
    */
   @Test
   public void testFileWriter() throws IOException, EEAException {
-    byte[] expectedResult = "".getBytes();
-    Mockito.when(
-        writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(expectedResult);
+    List<byte[]> expectedResult = new ArrayList<>();
+    expectedResult.add("".getBytes());
+    Mockito.when(writerStrategy.writeFileList(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean())).thenReturn(expectedResult);
     assertEquals("Not equals", expectedResult, fileExportContextImpl.fileWriter(1L, 1L, "", true));
   }
 

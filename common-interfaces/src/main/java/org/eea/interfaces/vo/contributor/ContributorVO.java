@@ -25,9 +25,6 @@ public class ContributorVO implements Serializable {
   /** The role. */
   private String role;
 
-  /** The write permission. */
-  private Boolean writePermission;
-
   /** The data provider id. */
   private Long dataProviderId;
 

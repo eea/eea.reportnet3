@@ -30,6 +30,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.rod.ObligationController.ObligationControllerZull;
@@ -148,6 +149,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataset Test controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDataSetControllerZuul;
+
+  /** The reference dataset controller zuul. */
+  @Autowired
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -592,8 +597,12 @@ public class DataflowServiceImpl implements DataflowService {
     // get the entity
     List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
         .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
+
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
+
+    dataflowPublicList.stream().forEach(dataflow -> dataflow.setReferenceDatasets(
+        referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId())));
 
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
@@ -645,6 +654,9 @@ public class DataflowServiceImpl implements DataflowService {
     }
     dataflowPublicVO.setReportingDatasets(
         datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
+
+    dataflowPublicVO.setReferenceDatasets(
+        referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
 
     findObligationPublicDataflow(dataflowPublicVO);
     return dataflowPublicVO;
@@ -932,41 +944,68 @@ public class DataflowServiceImpl implements DataflowService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Dataflow result = dataflowRepository.findById(id).orElse(null);
-    // filter datasets showed to the user depending on permissions
+
+    DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
+
+    // filter design datasets (schemas) showed to the user depending on permissions
     List<ResourceAccessVO> datasets =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET);
-    // add to the filter the design datasets (data schemas) too
-    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA));
-    // also, add to the filter the data collection
-    datasets
-        .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
-    // and the eu datasets
-    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
-    // add the test datasets
-    datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA);
+
+    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+      // add to the filter the reporting datasets
+      datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET));
+      // also, add to the filter the data collection
+      datasets.addAll(
+          userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
+      // and the eu datasets
+      datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
+      // add the test datasets
+      datasets
+          .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
+      // add the reference datasets
+      datasets.addAll(
+          userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.REFERENCE_DATASET));
+    }
+
     List<Long> datasetsIds =
         datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-    DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
+
+
+    // If the dataflow it's on design status, no need to call for DC, EU datasets, Tests, etc. and
+    // we can
+    // save some calls
     if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+      // Set the reporting datasets
       dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
           .findReportingDataSetIdByDataflowId(id).stream()
           .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+      // Add the data collections
+      dataflowVO.setDataCollections(dataCollectionControllerZuul
+          .findDataCollectionIdByDataflowId(id).stream()
+          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+      // Add the EU datasets
+      dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+      // Add the Test datasets
+      dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
+          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+      // Add the Reference datasets
+      dataflowVO.setReferenceDatasets(referenceDatasetControllerZuul
+          .findReferenceDatasetByDataflowId(id).stream()
+          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
     } else {
       dataflowVO.setReportingDatasets(new ArrayList<>());
+      dataflowVO.setDataCollections(new ArrayList<>());
+      dataflowVO.setEuDatasets(new ArrayList<>());
+      dataflowVO.setTestDatasets(new ArrayList<>());
+      dataflowVO.setReferenceDatasets(new ArrayList<>());
     }
 
-    // Add the data collections
-    dataflowVO.setDataCollections(
-        dataCollectionControllerZuul.findDataCollectionIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-    // Add the EU datasets
-    dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
-        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-    // Add the Test datasets
-    dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
-        .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
 
     // Add the representatives and design datasets
     if (includeAllRepresentatives) {

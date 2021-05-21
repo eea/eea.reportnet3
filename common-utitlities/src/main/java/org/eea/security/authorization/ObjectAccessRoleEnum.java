@@ -95,11 +95,24 @@ public enum ObjectAccessRoleEnum {
   /** The eudataset custodian. */
   EUDATASET_CUSTODIAN("ROLE_EUDATASET-%s-DATA_CUSTODIAN"),
 
+  /** The eudataset steward. */
+  EUDATASET_STEWARD("ROLE_EUDATASET-%s-DATA_STEWARD"),
+
   /** The eudataset observer. */
   EUDATASET_OBSERVER("ROLE_EUDATASET-%s-DATA_OBSERVER"),
 
+  /** The referencedataset observer. */
+  REFERENCEDATASET_OBSERVER("ROLE_REFERENCEDATASET-%s-DATA_OBSERVER"),
+
   /** The testdataset custodian. */
-  TESTDATASET_CUSTODIAN("ROLE_TESTDATASET-%s-DATA_CUSTODIAN");
+  TESTDATASET_CUSTODIAN("ROLE_TESTDATASET-%s-DATA_CUSTODIAN"),
+
+  /** The testdataset steward. */
+  TESTDATASET_STEWARD("ROLE_TESTDATASET-%s-DATA_STEWARD"),
+
+  /** The referencedataset custodian. */
+  REFERENCEDATASET_CUSTODIAN("ROLE_REFERENCEDATASET-%s-DATA_CUSTODIAN");
+
 
 
   /** The expression. */

@@ -53,6 +53,13 @@ public enum DataType {
   DATE("DATE", JavaType.DATE),
 
   /**
+   * The DateTime.
+   *
+   * Cast in JPA. CAST(VALUE as java.sql.Timestamp) Supports any date
+   */
+  DATETIME("DATETIME", JavaType.TIMESTAMP),
+
+  /**
    * The Boolean.
    *
    * Cast in JPA: java.lang.Boolean
@@ -61,7 +68,7 @@ public enum DataType {
 
   /**
    * The point.
-   * 
+   *
    * A String representing a GeoJSON Point object. ObjectMapper.readTree(...) should be used to
    * transform into JSON.
    */
@@ -69,7 +76,7 @@ public enum DataType {
 
   /**
    * The linestring.
-   * 
+   *
    * A String representing a GeoJSON LineString object. ObjectMapper.readTree(...) should be used to
    * transform into JSON.
    */
@@ -77,7 +84,7 @@ public enum DataType {
 
   /**
    * The polygon.
-   * 
+   *
    * A String representing a GeoJSON Polygon object. ObjectMapper.readTree(...) should be used to
    * transform into JSON.
    */
@@ -85,7 +92,7 @@ public enum DataType {
 
   /**
    * The MultiPoint.
-   * 
+   *
    * A String representing a GeoJSON MultiPoint object. ObjectMapper.readTree(...) should be used to
    * transform into JSON.
    */
@@ -93,7 +100,7 @@ public enum DataType {
 
   /**
    * The multilinestring.
-   * 
+   *
    * A String representing a GeoJSON MultiLineString object. ObjectMapper.readTree(...) should be
    * used to transform into JSON.
    */
@@ -101,7 +108,7 @@ public enum DataType {
 
   /**
    * The multipolygon.
-   * 
+   *
    * A String representing a GeoJSON GeometryCollection object. ObjectMapper.readTree(...) should be
    * used to transform into JSON.
    */
@@ -109,7 +116,7 @@ public enum DataType {
 
   /**
    * The geometrycollection.
-   * 
+   *
    * A String representing a GeoJSON GeometryCollection object. ObjectMapper.readTree(...) should be
    * used to transform into JSON.
    */
