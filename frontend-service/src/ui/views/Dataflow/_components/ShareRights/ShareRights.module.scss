@@ -49,3 +49,16 @@
 .shareRightsModal {
   height: 50vh;
 }
+
+.wrapperNoUserRoles,
+.wrapperEmptyFilter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wrapperNoUserRoles {
+  height: 100%;
+}
+.wrapperEmptyFilter {
+  height: 80%;
+}

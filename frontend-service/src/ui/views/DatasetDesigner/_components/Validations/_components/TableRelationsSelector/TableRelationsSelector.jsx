@@ -1,6 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import first from 'lodash/first';
 
 import styles from './TableRelationsSelector.module.scss';
 
@@ -9,7 +10,6 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 import { FieldRelations } from './_components/FieldRelations';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { first } from 'lodash';
 
 export const TableRelationsSelector = ({
   componentName,
@@ -57,7 +57,7 @@ export const TableRelationsSelector = ({
         ? creationFormState.schemaTables
         : relations.referencedTables
     );
-  }, []);
+  }, [creationFormState.candidateRule.relations.referencedDatasetSchema]);
 
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldRelations') {
@@ -74,11 +74,11 @@ export const TableRelationsSelector = ({
         />
       );
     }
-    return <></>;
+    return <div></div>;
   };
 
   return (
-    <>
+    <Fragment>
       <p className={styles.title}>{resources.messages['tableRelationsTitle']}</p>
       <div className={styles.section}>
         <div className={styles.fieldsGroup}>
@@ -89,13 +89,13 @@ export const TableRelationsSelector = ({
               disabled={relations.links.length > 1}
               filterPlaceholder={resources.messages['referenceSchemaPlaceholder']}
               id={`${componentName}__dataset`}
-              onChange={e => onDatasetSchemaChange(e.target.value.value)}
+              onChange={e => onDatasetSchemaChange(e.target.value)}
               optionLabel="label"
               options={creationFormState.datasetSchemas}
               placeholder={resources.messages['referenceSchemaPlaceholder']}
               value={first(
                 creationFormState.datasetSchemas.filter(
-                  option => option.value === creationFormState.candidateRule.relations.referencedDatasetSchema
+                  option => option.code === creationFormState.candidateRule.relations.referencedDatasetSchema.code
                 )
               )}
             />
@@ -111,7 +111,7 @@ export const TableRelationsSelector = ({
               optionLabel="label"
               options={referenceTableOptions}
               placeholder={resources.messages['referenceTablePlaceholder']}
-              value={first(referenceTableOptions.filter(option => option.value === relations.referencedTable))}
+              value={first(referenceTableOptions.filter(option => option.code === relations.referencedTable.code))}
             />
           </div>
           <div className={styles.checkbox}>
@@ -130,6 +130,6 @@ export const TableRelationsSelector = ({
         </div>
       </div>
       <div className={styles.section}>{expressionsTypeView()} </div>
-    </>
+    </Fragment>
   );
 };

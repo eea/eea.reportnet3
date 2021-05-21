@@ -231,7 +231,7 @@ const RepresentativesList = ({
   const onDeleteConfirm = async () => {
     setIsDeleting(true);
     try {
-      await RepresentativeService.deleteById(formState.representativeIdToDelete);
+      await RepresentativeService.deleteById(formState.representativeIdToDelete, dataflowId);
 
       const updatedList = formState.representatives.filter(
         representative => representative.representativeId !== formState.representativeIdToDelete
@@ -250,7 +250,7 @@ const RepresentativesList = ({
   const onDeleteLeadReporter = async () => {
     setIsDeleting(true);
     try {
-      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
+      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
 
       if (response.status >= 200 && response.status <= 299) {
         formDispatcher({ type: 'REFRESH' });
@@ -294,8 +294,8 @@ const RepresentativesList = ({
       if (isValidEmail(inputValue) && !isDuplicatedLeadReporter(inputValue, dataProviderId, formState.leadReporters)) {
         try {
           const response = TextUtils.areEquals(leadReporter.id, 'empty')
-            ? await addLeadReporter(inputValue, representativeId)
-            : await updateLeadReporter(inputValue, leadReporter.id, representativeId);
+            ? await addLeadReporter(inputValue, representativeId, dataflowId)
+            : await updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
 
           if (response.status >= 200 && response.status <= 299) {
             formDispatcher({ type: 'REFRESH' });

@@ -86,7 +86,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataCollectionVO.idDataflow,'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   public void createEmptyDataCollection(
       @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,

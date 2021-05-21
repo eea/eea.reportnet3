@@ -94,7 +94,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProviders  by their Group Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
       responseContainer = "List")
@@ -116,7 +116,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
   public List<DataProviderCodeVO> findAllDataProviderTypes() {
@@ -178,15 +178,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Delete representative.
    *
    * @param dataflowRepresentativeId the dataflow representative id
+   * @param dataflowId the dataflow id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/{dataflowRepresentativeId}")
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @DeleteMapping(value = "/{dataflowRepresentativeId}/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @ApiOperation(value = "Delete Representative")
   @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
-  public void deleteRepresentative(@ApiParam(value = "Dataflow Representative id",
-      example = "0") @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId) {
+  public void deleteRepresentative(
+      @ApiParam(value = "Dataflow Representative id",
+          example = "0") @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId,
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
       representativeService.deleteDataflowRepresentative(dataflowRepresentativeId);
     } catch (EEAException e) {
@@ -239,7 +242,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export file lead reporters")
   public ResponseEntity<byte[]> exportLeadReportersFile(
@@ -264,7 +267,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/exportTemplateReportersFile/{groupId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export template file countrys avaliable")
@@ -294,7 +297,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @ApiOperation(value = "Import file lead reporters ")
   @PostMapping("/import/{dataflowId}/group/{groupId}")
   public ResponseEntity<byte[]> importFileCountryTemplate(
@@ -346,19 +349,21 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    *
    * @param representativeId the representative id
    * @param leadReporterVO the lead reporter VO
+   * @param dataflowId the dataflow id
    * @return the created lead reporter id
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{representativeId}/leadReporter")
+  @PostMapping("/{representativeId}/leadReporter/dataflow/{dataflowId}")
   @LockMethod
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @ApiOperation(value = "Create one Lead reporter", response = Long.class)
   public Long createLeadReporter(
       @ApiParam(value = "Representative id", example = "0") @LockCriteria(
           name = "representativeId") @PathVariable("representativeId") Long representativeId,
       @ApiParam(type = "Object",
-          value = "Lead reporter Object") @RequestBody LeadReporterVO leadReporterVO) {
+          value = "Lead reporter Object") @RequestBody LeadReporterVO leadReporterVO,
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
     if (null == leadReporterVO || null == leadReporterVO.getEmail()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
@@ -382,13 +387,15 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Update lead reporter.
    *
    * @param leadReporterVO the lead reporter VO
+   * @param dataflowId the dataflow id
    * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PutMapping("/leadReporter/update")
-  @PreAuthorize("isAuthenticated()")
-  public Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO) {
+  @PutMapping("/leadReporter/update/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  public Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO,
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
     // Authorization
     if (!representativeService.authorizeByRepresentativeId(leadReporterVO.getRepresentativeId())) {
@@ -415,12 +422,14 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Delete lead reporter.
    *
    * @param leadReporterId the lead reporter id
+   * @param dataflowId the dataflow id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping("/leadReporter/{leadReporterId}")
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
-  public void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId) {
+  @DeleteMapping("/leadReporter/{leadReporterId}/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  public void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId,
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
       representativeService.deleteLeadReporter(leadReporterId);
     } catch (EEAException e) {

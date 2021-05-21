@@ -732,7 +732,7 @@
     "publicCountriesBreadcrumbs": "Countries",
     "publicCountryBreadcrumbs": "Country",
     "publicDataflowBreadcrumbs": "Dataflow",
-    "publicDataflowsBreadcrumbs": "Public dataflows",
+    "publicDataflowsBreadcrumbs": "Dataflows",
     "publicStatusLeftSideBarButton": "Public status",
     "pushNotifications": "Push notifications",
     "qcDescription": "Description (optional)",
@@ -1099,13 +1099,15 @@
     "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
     "geomTypeHelpTooltip": "Check the type format",
     "notFoundError": "Page not found error. The requested page does not exist",
-    "sqlSentenceSpatialTypesNote": "Note: You can see the different GIS operations with the following <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>link</a>",
+    "sqlSentenceSpatialTypesNote": "<i>Note: You can see the different GIS operations with the following <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>link</a></i>",
     "emailNotFoundError": "The email doesn't exist",
     "impossibleRoleError": "The lead reporter couldn't be assigned as reporter",
     "account": "Email",
     "emailAlreadyAssignedTooltip": "The email is already assigned",
     "notValidEmailTooltip": "The email is not valid",
     "emailHasErrorTooltip": "The email has an error",
-    "incompleteDataTooltip": "Incomplete data"
+    "incompleteDataTooltip": "Incomplete data",
+    "requesterNotMatchingFilter": "There are no requesters with the selected parameters",
+    "reporterNotMatchingFilter": "There are no reporters with the selected parameters"
   }
 }
