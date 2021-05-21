@@ -8,8 +8,8 @@ const add = async (dataflowId, providerAccount, dataProviderId) => {
   return await apiRepresentative.add(dataflowId, providerAccount, dataProviderId);
 };
 
-const addLeadReporter = async (leadReporterAccount, representativeId) => {
-  return await apiRepresentative.addLeadReporter(leadReporterAccount, representativeId);
+const addLeadReporter = async (leadReporterAccount, representativeId, dataflowId) => {
+  return await apiRepresentative.addLeadReporter(leadReporterAccount, representativeId, dataflowId);
 };
 
 const allDataProviders = async dataProviderGroup => {
@@ -60,7 +60,8 @@ const parseLeadReporters = (leadReporters = []) =>
 
 const deleteById = async representativeId => await apiRepresentative.deleteById(representativeId);
 
-const deleteLeadReporter = async leadReporterId => await apiRepresentative.deleteLeadReporter(leadReporterId);
+const deleteLeadReporter = async (leadReporterId, dataflowId) =>
+  await apiRepresentative.deleteLeadReporter(leadReporterId, dataflowId);
 
 const downloadById = async dataflowId => {
   return await apiRepresentative.downloadById(dataflowId);
@@ -74,8 +75,8 @@ const getProviderTypes = async () => await apiRepresentative.getProviderTypes();
 const updateDataProviderId = async (representativeId, dataProviderId) =>
   await apiRepresentative.updateDataProviderId(representativeId, dataProviderId);
 
-const updateLeadReporter = async (leadReporterAccount, leadReporterId, representativeId) =>
-  await apiRepresentative.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId);
+const updateLeadReporter = async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
+  await apiRepresentative.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId, dataflowId);
 
 export const ApiRepresentativeRepository = {
   add,
