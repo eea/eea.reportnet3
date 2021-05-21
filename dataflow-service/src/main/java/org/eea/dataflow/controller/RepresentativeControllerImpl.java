@@ -178,15 +178,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * Delete representative.
    *
    * @param dataflowRepresentativeId the dataflow representative id
+   * @param dataflowId the dataflow id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/{dataflowRepresentativeId}")
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @DeleteMapping(value = "/{dataflowRepresentativeId}/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @ApiOperation(value = "Delete Representative")
   @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
-  public void deleteRepresentative(@ApiParam(value = "Dataflow Representative id",
-      example = "0") @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId) {
+  public void deleteRepresentative(
+      @ApiParam(value = "Dataflow Representative id",
+          example = "0") @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId,
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
       representativeService.deleteDataflowRepresentative(dataflowRepresentativeId);
     } catch (EEAException e) {
