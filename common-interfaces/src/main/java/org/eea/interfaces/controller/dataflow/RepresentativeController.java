@@ -78,10 +78,11 @@ public interface RepresentativeController {
    * Delete representative.
    *
    * @param dataflowRepresentativeId the dataflow representative id
+   * @param dataflowId the dataflow id
    */
-  @DeleteMapping(value = "/{dataflowRepresentativeId}")
-  void deleteRepresentative(
-      @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId);
+  @DeleteMapping(value = "/{dataflowRepresentativeId}/dataflow/{dataflowId}")
+  void deleteRepresentative(@PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId,
+      @PathVariable("dataflowId") Long dataflowId);
 
 
   /**
