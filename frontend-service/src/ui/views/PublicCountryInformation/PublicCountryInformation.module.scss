@@ -54,27 +54,3 @@
     text-decoration: none;
   }
 }
-
-.tableLegendContainer {
-  margin-top: 0.4rem !important;
-  margin-right: 0.4rem;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  font-size: 0.9rem;
-  color: var(--gray-75);
-
-  > span {
-    margin-right: -0.4rem !important;
-  }
-
-  .tableLegendIcon {
-    margin-right: -0.4rem !important;
-    color: var(--button-secondary-bg-active);
-    font-size: 0.8rem;
-  }
-
-  .tableLegendText {
-    font-style: italic;
-  }
-}

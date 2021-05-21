@@ -1,2 +1,5 @@
-export const AddLeadReporter = ({ representativeRepository }) => async (leadReporterAccount, representativeId) =>
-  representativeRepository.addLeadReporter(leadReporterAccount, representativeId);
+export const AddLeadReporter = ({ representativeRepository }) => async (
+  leadReporterAccount,
+  representativeId,
+  dataflowId
+) => representativeRepository.addLeadReporter(leadReporterAccount, representativeId, dataflowId);
