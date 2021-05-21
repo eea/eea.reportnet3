@@ -39,6 +39,9 @@ public enum ResourceTypeEnum {
   /** The Test dataset. */
   TEST_DATASET("TestDataset"),
 
+  /** The reference dataset. */
+  REFERENCE_DATASET("ReferenceDataset"),
+
   /**
    * Join request resource enum.
    */

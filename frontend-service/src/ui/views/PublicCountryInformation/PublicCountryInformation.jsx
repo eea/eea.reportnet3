@@ -111,6 +111,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'publicFilesNames':
         header = resources.messages['files'];
         break;
+      case 'referencePublicFilesNames':
+        header = resources.messages['referenceDatasets'];
+        break;
       default:
         header = fieldHeader;
         break;
@@ -132,7 +135,13 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const onFileDownload = async (dataflowId, dataProviderId, fileName) => {
     try {
-      const fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+      let fileContent;
+
+      if (!isNil(dataProviderId)) {
+        fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+      } else {
+        fileContent = await DatasetService.downloadReferenceDatasetFileData(dataflowId, fileName);
+      }
 
       DownloadFile(fileContent.data, fileName);
     } catch (error) {
@@ -187,6 +196,13 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           publicFilesNames.push({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName });
         }
       });
+      const referencePublicFilesNames = [];
+      dataflow.referenceDatasets?.forEach(referenceDataset => {
+        if (!isNil(referenceDataset.publicFileName)) {
+          referencePublicFilesNames.push({ fileName: referenceDataset.publicFileName });
+        }
+      });
+
       const parsedDataflow = {
         id: dataflow.id,
         name: dataflow.name,
@@ -197,6 +213,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         isReleasable: dataflow.isReleasable,
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
+        referencePublicFilesNames: referencePublicFilesNames,
         publicFilesNames: publicFilesNames
       };
       parsedDataflows.push(parsedDataflow);
@@ -214,7 +231,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'isReleasable', index: 5 },
       { id: 'isReleased', index: 6 },
       { id: 'releaseDate', index: 7 },
-      { id: 'publicFilesNames', index: 8 }
+      { id: 'referencePublicFilesNames', index: 8 },
+      { id: 'publicFilesNames', index: 9 }
     ];
 
     return dataflows
@@ -235,13 +253,14 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
+        if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
         return (
           <Column
             body={template}
             field={field}
             header={getHeader(field)}
             key={field}
-            sortable={field === 'publicFilesNames' ? false : true}
+            sortable={field === 'publicFilesNames' || field === 'referencePublicFilesNames' ? false : true}
           />
         );
       });
@@ -283,6 +302,35 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
             <span>{resources.messages['restrictFromPublicField']}</span>
           </ReactTooltip>
+        </div>
+      );
+    }
+  };
+
+  const renderDownloadReferenceFileBodyColumn = rowData => {
+    if (rowData.referencePublicFilesNames.length !== 0) {
+      return (
+        <div className={styles.filesContainer}>
+          {rowData.referencePublicFilesNames.map(referencePublicFilesName => (
+            <span
+              className={styles.filesIcon}
+              key={referencePublicFilesName}
+              onClick={() => onFileDownload(rowData.id, null, referencePublicFilesName.fileName)}>
+              <FontAwesomeIcon
+                className={styles.cursorPointer}
+                data-for={referencePublicFilesName.fileName}
+                data-tip
+                icon={AwesomeIcons('7z')}
+              />
+              <ReactTooltip
+                className={styles.tooltipClass}
+                effect="solid"
+                id={referencePublicFilesName.fileName}
+                place="top">
+                <span>{referencePublicFilesName.fileName}</span>
+              </ReactTooltip>
+            </span>
+          ))}
         </div>
       );
     }
@@ -386,11 +434,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               value={dataflows}>
               {renderColumns(dataflows)}
             </DataTable>
-            <div className={styles.tableLegendContainer}>
-              <span>*</span>
-              <FontAwesomeIcon className={styles.tableLegendIcon} icon={AwesomeIcons('lock')} />
-              <div className={styles.tableLegendText}> {resources.messages['restrictFromPublicField']}</div>
-            </div>
           </div>
         )}
       </div>

@@ -78,6 +78,49 @@ public class CSVWriterStrategy implements WriterStrategy {
   }
 
   /**
+   * Write file list.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param includeCountryCode the include country code
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<byte[]> writeFileList(final Long dataflowId, final Long datasetId, final String tableSchemaId,
+      boolean includeCountryCode) throws EEAException {
+    LOG.info("starting csv file writter");
+
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
+
+    // Init the writer
+    StringWriter writer = new StringWriter();
+    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+
+    List<byte[]> byteList = new ArrayList<>();
+
+    if(tableSchemaId != null) {
+      setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode);
+
+      // Once read we convert it to string
+      byteList.add(writer.getBuffer().toString().getBytes());
+    }else {
+      dataSetSchema.getTableSchemas().forEach(tableSchemaVO -> {
+        setLines(tableSchemaVO.getIdTableSchema(), dataSetSchema, csvWriter, datasetId,
+            includeCountryCode);
+
+        // Once read we convert it to string
+        byteList.add(writer.getBuffer().toString().getBytes());
+      });
+    }
+
+    return byteList;
+
+  }
+
+  /**
    * Sets the lines.
    *
    * @param idTableSchema the id table schema

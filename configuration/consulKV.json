@@ -1422,5 +1422,17 @@
   {
     "key": "config/communication/spring.mail.active",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.referencedataset.path",
+    "value": "L3JlZmVyZW5jZURhdGFzZXQvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.referencedataset.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.referencedataset.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

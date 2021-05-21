@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import lombok.Getter;
@@ -28,6 +29,9 @@ public class DataflowPublicVO implements Serializable {
 
   /** The datasets. */
   private List<ReportingDatasetPublicVO> reportingDatasets;
+
+  /** The reference datasets. */
+  private List<ReferenceDatasetPublicVO> referenceDatasets;
 
   /** The description. */
   private String description;
@@ -73,8 +77,8 @@ public class DataflowPublicVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, name, deadlineDate, reportingDatasets, obligation, status,
-        releasable);
+    return Objects.hash(id, description, name, deadlineDate, reportingDatasets, referenceDatasets,
+        obligation, status, releasable);
   }
 
 }

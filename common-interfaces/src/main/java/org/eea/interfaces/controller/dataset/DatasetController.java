@@ -422,4 +422,16 @@ public interface DatasetController {
   void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
 
+
+  /**
+   * Export reference dataset file.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the response entity
+   */
+  @GetMapping("/exportPublicFile/dataflow/{dataflowId}")
+  public ResponseEntity<InputStreamResource> exportReferenceDatasetFile(
+      @PathVariable Long dataflowId, @RequestParam String fileName);
+
 }

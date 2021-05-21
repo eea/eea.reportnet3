@@ -24,6 +24,13 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant REGEX_DATE. */
+  private static final String REGEX_DATE = "[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01])";
+
+  /** The Constant REGEX_DATETIME. */
+  private static final String REGEX_DATETIME =
+      "[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01]) \\d{2}:\\d{2}:\\d{2}";
+
   /**
    * Converts a String containing a rule expression (Java code) into a RuleExpressionDTO data
    * structure.
@@ -194,6 +201,7 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
 
     loop: while (index < length) {
       switch (ruleExpressionString.charAt(index)) {
+        case '-':
         case '0':
         case '1':
         case '2':
@@ -415,11 +423,21 @@ public class RuleExpressionServiceImpl implements RuleExpressionService {
     }
 
     if (string.equals(VALUE) || ObjectId.isValid(string)) {
+      // this check between Date and Timestamp is forced to maintain compatibility using the same
+      // rule
+      // like FIELD_DAY_GT... in Date and Timestamp
+      if ((JavaType.TIMESTAMP.equals(dataTypeMap.get(string).getJavaType())
+          && JavaType.DATE.equals(superInputType))
+          || (JavaType.DATE.equals(dataTypeMap.get(string).getJavaType())
+              && JavaType.TIMESTAMP.equals(superInputType))) {
+        return true;
+      }
       return superInputType.equals(dataTypeMap.get(string).getJavaType());
     }
 
-    if (superInputType.equals(JavaType.DATE)) {
-      return string.matches("[0-9]{4}-(?:0[0-9]|1[0-2])-(?:[0-2][0-9]|3[01])");
+    if (superInputType.equals(JavaType.DATE) || superInputType.equals(JavaType.TIMESTAMP)) {
+      // check date and timestamp
+      return string.matches(REGEX_DATE) || string.matches(REGEX_DATETIME);
     }
 
     return superInputType.equals(JavaType.STRING);

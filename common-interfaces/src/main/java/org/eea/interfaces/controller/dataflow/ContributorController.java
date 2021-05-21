@@ -27,13 +27,13 @@ public interface ContributorController {
   }
 
   /**
-   * Delete editor.
+   * Delete requester.
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
    */
-  @DeleteMapping(value = "/editor/dataflow/{dataflowId}")
-  void deleteEditor(@PathVariable("dataflowId") Long dataflowId,
+  @DeleteMapping(value = "/requester/dataflow/{dataflowId}")
+  void deleteRequester(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO);
 
   /**
@@ -49,13 +49,14 @@ public interface ContributorController {
       @RequestBody ContributorVO contributorVO);
 
   /**
-   * Find editors by group.
+   * Find requesters by group.
    *
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @GetMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<ContributorVO> findEditorsByGroup(@PathVariable("dataflowId") Long dataflowId);
+  @GetMapping(value = "/requester/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ContributorVO> findRequestersByGroup(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Find reporters by group.
@@ -70,14 +71,15 @@ public interface ContributorController {
       @PathVariable("dataproviderId") Long dataproviderId);
 
   /**
-   * Update editor.
+   * Update requester.
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
    * @return the response entity
    */
-  @PutMapping(value = "/editor/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity updateEditor(@PathVariable("dataflowId") Long dataflowId,
+  @PutMapping(value = "/requester/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity updateRequester(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody ContributorVO contributorVO);
 
   /**

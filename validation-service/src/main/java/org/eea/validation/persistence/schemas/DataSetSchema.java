@@ -41,6 +41,12 @@ public class DataSetSchema {
   @Field(value = "availableInPublic")
   private boolean availableInPublic;
 
+
+  /** The reference dataset. */
+  @Field(value = "referenceDataset")
+  private boolean referenceDataset;
+
+
   /**
    * Hash code.
    *

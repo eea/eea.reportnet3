@@ -18,7 +18,10 @@ public enum DatasetTypeEnum {
   TEST("TEST"),
 
   /** The eudataset. */
-  EUDATASET("EUDATASET");
+  EUDATASET("EUDATASET"),
+
+  /** The reference. */
+  REFERENCE("REFERENCE");
 
 
   /** The value. */
