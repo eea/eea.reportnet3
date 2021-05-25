@@ -43,11 +43,16 @@ const Dataflows = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [tabMenuItems] = useState([
+  const tabMenuItems = [
     {
       label: resources.messages['dataflowsListTab'],
       className: styles.flow_tab,
       tabKey: 'pending'
+    },
+    {
+      label: resources.messages['referenceDataflowsListTab'],
+      className: styles.flow_tab,
+      tabKey: 'referenceDataflows'
     },
     {
       label: resources.messages['dataflowCompletedTab'],
@@ -55,7 +60,8 @@ const Dataflows = withRouter(({ history, match }) => {
       disabled: true,
       tabKey: 'completed'
     }
-  ]);
+  ];
+
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
 
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
@@ -184,7 +190,7 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
+        <TabMenu activeItem={tabMenuActiveItem} model={tabMenuItems} onTabChange={e => setTabMenuActiveItem(e.value)} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={dataflowsState.allDataflows}
@@ -204,8 +210,8 @@ const Dataflows = withRouter(({ history, match }) => {
 
       <DataflowManagement
         isEditForm={false}
-        onCreateDataflow={onCreateDataflow}
         manageDialogs={manageDialogs}
+        onCreateDataflow={onCreateDataflow}
         state={dataflowsState}
       />
     </div>
