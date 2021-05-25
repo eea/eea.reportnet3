@@ -34,44 +34,23 @@
   }
 }
 
-.noDataflowsWrapper {
+.noDataflows {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
   height: 40vh;
-
-  .noDataflows {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 2rem;
-    font-size: 1.4rem;
-    font-weight: bold;
-    height: 100%;
-  }
 }
 
-.tableLegendContainer {
-  margin-top: 0.4rem !important;
-  margin-right: 0.4rem;
+.cellWrapper {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  font-size: 0.9rem;
-  color: var(--gray-75);
 
-  > span {
-    margin-right: -0.4rem !important;
-  }
-
-  .tableLegendIcon {
-    margin-right: -0.4rem !important;
-    color: var(--button-secondary-bg-active);
-    font-size: 0.8rem;
-  }
-
-  .tableLegendText {
-    font-style: italic;
+  .link {
+    color: var(--hyperlink-color);
+    cursor: pointer;
+    text-decoration: none;
   }
 }

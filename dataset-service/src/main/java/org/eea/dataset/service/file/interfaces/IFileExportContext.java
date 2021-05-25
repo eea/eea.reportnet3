@@ -1,6 +1,7 @@
 package org.eea.dataset.service.file.interfaces;
 
 import java.io.IOException;
+import java.util.List;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.exception.EEAException;
 
@@ -22,6 +23,6 @@ public interface IFileExportContext {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  byte[] fileWriter(Long dataflowId, Long datasetId, String idTableSchema,
+  List<byte[]> fileWriter(Long dataflowId, Long datasetId, String idTableSchema,
       boolean includeCountryCode) throws InvalidFileException, IOException, EEAException;
 }

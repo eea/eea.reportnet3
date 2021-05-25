@@ -59,7 +59,7 @@ export const TableViewSchemas = ({
           onChange={() => onSelectDataflow(row)}
           role="checkbox"
         />
-        <label htmlFor={`${row.id}_checkbox`} className="srOnly">
+        <label className="srOnly" htmlFor={`${row.id}_checkbox`}>
           {resources.messages['selectedDataflow']}
         </label>
       </div>
@@ -81,10 +81,10 @@ export const TableViewSchemas = ({
 
   const renderCheckColumn = (
     <Column
-      key="checkId"
+      body={row => onLoadCheckButton(row)}
       className={styles.emptyTableHeader}
       header={resources.messages['selectedDataflow']}
-      body={row => onLoadCheckButton(row)}
+      key="checkId"
     />
   );
 

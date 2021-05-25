@@ -3,21 +3,21 @@ import PropTypes from 'prop-types';
 
 export class CurrentPageReport extends Component {
   static defaultProps = {
-    pageCount: null,
-    page: null,
     first: null,
+    page: null,
+    pageCount: null,
     rows: null,
-    totalRecords: null,
-    template: '({currentPage} of {totalPages})'
+    template: '({currentPage} of {totalPages})',
+    totalRecords: null
   };
 
   static propTypes = {
-    pageCount: PropTypes.number,
-    page: PropTypes.number,
     first: PropTypes.number,
+    page: PropTypes.number,
+    pageCount: PropTypes.number,
     rows: PropTypes.number,
-    totalRecords: PropTypes.number,
-    template: PropTypes.string
+    template: PropTypes.string,
+    totalRecords: PropTypes.number
   };
 
   render() {

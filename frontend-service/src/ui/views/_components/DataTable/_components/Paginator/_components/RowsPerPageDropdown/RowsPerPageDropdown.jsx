@@ -4,15 +4,15 @@ import { Dropdown } from 'ui/views/_components/Dropdown';
 
 export class RowsPerPageDropdown extends Component {
   static defaultProps = {
+    onChange: null,
     options: null,
-    value: null,
-    onChange: null
+    value: null
   };
 
   static propTypes = {
+    onChange: PropTypes.func,
     options: PropTypes.array,
-    value: PropTypes.number,
-    onChange: PropTypes.func
+    value: PropTypes.number
   };
 
   render() {

@@ -13,9 +13,9 @@ const apiRepresentative = {
         dataProviderGroupId
       }
     }),
-  addLeadReporter: async (leadReporterAccount, representativeId) =>
+  addLeadReporter: async (leadReporterAccount, representativeId, dataflowId) =>
     await HTTPRequester.post({
-      url: getUrl(RepresentativeConfig.addLeadReporter, { representativeId }),
+      url: getUrl(RepresentativeConfig.addLeadReporter, { representativeId, dataflowId }),
       data: { email: leadReporterAccount }
     }),
   allDataProviders: async dataProviderGroupId =>
@@ -30,14 +30,17 @@ const apiRepresentative = {
         dataflowId: dataflowId
       })
     }),
-  deleteById: async representativeId =>
+  deleteById: async (representativeId, dataflowId) =>
     await HTTPRequester.delete({
       url: getUrl(RepresentativeConfig.deleteById, {
-        representativeId
+        representativeId,
+        dataflowId
       })
     }),
-  deleteLeadReporter: async leadReporterId =>
-    await HTTPRequester.delete({ url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId }) }),
+  deleteLeadReporter: async (leadReporterId, dataflowId) =>
+    await HTTPRequester.delete({
+      url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId, dataflowId })
+    }),
   downloadById: async dataflowId =>
     await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentatives, { dataflowId })
@@ -58,9 +61,9 @@ const apiRepresentative = {
         dataProviderId: dataProviderId
       }
     }),
-  updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId) =>
+  updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
     await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.updateLeadReporter, {}),
+      url: getUrl(RepresentativeConfig.updateLeadReporter, { dataflowId }),
       data: { email: leadReporterAccount, id: leadReporterId, representativeId }
     })
 };

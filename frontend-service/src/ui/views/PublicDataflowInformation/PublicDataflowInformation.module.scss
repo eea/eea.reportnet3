@@ -14,13 +14,48 @@
   }
 }
 
+.cellContentPosition {
+  text-align: center !important;
+}
+
+.cellWrapper {
+  display: flex;
+  align-items: center;
+
+  .link {
+    color: var(--hyperlink-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+}
+.noDatasets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  height: 40vh;
+}
+
 .downloadFile {
   max-width: 35rem;
 }
 
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--documenticon-color);
+}
+
+.downloadReferenceDatasetFile {
+  width: 12.8% !important;
+  text-align: center;
+}
+
 .filesContainer {
   display: flex;
-  align-items: center;
+  justify-content: center !important;
 
   .filesIcon {
     font-size: 1.4rem;
@@ -38,47 +73,11 @@
   }
 }
 
-.checkedValueColumn {
-  text-align: center;
-}
+.referenceDatasetsWrapper {
+  margin: 3rem 0rem 2rem 0rem;
 
-.downloadIcon {
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--documenticon-color);
-  text-align: center;
-}
-
-.noDatasets {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2rem;
-  font-size: 1.4rem;
-  font-weight: bold;
-  height: 40vh;
-}
-
-.tableLegendContainer {
-  margin-top: 0.4rem !important;
-  margin-right: 0.4rem;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  font-size: 0.9rem;
-  color: var(--gray-75);
-
-  > span {
-    margin-right: -0.4rem !important;
-  }
-
-  .tableLegendIcon {
-    margin-right: -0.4rem !important;
-    color: var(--button-secondary-bg-active);
-    font-size: 0.8rem;
-  }
-
-  .tableLegendText {
-    font-style: italic;
+  .referenceDatasetsTitle {
+    margin-bottom: 1rem;
+    font-weight: bold;
   }
 }

@@ -243,10 +243,10 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
 
       {!isEmpty(historicReleasesState.filteredData) ? (
         <DataTable
+          autoLayout={true}
           className={
             historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset' ? '' : styles.noFilters
           }
-          autoLayout={true}
           paginator={true}
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}

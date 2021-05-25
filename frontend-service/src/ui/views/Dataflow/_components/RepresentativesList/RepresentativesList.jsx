@@ -231,7 +231,7 @@ const RepresentativesList = ({
   const onDeleteConfirm = async () => {
     setIsDeleting(true);
     try {
-      await RepresentativeService.deleteById(formState.representativeIdToDelete);
+      await RepresentativeService.deleteById(formState.representativeIdToDelete, dataflowId);
 
       const updatedList = formState.representatives.filter(
         representative => representative.representativeId !== formState.representativeIdToDelete
@@ -250,7 +250,7 @@ const RepresentativesList = ({
   const onDeleteLeadReporter = async () => {
     setIsDeleting(true);
     try {
-      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId);
+      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
 
       if (response.status >= 200 && response.status <= 299) {
         formDispatcher({ type: 'REFRESH' });
@@ -294,8 +294,8 @@ const RepresentativesList = ({
       if (isValidEmail(inputValue) && !isDuplicatedLeadReporter(inputValue, dataProviderId, formState.leadReporters)) {
         try {
           const response = TextUtils.areEquals(leadReporter.id, 'empty')
-            ? await addLeadReporter(inputValue, representativeId)
-            : await updateLeadReporter(inputValue, leadReporter.id, representativeId);
+            ? await addLeadReporter(inputValue, representativeId, dataflowId)
+            : await updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
 
           if (response.status >= 200 && response.status <= 299) {
             formDispatcher({ type: 'REFRESH' });
@@ -371,7 +371,7 @@ const RepresentativesList = ({
 
     return (
       <>
-        <label htmlFor={labelId} className="srOnly">
+        <label className="srOnly" htmlFor={labelId}>
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
         <select
@@ -393,8 +393,9 @@ const RepresentativesList = ({
           {remainingOptionsAndSelectedOption.map((provider, i) => {
             return (
               <option
-                key={`${provider.dataProviderId}${provider.label}${i}`}
                 className="p-dropdown-item"
+                // eslint-disable-next-line react/no-array-index-key
+                key={`${provider.dataProviderId}${provider.label}${i}`}
                 value={provider.dataProviderId}>
                 {provider.label}
               </option>
@@ -406,17 +407,18 @@ const RepresentativesList = ({
   };
 
   const renderDeleteBtnColumnTemplate = representative => {
-    return isNil(representative.representativeId) || representative.hasDatasets ? (
-      <></>
-    ) : (
-      <ActionsColumn
-        onDeleteClick={() => {
-          formDispatcher({
-            type: 'SHOW_CONFIRM_DIALOG',
-            payload: { representativeId: representative.representativeId }
-          });
-        }}
-      />
+    return (
+      !isNil(representative.representativeId) &&
+      !representative.hasDatasets && (
+        <ActionsColumn
+          onDeleteClick={() => {
+            formDispatcher({
+              type: 'SHOW_CONFIRM_DIALOG',
+              payload: { representativeId: representative.representativeId }
+            });
+          }}
+        />
+      )
     );
   };
 
@@ -430,13 +432,13 @@ const RepresentativesList = ({
           <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
           <Dropdown
             ariaLabel={'dataProviders'}
+            className={styles.dataProvidersDropdown}
             disabled={formState.representatives.length > 1}
             name="dataProvidersDropdown"
             onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
             optionLabel="label"
             options={formState.dataProvidersTypesList}
             placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-            className={styles.dataProvidersDropdown}
             value={formState.selectedDataProviderGroup}
           />
           <Button

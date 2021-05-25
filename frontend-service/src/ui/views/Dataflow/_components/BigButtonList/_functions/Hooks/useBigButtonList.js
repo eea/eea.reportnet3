@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useLayoutEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -109,7 +109,7 @@ const useBigButtonList = ({
     userContext
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       setButtonsVisibility(getButtonsVisibility());
     }
@@ -383,6 +383,30 @@ const useBigButtonList = ({
     }
   ];
 
+  const referenceDatasetModels = isNil(dataflowState.data.referenceDatasets)
+    ? []
+    : dataflowState.data.referenceDatasets.map(referenceDataset => {
+        return {
+          layout: 'defaultBigButton',
+          buttonClass: 'referenceDataset',
+          buttonIcon: 'howTo',
+          caption: referenceDataset.datasetSchemaName,
+          handleRedirect: () => {
+            handleRedirect(
+              getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true)
+            );
+          },
+          helpClassName: 'dataflow-dataset-container-help-step',
+          model: [],
+          onWheel: getUrl(
+            routes.DATASET,
+            { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId },
+            true
+          ),
+          visibility: true
+        };
+      });
+
   const dataCollectionModels = isNil(dataflowState.data.dataCollections)
     ? []
     : dataflowState.data.dataCollections.map(dataCollection => ({
@@ -548,12 +572,13 @@ const useBigButtonList = ({
     ...designDatasetModels,
     ...feedbackBigButton,
     ...dashboardBigButton,
-    ...testDatasetBigButton,
+    ...referenceDatasetModels,
     ...dataCollectionModels,
     ...manualTechnicalAcceptanceBigButton,
     ...copyDataCollectionToEuDatasetBigButton,
     ...euDatasetModels,
     ...exportEuDatasetBigButton,
+    ...testDatasetBigButton,
     ...newSchemaBigButton,
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,

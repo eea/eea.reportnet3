@@ -1,5 +1,3 @@
-import { Fragment } from 'react';
-
 import { Article13 } from './Article13';
 import { Article15 } from './Article15';
 import { NationalSystems } from './NationalSystems';
@@ -11,19 +9,19 @@ export const Webforms = ({ dataflowId, datasetId, isReleasing, isReporting = fal
         <Article13
           dataflowId={dataflowId}
           datasetId={datasetId}
-          state={state}
-          isReporting={isReporting}
           isReleasing={isReleasing}
+          isReporting={isReporting}
+          state={state}
         />
       );
 
     case 'MMR-ART15':
-      return <Article15 dataflowId={dataflowId} datasetId={datasetId} state={state} isReporting={isReporting} />;
+      return <Article15 dataflowId={dataflowId} datasetId={datasetId} isReporting={isReporting} state={state} />;
 
     case 'NATIONAL-SYSTEMS':
-      return <NationalSystems dataflowId={dataflowId} datasetId={datasetId} state={state} isReporting={isReporting} />;
+      return <NationalSystems dataflowId={dataflowId} datasetId={datasetId} isReporting={isReporting} state={state} />;
 
     default:
-      return <Fragment />;
+      return <div />;
   }
 };

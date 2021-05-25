@@ -40,7 +40,7 @@ export const TableView = ({
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />
-      <label htmlFor={`${row.id}_checkbox`} className="srOnly">
+      <label className="srOnly" htmlFor={`${row.id}_checkbox`}>
         {resources.messages['selectedObligation']}
       </label>
     </div>
@@ -60,10 +60,10 @@ export const TableView = ({
 
   const renderCheckColumn = (
     <Column
-      key="checkId"
+      body={row => onLoadCheckButton(row)}
       className={styles.emptyTableHeader}
       header={resources.messages['selectedObligation']}
-      body={row => onLoadCheckButton(row)}
+      key="checkId"
     />
   );
 

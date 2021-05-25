@@ -114,12 +114,21 @@ public enum ResourceGroupEnum {
   /** The eudataset observer. */
   EUDATASET_OBSERVER("EUDataset-%s-DATA_OBSERVER"),
 
+  /** The referencedataset observer. */
+  REFERENCEDATASET_OBSERVER("ReferenceDataset-%s-DATA_OBSERVER"),
+
   /** The testdataset steward. */
   TESTDATASET_STEWARD("TestDataset-%s-DATA_STEWARD"),
 
   /** The testdataset custodian. */
   TESTDATASET_CUSTODIAN("TestDataset-%s-DATA_CUSTODIAN"),
 
+  /** The referencedataset custodian. */
+  REFERENCEDATASET_CUSTODIAN("ReferenceDataset-%s-DATA_CUSTODIAN"),
+
+
+  /** The referencedataset steward. */
+  REFERENCEDATASET_STEWARD("ReferenceDataset-%s-DATA_STEWARD"),
 
   /** The provider national coordinator. */
   // DATAPROVIDER-%-NATIONAL_COORDINATOR

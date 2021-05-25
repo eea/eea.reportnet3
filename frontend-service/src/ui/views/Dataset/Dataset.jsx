@@ -20,10 +20,9 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { Dashboard } from 'ui/views/_components/Dashboard';
 import { Dialog } from 'ui/views/_components/Dialog';
-import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { TabularSwitch } from 'ui/views/_components/TabularSwitch';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Menu } from 'primereact/menu';
+import { Menu } from 'ui/views/_components/Menu';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'ui/views/_components/Snapshots';
@@ -258,7 +257,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const importFromFile = [
     {
       label: resources.messages['importFromFile'],
-      icon: config.icons['import'],
+      icon: 'upload',
       command: () => setIsImportDatasetDialogVisible(true)
     }
   ];
@@ -268,7 +267,7 @@ export const Dataset = withRouter(({ match, history }) => {
       label: resources.messages['importPreviousData'],
       items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
         label: importOtherSystem.name,
-        icon: config.icons['import'],
+        icon: 'upload',
         command: () => {
           setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
           setIsImportOtherSystemsDialogVisible(true);
@@ -277,18 +276,21 @@ export const Dataset = withRouter(({ match, history }) => {
     }
   ];
 
-  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => ({
-    label: type.text,
-    icon: config.icons['archive'],
-    command: () => onExportDataInternalExtension(type.code)
-  }));
+  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
+    const extensionsTypes = !isNil(type.code) && type.code.split('+');
+    return {
+      label: type.text,
+      icon: extensionsTypes[0],
+      command: () => onExportDataInternalExtension(type.code)
+    };
+  });
 
   const externalIntegrationsNames = [
     {
       label: resources.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
         label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
-        icon: config.icons['archive'],
+        icon: type.fileExtension,
         command: () => onExportDataExternalIntegration(type.id)
       }))
     }
@@ -334,20 +336,6 @@ export const Dataset = withRouter(({ match, history }) => {
     } catch (error) {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
-  };
-
-  const createFileName = (fileName, fileType) => {
-    return `${fileName}.${fileType}`;
-  };
-
-  const getPosition = e => {
-    const button = e.currentTarget;
-    const left = `${button.offsetLeft}px`;
-    const topValue = button.offsetHeight + button.offsetTop + 3;
-    const top = `${topValue}px `;
-    const menu = button.nextElementSibling;
-    menu.style.top = top;
-    menu.style.left = left;
   };
 
   const onChangeIsValidationSelected = options => {
@@ -464,7 +452,7 @@ export const Dataset = withRouter(({ match, history }) => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification.content.datasetId == datasetId) {
+    if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
     }
   }, [notificationContext]);
@@ -529,16 +517,21 @@ export const Dataset = withRouter(({ match, history }) => {
     try {
       const { data } = await DataflowService.reporting(match.params.dataflowId);
       let dataset = [];
-
       if (isTestDataset) {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       } else {
         dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
-        setIsDatasetReleased(dataset[0].isReleased);
+        if (!isEmpty(dataset)) {
+          setIsDatasetReleased(dataset[0].isReleased);
+        } else {
+          dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+          setIsDatasetReleased(dataset[0]?.isReleased);
+        }
       }
 
       setDataset(dataset[0]);
     } catch (error) {
+      console.error(error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -673,8 +666,7 @@ export const Dataset = withRouter(({ match, history }) => {
       recordPositionId: -1,
       selectedRuleMessage: '',
       selectedRuleLevelError: '',
-      selectedRuleId: '',
-      selectedRuleMessage: ''
+      selectedRuleId: ''
     });
 
   const onSelectValidation = (
@@ -796,8 +788,8 @@ export const Dataset = withRouter(({ match, history }) => {
     <Fragment>
       <Button
         className="p-button-animated-blink"
-        label={resources.messages['import']}
         icon={'check'}
+        label={resources.messages['import']}
         onClick={() => onImportOtherSystems()}
       />
       <Button
@@ -810,8 +802,7 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) &&
-    hasWritePermissions && (
+    !isNil(webformData) && (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
@@ -844,11 +835,11 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        title={datasetSchemaName}
-        insideTitle={`${datasetInsideTitle()}`}
-        subtitle={`${dataflowName} - ${datasetName}`}
         icon="dataset"
         iconSize="3.5rem"
+        insideTitle={`${datasetInsideTitle()}`}
+        subtitle={`${dataflowName} - ${datasetName}`}
+        title={datasetSchemaName}
       />
       <div className={styles.ButtonsBar}>
         <Toolbar>
@@ -869,13 +860,7 @@ export const Dataset = withRouter(({ match, history }) => {
                   }
                 />
                 {!isEmpty(externalOperationsList.importOtherSystems) && (
-                  <Menu
-                    id="importDataSetMenu"
-                    model={importButtonsList}
-                    onShow={e => getPosition(e)}
-                    popup={true}
-                    ref={importMenuRef}
-                  />
+                  <Menu id="importDataSetMenu" model={importButtonsList} popup={true} ref={importMenuRef} />
                 )}
               </Fragment>
             )}
@@ -890,7 +875,6 @@ export const Dataset = withRouter(({ match, history }) => {
               className={styles.exportSubmenu}
               id="exportDataSetMenu"
               model={exportButtonsList}
-              onShow={e => getPosition(e)}
               popup={true}
               ref={exportMenuRef}
             />
@@ -911,10 +895,10 @@ export const Dataset = withRouter(({ match, history }) => {
               }`}
               disabled={!hasWritePermissions}
               icon={'validate'}
+              iconClasses={null}
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
               ownButtonClasses={null}
-              iconClasses={null}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
@@ -922,10 +906,10 @@ export const Dataset = withRouter(({ match, history }) => {
               }`}
               disabled={!datasetHasErrors}
               icon={'warning'}
+              iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
               ownButtonClasses={null}
-              iconClasses={datasetHasErrors ? 'warning' : ''}
             />
             <Button
               className={
@@ -982,10 +966,10 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
-          isReportingWebform={isReportingWebform}
           hasWritePermissions={hasWritePermissions}
-          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+          isReportingWebform={isReportingWebform}
           isValidationSelected={dataViewerOptions.isValidationSelected}
           levelErrorTypes={levelErrorTypes}
           onChangeIsValidationSelected={onChangeIsValidationSelected}
@@ -998,9 +982,9 @@ export const Dataset = withRouter(({ match, history }) => {
           selectedRuleId={dataViewerOptions.selectedRuleId}
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+          tableSchemaColumns={tableSchemaColumns}
           tableSchemaId={dataViewerOptions.tableSchemaId}
           tables={tableSchema}
-          tableSchemaColumns={tableSchemaColumns}
         />
       ) : (
         <Webforms
@@ -1057,17 +1041,17 @@ export const Dataset = withRouter(({ match, history }) => {
 
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
+          accept={getImportExtensions}
+          chooseLabel={resources.messages['selectFile']}
+          className={styles.FileUpload}
           dialogClassName={styles.Dialog}
           dialogHeader={`${resources.messages['uploadDataset']}${datasetName}`}
           dialogOnHide={() => setIsImportDatasetDialogVisible(false)}
           dialogVisible={isImportDatasetDialogVisible}
-          isDialog={true}
-          accept={getImportExtensions}
-          chooseLabel={resources.messages['selectFile']}
-          className={styles.FileUpload}
           fileLimit={1}
           infoTooltip={infoExtensionsTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          isDialog={true}
           mode="advanced"
           multiple={false}
           name="file"

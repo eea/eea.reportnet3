@@ -49,6 +49,11 @@ public class DataSetSchema {
   @Field(value = "webform")
   private Webform webform;
 
+
+  /** The reference dataset. */
+  @Field(value = "referenceDataset")
+  private boolean referenceDataset;
+
   /**
    * Hash code.
    *
@@ -79,7 +84,8 @@ public class DataSetSchema {
         && Objects.equals(idDataSetSchema, other.idDataSetSchema)
         && Objects.equals(tableSchemas, other.tableSchemas)
         && Objects.equals(description, other.description) && Objects.equals(webform, other.webform)
-        && Objects.equals(availableInPublic, other.availableInPublic);
+        && Objects.equals(availableInPublic, other.availableInPublic)
+        && Objects.equals(referenceDataset, other.referenceDataset);
 
   }
 

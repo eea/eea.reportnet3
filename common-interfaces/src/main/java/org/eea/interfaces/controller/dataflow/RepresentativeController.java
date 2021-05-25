@@ -78,10 +78,11 @@ public interface RepresentativeController {
    * Delete representative.
    *
    * @param dataflowRepresentativeId the dataflow representative id
+   * @param dataflowId the dataflow id
    */
-  @DeleteMapping(value = "/{dataflowRepresentativeId}")
-  void deleteRepresentative(
-      @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId);
+  @DeleteMapping(value = "/{dataflowRepresentativeId}/dataflow/{dataflowId}")
+  void deleteRepresentative(@PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId,
+      @PathVariable("dataflowId") Long dataflowId);
 
 
   /**
@@ -158,28 +159,33 @@ public interface RepresentativeController {
    *
    * @param representativeId the representative id
    * @param leadReporterVO the lead reporter VO
+   * @param dataflowId the dataflow id
    * @return the long
    */
-  @PostMapping("/{representativeId}/leadReporter")
+  @PostMapping("/{representativeId}/leadReporter/dataflow/{dataflowId}")
   Long createLeadReporter(@PathVariable("representativeId") final Long representativeId,
-      @RequestBody LeadReporterVO leadReporterVO);
+      @RequestBody LeadReporterVO leadReporterVO, @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update lead reporter.
    *
    * @param leadReporterVO the lead reporter VO
+   * @param dataflowId the dataflow id
    * @return the response entity
    */
-  @PutMapping("/leadReporter/update")
-  Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO);
+  @PutMapping("/leadReporter/update/dataflow/{dataflowId}")
+  Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Delete lead reporter.
    *
    * @param leadReporterId the lead reporter id
+   * @param dataflowId the dataflow id
    */
-  @DeleteMapping("/leadReporter/{leadReporterId}")
-  void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId);
+  @DeleteMapping("/leadReporter/{leadReporterId}/dataflow/{dataflowId}")
+  void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Update internal representative.

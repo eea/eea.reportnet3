@@ -1254,6 +1254,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               .append(schemaId).append(AS).append("\"").append(columns.get(i).getName())
               .append("\" ");
           break;
+        case DATETIME:
+          stringQuery.append("(select case when dataset_" + datasetId
+              + ".is_date( fv.value ) then CAST(fv.value as timestamp) else null end from dataset_"
+              + datasetId + QUERY_FILTER_BY_ID_RECORD).append(schemaId).append(AS).append("\"")
+              .append(columns.get(i).getName()).append("\" ");
+          break;
         case NUMBER_DECIMAL:
         case NUMBER_INTEGER:
           stringQuery.append("(select case when dataset_" + datasetId

@@ -90,18 +90,16 @@ export const BigButtonListRepresentative = ({
   };
 
   const renderDialogFooter = (
-    <Fragment>
-      <Button
-        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
-        label={resources.messages['close']}
-        onClick={() => onCloseHistoricReleasesDialogVisible(false)}
-      />
-    </Fragment>
+    <Button
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => onCloseHistoricReleasesDialogVisible(false)}
+    />
   );
 
   return (
-    <>
+    <Fragment>
       <div className={styles.buttonsWrapper}>
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
@@ -116,7 +114,11 @@ export const BigButtonListRepresentative = ({
               onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
               uniqRepresentatives
-            }).map((button, i) => (button.visibility ? <BigButton key={i} {...button} /> : <Fragment key={i} />))}
+            })
+              .filter(button => button.visibility)
+              .map(button => (
+                <BigButton key={button.caption} {...button} />
+              ))}
           </div>
         </div>
       </div>
@@ -131,12 +133,12 @@ export const BigButtonListRepresentative = ({
           onHide={() => onCloseHistoricReleasesDialogVisible(false)}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
-            datasetId={bigButtonListRepresentativeState.datasetId}
             dataProviderId={bigButtonListRepresentativeState.dataProviderId}
+            datasetId={bigButtonListRepresentativeState.datasetId}
             historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
           />
         </Dialog>
       )}
-    </>
+    </Fragment>
   );
 };

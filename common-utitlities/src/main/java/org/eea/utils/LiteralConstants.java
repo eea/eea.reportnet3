@@ -153,12 +153,19 @@ public final class LiteralConstants {
   public static final String RELEASEMESSAGE =
       "This automatic notification informs that %s has successfully released in %s on %s (CET).";
 
+  /** The Constant GEOMETRYERROR. : {@value} */
   public static final String GEOMETRYERROR =
       "The value does not follow the expected syntax for a valid ";
 
-  /** The Constant POLYGONERROR. */
+  /** The Constant POLYGONERROR.: {@value} */
   public static final String POLYGONERROR =
       "Polygon geometry is not valid - polygon ring not closed";
+
+  /** The Constant REQUESTER. : {@value} */
+  public static final String REQUESTER = "REQUESTER";
+
+  /** The Constant REPORTER: {@value}. */
+  public static final String REPORTER = "REPORTER";
 
   /**
    * Instantiates a new literal constants.

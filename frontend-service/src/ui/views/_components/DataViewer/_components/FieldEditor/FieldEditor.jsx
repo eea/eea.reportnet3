@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
@@ -44,6 +44,7 @@ const FieldEditor = ({
   record,
   reporting
 }) => {
+  const refDatetimeCalendar = useRef(null);
   const crs = [
     { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
@@ -82,9 +83,12 @@ const FieldEditor = ({
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
+  const [dateTime, setDateTime] = useState();
+
   const { areEquals } = TextUtils;
 
   const calendarId = uuid.v4();
+  const calendarWithDatetimeId = uuid.v4();
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(getCodelistItemsWithEmptyOption());
@@ -190,6 +194,15 @@ const FieldEditor = ({
     }
   };
 
+  const calculateCalendarPanelPosition = () => {
+    if (record.dataRow?.length === 3 && !isCalendarVisible) {
+      const {
+        current: { panel }
+      } = refDatetimeCalendar;
+      panel.style.left = `${panel.offsetLeft - panel.offsetWidth / 2}px`;
+    }
+  };
+
   const changePoint = (geoJson, coordinates, crs, withCRS = true, parseToFloat = true, checkCoordinates = true) => {
     if (geoJson !== '') {
       geoJson.geometry.type = 'Point';
@@ -228,8 +241,8 @@ const FieldEditor = ({
   };
 
   const onCalendarBlur = e => {
-    if (e.target.value != RecordUtils.getCellValue(cells, cells.field)) {
-      saveCalendarDate(e.target.value);
+    if (e.target.value !== RecordUtils.getCellValue(cells, cells.field)) {
+      saveCalendarDate(e.target.value, false);
       setIsCalendarVisible(false);
     }
   };
@@ -239,10 +252,12 @@ const FieldEditor = ({
     onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
   };
 
-  const saveCalendarDate = inputDateValue => {
+  const saveCalendarDate = (inputDateValue, withDatetime) => {
     const formattedDateValue = isEmpty(inputDateValue)
       ? ''
-      : RecordUtils.formatDate(inputDateValue, isNil(inputDateValue));
+      : !withDatetime
+      ? RecordUtils.formatDate(inputDateValue, isNil(inputDateValue))
+      : inputDateValue;
     const isCorrectDateFormattedValue = getIsCorrectDateFormatedValue(formattedDateValue);
     if (isCorrectDateFormattedValue || isEmpty(formattedDateValue)) {
       onEditorValueChange(cells, formattedDateValue, record);
@@ -250,13 +265,13 @@ const FieldEditor = ({
     }
   };
 
-  const saveCalendarFromKeys = inputDateValue => {
+  const saveCalendarFromKeys = (inputDateValue, withDatetime = false) => {
     setIsCalendarVisible(false);
-    saveCalendarDate(inputDateValue);
+    saveCalendarDate(inputDateValue, withDatetime);
   };
 
-  const onSelectCalendar = e => {
-    saveCalendarDate(dayjs(e.value).format('YYYY-MM-DD'));
+  const onSelectCalendar = (e, withDatetime = false) => {
+    saveCalendarDate(!withDatetime ? dayjs(e.value).format('YYYY-MM-DD') : dayjs(e.value).format(), withDatetime);
   };
 
   useEffect(() => {
@@ -272,6 +287,19 @@ const FieldEditor = ({
 
           if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
             saveCalendarFromKeys(inputValue);
+          }
+        });
+      const calendarWithDatetimeInput = document.getElementById(calendarWithDatetimeId);
+      !isNil(calendarWithDatetimeInput) &&
+        calendarWithDatetimeInput.addEventListener('keydown', event => {
+          const {
+            key,
+            target: { value: inputValue }
+          } = event;
+          const storedValue = RecordUtils.getCellValue(cells, cells.field);
+
+          if ((key === 'Tab' || key === 'Enter') && inputValue !== storedValue) {
+            saveCalendarFromKeys(inputValue, true);
           }
         });
     }
@@ -296,6 +324,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={textCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -305,16 +334,15 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={textCharacters}
           />
         );
       case 'TEXTAREA':
         return (
           <InputTextarea
             collapsedHeight={75}
-            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             maxLength={textCharacters}
             moveCaretToEnd={true}
+            onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
               e.preventDefault();
@@ -328,6 +356,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={richTextCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -337,13 +366,13 @@ const FieldEditor = ({
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
             type="text"
             value={RecordUtils.getCellValue(cells, cells.field)}
-            maxLength={richTextCharacters}
           />
         );
       case 'NUMBER_INTEGER':
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={longCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -351,7 +380,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={longCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -359,6 +387,7 @@ const FieldEditor = ({
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={decimalCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -366,7 +395,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={decimalCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -458,12 +486,10 @@ const FieldEditor = ({
               <label className={styles.epsg}>{resources.messages['epsg']}</label>
               <div>
                 <Dropdown
-                  ariaLabel={'crs'}
                   appendTo={document.body}
+                  ariaLabel={'crs'}
                   className={styles.epsgSwitcher}
                   disabled={isMapDisabled}
-                  options={crs}
-                  optionLabel="label"
                   onChange={e => {
                     onEditorSubmitValue(
                       cells,
@@ -490,6 +516,8 @@ const FieldEditor = ({
                     setCurrentCRS(e.target.value);
                     onChangePointCRS(e.target.value.value);
                   }}
+                  optionLabel="label"
+                  options={crs}
                   placeholder="Select a CRS"
                   value={currentCRS}
                 />
@@ -563,22 +591,75 @@ const FieldEditor = ({
       case 'DATE':
         return (
           <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
             inputId={calendarId}
+            monthNavigator={true}
             onBlur={onCalendarBlur}
             onFocus={onCalendarFocus}
             onSelect={onSelectCalendar}
-            appendTo={document.body}
-            dateFormat="yy-mm-dd"
-            monthNavigator={true}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
             yearRange="1900:2100"
           />
         );
+      case 'DATETIME':
+        return (
+          <Calendar
+            appendTo={document.body}
+            inputId={calendarWithDatetimeId}
+            inputRef={refDatetimeCalendar}
+            locale={{
+              firstDayOfWeek: 0,
+              dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+              dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+              dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+              monthNames: [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December'
+              ],
+              monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              today: 'Save',
+              clear: 'Clear',
+              weekHeader: 'Wk'
+            }}
+            monthNavigator={true}
+            onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
+            onFocus={e => {
+              calculateCalendarPanelPosition();
+              const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
+              setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
+              setIsCalendarVisible(true);
+            }}
+            onTodayButtonClick={e => {
+              e.stopPropagation();
+              saveCalendarDate(dateTime === '' ? '' : dayjs(dateTime).format('YYYY-MM-DD HH:mm:ss'), true);
+            }}
+            showButtonBar={true}
+            showSeconds={true}
+            showTime={true}
+            todayButtonClassName="p-button-primary"
+            value={!isNil(dateTime) ? dateTime : new Date(RecordUtils.getCellValue(cells, cells.field))}
+            yearNavigator={true}
+            yearRange="1900:2100"
+          />
+        );
+
       case 'EMAIL':
         return (
           <InputText
             keyfilter={RecordUtils.getFilter(type)}
+            maxLength={emailCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}
             onFocus={e => {
@@ -586,7 +667,6 @@ const FieldEditor = ({
               onEditorValueFocus(cells, e.target.value);
             }}
             onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            maxLength={emailCharacters}
             value={RecordUtils.getCellValue(cells, cells.field)}
           />
         );
@@ -640,8 +720,8 @@ const FieldEditor = ({
                   onEditorValueFocus(cells, codelistItemValue);
                 }
               }}
-              options={linkItemsOptions}
               optionLabel="itemType"
+              options={linkItemsOptions}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, linkItemsValue)}
               valuesSeparator=";"
             />
@@ -653,8 +733,8 @@ const FieldEditor = ({
               currentValue={RecordUtils.getCellValue(cells, cells.field)}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               filterBy="itemType,value"
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={e => {
                 setLinkItemsValue(e.target.value.value);
@@ -714,8 +794,8 @@ const FieldEditor = ({
                 onEditorValueFocus(cells, codelistItemValue);
               }
             }}
-            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             optionLabel="itemType"
+            options={RecordUtils.getCodelistItems(colsSchema, cells.field)}
             value={RecordUtils.getMultiselectValues(codelistItemsOptions, codelistItemValue)}
             valuesSeparator=";"
           />

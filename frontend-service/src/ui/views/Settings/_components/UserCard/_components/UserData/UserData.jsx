@@ -28,12 +28,12 @@ const UserData = () => {
       </div>
       <div>
         <a
-          type="button"
           disabled
-          style={{ cursor: 'pointer' }}
           href={getUrl(routes.PRIVACY_STATEMENT)}
+          rel="noopener noreferrer"
+          style={{ cursor: 'pointer' }}
           target="_blank"
-          rel="noopener noreferrer">
+          type="button">
           {resources.messages['privacyPolicy']}
         </a>
       </div>

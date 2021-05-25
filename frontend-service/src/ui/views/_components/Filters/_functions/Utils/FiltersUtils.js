@@ -3,6 +3,13 @@ import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 
+import { config } from 'conf';
+
+const getUserRoleLabel = role => {
+  const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
+  return userRole?.label || role;
+};
+
 const getCheckboxFilterInitialState = checkboxOptions => {
   const initialCheckboxes = [];
 
@@ -103,6 +110,10 @@ const getOptionsTemplate = (filteredOptions, property) => {
 
       case 'userRole':
         template.push({ type: option, value: option });
+        break;
+
+      case 'role':
+        template.push({ type: getUserRoleLabel(option), value: option });
         break;
 
       default:

@@ -1,8 +1,29 @@
 {
+  "overrides": [
+    {
+      "files": ["*.jsx", "*.js"]
+    }
+  ],
   "extends": ["react-app", "prettier"],
   "plugins": ["react-hooks"],
   "rules": {
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/rules-of-hooks": "warn",
+    "react-hooks/exhaustive-deps": "off",
+    "react/no-deprecated": "warn",
+    "react/no-array-index-key": "warn",
+    "react/no-direct-mutation-state": "warn",
+    "react/no-multi-comp": "warn",
+    "react/no-unused-prop-types": "warn",
+    "react/no-unused-state": "warn",
+    "react/jsx-key": "warn",
+    "react/jsx-no-duplicate-props": "warn",
+    "react/jsx-no-target-blank": "warn",
+    "react/jsx-uses-vars": "warn",
+    "react/jsx-uses-react": "warn",
+    "react/jsx-no-undef": "warn",
+    "react/jsx-no-useless-fragment": "warn",
+    "react/jsx-sort-default-props": "warn",
+    "react/jsx-sort-props": "warn",
+    "no-unused-vars": "warn"
   }
 }

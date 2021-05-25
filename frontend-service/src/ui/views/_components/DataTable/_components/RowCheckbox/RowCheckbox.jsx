@@ -31,13 +31,13 @@ export const RowCheckbox = props => {
 };
 
 RowCheckbox.defaultProps = {
-  rowData: null,
+  disabled: false,
   onClick: null,
-  disabled: false
+  rowData: null
 };
 
 RowCheckbox.propTypes = {
-  rowData: PropTypes.object,
+  disabled: PropTypes.bool,
   onClick: PropTypes.func,
-  disabled: PropTypes.bool
+  rowData: PropTypes.object
 };

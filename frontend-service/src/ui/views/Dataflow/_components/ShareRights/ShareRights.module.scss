@@ -21,3 +21,44 @@
     display: none;
   }
 }
+
+.manageDialog {
+  display: flex;
+  flex-direction: column;
+  div {
+    padding: 0 0.5rem;
+    width: 100%;
+
+    .label {
+      font-size: 1rem;
+    }
+  }
+  .inputWrapper {
+    margin-bottom: 1rem;
+  }
+}
+.table tbody > tr {
+  height: 3rem !important;
+}
+.error {
+  border-color: var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors) !important;
+  outline: none;
+  overflow: hidden;
+}
+.shareRightsModal {
+  height: 50vh;
+}
+
+.wrapperNoUserRoles,
+.wrapperEmptyFilter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wrapperNoUserRoles {
+  height: 100%;
+}
+.wrapperEmptyFilter {
+  height: 80%;
+}

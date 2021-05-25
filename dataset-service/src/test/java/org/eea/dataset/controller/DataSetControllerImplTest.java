@@ -45,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -671,7 +672,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
     dataSetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
-    Mockito.verify(datasetService, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
+    Mockito.verify(fileTreatmentHelper, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 
@@ -700,8 +701,8 @@ public class DataSetControllerImplTest {
   public void etlImportDatasetExceptionTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
-    doThrow(new EEAException()).when(datasetService).etlImportDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    doThrow(new EEAException()).when(fileTreatmentHelper).etlImportDataset(Mockito.any(),
+        Mockito.any(), Mockito.any());
     try {
       dataSetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
     } catch (ResponseStatusException e) {
@@ -1170,6 +1171,17 @@ public class DataSetControllerImplTest {
         .thenReturn(new File(""));
     dataSetControllerImpl.downloadFile(0L, recordId, httpServletResponse);
     Mockito.verify(httpServletResponse, times(1)).getOutputStream();
+  }
+
+  @Test
+  public void exportReferenceDatasetFileTest() throws EEAException, IOException {
+    Mockito.when(datasetService.exportPublicFile(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new File(""));
+    ResponseEntity<InputStreamResource> value =
+        dataSetControllerImpl.exportReferenceDatasetFile(1L, "file.zip");
+    assertEquals(null, value.getBody());
+    assertEquals(HttpStatus.NOT_FOUND, value.getStatusCode());
+
   }
 
 }

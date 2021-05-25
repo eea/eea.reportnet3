@@ -44,13 +44,13 @@ export const PublicCountries = withRouter(({ history }) => {
 
     return (
       <div
+        className={styles.wrapper}
         href={getUrl(routes.COUNTRY)}
         key={country.code}
         onClick={e => {
           e.preventDefault();
           history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-        }}
-        className={styles.wrapper}>
+        }}>
         <ReactCountryFlag aria-label={country.name} className={styles.flag} countryCode={country.code} svg />
 
         <div className={styles.titleWrap}>

@@ -136,9 +136,8 @@ export const UserList = ({ dataflowId, representativeId }) => {
           {renderFilters()}
           {!isEmpty(filteredData) ? (
             <DataTable
-              value={filteredData}
-              paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
               paginator={true}
+              paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={userListData.length}>
