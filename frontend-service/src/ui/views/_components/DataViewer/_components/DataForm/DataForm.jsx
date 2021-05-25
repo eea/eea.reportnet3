@@ -99,7 +99,9 @@ const DataForm = ({
                       ].includes(column.type)
                         ? '.5em'
                         : '0',
-                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type)
+                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'EXTERNAL_LINK'].includes(
+                        column.type
+                      )
                         ? '30%'
                         : ''
                     }}>
@@ -195,7 +197,9 @@ const DataForm = ({
                       ].includes(column.type)
                         ? '.5em'
                         : '0',
-                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type)
+                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'EXTERNAL_LINK'].includes(
+                        column.type
+                      )
                         ? '30%'
                         : ''
                     }}>

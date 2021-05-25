@@ -89,7 +89,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(fields)) {
       setIsCodelistOrLink(
         fields.filter(field =>
-          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
+          ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
         ).length > 0
       );
     }
@@ -99,11 +99,14 @@ export const FieldsDesigner = ({
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
-          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase()) &&
-          field.fieldId !== fieldId
+          ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(
+            field.type.toUpperCase()
+          ) && field.fieldId !== fieldId
         );
       }).length > 0 ||
-        ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(selectedField.fieldType.toUpperCase())
+        ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(
+          selectedField.fieldType.toUpperCase()
+        )
     );
   };
 
@@ -140,7 +143,11 @@ export const FieldsDesigner = ({
       type,
       validExtensions
     });
-    onChangeFields(inmFields, TextUtils.areEquals(type, 'LINK'), table.tableSchemaId);
+    onChangeFields(
+      inmFields,
+      TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK'),
+      table.tableSchemaId
+    );
     setFields(inmFields);
   };
 
@@ -248,7 +255,11 @@ export const FieldsDesigner = ({
       if (status >= 200 && status <= 299) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(inmFields, TextUtils.areEquals(deletedFieldType, 'LINK'), table.tableSchemaId);
+        onChangeFields(
+          inmFields,
+          TextUtils.areEquals(deletedFieldType, 'LINK') || TextUtils.areEquals(deletedFieldType, 'EXTERNAL_LINK'),
+          table.tableSchemaId
+        );
         setFields(inmFields);
       }
     } catch (error) {

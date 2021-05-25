@@ -253,7 +253,8 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+                (!isNil(field.fieldData[column.field]) &&
+                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
               ? !Array.isArray(field.fieldData[column.field])
                 ? splitByChar(field.fieldData[column.field], ';')
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
@@ -293,7 +294,8 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+                (!isNil(field.fieldData[column.field]) &&
+                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
               ? !Array.isArray(field.fieldData[column.field])
                 ? splitByChar(field.fieldData[column.field], ';')
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))

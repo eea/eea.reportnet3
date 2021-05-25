@@ -79,6 +79,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       case 'TEXTAREA':
         return textCharacters;
       case 'RICH_TEXT':
+      case 'EXTERNAL_LINK':
       case 'LINK':
         return richTextCharacters;
       case 'EMAIL':

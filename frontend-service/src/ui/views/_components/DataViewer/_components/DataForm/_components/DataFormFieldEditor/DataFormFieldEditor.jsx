@@ -86,7 +86,7 @@ const DataFormFieldEditor = ({
 
   useEffect(() => {
     if (!isUndefined(fieldValue)) {
-      if (type === 'LINK' && editing) {
+      if ((type === 'LINK' || type === 'EXTERNAL_LINK') && editing) {
         onLoadColsSchema(column.pkHasMultipleValues ? '' : fieldValue);
       }
       if (type === 'POINT') {
@@ -145,7 +145,7 @@ const DataFormFieldEditor = ({
   ]);
 
   useEffect(() => {
-    if (areEquals('LINK', type)) {
+    if (areEquals('LINK', type) || areEquals('EXTERNAL_LINK', type)) {
       if (fieldValue === '') {
         if (!isNil(linkDropdownRef.current)) {
           linkDropdownRef.current.clearFilter();
@@ -213,7 +213,7 @@ const DataFormFieldEditor = ({
   };
 
   const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
-    if (isNil(type) || !areEquals(type, 'LINK') || isNil(referencedField)) {
+    if (isNil(type) || !areEquals(type, 'LINK') || !areEquals(type, 'EXTERNAL_LINK') || isNil(referencedField)) {
       return [];
     }
 
@@ -374,7 +374,7 @@ const DataFormFieldEditor = ({
       renderCodelistDropdown(field, fieldValue)
     ) : type === 'MULTISELECT_CODELIST' ? (
       renderMultiselectCodelist(field, fieldValue)
-    ) : type === 'LINK' ? (
+    ) : type === 'LINK' || type === 'EXTERNAL_LINK' ? (
       renderLinkDropdown(field, fieldValue)
     ) : type === 'DATE' ? (
       renderCalendar(field, fieldValue)

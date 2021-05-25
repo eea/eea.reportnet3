@@ -91,8 +91,7 @@ export const FieldDesigner = ({
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
-    // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
+    { fieldType: 'External_Link', value: 'External link', fieldTypeIcon: 'externalLink' },
     // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
     // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
@@ -790,11 +789,12 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField: TextUtils.areEquals(type, 'LINK')
-          ? !isNil(referencedField)
-            ? parseReferenceField(referencedField)
-            : fieldDesignerState.fieldLinkValue
-          : null,
+        referencedField:
+          TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
+            ? !isNil(referencedField)
+              ? parseReferenceField(referencedField)
+              : fieldDesignerState.fieldLinkValue
+            : null,
         required,
         type,
         validExtensions
@@ -813,11 +813,12 @@ export const FieldDesigner = ({
           name,
           readOnly,
           recordId,
-          referencedField: TextUtils.areEquals(type, 'LINK')
-            ? !isNil(referencedField)
-              ? parseReferenceField(referencedField)
-              : fieldDesignerState.fieldLinkValue
-            : null,
+          referencedField:
+            TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
+              ? !isNil(referencedField)
+                ? parseReferenceField(referencedField)
+                : fieldDesignerState.fieldLinkValue
+              : null,
           required,
           type,
           validExtensions
@@ -958,7 +959,9 @@ export const FieldDesigner = ({
         }
         tooltipOptions={{ position: 'top' }}
       />
-    ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Link' ? (
+    ) : !isUndefined(fieldDesignerState.fieldTypeValue) &&
+      (fieldDesignerState.fieldTypeValue.fieldType === 'Link' ||
+        fieldDesignerState.fieldTypeValue.fieldType === 'External_link') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
