@@ -802,8 +802,7 @@ export const Dataset = withRouter(({ match, history }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) &&
-    hasWritePermissions && (
+    !isNil(webformData) && (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
