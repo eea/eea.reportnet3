@@ -140,7 +140,8 @@ export const UserList = ({ dataflowId, representativeId }) => {
               paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
-              totalRecords={userListData.length}>
+              totalRecords={userListData.length}
+              value={filteredData}>
               {isNil(representativeId) && isNil(dataflowId) && (
                 <Column field="dataflowName" header={resources.messages['dataflowName']} sortable={true} />
               )}
