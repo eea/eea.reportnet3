@@ -45,16 +45,19 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const tabMenuItems = [
     {
+      id: 'pending',
       label: resources.messages['dataflowsListTab'],
       className: styles.flow_tab,
       tabKey: 'pending'
     },
     {
+      id: 'referenceDataflows',
       label: resources.messages['referenceDataflowsListTab'],
       className: styles.flow_tab,
       tabKey: 'referenceDataflows'
     },
     {
+      id: 'completed',
       label: resources.messages['dataflowCompletedTab'],
       className: styles.flow_tab,
       disabled: true,
