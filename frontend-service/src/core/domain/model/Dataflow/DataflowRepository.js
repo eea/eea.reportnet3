@@ -23,7 +23,8 @@ export const DataflowRepository = {
   newEmptyDatasetSchema: () => Promise.reject('[DataflowRepository#newEmptyDatasetSchema] must be implemented'),
   reporting: () => Promise.reject('[DataflowRepository#reporting] must be implemented'),
   schemasValidation: () => Promise.reject('[DataflowRepository#schemasValidation] must be implemented'),
-  update: () => Promise.reject('[DataflowRepository#update] must be implemented')
+  update: () => Promise.reject('[DataflowRepository#update] must be implemented'),
+  referenced: () => Promise.reject('[DataflowRepository#referenced] must be implemented')
 };
 
 export const dataflowRepository = Object.assign({}, DataflowRepository, ApiDataflowRepository);

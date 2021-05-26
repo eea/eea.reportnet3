@@ -109,6 +109,11 @@ const all = async userData => {
   return dataflowsDTO;
 };
 
+const referenced = async userData => {
+  const referencedDTO = await apiDataflow.referenced();
+  return referencedDTO.data;
+};
+
 const create = async (name, description, obligationId, type) => {
   return await apiDataflow.create(name, description, obligationId, type);
 };
@@ -735,5 +740,6 @@ export const ApiDataflowRepository = {
   publicData,
   reporting,
   schemasValidation,
-  update
+  update,
+  referenced
 };

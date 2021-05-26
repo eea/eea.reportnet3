@@ -74,7 +74,8 @@ const Dataflows = withRouter(({ history, match }) => {
     isLoading: true,
     isNationalCoordinator: false,
     isRepObDialogVisible: false,
-    isUserListVisible: false
+    isUserListVisible: false,
+    referenced: []
   });
 
   const visibleTab = tabMenuItems[tabMenuActiveItem];
@@ -132,7 +133,8 @@ const Dataflows = withRouter(({ history, match }) => {
     isLoading(true);
     try {
       const { data } = await DataflowService.all(userContext.contextRoles);
-      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data } });
+      const referenced = await DataflowService.referenced();
+      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data, referenced } });
     } catch (error) {
       console.error('dataFetch error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -197,7 +199,14 @@ const Dataflows = withRouter(({ history, match }) => {
         );
 
       case 'referenceDataflows':
-        return '';
+        return (
+          <DataflowsList
+            className="dataflowList-accepted-help-step"
+            content={dataflowsState.referenced}
+            isCustodian={dataflowsState.isCustodian}
+            visibleTab={tabMenuItems[tabMenuActiveItem]}
+          />
+        );
 
       default:
         break;
