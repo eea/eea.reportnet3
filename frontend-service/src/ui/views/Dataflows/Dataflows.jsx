@@ -15,7 +15,7 @@ import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabMenu } from 'primereact/tabmenu';
+import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'ui/views/_components/UserList';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -65,7 +65,7 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   ];
 
-  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
+  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
 
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     allDataflows: [],
@@ -193,7 +193,11 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu activeItem={tabMenuActiveItem} model={tabMenuItems} onTabChange={e => setTabMenuActiveItem(e.value)} />
+        <TabMenu
+          activeIndex={tabMenuActiveItem}
+          model={tabMenuItems}
+          onTabChange={event => setTabMenuActiveItem(event.index)}
+        />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={dataflowsState.allDataflows}
