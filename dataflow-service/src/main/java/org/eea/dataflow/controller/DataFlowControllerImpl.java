@@ -15,6 +15,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -153,6 +154,33 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+
+  /**
+   * Find reference dataflows.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Reference Dataflows for the logged User",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findReferenceDataflows() {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      dataflows = dataflowService.getReferenceDataflows(userId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+  }
+
+
   /**
    * Find completed.
    *
@@ -286,8 +314,9 @@ public class DataFlowControllerImpl implements DataFlowController {
     HttpStatus status = HttpStatus.OK;
 
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
-    if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
-        || dataFlowVO.getDeadlineDate().equals(dateToday))) {
+    if (!TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+        && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
+            || dataFlowVO.getDeadlineDate().equals(dateToday))) {
 
       message = EEAErrorMessage.DATE_AFTER_INCORRECT;
       status = HttpStatus.BAD_REQUEST;
@@ -299,8 +328,9 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
-    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
-        || null == dataFlowVO.getObligation().getObligationId())) {
+    if (!TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType()) && status == HttpStatus.OK
+        && (null == dataFlowVO.getObligation()
+            || null == dataFlowVO.getObligation().getObligationId())) {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
@@ -342,8 +372,9 @@ public class DataFlowControllerImpl implements DataFlowController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
 
-    if (null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
-        || dataFlowVO.getDeadlineDate().equals(dateToday))) {
+    if (!TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+        && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
+            || dataFlowVO.getDeadlineDate().equals(dateToday))) {
       message = EEAErrorMessage.DATE_AFTER_INCORRECT;
       status = HttpStatus.BAD_REQUEST;
     }
@@ -353,8 +384,9 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     }
-    if (status == HttpStatus.OK && (null == dataFlowVO.getObligation()
-        || null == dataFlowVO.getObligation().getObligationId())) {
+    if (!TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType()) && status == HttpStatus.OK
+        && (null == dataFlowVO.getObligation()
+            || null == dataFlowVO.getObligation().getObligationId())) {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
