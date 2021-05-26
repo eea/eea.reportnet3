@@ -77,6 +77,8 @@ const Dataflows = withRouter(({ history, match }) => {
     isUserListVisible: false
   });
 
+  const visibleTab = tabMenuItems[tabMenuActiveItem];
+
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
   useEffect(() => {
@@ -182,6 +184,26 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
+  const renderDataflows = () => {
+    switch (visibleTab.id) {
+      case 'pending':
+        return (
+          <DataflowsList
+            className="dataflowList-accepted-help-step"
+            content={dataflowsState.allDataflows}
+            isCustodian={dataflowsState.isCustodian}
+            visibleTab={tabMenuItems[tabMenuActiveItem]}
+          />
+        );
+
+      case 'referenceDataflows':
+        return '';
+
+      default:
+        break;
+    }
+  };
+
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -198,11 +220,7 @@ const Dataflows = withRouter(({ history, match }) => {
           model={tabMenuItems}
           onTabChange={event => setTabMenuActiveItem(event.index)}
         />
-        <DataflowsList
-          className="dataflowList-accepted-help-step"
-          content={dataflowsState.allDataflows}
-          isCustodian={dataflowsState.isCustodian}
-        />
+        {renderDataflows()}
       </div>
 
       {dataflowsState.isUserListVisible && (
@@ -220,6 +238,7 @@ const Dataflows = withRouter(({ history, match }) => {
         manageDialogs={manageDialogs}
         onCreateDataflow={onCreateDataflow}
         state={dataflowsState}
+        visibleTab={visibleTab}
       />
     </div>
   );

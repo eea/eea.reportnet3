@@ -33,7 +33,8 @@ export const DataflowManagement = ({
   onEditDataflow,
   onConfirmDeleteDataflow,
   manageDialogs,
-  state
+  state,
+  visibleTab
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -194,6 +195,7 @@ export const DataflowManagement = ({
             onSubmit={onSubmit}
             ref={formRef}
             refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
+            visibleTab={visibleTab}
           />
         </Dialog>
       )}
