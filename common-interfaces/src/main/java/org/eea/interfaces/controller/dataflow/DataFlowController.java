@@ -85,7 +85,7 @@ public interface DataFlowController {
    *
    * @return the list
    */
-  @GetMapping(value = "/getReferenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findReferenceDataflows();
 
   /**
