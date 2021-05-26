@@ -39,6 +39,9 @@ public class ReferencedFieldSchema {
   private ObjectId masterConditionalFieldId;
 
 
+  /** The dataflow id. */
+  @Field(value = "dataflowId")
+  private Long dataflowId;
 
   /**
    * Hash code.

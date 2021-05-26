@@ -863,6 +863,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } else {
       referenced.put("masterConditionalFieldId", null);
     }
+    if (referencedField.getDataflowId() != null) {
+      referenced.put("dataflowId", referencedField.getDataflowId());
+    } else {
+      referenced.put("dataflowId", null);
+    }
     return referenced;
   }
 
