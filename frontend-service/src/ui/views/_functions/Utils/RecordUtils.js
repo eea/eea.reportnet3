@@ -189,7 +189,7 @@ const getFieldTypeValue = fieldType => {
     { fieldType: 'Codelist', value: 'Single select' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
     { fieldType: 'Link', value: 'Link' },
-    { fieldType: 'External_Link', value: 'External link' },
+    { fieldType: 'External_link', value: 'External link' },
     { fieldType: 'Attachment', value: 'Attachment' }
   ];
 

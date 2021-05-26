@@ -91,7 +91,7 @@ export const FieldDesigner = ({
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    { fieldType: 'External_Link', value: 'External link', fieldTypeIcon: 'externalLink' },
+    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
     // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
     // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },

@@ -311,7 +311,7 @@ const getFieldTypeValue = value => {
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    { fieldType: 'External_Link', value: 'External link', fieldTypeIcon: 'externalLink' },
+    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
     { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
   return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
