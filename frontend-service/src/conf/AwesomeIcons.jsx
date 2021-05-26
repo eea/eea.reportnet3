@@ -114,7 +114,7 @@ import {
   faSquare as farSquareRegular,
   faFilePdf as farFilePdf
 } from '@fortawesome/free-regular-svg-icons';
-import { faBuffer, faConnectdevelop, faLinode, faStaylinked } from '@fortawesome/free-brands-svg-icons';
+import { faBuffer, faConnectdevelop, faStaylinked } from '@fortawesome/free-brands-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
