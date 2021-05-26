@@ -252,8 +252,10 @@ export const PublicDataflowInformation = withRouter(
         setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('error', error);
-        setIsWrongUrlDataflowId(true);
-        notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
+        if (error.status !== 404) {
+          setIsWrongUrlDataflowId(true);
+          notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
+        }
       } finally {
         setIsLoading(false);
       }
