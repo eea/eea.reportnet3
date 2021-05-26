@@ -894,6 +894,7 @@ public class FileTreatmentHelper implements DisposableBean {
         } else {
           refillFields(oldRecord, null);
         }
+        oldRecord.setTableValue(targetTable);
         recordsToSave.add(oldRecord);
       }
     } else {
