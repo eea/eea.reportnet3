@@ -105,7 +105,11 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   };
 
-  const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
+  const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(
+    exportType => exportType.code !== 'xlsx+validations'
+  );
+
+  const internalExtensions = internalExtensionsList.map(type => {
     const extensionsTypes = type.code.split('+');
     return {
       label: type.text,
