@@ -1112,6 +1112,7 @@
     "referenceDataflows": "Reference dataflows",
     "externalLinkSelector": "Select an External Link",
     "externalLinkDialogNoReferenceDataflowMessage": "Please select a reference dataflow",
-    "referenceDataflow": "Reference dataflow"
+    "referenceDataflow": "Reference dataflow",
+    "selectedReferenceDataflow": "Selected Reference Dataflow"
   }
 }

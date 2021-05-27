@@ -282,7 +282,7 @@ const LinkSelector = withRouter(
           <div className={styles.referenceDataflowsDropdownWrapper}>
             <label>{resources.messages['referenceDataflows']}</label>
             <Dropdown
-              ariaLabel={'dataProviders'}
+              ariaLabel={'referenceDataflows'}
               className={styles.referenceDataflowsDropdown}
               name="referenceDataflowsDropdown"
               onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
