@@ -4,22 +4,30 @@
   left: 40%;
 }
 
-.referenceDataflowsDropdownWrapper {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  > label {
-    margin-right: 0.5rem;
-    font-weight: bold;
-  }
+.referenceDataflowsWrapper {
+  height: 22rem;
 
-  .referenceDataflowsDropdown {
-    width: 15rem;
+  .referenceDataflowsDropdownWrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    > label {
+      margin-right: 0.5rem;
+      font-weight: bold;
+    }
+
+    .referenceDataflowsDropdown {
+      width: 15rem;
+    }
   }
 }
 
 .positioning {
   top: 0 !important;
+}
+
+.referenceDataflowSchemaWrapper {
+  padding: 0rem !important;
 }
 
 .schemaWrapper {

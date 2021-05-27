@@ -277,7 +277,7 @@ const LinkSelector = withRouter(
 
     const renderExternalLinkSelector = () => {
       return (
-        <div style={{ height: '22rem' }}>
+        <div className={styles.referenceDataflowsWrapper}>
           <div className={styles.referenceDataflowsDropdownWrapper}>
             <label>{resources.messages['referenceDataflows']}</label>
             <Dropdown
@@ -314,7 +314,7 @@ const LinkSelector = withRouter(
     const renderLinkSelector = () => {
       return (
         <Fragment>
-          <div className={styles.schemaWrapper}>
+          <div className={`${styles.schemaWrapper} ${isExternalLink && styles.referenceDataflowSchemaWrapper}`}>
             {!isUndefined(datasetSchemas) &&
               !isEmpty(datasetSchemas) &&
               datasetSchemas.map((datasetSchema, i) => {
