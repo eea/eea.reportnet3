@@ -72,6 +72,9 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
         referenced.setMasterConditionalFieldId(
             fieldSchema.getReferencedField().getMasterConditionalFieldId().toString());
       }
+      if (fieldSchema.getReferencedField().getDataflowId() != null) {
+        referenced.setDataflowId(fieldSchema.getReferencedField().getDataflowId());
+      }
       fieldSchemaVO.setReferencedField(referenced);
     }
   }
@@ -103,6 +106,9 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
           .isNotBlank(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId())) {
         referenced.setMasterConditionalFieldId(
             new ObjectId(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId()));
+      }
+      if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
+        referenced.setDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
       }
       fieldSchema.setReferencedField(referenced);
     }

@@ -385,7 +385,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("/private/createIntegrations")
   @ApiOperation(value = "Create Integrations")
   @ApiResponse(code = 500, message = "Internal Server Error")
