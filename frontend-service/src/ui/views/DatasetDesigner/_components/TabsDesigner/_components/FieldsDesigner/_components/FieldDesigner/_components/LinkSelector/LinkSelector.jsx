@@ -26,7 +26,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 const LinkSelector = withRouter(
   ({
     datasetSchemaId,
-    fieldTypeValue,
+    externalLink,
     hasMultipleValues = false,
     isLinkSelectorVisible,
     isReferenceDataset,
@@ -407,11 +407,7 @@ const LinkSelector = withRouter(
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
           footer={linkSelectorDialogFooter}
-          header={
-            TextUtils.areEquals(fieldType, 'external_link')
-              ? resources.messages['externalLinkSelector']
-              : resources.messages['linkSelector']
-          }
+          header={externalLink ? resources.messages['externalLinkSelector'] : resources.messages['linkSelector']}
           modal={true}
           onHide={() => {
             onCancelSaveLink({
@@ -429,7 +425,7 @@ const LinkSelector = withRouter(
           zIndex={3003}>
           {isLoading ? (
             <Spinner className={styles.positioning} />
-          ) : TextUtils.areEquals(fieldType, 'external_link') ? (
+          ) : externalLink ? (
             renderExternalLinkSelector()
           ) : (
             renderLinkSelector()

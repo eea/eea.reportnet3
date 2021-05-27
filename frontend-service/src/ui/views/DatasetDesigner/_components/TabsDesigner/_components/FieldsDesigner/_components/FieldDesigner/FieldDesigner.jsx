@@ -1228,7 +1228,9 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
-          fieldTypeValue={fieldDesignerState.fieldTypeValue}
+          externalLink={
+            TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false
+          }
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
           isReferenceDataset={isReferenceDataset}
