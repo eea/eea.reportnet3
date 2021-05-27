@@ -22,13 +22,11 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
-import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
-
 const LinkSelector = withRouter(
   ({
     datasetSchemaId,
-    externalLink,
     hasMultipleValues = false,
+    isExternalLink,
     isLinkSelectorVisible,
     isReferenceDataset,
     linkedTableConditional,
@@ -72,14 +70,13 @@ const LinkSelector = withRouter(
     const [datasetSchemas, setDatasetSchemas] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
+    const [isSaved, setIsSaved] = useState(false);
     const [pkHasMultipleValues, setPkHasMultipleValues] = useState(hasMultipleValues);
     const [pkMustBeUsed, setPkMustBeUsed] = useState(mustBeUsed);
 
     const {
       params: { dataflowId }
     } = match;
-
-    const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
       const getReferenceDataflows = async () => {
@@ -413,7 +410,7 @@ const LinkSelector = withRouter(
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
           footer={linkSelectorDialogFooter}
-          header={externalLink ? resources.messages['externalLinkSelector'] : resources.messages['linkSelector']}
+          header={isExternalLink ? resources.messages['externalLinkSelector'] : resources.messages['linkSelector']}
           modal={true}
           onHide={() => {
             onCancelSaveLink({
@@ -431,7 +428,7 @@ const LinkSelector = withRouter(
           zIndex={3003}>
           {isLoading ? (
             <Spinner className={styles.positioning} />
-          ) : externalLink ? (
+          ) : isExternalLink ? (
             renderExternalLinkSelector()
           ) : (
             renderLinkSelector()
