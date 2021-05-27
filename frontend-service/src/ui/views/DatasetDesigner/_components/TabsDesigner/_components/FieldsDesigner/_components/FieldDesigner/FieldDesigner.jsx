@@ -401,7 +401,9 @@ export const FieldDesigner = ({
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
           onFieldAdd({
             codelistItems,
-            type: 'LINK',
+            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
+              ? 'EXTERNAL_LINK'
+              : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -719,7 +721,9 @@ export const FieldDesigner = ({
         if (fieldId.toString() === '-1') {
           onFieldAdd({
             codelistItems,
-            type: 'LINK',
+            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
+              ? 'EXTERNAL_LINK'
+              : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -731,7 +735,9 @@ export const FieldDesigner = ({
           fieldUpdate({
             codelistItems,
             isLinkChange: true,
-            type: 'LINK',
+            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
+              ? 'EXTERNAL_LINK'
+              : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
