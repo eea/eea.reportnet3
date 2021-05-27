@@ -36,7 +36,7 @@ export const linkSelectorReducer = (state, { type, payload }) => {
     case 'SET_REFERENCE_DATAFLOW':
       return {
         ...state,
-        referenceDataflow: payload
+        selectedReferenceDataflow: payload
       };
     default:
       return state;

@@ -54,7 +54,7 @@ const LinkSelector = withRouter(
       pkLinkedTableConditional: {},
       masterTableConditional: {},
       masterTableFields: [],
-      referenceDataflow: {}
+      selectedReferenceDataflow: {}
     });
 
     const {
@@ -92,8 +92,8 @@ const LinkSelector = withRouter(
       const getDatasetSchemas = async () => {
         setIsLoading(true);
         let datasetSchemasDTO;
-        if (isExternalLink && !isEmpty(linkSelectorState.referenceDataflow)) {
-          datasetSchemasDTO = await DataflowService.getAllSchemas(linkSelectorState.referenceDataflow.id);
+        if (isExternalLink && !isEmpty(linkSelectorState.selectedReferenceDataflow)) {
+          datasetSchemasDTO = await DataflowService.getAllSchemas(linkSelectorState.selectedReferenceDataflow.id);
         } else {
           datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
         }
@@ -107,7 +107,7 @@ const LinkSelector = withRouter(
       };
 
       getDatasetSchemas();
-    }, [linkSelectorState.referenceDataflow]);
+    }, [linkSelectorState.selectedReferenceDataflow]);
 
     useEffect(() => {
       if (!isEmpty(datasetSchemas) && !isNil(selectedLink)) {
@@ -288,17 +288,17 @@ const LinkSelector = withRouter(
               optionLabel="name"
               options={referenceDataflows}
               placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-              value={linkSelectorState.referenceDataflow}
+              value={linkSelectorState.selectedReferenceDataflow}
             />
           </div>
-          {!isEmpty(linkSelectorState.referenceDataflow) ? (
+          {!isEmpty(linkSelectorState.selectedReferenceDataflow) ? (
             <Fragment>
               <div className={styles.selectedReferenceDataflowWrapper}>
                 <span
                   className={
                     styles.selectedReferenceDataflowLabel
-                  }>{`${resources.messages['referenceDataflow']}: `}</span>
-                <span>{linkSelectorState.referenceDataflow.name}</span>
+                  }>{`${resources.messages['selectedReferenceDataflow']}: `}</span>
+                <span>{linkSelectorState.selectedReferenceDataflow.name}</span>
               </div>
               {renderLinkSelector()}
             </Fragment>
