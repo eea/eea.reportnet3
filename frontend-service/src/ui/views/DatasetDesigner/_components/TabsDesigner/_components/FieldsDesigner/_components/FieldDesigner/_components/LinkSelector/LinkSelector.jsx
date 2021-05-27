@@ -18,6 +18,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { DataflowService } from 'core/services/Dataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
@@ -41,6 +42,8 @@ const LinkSelector = withRouter(
     tableSchemaId
   }) => {
     const resources = useContext(ResourcesContext);
+    const userContext = useContext(UserContext);
+
     const [linkSelectorState, dispatchLinkSelector] = useReducer(linkSelectorReducer, {
       link: {
         ...selectedLink,
@@ -65,6 +68,7 @@ const LinkSelector = withRouter(
       masterTableFields
     } = linkSelectorState;
 
+    const [referenceDataflows, setReferenceDataflows] = useState([]);
     const [datasetSchemas, setDatasetSchemas] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
@@ -75,9 +79,16 @@ const LinkSelector = withRouter(
       params: { dataflowId }
     } = match;
 
-    const { fieldType } = fieldTypeValue;
-
     const [isSaved, setIsSaved] = useState(false);
+
+    useEffect(() => {
+      const getReferenceDataflows = async () => {
+        const { data } = await DataflowService.all(userContext.contextRoles);
+        setReferenceDataflows(data);
+      };
+
+      getReferenceDataflows();
+    }, []);
 
     useEffect(() => {
       const getDatasetSchemas = async () => {
@@ -261,11 +272,6 @@ const LinkSelector = withRouter(
         }
       });
 
-    const referenceDataflows = [
-      { dataflowName: 'aaaaaaaaaaaaaaaaaaa', dataflowId: '1' },
-      { dataflowName: 'b', dataflowId: '2' }
-    ];
-
     const renderExternalLinkSelector = () => {
       return (
         <div style={{ height: '22rem' }}>
@@ -276,7 +282,7 @@ const LinkSelector = withRouter(
               className={styles.referenceDataflowsDropdown}
               name="referenceDataflowsDropdown"
               onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
-              optionLabel="dataflowName"
+              optionLabel="name"
               options={referenceDataflows}
               placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
               value={linkSelectorState.referenceDataflow}
@@ -289,7 +295,7 @@ const LinkSelector = withRouter(
                   className={
                     styles.selectedReferenceDataflowLabel
                   }>{`${resources.messages['referenceDataflow']}: `}</span>
-                <span>{linkSelectorState.referenceDataflow.dataflowName}</span>
+                <span>{linkSelectorState.referenceDataflow.name}</span>
               </div>
               {renderLinkSelector()}
             </Fragment>
