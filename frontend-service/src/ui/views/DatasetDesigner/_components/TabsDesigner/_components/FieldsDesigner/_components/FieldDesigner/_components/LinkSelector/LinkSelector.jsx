@@ -46,7 +46,7 @@ const LinkSelector = withRouter(
       link: {
         ...selectedLink,
         referencedField: !isNil(selectedLink)
-          ? pick(selectedLink.referencedField, 'datasetSchemaId', 'fieldSchemaId', 'tableSchemaId')
+          ? pick(selectedLink.referencedField, 'dataflowId', 'datasetSchemaId', 'fieldSchemaId', 'tableSchemaId')
           : null
       },
       linkedTableFields: [],
@@ -244,6 +244,7 @@ const LinkSelector = withRouter(
               name: `${table.tableSchemaName} - ${pkField.name}`,
               value: `${table.tableSchemaName} - ${pkField.fieldId}`,
               referencedField: {
+                dataflowId: linkSelectorState.selectedReferenceDataflow.id,
                 fieldSchemaId: pkField.fieldId,
                 datasetSchemaId: datasetSchema.datasetSchemaId,
                 tableSchemaId: table.tableSchemaId
