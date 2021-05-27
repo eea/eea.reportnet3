@@ -6,6 +6,8 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import pick from 'lodash/pick';
 
+import { config } from 'conf';
+
 import styles from './LinkSelector.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -21,6 +23,8 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
+
+import { TextUtils } from 'core/infrastructure/CoreUtils';
 
 const LinkSelector = withRouter(
   ({
@@ -299,7 +303,12 @@ const LinkSelector = withRouter(
                   className={
                     styles.selectedReferenceDataflowLabel
                   }>{`${resources.messages['selectedReferenceDataflow']}: `}</span>
-                <span>{linkSelectorState.selectedReferenceDataflow.name}</span>
+                <span>
+                  {TextUtils.ellipsis(
+                    linkSelectorState.selectedReferenceDataflow.name,
+                    config.MAX_SELECTED_REFERENCE_DATAFLOW_NAME_LENGTH
+                  )}
+                </span>
               </div>
               {renderLinkSelector()}
             </Fragment>
