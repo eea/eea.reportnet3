@@ -1228,6 +1228,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
+          fieldTypeValue={fieldDesignerState.fieldTypeValue}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
           isReferenceDataset={isReferenceDataset}

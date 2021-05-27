@@ -1,3 +1,23 @@
+.chooseReferenceDataflow {
+  position: absolute;
+  top: 50%;
+  left: 40%;
+}
+
+.referenceDataflowsDropdownWrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  > label {
+    margin-right: 0.5rem;
+    font-weight: bold;
+  }
+
+  .referenceDataflowsDropdown {
+    width: 15rem;
+  }
+}
+
 .positioning {
   top: 0 !important;
 }
@@ -38,6 +58,14 @@
 .selectedLinkWrapper {
   margin-top: 1rem;
 }
+.selectedReferenceDataflowWrapper {
+  position: relative;
+  top: -1.5rem;
+  .selectedReferenceDataflowLabel {
+    font-weight: bold;
+  }
+}
+
 .selectedLinkLabel {
   font-weight: bold;
   font-style: italic;

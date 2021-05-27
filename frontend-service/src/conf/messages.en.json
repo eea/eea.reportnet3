@@ -1108,6 +1108,10 @@
     "emailHasErrorTooltip": "The email has an error",
     "incompleteDataTooltip": "Incomplete data",
     "requesterNotMatchingFilter": "There are no requesters with the selected parameters",
-    "reporterNotMatchingFilter": "There are no reporters with the selected parameters"
+    "reporterNotMatchingFilter": "There are no reporters with the selected parameters",
+    "referenceDataflows": "Reference dataflows",
+    "externalLinkSelector": "Select an External Link",
+    "externalLinkDialogNoReferenceDataflowMessage": "Please select a reference dataflow",
+    "referenceDataflow": "Reference dataflow"
   }
 }

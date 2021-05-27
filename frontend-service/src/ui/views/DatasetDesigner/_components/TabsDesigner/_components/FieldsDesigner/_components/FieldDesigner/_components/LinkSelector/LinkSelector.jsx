@@ -21,9 +21,12 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const LinkSelector = withRouter(
   ({
     datasetSchemaId,
+    fieldTypeValue,
     hasMultipleValues = false,
     isLinkSelectorVisible,
     isReferenceDataset,
@@ -49,7 +52,8 @@ const LinkSelector = withRouter(
       pkLinkedTableLabel: {},
       pkLinkedTableConditional: {},
       masterTableConditional: {},
-      masterTableFields: []
+      masterTableFields: [],
+      referenceDataflow: {}
     });
 
     const {
@@ -70,6 +74,8 @@ const LinkSelector = withRouter(
     const {
       params: { dataflowId }
     } = match;
+
+    const { fieldType } = fieldTypeValue;
 
     const [isSaved, setIsSaved] = useState(false);
 
@@ -255,6 +261,47 @@ const LinkSelector = withRouter(
         }
       });
 
+    const referenceDataflows = [
+      { dataflowName: 'aaaaaaaaaaaaaaaaaaa', dataflowId: '1' },
+      { dataflowName: 'b', dataflowId: '2' }
+    ];
+
+    const renderExternalLinkSelector = () => {
+      return (
+        <div style={{ height: '22rem' }}>
+          <div className={styles.referenceDataflowsDropdownWrapper}>
+            <label>{resources.messages['referenceDataflows']}</label>
+            <Dropdown
+              ariaLabel={'dataProviders'}
+              className={styles.referenceDataflowsDropdown}
+              name="referenceDataflowsDropdown"
+              onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
+              optionLabel="dataflowName"
+              options={referenceDataflows}
+              placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+              value={linkSelectorState.referenceDataflow}
+            />
+          </div>
+          {!isEmpty(linkSelectorState.referenceDataflow) ? (
+            <Fragment>
+              <div className={styles.selectedReferenceDataflowWrapper}>
+                <span
+                  className={
+                    styles.selectedReferenceDataflowLabel
+                  }>{`${resources.messages['referenceDataflow']}: `}</span>
+                <span>{linkSelectorState.referenceDataflow.dataflowName}</span>
+              </div>
+              {renderLinkSelector()}
+            </Fragment>
+          ) : (
+            <p className={styles.chooseReferenceDataflow}>
+              {resources.messages['externalLinkDialogNoReferenceDataflowMessage']}
+            </p>
+          )}
+        </div>
+      );
+    };
+
     const renderLinkSelector = () => {
       return (
         <Fragment>
@@ -360,7 +407,11 @@ const LinkSelector = withRouter(
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
           footer={linkSelectorDialogFooter}
-          header={resources.messages['linkSelector']}
+          header={
+            TextUtils.areEquals(fieldType, 'external_link')
+              ? resources.messages['externalLinkSelector']
+              : resources.messages['linkSelector']
+          }
           modal={true}
           onHide={() => {
             onCancelSaveLink({
@@ -376,7 +427,13 @@ const LinkSelector = withRouter(
           style={{ minWidth: '55%' }}
           visible={isVisible}
           zIndex={3003}>
-          {isLoading ? <Spinner className={styles.positioning} /> : renderLinkSelector()}
+          {isLoading ? (
+            <Spinner className={styles.positioning} />
+          ) : TextUtils.areEquals(fieldType, 'external_link') ? (
+            renderExternalLinkSelector()
+          ) : (
+            renderLinkSelector()
+          )}
         </Dialog>
       )
     );
