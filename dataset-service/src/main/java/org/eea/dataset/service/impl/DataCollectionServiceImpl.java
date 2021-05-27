@@ -384,7 +384,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // new check: dataflow is Reference dataset?
     DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
     boolean referenceDataflow = false;
-    if (TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
       referenceDataflow = true;
     }
 
