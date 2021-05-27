@@ -642,7 +642,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         dataschemaService.deleteUniquesConstraintFromField(datasetSchemaId, fieldSchemaId);
 
         // Delete FK rules
-        if (null != fieldVO && fieldVO.getType().equals(DataType.LINK)) {
+        if (null != fieldVO && (DataType.LINK.equals(fieldVO.getType())
+            || DataType.EXTERNAL_LINK.equals(fieldVO.getType()))) {
           rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, fieldSchemaId);
         }
         // Delete the fieldSchema from the dataset
