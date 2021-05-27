@@ -81,6 +81,7 @@ const LinkSelector = withRouter(
     useEffect(() => {
       const getReferenceDataflows = async () => {
         const { data } = await DataflowService.all(userContext.contextRoles);
+        // const { data } = await DataflowService.referenced();
         setReferenceDataflows(data);
       };
 
@@ -90,7 +91,12 @@ const LinkSelector = withRouter(
     useEffect(() => {
       const getDatasetSchemas = async () => {
         setIsLoading(true);
-        const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+        let datasetSchemasDTO;
+        if (isExternalLink && !isEmpty(linkSelectorState.referenceDataflow)) {
+          datasetSchemasDTO = await DataflowService.getAllSchemas(linkSelectorState.referenceDataflow.id);
+        } else {
+          datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+        }
         setIsLoading(false);
         if (isReferenceDataset) {
           const filteredDatasets = datasetSchemasDTO.data.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
@@ -101,7 +107,7 @@ const LinkSelector = withRouter(
       };
 
       getDatasetSchemas();
-    }, []);
+    }, [linkSelectorState.referenceDataflow]);
 
     useEffect(() => {
       if (!isEmpty(datasetSchemas) && !isNil(selectedLink)) {
