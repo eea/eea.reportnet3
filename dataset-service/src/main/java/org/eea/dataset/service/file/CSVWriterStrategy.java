@@ -88,8 +88,8 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<byte[]> writeFileList(final Long dataflowId, final Long datasetId, final String tableSchemaId,
-      boolean includeCountryCode) throws EEAException {
+  public List<byte[]> writeFileList(final Long dataflowId, final Long datasetId,
+      final String tableSchemaId, boolean includeCountryCode) throws EEAException {
     LOG.info("starting csv file writter");
 
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
@@ -100,13 +100,14 @@ public class CSVWriterStrategy implements WriterStrategy {
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
     List<byte[]> byteList = new ArrayList<>();
-
-    if(tableSchemaId != null) {
+    if ("validations".equals(tableSchemaId)) {
+      setValidationLines(csvWriter, datasetId);
+    } else if (tableSchemaId != null) {
       setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode);
 
       // Once read we convert it to string
       byteList.add(writer.getBuffer().toString().getBytes());
-    }else {
+    } else {
       dataSetSchema.getTableSchemas().forEach(tableSchemaVO -> {
         setLines(tableSchemaVO.getIdTableSchema(), dataSetSchema, csvWriter, datasetId,
             includeCountryCode);
@@ -117,6 +118,11 @@ public class CSVWriterStrategy implements WriterStrategy {
     }
 
     return byteList;
+
+  }
+
+  private void setValidationLines(CSVWriter csvWriter, Long datasetId) {
+    // TODO Auto-generated method stub
 
   }
 
