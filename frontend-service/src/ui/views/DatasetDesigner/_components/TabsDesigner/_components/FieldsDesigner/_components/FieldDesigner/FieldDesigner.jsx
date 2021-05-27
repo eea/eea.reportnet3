@@ -222,7 +222,7 @@ export const FieldDesigner = ({
       TextUtils.areEquals(type.fieldType, 'multiselect_codelist')
     ) {
       onCodelistDropdownSelected(type);
-    } else if (TextUtils.areEquals(type.fieldType, 'link')) {
+    } else if (TextUtils.areEquals(type.fieldType, 'link') || TextUtils.areEquals(type.fieldType, 'external_link')) {
       onLinkDropdownSelected(type);
     } else if (TextUtils.areEquals(type.fieldType, 'attachment')) {
       onAttachmentDropdownSelected(type);
