@@ -95,7 +95,8 @@ import {
   faFlagCheckered,
   faUpload,
   faFile,
-  faClock
+  faClock,
+  faMeteor
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -375,7 +376,7 @@ export const AwesomeIcons = icon => {
     case 'tiff':
       return faFileImage;
     case 'upload':
-        return faUpload;
+      return faUpload;
     case 'url':
       return faGlobeEurope;
     case 'users':
@@ -412,6 +413,8 @@ export const AwesomeIcons = icon => {
       return faFlagCheckered;
     case 'clock':
       return faClock;
+    case 'meteor':
+      return faMeteor;
     default:
       return faFileAlt;
   }

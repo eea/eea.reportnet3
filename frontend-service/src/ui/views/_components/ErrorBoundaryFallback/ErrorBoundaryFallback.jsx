@@ -2,6 +2,9 @@ import { useContext } from 'react';
 
 import styles from './ErrorBoundaryFallback.module.scss';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { Button } from 'ui/views/_components/Button';
@@ -35,13 +38,15 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
     <MainLayout>
       <div className="rep-container">
         <div className={styles.boundaryWrap}>
-          <div>
-            <div>
-              <h2 className="warning">{resources.messages['errorBoundaryTitle']}</h2>
-            </div>
-            <div>
-              <p className="warning">{error.message}</p>
-              <p>{resources.messages['errorBoundaryMessageCopy']}</p>
+          <div className={styles.boundaryContainer}>
+            <h2>{resources.messages['errorBoundaryTitle']}</h2>
+            <h3 className={styles.errorMessage}>{error.message}</h3>
+            <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('meteor')} />
+            <div className={styles.errorTexts}>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: resources.messages['errorBoundaryMessageCopy']
+                }}></p>
               <p>{resources.messages['errorBoundaryMessageRefresh']}</p>
             </div>
 
