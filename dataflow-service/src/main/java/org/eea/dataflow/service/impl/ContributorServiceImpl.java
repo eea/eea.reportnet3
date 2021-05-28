@@ -663,7 +663,8 @@ public class ContributorServiceImpl implements ContributorService {
             if (contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")
                 && resource.getRole().toString().contains(LiteralConstants.REPORTER + "_")) {
               resourceAccess = resource;
-            } else if (!contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")) {
+            } else if (!contributorVO.getRole().contains(LiteralConstants.REPORTER + "_")
+                && !resource.getRole().toString().contains(LiteralConstants.REPORTER + "_")) {
               resourceAccess = resource;
               break;
             }
