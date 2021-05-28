@@ -332,8 +332,9 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @PutMapping("/private/deleteRuleRequired")
   public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
-      @RequestParam("referenceId") String referenceId) {
-    rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+      @RequestParam("referenceId") String referenceId,
+      @RequestParam("typeData") DataType typeData) {
+    rulesService.deleteRuleRequired(datasetSchemaId, referenceId, typeData);
   }
 
   /**

@@ -117,6 +117,21 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
     return mongoTemplate.updateMulti(query, update, RulesSchema.class).getModifiedCount() == 1;
   }
 
+  /**
+   * Delete rule point required.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return true, if successful
+   */
+  @Override
+  public boolean deleteRulePointRequired(ObjectId datasetSchemaId, ObjectId referenceId) {
+    Document pullCriteria =
+        new Document(REFERENCE_ID, referenceId).append(WHEN_CONDITION, "isBlankPoint(this)");
+    Update update = new Update().pull(LiteralConstants.RULES, pullCriteria);
+    Query query = new Query(new Criteria(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId));
+    return mongoTemplate.updateFirst(query, update, RulesSchema.class).getModifiedCount() == 1;
+  }
 
   /**
    * Delete rule required.
