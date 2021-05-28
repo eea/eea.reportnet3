@@ -149,9 +149,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           subtitle={resources.messages['referenceDataflowCrumbLabel']}
           title={dataflowState.name}
         />
-
-        <BigButtonListReference className="dataflow-big-buttons-help-step" />
       </div>
+      <BigButtonListReference className="dataflow-big-buttons-help-step" />
     </div>
   );
 });

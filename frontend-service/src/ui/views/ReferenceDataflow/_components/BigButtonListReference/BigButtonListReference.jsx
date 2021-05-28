@@ -37,11 +37,53 @@ const BigButtonListReference = () => {
     layout:
       /*  buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow
           ? 'menuBigButton'
-        :  */ 'defaultBigButton',
-    // model: /* buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow ? */ newSchemaModel, //: [],
+        :  */ 'menuBigButton',
+    model: /* buttonsVisibility.cloneSchemasFromDataflow && !isCloningDataflow && !isImportingDataflow ? */ newSchemaModel, //: [],
     visibility: /* buttonsVisibility.newSchema */ true
   };
-  return <BigButton {...newSchemaBigButton} />;
+
+  const buildGroupByRepresentativeModels = datasets => {
+    const allDatasets = datasets.map((dataset, i) => {
+      //i remove
+      return {
+        datasetId: i, // dataset.datasetId,
+        datasetName: 'Name DS', //,dataset.name,
+        dataProviderId: dataset, // dataset.dataProviderId,
+        isReleased: true, //dataset.isReleased,
+        name: 'Schema name' //dataset.datasetSchemaName
+      };
+    });
+
+    return allDatasets.map(dataset => {
+      return {
+        buttonClass: 'dataset',
+        buttonIcon: 'dataset',
+        caption: dataset.datasetName,
+        helpClassName: 'dataflow-dataset-help-step',
+        // handleRedirect: () => {
+        //   handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
+        // },
+        infoStatus: dataset.isReleased,
+        infoStatusIcon: true,
+        layout: 'defaultBigButton',
+        model: [
+          {
+            label: resources.messages['historicReleases']
+            // command: () => {
+            //   onShowHistoricReleases('reportingDataset');
+            //   getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
+            // }
+          }
+        ],
+        // onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
+        visibility: true
+      };
+    });
+  };
+
+  return [newSchemaBigButton, ...buildGroupByRepresentativeModels([1, 2])].map(button => (
+    <BigButton key={button.caption} {...button} />
+  ));
 };
 
 export { BigButtonListReference };
