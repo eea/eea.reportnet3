@@ -29,6 +29,7 @@ import { TextUtils } from 'core/infrastructure/CoreUtils';
 const LinkSelector = withRouter(
   ({
     datasetSchemaId,
+    fields,
     hasMultipleValues = false,
     isExternalLink,
     isLinkSelectorVisible,
@@ -213,10 +214,25 @@ const LinkSelector = withRouter(
         fieldSchemaId: ''
       });
 
-      const masterTable = datasetSchemas
-        .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
-        .tables.find(table => table.tableSchemaId === tableSchemaId);
-      masterFields = masterTable?.records[0].fields
+      if (isExternalLink && !isNil(fields)) {
+        masterFields = getMasterFields(fields);
+      } else {
+        const masterTable = datasetSchemas
+          .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
+          .tables.find(table => table.tableSchemaId === tableSchemaId);
+        masterFields = getMasterFields(masterTable?.records[0].fields);
+      }
+
+      masterFields?.unshift({
+        name: resources.messages['noneCodelist'],
+        fieldSchemaId: ''
+      });
+
+      dispatchLinkSelector({ type: 'SET_LINKED_AND_MASTER_FIELDS', payload: { linkedFields, masterFields } });
+    };
+
+    const getMasterFields = fields => {
+      const masterFields = fields
         .filter(
           field =>
             !field.pk &&
@@ -227,13 +243,7 @@ const LinkSelector = withRouter(
         .map(field => {
           return { fieldSchemaId: field.fieldId, name: field.name };
         });
-
-      masterFields?.unshift({
-        name: resources.messages['noneCodelist'],
-        fieldSchemaId: ''
-      });
-
-      dispatchLinkSelector({ type: 'SET_LINKED_AND_MASTER_FIELDS', payload: { linkedFields, masterFields } });
+      return masterFields;
     };
 
     const getOptions = datasetSchema =>
@@ -306,7 +316,7 @@ const LinkSelector = withRouter(
                 <span>
                   {TextUtils.ellipsis(
                     linkSelectorState.selectedReferenceDataflow.name,
-                    config.MAX_SELECTED_REFERENCE_DATAFLOW_NAME_LENGTH
+                    config.notifications.STRING_LENGTH_MAX
                   )}
                 </span>
               </div>

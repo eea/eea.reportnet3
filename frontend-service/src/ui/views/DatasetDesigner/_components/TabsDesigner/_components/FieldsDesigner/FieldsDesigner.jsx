@@ -442,6 +442,7 @@ export const FieldsDesigner = ({
           fieldRequired={false}
           fieldType=""
           fieldValue=""
+          fields={fields}
           hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}

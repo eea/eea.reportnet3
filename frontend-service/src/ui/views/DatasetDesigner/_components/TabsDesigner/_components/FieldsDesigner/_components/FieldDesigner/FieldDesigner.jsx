@@ -52,6 +52,7 @@ export const FieldDesigner = ({
   fieldReadOnly,
   fieldRequired,
   fieldType,
+  fields,
   hasPK,
   index,
   initialFieldIndexDragged,
@@ -1235,6 +1236,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
+          fields={fields}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isExternalLink={
             TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false
