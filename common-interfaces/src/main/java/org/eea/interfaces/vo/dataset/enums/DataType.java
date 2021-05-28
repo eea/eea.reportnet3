@@ -143,12 +143,13 @@ public enum DataType {
    */
   LINK("LINK", JavaType.STRING),
 
+
   /**
-   * The link data with PK.
+   * The external link.
    *
    * Cast in JPA: java.lang.String
    */
-  LINK_DATA("LINK_DATA", JavaType.STRING),
+  EXTERNAL_LINK("EXTERNAL_LINK", JavaType.STRING),
 
   /**
    * The url valid.

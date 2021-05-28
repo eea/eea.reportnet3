@@ -470,6 +470,7 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
+        case EXTERNAL_LINK:
         case LINK:
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level
