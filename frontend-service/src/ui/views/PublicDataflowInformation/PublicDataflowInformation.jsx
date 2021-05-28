@@ -47,9 +47,9 @@ export const PublicDataflowInformation = withRouter(
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
     const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
-    const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
 
     const notificationContext = useContext(NotificationContext);
 
