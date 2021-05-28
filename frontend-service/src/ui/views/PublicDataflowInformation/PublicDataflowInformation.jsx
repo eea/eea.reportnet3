@@ -47,9 +47,9 @@ export const PublicDataflowInformation = withRouter(
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
     const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
-    const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
 
     const notificationContext = useContext(NotificationContext);
 
@@ -252,8 +252,10 @@ export const PublicDataflowInformation = withRouter(
         setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('error', error);
-        setIsWrongUrlDataflowId(true);
-        notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
+        if (error.status !== 404) {
+          setIsWrongUrlDataflowId(true);
+          notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
+        }
       } finally {
         setIsLoading(false);
       }
