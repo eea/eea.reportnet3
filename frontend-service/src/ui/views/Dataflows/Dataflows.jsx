@@ -2,6 +2,7 @@ import { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './Dataflows.module.scss';
 
@@ -175,8 +176,6 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
-  const RenderDistruction = ({ vitalArrayProp }) => vitalArrayProp.map(element => <div>{element.name}</div>);
-
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -188,15 +187,7 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu model={tabMenuItems} activeItem={tabMenuActiveItem} onTabChange={e => setTabMenuActiveItem(e.value)} />
-        <Button
-          className="p-button-danger p-button-animated-blink"
-          icon={'cancel'}
-          label={'DESTROY'}
-          onClick={() => setShowBadComponent(true)}
-        />
-
-        {showBadComponent && <RenderDistruction />}
+        <TabMenu activeItem={tabMenuActiveItem} model={tabMenuItems} onTabChange={e => setTabMenuActiveItem(e.value)} />
 
         <DataflowsList
           className="dataflowList-accepted-help-step"
@@ -217,8 +208,8 @@ const Dataflows = withRouter(({ history, match }) => {
 
       <DataflowManagement
         isEditForm={false}
-        onCreateDataflow={onCreateDataflow}
         manageDialogs={manageDialogs}
+        onCreateDataflow={onCreateDataflow}
         state={dataflowsState}
       />
     </div>

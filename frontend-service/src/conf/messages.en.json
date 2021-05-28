@@ -1110,7 +1110,7 @@
     "requesterNotMatchingFilter": "There are no requesters with the selected parameters",
     "reporterNotMatchingFilter": "There are no reporters with the selected parameters",
     "errorBoundaryTitle": "Sorry... An unexpected error occurred",
-    "errorBoundaryMessageCopy": "Please click Copy to clipboard and submit this information to the helpdesk.",
+    "errorBoundaryMessageCopy": "Please click <strong>Copy to clipboard</strong> and submit this information to the helpdesk.",
     "errorBoundaryMessageRefresh": "Press the Refresh button to continue."
   }
 }
