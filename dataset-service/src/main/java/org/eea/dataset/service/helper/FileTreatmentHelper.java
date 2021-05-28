@@ -1014,18 +1014,15 @@ public class FileTreatmentHelper implements DisposableBean {
       Map<String, byte[]> contents = new HashMap<>();
       if (extension.equalsIgnoreCase("csv") || extension.equalsIgnoreCase("validations")) {
         List<TableSchema> tablesSchema = getTables(datasetId);
-        for (TableSchema table : tablesSchema) {
-          List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId,
-              table.getIdTableSchema().toString(), includeCountryCode);
-          contents.put(table.getIdTableSchema() + "_" + table.getNameTableSchema(),
-              dataFile.get(0));
-        }
-        if (extension.equalsIgnoreCase("validations")) {
-          contents.put("validations",
-              context.fileWriter(dataflowId, datasetId, "validations", includeCountryCode).get(0));
+        List<byte[]> dataFile =
+            context.fileListWriter(dataflowId, datasetId, includeCountryCode, true);
+        for (int i = 0; i < tablesSchema.size(); i++) {
+          contents.put(tablesSchema.get(i).getIdTableSchema() + "_"
+              + tablesSchema.get(i).getNameTableSchema(), dataFile.get(i));
         }
       } else {
-        List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
+        List<byte[]> dataFile =
+            context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
         contents.put(null, dataFile.get(0));
       }
 

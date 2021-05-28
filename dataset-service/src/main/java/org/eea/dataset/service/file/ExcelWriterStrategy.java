@@ -119,8 +119,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
   }
 
   @Override
-  public List<byte[]> writeFileList(Long dataflowId, Long datasetId, String tableSchemaId,
-      boolean includeCountryCode) throws EEAException {
+  public List<byte[]> writeFileList(Long dataflowId, Long datasetId, boolean includeCountryCode,
+      boolean includeValidations) throws EEAException {
 
     List<byte[]> byteList = new ArrayList<>();
 
@@ -130,13 +130,6 @@ public class ExcelWriterStrategy implements WriterStrategy {
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
-    TableSchemaVO table = fileCommon.findTableSchema(tableSchemaId, dataset);
-
-    // If the given idTableSchema exists, replace all tables with it
-    if (null != table) {
-      tables.clear();
-      tables.add(table);
-    }
 
     try (Workbook workbook = createWorkbook()) {
 
@@ -215,7 +208,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
     for (RecordValue record : fileCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
 
       Row row = sheet.createRow(nRow++);
-      List<FieldValue> fields = record.getFields();
+      List<FieldValue> fields = new ArrayList<>(record.getFields());
       int nextUnknownCellNumber = nHeaders;
 
       if (includeCountryCode) {
