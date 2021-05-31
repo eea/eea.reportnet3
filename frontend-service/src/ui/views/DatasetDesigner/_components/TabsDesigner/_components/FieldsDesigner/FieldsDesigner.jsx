@@ -56,7 +56,6 @@ export const FieldsDesigner = ({
 
   const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
-  const [externalLink, setExternalLink] = useState({});
   const [fields, setFields] = useState();
   const [fieldToDeleteType, setFieldToDeleteType] = useState();
   const [indexToDelete, setIndexToDelete] = useState();
@@ -416,8 +415,6 @@ export const FieldsDesigner = ({
     );
   };
 
-  const getLinkInfo = linkData => setExternalLink(linkData);
-
   const renderNewField = () => {
     return (
       <div className={styles.fieldDesignerWrapper} key="0">
@@ -439,7 +436,6 @@ export const FieldsDesigner = ({
           fieldType=""
           fieldValue=""
           fields={fields}
-          getLinkInfo={getLinkInfo}
           hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
@@ -497,7 +493,6 @@ export const FieldsDesigner = ({
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
-                getLinkInfo={getLinkInfo}
                 hasPK={fields.filter(field => field.pk).length > 0}
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}
