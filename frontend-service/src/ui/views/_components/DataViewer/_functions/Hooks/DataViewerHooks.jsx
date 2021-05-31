@@ -220,7 +220,7 @@ export const useSetColumns = (
             ? `<br /><span style="font-weight:bold">${resources.messages['validExtensions']}</span> ${
                 !isEmpty(column.validExtensions) ? column.validExtensions.join(', ') : '*'
               }
-    <span style="font-weight:bold">${resources.messages['maxFileSize']}</span> ${
+              <br /><span style="font-weight:bold">${resources.messages['maxFileSize']}</span> ${
                 !isNil(column.maxSize) && column.maxSize.toString() !== '0'
                   ? `${column.maxSize} ${resources.messages['MB']}`
                   : resources.messages['maxSizeNotDefined']
