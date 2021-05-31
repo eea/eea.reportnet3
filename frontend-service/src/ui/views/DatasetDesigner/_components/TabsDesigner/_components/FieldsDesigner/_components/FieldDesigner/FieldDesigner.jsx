@@ -941,8 +941,6 @@ export const FieldDesigner = ({
     </div>
   );
 
-  console.log(`fieldDesignerState.fieldLinkValue`, fieldDesignerState.fieldLinkValue);
-
   const renderCodelistFileAndLinkButtons = () =>
     !isUndefined(fieldDesignerState.fieldTypeValue) &&
     (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||

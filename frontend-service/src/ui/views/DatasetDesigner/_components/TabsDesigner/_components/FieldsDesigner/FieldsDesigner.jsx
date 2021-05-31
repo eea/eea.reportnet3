@@ -386,7 +386,6 @@ export const FieldsDesigner = ({
   );
 
   const renderAllFields = () => {
-    console.log(`viewType['tabularData']`, viewType['tabularData']);
     if (isLoading) {
       return <Spinner className={styles.positioning} />;
     } else {
@@ -464,7 +463,6 @@ export const FieldsDesigner = ({
     const renderedFields =
       !isNil(fields) && !isEmpty(fields) ? (
         fields.map((field, index) => {
-          console.log(`field.referencedField`, field.referencedField);
           return (
             <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
               <FieldDesigner
