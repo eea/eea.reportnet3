@@ -849,7 +849,7 @@ export const FieldDesigner = ({
 
   const parseReferenceField = completeReferencedField => {
     return {
-      idDataflow: completeReferencedField.referencedField.dataflowId,
+      dataflowId: completeReferencedField.referencedField.dataflowId,
       idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId,
       idPk: completeReferencedField.referencedField.fieldSchemaId,
       linkedConditionalFieldId: completeReferencedField.referencedField.linkedTableConditional,
