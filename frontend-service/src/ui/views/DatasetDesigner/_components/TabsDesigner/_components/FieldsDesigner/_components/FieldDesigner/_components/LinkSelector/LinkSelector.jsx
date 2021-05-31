@@ -29,6 +29,7 @@ import { TextUtils } from 'core/infrastructure/CoreUtils';
 const LinkSelector = withRouter(
   ({
     datasetSchemaId,
+    getLinkInfo = () => {},
     fields,
     hasMultipleValues = false,
     isExternalLink,
@@ -159,6 +160,10 @@ const LinkSelector = withRouter(
         });
       }
     }, [isVisible]);
+
+    useEffect(() => {
+      getLinkInfo(linkSelectorState.link);
+    }, [linkSelectorState.link]);
 
     const linkSelectorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">

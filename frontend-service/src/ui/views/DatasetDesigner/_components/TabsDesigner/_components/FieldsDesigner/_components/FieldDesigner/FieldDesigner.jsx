@@ -53,6 +53,7 @@ export const FieldDesigner = ({
   fieldRequired,
   fieldType,
   fields,
+  getLinkInfo = () => {},
   hasPK,
   index,
   initialFieldIndexDragged,
@@ -940,6 +941,8 @@ export const FieldDesigner = ({
     </div>
   );
 
+  console.log(`fieldDesignerState.fieldLinkValue`, fieldDesignerState.fieldLinkValue);
+
   const renderCodelistFileAndLinkButtons = () =>
     !isUndefined(fieldDesignerState.fieldTypeValue) &&
     (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
@@ -1237,6 +1240,7 @@ export const FieldDesigner = ({
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
           fields={fields}
+          getLinkInfo={getLinkInfo}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isExternalLink={
             TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false

@@ -56,9 +56,10 @@ export const FieldsDesigner = ({
 
   const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
+  const [externalLink, setExternalLink] = useState({});
   const [fields, setFields] = useState();
-  const [indexToDelete, setIndexToDelete] = useState();
   const [fieldToDeleteType, setFieldToDeleteType] = useState();
+  const [indexToDelete, setIndexToDelete] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
@@ -385,6 +386,7 @@ export const FieldsDesigner = ({
   );
 
   const renderAllFields = () => {
+    console.log(`viewType['tabularData']`, viewType['tabularData']);
     if (isLoading) {
       return <Spinner className={styles.positioning} />;
     } else {
@@ -415,6 +417,8 @@ export const FieldsDesigner = ({
     );
   };
 
+  const getLinkInfo = linkData => setExternalLink(linkData);
+
   const renderNewField = () => {
     return (
       <div className={styles.fieldDesignerWrapper} key="0">
@@ -436,6 +440,7 @@ export const FieldsDesigner = ({
           fieldType=""
           fieldValue=""
           fields={fields}
+          getLinkInfo={getLinkInfo}
           hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
@@ -459,6 +464,7 @@ export const FieldsDesigner = ({
     const renderedFields =
       !isNil(fields) && !isEmpty(fields) ? (
         fields.map((field, index) => {
+          console.log(`field.referencedField`, field.referencedField);
           return (
             <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
               <FieldDesigner
@@ -471,7 +477,13 @@ export const FieldsDesigner = ({
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldId={field.fieldId}
-                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
+                fieldLink={
+                  !isNull(field.referencedField)
+                    ? !TextUtils.areEquals(field.type, 'external_link')
+                      ? getReferencedFieldName(field.referencedField)
+                      : externalLink
+                    : null
+                }
                 fieldLinkedTableConditional={
                   !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
                 }
@@ -487,6 +499,7 @@ export const FieldsDesigner = ({
                 fieldRequired={Boolean(field.required)}
                 fieldType={field.type}
                 fieldValue={field.value}
+                getLinkInfo={getLinkInfo}
                 hasPK={fields.filter(field => field.pk).length > 0}
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}
