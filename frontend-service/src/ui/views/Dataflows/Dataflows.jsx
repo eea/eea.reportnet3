@@ -45,25 +45,9 @@ const Dataflows = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const tabMenuItems = [
-    {
-      id: 'pending',
-      label: resources.messages['dataflowsListTab'],
-      className: styles.flow_tab,
-      tabKey: 'pending'
-    },
-    {
-      id: 'referenceDataflows',
-      label: resources.messages['referenceDataflowsListTab'],
-      className: styles.flow_tab,
-      tabKey: 'referenceDataflows'
-    },
-    {
-      id: 'completed',
-      label: resources.messages['dataflowCompletedTab'],
-      className: styles.flow_tab,
-      disabled: true,
-      tabKey: 'completed'
-    }
+    { className: styles.flow_tab, id: 'pending', label: resources.messages['dataflowsListTab'] },
+    { className: styles.flow_tab, id: 'referenceDataflows', label: resources.messages['referenceDataflowsListTab'] },
+    { className: styles.flow_tab, disabled: true, id: 'completed', label: resources.messages['dataflowCompletedTab'] }
   ];
 
   const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
@@ -138,7 +122,6 @@ const Dataflows = withRouter(({ history, match }) => {
 
       dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data, referenced: referenced.data } });
     } catch (error) {
-      console.error('dataFetch error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
     }
     isLoading(false);
