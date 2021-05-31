@@ -109,7 +109,7 @@ export const useBreadCrumbs = ({
         command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
         href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
         label: representativeCrumbLabel,
-        icon: 'clone'
+        icon: 'representative'
       };
     }
 
