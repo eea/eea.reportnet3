@@ -11,11 +11,11 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 
 import { UserService } from 'core/services/User';
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
@@ -41,57 +41,64 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
-    anySchemaAvailableInPublic: false,
-    currentUrl: '',
+    requestStatus: 'idle',
+    error: null,
+    // anySchemaAvailableInPublic: false,
+    // currentUrl: '',
     data: {},
-    dataProviderId: [],
-    dataProviderSelected: {},
-    deleteInput: '',
+    // dataProviderId: [],
+    // dataProviderSelected: {},
+    // deleteInput: '',
     description: '',
-    designDatasetSchemas: [],
-    formHasRepresentatives: false,
-    hasRepresentativesWithoutDatasets: false,
-    hasWritePermissions: false,
-    id: referenceDataflowId,
-    isApiKeyDialogVisible: false,
-    isCopyDataCollectionToEuDatasetLoading: false,
-    isCustodian: false,
-    isDataSchemaCorrect: [],
-    isDataUpdated: false,
-    isDeleteDialogVisible: false,
-    isEditDialogVisible: false,
-    isExportDialogVisible: false,
-    isExportEuDatasetLoading: false,
-    isExporting: false,
-    isFetchingData: false,
-    isImportLeadReportersVisible: false,
-    isManageRequestersDialogVisible: false,
-    isManageReportersDialogVisible: false,
-    isManageRolesDialogVisible: false,
-    isNationalCoordinator: false,
-    isObserver: false,
-    isPageLoading: true,
-    isPropertiesDialogVisible: false,
-    isReceiptLoading: false,
-    isReceiptOutdated: false,
-    isReleasable: false,
-    isReleaseableDialogVisible: false,
-    isReleaseDialogVisible: false,
-    isShowPublicInfoDialogVisible: false,
-    isSnapshotDialogVisible: false,
-    isUserListVisible: false,
-    name: 'My name is',
-    obligations: {},
-    representativesImport: false,
-    restrictFromPublic: false,
-    showPublicInfo: false,
-    status: '',
-    updatedDatasetSchema: [],
-    userRoles: [],
-    isUserRightManagementDialogVisible: false
+    // designDatasetSchemas: [],
+    // formHasRepresentatives: false,
+    // hasRepresentativesWithoutDatasets: false,
+    // hasWritePermissions: false,
+    // id: referenceDataflowId,
+    // isApiKeyDialogVisible: false,
+    // isCopyDataCollectionToEuDatasetLoading: false,
+    // isCustodian: false,
+    // isDataSchemaCorrect: [],
+    // isDataUpdated: false,
+    // isDeleteDialogVisible: false,
+    // isEditDialogVisible: false,
+    // isExportDialogVisible: false,
+    // isExportEuDatasetLoading: false,
+    // isExporting: false,
+    // isFetchingData: false,
+    // isImportLeadReportersVisible: false,
+    // isManageRequestersDialogVisible: false,
+    // isManageReportersDialogVisible: false,
+    // isManageRolesDialogVisible: false,
+    // isNationalCoordinator: false,
+    // isObserver: false,
+    // isPageLoading: true,
+    // isPropertiesDialogVisible: false,
+    // isReceiptLoading: false,
+    // isReceiptOutdated: false,
+    // isReleasable: false,
+    // isReleaseableDialogVisible: false,
+    // isReleaseDialogVisible: false,
+    // isShowPublicInfoDialogVisible: false,
+    // isSnapshotDialogVisible: false,
+    // isUserListVisible: false,
+    name: '',
+    // obligations: {},
+    // representativesImport: false,
+    // restrictFromPublic: false,
+    // showPublicInfo: false,
+    status: ''
+    // updatedDatasetSchema: [],
+    // userRoles: [],
+    // isUserRightManagementDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+
+  useEffect(() => {
+    dataflowDispatch({ type: 'LOADING_STARTED' });
+    onLoadReportingDataflow();
+  }, [dataflowState.isDataUpdated]);
 
   useBreadCrumbs({
     currentPage: CurrentPage.REFERENCE_DATAFLOW,
@@ -99,6 +106,26 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     history,
     matchParams: match.params
   });
+
+  const onLoadReportingDataflow = async () => {
+    try {
+      const referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
+      const referenceDataflow = referenceDataflowResponse.data;
+
+      dataflowDispatch({
+        type: 'LOADING_SUCCESS',
+        payload: {
+          data: referenceDataflow,
+          description: referenceDataflow.description,
+          name: referenceDataflow.name,
+          status: referenceDataflow.status
+        }
+      });
+    } catch (error) {
+      notificationContext.add({ type: 'LOADING_ERROR', error });
+      history.push(getUrl(routes.DATAFLOWS));
+    }
+  };
 
   const getLeftSidebarButtonsVisibility = () => {
     // if (isEmpty(dataflowState.data)) {

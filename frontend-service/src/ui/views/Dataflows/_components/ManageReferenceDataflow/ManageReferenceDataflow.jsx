@@ -9,7 +9,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
-import { ReferenceDataflowService } from 'core/services/ReferencedDataflow';
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';

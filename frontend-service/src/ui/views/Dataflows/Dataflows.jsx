@@ -19,7 +19,7 @@ import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'ui/views/_components/UserList';
 
 import { DataflowService } from 'core/services/Dataflow';
-import { ReferenceDataflowService } from 'core/services/ReferencedDataflow';
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 import { UserService } from 'core/services/User';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
