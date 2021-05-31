@@ -8,7 +8,7 @@ import { DataflowConfig } from 'conf/domain/model/Dataflow';
 
 import styles from './BigButtonList.module.scss';
 
-import { BigButton } from '../BigButton';
+import { BigButton } from 'ui/views/_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox';
