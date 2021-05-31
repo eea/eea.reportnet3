@@ -10,6 +10,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -66,6 +67,9 @@ public class ContributorServiceImplTest {
   /** The test dataset controller zuul. */
   @Mock
   private TestDatasetControllerZuul testDatasetControllerZuul;
+
+  @Mock
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
