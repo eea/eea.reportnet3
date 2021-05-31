@@ -19,7 +19,6 @@ import { GetPublicDataflowData } from './GetPublicDataflowData';
 import { GetReleasedDashboards } from './GetReleasedDashboards';
 import { GetReporting } from './GetReporting';
 import { Update } from './Update';
-import { Referenced } from './Referenced';
 import { ValidateSchemas } from './ValidateSchemas';
 
 export const DataflowService = {
@@ -41,7 +40,6 @@ export const DataflowService = {
   getUserList: GetUserList({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
   publicData: GetPublicData({ dataflowRepository }),
-  referenced: Referenced({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
   schemasValidation: ValidateSchemas({ dataflowRepository }),
   update: Update({ dataflowRepository })
