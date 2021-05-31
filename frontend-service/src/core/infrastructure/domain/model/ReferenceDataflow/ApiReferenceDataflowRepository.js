@@ -66,6 +66,8 @@ const all = async userData => {
   return dataflowsDTO;
 };
 
+const create = async (name, description, type) => apiReferenceDataflow.create(name, description, type);
+
 const sortDatasetTypeByName = (a, b) => {
   let datasetName_A = a.datasetSchemaName;
   let datasetName_B = b.datasetSchemaName;
@@ -84,4 +86,4 @@ const referenceDataflow = async dataflowId => {
   return referenceDataflowDTO;
 };
 
-export const ApiReferenceDataflowRepository = { all, referenceDataflow };
+export const ApiReferenceDataflowRepository = { all, create, referenceDataflow };
