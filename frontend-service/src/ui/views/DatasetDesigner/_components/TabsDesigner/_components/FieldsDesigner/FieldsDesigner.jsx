@@ -290,28 +290,21 @@ export const FieldsDesigner = ({
     const link = {};
     let tableSchema = '';
 
-    if (!isNil(datasetSchemas)) {
-      datasetSchemas.forEach(schema => {
-        if (!isNil(schema.tables)) {
-          schema.tables.forEach(table => {
-            if (!table.addTab && !isNil(table.records)) {
-              table.records.forEach(record => {
-                if (!isNil(record.fields)) {
-                  record.fields.forEach(field => {
-                    if (!isNil(field) && field.fieldId === referencedField.idPk) {
-                      link.name = `${table.tableSchemaName} - ${field.name}`;
-                      link.value = `${table.tableSchemaName} - ${field.fieldId}`;
-                      link.disabled = false;
-                      tableSchema = table.tableSchemaId;
-                    }
-                  });
-                }
-              });
-            }
+    datasetSchemas?.forEach(schema => {
+      schema?.tables.forEach(table => {
+        !table.addTab &&
+          table?.records.forEach(record => {
+            record?.fields.forEach(field => {
+              if (field?.fieldId === referencedField.idPk) {
+                link.name = `${table.tableSchemaName} - ${field.name}`;
+                link.value = `${table.tableSchemaName} - ${field.fieldId}`;
+                link.disabled = false;
+                tableSchema = table.tableSchemaId;
+              }
+            });
           });
-        }
       });
-    }
+    });
 
     link.referencedField = {
       datasetSchemaId: referencedField.idDatasetSchema,
