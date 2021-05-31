@@ -1,6 +1,7 @@
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './Dataflows.module.scss';
@@ -14,7 +15,6 @@ import { DataflowManagement } from 'ui/views/_components/DataflowManagement';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
-import { Spinner } from 'ui/views/_components/Spinner';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'ui/views/_components/UserList';
 
@@ -31,39 +31,46 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
-import { CurrentPage } from 'ui/views/_functions/Utils';
+import { CurrentPage, TextUtils } from 'ui/views/_functions/Utils';
+import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
+import { ManageReferenceDataflow } from './_components/ManageReferenceDataflow/ManageReferenceDataflow';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {
     params: { errorType: dataflowsErrorType }
   } = match;
 
+  const { permissions } = config;
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const tabMenuItems = [
-    { className: styles.flow_tab, id: 'pending', label: resources.messages['dataflowsListTab'] },
-    { className: styles.flow_tab, id: 'referenceDataflows', label: resources.messages['referenceDataflowsListTab'] },
-    { className: styles.flow_tab, disabled: true, id: 'completed', label: resources.messages['dataflowCompletedTab'] }
-  ];
-
-  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
-
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
-    allDataflows: [],
+    activeIndex: 0,
+    dataflows: [],
     isAddDialogVisible: false,
     isCustodian: null,
-    isLoading: true,
     isNationalCoordinator: false,
+    isReferencedDataflowDialogVisible: false,
     isRepObDialogVisible: false,
     isUserListVisible: false,
-    referenced: []
+    loadingStatus: { dataflows: true, reference: true },
+    reference: []
   });
 
-  const visibleTab = tabMenuItems[tabMenuActiveItem];
+  const { activeIndex, isCustodian, loadingStatus } = dataflowsState;
+
+  const tabMenuItems = isCustodian
+    ? [
+        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['dataflowsListTab'] },
+        { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
+      ]
+    : [{ className: styles.flow_tab, id: 'dataflows', label: resources.messages['dataflowsListTab'] }];
+
+  const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
@@ -74,13 +81,6 @@ const Dataflows = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    if (!isNil(userContext.contextRoles)) {
-      dataFetch();
-      onLoadPermissions();
-    }
-  }, [userContext.contextRoles]);
-
-  useEffect(() => {
     leftSideBarContext.removeModels();
 
     const createBtn = {
@@ -88,7 +88,8 @@ const Dataflows = withRouter(({ history, match }) => {
       icon: 'plus',
       isVisible: dataflowsState.isCustodian,
       label: 'createNewDataflow',
-      onClick: () => manageDialogs('isAddDialogVisible', true),
+      onClick: () =>
+        manageDialogs(tabId === 'dataflows' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible', true),
       title: 'createNewDataflow'
     };
 
@@ -101,10 +102,8 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
-    const allButtons = [createBtn, userListBtn];
-
-    leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
-  }, [dataflowsState.isCustodian, dataflowsState.isNationalCoordinator]);
+    leftSideBarContext.addModels([createBtn, userListBtn].filter(button => button.isVisible));
+  }, [dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
 
   useEffect(() => {
     const messageStep0 = dataflowsState.isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
@@ -114,43 +113,60 @@ const Dataflows = withRouter(({ history, match }) => {
     );
   }, [dataflowsState]);
 
-  const dataFetch = async () => {
-    isLoading(true);
-    try {
-      const { data } = await DataflowService.all(userContext.contextRoles);
-      const referenced = await ReferenceDataflowService.all();
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) onLoadPermissions();
+  }, [userContext.contextRoles]);
 
-      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data, referenced: referenced.data } });
+  useLayoutEffect(() => {
+    if (isEmpty(dataflowsState[tabId]) && !isNil(userContext.contextRoles)) {
+      getDataflows();
+    }
+  }, [tabId, userContext.contextRoles]);
+
+  const getDataflows = async () => {
+    setLoading(true);
+    try {
+      if (TextUtils.areEquals(tabId, 'dataflows')) {
+        const { data } = await DataflowService.all(userContext.contextRoles);
+        dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'dataflows' } });
+      } else {
+        const { data } = await ReferenceDataflowService.all();
+        dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'reference' } });
+      }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
+    } finally {
+      setLoading(false);
     }
-    isLoading(false);
   };
 
-  const isLoading = value => dataflowsDispatch({ type: 'IS_LOADING', payload: { value } });
+  const manageDialogs = (dialog, value) => dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
 
   const onCreateDataflow = () => {
     manageDialogs('isAddDialogVisible', false);
     onRefreshToken();
+    getDataflows();
   };
 
+  const onCreateReferenceDataflow = () => {
+    manageDialogs('isReferencedDataflowDialogVisible', false);
+    onRefreshToken();
+    getDataflows();
+  };
+
+  const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+
   const onLoadPermissions = () => {
-    const isCustodian = userContext.hasPermission([
-      config.permissions.roles.CUSTODIAN.key,
-      config.permissions.roles.STEWARD.key
-    ]);
+    const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
-      config.permissions.prefixes.NATIONAL_COORDINATOR,
+      permissions.prefixes.NATIONAL_COORDINATOR,
       null,
-      [config.permissions.roles.NATIONAL_COORDINATOR.key]
+      [permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
     dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian, isNationalCoordinator } });
   };
-
-  const manageDialogs = (dialog, value, secondDialog, secondValue, data = {}) =>
-    dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue, data } });
 
   const onRefreshToken = async () => {
     try {
@@ -162,7 +178,15 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   };
 
-  const renderDataflowUsersListFooter = (
+  const setLoading = status => dataflowsDispatch({ type: 'SET_LOADING', payload: { tab: tabId, status } });
+
+  const renderLayout = children => (
+    <MainLayout>
+      <div className="rep-container">{children}</div>
+    </MainLayout>
+  );
+
+  const renderUserListDialogFooter = () => (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
@@ -171,55 +195,21 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
-  const renderDataflows = () => {
-    switch (visibleTab.id) {
-      case 'pending':
-        return (
-          <DataflowsList
-            className="dataflowList-accepted-help-step"
-            content={dataflowsState.allDataflows}
-            isCustodian={dataflowsState.isCustodian}
-            visibleTab={tabMenuItems[tabMenuActiveItem]}
-          />
-        );
-
-      case 'referenceDataflows':
-        return (
-          <DataflowsList
-            className="dataflowList-accepted-help-step"
-            content={dataflowsState.referenced}
-            isCustodian={dataflowsState.isCustodian}
-            visibleTab={tabMenuItems[tabMenuActiveItem]}
-          />
-        );
-
-      default:
-        break;
-    }
-  };
-
-  const renderLayout = children => (
-    <MainLayout>
-      <div className="rep-container">{children}</div>
-    </MainLayout>
-  );
-
-  if (dataflowsState.isLoading) return renderLayout(<Spinner />);
-
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu
-          activeIndex={tabMenuActiveItem}
-          model={tabMenuItems}
-          onTabChange={event => setTabMenuActiveItem(event.index)}
+        <TabMenu activeIndex={activeIndex} model={tabMenuItems} onTabChange={event => onChangeTab(event.index)} />
+        <DataflowsList
+          className="dataflowList-accepted-help-step"
+          content={dataflowsState[tabId]}
+          isLoading={loadingStatus[tabId]}
+          visibleTab={tabId}
         />
-        {renderDataflows()}
       </div>
 
       {dataflowsState.isUserListVisible && (
         <Dialog
-          footer={renderDataflowUsersListFooter}
+          footer={renderUserListDialogFooter()}
           header={resources.messages['allDataflowsUserListHeader']}
           onHide={() => manageDialogs('isUserListVisible', false)}
           visible={dataflowsState.isUserListVisible}>
@@ -227,12 +217,19 @@ const Dataflows = withRouter(({ history, match }) => {
         </Dialog>
       )}
 
+      {dataflowsState.isReferencedDataflowDialogVisible && (
+        <ManageReferenceDataflow
+          isVisible={dataflowsState.isReferencedDataflowDialogVisible}
+          manageDialogs={manageDialogs}
+          onCreate={onCreateReferenceDataflow}
+        />
+      )}
+
       <DataflowManagement
         isEditForm={false}
         manageDialogs={manageDialogs}
         onCreateDataflow={onCreateDataflow}
         state={dataflowsState}
-        visibleTab={visibleTab}
       />
     </div>
   );
