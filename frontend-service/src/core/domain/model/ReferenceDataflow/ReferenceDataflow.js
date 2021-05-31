@@ -1,11 +1,10 @@
-export class ReferencedDataflow {
+export class ReferenceDataflow {
   constructor({
     creationDate,
     dataCollections,
     datasets,
     description,
     designDatasets,
-    euDatasets,
     expirationDate,
     id,
     isReleasable,
@@ -23,7 +22,6 @@ export class ReferencedDataflow {
     this.datasets = datasets;
     this.description = description;
     this.designDatasets = designDatasets;
-    this.euDatasets = euDatasets;
     this.expirationDate = expirationDate;
     this.id = id;
     this.isReleasable = isReleasable;

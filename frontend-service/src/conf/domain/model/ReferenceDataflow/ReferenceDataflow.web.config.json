@@ -1,0 +1,4 @@
+{
+  "all": "/dataflow/referenceDataflows",
+  "referenceDataflow": "/dataflow/referenceDataflow/{:referenceDataflowId}"
+}

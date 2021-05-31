@@ -110,6 +110,6 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
     dataflowState.userRoles,
     dataflowState.status,
     dataflowState.datasetId,
-    dataflowState.designDatasetSchemas.length
+    dataflowState.designDatasetSchemas?.length
   ]);
 };
