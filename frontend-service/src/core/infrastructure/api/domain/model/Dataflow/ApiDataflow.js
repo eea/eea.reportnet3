@@ -5,6 +5,8 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 export const apiDataflow = {
   all: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflows) }),
 
+  referenced: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.referenced) }),
+
   allSchemas: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.allSchemas, { dataflowId }) }),
 
   cloneDatasetSchemas: async (sourceDataflowId, targetDataflowId) => {
@@ -13,10 +15,10 @@ export const apiDataflow = {
     });
   },
 
-  create: async (name, description, obligationId) => {
+  create: async (name, description, obligationId, type) => {
     return await HTTPRequester.post({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { name, description, obligation: { obligationId }, releasable: true }
+      data: { name, description, obligation: { obligationId }, releasable: true, type }
     });
   },
 

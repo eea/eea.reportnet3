@@ -15,10 +15,11 @@ import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
-import { TabMenu } from 'primereact/tabmenu';
+import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'ui/views/_components/UserList';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { ReferenceDataflowService } from 'core/services/ReferencedDataflow';
 import { UserService } from 'core/services/User';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
@@ -65,7 +66,7 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   ];
 
-  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(tabMenuItems[0]);
+  const [tabMenuActiveItem, setTabMenuActiveItem] = useState(0);
 
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     allDataflows: [],
@@ -74,8 +75,11 @@ const Dataflows = withRouter(({ history, match }) => {
     isLoading: true,
     isNationalCoordinator: false,
     isRepObDialogVisible: false,
-    isUserListVisible: false
+    isUserListVisible: false,
+    referenced: []
   });
+
+  const visibleTab = tabMenuItems[tabMenuActiveItem];
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
@@ -130,7 +134,9 @@ const Dataflows = withRouter(({ history, match }) => {
     isLoading(true);
     try {
       const { data } = await DataflowService.all(userContext.contextRoles);
-      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data } });
+      const referenced = await ReferenceDataflowService.all();
+
+      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data, referenced: referenced.data } });
     } catch (error) {
       console.error('dataFetch error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -182,6 +188,33 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
+  const renderDataflows = () => {
+    switch (visibleTab.id) {
+      case 'pending':
+        return (
+          <DataflowsList
+            className="dataflowList-accepted-help-step"
+            content={dataflowsState.allDataflows}
+            isCustodian={dataflowsState.isCustodian}
+            visibleTab={tabMenuItems[tabMenuActiveItem]}
+          />
+        );
+
+      case 'referenceDataflows':
+        return (
+          <DataflowsList
+            className="dataflowList-accepted-help-step"
+            content={dataflowsState.referenced}
+            isCustodian={dataflowsState.isCustodian}
+            visibleTab={tabMenuItems[tabMenuActiveItem]}
+          />
+        );
+
+      default:
+        break;
+    }
+  };
+
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -193,12 +226,12 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu activeItem={tabMenuActiveItem} model={tabMenuItems} onTabChange={e => setTabMenuActiveItem(e.value)} />
-        <DataflowsList
-          className="dataflowList-accepted-help-step"
-          content={dataflowsState.allDataflows}
-          isCustodian={dataflowsState.isCustodian}
+        <TabMenu
+          activeIndex={tabMenuActiveItem}
+          model={tabMenuItems}
+          onTabChange={event => setTabMenuActiveItem(event.index)}
         />
+        {renderDataflows()}
       </div>
 
       {dataflowsState.isUserListVisible && (
@@ -216,6 +249,7 @@ const Dataflows = withRouter(({ history, match }) => {
         manageDialogs={manageDialogs}
         onCreateDataflow={onCreateDataflow}
         state={dataflowsState}
+        visibleTab={visibleTab}
       />
     </div>
   );

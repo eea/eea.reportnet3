@@ -19,6 +19,7 @@ import { GetPublicDataflowData } from './GetPublicDataflowData';
 import { GetReleasedDashboards } from './GetReleasedDashboards';
 import { GetReporting } from './GetReporting';
 import { Update } from './Update';
+import { Referenced } from './Referenced';
 import { ValidateSchemas } from './ValidateSchemas';
 
 export const DataflowService = {
@@ -31,15 +32,16 @@ export const DataflowService = {
   datasetsValidationStatistics: GetDatasetStatisticStatus({ dataflowRepository }),
   deleteById: Delete({ dataflowRepository }),
   downloadById: Download({ dataflowRepository }),
+  generateApiKey: GenerateApiKey({ dataflowRepository }),
   getAllDataflowsUserList: GetAllDataflowsUserList({ dataflowRepository }),
-  getUserList: GetUserList({ dataflowRepository }),
   getAllSchemas: GetAllSchemas({ dataflowRepository }),
   getApiKey: GetApiKey({ dataflowRepository }),
-  getPublicDataflowsByCountryCode: GetPublicDataflowsByCountryCode({ dataflowRepository }),
   getPublicDataflowData: GetPublicDataflowData({ dataflowRepository }),
-  generateApiKey: GenerateApiKey({ dataflowRepository }),
+  getPublicDataflowsByCountryCode: GetPublicDataflowsByCountryCode({ dataflowRepository }),
+  getUserList: GetUserList({ dataflowRepository }),
   newEmptyDatasetSchema: CreateDatasetSchema({ dataflowRepository }),
   publicData: GetPublicData({ dataflowRepository }),
+  referenced: Referenced({ dataflowRepository }),
   reporting: GetReporting({ dataflowRepository }),
   schemasValidation: ValidateSchemas({ dataflowRepository }),
   update: Update({ dataflowRepository })

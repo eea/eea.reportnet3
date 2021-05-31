@@ -140,8 +140,8 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredSearched}
           options={filterOptions}
-          sortable={true}
           sortCategory={'pinned'}
+          sortable={true}
         />
       </div>
 
