@@ -19,6 +19,7 @@ import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'ui/views/_components/UserList';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { ReferenceDataflowService } from 'core/services/ReferencedDataflow';
 import { UserService } from 'core/services/User';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
@@ -133,8 +134,9 @@ const Dataflows = withRouter(({ history, match }) => {
     isLoading(true);
     try {
       const { data } = await DataflowService.all(userContext.contextRoles);
-      const referenced = await DataflowService.referenced();
-      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data, referenced } });
+      const referenced = await ReferenceDataflowService.all();
+
+      dataflowsDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: data, referenced: referenced.data } });
     } catch (error) {
       console.error('dataFetch error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
