@@ -11,10 +11,8 @@ import { apiReferenceDataflow } from 'core/infrastructure/api/domain/model/Refer
 
 import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
 
-const all = async userData => {
-  const dataflowsDTO = await apiReferenceDataflow.all(userData);
+const all = async userData => await apiReferenceDataflow.all(userData);
 
-  return dataflowsDTO;
-};
+const create = async (name, description, type) => await apiReferenceDataflow.create(name, description, type);
 
-export const ApiReferenceDataflowRepository = { all };
+export const ApiReferenceDataflowRepository = { all, create };
