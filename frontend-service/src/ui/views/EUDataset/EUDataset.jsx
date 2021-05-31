@@ -131,8 +131,12 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   };
 
+  const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(
+    exportType => exportType.code !== 'xlsx+validations'
+  );
+
   const getExportExtensionsList = () => {
-    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
+    const internalExtensionList = internalExtensionsList.map(type => {
       const extensionsTypes = type.code.split('+');
       return {
         command: () => onExportDataInternalExtension(type.code),

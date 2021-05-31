@@ -9,3 +9,4 @@ export { RecordUtils } from './RecordUtils';
 export { RouteUtils } from './RouteUtils';
 export { TabsUtils } from './TabsUtils';
 export { TextUtils } from './TextUtils';
+export { TooltipUtils } from './TooltipUtils';
