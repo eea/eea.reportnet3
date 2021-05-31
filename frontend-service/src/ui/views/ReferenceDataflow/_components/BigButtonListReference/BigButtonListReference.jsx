@@ -3,8 +3,9 @@ import { useContext } from 'react';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { BigButton } from 'ui/views/_components/BigButton';
+import { isNil } from 'lodash';
 
-const BigButtonListReference = () => {
+const BigButtonListReference = ({ dataflowState }) => {
   const resources = useContext(ResourcesContext);
 
   const newSchemaModel = [
@@ -81,7 +82,67 @@ const BigButtonListReference = () => {
     });
   };
 
-  return [newSchemaBigButton, ...buildGroupByRepresentativeModels([1, 2])].map(button => (
+  const designDatasetModels = isNil(dataflowState.data.designDatasets)
+    ? []
+    : dataflowState.data.designDatasets.map(newDatasetSchema => ({
+        buttonClass: 'schemaDataset',
+        buttonIcon: 'pencilRuler',
+        // canEditName: buttonsVisibility.designDatasetsActions,
+        caption: newDatasetSchema.datasetSchemaName,
+        dataflowStatus: dataflowState.status,
+        datasetSchemaInfo: dataflowState.updatedDatasetSchema,
+        enabled: true, //buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen,
+        handleRedirect:
+          // buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetsOpen
+          //   ? () => {
+          //       handleRedirect(
+          //         getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+          //       );
+          //     }:
+          () => {},
+
+        helpClassName: 'dataflow-schema-help-step',
+        index: newDatasetSchema.index,
+        layout: 'defaultBigButton',
+        // model:
+        //   buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetEditorReadActions
+        //     ? [
+        //         {
+        //           label: resources.messages['openDataset'],
+        //           icon: 'openFolder',
+        //           command: () => {
+        //             handleRedirect(
+        //               getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true)
+        //             );
+        //           }
+        //         },
+        //         {
+        //           label: resources.messages['rename'],
+        //           icon: 'pencil',
+        //           disabled:
+        //             dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
+        //         },
+        //         {
+        //           label: resources.messages['delete'],
+        //           icon: 'trash',
+        //           command: () => getDeleteSchemaIndex(newDatasetSchema.index),
+        //           disabled:
+        //             dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
+        //         }
+        //       ]
+        //     : [],
+        // onSaveName: onSaveName,
+        // onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
+        placeholder: resources.messages['datasetSchemaNamePlaceholder'],
+        // setErrorDialogData: setErrorDialogData,
+        // tooltip:
+        //   !buttonsVisibility.designDatasetsActions && !buttonsVisibility.designDatasetsOpen
+        //     ? resources.messages['accessDenied']
+        //     : '',
+        visibility: true // buttonsVisibility.designDatasets || buttonsVisibility.designDatasetsOpen
+      }));
+
+  return [...designDatasetModels, newSchemaBigButton /* ...buildGroupByRepresentativeModels([1, 2]) */].map(button => (
     <BigButton key={button.caption} {...button} />
   ));
 };

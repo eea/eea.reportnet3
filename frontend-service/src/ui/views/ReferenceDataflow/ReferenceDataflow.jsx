@@ -27,7 +27,7 @@ import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
-import { BigButtonListReference } from './_components/BigButtonListReference/BigButtonListReference';
+import { BigButtonListReference } from './_components/BigButtonListReference';
 import { BigButton } from '../_components/BigButton/BigButton';
 
 const ReferenceDataflow = withRouter(({ history, match }) => {
@@ -43,9 +43,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   const dataflowInitialState = {
     requestStatus: 'idle',
     error: null,
+    data: {},
     // anySchemaAvailableInPublic: false,
     // currentUrl: '',
-    data: {},
     // dataProviderId: [],
     // dataProviderSelected: {},
     // deleteInput: '',
@@ -100,6 +100,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
   }, [dataflowState.isDataUpdated]);
 
+  useEffect(() => {
+    console.log(`dataflowState`, dataflowState);
+  }, [dataflowState]);
+
   useBreadCrumbs({
     currentPage: CurrentPage.REFERENCE_DATAFLOW,
     referenceDataflowId,
@@ -108,8 +112,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   });
 
   const onLoadReportingDataflow = async () => {
+    let referenceDataflowResponse;
     try {
-      const referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
+      referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
       const referenceDataflow = referenceDataflowResponse.data;
 
       dataflowDispatch({
@@ -122,8 +127,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
+      console.log(`error`, error);
       notificationContext.add({ type: 'LOADING_ERROR', error });
-      // history.push(getUrl(routes.DATAFLOWS));
+      history.push(getUrl(routes.DATAFLOWS));
     }
   };
 
@@ -165,7 +171,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     </MainLayout>
   );
 
-  // if (dataflowState.isPageLoading) return layout(<Spinner />);
+  if (dataflowState.requestStatus === 'pending') return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
@@ -177,7 +183,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
       </div>
-      <BigButtonListReference className="dataflow-big-buttons-help-step" />
+      <BigButtonListReference className="dataflow-big-buttons-help-step" dataflowState={dataflowState} />
     </div>
   );
 });
