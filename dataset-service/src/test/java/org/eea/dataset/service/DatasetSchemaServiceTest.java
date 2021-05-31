@@ -1161,7 +1161,8 @@ public class DatasetSchemaServiceTest {
 
     dataSchemaServiceImpl.propagateRulesAfterUpdateSchema("datasetSchemaId", fieldSchemaVO, null,
         1L);
-    Mockito.verify(rulesControllerZuul, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesControllerZuul, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any(),
+        Mockito.any());
 
   }
 

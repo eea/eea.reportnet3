@@ -291,6 +291,21 @@ public class RulesServiceImplTest {
         rulesServiceImpl.getActiveRulesSchemaByDatasetId("5e44110d6a9e3a270ce13fac"));
   }
 
+  /**
+   * Creates the automatic rules required test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createAutomaticRulesPointRequiredTest() throws EEAException {
+    RulesSchema ruleSchema = new RulesSchema();
+    ruleSchema.setRules(new ArrayList<Rule>());
+    Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        DataType.POINT, EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
+    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+
+  }
 
   /**
    * Creates the automatic rules required test.
@@ -303,7 +318,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(new ArrayList<Rule>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        null, EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
+        DataType.TEXT, EntityTypeEnum.FIELD, 1L, Boolean.TRUE);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
 
   }
@@ -967,7 +982,8 @@ public class RulesServiceImplTest {
    */
   @Test
   public void deleteRuleRequiredTest() {
-    rulesServiceImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac");
+    rulesServiceImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        DataType.TEXT);
     Mockito.verify(rulesRepository, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
   }
 
