@@ -20,7 +20,7 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases';
 import { ManageManualAcceptanceDataset } from 'ui/views/Dataflow/_components/ManageManualAcceptanceDataset';
 import { ManualAcceptanceDatasets } from 'ui/views/Dataflow/_components/ManualAcceptanceDatasets';
-import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
+import { NewDatasetSchemaForm } from 'ui/views/_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DataCollectionService } from 'core/services/DataCollection';

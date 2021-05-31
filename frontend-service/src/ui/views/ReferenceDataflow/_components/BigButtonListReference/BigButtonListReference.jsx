@@ -1,18 +1,25 @@
-import { useContext } from 'react';
+import { Fragment, useContext, useState } from 'react';
+
+import styles from './BigButtonListReference.module.scss';
+
+import { isNil } from 'lodash';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { BigButton } from 'ui/views/_components/BigButton';
-import { isNil } from 'lodash';
+import { Dialog } from 'ui/views/_components/Dialog';
+import { NewDatasetSchemaForm } from 'ui/views/_components/NewDatasetSchemaForm';
 
-const BigButtonListReference = ({ dataflowState }) => {
+const BigButtonListReference = ({ dataflowState, onShowNewSchemaDialog }) => {
+  const [showNewDatasetDialog, setShowNewDatasetDialog] = useState(false);
+
   const resources = useContext(ResourcesContext);
 
   const newSchemaModel = [
     {
       label: resources.messages['createNewEmptyDatasetSchema'],
-      icon: 'add'
-      //   command: () => onShowNewSchemaDialog()
+      icon: 'add',
+      command: () => onShowNewSchemaDialog()
     },
     {
       disabled: true,
@@ -82,7 +89,7 @@ const BigButtonListReference = ({ dataflowState }) => {
     });
   };
 
-  const designDatasetModels = isNil(dataflowState.data.designDatasets)
+  const designDatasetButtons = isNil(dataflowState.data.designDatasets)
     ? []
     : dataflowState.data.designDatasets.map(newDatasetSchema => ({
         buttonClass: 'schemaDataset',
@@ -142,9 +149,37 @@ const BigButtonListReference = ({ dataflowState }) => {
         visibility: true // buttonsVisibility.designDatasets || buttonsVisibility.designDatasetsOpen
       }));
 
-  return [...designDatasetModels, newSchemaBigButton /* ...buildGroupByRepresentativeModels([1, 2]) */].map(button => (
-    <BigButton key={button.caption} {...button} />
-  ));
+  const bigButtonList = [
+    ...designDatasetButtons,
+    newSchemaBigButton
+    /* ...buildGroupByRepresentativeModels([1, 2]) */
+  ].map(button => <BigButton key={button.caption} {...button} />);
+
+  return (
+    <Fragment>
+      <div className={styles.buttonsWrapper}>
+        <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
+          <div className={styles.datasetItem}>{bigButtonList}</div>
+        </div>
+      </div>
+
+      {showNewDatasetDialog && (
+        <Dialog
+          className={styles.dialog}
+          header={resources.messages['newDatasetSchema']}
+          onHide={() => setShowNewDatasetDialog(false)}
+          visible={showNewDatasetDialog}>
+          <NewDatasetSchemaForm
+            // dataflowId={dataflowId}
+            datasetSchemaInfo={dataflowState.updatedDatasetSchema}
+            // onCreate={onCreateDatasetSchema}
+            // onUpdateData={onUpdateData}
+            // setNewDatasetDialog={setNewDatasetDialog}
+          />
+        </Dialog>
+      )}
+    </Fragment>
+  );
 };
 
 export { BigButtonListReference };
