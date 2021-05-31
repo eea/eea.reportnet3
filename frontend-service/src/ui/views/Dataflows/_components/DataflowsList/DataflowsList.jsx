@@ -18,15 +18,15 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
+import { Spinner } from 'ui/views/_components/Spinner/Spinner';
 
-const DataflowsList = ({ className, content = [], description, isCustodian, title }) => {
+const DataflowsList = ({ className, content = [], isCustodian, isLoading, visibleTab }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [dataToFilter, setDataToFilter] = useState(content);
   const [filteredData, setFilteredData] = useState(dataToFilter);
-  const [filteredState, setFilteredState] = useState(false);
   const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
 
   useEffect(() => {
@@ -60,8 +60,6 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
       notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });
     }
   };
-
-  const getFilteredSearched = value => setFilteredState(value);
 
   const isFilteredByPinned = () =>
     filteredData.filter(dataflow => dataflow.pinned === 'pinned').length === filteredData.length ||
@@ -130,16 +128,15 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
     { type: 'date', properties: [{ name: 'expirationDate' }] }
   ];
 
+  if (isLoading) return <Spinner />;
+
   return (
     <div className={`${styles.wrap} ${className}`}>
-      {title && <h2>{title}</h2>}
-      <p>{description}</p>
       <div className="dataflowList-filters-help-step">
         <Filters
           data={dataToFilter}
           getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredSearched}
-          options={filterOptions}
+          options={filterOptions[visibleTab]}
           sortCategory={'pinned'}
           sortable={true}
         />
@@ -157,7 +154,7 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
           <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
         )
       ) : (
-        <div className={styles.noDataflows}>{resources.messages['thereAreNoDatalows']}</div>
+        <div className={styles.noDataflows}>{resources.messages['thereAreNoDataflows']}</div>
       )}
     </div>
   );
