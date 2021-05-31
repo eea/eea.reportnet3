@@ -1272,8 +1272,7 @@ public class DatasetServiceTest {
    */
   @Test
   public void exportFileTest() throws EEAException, IOException {
-    List<byte[]> expectedResult = new ArrayList<>();
-    expectedResult.add("".getBytes());
+    byte[] expectedResult = "".getBytes();
     ReportingDataset dataset = new ReportingDataset();
     dataset.setDataflowId(1L);
     // partition.setId(1L);
@@ -1284,7 +1283,7 @@ public class DatasetServiceTest {
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
             .thenReturn(expectedResult);
-    assertEquals("not equals", expectedResult.get(0), datasetService.exportFile(1L, "csv", ""));
+    assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
   }
 
   /**
@@ -2764,7 +2763,7 @@ public class DatasetServiceTest {
     dataSetMetabase.setDataflowId(1L);
     dataSetMetabase.setDataProviderId(1L);
     dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
-    List<RepresentativeVO> representativeList = new ArrayList();
+    List<RepresentativeVO> representativeList = new ArrayList<>();
     RepresentativeVO representativeVO = new RepresentativeVO();
     representativeVO.setDataProviderId(1L);
     representativeVO.setRestrictFromPublic(false);
@@ -2777,14 +2776,14 @@ public class DatasetServiceTest {
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(dataProvider);
 
-    List<DesignDataset> desingDataset = new ArrayList();
+    List<DesignDataset> desingDataset = new ArrayList<>();
     DesignDataset designDataset = new DesignDataset();
     designDataset.setDatasetSchema("603362319d49f04fce13b68f");
     designDataset.setDataSetName("test");
     desingDataset.add(designDataset);
     Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(desingDataset);
-    List<DataSetMetabase> datasetMetabaseList = new ArrayList();
+    List<DataSetMetabase> datasetMetabaseList = new ArrayList<>();
     DataSetMetabase dataSetMetabaseEnd = new DataSetMetabase();
     dataSetMetabaseEnd.setDatasetSchema("603362319d49f04fce13b68f");
     datasetMetabaseList.add(dataSetMetabaseEnd);
@@ -2794,7 +2793,7 @@ public class DatasetServiceTest {
         .thenReturn(true);
     DataSetSchema dataSetSchema = new DataSetSchema();
     dataSetSchema.setAvailableInPublic(true);
-    List<byte[]> expectedResult = null;
+    byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))

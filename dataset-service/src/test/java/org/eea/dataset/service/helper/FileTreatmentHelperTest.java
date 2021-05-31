@@ -765,7 +765,7 @@ public class FileTreatmentHelperTest {
     dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
     dataSetMetabase.setDataSetName("file");
 
-    List<byte[]> expectedResult = null;
+    byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(
         contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
