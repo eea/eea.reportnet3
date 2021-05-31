@@ -123,7 +123,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       });
     } catch (error) {
       notificationContext.add({ type: 'LOADING_ERROR', error });
-      history.push(getUrl(routes.DATAFLOWS));
+      // history.push(getUrl(routes.DATAFLOWS));
     }
   };
 

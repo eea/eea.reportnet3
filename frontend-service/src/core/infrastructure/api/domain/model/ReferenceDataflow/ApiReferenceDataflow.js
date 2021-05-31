@@ -4,5 +4,7 @@ import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
 
 export const apiReferenceDataflow = {
   all: async () => await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.all) }),
-  referenceDataflow: async () => await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow) })
+  referenceDataflow: async referenceDataflowId => {
+    return await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow, { referenceDataflowId }) });
+  }
 };
