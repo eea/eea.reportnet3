@@ -9,6 +9,7 @@ import pull from 'lodash/pull';
 import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './_components/DataflowsItem';
+import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
 import { Filters } from 'ui/views/_components/Filters';
 
 import { UserService } from 'core/services/User';
@@ -128,6 +129,19 @@ const DataflowsList = ({ className, content = [], isCustodian, isLoading, visibl
     { type: 'date', properties: [{ name: 'expirationDate' }] }
   ];
 
+  const renderDataflowItem = dataflow => {
+    switch (visibleTab) {
+      case 'dataflows':
+        return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
+
+      case 'reference':
+        return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
+
+      default:
+        break;
+    }
+  };
+
   if (isLoading) return <Spinner />;
 
   return (
@@ -136,7 +150,7 @@ const DataflowsList = ({ className, content = [], isCustodian, isLoading, visibl
         <Filters
           data={dataToFilter}
           getFilteredData={onLoadFilteredData}
-          options={filterOptions[visibleTab]}
+          options={filterOptions}
           sortCategory={'pinned'}
           sortable={true}
         />
@@ -146,7 +160,7 @@ const DataflowsList = ({ className, content = [], isCustodian, isLoading, visibl
         !isEmpty(filteredData) ? (
           filteredData.map((dataflow, i) => (
             <Fragment key={dataflow.id}>
-              <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />
+              {renderDataflowItem(dataflow)}
               {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
             </Fragment>
           ))
