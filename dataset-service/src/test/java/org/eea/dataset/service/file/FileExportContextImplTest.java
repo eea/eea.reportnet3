@@ -49,17 +49,33 @@ public class FileExportContextImplTest {
 
   /**
    * Test file writer.
-   * 
+   *
    * @throws IOException
    * @throws EEAException
    */
   @Test
   public void testFileWriter() throws IOException, EEAException {
+    byte[] expectedResult = "".getBytes();
+    Mockito.when(
+        writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+        .thenReturn(expectedResult);
+    assertEquals("Not equals", expectedResult, fileExportContextImpl.fileWriter(1L, 1L, "", true));
+  }
+
+  /**
+   * Test file list writer.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testFileListWriter() throws IOException, EEAException {
     List<byte[]> expectedResult = new ArrayList<>();
     expectedResult.add("".getBytes());
-    Mockito.when(writerStrategy.writeFileList(Mockito.any(), Mockito.any(), Mockito.any(),
+    Mockito.when(writerStrategy.writeFileList(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
         Mockito.anyBoolean())).thenReturn(expectedResult);
-    assertEquals("Not equals", expectedResult, fileExportContextImpl.fileWriter(1L, 1L, "", true));
+    assertEquals("Not equals", expectedResult,
+        fileExportContextImpl.fileListWriter(1L, 1L, true, true));
   }
 
 }
