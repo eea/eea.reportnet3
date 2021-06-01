@@ -1078,8 +1078,12 @@ const DataViewer = withRouter(
       .flat()
       .join(', ');
 
-    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
-    ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+    const infoAttachTooltip = `<span style="font-weight: bold">${
+      resources.messages['supportedFileAttachmentsTooltip']
+    } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${getAttachExtensions || '*'}</span>
+    <span style="font-weight: bold">${
+      resources.messages['supportedFileAttachmentsMaxSizeTooltip']
+    } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${
       !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
         ? `${records.selectedMaxSize} ${resources.messages['MB']}`
         : resources.messages['maxSizeNotDefined']
