@@ -79,6 +79,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
@@ -121,6 +122,16 @@ public class ExcelWriterStrategy implements WriterStrategy {
     return out.toByteArray();
   }
 
+  /**
+   * Write file list.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<byte[]> writeFileList(Long dataflowId, Long datasetId, boolean includeCountryCode,
       boolean includeValidations) throws EEAException {
@@ -183,6 +194,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param table the table
    * @param datasetId the DataSet id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
+   * @param dataset the dataset
    */
   private void writeSheet(Workbook workbook, TableSchemaVO table, Long datasetId,
       boolean includeCountryCode, boolean includeValidations, DataSetSchemaVO dataset) {
@@ -251,6 +264,12 @@ public class ExcelWriterStrategy implements WriterStrategy {
     }
   }
 
+  /**
+   * Map errors.
+   *
+   * @param failedValidationsByIdDataset the failed validations by id dataset
+   * @return the map
+   */
   private Map<String, String> mapErrors(FailedValidationsDatasetVO failedValidationsByIdDataset) {
     Map<String, String> errorsMap = new HashMap<>();
     for (Object error : failedValidationsByIdDataset.getErrors()) {
