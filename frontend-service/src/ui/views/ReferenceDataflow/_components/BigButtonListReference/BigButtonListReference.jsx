@@ -10,13 +10,11 @@ import { BigButton } from 'ui/views/_components/BigButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from 'ui/views/_components/NewDatasetSchemaForm';
 
-const BigButtonListReference = ({ dataflowState, onUpdateData, onSaveName }) => {
+const BigButtonListReference = ({ dataflowId, dataflowState, onSaveName, onUpdateData }) => {
   const [showNewDatasetDialog, setShowNewDatasetDialog] = useState(false);
 
-  console.log(`dataflowState`, dataflowState);
   const resources = useContext(ResourcesContext);
 
-  const dataflowId = dataflowState.id;
   const dataflowName = dataflowState.name;
   const dataflowData = dataflowState.data;
 

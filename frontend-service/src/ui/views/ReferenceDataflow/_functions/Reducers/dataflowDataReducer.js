@@ -13,7 +13,6 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     }
 
     case 'LOADING_SUCCESS': {
-      console.log(`payload`, payload);
       return { ...state, requestStatus: 'resolved', ...payload };
     }
 

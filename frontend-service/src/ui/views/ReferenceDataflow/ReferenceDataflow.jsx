@@ -227,6 +227,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       </div>
       <BigButtonListReference
         className="dataflow-big-buttons-help-step"
+        dataflowId={referenceDataflowId}
         dataflowState={dataflowState}
         onSaveName={onSaveDatasetName}
         onUpdateData={setIsDataUpdated}
