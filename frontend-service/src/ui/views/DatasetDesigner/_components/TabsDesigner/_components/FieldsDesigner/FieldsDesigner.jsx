@@ -16,6 +16,7 @@ import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Spinner } from 'ui/views/_components/Spinner';
 
+import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -71,7 +72,7 @@ export const FieldsDesigner = ({
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   useEffect(() => {
-    if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
+    if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {      
       setFields(table.records[0].fields);
     } else {
       setFields([]);
@@ -314,6 +315,24 @@ export const FieldsDesigner = ({
     return link;
   };
 
+  const getExternalReferencedFieldName = referencedField => {
+    const link = {};
+    let tableSchema = '';
+
+    link.name = `T1 - Datetime`;
+    link.value = `T1 - 60a74005807124000159a196`;
+    link.disabled = false;
+    tableSchema = table.tableSchemaId;
+
+    link.referencedField = {
+      dataflowId: referencedField.dataflowId,
+      datasetSchemaId: referencedField.idDatasetSchema,
+      fieldSchemaId: referencedField.idPk,
+      tableSchemaId: tableSchema
+    };
+    return link;
+  };
+
   const previewData = () => {
     const tableSchemaColumns = !isNil(fields)
       ? fields.map(field => {
@@ -475,7 +494,7 @@ export const FieldsDesigner = ({
                   !isNull(field.referencedField)
                     ? !TextUtils.areEquals(field.type, 'external_link')
                       ? getReferencedFieldName(field.referencedField)
-                      : externalLink
+                      : getExternalReferencedFieldName(field.referencedField)
                     : null
                 }
                 fieldLinkedTableConditional={
@@ -491,6 +510,7 @@ export const FieldsDesigner = ({
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
+                fields={fields}
                 fieldType={field.type}
                 fieldValue={field.value}
                 hasPK={fields.filter(field => field.pk).length > 0}

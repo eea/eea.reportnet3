@@ -90,8 +90,22 @@ const LinkSelector = withRouter(
         setReferenceDataflows(data);
       };
 
-      getReferenceDataflows();
+      if (isExternalLink) {
+        getReferenceDataflows();
+      }
     }, []);
+
+    useEffect(() => {
+      if (isExternalLink && !isEmpty(referenceDataflows) && !isNil(selectedLink) && !isEmpty(selectedLink)) {
+        dispatchLinkSelector({
+          type: 'SET_REFERENCE_DATAFLOW',
+          payload:
+            referenceDataflows.find(
+              referenceDataflow => referenceDataflow.id === selectedLink.referencedField.dataflowId
+            ) || {}
+        });
+      }
+    }, [referenceDataflows]);
 
     useEffect(() => {
       const getDatasetSchemas = async () => {
@@ -196,7 +210,7 @@ const LinkSelector = withRouter(
       let masterFields = [];
       const linkedTable = datasetSchemas
         .find(datasetSchema => datasetSchema.datasetSchemaId === field.referencedField.datasetSchemaId)
-        .tables.find(table => table.tableSchemaId === field.referencedField.tableSchemaId);
+        ?.tables.find(table => table.tableSchemaId === field.referencedField.tableSchemaId);
 
       linkedFields = linkedTable?.records[0]?.fields
         .filter(
@@ -219,7 +233,7 @@ const LinkSelector = withRouter(
       } else {
         const masterTable = datasetSchemas
           .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
-          .tables.find(table => table.tableSchemaId === tableSchemaId);
+          ?.tables.find(table => table.tableSchemaId === tableSchemaId);
         masterFields = getMasterFields(masterTable?.records[0].fields);
       }
 
@@ -233,7 +247,7 @@ const LinkSelector = withRouter(
 
     const getMasterFields = fields => {
       const masterFields = fields
-        .filter(
+        ?.filter(
           field =>
             !field.pk &&
             !['ATTACHMENT', 'POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
@@ -254,17 +268,20 @@ const LinkSelector = withRouter(
           if (
             !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(pkField.type)
           ) {
-            return {
+            const linkObj = {
               name: `${table.tableSchemaName} - ${pkField.name}`,
               value: `${table.tableSchemaName} - ${pkField.fieldId}`,
               referencedField: {
-                dataflowId: linkSelectorState.selectedReferenceDataflow.id,
                 fieldSchemaId: pkField.fieldId,
                 datasetSchemaId: datasetSchema.datasetSchemaId,
                 tableSchemaId: table.tableSchemaId
               },
               disabled: false
             };
+            if (isExternalLink) {
+              linkObj.referencedField.dataflowId = linkSelectorState.selectedReferenceDataflow.id;
+            }
+            return linkObj;
           } else {
             return {
               name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
