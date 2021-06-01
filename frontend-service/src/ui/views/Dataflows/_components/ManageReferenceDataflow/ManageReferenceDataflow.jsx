@@ -21,6 +21,7 @@ export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) 
   const resources = useContext(ResourcesContext);
 
   const [description, setDescription] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState('');
 
   const inputRef = useRef(null);
@@ -28,6 +29,7 @@ export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) 
   useInputTextFocus(isVisible, inputRef);
 
   const onCreateReferenceDataflow = async () => {
+    setIsSending(true);
     try {
       const { status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
 
@@ -36,6 +38,8 @@ export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) 
       }
     } catch (error) {
       console.log('error :>> ', error);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -43,8 +47,8 @@ export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) 
     <Fragment>
       <Button
         className="p-button-primary p-button-animated-blink"
-        disabled={isEmpty(name) || isEmpty(description)}
-        icon={'save'}
+        disabled={isEmpty(name) || isEmpty(description) || isSending}
+        icon={isSending ? 'spinnerAnimate' : 'save'}
         label={resources.messages['save']}
         onClick={() => onCreateReferenceDataflow()}
       />
