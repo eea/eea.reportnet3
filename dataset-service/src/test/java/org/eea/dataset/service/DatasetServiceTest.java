@@ -1280,9 +1280,8 @@ public class DatasetServiceTest {
     // Mockito.any())).thenReturn(Optional.of(partition));
     // when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(
-        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-            .thenReturn(expectedResult);
+    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.anyBoolean())).thenReturn(expectedResult);
     assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
   }
 
@@ -2795,9 +2794,8 @@ public class DatasetServiceTest {
     dataSetSchema.setAvailableInPublic(true);
     byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(
-        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-            .thenReturn(expectedResult);
+    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.anyBoolean())).thenReturn(expectedResult);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
         Mockito.anyLong())).thenReturn(datasetMetabaseList);
     datasetService.savePublicFiles(1L, 1L);

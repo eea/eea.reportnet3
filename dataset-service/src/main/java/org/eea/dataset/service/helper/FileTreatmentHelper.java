@@ -1012,16 +1012,17 @@ public class FileTreatmentHelper implements DisposableBean {
 
     try {
       Map<String, byte[]> contents = new HashMap<>();
-      if (extension.equalsIgnoreCase("csv") || extension.equalsIgnoreCase("validations")) {
+      if (extension.equalsIgnoreCase("csv")) {
         List<TableSchema> tablesSchema = getTables(datasetId);
-        List<byte[]> dataFile = context.fileListWriter(dataflowId, datasetId, includeCountryCode,
-            extension.equalsIgnoreCase("validations"));
+        List<byte[]> dataFile =
+            context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
         for (int i = 0; i < tablesSchema.size(); i++) {
           contents.put(tablesSchema.get(i).getIdTableSchema() + "_"
               + tablesSchema.get(i).getNameTableSchema(), dataFile.get(i));
         }
       } else {
-        byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
+        byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
+            extension.equalsIgnoreCase("validations"));
         contents.put(null, dataFile);
       }
 
@@ -1132,7 +1133,9 @@ public class FileTreatmentHelper implements DisposableBean {
             nameFileXlsxCsv =
                 entry.getKey().substring(entry.getKey().indexOf("_") + 1, entry.getKey().length());
           }
-
+          if ("validations".equals(mimeType)) {
+            mimeType = "xlsx";
+          }
           // Adding the xlsx/csv file to the zip
           ZipEntry e = new ZipEntry(nameFileXlsxCsv + "." + mimeType);
           out.putNextEntry(e);
@@ -1144,6 +1147,9 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     // only the xlsx file
     else {
+      if ("validations".equals(mimeType)) {
+        mimeType = "xlsx";
+      }
       nameFile = nameDataset + "." + mimeType;
       File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
       try (OutputStream out = new FileOutputStream(fileWrite.toString())) {

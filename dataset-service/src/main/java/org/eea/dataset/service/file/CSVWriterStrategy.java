@@ -3,14 +3,12 @@ package org.eea.dataset.service.file;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
@@ -61,7 +59,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   @Override
   public byte[] writeFile(final Long dataflowId, final Long datasetId, final String tableSchemaId,
-      boolean includeCountryCode) throws EEAException {
+      boolean includeCountryCode, boolean includeValidations) throws EEAException {
     LOG.info("starting csv file writter");
 
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
@@ -71,7 +69,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
-    setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode, false);
+    setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode);
 
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
@@ -105,7 +103,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     List<byte[]> byteList = new ArrayList<>();
     dataSetSchema.getTableSchemas().forEach(tableSchemaVO -> {
       setLines(tableSchemaVO.getIdTableSchema(), dataSetSchema, csvWriter, datasetId,
-          includeCountryCode, includeValidations);
+          includeCountryCode);
 
       // Once read we convert it to string
       byteList.add(writer.getBuffer().toString().getBytes());
@@ -126,41 +124,22 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param includeCountryCode the include country code
    */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
-      CSVWriter csvWriter, Long datasetId, boolean includeCountryCode, boolean includeValidations) {
+      CSVWriter csvWriter, Long datasetId, boolean includeCountryCode) {
 
     List<FieldSchemaVO> fieldSchemas = fileCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     List<RecordValue> records = fileCommon.getRecordValues(datasetId, idTableSchema);
-    Map<String, String> errorsMap = null;
-    if (includeValidations) {
-      errorsMap = mapErrors(fileCommon.getErrors(datasetId, idTableSchema, dataSetSchema));
-    }
     Map<String, Integer> indexMap = new HashMap<>();
 
     // If we don't have fieldSchemas, return an empty file.
     if (fieldSchemas != null) {
 
-      int nHeaders =
-          setHeaders(fieldSchemas, indexMap, csvWriter, includeCountryCode, includeValidations);
+      int nHeaders = setHeaders(fieldSchemas, indexMap, csvWriter, includeCountryCode);
 
       // If we don't have records, return a file only with headers.
       if (records != null) {
-        setRecords(records, indexMap, nHeaders, csvWriter, includeCountryCode, errorsMap);
+        setRecords(records, indexMap, nHeaders, csvWriter, includeCountryCode);
       }
     }
-  }
-
-  private Map<String, String> mapErrors(FailedValidationsDatasetVO failedValidationsByIdDataset) {
-    Map<String, String> errorsMap = new HashMap<>();
-    for (Object error : failedValidationsByIdDataset.getErrors()) {
-      LinkedHashMap<?, ?> castedError = (LinkedHashMap<?, ?>) error;
-      String value = errorsMap.putIfAbsent(castedError.get("idObject").toString(),
-          castedError.get("levelError") + ": " + castedError.get("message"));
-      if (value != null) {
-        errorsMap.put(castedError.get("idObject").toString(),
-            value + " " + castedError.get("levelError") + ": " + castedError.get("message"));
-      }
-    }
-    return errorsMap;
   }
 
   /**
@@ -173,7 +152,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @return the int
    */
   private int setHeaders(List<FieldSchemaVO> fieldSchemas, Map<String, Integer> indexMap,
-      CSVWriter csvWriter, boolean includeCountryCode, boolean includeValidations) {
+      CSVWriter csvWriter, boolean includeCountryCode) {
 
     List<String> headers = new ArrayList<>();
     int nHeaders = 0;
@@ -186,16 +165,8 @@ public class CSVWriterStrategy implements WriterStrategy {
     for (FieldSchemaVO fieldSchema : fieldSchemas) {
       headers.add(fieldSchema.getName());
       indexMap.put(fieldSchema.getId(), nHeaders++);
-      if (includeValidations) {
-        headers.add(fieldSchema.getName() + " validations");
-        nHeaders++;
-      }
     }
 
-    if (includeValidations) {
-      headers.add("Record validations");
-      nHeaders++;
-    }
     csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
 
     return nHeaders;
@@ -211,7 +182,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param includeCountryCode the include country code
    */
   private void setRecords(List<RecordValue> records, Map<String, Integer> indexMap, int nHeaders,
-      CSVWriter csvWriter, boolean includeCountryCode, Map<String, String> errorsMap) {
+      CSVWriter csvWriter, boolean includeCountryCode) {
 
     for (RecordValue recordValue : records) {
       List<FieldValue> fields = recordValue.getFields();
@@ -226,15 +197,9 @@ public class CSVWriterStrategy implements WriterStrategy {
         if (null != field.getIdFieldSchema()) {
           Integer index = indexMap.get(field.getIdFieldSchema());
           fieldsToWrite[index] = field.getValue();
-          if (errorsMap != null) {
-            fieldsToWrite[index + 1] = errorsMap.get(field.getId());
-          }
         } else {
           unknownColumns.add(field.getValue());
         }
-      }
-      if (errorsMap != null) {
-        fieldsToWrite[nHeaders - 1] = errorsMap.get(recordValue.getId());
       }
       csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);
     }

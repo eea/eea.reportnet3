@@ -36,8 +36,9 @@ public class FileExportContextImpl implements IFileExportContext {
    */
   @Override
   public byte[] fileWriter(Long dataflowId, Long partitionId, String tableSchemaId,
-      boolean includeCountryCode) throws IOException, EEAException {
-    return writerStrategy.writeFile(dataflowId, partitionId, tableSchemaId, includeCountryCode);
+      boolean includeCountryCode, boolean includeValidations) throws IOException, EEAException {
+    return writerStrategy.writeFile(dataflowId, partitionId, tableSchemaId, includeCountryCode,
+        includeValidations);
   }
 
   /**

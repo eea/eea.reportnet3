@@ -19,7 +19,7 @@ public interface WriterStrategy {
    * @throws EEAException the EEA exception
    */
   byte[] writeFile(Long dataflowId, Long partitionId, String idTableSchema,
-      boolean includeCountryCode) throws EEAException;
+      boolean includeCountryCode, boolean includeValidations) throws EEAException;
 
   /**
    * Write file list.

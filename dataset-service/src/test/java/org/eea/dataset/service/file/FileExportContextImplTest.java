@@ -56,10 +56,10 @@ public class FileExportContextImplTest {
   @Test
   public void testFileWriter() throws IOException, EEAException {
     byte[] expectedResult = "".getBytes();
-    Mockito.when(
-        writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-        .thenReturn(expectedResult);
-    assertEquals("Not equals", expectedResult, fileExportContextImpl.fileWriter(1L, 1L, "", true));
+    Mockito.when(writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.anyBoolean())).thenReturn(expectedResult);
+    assertEquals("Not equals", expectedResult,
+        fileExportContextImpl.fileWriter(1L, 1L, "", true, false));
   }
 
   /**

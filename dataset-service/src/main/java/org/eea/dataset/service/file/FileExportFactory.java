@@ -37,13 +37,13 @@ public class FileExportFactory implements IFileExportFactory {
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-      case "validations":
         context = new FileExportContextImpl(new CSVWriterStrategy(delimiter, fileCommon));
         break;
       case "xml":
         // Fill it with the xml strategy
         break;
       case "xlsx":
+      case "validations":
         context = new FileExportContextImpl(new ExcelWriterStrategy(fileCommon, mimeType));
         break;
       default:

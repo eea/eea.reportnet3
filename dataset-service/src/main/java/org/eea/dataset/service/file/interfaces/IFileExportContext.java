@@ -23,7 +23,8 @@ public interface IFileExportContext {
    * @throws EEAException the EEA exception
    */
   byte[] fileWriter(Long dataflowId, Long datasetId, String idTableSchema,
-      boolean includeCountryCode) throws InvalidFileException, IOException, EEAException;
+      boolean includeCountryCode, boolean includeValidations)
+      throws InvalidFileException, IOException, EEAException;
 
   /**
    * File list writer.

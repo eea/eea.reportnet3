@@ -767,9 +767,8 @@ public class FileTreatmentHelperTest {
 
     byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(
-        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-            .thenReturn(expectedResult);
+    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.anyBoolean())).thenReturn(expectedResult);
     fileTreatmentHelper.exportDatasetFile(1L, "xslx");
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
