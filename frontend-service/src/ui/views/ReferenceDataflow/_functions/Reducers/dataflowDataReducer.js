@@ -21,6 +21,15 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return { ...state, requestStatus: 'rejected', error: payload.error };
     }
 
+    case 'SET_UPDATED_DATASET_SCHEMA':
+      return { ...state, updatedDatasetSchema: payload.updatedData };
+
+    case 'SET_DESIGN_DATASET_SCHEMAS':
+      return { ...state, designDatasetSchemas: payload.designDatasets };
+
+    case 'SET_IS_DATA_UPDATED':
+      return { ...state, isDataUpdated: !state.isDataUpdated };
+
     default: {
       throw new Error(`Unhandled action type: ${type}`);
     }

@@ -10,16 +10,21 @@ import { BigButton } from 'ui/views/_components/BigButton';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from 'ui/views/_components/NewDatasetSchemaForm';
 
-const BigButtonListReference = ({ dataflowState, onShowNewSchemaDialog }) => {
+const BigButtonListReference = ({ dataflowState, onUpdateData, onSaveName }) => {
   const [showNewDatasetDialog, setShowNewDatasetDialog] = useState(false);
 
+  console.log(`dataflowState`, dataflowState);
   const resources = useContext(ResourcesContext);
+
+  const dataflowId = dataflowState.id;
+  const dataflowName = dataflowState.name;
+  const dataflowData = dataflowState.data;
 
   const newSchemaModel = [
     {
       label: resources.messages['createNewEmptyDatasetSchema'],
       icon: 'add',
-      command: () => onShowNewSchemaDialog()
+      command: () => setShowNewDatasetDialog(true)
     },
     {
       disabled: true,
@@ -50,44 +55,44 @@ const BigButtonListReference = ({ dataflowState, onShowNewSchemaDialog }) => {
     visibility: /* buttonsVisibility.newSchema */ true
   };
 
-  const buildGroupByRepresentativeModels = datasets => {
-    const allDatasets = datasets.map((dataset, i) => {
-      //i remove
-      return {
-        datasetId: i, // dataset.datasetId,
-        datasetName: 'Name DS', //,dataset.name,
-        dataProviderId: dataset, // dataset.dataProviderId,
-        isReleased: true, //dataset.isReleased,
-        name: 'Schema name' //dataset.datasetSchemaName
-      };
-    });
+  // const buildGroupByRepresentativeModels = datasets => {
+  //   const allDatasets = datasets.map((dataset, i) => {
+  //     //i remove
+  //     return {
+  //       datasetId: i, // dataset.datasetId,
+  //       datasetName: 'Name DS', //,dataset.name,
+  //       dataProviderId: dataset, // dataset.dataProviderId,
+  //       isReleased: true, //dataset.isReleased,
+  //       name: 'Schema name' //dataset.datasetSchemaName
+  //     };
+  //   });
 
-    return allDatasets.map(dataset => {
-      return {
-        buttonClass: 'dataset',
-        buttonIcon: 'dataset',
-        caption: dataset.datasetName,
-        helpClassName: 'dataflow-dataset-help-step',
-        // handleRedirect: () => {
-        //   handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
-        // },
-        infoStatus: dataset.isReleased,
-        infoStatusIcon: true,
-        layout: 'defaultBigButton',
-        model: [
-          {
-            label: resources.messages['historicReleases']
-            // command: () => {
-            //   onShowHistoricReleases('reportingDataset');
-            //   getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
-            // }
-          }
-        ],
-        // onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-        visibility: true
-      };
-    });
-  };
+  //   return allDatasets.map(dataset => {
+  //     return {
+  //       buttonClass: 'dataset',
+  //       buttonIcon: 'dataset',
+  //       caption: dataset.datasetName,
+  //       helpClassName: 'dataflow-dataset-help-step',
+  //       // handleRedirect: () => {
+  //       //   handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
+  //       // },
+  //       infoStatus: dataset.isReleased,
+  //       infoStatusIcon: true,
+  //       layout: 'defaultBigButton',
+  //       model: [
+  //         {
+  //           label: resources.messages['historicReleases']
+  //           // command: () => {
+  //           //   onShowHistoricReleases('reportingDataset');
+  //           //   getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
+  //           // }
+  //         }
+  //       ],
+  //       // onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
+  //       visibility: true
+  //     };
+  //   });
+  // };
 
   const designDatasetButtons = isNil(dataflowState.data.designDatasets)
     ? []
@@ -138,7 +143,7 @@ const BigButtonListReference = ({ dataflowState, onShowNewSchemaDialog }) => {
         //         }
         //       ]
         //     : [],
-        // onSaveName: onSaveName,
+        onSaveName: onSaveName,
         // onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
         placeholder: resources.messages['datasetSchemaNamePlaceholder'],
         // setErrorDialogData: setErrorDialogData,
@@ -170,11 +175,11 @@ const BigButtonListReference = ({ dataflowState, onShowNewSchemaDialog }) => {
           onHide={() => setShowNewDatasetDialog(false)}
           visible={showNewDatasetDialog}>
           <NewDatasetSchemaForm
-            // dataflowId={dataflowId}
+            dataflowId={dataflowId}
             datasetSchemaInfo={dataflowState.updatedDatasetSchema}
-            // onCreate={onCreateDatasetSchema}
-            // onUpdateData={onUpdateData}
-            // setNewDatasetDialog={setNewDatasetDialog}
+            onCreate={() => setShowNewDatasetDialog(false)}
+            onUpdateData={onUpdateData}
+            setNewDatasetDialog={setShowNewDatasetDialog}
           />
         </Dialog>
       )}

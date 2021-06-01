@@ -1,17 +1,21 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import styles from './ReferenceDataflow.module.scss';
 
-import { config } from 'conf';
+import { isEmpty } from 'lodash';
+// import { config } from 'conf';
+
 import { routes } from 'ui/routes';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
+import { BigButtonListReference } from './_components/BigButtonListReference';
 
-import { UserService } from 'core/services/User';
+// import { UserService } from 'core/services/User';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
+import { DatasetService } from 'core/services/Dataset';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -21,14 +25,12 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
-import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+// import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { TextUtils } from 'ui/views/_functions/Utils';
-import { BigButtonListReference } from './_components/BigButtonListReference';
-import { BigButton } from '../_components/BigButton/BigButton';
+// import { TextUtils } from 'ui/views/_functions/Utils';
 
 const ReferenceDataflow = withRouter(({ history, match }) => {
   const {
@@ -50,7 +52,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     // dataProviderSelected: {},
     // deleteInput: '',
     description: '',
-    // designDatasetSchemas: [],
+    designDatasetSchemas: [],
     // formHasRepresentatives: false,
     // hasRepresentativesWithoutDatasets: false,
     // hasWritePermissions: false,
@@ -59,7 +61,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     // isCopyDataCollectionToEuDatasetLoading: false,
     // isCustodian: false,
     // isDataSchemaCorrect: [],
-    // isDataUpdated: false,
+    isDataUpdated: false,
     // isDeleteDialogVisible: false,
     // isEditDialogVisible: false,
     // isExportDialogVisible: false,
@@ -87,22 +89,21 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     // representativesImport: false,
     // restrictFromPublic: false,
     // showPublicInfo: false,
-    status: ''
-    // updatedDatasetSchema: [],
+    status: '',
+    updatedDatasetSchema: []
     // userRoles: [],
     // isUserRightManagementDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  const setUpdatedDatasetSchema = updatedData =>
+    dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
+
   useEffect(() => {
     dataflowDispatch({ type: 'LOADING_STARTED' });
     onLoadReportingDataflow();
   }, [dataflowState.isDataUpdated]);
-
-  useEffect(() => {
-    console.log(`dataflowState`, dataflowState);
-  }, [dataflowState]);
 
   useBreadCrumbs({
     currentPage: CurrentPage.REFERENCE_DATAFLOW,
@@ -110,6 +111,26 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     history,
     matchParams: match.params
   });
+
+  const onSaveDatasetName = async (value, index) => {
+    try {
+      await DatasetService.updateSchemaNameById(
+        dataflowState.designDatasetSchemas[index].datasetId,
+        encodeURIComponent(value)
+      );
+      const updatedTitles = [...dataflowState.updatedDatasetSchema];
+      updatedTitles[index].schemaName = value;
+      setUpdatedDatasetSchema(updatedTitles);
+    } catch (error) {
+      console.error('error', error);
+      if (error?.response?.status === 400) {
+        notificationContext.add({
+          type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
+          content: { schemaName: value }
+        });
+      }
+    }
+  };
 
   const onLoadReportingDataflow = async () => {
     let referenceDataflowResponse;
@@ -126,12 +147,33 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           status: referenceDataflow.status
         }
       });
+
+      if (!isEmpty(referenceDataflow.designDatasets)) {
+        referenceDataflow.designDatasets.forEach((schema, idx) => {
+          schema.index = idx;
+        });
+
+        dataflowDispatch({
+          type: 'SET_DESIGN_DATASET_SCHEMAS',
+          payload: { designDatasets: referenceDataflow.designDatasets }
+        });
+
+        const datasetSchemaInfo = [];
+        referenceDataflow.designDatasets.forEach(schema => {
+          datasetSchemaInfo.push({ schemaName: schema.datasetSchemaName, schemaIndex: schema.index });
+        });
+
+        setUpdatedDatasetSchema(datasetSchemaInfo);
+      } else {
+        dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: [] } });
+      }
     } catch (error) {
-      console.log(`error`, error);
       notificationContext.add({ type: 'LOADING_ERROR', error });
       history.push(getUrl(routes.DATAFLOWS));
     }
   };
+
+  const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const getLeftSidebarButtonsVisibility = () => {
     // if (isEmpty(dataflowState.data)) {
@@ -183,7 +225,12 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
       </div>
-      <BigButtonListReference className="dataflow-big-buttons-help-step" dataflowState={dataflowState} />
+      <BigButtonListReference
+        className="dataflow-big-buttons-help-step"
+        dataflowState={dataflowState}
+        onSaveName={onSaveDatasetName}
+        onUpdateData={setIsDataUpdated}
+      />
     </div>
   );
 });
