@@ -74,13 +74,12 @@ const sortDatasetTypeByName = (a, b) => {
   return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
 };
 
-const referenceDataflow = async dataflowId => {
-  const referenceDataflowDTO = await apiReferenceDataflow.referenceDataflow(dataflowId);
+const referenceDataflow = async referenceDataflowId => {
+  const referenceDataflowDTO = await apiReferenceDataflow.referenceDataflow(referenceDataflowId);
   const dataflow = parseDataflowDTO(referenceDataflowDTO.data);
-  dataflow.testDatasets.sort(sortDatasetTypeByName);
   dataflow.datasets.sort(sortDatasetTypeByName);
   dataflow.designDatasets.sort(sortDatasetTypeByName);
-  dataflow.referenceDatasets.sort(sortDatasetTypeByName);
+  // dataflow.referenceDatasets.sort(sortDatasetTypeByName);
   referenceDataflowDTO.data = dataflow;
 
   return referenceDataflowDTO;

@@ -2,8 +2,10 @@ import { referenceDataflowRepository } from 'core/domain/model/ReferenceDataflow
 
 import { Create } from './Create';
 import { GetAll } from './GetAll';
+import { GetReferenceDataflow } from './GetReferenceDataflow';
 
 export const ReferenceDataflowService = {
   all: GetAll({ referenceDataflowRepository }),
-  create: Create({ referenceDataflowRepository })
+  create: Create({ referenceDataflowRepository }),
+  referenceDataflow: GetReferenceDataflow({ referenceDataflowRepository })
 };

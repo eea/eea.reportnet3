@@ -1,0 +1,83 @@
+.buttonsWrapper {
+  display: flex !important;
+  flex-direction: row !important;
+}
+.buttonsWrapper button {
+  border-radius: 10px !important;
+}
+.buttonsWrapper button :global .p-button-text {
+  font-size: 2rem;
+  padding: 2rem !important;
+}
+.buttonsWrapper :global .p-splitbutton-menubutton {
+  right: 2em;
+  position: absolute;
+  height: 20px;
+  right: 0;
+  bottom: 0;
+  border-radius: 0px 0px 20px 0px !important;
+}
+.buttonsWrapper :global .p-splitbutton-menubutton:enabled:focus {
+  box-shadow: none;
+}
+.buttonsWrapper :global .p-button-icon-left {
+  bottom: 0px;
+  top: auto;
+}
+.splitButtonWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: self-start;
+  flex-wrap: wrap;
+}
+.splitButtonWrapper:nth-last-of-type(2) {
+  margin-left: 0px;
+}
+
+.datasetItem {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 4rem;
+}
+
+.calendarConfirm {
+  min-width: 20rem !important;
+  min-height: 20rem !important;
+  width: 40rem;
+}
+
+.calendar {
+  display: flex !important;
+}
+
+.radioButtonDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-top: 1rem;
+
+  .radioButton {
+    border-radius: 10px;
+    padding: 0.5rem;
+
+    &:hover {
+      background: var(--radioButton-dc-hover-bg);
+    }
+
+    .button {
+      margin-right: 0.5rem;
+    }
+
+    .label {
+      cursor: pointer;
+    }
+  }
+}
+
+:global body .p-datepicker .p-datepicker-header .p-datepicker-title select {
+  display: initial;
+  width: auto;
+  box-sizing: border-box;
+}

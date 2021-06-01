@@ -1,5 +1,5 @@
 {
   "all": "/dataflow/referenceDataflows",
   "createDataflow": "/dataflow",
-  "referenceDataflow": "/dataflow/referenceDataflow/{:referenceDataflowId}"
+  "referenceDataflow": "/dataflow/{:referenceDataflowId}"
 }

@@ -12,5 +12,6 @@ export const apiReferenceDataflow = {
     });
   },
 
-  referenceDataflow: async () => await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow) })
+  referenceDataflow: async referenceDataflowId =>
+    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow, { referenceDataflowId }) })
 };
