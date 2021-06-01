@@ -51,7 +51,15 @@ const LinkSelector = withRouter(
       link: {
         ...selectedLink,
         referencedField: !isNil(selectedLink)
-          ? pick(selectedLink.referencedField, 'dataflowId', 'datasetSchemaId', 'fieldSchemaId', 'tableSchemaId')
+          ? pick(
+              selectedLink.referencedField,
+              'dataflowId',
+              'datasetSchemaId',
+              'fieldSchemaId',
+              'fieldSchemaName',
+              'tableSchemaId',
+              'tableSchemaName'
+            )
           : null
       },
       linkedTableFields: [],
@@ -87,7 +95,8 @@ const LinkSelector = withRouter(
       const getReferenceDataflows = async () => {
         const { data } = await DataflowService.all(userContext.contextRoles);
         // const { data } = await DataflowService.referenced();
-        setReferenceDataflows(data);
+        const filteredDataflows = data.filter(dataflow => dataflow.id !== parseFloat(dataflowId));
+        setReferenceDataflows(filteredDataflows);
       };
 
       if (isExternalLink) {
