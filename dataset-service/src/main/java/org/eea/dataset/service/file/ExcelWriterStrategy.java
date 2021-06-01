@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -15,6 +16,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -77,12 +79,13 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
   @Override
   public byte[] writeFile(Long dataflowId, Long datasetId, String tableSchemaId,
-      boolean includeCountryCode) throws EEAException {
+      boolean includeCountryCode, boolean includeValidations) throws EEAException {
 
     DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -104,7 +107,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       // Add one sheet per table
       for (TableSchemaVO tableSchema : tables) {
-        writeSheet(workbook, tableSchema, datasetId, includeCountryCode);
+        writeSheet(workbook, tableSchema, datasetId, includeCountryCode, includeValidations,
+            dataset);
       }
 
       workbook.write(out);
@@ -118,9 +122,19 @@ public class ExcelWriterStrategy implements WriterStrategy {
     return out.toByteArray();
   }
 
+  /**
+   * Write file list.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
+   * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
   @Override
-  public List<byte[]> writeFileList(Long dataflowId, Long datasetId, String tableSchemaId,
-      boolean includeCountryCode) throws EEAException {
+  public List<byte[]> writeFileList(Long dataflowId, Long datasetId, boolean includeCountryCode,
+      boolean includeValidations) throws EEAException {
 
     List<byte[]> byteList = new ArrayList<>();
 
@@ -130,13 +144,6 @@ public class ExcelWriterStrategy implements WriterStrategy {
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
-    TableSchemaVO table = fileCommon.findTableSchema(tableSchemaId, dataset);
-
-    // If the given idTableSchema exists, replace all tables with it
-    if (null != table) {
-      tables.clear();
-      tables.add(table);
-    }
 
     try (Workbook workbook = createWorkbook()) {
 
@@ -144,7 +151,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       // Add one sheet per table
       for (TableSchemaVO tableSchema : tables) {
-        writeSheet(workbook, tableSchema, datasetId, includeCountryCode);
+        writeSheet(workbook, tableSchema, datasetId, includeCountryCode, includeValidations,
+            dataset);
       }
 
       workbook.write(out);
@@ -172,6 +180,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
       case "xls":
         return new HSSFWorkbook();
       case "xlsx":
+      case "validations":
         return new XSSFWorkbook();
       default:
         throw new IOException("Unknow MIME type: " + mimeType);
@@ -185,9 +194,11 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param table the table
    * @param datasetId the DataSet id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
+   * @param dataset the dataset
    */
   private void writeSheet(Workbook workbook, TableSchemaVO table, Long datasetId,
-      boolean includeCountryCode) {
+      boolean includeCountryCode, boolean includeValidations, DataSetSchemaVO dataset) {
 
     Sheet sheet = workbook.createSheet(table.getNameTableSchema());
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
@@ -207,15 +218,27 @@ public class ExcelWriterStrategy implements WriterStrategy {
     for (FieldSchemaVO fieldSchema : fieldSchemas) {
       rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName());
       indexMap.put(fieldSchema.getId(), nHeaders++);
+      if (includeValidations) {
+        rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName() + " validations");
+        nHeaders++;
+      }
+    }
+    if (includeValidations) {
+      rowhead.createCell(nHeaders).setCellValue("Record validations");
+      nHeaders++;
     }
 
     // Set records
     int nRow = 1;
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+    Map<String, String> errorsMap = null;
+    if (includeValidations) {
+      errorsMap = mapErrors(fileCommon.getErrors(datasetId, table.getIdTableSchema(), dataset));
+    }
     for (RecordValue record : fileCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
 
       Row row = sheet.createRow(nRow++);
-      List<FieldValue> fields = record.getFields();
+      List<FieldValue> fields = new ArrayList<>(record.getFields());
       int nextUnknownCellNumber = nHeaders;
 
       if (includeCountryCode) {
@@ -231,8 +254,34 @@ public class ExcelWriterStrategy implements WriterStrategy {
         }
 
         row.createCell(cellNumber).setCellValue(field.getValue());
+        if (errorsMap != null) {
+          row.createCell(cellNumber + 1).setCellValue(errorsMap.get(field.getId()));
+        }
+      }
+      if (errorsMap != null) {
+        row.createCell(nHeaders - 1).setCellValue(errorsMap.get(record.getId()));
       }
     }
+  }
+
+  /**
+   * Map errors.
+   *
+   * @param failedValidationsByIdDataset the failed validations by id dataset
+   * @return the map
+   */
+  private Map<String, String> mapErrors(FailedValidationsDatasetVO failedValidationsByIdDataset) {
+    Map<String, String> errorsMap = new HashMap<>();
+    for (Object error : failedValidationsByIdDataset.getErrors()) {
+      LinkedHashMap<?, ?> castedError = (LinkedHashMap<?, ?>) error;
+      String value = errorsMap.putIfAbsent(castedError.get("idObject").toString(),
+          castedError.get("levelError") + ": " + castedError.get("message"));
+      if (value != null) {
+        errorsMap.put(castedError.get("idObject").toString(),
+            value + " " + castedError.get("levelError") + ": " + castedError.get("message"));
+      }
+    }
+    return errorsMap;
   }
 
 }
