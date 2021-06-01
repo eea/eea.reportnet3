@@ -70,6 +70,8 @@ const Dataflows = withRouter(({ history, match }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
+  const RenderDistruction = ({ vitalArrayProp }) => vitalArrayProp?.map(element => <div>{element.name}</div>);
+
   useEffect(() => {
     if (!isNil(dataflowsErrorType)) {
       notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
@@ -183,6 +185,7 @@ const Dataflows = withRouter(({ history, match }) => {
 
   return renderLayout(
     <div className="rep-row">
+      <RenderDistruction />
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
         <TabMenu activeItem={tabMenuActiveItem} model={tabMenuItems} onTabChange={e => setTabMenuActiveItem(e.value)} />
 
