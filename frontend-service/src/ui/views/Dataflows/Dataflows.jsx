@@ -201,7 +201,7 @@ const Dataflows = withRouter(({ history, match }) => {
         <TabMenu activeIndex={activeIndex} model={tabMenuItems} onTabChange={event => onChangeTab(event.index)} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          content={dataflowsState[tabId]}
+          content={{ dataflows: dataflowsState['dataflows'], reference: dataflowsState['reference'] }}
           isLoading={loadingStatus[tabId]}
           visibleTab={tabId}
         />

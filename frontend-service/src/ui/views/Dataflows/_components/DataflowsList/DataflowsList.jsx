@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
@@ -9,8 +9,9 @@ import pull from 'lodash/pull';
 import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './_components/DataflowsItem';
-import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
 import { Filters } from 'ui/views/_components/Filters';
+import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { UserService } from 'core/services/User';
 
@@ -19,24 +20,26 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
-import { Spinner } from 'ui/views/_components/Spinner/Spinner';
 
-const DataflowsList = ({ className, content = [], isCustodian, isLoading, visibleTab }) => {
+const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibleTab }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [dataToFilter, setDataToFilter] = useState(content);
-  const [filteredData, setFilteredData] = useState(dataToFilter);
+  const [dataToFilter, setDataToFilter] = useState({
+    dataflows: content['dataflows'],
+    reference: content['reference']
+  });
+  const [filteredData, setFilteredData] = useState(dataToFilter[visibleTab]);
   const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const parsedDataflows = orderBy(
-      DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
+      DataflowsListUtils.parseDataToFilter(content[visibleTab], userContext.userProps.pinnedDataflows),
       ['pinned', 'expirationDate', 'status', 'id'],
       ['asc', 'asc', 'asc', 'asc']
     );
-    setDataToFilter(parsedDataflows);
+    setDataToFilter({ ...dataToFilter, [visibleTab]: parsedDataflows });
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
@@ -120,14 +123,22 @@ const DataflowsList = ({ className, content = [], isCustodian, isLoading, visibl
     }
   };
 
-  const filterOptions = [
-    {
-      type: 'input',
-      properties: [{ name: 'name' }, { name: 'description' }, { name: 'legalInstrument' }, { name: 'obligationTitle' }]
-    },
-    { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
-    { type: 'date', properties: [{ name: 'expirationDate' }] }
-  ];
+  const filterOptions = {
+    dataflows: [
+      {
+        type: 'input',
+        properties: [
+          { name: 'name' },
+          { name: 'description' },
+          { name: 'legalInstrument' },
+          { name: 'obligationTitle' }
+        ]
+      },
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
+      { type: 'date', properties: [{ name: 'expirationDate' }] }
+    ],
+    reference: [{ type: 'input', properties: [{ name: 'name' }, { name: 'description' }] }]
+  };
 
   const renderDataflowItem = dataflow => {
     switch (visibleTab) {
@@ -147,13 +158,24 @@ const DataflowsList = ({ className, content = [], isCustodian, isLoading, visibl
   return (
     <div className={`${styles.wrap} ${className}`}>
       <div className="dataflowList-filters-help-step">
-        <Filters
-          data={dataToFilter}
-          getFilteredData={onLoadFilteredData}
-          options={filterOptions}
-          sortCategory={'pinned'}
-          sortable={true}
-        />
+        {visibleTab === 'dataflows' && (
+          <Filters
+            data={dataToFilter['dataflows']}
+            getFilteredData={onLoadFilteredData}
+            options={filterOptions['dataflows']}
+            sortCategory={'pinned'}
+            sortable={true}
+          />
+        )}
+        {visibleTab === 'reference' && (
+          <Filters
+            data={dataToFilter['reference']}
+            getFilteredData={onLoadFilteredData}
+            options={filterOptions['reference']}
+            sortCategory={'pinned'}
+            sortable={true}
+          />
+        )}
       </div>
 
       {!isEmpty(content) ? (
