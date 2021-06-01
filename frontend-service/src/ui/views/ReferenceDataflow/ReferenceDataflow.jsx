@@ -2,9 +2,10 @@
 import { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import isEmpty from 'lodash/isEmpty';
+
 import styles from './ReferenceDataflow.module.scss';
 
-import { isEmpty } from 'lodash';
 // import { config } from 'conf';
 
 import { routes } from 'ui/routes';
