@@ -850,11 +850,13 @@ export const FieldDesigner = ({
   const parseReferenceField = completeReferencedField => {
     return {
       dataflowId: completeReferencedField.referencedField.dataflowId,
+      fieldSchemaName: completeReferencedField.referencedField.fieldSchemaName,
       idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId,
       idPk: completeReferencedField.referencedField.fieldSchemaId,
-      linkedConditionalFieldId: completeReferencedField.referencedField.linkedTableConditional,
       labelId: completeReferencedField.referencedField.linkedTableLabel,
-      masterConditionalFieldId: completeReferencedField.referencedField.masterTableConditional
+      linkedConditionalFieldId: completeReferencedField.referencedField.linkedTableConditional,
+      masterConditionalFieldId: completeReferencedField.referencedField.masterTableConditional,
+      tableSchemaName: completeReferencedField.referencedField.tableSchemaName
     };
   };
 

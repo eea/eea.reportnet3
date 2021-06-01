@@ -273,8 +273,10 @@ const LinkSelector = withRouter(
               value: `${table.tableSchemaName} - ${pkField.fieldId}`,
               referencedField: {
                 fieldSchemaId: pkField.fieldId,
+                fieldSchemaName: pkField.name,
                 datasetSchemaId: datasetSchema.datasetSchemaId,
-                tableSchemaId: table.tableSchemaId
+                tableSchemaId: table.tableSchemaId,
+                tableSchemaName: table.tableSchemaName
               },
               disabled: false
             };

@@ -72,7 +72,7 @@ export const FieldsDesigner = ({
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
 
   useEffect(() => {
-    if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {      
+    if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
       setFields(table.records[0].fields);
     } else {
       setFields([]);
@@ -292,10 +292,10 @@ export const FieldsDesigner = ({
     let tableSchema = '';
 
     datasetSchemas?.forEach(schema => {
-      schema?.tables.forEach(table => {
+      schema.tables?.forEach(table => {
         !table.addTab &&
-          table?.records.forEach(record => {
-            record?.fields.forEach(field => {
+          table.records?.forEach(record => {
+            record.fields?.forEach(field => {
               if (field?.fieldId === referencedField.idPk) {
                 link.name = `${table.tableSchemaName} - ${field.name}`;
                 link.value = `${table.tableSchemaName} - ${field.fieldId}`;
