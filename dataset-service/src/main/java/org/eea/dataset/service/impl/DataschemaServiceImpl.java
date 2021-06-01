@@ -1426,7 +1426,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
       if (catalogue != null) {
         catalogue.getReferenced().remove(new ObjectId(fieldSchemaVO.getId()));
-        if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
+        if (fieldSchemaVO.getReferencedField().getDataflowId() != null
+            && catalogue.getReferencedByDataflow() != null
+            && !catalogue.getReferencedByDataflow().isEmpty()) {
           catalogue.getReferencedByDataflow()
               .remove(fieldSchemaVO.getReferencedField().getDataflowId());
         }
