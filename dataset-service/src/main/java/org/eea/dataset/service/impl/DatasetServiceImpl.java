@@ -1854,7 +1854,7 @@ public class DatasetServiceImpl implements DatasetService {
             tableSchema.getNameTableSchema(), tableSchema.getIdTableSchema(), originId,
             targetDataset.getId());
         processRecordPageWithFixedRecords(dictionaryIdFieldAttachment, targetTable,
-            datasetPartitionId, null, targetDataset.getId(), originId);
+            datasetPartitionId, null, targetDataset.getId(), originId, dataproviderVO);
       } else {
         Integer numberOfFieldsInRecord = tableSchema.getRecordSchema().getFieldSchema().size();
 
@@ -2561,7 +2561,7 @@ public class DatasetServiceImpl implements DatasetService {
             desingTable.getNameTableSchema(), desingTable.getIdTableSchema(), originDataset,
             targetDataset);
         processRecordPageWithFixedRecords(dictionaryIdFieldAttachment, targetTable,
-            datasetPartitionId, dictionaryOriginTargetObjectId, targetDataset, originDataset);
+            datasetPartitionId, dictionaryOriginTargetObjectId, targetDataset, originDataset, null);
       } else {
         // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
 
@@ -2608,11 +2608,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param targetDatasetId the target dataset id
    * @param originDatasetId the origin dataset id
+   * @param dataproviderVO the dataprovider VO
    */
   private void processRecordPageWithFixedRecords(
       Map<String, AttachmentValue> dictionaryIdFieldAttachment, TableValue targetTable,
       Long datasetPartitionId, Map<String, String> dictionaryOriginTargetObjectId,
-      Long targetDatasetId, Long originDatasetId) {
+      Long targetDatasetId, Long originDatasetId, DataProviderVO dataproviderVO) {
     try {
       List<RecordValue> auxRecords = new ArrayList<>();
       for (RecordValue record : recordRepository.findOrderedNativeRecord(targetTable.getId(),
@@ -2625,6 +2626,9 @@ public class DatasetServiceImpl implements DatasetService {
         if (dictionaryOriginTargetObjectId != null) {
           recordAux
               .setIdRecordSchema(dictionaryOriginTargetObjectId.get(recordAux.getIdRecordSchema()));
+        }
+        if (null != dataproviderVO) {
+          recordAux.setDataProviderCode(dataproviderVO.getCode());
         }
         List<FieldValue> fields = new ArrayList<>();
         for (FieldValue field : record.getFields()) {

@@ -1,8 +1,10 @@
 package org.eea.dataset.controller;
 
 import java.util.List;
+import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,20 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   public List<ReferenceDatasetPublicVO> findReferenceDataSetPublicByDataflowId(
       @PathVariable("id") Long dataflowId) {
     return referenceDatasetService.getReferenceDatasetPublicByDataflow(dataflowId);
+  }
+
+
+  /**
+   * Find dataflows referenced by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the sets the
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/referenced/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Set<DataFlowVO> findDataflowsReferencedByDataflowId(@PathVariable("id") Long dataflowId) {
+    return referenceDatasetService.getDataflowsReferenced(dataflowId);
   }
 
 
