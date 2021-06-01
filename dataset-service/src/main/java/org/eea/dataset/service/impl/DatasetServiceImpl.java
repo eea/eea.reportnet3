@@ -1053,7 +1053,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     Boolean isLinkMultiselect = Boolean.FALSE;
-    if (DataType.LINK.equals(field.getType())) {
+    if (DataType.LINK.equals(field.getType()) || DataType.EXTERNAL_LINK.equals(field.getType())) {
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
           && fieldSchema.getBoolean(LiteralConstants.PK_HAS_MULTIPLE_VALUES);
     }
@@ -2752,8 +2752,9 @@ public class DatasetServiceImpl implements DatasetService {
           value = fieldVO.getValue();
 
           // Sort values if there are multiple
-          if (DataType.MULTISELECT_CODELIST.equals(dataType) || (DataType.LINK.equals(dataType)
-              && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
+          if (DataType.MULTISELECT_CODELIST.equals(dataType)
+              || (DataType.LINK.equals(dataType) || DataType.EXTERNAL_LINK.equals(dataType)
+                  && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
             String[] values = value.trim().split("\\s*;\\s*");
             Arrays.sort(values);
             value = Arrays.stream(values).collect(Collectors.joining("; "));
