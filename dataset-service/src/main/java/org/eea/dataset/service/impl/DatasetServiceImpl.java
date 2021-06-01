@@ -2633,7 +2633,7 @@ public class DatasetServiceImpl implements DatasetService {
           recordAux
               .setIdRecordSchema(dictionaryOriginTargetObjectId.get(recordAux.getIdRecordSchema()));
         }
-        if (null != dataproviderVO) { // called from recordDesingAssignation
+        if (null != dataproviderVO) {
           recordAux.setDataProviderCode(dataproviderVO.getCode());
         }
         List<FieldValue> fields = new ArrayList<>();
