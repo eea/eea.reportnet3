@@ -73,7 +73,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = intersection(
       inmUserProperties.pinnedDataflows,
-      dataToFilter.map(data => data.id.toString())
+      dataToFilter[visibleTab].map(data => data.id.toString())
     );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
@@ -109,17 +109,22 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       const orderedPinned = orderedFilteredData.map(el => el.pinned);
       setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
 
-      const inmDataToFilter = [...dataToFilter];
-      const changedInitialData = inmDataToFilter.map(item => {
+      const inmDataToFilter = { ...dataToFilter };
+      const changedInitialData = inmDataToFilter[visibleTab].map(item => {
         if (item.id === pinnedItem.id) {
           item.pinned = isPinned ? 'pinned' : 'unpinned';
         }
         return item;
       });
 
-      setDataToFilter(
-        orderBy(changedInitialData, ['pinned', 'expirationDate', 'status', 'id'], ['asc', 'asc', 'asc', 'asc'])
-      );
+      setDataToFilter({
+        ...dataToFilter,
+        [visibleTab]: orderBy(
+          changedInitialData,
+          ['pinned', 'expirationDate', 'status', 'id'],
+          ['asc', 'asc', 'asc', 'asc']
+        )
+      });
     }
   };
 
