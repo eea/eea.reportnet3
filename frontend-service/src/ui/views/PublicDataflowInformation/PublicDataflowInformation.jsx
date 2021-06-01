@@ -252,8 +252,9 @@ export const PublicDataflowInformation = withRouter(
         setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('error', error);
-        if (error.status !== 404) {
+        if (error.response.status === 404 || error.response.status === 400) {
           setIsWrongUrlDataflowId(true);
+        } else {
           notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
         }
       } finally {
@@ -353,31 +354,27 @@ export const PublicDataflowInformation = withRouter(
           {!isLoading ? (
             isWrongUrlDataflowId ? (
               <div className={styles.noDatasets}>{resources.messages['wrongUrlDataflowId']}</div>
-            ) : (
+            ) : !isEmpty(representatives) ? (
               <Fragment>
                 <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-                {!isEmpty(representatives) ? (
-                  <Fragment>
-                    <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                      {renderColumns(representatives)}
+                <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
+                  {renderColumns(representatives)}
+                </DataTable>
+                {!isEmpty(referenceDatasets) && (
+                  <div className={styles.referenceDatasetsWrapper}>
+                    <div className={styles.referenceDatasetsTitle}>{resources.messages['referenceDatasets']}</div>
+                    <DataTable
+                      autoLayout={true}
+                      className={styles.referenceDatasetsTable}
+                      totalRecords={referenceDatasets.length}
+                      value={referenceDatasets}>
+                      {renderReferenceDatasetsColumns(referenceDatasets)}
                     </DataTable>
-                    {!isEmpty(referenceDatasets) && (
-                      <div className={styles.referenceDatasetsWrapper}>
-                        <div className={styles.referenceDatasetsTitle}>{resources.messages['referenceDatasets']}</div>
-                        <DataTable
-                          autoLayout={true}
-                          className={styles.referenceDatasetsTable}
-                          totalRecords={referenceDatasets.length}
-                          value={referenceDatasets}>
-                          {renderReferenceDatasetsColumns(referenceDatasets)}
-                        </DataTable>
-                      </div>
-                    )}
-                  </Fragment>
-                ) : (
-                  <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+                  </div>
                 )}
               </Fragment>
+            ) : (
+              <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
             )
           ) : (
             <Spinner className={styles.isLoading} />
