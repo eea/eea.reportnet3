@@ -16,6 +16,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
+import ReactTooltip from 'react-tooltip';
 import { TextUtils, RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
@@ -195,7 +196,7 @@ export const useSetColumns = (
   const getTooltipMessage = column => {
     return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
       ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
-        <span style="font-weight:bold">Description:</span> ${
+        <br/><span style="font-weight:bold">Description:</span> ${
           !isNil(column.description) && column.description !== ''
             ? column.description
             : resources.messages['noDescription']
@@ -208,7 +209,7 @@ export const useSetColumns = (
           )
           .join('; ')}`
       : `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
-      <span style="font-weight:bold">Description:</span> ${
+      <br/><span style="font-weight:bold">Description:</span> ${
         !isNil(column.description) && column.description !== '' && column.description.length > 35
           ? column.description.substring(0, 35)
           : isNil(column.description) || column.description === ''
@@ -216,10 +217,10 @@ export const useSetColumns = (
           : column.description
       }${
           column.type === 'ATTACHMENT'
-            ? `<br/><span style="font-weight:bold">${resources.messages['validExtensions']}</span> ${
+            ? `<br /><span style="font-weight:bold">${resources.messages['validExtensions']}</span> ${
                 !isEmpty(column.validExtensions) ? column.validExtensions.join(', ') : '*'
               }
-    <span style="font-weight:bold">${resources.messages['maxFileSize']}</span> ${
+              <br /><span style="font-weight:bold">${resources.messages['maxFileSize']}</span> ${
                 !isNil(column.maxSize) && column.maxSize.toString() !== '0'
                   ? `${column.maxSize} ${resources.messages['MB']}`
                   : resources.messages['maxSizeNotDefined']
@@ -351,15 +352,18 @@ export const useSetColumns = (
                 />
               )}
               {column.header}
-              <Button
-                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
-                icon="infoCircle"
-                onClick={() => {
-                  onShowFieldInfo(column.header, true);
-                }}
-                tooltip={getTooltipMessage(column)}
-                tooltipOptions={{ position: 'top' }}
-              />
+              <span data-for={`infoCircleButton_${i}`} data-tip>
+                <Button
+                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
+                  icon="infoCircle"
+                  onClick={() => {
+                    onShowFieldInfo(column.header, true);
+                  }}
+                />
+              </span>
+              <ReactTooltip effect="solid" html={true} id={`infoCircleButton_${i}`} place="top">
+                {getTooltipMessage(column)}
+              </ReactTooltip>
             </Fragment>
           }
           key={column.field}
