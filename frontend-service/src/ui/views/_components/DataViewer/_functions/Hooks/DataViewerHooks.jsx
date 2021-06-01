@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -194,39 +195,72 @@ export const useSetColumns = (
   };
 
   const getTooltipMessage = column => {
-    return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
-      ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
-        <br/><span style="font-weight:bold">Description:</span> ${
-          !isNil(column.description) && column.description !== ''
-            ? column.description
-            : resources.messages['noDescription']
-        }<br/><span style="font-weight:bold">${
-          column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']
-        }: </span>
-        ${column.codelistItems
-          .map(codelistItem =>
-            !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
-          )
-          .join('; ')}`
-      : `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
-      <br/><span style="font-weight:bold">Description:</span> ${
-        !isNil(column.description) && column.description !== '' && column.description.length > 35
-          ? column.description.substring(0, 35)
-          : isNil(column.description) || column.description === ''
-          ? resources.messages['noDescription']
-          : column.description
-      }${
-          column.type === 'ATTACHMENT'
-            ? `<br /><span style="font-weight:bold">${resources.messages['validExtensions']}</span> ${
-                !isEmpty(column.validExtensions) ? column.validExtensions.join(', ') : '*'
-              }
-              <br /><span style="font-weight:bold">${resources.messages['maxFileSize']}</span> ${
-                !isNil(column.maxSize) && column.maxSize.toString() !== '0'
-                  ? `${column.maxSize} ${resources.messages['MB']}`
-                  : resources.messages['maxSizeNotDefined']
-              }`
-            : ''
-        }`;
+    if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
+      return (
+        <>
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {RecordUtils.getFieldTypeValue(column.type)}
+          </span>
+          <br />
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {!isNil(column.description) && column.description !== ''
+              ? column.description
+              : resources.messages['noDescription']}
+          </span>
+          <br />
+          <span style={{ fontWeight: 'bold' }}>
+            {column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']}:{' '}
+          </span>
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {column.codelistItems
+              .map(codelistItem =>
+                !isEmpty(codelistItem) && codelistItem.length > 15
+                  ? `${codelistItem.substring(0, 15)}...`
+                  : codelistItem
+              )
+              .join('; ')}
+          </span>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {RecordUtils.getFieldTypeValue(column.type)}
+          </span>
+          <br />
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {!isNil(column.description) && column.description !== '' && column.description.length > 35
+              ? `${column.description.substring(0, 35)}...`
+              : isNil(column.description) || column.description === ''
+              ? resources.messages['noDescription']
+              : column.description}
+          </span>
+          {column.type === 'ATTACHMENT' ? (
+            <>
+              <br />
+              <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
+              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+                {!isEmpty(column.validExtensions) ? column.validExtensions.join(', ') : '*'}
+              </span>
+              <br />
+              <span style={{ fontWeight: 'bold' }}>{resources.messages['maxFileSize']}</span>
+              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+                {!isNil(column.maxSize) && column.maxSize.toString() !== '0'
+                  ? ` ${column.maxSize} ${resources.messages['MB']}`
+                  : resources.messages['maxSizeNotDefined']}
+              </span>
+            </>
+          ) : (
+            ''
+          )}
+        </>
+      );
+    }
   };
 
   const dataTemplate = (rowData, column) => {
@@ -361,9 +395,23 @@ export const useSetColumns = (
                   }}
                 />
               </span>
-              <ReactTooltip effect="solid" html={true} id={`infoCircleButton_${i}`} place="top">
-                {getTooltipMessage(column)}
-              </ReactTooltip>
+              <ReactTooltip
+                effect="solid"
+                getContent={() =>
+                  ReactDOMServer.renderToStaticMarkup(
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start'
+                      }}>
+                      {getTooltipMessage(column)}
+                    </div>
+                  )
+                }
+                html={true}
+                id={`infoCircleButton_${i}`}
+                place="top"></ReactTooltip>
             </Fragment>
           }
           key={column.field}
