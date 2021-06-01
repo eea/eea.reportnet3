@@ -2,7 +2,6 @@ import { useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
-import uniqueId from 'lodash/uniqueId';
 
 import styles from './Dataflows.module.scss';
 
@@ -43,8 +42,6 @@ const Dataflows = withRouter(({ history, match }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-
-  const [showBadComponent, setShowBadComponent] = useState(false);
 
   const [tabMenuItems] = useState([
     {
