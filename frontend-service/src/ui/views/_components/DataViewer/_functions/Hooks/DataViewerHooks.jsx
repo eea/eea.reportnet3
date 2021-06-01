@@ -245,7 +245,9 @@ export const useSetColumns = (
               <br />
               <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
               <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-                {!isEmpty(column.validExtensions) ? column.validExtensions.join(', ') : '*'}
+                {!isEmpty(column.validExtensions)
+                  ? column.validExtensions.map(extension => `.${extension}`).join(', ')
+                  : '*'}
               </span>
               <br />
               <span style={{ fontWeight: 'bold' }}>{resources.messages['maxFileSize']}</span>
