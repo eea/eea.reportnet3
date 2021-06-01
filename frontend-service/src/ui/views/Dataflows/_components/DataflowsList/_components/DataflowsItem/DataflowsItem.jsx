@@ -38,9 +38,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         } dataflowList-first-dataflow-help-step`}
         onMouseEnter={() => setIsPinShowed(true)}
         onMouseLeave={() => setIsPinShowed(false)}>
-        <Link
-          className={`${styles.containerLink}`}
-          to={getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId: itemContent.id }, true)}>
+        <Link className={`${styles.containerLink}`} to={getUrl(routes.DATAFLOW, { dataflowId: itemContent.id }, true)}>
           {children}
         </Link>
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>

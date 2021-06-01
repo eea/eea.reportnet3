@@ -11,10 +11,9 @@ import { DataflowService } from 'core/services/Dataflow';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { TextUtils } from 'ui/views/_functions/Utils';
 
 const DataflowManagementForm = forwardRef(
-  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onSearch, onSubmit, refresh, visibleTab }, ref) => {
+  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onSearch, onSubmit, refresh }, ref) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
 
@@ -64,12 +63,9 @@ const DataflowManagementForm = forwardRef(
     };
 
     const onConfirm = async () => {
+      checkIsCorrectInputValue(data.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
-      if (!TextUtils.areEquals(visibleTab?.id, 'referenceDataflows')) {
-        checkIsCorrectInputValue(data.obligation.title, 'obligation');
-      }
-      const dataflowType = TextUtils.areEquals(visibleTab?.id, 'referenceDataflows') ? 'REFERENCE' : undefined;
 
       if (!errors.obligation.hasErrors && !errors.name.hasErrors && !errors.description.hasErrors) {
         onSubmit(true);
@@ -86,7 +82,7 @@ const DataflowManagementForm = forwardRef(
             );
             onEdit(name, description, data.obligation.id);
           } else {
-            await DataflowService.create(name, description, data.obligation.id, dataflowType);
+            await DataflowService.create(name, description, data.obligation.id);
             onCreate();
           }
         } catch (error) {
@@ -170,27 +166,25 @@ const DataflowManagementForm = forwardRef(
             {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
           </div>
 
-          {!TextUtils.areEquals(visibleTab?.id, 'referenceDataflows') && (
-            <div className={`${styles.search}`}>
-              <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
-              <input
-                className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
-                id="searchObligation"
-                name="obligation.title"
-                onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
-                onKeyPress={e => {
-                  if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
-                }}
-                placeholder={resources.messages['associatedObligation']}
-                readOnly={true}
-                type="text"
-                value={data.obligation.title}
-              />
-              <label className="srOnly" htmlFor="searchObligation">
-                {resources.messages['searchObligations']}
-              </label>
-            </div>
-          )}
+          <div className={`${styles.search}`}>
+            <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
+            <input
+              className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
+              id="searchObligation"
+              name="obligation.title"
+              onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
+              onKeyPress={e => {
+                if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
+              }}
+              placeholder={resources.messages['associatedObligation']}
+              readOnly={true}
+              type="text"
+              value={data.obligation.title}
+            />
+            <label className="srOnly" htmlFor="searchObligation">
+              {resources.messages['searchObligations']}
+            </label>
+          </div>
         </fieldset>
       </form>
     );
