@@ -246,8 +246,9 @@ public interface DatasetSchemaService {
    * Adds the to pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
+   * @param datasetId the dataset id
    */
-  void addToPkCatalogue(FieldSchemaVO fieldSchemaVO);
+  void addToPkCatalogue(FieldSchemaVO fieldSchemaVO, Long datasetId);
 
   /**
    * Check existing pk referenced.

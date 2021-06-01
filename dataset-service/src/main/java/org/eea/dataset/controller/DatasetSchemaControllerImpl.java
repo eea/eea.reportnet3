@@ -519,7 +519,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
 
       // Add the Pk if needed to the catalogue
-      dataschemaService.addToPkCatalogue(fieldSchemaVO);
+      dataschemaService.addToPkCatalogue(fieldSchemaVO, datasetId);
 
       // Add the register into the metabase fieldRelations
       dataschemaService.addForeignRelation(datasetId, fieldSchemaVO);
@@ -589,7 +589,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
             datasetId);
 
         // Add the Pk if needed to the catalogue
-        dataschemaService.addToPkCatalogue(fieldSchemaVO);
+        dataschemaService.addToPkCatalogue(fieldSchemaVO, datasetId);
       } else {
         if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
