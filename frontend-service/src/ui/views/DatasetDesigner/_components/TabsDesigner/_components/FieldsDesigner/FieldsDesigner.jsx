@@ -319,8 +319,8 @@ export const FieldsDesigner = ({
     const link = {};
     let tableSchema = '';
 
-    link.name = `T1 - Datetime`;
-    link.value = `T1 - 60a74005807124000159a196`;
+    link.name = `${referencedField.tableSchemaName} - ${referencedField.fieldSchemaName}`;
+    link.value = `${referencedField.tableSchemaName} - ${referencedField.idPk}`;
     link.disabled = false;
     tableSchema = table.tableSchemaId;
 
