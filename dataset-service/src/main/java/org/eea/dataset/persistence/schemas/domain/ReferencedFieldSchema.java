@@ -41,6 +41,14 @@ public class ReferencedFieldSchema {
   @Field(value = "dataflowId")
   private Long dataflowId;
 
+  /** The table schema name. */
+  @Field(value = "tableSchemaName")
+  private String tableSchemaName;
+
+  /** The field schema name. */
+  @Field(value = "fieldSchemaName")
+  private String fieldSchemaName;
+
 
 
   /**

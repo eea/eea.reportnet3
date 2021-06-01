@@ -869,6 +869,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } else {
       referenced.put("dataflowId", null);
     }
+    if (StringUtils.isNotBlank(referencedField.getTableSchemaName())) {
+      referenced.put("tableSchemaName", referencedField.getTableSchemaName());
+    } else {
+      referenced.put("tableSchemaName", null);
+    }
+    if (StringUtils.isNotBlank(referencedField.getFieldSchemaName())) {
+      referenced.put("fieldSchemaName", referencedField.getFieldSchemaName());
+    } else {
+      referenced.put("fieldSchemaName", null);
+    }
     return referenced;
   }
 
