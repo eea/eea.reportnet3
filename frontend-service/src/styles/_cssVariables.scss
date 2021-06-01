@@ -420,7 +420,6 @@
   --checkbox-box-highlight-color-hover: var(--white);
 
   /* InputTextArea */
-
   --inputtextarea-box-shadow: 0 10px 6px -6px rgba(var(--c-corporate-blue-rgb), 0.1);
 
   /* FieldDesigner */
@@ -522,4 +521,8 @@
   --webform-table-bg: var(--gray-10);
   --webform-table-border: 1px solid var(--gray-10);
   --general-text-color: var(--grey-110);
+
+  /* Fileupload */
+  --fileupload-bg-color: var(--bg);
+  --fileupload-header-bg-color: var(--bg);
 }

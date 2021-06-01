@@ -27,11 +27,13 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -94,6 +96,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The dataset metabase controller. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
+
+  /** The reference dataset controller zuul. */
+  @Autowired
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
   /**
    * The delimiter.
@@ -712,6 +718,14 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         assignments.add(
             createAssignments(dataset.getId(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
       }
+      // assign reference to lead reporter
+      List<ReferenceDatasetVO> references = referenceDatasetControllerZuul
+          .findReferenceDatasetByDataflowId(representative.getDataflow().getId());
+      for (ReferenceDatasetVO referenceDatasetVO : references) {
+        assignments.add(createAssignments(referenceDatasetVO.getId(), email,
+            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+      }
+
       // Assign Dataflow-%s-LEAD_REPORTER
       assignments.add(createAssignments(representative.getDataflow().getId(), email,
           ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));

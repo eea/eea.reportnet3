@@ -742,7 +742,7 @@ export const Dataset = withRouter(({ match, history }) => {
 
   const layout = children => {
     return (
-      <MainLayout>
+      <MainLayout history={history}>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

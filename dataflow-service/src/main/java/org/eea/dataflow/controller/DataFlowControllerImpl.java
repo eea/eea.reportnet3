@@ -493,6 +493,9 @@ public class DataFlowControllerImpl implements DataFlowController {
     try {
       return dataflowService.getPublicDataflowById(dataflowId);
     } catch (EEAException e) {
+      if (EEAErrorMessage.DATAFLOW_NOTFOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
