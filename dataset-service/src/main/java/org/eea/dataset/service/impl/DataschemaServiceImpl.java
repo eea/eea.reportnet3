@@ -869,6 +869,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } else {
       referenced.put("dataflowId", null);
     }
+    if (StringUtils.isNotBlank(referencedField.getTableSchemaName())) {
+      referenced.put("tableSchemaName", referencedField.getTableSchemaName());
+    } else {
+      referenced.put("tableSchemaName", null);
+    }
+    if (StringUtils.isNotBlank(referencedField.getFieldSchemaName())) {
+      referenced.put("fieldSchemaName", referencedField.getFieldSchemaName());
+    } else {
+      referenced.put("fieldSchemaName", null);
+    }
     return referenced;
   }
 
@@ -1362,8 +1372,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (catalogue != null && catalogue.getIdPk() != null) {
         catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
         if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
-          catalogue.getReferencedByDataflow()
-              .add(fieldSchemaVO.getReferencedField().getDataflowId());
+          if (catalogue.getReferencedByDataflow() == null) {
+            catalogue.setReferencedByDataflow(new ArrayList<>());
+          }
+          if (!catalogue.getReferencedByDataflow()
+              .contains(fieldSchemaVO.getReferencedField().getDataflowId())) {
+            catalogue.getReferencedByDataflow()
+                .add(fieldSchemaVO.getReferencedField().getDataflowId());
+          }
         }
         pkCatalogueRepository
             .deleteByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
