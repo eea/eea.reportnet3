@@ -904,7 +904,7 @@
     "text": "Text",
     "textFieldFormatRestriction": "Maximum of 10000 characters",
     "theme": "Theme",
-    "thereAreNoDatalows": "There are no pending dataflows",
+    "thereAreNoDataflows": "There are no pending dataflows",
     "title": "Title",
     "titleDashboard": "Error/Warning dashboard",
     "titleHeader": "Reportnet",
@@ -1116,6 +1116,8 @@
     "selectedReferenceDataflow": "Selected Reference Dataflow",
     "errorBoundaryTitle": "Sorry... An unexpected error occurred",
     "errorBoundaryMessageCopy": "Please click <strong>Copy to clipboard</strong> and submit this information to the helpdesk.",
-    "errorBoundaryMessageRefresh": "Press the Refresh button to continue."
+    "errorBoundaryMessageRefresh": "Press the Refresh button to continue.",
+    "referenceDataflowsListTab": "Reference Dataflows",
+    "referenceDataflowCrumbLabel": "Reference Dataflow"
   }
 }

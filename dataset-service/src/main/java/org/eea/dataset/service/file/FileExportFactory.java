@@ -43,6 +43,7 @@ public class FileExportFactory implements IFileExportFactory {
         // Fill it with the xml strategy
         break;
       case "xlsx":
+      case "validations":
         context = new FileExportContextImpl(new ExcelWriterStrategy(fileCommon, mimeType));
         break;
       default:

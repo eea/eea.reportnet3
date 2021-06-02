@@ -17,6 +17,13 @@ const apiDataCollection = {
       }
     }),
 
+  createReference: async dataflowId => {
+    return await HTTPRequester.post({
+      url: getUrl(DataCollectionConfig.createDataCollection),
+      data: { idDataflow: dataflowId }
+    });
+  },
+
   update: async dataflowId =>
     await HTTPRequester.update({
       url: getUrl(DataCollectionConfig.updateDataCollectionNewRepresentatives, { dataflowId })

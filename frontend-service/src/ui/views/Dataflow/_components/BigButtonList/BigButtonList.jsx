@@ -8,7 +8,7 @@ import { DataflowConfig } from 'conf/domain/model/Dataflow';
 
 import styles from './BigButtonList.module.scss';
 
-import { BigButton } from '../BigButton';
+import { BigButton } from 'ui/views/_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox';
@@ -20,7 +20,7 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { HistoricReleases } from 'ui/views/Dataflow/_components/HistoricReleases';
 import { ManageManualAcceptanceDataset } from 'ui/views/Dataflow/_components/ManageManualAcceptanceDataset';
 import { ManualAcceptanceDatasets } from 'ui/views/Dataflow/_components/ManualAcceptanceDatasets';
-import { NewDatasetSchemaForm } from './_components/NewDatasetSchemaForm';
+import { NewDatasetSchemaForm } from 'ui/views/_components/NewDatasetSchemaForm';
 
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { DataCollectionService } from 'core/services/DataCollection';
