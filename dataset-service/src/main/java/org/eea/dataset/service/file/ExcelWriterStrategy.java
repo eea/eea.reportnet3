@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -29,6 +31,15 @@ import org.slf4j.LoggerFactory;
  * The Class ExcelWriterStrategy.
  */
 public class ExcelWriterStrategy implements WriterStrategy {
+
+  /** The Constant INFO: {@value}. */
+  private static final String INFO = "INFO:";
+
+  /** The Constant WARNING: {@value}. */
+  private static final String WARNING = "WARNING:";
+
+  /** The Constant ERROR: {@value}. */
+  private static final String ERROR = "ERROR:";
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -235,8 +246,9 @@ public class ExcelWriterStrategy implements WriterStrategy {
     if (includeValidations) {
       errorsMap = mapErrors(fileCommon.getErrors(datasetId, table.getIdTableSchema(), dataset));
     }
+    CellStyle cs = workbook.createCellStyle();
+    cs.setWrapText(true);
     for (RecordValue record : fileCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
-
       Row row = sheet.createRow(nRow++);
       List<FieldValue> fields = new ArrayList<>(record.getFields());
       int nextUnknownCellNumber = nHeaders;
@@ -255,11 +267,15 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
         row.createCell(cellNumber).setCellValue(field.getValue());
         if (errorsMap != null) {
-          row.createCell(cellNumber + 1).setCellValue(errorsMap.get(field.getId()));
+          Cell cell = row.createCell(cellNumber + 1);
+          cell.setCellStyle(cs);
+          cell.setCellValue(errorsMap.get(field.getId()));
         }
       }
       if (errorsMap != null) {
-        row.createCell(nHeaders - 1).setCellValue(errorsMap.get(record.getId()));
+        Cell cell = row.createCell(nHeaders - 1);
+        cell.setCellStyle(cs);
+        cell.setCellValue(errorsMap.get(record.getId()));
       }
     }
   }
@@ -274,14 +290,58 @@ public class ExcelWriterStrategy implements WriterStrategy {
     Map<String, String> errorsMap = new HashMap<>();
     for (Object error : failedValidationsByIdDataset.getErrors()) {
       LinkedHashMap<?, ?> castedError = (LinkedHashMap<?, ?>) error;
-      String value = errorsMap.putIfAbsent(castedError.get("idObject").toString(),
-          castedError.get("levelError") + ": " + castedError.get("message"));
+      String newError = (String) castedError.get("levelError");
+      String message = (String) castedError.get("message");
+      String id = castedError.get("idObject").toString();
+      String value = errorsMap.putIfAbsent(id, newError + ": " + message);
       if (value != null) {
-        errorsMap.put(castedError.get("idObject").toString(),
-            value + " " + castedError.get("levelError") + ": " + castedError.get("message"));
+        insertIntoOrderedPosition(errorsMap, value, id, newError, message);
       }
     }
     return errorsMap;
+  }
+
+  /**
+   * Insert into ordered position.
+   *
+   * @param errorsMap the errors map
+   * @param value the value
+   * @param id the id
+   * @param newError the new error
+   * @param message the message
+   */
+  private void insertIntoOrderedPosition(Map<String, String> errorsMap, String value, String id,
+      String newError, String message) {
+    switch (newError) {
+      case "BLOCKER":
+        errorsMap.put(id, newError + ": " + message + "\n" + value);
+        break;
+      case "ERROR":
+        if (value.contains(ERROR)) {
+          value = value.replaceFirst(ERROR, newError + ": " + message + "\nERROR:");
+        } else if (value.contains(WARNING)) {
+          value = value.replaceFirst(WARNING, newError + ": " + message + "\nWARNING:");
+        } else if (value.contains(INFO)) {
+          value = value.replaceFirst(INFO, newError + ": " + message + "\nINFO:");
+        } else {
+          value = value + "\n " + newError + ": " + message;
+        }
+        errorsMap.put(id, value);
+        break;
+      case "WARNING":
+        if (value.contains(WARNING)) {
+          value = value.replaceFirst(WARNING, newError + ": " + message + "\nWARNING:");
+        } else if (value.contains(INFO)) {
+          value = value.replaceFirst(INFO, newError + ": " + message + "\nINFO:");
+        } else {
+          value = value + "\n" + newError + ": " + message;
+        }
+        errorsMap.put(id, value);
+        break;
+      default:
+        errorsMap.put(id, value + "\n" + newError + ": " + message);
+        break;
+    }
   }
 
 }
