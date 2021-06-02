@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 
 import styles from '../BigButtonList/BigButtonList.module.scss';
 
-import { BigButton } from '../BigButton';
+import { BigButton } from 'ui/views/_components/BigButton';
 import { Button } from 'ui/views/_components/Button';
 import { ConfirmationReceiptService } from 'core/services/ConfirmationReceipt';
 import { Dialog } from 'ui/views/_components/Dialog';
