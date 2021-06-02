@@ -38,6 +38,9 @@ public class IntegrationParams {
   /** The Constant DATABASE_CONNECTION_PUBLIC: {@value}. */
   public static final String DATABASE_CONNECTION_PUBLIC = "DataBaseConnectionPublic";
 
+  /** The Constant schema: {@value}. */
+  public static final String SCHEMA = "schema";
+
   /** The Constant MODE: {@value}. */
   public static final String MODE = "mode";
 

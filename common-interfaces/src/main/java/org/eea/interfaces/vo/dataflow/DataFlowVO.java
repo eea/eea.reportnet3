@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.contributor.ContributorVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -72,6 +73,9 @@ public class DataFlowVO implements Serializable {
 
   /** The weblinks. */
   private List<WeblinkVO> weblinks;
+
+  /** The type. */
+  private TypeDataflowEnum type;
 
 
   /** The request id. */

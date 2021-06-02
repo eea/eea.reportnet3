@@ -371,7 +371,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
       for (SortField field : sortFields) {
         // we check if the field is link and look the linked type to sort in the table
-        if (field.getTypefield().equals(DataType.LINK)) {
+        if (DataType.LINK.equals(field.getTypefield())
+            || DataType.EXTERNAL_LINK.equals(field.getTypefield())) {
           Document documentField =
               schemasRepository.findFieldSchema(datasetSchemaId, field.getFieldName());
           Document documentReference = (Document) documentField.get("referencedField");
