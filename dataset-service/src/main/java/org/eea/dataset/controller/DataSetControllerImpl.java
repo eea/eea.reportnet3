@@ -726,8 +726,10 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))")
   public ResponseEntity<byte[]> getAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField) {
+      @PathVariable("fieldId") String idField, @RequestParam(value = "dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
 
     LOG.info("Downloading attachment from the datasetId {}", datasetId);
     try {
@@ -767,7 +769,8 @@ public class DataSetControllerImpl implements DatasetController {
             datasetId);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
       }
-      String fileName = file.getOriginalFilename();
+      // Remove comma "," character to avoid error with special characters
+      String fileName = file.getOriginalFilename().replace(",", "");
       if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
       }
