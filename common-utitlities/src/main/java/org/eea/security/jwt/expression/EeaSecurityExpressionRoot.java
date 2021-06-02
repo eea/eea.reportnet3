@@ -26,16 +26,22 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * The type Eea security expression root.
  */
+
 @Slf4j
 public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     implements MethodSecurityExpressionOperations {
 
+  /** The return object. */
   private Object returnObject;
+
+  /** The filter object. */
   private Object filterObject;
+
+  /** The user management controller zull. */
   private UserManagementControllerZull userManagementControllerZull;
 
   /**
-   * Creates a new instance
+   * Creates a new instance.
    *
    * @param authentication the {@link Authentication} to use. Cannot be null.
    * @param userManagementControllerZull the user management controller zull
@@ -142,7 +148,8 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    *
    * @param dataflowId the dataflow id
    * @param dataProvider the data provider
-   *
+   * @param idEntity the id entity
+   * @param objectAccessRoles the object access roles
    * @return the boolean
    */
   public boolean checkApiKey(final Long dataflowId, final Long dataProvider, Long idEntity,
@@ -163,6 +170,11 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     return canAccess;
   }
 
+  /**
+   * Checks if is api key.
+   *
+   * @return true, if is api key
+   */
   public boolean isApiKey() {
     Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
 
@@ -174,26 +186,51 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     return false;
   }
 
+  /**
+   * Sets the filter object.
+   *
+   * @param filterObject the new filter object
+   */
   @Override
   public void setFilterObject(Object filterObject) {
     this.filterObject = filterObject;
   }
 
+  /**
+   * Gets the filter object.
+   *
+   * @return the filter object
+   */
   @Override
   public Object getFilterObject() {
     return this.filterObject;
   }
 
+  /**
+   * Sets the return object.
+   *
+   * @param returnObject the new return object
+   */
   @Override
   public void setReturnObject(Object returnObject) {
     this.returnObject = returnObject;
   }
 
+  /**
+   * Gets the return object.
+   *
+   * @return the return object
+   */
   @Override
   public Object getReturnObject() {
     return this.returnObject;
   }
 
+  /**
+   * Gets the this.
+   *
+   * @return the this
+   */
   @Override
   public Object getThis() {
     return this;
