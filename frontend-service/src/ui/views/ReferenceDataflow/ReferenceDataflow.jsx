@@ -123,7 +123,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       updatedTitles[index].schemaName = value;
       setUpdatedDatasetSchema(updatedTitles);
     } catch (error) {
-      console.error('error', error);
       if (error?.response?.status === 400) {
         notificationContext.add({
           type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',

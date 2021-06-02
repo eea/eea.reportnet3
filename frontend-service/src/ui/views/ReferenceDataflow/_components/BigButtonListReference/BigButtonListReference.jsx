@@ -120,7 +120,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
       infoStatusIcon: true,
       layout: 'defaultBigButton',
       onWheel: onRedirect({ route: routes.DATASET, params: { dataflowId, datasetId: dataset.datasetId } }),
-      visibility: !isDesignStatus
+      visibility: true //!isDesignStatus
     }));
   };
 
@@ -140,7 +140,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
         layout: 'defaultBigButton',
         onSaveName: onSaveName,
         placeholder: resources.messages['datasetSchemaNamePlaceholder'],
-        visibility: isDesignStatus
+        visibility: true //isDesignStatus
       }));
 
   const bigButtonList = [
