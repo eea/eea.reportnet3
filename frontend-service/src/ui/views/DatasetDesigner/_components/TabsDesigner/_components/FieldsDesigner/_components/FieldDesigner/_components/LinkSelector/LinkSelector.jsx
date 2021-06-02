@@ -362,102 +362,106 @@ const LinkSelector = withRouter(
     };
 
     const renderLinkSelector = () => {
-      return (
-        <Fragment>
-          <div className={`${styles.schemaWrapper} ${isExternalLink && styles.referenceDataflowSchemaWrapper}`}>
-            {!isUndefined(datasetSchemas) &&
-              !isEmpty(datasetSchemas) &&
-              datasetSchemas.map((datasetSchema, i) => {
-                return (
-                  <ListBox
-                    key={`datasetSchema_${i}`}
-                    options={getOptions(datasetSchema)}
-                    onChange={e => {
-                      if (!isNil(e.value)) {
-                        dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
-                        getFields(e.value);
-                      }
-                    }}
-                    optionLabel="name"
-                    optionValue="value"
-                    title={datasetSchema.datasetSchemaName}
-                    value={link}></ListBox>
-                );
-              })}
-          </div>
-          <div className={styles.selectedLinkFieldsWrapper}>
-            <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel="linkedTableLabel"
-              className={styles.fieldSelector}
-              inputId="linkedTableLabel"
-              name={resources.messages['linkedTableLabel']}
-              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_LABEL', payload: e.target.value })}
-              optionLabel="name"
-              options={linkedTableFields}
-              placeholder={resources.messages['linkedTableLabel']}
-              value={pkLinkedTableLabel}
-            />
-          </div>
-          <div className={styles.selectedLinkFieldsWrapper}>
-            <span htmlFor={'masterTableConditional'}>{resources.messages['masterTableConditional']}</span>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel="masterTableConditional"
-              className={styles.fieldSelector}
-              inputId="masterTableConditional"
-              name={resources.messages['masterTableConditional']}
-              onChange={e => dispatchLinkSelector({ type: 'SET_MASTER_TABLE_CONDITIONAL', payload: e.target.value })}
-              optionLabel="name"
-              options={masterTableFields}
-              placeholder={resources.messages['masterTableConditional']}
-              value={pkMasterTableConditional}
-            />
-            <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel="linkedTableConditional"
-              className={styles.fieldSelector}
-              inputId="linkedTableConditional"
-              name={resources.messages['linkedTableConditional']}
-              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
-              optionLabel="name"
-              options={linkedTableFields}
-              placeholder={resources.messages['linkedTableConditional']}
-              value={pkLinkedTableConditional}
-            />
-          </div>
-          <div className={styles.selectedLinkWrapper}>
-            <span className={styles.switchTextInput} htmlFor={'pkMustBeUsed_check'}>
-              {resources.messages['pkValuesMustBeUsed']}
-            </span>
-            <Checkbox
-              checked={pkMustBeUsed}
-              id={'pkMustBeUsed_check'}
-              inputId={'pkMustBeUsed_check'}
-              label="Default"
-              onChange={e => setPkMustBeUsed(e.checked)}
-              style={{ width: '70px', marginLeft: '0.5rem' }}
-            />
-            <span className={styles.switchTextInput} htmlFor={'pkHasMultipleValues_check'}>
-              {resources.messages['pkHasMultipleValues']}
-            </span>
-            <Checkbox
-              checked={pkHasMultipleValues}
-              id={'pkHasMultipleValues_check'}
-              inputId={'pkHasMultipleValues_check'}
-              label="Default"
-              onChange={e => setPkHasMultipleValues(e.checked)}
-              style={{ width: '70px', marginLeft: '0.5rem' }}
-            />
-          </div>
-          <div className={styles.selectedLinkWrapper}>
-            <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
-            <span>{!isNil(link) ? link.name : ''}</span>
-          </div>
-        </Fragment>
-      );
+      if (!datasetSchemas.length) {
+        return <p className={styles.chooseReferenceDataflowText}>{resources.messages['emptyDatasetSchemas']}</p>;
+      } else {
+        return (
+          <Fragment>
+            <div className={`${styles.schemaWrapper} ${isExternalLink && styles.referenceDataflowSchemaWrapper}`}>
+              {!isUndefined(datasetSchemas) &&
+                !isEmpty(datasetSchemas) &&
+                datasetSchemas.map((datasetSchema, i) => {
+                  return (
+                    <ListBox
+                      key={`datasetSchema_${i}`}
+                      options={getOptions(datasetSchema)}
+                      onChange={e => {
+                        if (!isNil(e.value)) {
+                          dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
+                          getFields(e.value);
+                        }
+                      }}
+                      optionLabel="name"
+                      optionValue="value"
+                      title={datasetSchema.datasetSchemaName}
+                      value={link}></ListBox>
+                  );
+                })}
+            </div>
+            <div className={styles.selectedLinkFieldsWrapper}>
+              <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="linkedTableLabel"
+                className={styles.fieldSelector}
+                inputId="linkedTableLabel"
+                name={resources.messages['linkedTableLabel']}
+                onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_LABEL', payload: e.target.value })}
+                optionLabel="name"
+                options={linkedTableFields}
+                placeholder={resources.messages['linkedTableLabel']}
+                value={pkLinkedTableLabel}
+              />
+            </div>
+            <div className={styles.selectedLinkFieldsWrapper}>
+              <span htmlFor={'masterTableConditional'}>{resources.messages['masterTableConditional']}</span>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="masterTableConditional"
+                className={styles.fieldSelector}
+                inputId="masterTableConditional"
+                name={resources.messages['masterTableConditional']}
+                onChange={e => dispatchLinkSelector({ type: 'SET_MASTER_TABLE_CONDITIONAL', payload: e.target.value })}
+                optionLabel="name"
+                options={masterTableFields}
+                placeholder={resources.messages['masterTableConditional']}
+                value={pkMasterTableConditional}
+              />
+              <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="linkedTableConditional"
+                className={styles.fieldSelector}
+                inputId="linkedTableConditional"
+                name={resources.messages['linkedTableConditional']}
+                onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
+                optionLabel="name"
+                options={linkedTableFields}
+                placeholder={resources.messages['linkedTableConditional']}
+                value={pkLinkedTableConditional}
+              />
+            </div>
+            <div className={styles.selectedLinkWrapper}>
+              <span className={styles.switchTextInput} htmlFor={'pkMustBeUsed_check'}>
+                {resources.messages['pkValuesMustBeUsed']}
+              </span>
+              <Checkbox
+                checked={pkMustBeUsed}
+                id={'pkMustBeUsed_check'}
+                inputId={'pkMustBeUsed_check'}
+                label="Default"
+                onChange={e => setPkMustBeUsed(e.checked)}
+                style={{ width: '70px', marginLeft: '0.5rem' }}
+              />
+              <span className={styles.switchTextInput} htmlFor={'pkHasMultipleValues_check'}>
+                {resources.messages['pkHasMultipleValues']}
+              </span>
+              <Checkbox
+                checked={pkHasMultipleValues}
+                id={'pkHasMultipleValues_check'}
+                inputId={'pkHasMultipleValues_check'}
+                label="Default"
+                onChange={e => setPkHasMultipleValues(e.checked)}
+                style={{ width: '70px', marginLeft: '0.5rem' }}
+              />
+            </div>
+            <div className={styles.selectedLinkWrapper}>
+              <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
+              <span>{!isNil(link) ? link.name : ''}</span>
+            </div>
+          </Fragment>
+        );
+      }
     };
 
     return (
@@ -479,7 +483,7 @@ const LinkSelector = withRouter(
             });
             setIsVisible(false);
           }}
-          style={{ minWidth: '55%' }}
+          style={{ width: '65%' }}
           visible={isVisible}
           zIndex={3003}>
           {isLoading ? (
