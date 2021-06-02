@@ -1014,15 +1014,16 @@ public class FileTreatmentHelper implements DisposableBean {
       Map<String, byte[]> contents = new HashMap<>();
       if (extension.equalsIgnoreCase("csv")) {
         List<TableSchema> tablesSchema = getTables(datasetId);
-        for (TableSchema table : tablesSchema) {
-          List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId,
-              table.getIdTableSchema().toString(), includeCountryCode);
-          contents.put(table.getIdTableSchema() + "_" + table.getNameTableSchema(),
-              dataFile.get(0));
+        List<byte[]> dataFile =
+            context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
+        for (int i = 0; i < tablesSchema.size(); i++) {
+          contents.put(tablesSchema.get(i).getIdTableSchema() + "_"
+              + tablesSchema.get(i).getNameTableSchema(), dataFile.get(i));
         }
       } else {
-        List<byte[]> dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode);
-        contents.put(null, dataFile.get(0));
+        byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
+            extension.equalsIgnoreCase("validations"));
+        contents.put(null, dataFile);
       }
 
       Boolean includeZip = false;
@@ -1132,7 +1133,9 @@ public class FileTreatmentHelper implements DisposableBean {
             nameFileXlsxCsv =
                 entry.getKey().substring(entry.getKey().indexOf("_") + 1, entry.getKey().length());
           }
-
+          if ("validations".equals(mimeType)) {
+            mimeType = "xlsx";
+          }
           // Adding the xlsx/csv file to the zip
           ZipEntry e = new ZipEntry(nameFileXlsxCsv + "." + mimeType);
           out.putNextEntry(e);
@@ -1144,6 +1147,9 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     // only the xlsx file
     else {
+      if ("validations".equals(mimeType)) {
+        mimeType = "xlsx";
+      }
       nameFile = nameDataset + "." + mimeType;
       File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
       try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
