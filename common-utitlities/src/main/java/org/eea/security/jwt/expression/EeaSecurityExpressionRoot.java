@@ -55,6 +55,21 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    * @return the boolean
    */
   public boolean secondLevelAuthorize(Long idEntity, ObjectAccessRoleEnum... objectAccessRoles) {
+    boolean canAccess = checkAuthorize(idEntity, objectAccessRoles);
+    if (canAccess) {
+      canAccess = !isApiKey();
+    }
+    return canAccess;
+  }
+
+  /**
+   * Check authorize.
+   *
+   * @param idEntity the id entity
+   * @param objectAccessRoles the object access roles
+   * @return true, if successful
+   */
+  private boolean checkAuthorize(Long idEntity, ObjectAccessRoleEnum... objectAccessRoles) {
     boolean canAccess = false;
     if (SecurityContextHolder.getContext().getAuthentication().getAuthorities()
         .contains(new SimpleGrantedAuthority("ROLE_FEIGN"))) {
@@ -130,14 +145,30 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    *
    * @return the boolean
    */
-  public boolean checkApiKey(final Long dataflowId, final Long dataProvider) {
+  public boolean checkApiKey(final Long dataflowId, final Long dataProvider, Long idEntity,
+      ObjectAccessRoleEnum... objectAccessRoles) {
+    boolean canAccess = false;
     Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
 
     if (details instanceof Map) {
       String userId = ((Map<String, String>) details).get(AuthenticationDetails.USER_ID);
       String apiKey = this.userManagementControllerZull.getApiKey(userId, dataflowId, dataProvider);
-      return StringUtils.isNotBlank(apiKey) && SecurityContextHolder.getContext()
+      canAccess = StringUtils.isNotBlank(apiKey) && SecurityContextHolder.getContext()
           .getAuthentication().getCredentials().toString().contains(apiKey);
+    }
+    if (canAccess) {
+      canAccess = checkAuthorize(idEntity, objectAccessRoles);
+    }
+
+    return canAccess;
+  }
+
+  public boolean isApiKey() {
+    Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
+
+    if (details instanceof Map) {
+      return SecurityContextHolder.getContext().getAuthentication().getCredentials().toString()
+          .contains("ApiKey");
     }
 
     return false;

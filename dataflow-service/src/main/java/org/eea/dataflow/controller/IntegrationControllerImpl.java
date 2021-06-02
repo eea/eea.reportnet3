@@ -242,7 +242,8 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR (checkApiKey(#dataflowId,0L))")
+  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR
+  // (checkApiKey(#dataflowId,0L,#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD'))")
   @LockMethod
   @PostMapping(value = "/executeEUDatasetExport")
   @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,

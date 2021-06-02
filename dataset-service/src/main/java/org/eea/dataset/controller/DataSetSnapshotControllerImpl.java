@@ -398,7 +398,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("(secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))) OR (checkApiKey(#dataflowId,0L) AND secondLevelAuthorize(#datasetId,'EUDATASET_CUSTODIAN'))")
+  // @PreAuthorize("(secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER')
+  // OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))) OR (checkApiKey(#dataflowId,0L) AND
+  // secondLevelAuthorize(#datasetId,'EUDATASET_CUSTODIAN'))")
   public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
     List<ReleaseVO> releases;

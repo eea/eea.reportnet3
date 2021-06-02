@@ -69,7 +69,7 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @HystrixCommand
   @PostMapping("/populateData/dataflow/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,0L))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,0L,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
   public void populateDataFromDataCollection(
       @LockCriteria(name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
     try {
