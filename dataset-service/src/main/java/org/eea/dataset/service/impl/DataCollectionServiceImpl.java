@@ -47,7 +47,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -111,6 +110,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The Constant UPDATE_DATAFLOW_STATUS: {@value}. */
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
+
+  /** The Constant UPDATE_REFERENCE_DATAFLOW_STATUS: {@value}. */
+  private static final String UPDATE_REFERENCE_DATAFLOW_STATUS =
+      "update dataflow set status = '%s', manual_acceptance = '%s' where id = %d";
 
   /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS: {@value}. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
@@ -260,6 +263,23 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
   /**
+   * Gets the dataflow metabase.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataflow metabase
+   */
+  @Override
+  public DataFlowVO getDataflowMetabase(Long dataflowId) {
+    try {
+      DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      return (dataflowVO != null) ? dataflowVO : null;
+    } catch (Exception e) {
+      LOG_ERROR.error("Error getting dataflow {} metabase", dataflowId, e);
+      return null;
+    }
+  }
+
+  /**
    * Gets the data collection id by dataflow id.
    *
    * @param idFlow the id flow
@@ -328,11 +348,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Update data collection.
    *
    * @param dataflowId the dataflow id
+   * @param referenceDataflow the reference dataflow
    */
   @Override
   @Async
-  public void updateDataCollection(Long dataflowId) {
-    manageDataCollection(dataflowId, null, false, false, false);
+  public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow);
   }
 
   /**
@@ -342,13 +363,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dueDate the due date
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param showPublicInfo the show public info
+   * @param referenceDataflow the reference dataflow
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
+      boolean referenceDataflow) {
 
-    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
+    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
+        referenceDataflow);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
@@ -375,18 +400,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param isCreation the is creation
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param referenceDataflow the reference dataflow
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean stopAndNotifySQLErrors, boolean manualCheck) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
-    // new check: dataflow is Reference dataset?
-    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-    boolean referenceDataflow = false;
-    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
-      referenceDataflow = true;
-    }
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
@@ -446,9 +466,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
 
       // 3. Get the providers associated with representatives
-      List<DataProviderVO> dataProviders =
-          representativeControllerZuul.findDataProvidersByIds(representatives.stream()
-              .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+      List<DataProviderVO> dataProviders = new ArrayList<>();
+      if (!representatives.isEmpty()) {
+        dataProviders = representativeControllerZuul.findDataProvidersByIds(representatives.stream()
+            .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+      }
 
       // 4. Map representatives to providers
       Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
@@ -575,10 +597,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     try {
       connection.setAutoCommit(false);
 
-      if (isCreation) {
+      if (isCreation && !referenceDataflow) {
         // 5. Set dataflow to DRAFT
         statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, manualCheck,
             dueDate, dataflowId));
+      } else if (isCreation && referenceDataflow) {
+        // Set dataflow to DRAFT but keeping some attributes to null because we are in reference
+        // dataflow
+        statement.addBatch(String.format(UPDATE_REFERENCE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
+            manualCheck, dataflowId));
       }
 
       for (RepresentativeVO representative : representatives) {
@@ -640,7 +667,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               persistReferenceDataset(statement, referenceDataset, time, dataflowId);
           referenceDatasetIds.add(referenceDatasetId);
           datasetIdsAndSchemaIds.put(referenceDatasetId, referenceDataset.getDatasetSchema());
-
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
@@ -662,8 +688,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<ReferenceDataset> references = referenceDatasetRepository.findByDataflowId(dataflowId);
         references.stream().forEach(r -> {
           referenceDatasetIds.add(r.getId());
+          for (RepresentativeVO representative : representatives) {
+            List<String> emails = representative.getLeadReporters().stream()
+                .map(LeadReporterVO::getEmail).collect(Collectors.toList());
+            if (emails.isEmpty()) {
+              referenceDatasetIdsEmails.put(r.getId(), null);
+            } else {
+              referenceDatasetIdsEmails.put(r.getId(), emails);
+            }
+          }
         });
       }
+
+
       createPermissions(datasetIdsEmails, referenceDatasetIdsEmails, dataCollectionIds,
           euDatasetIds, testDatasetIds, referenceDatasetIds, dataflowId, isCreation);
       // 9. Delete editors
