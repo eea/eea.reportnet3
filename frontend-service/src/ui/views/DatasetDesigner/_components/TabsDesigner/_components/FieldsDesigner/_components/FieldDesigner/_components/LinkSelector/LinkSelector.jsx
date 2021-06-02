@@ -92,12 +92,14 @@ const LinkSelector = withRouter(
     } = match;
 
     useEffect(() => {
+      setIsLoading(true);
       const getReferenceDataflows = async () => {
         const { data } = await DataflowService.all(userContext.contextRoles);
         // const { data } = await DataflowService.referenced();
         const filteredDataflows = data.filter(dataflow => dataflow.id !== parseFloat(dataflowId));
         setReferenceDataflows(filteredDataflows);
       };
+      isEmpty(selectedLink) && setIsLoading(false);
 
       if (isExternalLink) {
         getReferenceDataflows();
@@ -117,25 +119,29 @@ const LinkSelector = withRouter(
     }, [referenceDataflows]);
 
     useEffect(() => {
-      const getDatasetSchemas = async () => {
-        setIsLoading(true);
-        let datasetSchemasDTO;
-        if (isExternalLink && !isEmpty(linkSelectorState.selectedReferenceDataflow)) {
-          datasetSchemasDTO = await DataflowService.getAllSchemas(linkSelectorState.selectedReferenceDataflow.id);
-        } else {
-          datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
-        }
-        setIsLoading(false);
-        if (isReferenceDataset) {
-          const filteredDatasets = datasetSchemasDTO.data.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
-          setDatasetSchemas(filteredDatasets);
-        } else {
-          setDatasetSchemas(datasetSchemasDTO.data);
-        }
-      };
-
-      getDatasetSchemas();
+      if (!isExternalLink) {
+        getDatasetSchemas();
+      } else if (isExternalLink && !isEmpty(linkSelectorState.selectedReferenceDataflow)) {
+        getDatasetSchemas();
+      }
     }, [linkSelectorState.selectedReferenceDataflow]);
+
+    const getDatasetSchemas = async () => {
+      setIsLoading(true);
+      let datasetSchemasDTO;
+      if (isExternalLink && !isEmpty(linkSelectorState.selectedReferenceDataflow)) {
+        datasetSchemasDTO = await DataflowService.getAllSchemas(linkSelectorState.selectedReferenceDataflow.id);
+      } else {
+        datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+      }
+      setIsLoading(false);
+      if (isReferenceDataset) {
+        const filteredDatasets = datasetSchemasDTO.data.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
+        setDatasetSchemas(filteredDatasets);
+      } else {
+        setDatasetSchemas(datasetSchemasDTO.data);
+      }
+    };
 
     useEffect(() => {
       if (!isEmpty(datasetSchemas) && !isNil(selectedLink)) {
