@@ -104,7 +104,7 @@ public interface RulesService {
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
    */
-  void deleteRuleRequired(String datasetSchemaId, String referenceId);
+  void deleteRuleRequired(String datasetSchemaId, String referenceId, DataType typeData);
 
   /**
    * Exists rule required.

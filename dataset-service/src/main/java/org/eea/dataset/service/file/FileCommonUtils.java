@@ -1,6 +1,7 @@
 package org.eea.dataset.service.file;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,9 @@ import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -46,6 +50,10 @@ public class FileCommonUtils {
    */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
+
+  /** The validation controller. */
+  @Autowired
+  private ValidationControllerZuul validationController;
 
   /**
    * The Constant LOG.
@@ -251,5 +259,18 @@ public class FileCommonUtils {
     return designDatasetRepository.existsById(datasetId);
   }
 
+  /**
+   * Gets the errors.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the errors
+   */
+  public FailedValidationsDatasetVO getErrors(Long datasetId, String idTableSchema,
+      DataSetSchemaVO datasetSchema) {
+    return validationController.getFailedValidationsByIdDataset(datasetId, 0, null, null, true,
+        null, Arrays.asList(EntityTypeEnum.FIELD, EntityTypeEnum.RECORD),
+        getTableName(idTableSchema, datasetSchema), null);
+  }
 
 }
