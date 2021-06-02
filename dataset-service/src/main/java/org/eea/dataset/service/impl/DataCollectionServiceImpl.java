@@ -111,6 +111,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
 
+  /** The Constant UPDATE_REFERENCE_DATAFLOW_STATUS: {@value}. */
+  private static final String UPDATE_REFERENCE_DATAFLOW_STATUS =
+      "update dataflow set status = '%s', manual_acceptance = '%s' where id = %d";
+
   /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS: {@value}. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
       "update representative set has_datasets = %b where id = %d;";
@@ -462,9 +466,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
 
       // 3. Get the providers associated with representatives
-      List<DataProviderVO> dataProviders =
-          representativeControllerZuul.findDataProvidersByIds(representatives.stream()
-              .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+      List<DataProviderVO> dataProviders = new ArrayList<>();
+      if (!representatives.isEmpty()) {
+        dataProviders = representativeControllerZuul.findDataProvidersByIds(representatives.stream()
+            .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+      }
 
       // 4. Map representatives to providers
       Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
@@ -591,10 +597,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     try {
       connection.setAutoCommit(false);
 
-      if (isCreation) {
+      if (isCreation && !referenceDataflow) {
         // 5. Set dataflow to DRAFT
         statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, manualCheck,
             dueDate, dataflowId));
+      } else if (isCreation && referenceDataflow) {
+        // Set dataflow to DRAFT but keeping some attributes to null because we are in reference
+        // dataflow
+        statement.addBatch(String.format(UPDATE_REFERENCE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
+            manualCheck, dataflowId));
       }
 
       for (RepresentativeVO representative : representatives) {

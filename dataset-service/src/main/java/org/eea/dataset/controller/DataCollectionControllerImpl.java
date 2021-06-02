@@ -117,6 +117,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     boolean referenceDataflow = false;
     if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
       referenceDataflow = true;
+      showPublicInfo = false;
+      manualCheck = false;
+      stopAndNotifySQLErrors = false;
     }
 
     // Continue if the dataflow exists and is DESIGN

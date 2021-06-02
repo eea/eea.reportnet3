@@ -100,7 +100,7 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
 
       // we find all users who have a national coordinator group, to assing its news dataflow and
       // datasets
-      List<ResourceAssignationVO> resourcesForDataProvider = new ArrayList();
+      List<ResourceAssignationVO> resourcesForDataProvider = new ArrayList<>();
       String resource =
           ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR.getGroupName(providers.getValue());
       List<UserRepresentationVO> users = userManagementControllerZull.getUsersByGroup(resource);
@@ -155,9 +155,11 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
     List<RepresentativeVO> representatives =
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
 
-    List<DataProviderVO> dataProviders =
-        representativeControllerZuul.findDataProvidersByIds(representatives.stream()
-            .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+    List<DataProviderVO> dataProviders = new ArrayList<>();
+    if (representatives != null && !representatives.isEmpty()) {
+      dataProviders = representativeControllerZuul.findDataProvidersByIds(representatives.stream()
+          .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+    }
 
     Map<Long, String> mapRepresentativeProviders = new HashMap<>();
     for (RepresentativeVO representative : representatives) {
