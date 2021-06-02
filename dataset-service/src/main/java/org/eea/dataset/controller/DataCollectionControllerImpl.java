@@ -32,12 +32,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The Class DataCollectionControllerImpl.
  */
 @RestController
 @RequestMapping("/datacollection")
+@Api(tags = "Dataset: Data Collection Manager")
 public class DataCollectionControllerImpl implements DataCollectionController {
 
   /** The Constant LOG. */
@@ -78,7 +83,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    * Creates the empty data collection.
    *
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
-   * @param manualCheck the manual check
+   * @param manualCheck enable the manual check for the custodian approval
    * @param showPublicInfo the show public info
    * @param dataCollectionVO the dataflow collection vo
    */
@@ -86,14 +91,22 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @HystrixCommand
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
-  public void createEmptyDataCollection(
-      @RequestParam(defaultValue = "true",
+  @PreAuthorize("secondLevelAuthorize(#dataCollectionVO.idDataflow,'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
+  @ApiOperation(value = "Create a Data Collection")
+  @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DESIGN_DATAFLOW)
+  public void createEmptyDataCollection(@ApiParam(
+      value = "Stop And Notify SQL Errors: If an error is found in the SQL rules, it stops the creation process.",
+      example = "true") @RequestParam(defaultValue = "true",
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
-      @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
-      @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
-      @RequestBody @LockCriteria(name = "dataflowId",
-          path = "idDataflow") DataCollectionVO dataCollectionVO) {
+      @ApiParam(value = "Manual Check: Enable the manual check for the custodian approval.",
+          example = "false") @RequestParam(value = "manualCheck",
+              required = false) boolean manualCheck,
+      @ApiParam(
+          value = "Show Public Info: If the schema has been marked as public, and this option is checked, the Dataflow will appear as public.",
+          example = "true") @RequestParam(value = "showPublicInfo",
+              defaultValue = "true") boolean showPublicInfo,
+      @ApiParam(value = "Dataflow Id", example = "0") @RequestBody @LockCriteria(
+          name = "dataflowId", path = "idDataflow") DataCollectionVO dataCollectionVO) {
 
     Date date = dataCollectionVO.getDueDate();
     Long dataflowId = dataCollectionVO.getIdDataflow();
@@ -131,8 +144,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @PutMapping("/update/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @ApiOperation(value = "Update a Data Collection")
+  @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DRAFT_DATAFLOW)
   public void updateDataCollection(
-      @PathVariable("dataflowId") @LockCriteria(name = "dataflowId") Long dataflowId) {
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") @LockCriteria(
+          name = "dataflowId") Long dataflowId) {
 
     TypeStatusEnum status = dataCollectionService.getDataflowStatus(dataflowId);
 
@@ -166,7 +182,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<DataCollectionVO> findDataCollectionIdByDataflowId(Long idDataflow) {
+  @ApiOperation(value = "Find a Data Collection by Dataflow id",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataCollectionVO.class,
+      responseContainer = "List")
+  public List<DataCollectionVO> findDataCollectionIdByDataflowId(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long idDataflow) {
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
   }
 }

@@ -34,6 +34,7 @@ public class CSVWriterStrategy implements WriterStrategy {
   /** The file common. */
   private FileCommonUtils fileCommon;
 
+
   /**
    * Instantiates a new CSV writer strategy.
    *
@@ -58,7 +59,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   @Override
   public byte[] writeFile(final Long dataflowId, final Long datasetId, final String tableSchemaId,
-      boolean includeCountryCode) throws EEAException {
+      boolean includeCountryCode, boolean includeValidations) throws EEAException {
     LOG.info("starting csv file writter");
 
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
@@ -88,8 +89,8 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<byte[]> writeFileList(final Long dataflowId, final Long datasetId, final String tableSchemaId,
-      boolean includeCountryCode) throws EEAException {
+  public List<byte[]> writeFileList(final Long dataflowId, final Long datasetId,
+      boolean includeCountryCode, boolean includeValidations) throws EEAException {
     LOG.info("starting csv file writter");
 
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
@@ -100,21 +101,14 @@ public class CSVWriterStrategy implements WriterStrategy {
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
     List<byte[]> byteList = new ArrayList<>();
-
-    if(tableSchemaId != null) {
-      setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode);
+    dataSetSchema.getTableSchemas().forEach(tableSchemaVO -> {
+      setLines(tableSchemaVO.getIdTableSchema(), dataSetSchema, csvWriter, datasetId,
+          includeCountryCode);
 
       // Once read we convert it to string
       byteList.add(writer.getBuffer().toString().getBytes());
-    }else {
-      dataSetSchema.getTableSchemas().forEach(tableSchemaVO -> {
-        setLines(tableSchemaVO.getIdTableSchema(), dataSetSchema, csvWriter, datasetId,
-            includeCountryCode);
-
-        // Once read we convert it to string
-        byteList.add(writer.getBuffer().toString().getBytes());
-      });
-    }
+      writer.getBuffer().setLength(0);
+    });
 
     return byteList;
 
@@ -172,6 +166,7 @@ public class CSVWriterStrategy implements WriterStrategy {
       headers.add(fieldSchema.getName());
       indexMap.put(fieldSchema.getId(), nHeaders++);
     }
+
     csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
 
     return nHeaders;
@@ -200,12 +195,12 @@ public class CSVWriterStrategy implements WriterStrategy {
 
       for (FieldValue field : fields) {
         if (null != field.getIdFieldSchema()) {
-          fieldsToWrite[indexMap.get(field.getIdFieldSchema())] = field.getValue();
+          Integer index = indexMap.get(field.getIdFieldSchema());
+          fieldsToWrite[index] = field.getValue();
         } else {
           unknownColumns.add(field.getValue());
         }
       }
-
       csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);
     }
   }
