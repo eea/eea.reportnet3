@@ -656,7 +656,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               persistReferenceDataset(statement, referenceDataset, time, dataflowId);
           referenceDatasetIds.add(referenceDatasetId);
           datasetIdsAndSchemaIds.put(referenceDatasetId, referenceDataset.getDatasetSchema());
-
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
@@ -678,8 +677,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<ReferenceDataset> references = referenceDatasetRepository.findByDataflowId(dataflowId);
         references.stream().forEach(r -> {
           referenceDatasetIds.add(r.getId());
+          for (RepresentativeVO representative : representatives) {
+            List<String> emails = representative.getLeadReporters().stream()
+                .map(LeadReporterVO::getEmail).collect(Collectors.toList());
+            if (emails.isEmpty()) {
+              referenceDatasetIdsEmails.put(r.getId(), null);
+            } else {
+              referenceDatasetIdsEmails.put(r.getId(), emails);
+            }
+          }
         });
       }
+
+
       createPermissions(datasetIdsEmails, referenceDatasetIdsEmails, dataCollectionIds,
           euDatasetIds, testDatasetIds, referenceDatasetIds, dataflowId, isCreation);
       // 9. Delete editors
