@@ -8,16 +8,16 @@
 .referenceDataflowsWrapper {
   height: 22rem;
 
-  .selectedReferenceDataflowText {
-    margin-right: 19rem;
-  }
-
   .referenceDataflowsDropdownTitle {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     margin-bottom: 1.2rem;
     margin-top: 0.5rem;
+  }
+
+  .selectedReferenceDataflowsDropdownTitle {
+    justify-content: space-between;
   }
 
   .referenceDataflowsDropdownWrapper {
