@@ -59,13 +59,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
     // setIsActiveButton(false);
 
     try {
-      return await DataCollectionService.create(
-        dataflowId,
-        new Date(9999999999999),
-        false, //isManualTechnicalAcceptance,
-        true,
-        false //showPublicInfo
-      );
+      return await DataCollectionService.createReference(dataflowId);
     } catch (error) {
       console.error(error);
       const {
@@ -75,8 +69,6 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
 
       // setIsActiveButton(true);
-    } finally {
-      // setDataCollectionDialog(false);
     }
   };
 
@@ -94,7 +86,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
     buttonClass: 'newItem',
     buttonIcon: 'siteMap',
     buttonIconClass: 'siteMapDisabled',
-    caption: 'Covert to reference',
+    caption: 'Create reference datasets',
     handleRedirect: () => handleDialogs({ dialog: 'isCreateReference', isVisible: true }),
     helpClassName: 'dataflow-create-datacollection-help-step',
     layout: 'defaultBigButton',
