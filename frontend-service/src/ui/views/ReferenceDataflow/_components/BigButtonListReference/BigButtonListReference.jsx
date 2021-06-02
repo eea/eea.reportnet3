@@ -13,15 +13,20 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from 'ui/views/_components/NewDatasetSchemaForm';
 
+import { DataCollectionService } from 'core/services/DataCollection';
+
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { referenceBigButtonsReducer } from './_functions/Reducers/referenceBigButtonsReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history, onSaveName, onUpdateData }) => {
   const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
 
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
   const [referenceBigButtonsState, referenceBigButtonsDispatch] = useReducer(referenceBigButtonsReducer, {
@@ -37,6 +42,43 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
   const onToggleNewDatasetDialog = isVisible => handleDialogs({ dialog: 'isNewDataset', isVisible });
 
   const onRedirect = ({ params, route }) => history.push(getUrl(route, params, true));
+
+  const getMetadata = async ids => {
+    try {
+      return await MetadataUtils.getMetadata(ids);
+    } catch (error) {
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
+    }
+  };
+
+  const onCreateReferenceDataset = async () => {
+    handleDialogs({ dialog: 'isCreateReference', isVisible: false });
+
+    notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
+
+    // setIsActiveButton(false);
+
+    try {
+      return await DataCollectionService.create(
+        dataflowId,
+        new Date(9999999999999),
+        false, //isManualTechnicalAcceptance,
+        true,
+        false //showPublicInfo
+      );
+    } catch (error) {
+      console.error(error);
+      const {
+        dataflow: { name: dataflowName }
+      } = await getMetadata({ dataflowId });
+
+      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
+
+      // setIsActiveButton(true);
+    } finally {
+      // setDataCollectionDialog(false);
+    }
+  };
 
   const newSchemaModel = [
     {
@@ -71,7 +113,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
     visibility: isDesignStatus
   };
 
-  const datasetsButtons = (datasets = []) => {
+  const getDatasetsButtons = (datasets = []) => {
     const allDatasets = datasets.map(dataset => {
       return { datasetId: dataset.datasetId, datasetName: dataset.name, name: dataset.datasetSchemaName };
     });
@@ -109,9 +151,12 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
         visibility: isDesignStatus
       }));
 
-  const bigButtonList = [...designDatasetButtons, newSchemaBigButton, createDataCollection].map(button => (
-    <BigButton key={button.caption} {...button} />
-  ));
+  const bigButtonList = [
+    ...designDatasetButtons,
+    ...getDatasetsButtons(dataflowState?.data?.datasets),
+    newSchemaBigButton,
+    createDataCollection
+  ].map(button => <BigButton key={button.caption} {...button} />);
 
   return (
     <Fragment>
@@ -139,13 +184,14 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
 
       {dialogVisibility.isCreateReference && (
         <ConfirmDialog
-          header={'holi'}
+          header={'Release'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          // onConfirm={onConfirmDeleteTable}
+          onConfirm={onCreateReferenceDataset}
           onHide={() => handleDialogs({ dialog: 'isCreateReference', isVisible: false })}
-          visible={dialogVisibility.isCreateReference}
-        />
+          visible={dialogVisibility.isCreateReference}>
+          Proceed release
+        </ConfirmDialog>
       )}
     </Fragment>
   );
