@@ -47,7 +47,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -260,6 +259,23 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
   /**
+   * Gets the dataflow metabase.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataflow metabase
+   */
+  @Override
+  public DataFlowVO getDataflowMetabase(Long dataflowId) {
+    try {
+      DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      return (dataflowVO != null) ? dataflowVO : null;
+    } catch (Exception e) {
+      LOG_ERROR.error("Error getting dataflow {} metabase", dataflowId, e);
+      return null;
+    }
+  }
+
+  /**
    * Gets the data collection id by dataflow id.
    *
    * @param idFlow the id flow
@@ -328,11 +344,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Update data collection.
    *
    * @param dataflowId the dataflow id
+   * @param referenceDataflow the reference dataflow
    */
   @Override
   @Async
-  public void updateDataCollection(Long dataflowId) {
-    manageDataCollection(dataflowId, null, false, false, false);
+  public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow);
   }
 
   /**
@@ -342,13 +359,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dueDate the due date
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param showPublicInfo the show public info
+   * @param referenceDataflow the reference dataflow
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
+      boolean referenceDataflow) {
 
-    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
+    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
+        referenceDataflow);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
@@ -375,18 +396,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param isCreation the is creation
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param referenceDataflow the reference dataflow
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean stopAndNotifySQLErrors, boolean manualCheck) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
-    // new check: dataflow is Reference dataset?
-    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-    boolean referenceDataflow = false;
-    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
-      referenceDataflow = true;
-    }
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);

@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.util.Date;
 import java.util.List;
 import org.eea.dataset.service.model.FKDataCollection;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 
@@ -41,9 +42,11 @@ public interface DataCollectionService {
    * @param dueDate the due date
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck enable the manual check for the custodian approval
+   * @param showPublicInfo the show public info
+   * @param referenceDataflow the reference dataflow
    */
   void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean stopAndNotifySQLErrors,
-      boolean manualCheck, boolean showPublicInfo);
+      boolean manualCheck, boolean showPublicInfo, boolean referenceDataflow);
 
   /**
    * Adds the foreign relations from new reportings.
@@ -56,7 +59,17 @@ public interface DataCollectionService {
    * Update data collection.
    *
    * @param dataflowId the dataflow id
+   * @param referenceDataflow the reference dataflow
    */
-  void updateDataCollection(Long dataflowId);
+  void updateDataCollection(Long dataflowId, boolean referenceDataflow);
+
+
+  /**
+   * Gets the dataflow metabase.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataflow metabase
+   */
+  DataFlowVO getDataflowMetabase(Long dataflowId);
 
 }
