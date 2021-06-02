@@ -30,7 +30,7 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
-import { ShareRights } from './_components/ShareRights';
+import { ShareRights } from 'ui/views/_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 import { UserList } from 'ui/views/_components/UserList';

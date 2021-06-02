@@ -1,16 +1,19 @@
 export const dataflowsReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'INITIAL_LOAD':
-      return { ...state, ...payload };
+    case 'GET_DATAFLOWS':
+      return { ...state, [payload.type]: payload.data };
 
     case 'HAS_PERMISSION':
       return { ...state, isCustodian: payload.isCustodian, isNationalCoordinator: payload.isNationalCoordinator };
 
-    case 'IS_LOADING':
-      return { ...state, isLoading: payload.value };
-
     case 'MANAGE_DIALOGS':
-      return { ...state, [payload.dialog]: payload.value, [payload.secondDialog]: payload.secondValue };
+      return { ...state, [payload.dialog]: payload.value };
+
+    case 'ON_CHANGE_TAB':
+      return { ...state, activeIndex: payload.index };
+
+    case 'SET_LOADING':
+      return { ...state, loadingStatus: { ...state.loadingStatus, [payload.tab]: payload.status } };
 
     default:
       return state;
