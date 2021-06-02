@@ -1029,7 +1029,7 @@ public class FileTreatmentHelper implements DisposableBean {
       Boolean includeZip = false;
       // If the length after splitting the file type arrives it's more than 1, then there's a
       // zip+xlsx type
-      if (type.length > 1) {
+      if (type.length > 1 && !extension.equalsIgnoreCase("validations")) {
         includeZip = true;
       }
       generateFile(datasetId, extension, contents, includeZip, datasetType);
