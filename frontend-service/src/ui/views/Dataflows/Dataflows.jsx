@@ -70,8 +70,6 @@ const Dataflows = withRouter(({ history, match }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
-  const RenderDistruction = ({ vitalArrayProp }) => vitalArrayProp?.map(element => <div>{element.name}</div>);
-
   useEffect(() => {
     if (!isNil(dataflowsErrorType)) {
       notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
