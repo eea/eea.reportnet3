@@ -1,16 +1,26 @@
-.chooseReferenceDataflow {
+.chooseReferenceDataflowText {
   position: absolute;
   top: 50%;
-  left: 40%;
+  width: 96%;
+  text-align: center;
 }
 
 .referenceDataflowsWrapper {
   height: 22rem;
 
-  .referenceDataflowsDropdownWrapper {
+  .selectedReferenceDataflowText {
+    margin-right: 19rem;
+  }
+
+  .referenceDataflowsDropdownTitle {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    margin-bottom: 1.2rem;
+    margin-top: 0.5rem;
+  }
+
+  .referenceDataflowsDropdownWrapper {
     > label {
       margin-right: 0.5rem;
       font-weight: bold;
@@ -66,12 +76,8 @@
 .selectedLinkWrapper {
   margin-top: 1rem;
 }
-.selectedReferenceDataflowWrapper {
-  position: relative;
-  top: -1.5rem;
-  .selectedReferenceDataflowLabel {
-    font-weight: bold;
-  }
+.selectedReferenceDataflowLabel {
+  font-weight: bold;
 }
 
 .selectedLinkLabel {

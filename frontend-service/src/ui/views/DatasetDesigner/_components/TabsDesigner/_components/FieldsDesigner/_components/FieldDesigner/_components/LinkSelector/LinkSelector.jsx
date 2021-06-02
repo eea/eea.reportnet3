@@ -321,22 +321,9 @@ const LinkSelector = withRouter(
     const renderExternalLinkSelector = () => {
       return (
         <div className={styles.referenceDataflowsWrapper}>
-          <div className={styles.referenceDataflowsDropdownWrapper}>
-            <label>{resources.messages['referenceDataflows']}</label>
-            <Dropdown
-              ariaLabel={'referenceDataflows'}
-              className={styles.referenceDataflowsDropdown}
-              name="referenceDataflowsDropdown"
-              onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
-              optionLabel="name"
-              options={referenceDataflows}
-              placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-              value={linkSelectorState.selectedReferenceDataflow}
-            />
-          </div>
-          {!isEmpty(linkSelectorState.selectedReferenceDataflow) ? (
-            <Fragment>
-              <div className={styles.selectedReferenceDataflowWrapper}>
+          <div className={styles.referenceDataflowsDropdownTitle}>
+            {!isEmpty(linkSelectorState.selectedReferenceDataflow) && (
+              <div className={styles.selectedReferenceDataflowText}>
                 <span
                   className={
                     styles.selectedReferenceDataflowLabel
@@ -348,12 +335,27 @@ const LinkSelector = withRouter(
                   )}
                 </span>
               </div>
-              {renderLinkSelector()}
-            </Fragment>
-          ) : (
-            <p className={styles.chooseReferenceDataflow}>
+            )}
+            <div className={styles.referenceDataflowsDropdownWrapper}>
+              <label>{resources.messages['referenceDataflows']}</label>
+              <Dropdown
+                ariaLabel={'referenceDataflows'}
+                className={styles.referenceDataflowsDropdown}
+                name="referenceDataflowsDropdown"
+                onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
+                optionLabel="name"
+                options={referenceDataflows}
+                placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+                value={linkSelectorState.selectedReferenceDataflow}
+              />
+            </div>
+          </div>
+          {isEmpty(linkSelectorState.selectedReferenceDataflow) ? (
+            <p className={styles.chooseReferenceDataflowText}>
               {resources.messages['externalLinkDialogNoReferenceDataflowMessage']}
             </p>
+          ) : (
+            renderLinkSelector()
           )}
         </div>
       );
