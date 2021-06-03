@@ -63,7 +63,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   }
 
   if (state.requestStatus === 'resolved' && state.dataflows.length === 0) {
-    return <h3>No dataflow is using this as reference</h3>;
+    return <h3>{resources.messages['noReferencingDataflows']} </h3>;
   }
 
   return (
@@ -71,7 +71,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
       <Filters data={state.dataflows} getFilteredData={onLoadFilteredData} options={filterOptions} />
 
       {state.filteredData === 0 ? (
-        <h3>No matching results</h3>
+        <h3>{resources.messages['dataflowsNotMatchingFilter']}</h3>
       ) : (
         <DataTable
           first={state.pagination.first}

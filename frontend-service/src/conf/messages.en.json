@@ -1118,6 +1118,8 @@
     "createReferenceDatasetsError": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "leftBarReportingDataflowsButton": "Referencing dataflows",
     "referencingDataflowsDialogHeader": "Referencing dataflows list",
-    "referencingDataflowNameColumnLabel": "Dataflow name"
+    "referencingDataflowNameColumnLabel": "Dataflow name",
+    "dataflowsNotMatchingFilter": "There are no dataflows with the selected parameters",
+    "noReferencingDataflows": "There are no referencing dataflows"
   }
 }
