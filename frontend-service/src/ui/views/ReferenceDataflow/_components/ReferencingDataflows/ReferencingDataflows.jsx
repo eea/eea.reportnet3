@@ -58,15 +58,17 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
 
   const renderNameColumnTemplate = dataflow => <div>{dataflow.name}</div>;
 
+  const renderDialogLayout = children => <div className={styles.modal}>{children}</div>;
+
   if (state.requestStatus === 'pending') {
-    return <Spinner className={styles.spinner} />;
+    return renderDialogLayout(<Spinner className={styles.middle} />);
   }
 
   if (state.requestStatus === 'resolved' && state.dataflows.length === 0) {
-    return <h3>{resources.messages['noReferencingDataflows']} </h3>;
+    return renderDialogLayout(<h3 className={styles.message}>{resources.messages['noReferencingDataflows']}</h3>);
   }
 
-  return (
+  return renderDialogLayout(
     <Fragment>
       <Filters data={state.dataflows} getFilteredData={onLoadFilteredData} options={filterOptions} />
 
