@@ -13,7 +13,7 @@ import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 import { BigButtonListReference } from './_components/BigButtonListReference';
-import { ReportingDataflows } from './_components/ReportingDataflows';
+import { ReferencingDataflows } from './_components/ReferencingDataflows';
 
 // import { UserService } from 'core/services/User';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
@@ -96,7 +96,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     updatedDatasetSchema: [],
     // userRoles: [],
     // isUserRightManagementDialogVisible: false,
-    isReportingDataflowsDialogVisible: false
+    isReferencingDataflowsDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -243,13 +243,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         onSaveName={onSaveDatasetName}
         onUpdateData={setIsDataUpdated}
       />
-      {dataflowState.isReportingDataflowsDialogVisible && (
+      {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
           // footer={dataflowUsersListFooter}
           header={resources.messages['dataflowUsersList']}
-          onHide={() => manageDialogs('isReportingDataflowsDialogVisible', false)}
-          visible={dataflowState.isReportingDataflowsDialogVisible}>
-          <ReportingDataflows referenceDataflowId={referenceDataflowId} />
+          onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
+          visible={dataflowState.isReferencingDataflowsDialogVisible}>
+          <ReferencingDataflows referenceDataflowId={referenceDataflowId} />
         </Dialog>
       )}
     </div>
