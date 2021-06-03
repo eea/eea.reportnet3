@@ -52,6 +52,7 @@ export const FieldDesigner = ({
   fieldReadOnly,
   fieldRequired,
   fieldType,
+  fields,
   hasPK,
   index,
   initialFieldIndexDragged,
@@ -91,8 +92,7 @@ export const FieldDesigner = ({
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    // { fieldType: 'Reference', value: 'Reference', fieldTypeIcon: 'link' }
-    // { fieldType: 'URL', value: 'Url', fieldTypeIcon: 'url' },
+    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
     // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
     // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
     // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
@@ -223,7 +223,7 @@ export const FieldDesigner = ({
       TextUtils.areEquals(type.fieldType, 'multiselect_codelist')
     ) {
       onCodelistDropdownSelected(type);
-    } else if (TextUtils.areEquals(type.fieldType, 'link')) {
+    } else if (TextUtils.areEquals(type.fieldType, 'link') || TextUtils.areEquals(type.fieldType, 'external_link')) {
       onLinkDropdownSelected(type);
     } else if (TextUtils.areEquals(type.fieldType, 'attachment')) {
       onAttachmentDropdownSelected(type);
@@ -402,7 +402,9 @@ export const FieldDesigner = ({
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
           onFieldAdd({
             codelistItems,
-            type: 'LINK',
+            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
+              ? 'EXTERNAL_LINK'
+              : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -720,7 +722,9 @@ export const FieldDesigner = ({
         if (fieldId.toString() === '-1') {
           onFieldAdd({
             codelistItems,
-            type: 'LINK',
+            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
+              ? 'EXTERNAL_LINK'
+              : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -732,7 +736,9 @@ export const FieldDesigner = ({
           fieldUpdate({
             codelistItems,
             isLinkChange: true,
-            type: 'LINK',
+            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
+              ? 'EXTERNAL_LINK'
+              : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -790,11 +796,9 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField: TextUtils.areEquals(type, 'LINK')
-          ? !isNil(referencedField)
-            ? parseReferenceField(referencedField)
-            : fieldDesignerState.fieldLinkValue
-          : null,
+        referencedField: !isNil(referencedField)
+          ? parseReferenceField(referencedField)
+          : fieldDesignerState.fieldLinkValue,
         required,
         type,
         validExtensions
@@ -813,11 +817,12 @@ export const FieldDesigner = ({
           name,
           readOnly,
           recordId,
-          referencedField: TextUtils.areEquals(type, 'LINK')
-            ? !isNil(referencedField)
-              ? parseReferenceField(referencedField)
-              : fieldDesignerState.fieldLinkValue
-            : null,
+          referencedField:
+            TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
+              ? !isNil(referencedField)
+                ? parseReferenceField(referencedField)
+                : fieldDesignerState.fieldLinkValue
+              : null,
           required,
           type,
           validExtensions
@@ -841,11 +846,14 @@ export const FieldDesigner = ({
 
   const parseReferenceField = completeReferencedField => {
     return {
+      dataflowId: completeReferencedField.referencedField.dataflowId,
+      fieldSchemaName: completeReferencedField.referencedField.fieldSchemaName,
       idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId,
       idPk: completeReferencedField.referencedField.fieldSchemaId,
-      linkedConditionalFieldId: completeReferencedField.referencedField.linkedTableConditional,
       labelId: completeReferencedField.referencedField.linkedTableLabel,
-      masterConditionalFieldId: completeReferencedField.referencedField.masterTableConditional
+      linkedConditionalFieldId: completeReferencedField.referencedField.linkedTableConditional,
+      masterConditionalFieldId: completeReferencedField.referencedField.masterTableConditional,
+      tableSchemaName: completeReferencedField.referencedField.tableSchemaName
     };
   };
 
@@ -958,7 +966,9 @@ export const FieldDesigner = ({
         }
         tooltipOptions={{ position: 'top' }}
       />
-    ) : !isUndefined(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue.fieldType === 'Link' ? (
+    ) : !isUndefined(fieldDesignerState.fieldTypeValue) &&
+      (fieldDesignerState.fieldTypeValue.fieldType === 'Link' ||
+        fieldDesignerState.fieldTypeValue.fieldType === 'External_link') ? (
       <Button
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -1225,7 +1235,11 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
+          fields={fields}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
+          isExternalLink={
+            TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false
+          }
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
           isReferenceDataset={isReferenceDataset}
           linkedTableConditional={fieldLinkedTableConditional}
