@@ -268,7 +268,7 @@ public class FileCommonUtils {
    */
   public FailedValidationsDatasetVO getErrors(Long datasetId, String idTableSchema,
       DataSetSchemaVO datasetSchema) {
-    return validationController.getFailedValidationsByIdDataset(datasetId, 0, null, null, true,
+    return validationController.getFailedValidationsByIdDataset(datasetId, 0, 1000000, null, true,
         null, Arrays.asList(EntityTypeEnum.FIELD, EntityTypeEnum.RECORD),
         getTableName(idTableSchema, datasetSchema), null);
   }
