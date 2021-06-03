@@ -59,6 +59,7 @@ import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 const DataViewer = withRouter(
   ({
+    dataProviderId,
     hasCountryCode,
     hasWritePermissions,
     isDataflowOpen,
@@ -231,7 +232,7 @@ const DataViewer = withRouter(
 
     const onFileDownload = async (fileName, fieldId) => {
       try {
-        const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
+        const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
         DownloadFile(data, fileName);
       } catch (error) {
