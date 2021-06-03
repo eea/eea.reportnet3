@@ -12,6 +12,9 @@ export const referencingDataflowsReducer = (state, { type, payload }) => {
       return { ...state, requestStatus: 'resolved', dataflows: payload.dataflows };
     }
 
+    case 'ON_LOAD_FILTERED_DATA':
+      return { ...state, filteredData: payload.dataflows };
+
     case 'ON_PAGINATE':
       return { ...state, pagination: payload.pagination };
 

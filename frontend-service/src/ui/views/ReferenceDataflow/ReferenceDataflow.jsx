@@ -246,7 +246,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
           // footer={dataflowUsersListFooter}
-          header={resources.messages['dataflowUsersList']}
+          header={resources.messages['referencingDataflowsDialogHeader']}
           onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
           <ReferencingDataflows referenceDataflowId={referenceDataflowId} />

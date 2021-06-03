@@ -6,8 +6,10 @@ import { referencingDataflowsReducer } from './_functions/referencingDataflowsRe
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { Filters } from 'ui/views/_components/Filters';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { Fragment } from 'react';
 
 const ReferencingDataflows = ({ referenceDataflowId }) => {
   const resources = useContext(ResourcesContext);
@@ -39,10 +41,18 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
     dispatch({ type: 'ON_PAGINATE', payload: { pagination } });
   };
 
+  const onLoadFilteredData = dataflows => {
+    dispatch({ type: 'ON_LOAD_FILTERED_DATA', payload: { dataflows } });
+  };
+
+  const filterOptions = [{ type: 'input', properties: [{ name: 'name' }] }];
+
   const renderNameColumnTemplate = dataflow => <div>{dataflow.name}</div>;
 
   return (
-    <div className={styles.table}>
+    <Fragment>
+      <Filters data={state.dataflows} getFilteredData={onLoadFilteredData} options={filterOptions} />
+
       <DataTable
         first={state.pagination.first}
         getPageChange={onPaginate}
@@ -50,9 +60,9 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
         rows={state.pagination.rows}
         rowsPerPageOptions={[5, 10, 15]}
         value={state.filteredData}>
-        <Column body={renderNameColumnTemplate} header={resources.messages['rolesColumn']} />
+        <Column body={renderNameColumnTemplate} header={resources.messages['referencingDataflowNameColumnLabel']} />
       </DataTable>
-    </div>
+    </Fragment>
   );
 };
 

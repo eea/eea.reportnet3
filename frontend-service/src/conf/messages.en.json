@@ -1115,6 +1115,8 @@
     "referenceDataflowsListTab": "Reference Dataflows",
     "referenceDataflowCrumbLabel": "Reference Dataflow",
     "createReferenceDatasetsError": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
-    "leftBarReportingDataflowsButton": "Reporting dataflows"
+    "leftBarReportingDataflowsButton": "Referencing dataflows",
+    "referencingDataflowsDialogHeader": "Referencing dataflows list",
+    "referencingDataflowNameColumnLabel": "Dataflow name"
   }
 }
