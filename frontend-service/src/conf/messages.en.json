@@ -1114,6 +1114,7 @@
     "errorBoundaryMessageRefresh": "Press the Refresh button to continue.",
     "referenceDataflowsListTab": "Reference Dataflows",
     "referenceDataflowCrumbLabel": "Reference Dataflow",
+    "referenceDatasetDesigner": "Reference Dataset Designer",
     "createReferenceDatasetsError": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "leftBarReportingDataflowsButton": "Referencing dataflows",
     "referencingDataflowsDialogHeader": "Referencing dataflows list",

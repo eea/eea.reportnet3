@@ -74,6 +74,11 @@ export const useBreadCrumbs = ({
     return { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' };
   };
 
+  const getReferenceDatasetDesignerCrumb = () => ({
+    label: resources.messages['referenceDatasetDesigner'],
+    icon: 'pencilRuler'
+  });
+
   const getEuDatasetCrumb = () => {
     return { label: resources.messages['euDataset'], icon: 'euDataset' };
   };
@@ -259,6 +264,15 @@ export const useBreadCrumbs = ({
 
     if (currentPage === CurrentPage.REFERENCE_DATAFLOW) {
       breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getReferenceDataflowCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.REFERENCE_DATASET_DESIGNER) {
+      breadCrumbContext.add([
+        getHomeCrumb(),
+        getDataflowsCrumb(),
+        getReferenceDataflowCrumb(),
+        getReferenceDatasetDesignerCrumb()
+      ]);
     }
   };
 
