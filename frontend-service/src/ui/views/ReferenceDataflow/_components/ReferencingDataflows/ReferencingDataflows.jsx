@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import styles from './ReferencingDataflows.module.scss';
 
@@ -9,12 +9,15 @@ import { referencingDataflowsReducer } from './_functions/referencingDataflowsRe
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { Fragment } from 'react';
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
 const ReferencingDataflows = ({ referenceDataflowId }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
   const [state, dispatch] = useReducer(referencingDataflowsReducer, {
     dataflows: [],
     error: '',
@@ -24,27 +27,23 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   });
 
   useEffect(() => {
-    //fetch data
-    //make api call
-    //referenceDataset/referenced/dataflow/1
-    //setDataflows
-
-    const res = onLoadDataflows();
-    console.log(`res`, res);
+    onLoadDataflows();
   }, []);
 
   const onLoadDataflows = async () => {
-    const dataflows = await ReferenceDataflowService.getReferencingDataflows(referenceDataflowId);
-    return dataflows;
+    dispatch({ type: 'LOADING_STARTED' });
+
+    try {
+      const referencingDataflowsResponse = await ReferenceDataflowService.getReferencingDataflows(referenceDataflowId);
+
+      dispatch({
+        type: 'LOADING_SUCCESS',
+        payload: { dataflows: referencingDataflowsResponse.data }
+      });
+    } catch (error) {
+      notificationContext.add({ type: 'LOADING_ERROR', error });
+    }
   };
-
-  //add filters
-  //add table
-  //add pagination
-
-  //spinner on fetch
-  //message on empty array
-  // filters and table when has data
 
   const onPaginate = event => {
     const pagination = { first: event.first, page: event.page, rows: event.rows };
@@ -59,19 +58,31 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
 
   const renderNameColumnTemplate = dataflow => <div>{dataflow.name}</div>;
 
+  if (state.requestStatus === 'pending') {
+    return <Spinner className={styles.spinner} />;
+  }
+
+  if (state.requestStatus === 'resolved' && state.dataflows.length === 0) {
+    return <h3>No dataflow is using this as reference</h3>;
+  }
+
   return (
     <Fragment>
       <Filters data={state.dataflows} getFilteredData={onLoadFilteredData} options={filterOptions} />
 
-      <DataTable
-        first={state.pagination.first}
-        getPageChange={onPaginate}
-        paginator={true}
-        rows={state.pagination.rows}
-        rowsPerPageOptions={[5, 10, 15]}
-        value={state.filteredData}>
-        <Column body={renderNameColumnTemplate} header={resources.messages['referencingDataflowNameColumnLabel']} />
-      </DataTable>
+      {state.filteredData === 0 ? (
+        <h3>No matching results</h3>
+      ) : (
+        <DataTable
+          first={state.pagination.first}
+          getPageChange={onPaginate}
+          paginator={true}
+          rows={state.pagination.rows}
+          rowsPerPageOptions={[5, 10, 15]}
+          value={state.filteredData}>
+          <Column body={renderNameColumnTemplate} header={resources.messages['referencingDataflowNameColumnLabel']} />
+        </DataTable>
+      )}
     </Fragment>
   );
 };
