@@ -37,14 +37,17 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
@@ -126,6 +129,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /** The kafka sender utils. */
   @Autowired
@@ -606,11 +613,19 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         return new AsyncResult<>(idDesignDataset);
 
       } catch (EEAException e) {
-        LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
-            e.getMessage(), e);
+        DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+        EventType failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT;
+        if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+          failEvent = EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT;
+          LOG_ERROR.error("Error processing the reference dataflow {}. Error message: {}",
+              dataflowId, e.getMessage(), e);
+        } else {
+          LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
+              e.getMessage(), e);
+        }
+
         // Error notification
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADD_DATACOLLECTION_FAILED_EVENT,
-            null,
+        kafkaSenderUtils.releaseNotificableKafkaEvent(failEvent, null,
             NotificationVO.builder()
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .dataflowId(dataflowId).error(e.getMessage()).build());

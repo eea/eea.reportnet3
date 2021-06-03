@@ -71,7 +71,7 @@ public class FMEControllerImpl implements FMEController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD')")
   @GetMapping(value = "/findRepositories", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find FME Repositories", produces = MediaType.APPLICATION_JSON_VALUE,
       response = FMECollectionVO.class)
@@ -90,7 +90,7 @@ public class FMEControllerImpl implements FMEController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD') OR (hasRole('DATA_CUSTODIAN')) OR (hasRole('DATA_STEWARD'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD')")
   @GetMapping(value = "/findItems", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find FME Items", produces = MediaType.APPLICATION_JSON_VALUE,
       response = FMECollectionVO.class)
