@@ -177,7 +177,7 @@ const DatasetSchema = ({
               className="p-breadcrumb-home"
               data-for="geometricTypeTooltip"
               data-tip
-              icon={AwesomeIcons('externalLink')}
+              icon={AwesomeIcons('externalUrl')}
             />
             <ReactTooltip className={styles.tooltipClass} effect="solid" id="geometricTypeTooltip" place="top">
               <span>{resources.messages['geomTypeHelpTooltip']}</span>
@@ -222,12 +222,16 @@ const DatasetSchema = ({
               fieldElmt => fieldElmt.type === 'CODELIST' || fieldElmt.type === 'MULTISELECT_CODELIST'
             )
           );
-          const containsLinks = !isEmpty(tableDTO.records[0].fields.filter(fieldElmt => fieldElmt.type === 'LINK'));
+          const containsLinks = !isEmpty(
+            tableDTO.records[0].fields.filter(
+              fieldElmt => fieldElmt.type === 'LINK' || fieldElmt.type === 'EXTERNAL_LINK'
+            )
+          );
           const fields = tableDTO.records[0].fields.map(fieldDTO => {
             const field = {};
             let referencedField = {};
             if (!isNil(fieldDTO.referencedField)) {
-              referencedField = onGetReferencedFieldName(fieldDTO.referencedField);
+              referencedField = onGetReferencedFieldName(fieldDTO.referencedField, fieldDTO.type === 'EXTERNAL_LINK');
               referencedField.pkHasMultipleValues = fieldDTO.pkHasMultipleValues;
               referencedField.pkMustBeUsed = fieldDTO.pkMustBeUsed;
             }
