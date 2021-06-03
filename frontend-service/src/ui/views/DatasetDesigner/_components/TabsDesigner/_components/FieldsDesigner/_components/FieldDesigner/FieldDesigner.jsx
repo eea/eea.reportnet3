@@ -796,12 +796,9 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField:
-          TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
-            ? !isNil(referencedField)
-              ? parseReferenceField(referencedField)
-              : fieldDesignerState.fieldLinkValue
-            : null,
+        referencedField: !isNil(referencedField)
+          ? parseReferenceField(referencedField)
+          : fieldDesignerState.fieldLinkValue,
         required,
         type,
         validExtensions

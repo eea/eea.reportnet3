@@ -221,7 +221,11 @@ const LinkSelector = withRouter(
       let masterFields = [];
       const linkedTable = datasetSchemas
         .find(datasetSchema => datasetSchema.datasetSchemaId === field.referencedField.datasetSchemaId)
-        ?.tables.find(table => table.tableSchemaId === field.referencedField.tableSchemaId);
+        ?.tables.find(table =>
+          !isExternalLink
+            ? table.tableSchemaId === field.referencedField.tableSchemaId
+            : table.tableSchemaName === field.referencedField.tableSchemaName
+        );
 
       linkedFields = linkedTable?.records[0]?.fields
         .filter(
@@ -284,15 +288,15 @@ const LinkSelector = withRouter(
               value: `${table.tableSchemaName} - ${pkField.fieldId}`,
               referencedField: {
                 fieldSchemaId: pkField.fieldId,
-                fieldSchemaName: pkField.name,
                 datasetSchemaId: datasetSchema.datasetSchemaId,
-                tableSchemaId: table.tableSchemaId,
-                tableSchemaName: table.tableSchemaName
+                tableSchemaId: table.tableSchemaId
               },
               disabled: false
             };
             if (isExternalLink) {
               linkObj.referencedField.dataflowId = linkSelectorState.selectedReferenceDataflow.id;
+              linkObj.referencedField.fieldSchemaName = pkField.name;
+              linkObj.referencedField.tableSchemaName = table.tableSchemaName;
             }
             return linkObj;
           } else {
@@ -365,6 +369,14 @@ const LinkSelector = withRouter(
       if (!datasetSchemas.length) {
         return <p className={styles.chooseReferenceDataflowText}>{resources.messages['emptyDatasetSchemas']}</p>;
       } else {
+        if (isExternalLink) {
+          const tabSchema = datasetSchemas
+            .find(datasetSchema => datasetSchema.datasetSchemaId === link.referencedField?.datasetSchemaId)
+            ?.tables.find(table => table.tableSchemaName === link.referencedField?.tableSchemaName);
+          if (!isNil(tabSchema)) {
+            link.referencedField.tableSchemaId = tabSchema.tableSchemaId;
+          }
+        }
         return (
           <Fragment>
             <div className={`${styles.schemaWrapper} ${isExternalLink && styles.referenceDataflowSchemaWrapper}`}>

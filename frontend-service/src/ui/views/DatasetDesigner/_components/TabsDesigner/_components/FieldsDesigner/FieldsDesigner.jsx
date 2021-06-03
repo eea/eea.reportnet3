@@ -317,18 +317,16 @@ export const FieldsDesigner = ({
 
   const getExternalReferencedFieldName = referencedField => {
     const link = {};
-    let tableSchema = '';
-
     link.name = `${referencedField.tableSchemaName} - ${referencedField.fieldSchemaName}`;
     link.value = `${referencedField.tableSchemaName} - ${referencedField.idPk}`;
     link.disabled = false;
-    tableSchema = table.tableSchemaId;
 
     link.referencedField = {
       dataflowId: referencedField.dataflowId,
       datasetSchemaId: referencedField.idDatasetSchema,
       fieldSchemaId: referencedField.idPk,
-      tableSchemaId: tableSchema
+      fieldSchemaName: referencedField.fieldSchemaName,
+      tableSchemaName: referencedField.tableSchemaName
     };
     return link;
   };
