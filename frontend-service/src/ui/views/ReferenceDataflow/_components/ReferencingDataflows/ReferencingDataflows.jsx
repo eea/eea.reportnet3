@@ -2,6 +2,8 @@ import { useContext, useEffect, useReducer } from 'react';
 
 import styles from './ReferencingDataflows.module.scss';
 
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
+
 import { referencingDataflowsReducer } from './_functions/referencingDataflowsReducer';
 
 import { Column } from 'primereact/column';
@@ -23,10 +25,18 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
 
   useEffect(() => {
     //fetch data
+    //make api call
+    //referenceDataset/referenced/dataflow/1
     //setDataflows
+
+    const res = onLoadDataflows();
+    console.log(`res`, res);
   }, []);
 
-  //make api call
+  const onLoadDataflows = async () => {
+    const dataflows = await ReferenceDataflowService.getReferencingDataflows(referenceDataflowId);
+    return dataflows;
+  };
 
   //add filters
   //add table
