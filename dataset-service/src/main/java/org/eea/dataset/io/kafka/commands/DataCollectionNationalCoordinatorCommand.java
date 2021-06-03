@@ -140,7 +140,7 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
     Boolean isCreation =
         Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isCreation")));
     DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-    if (dataflow != null && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+    if (dataflow != null && !TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
       successEvent = Boolean.TRUE.equals(isCreation) ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
           : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
     } else {
