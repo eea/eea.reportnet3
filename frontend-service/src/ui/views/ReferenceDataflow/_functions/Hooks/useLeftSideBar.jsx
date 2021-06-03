@@ -97,7 +97,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'clone',
       isVisible: buttonsVisibility.reportingDataflows,
       label: 'leftBarReportingDataflowsButton',
-      // onClick: () => manageDialogs('isUserListVisible', true),
+      onClick: () => manageDialogs('isReportingDataflowsDialogVisible', true),
       title: 'leftBarReportingDataflowsButton'
     };
 
