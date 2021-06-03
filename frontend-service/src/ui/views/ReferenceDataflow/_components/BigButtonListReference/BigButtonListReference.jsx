@@ -103,7 +103,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
     handleRedirect: () => handleDialogs({ dialog: 'isCreateReference', isVisible: true }),
     helpClassName: 'dataflow-create-datacollection-help-step',
     layout: 'defaultBigButton',
-    tooltip: 'tooltip',
+    tooltip: !hasDatasets ? 'There are no datasets in this dataflow' : '',
     visibility: isDesignStatus
   };
 
