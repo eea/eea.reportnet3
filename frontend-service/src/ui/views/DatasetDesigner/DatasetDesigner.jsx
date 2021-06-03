@@ -60,7 +60,7 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils, TextUtils
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const DatasetDesigner = withRouter(({ history, match }) => {
+export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false, match }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -70,8 +70,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
+
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -174,7 +175,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     snapshotState
   } = useDatasetDesigner(dataflowId, datasetId, designerState.datasetSchemaId);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATASET_DESIGNER, dataflowId, history });
+  useBreadCrumbs({
+    currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
+    dataflowId,
+    history,
+    referenceDataflowId: dataflowId
+  });
 
   useEffect(() => {
     leftSideBarContext.removeModels();

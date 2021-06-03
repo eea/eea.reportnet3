@@ -1113,6 +1113,7 @@
     "errorBoundaryMessageCopy": "Please click <strong>Copy to clipboard</strong> and submit this information to the helpdesk.",
     "errorBoundaryMessageRefresh": "Press the Refresh button to continue.",
     "referenceDataflowsListTab": "Reference Dataflows",
-    "referenceDataflowCrumbLabel": "Reference Dataflow"
+    "referenceDataflowCrumbLabel": "Reference Dataflow",
+    "referenceDatasetDesigner": "Reference Dataset Designer"
   }
 }

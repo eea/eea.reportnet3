@@ -134,7 +134,10 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
         datasetSchemaInfo: dataflowState.updatedDatasetSchema,
         enabled: true,
         handleRedirect: () =>
-          onRedirect({ route: routes.DATASET_SCHEMA, params: { dataflowId, datasetId: newDatasetSchema.datasetId } }),
+          onRedirect({
+            route: routes.REFERENCE_DATASET_SCHEMA,
+            params: { dataflowId, datasetId: newDatasetSchema.datasetId }
+          }),
         helpClassName: 'dataflow-schema-help-step',
         index: newDatasetSchema.index,
         layout: 'defaultBigButton',
