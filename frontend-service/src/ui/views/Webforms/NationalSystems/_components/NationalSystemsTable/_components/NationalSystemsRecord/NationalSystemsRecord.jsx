@@ -4,7 +4,7 @@ import styles from './NationalSystemsRecord.module.scss';
 
 import { NationalSystemsField } from './_components/NationalSystemsField';
 
-export const NationalSystemsRecord = ({ datasetId, getTableErrors, record }) => (
+export const NationalSystemsRecord = ({ dataProviderId, dataflowId, datasetId, getTableErrors, record }) => (
   <div className={styles.record}>
     {record.elements.map((element, index) => {
       const { name, title, titleSource, tooltipSource } = element;
@@ -12,6 +12,8 @@ export const NationalSystemsRecord = ({ datasetId, getTableErrors, record }) => 
       return (
         <Fragment key={index}>
           <NationalSystemsField
+            dataProviderId={dataProviderId}
+            dataflowId={dataflowId}
             datasetId={datasetId}
             getTableErrors={getTableErrors}
             nationalField={name}
