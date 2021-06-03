@@ -66,8 +66,11 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
 
-      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
-
+      notificationContext.add({
+        type: 'CREATE_REFERENCE_DATASETS_ERROR',
+        content: { referenceDataflowId: dataflowId, dataflowName }
+      });
+      //REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT  from BE
       // setIsActiveButton(true);
     }
   };
