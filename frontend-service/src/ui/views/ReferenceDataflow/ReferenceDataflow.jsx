@@ -6,13 +6,14 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReferenceDataflow.module.scss';
 
-// import { config } from 'conf';
+import { config } from 'conf';
 
 import { routes } from 'ui/routes';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 import { BigButtonListReference } from './_components/BigButtonListReference';
+import { ReportingDataflows } from './_components/ReportingDataflows';
 
 // import { UserService } from 'core/services/User';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
@@ -23,7 +24,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
+import { dataflowReducer } from './_functions/Reducers/dataflowReducer';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 // import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
@@ -31,6 +32,7 @@ import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { Dialog } from '../_components/Dialog/Dialog';
 // import { TextUtils } from 'ui/views/_functions/Utils';
 
 const ReferenceDataflow = withRouter(({ history, match }) => {
@@ -91,12 +93,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     // restrictFromPublic: false,
     // showPublicInfo: false,
     status: '',
-    updatedDatasetSchema: []
+    updatedDatasetSchema: [],
     // userRoles: [],
-    // isUserRightManagementDialogVisible: false
+    // isUserRightManagementDialogVisible: false,
+    isReportingDataflowsDialogVisible: false
   };
 
-  const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+  const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
 
   const setUpdatedDatasetSchema = updatedData =>
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
@@ -112,6 +115,15 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     history,
     matchParams: match.params
   });
+
+  useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs);
+
+  function manageDialogs(dialog, value, secondDialog, secondValue) {
+    dataflowDispatch({
+      type: 'MANAGE_DIALOGS',
+      payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
+    });
+  }
 
   const onSaveDatasetName = async (value, index) => {
     try {
@@ -175,7 +187,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
-  const getLeftSidebarButtonsVisibility = () => {
+  function getLeftSidebarButtonsVisibility() {
     // if (isEmpty(dataflowState.data)) {
     //   return {
     //     apiKeyBtn: false,
@@ -193,8 +205,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       editBtn: /* isDesign && isLeadDesigner */ true,
       // exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       // manageReportersBtn: isLeadReporterOfCountry,
-      manageRequestersBtn: true, //dataflowState.isCustodian,
-      propertiesBtn: true
+      manageRequestersBtn: dataflowState.status === config.dataflowStatus.DESIGN,
+      propertiesBtn: true,
+      reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
       // releaseableBtn: !isDesign && isLeadDesigner,
       // showPublicInfoBtn: !isDesign && isLeadDesigner,
       // usersListBtn:
@@ -203,9 +216,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       //   isReporterOfCountry ||
       //   ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
     };
-  };
-
-  useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility /* manageDialogs */);
+  }
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
@@ -232,6 +243,15 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         onSaveName={onSaveDatasetName}
         onUpdateData={setIsDataUpdated}
       />
+      {dataflowState.isReportingDataflowsDialogVisible && (
+        <Dialog
+          // footer={dataflowUsersListFooter}
+          header={resources.messages['dataflowUsersList']}
+          onHide={() => manageDialogs('isReportingDataflowsDialogVisible', false)}
+          visible={dataflowState.isReportingDataflowsDialogVisible}>
+          <ReportingDataflows referenceDataflowId={referenceDataflowId} />
+        </Dialog>
+      )}
     </div>
   );
 });

@@ -92,6 +92,15 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       title: 'dataflowUsersList'
     };
 
+    const reportingDataflows = {
+      className: 'dataflow-properties-help-step',
+      icon: 'clone',
+      isVisible: buttonsVisibility.reportingDataflows,
+      label: 'leftBarReportingDataflowsButton',
+      onClick: () => manageDialogs('isReportingDataflowsDialogVisible', true),
+      title: 'leftBarReportingDataflowsButton'
+    };
+
     const allButtons = [
       propertiesBtn,
       editBtn,
@@ -101,15 +110,11 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       apiKeyBtn,
       manageReportersBtn,
       manageRequestersBtn,
-      userListBtn
+      userListBtn,
+      reportingDataflows
     ];
 
     leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
     // }
-  }, [
-    dataflowState.userRoles,
-    dataflowState.status,
-    dataflowState.datasetId,
-    dataflowState.designDatasetSchemas?.length
-  ]);
+  }, [dataflowState.userRoles, dataflowState.status, dataflowState.datasetId]);
 };
