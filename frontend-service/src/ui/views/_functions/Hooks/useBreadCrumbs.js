@@ -18,7 +18,8 @@ export const useBreadCrumbs = ({
   history,
   matchParams,
   metaData,
-  representativeId
+  representativeId,
+  referenceDataflowId
 }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
@@ -33,6 +34,14 @@ export const useBreadCrumbs = ({
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
       icon: 'clone',
       label: resources.messages['dataflow']
+    };
+  };
+  const getReferenceDataflowCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
+      href: getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true),
+      icon: 'clone',
+      label: resources.messages['referenceDataflowCrumbLabel']
     };
   };
 
@@ -246,6 +255,10 @@ export const useBreadCrumbs = ({
 
     if (currentPage === CurrentPage.TEST_DATASETS) {
       breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getTestDatasetsCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.REFERENCE_DATAFLOW) {
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getReferenceDataflowCrumb()]);
     }
   };
 
