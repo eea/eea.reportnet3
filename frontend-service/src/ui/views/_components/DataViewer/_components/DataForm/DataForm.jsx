@@ -1,4 +1,6 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
+
 import first from 'lodash/first';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -7,6 +9,7 @@ import styles from './DataForm.module.css';
 
 import { Button } from 'ui/views/_components/Button';
 import { DataFormFieldEditor } from './_components/DataFormFieldEditor';
+import ReactTooltip from 'react-tooltip';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -76,14 +79,31 @@ const DataForm = ({
                       <label htmlFor={column.field}>{`${column.header}${
                         TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
                       }`}</label>
-                      <Button
-                        className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                        icon="infoCircle"
-                        onClick={() => onShowFieldInfo(column.header, true)}
-                        tabIndex="-1"
-                        tooltip={getTooltipMessage(column)}
-                        tooltipOptions={{ position: 'top' }}
-                      />
+                      <span data-for={`infoCircleButton_${i}`} data-tip>
+                        <Button
+                          className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                          icon="infoCircle"
+                          onClick={() => onShowFieldInfo(column.header, true)}
+                          tabIndex="-1"
+                        />
+                      </span>
+                      <ReactTooltip
+                        effect="solid"
+                        getContent={() =>
+                          ReactDOMServer.renderToStaticMarkup(
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start'
+                              }}>
+                              {getTooltipMessage(column)}
+                            </div>
+                          )
+                        }
+                        html={true}
+                        id={`infoCircleButton_${i}`}
+                        place="top"></ReactTooltip>
                     </div>
                   )}
                   <div
@@ -99,7 +119,9 @@ const DataForm = ({
                       ].includes(column.type)
                         ? '.5em'
                         : '0',
-                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type)
+                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'EXTERNAL_LINK'].includes(
+                        column.type
+                      )
                         ? '30%'
                         : ''
                     }}>
@@ -170,16 +192,33 @@ const DataForm = ({
                           ? ' (YYYY-MM-DD HH:mm:ss)'
                           : ''
                       }`}</label>
-                      <Button
-                        className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                        icon="infoCircle"
-                        onClick={() => {
-                          onShowFieldInfo(column.header, true);
-                        }}
-                        tabIndex="-1"
-                        tooltip={getTooltipMessage(column)}
-                        tooltipOptions={{ position: 'top' }}
-                      />
+                      <span data-for={`infoCircleButton_${i}`} data-tip>
+                        <Button
+                          className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                          icon="infoCircle"
+                          onClick={() => {
+                            onShowFieldInfo(column.header, true);
+                          }}
+                          tabIndex="-1"
+                        />
+                      </span>
+                      <ReactTooltip
+                        effect="solid"
+                        getContent={() =>
+                          ReactDOMServer.renderToStaticMarkup(
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start'
+                              }}>
+                              {getTooltipMessage(column)}
+                            </div>
+                          )
+                        }
+                        html={true}
+                        id={`infoCircleButton_${i}`}
+                        place="top"></ReactTooltip>
                     </div>
                   )}
                   <div
@@ -195,7 +234,9 @@ const DataForm = ({
                       ].includes(column.type)
                         ? '.5em'
                         : '0',
-                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK'].includes(column.type)
+                      width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'EXTERNAL_LINK'].includes(
+                        column.type
+                      )
                         ? '30%'
                         : ''
                     }}>

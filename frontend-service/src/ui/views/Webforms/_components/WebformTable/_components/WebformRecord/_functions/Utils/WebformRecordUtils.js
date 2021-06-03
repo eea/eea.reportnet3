@@ -56,7 +56,8 @@ const parseMultiselect = record => {
   record.dataRow.forEach(field => {
     if (
       field.fieldData.type === 'MULTISELECT_CODELIST' ||
-      (field.fieldData.type === 'LINK' && Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
+      ((field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK') &&
+        Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
     ) {
       if (
         !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
