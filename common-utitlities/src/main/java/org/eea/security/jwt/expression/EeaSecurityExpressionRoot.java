@@ -61,11 +61,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    * @return the boolean
    */
   public boolean secondLevelAuthorize(Long idEntity, ObjectAccessRoleEnum... objectAccessRoles) {
-    boolean canAccess = checkAuthorize(idEntity, objectAccessRoles);
-    if (canAccess) {
-      canAccess = !isApiKey();
-    }
-    return canAccess;
+    return checkAuthorize(idEntity, objectAccessRoles) && !isApiKey();
   }
 
   /**
