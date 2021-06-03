@@ -27,7 +27,6 @@ import { PublicRoute } from 'ui/views/_components/PublicRoute';
 import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
 import { ScrollToTop } from 'ui/views/_components/ScrollToTop';
 import { Settings } from 'ui/views/Settings';
-import { ErrorPage } from 'ui/views/ErrorPage';
 
 import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
 import { DialogProvider } from 'ui/views/_functions/Providers/DialogProvider';
@@ -102,7 +101,6 @@ const App = () => {
                               <PrivateRoute component={EUDataset} exact path={routes.EU_DATASET} />
                               <Route component={PrivacyStatement} exact path={routes.PRIVACY_STATEMENT} />
                               <PrivateRoute component={Settings} exact path={routes.SETTINGS} />
-                              <PrivateRoute component={ErrorPage} exact path={routes.ERROR_PAGE} />
                               <PrivateRoute component={ReferenceDataflow} exact path={routes.REFERENCE_DATAFLOW} />
                               <Route>
                                 <Redirect to={'/dataflows/error/notFound'} />
