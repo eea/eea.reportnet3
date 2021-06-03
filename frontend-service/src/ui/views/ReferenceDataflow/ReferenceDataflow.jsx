@@ -6,7 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReferenceDataflow.module.scss';
 
-// import { config } from 'conf';
+import { config } from 'conf';
 
 import { routes } from 'ui/routes';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -113,6 +113,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     matchParams: match.params
   });
 
+  useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility /* manageDialogs */);
+
   const onSaveDatasetName = async (value, index) => {
     try {
       await DatasetService.updateSchemaNameById(
@@ -175,7 +177,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
-  const getLeftSidebarButtonsVisibility = () => {
+  function getLeftSidebarButtonsVisibility() {
     // if (isEmpty(dataflowState.data)) {
     //   return {
     //     apiKeyBtn: false,
@@ -193,8 +195,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       editBtn: /* isDesign && isLeadDesigner */ true,
       // exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       // manageReportersBtn: isLeadReporterOfCountry,
-      manageRequestersBtn: true, //dataflowState.isCustodian,
-      propertiesBtn: true
+      manageRequestersBtn: dataflowState.status === config.dataflowStatus.DESIGN,
+      propertiesBtn: true,
+      reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
       // releaseableBtn: !isDesign && isLeadDesigner,
       // showPublicInfoBtn: !isDesign && isLeadDesigner,
       // usersListBtn:
@@ -203,9 +206,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       //   isReporterOfCountry ||
       //   ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
     };
-  };
-
-  useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility /* manageDialogs */);
+  }
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
