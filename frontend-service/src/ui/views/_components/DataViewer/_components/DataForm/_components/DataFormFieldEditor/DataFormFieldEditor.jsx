@@ -213,7 +213,7 @@ const DataFormFieldEditor = ({
   };
 
   const getLinkItemsWithEmptyOption = async (filter, type, referencedField, hasMultipleValues) => {
-    if (isNil(type) || !areEquals(type, 'LINK') || !areEquals(type, 'EXTERNAL_LINK') || isNil(referencedField)) {
+    if (isNil(type) || (!areEquals(type, 'LINK') && !areEquals(type, 'EXTERNAL_LINK')) || isNil(referencedField)) {
       return [];
     }
 
