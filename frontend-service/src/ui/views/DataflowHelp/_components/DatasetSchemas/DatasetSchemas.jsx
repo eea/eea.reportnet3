@@ -19,6 +19,7 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
+import { DataflowService } from 'core/services/Dataflow';
 import { IntegrationService } from 'core/services/Integration';
 import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { ValidationService } from 'core/services/Validation';
@@ -46,7 +47,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     }
   }, [extensionsOperationsList, uniqueList, validationList]);
 
-  const onGetReferencedFieldName = referenceField => {
+  const onGetReferencedFieldName = (referenceField, isExternalLink) => {
     const fieldObj = {};
     if (!isNil(datasetsSchemas) && !isEmpty(datasetsSchemas)) {
       datasetsSchemas.forEach(dataset => {
@@ -58,20 +59,26 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                   fieldObj.tableName = table.tableSchemaName;
                   fieldObj.fieldName = field.name;
                 }
-                if (field.fieldId === referenceField.labelId) {
-                  fieldObj.linkedTableLabel = field.name;
-                }
-                if (field.fieldId === referenceField.linkedConditionalFieldId) {
-                  fieldObj.linkedTableConditional = field.name;
-                }
-                if (field.fieldId === referenceField.masterConditionalFieldId) {
-                  fieldObj.masterTableConditional = field.name;
+                if (!isExternalLink) {
+                  if (field.fieldId === referenceField.labelId) {
+                    fieldObj.linkedTableLabel = field.name;
+                  }
+                  if (field.fieldId === referenceField.linkedConditionalFieldId) {
+                    fieldObj.linkedTableConditional = field.name;
+                  }
+                  if (field.fieldId === referenceField.masterConditionalFieldId) {
+                    fieldObj.masterTableConditional = field.name;
+                  }
                 }
               });
             });
           });
         }
       });
+      if (isExternalLink) {
+        fieldObj.tableName = referenceField.tableSchemaName;
+        fieldObj.fieldName = referenceField.fieldSchemaName;
+      }
       return fieldObj;
     }
   };

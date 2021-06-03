@@ -231,7 +231,7 @@ const DatasetSchema = ({
             const field = {};
             let referencedField = {};
             if (!isNil(fieldDTO.referencedField)) {
-              referencedField = onGetReferencedFieldName(fieldDTO.referencedField);
+              referencedField = onGetReferencedFieldName(fieldDTO.referencedField, fieldDTO.type === 'EXTERNAL_LINK');
               referencedField.pkHasMultipleValues = fieldDTO.pkHasMultipleValues;
               referencedField.pkMustBeUsed = fieldDTO.pkMustBeUsed;
             }
