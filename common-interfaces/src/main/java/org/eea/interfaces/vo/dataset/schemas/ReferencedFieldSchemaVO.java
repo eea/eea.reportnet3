@@ -30,7 +30,14 @@ public class ReferencedFieldSchemaVO {
   /** The master conditional field id. */
   private String masterConditionalFieldId;
 
+  /** The dataflow id. */
+  private Long dataflowId;
 
+  /** The table schema name. */
+  private String tableSchemaName;
+
+  /** The field schema name. */
+  private String fieldSchemaName;
 
   /**
    * Hash code.

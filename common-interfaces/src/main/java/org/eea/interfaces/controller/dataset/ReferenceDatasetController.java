@@ -1,6 +1,8 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import java.util.Set;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -47,5 +49,15 @@ public interface ReferenceDatasetController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReferenceDatasetPublicVO> findReferenceDataSetPublicByDataflowId(
       @PathVariable("id") Long dataflowId);
+
+
+  /**
+   * Find dataflows referenced by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the sets the
+   */
+  @GetMapping(value = "/referenced/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  Set<DataFlowVO> findDataflowsReferencedByDataflowId(@PathVariable("id") Long dataflowId);
 
 }

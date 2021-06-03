@@ -75,7 +75,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   @LockMethod(removeWhenFinish = false)
   public void validateDataSetData(
       @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
@@ -118,6 +118,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @return the failed validations by id dataset
    */
   @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN')")
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
       @PathVariable("id") Long datasetId,
@@ -173,6 +174,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN')")
   public FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
       @PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,

@@ -232,6 +232,37 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVOs;
   }
 
+
+
+  /**
+   * Gets the reference dataflows.
+   *
+   * @param userId the user id
+   * @return the reference dataflows
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+
+    // Get user's dataflows sorted by status and creation date
+    dataflowRepository.findReferenceByIdInOrderByStatusDescCreationDateDesc().forEach(dataflow -> {
+      DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+      List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+      if (!map.isEmpty() && null != datasetsStatusList) {
+        setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+      }
+      dataflowVOs.add(dataflowVO);
+    });
+
+    return dataflowVOs;
+  }
+
+
   /**
    * Sets the reporting dataset status.
    *

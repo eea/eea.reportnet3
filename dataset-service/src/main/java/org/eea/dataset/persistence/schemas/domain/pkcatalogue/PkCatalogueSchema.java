@@ -26,13 +26,19 @@ public class PkCatalogueSchema {
   @Field(value = "idPk")
   private ObjectId idPk;
 
-  /** The name. */
-  @Field(value = "name")
-  private String name;
+  /** The dataflow id. */
+  @Field(value = "dataflowId")
+  private Long dataflowId;
 
   /** The referenced. */
   @Field(value = "referencedBy")
   private List<ObjectId> referenced;
+
+
+  /** The referenced by dataflow. */
+  @Field(value = "referencedByDataflow")
+  private List<Long> referencedByDataflow;
+
 
 
   /**
@@ -42,7 +48,7 @@ public class PkCatalogueSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idPk, name, referenced);
+    return Objects.hash(idPk, referenced);
   }
 
   /**
@@ -60,8 +66,7 @@ public class PkCatalogueSchema {
       return false;
     }
     PkCatalogueSchema other = (PkCatalogueSchema) obj;
-    return Objects.equals(idPk, other.idPk) && Objects.equals(name, other.name)
-        && Objects.equals(referenced, other.referenced);
+    return Objects.equals(idPk, other.idPk) && Objects.equals(referenced, other.referenced);
   }
 
 }

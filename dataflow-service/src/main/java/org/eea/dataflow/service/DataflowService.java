@@ -57,6 +57,16 @@ public interface DataflowService {
 
 
   /**
+   * Gets the reference dataflows.
+   *
+   * @param userId the user id
+   * @return the reference dataflows
+   * @throws EEAException the EEA exception
+   */
+  List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
+
+
+  /**
    * Gets the completed.
    *
    * @param userId the user id

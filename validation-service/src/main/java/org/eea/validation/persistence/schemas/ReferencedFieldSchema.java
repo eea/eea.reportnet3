@@ -11,7 +11,6 @@ import lombok.ToString;
 /**
  * The Class ReferencedFieldSchema.
  */
-
 @Getter
 @Setter
 @ToString
@@ -38,6 +37,19 @@ public class ReferencedFieldSchema {
   @Field(value = "masterConditionalFieldId")
   private ObjectId masterConditionalFieldId;
 
+
+  /** The dataflow id. */
+  @Field(value = "dataflowId")
+  private Long dataflowId;
+
+
+  /** The table schema name. */
+  @Field(value = "tableSchemaName")
+  private String tableSchemaName;
+
+  /** The field schema name. */
+  @Field(value = "fieldSchemaName")
+  private String fieldSchemaName;
 
 
   /**
