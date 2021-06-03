@@ -24,5 +24,6 @@ export const routes = {
   PUBLIC_DATAFLOW_INFORMATION_ID: '/public/dataflows/:dataflowId',
   PUBLIC_DATAFLOWS: '/public/dataflows',
   SETTINGS: '/settings',
-  TEST_DATASETS: '/dataflow/:dataflowId/testDatasets'
+  TEST_DATASETS: '/dataflow/:dataflowId/testDatasets',
+  ERROR_PAGE: '/errorpage'
 };
