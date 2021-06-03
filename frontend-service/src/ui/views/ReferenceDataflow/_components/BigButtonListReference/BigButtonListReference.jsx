@@ -1,4 +1,4 @@
-import { Fragment, useContext, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router';
 
 import isNil from 'lodash/isNil';
@@ -24,7 +24,16 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
 
 const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history, onSaveName, onUpdateData }) => {
-  const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
+  const [isDesignStatus, setIsDesignStatus] = useState(false);
+  const [hasDatasets, setHasDatasets] = useState(false);
+
+  useEffect(() => {
+    setIsDesignStatus(dataflowState.status === config.dataflowStatus.DESIGN);
+  }, [dataflowState.status]);
+
+  useEffect(() => {
+    setHasDatasets(dataflowState.data?.designDatasets?.length);
+  }, [dataflowState.data.designDatasets]);
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -51,7 +60,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
     }
   };
 
-  const onCreateReferenceDataset = async () => {
+  const onAddReferenceDataset = async () => {
     handleDialogs({ dialog: 'isCreateReference', isVisible: false });
 
     notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
@@ -85,9 +94,10 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
     { disabled: true, icon: 'import', label: resources.messages['importSchema'] }
   ];
 
-  const createDataCollection = {
+  const createReferenceDatasets = {
     buttonClass: 'newItem',
     buttonIcon: 'siteMap',
+    enabled: hasDatasets,
     buttonIconClass: 'siteMapDisabled',
     caption: 'Create reference datasets',
     handleRedirect: () => handleDialogs({ dialog: 'isCreateReference', isVisible: true }),
@@ -108,25 +118,6 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
     visibility: isDesignStatus
   };
 
-  const getDatasetsButtons = (datasets = []) => {
-    const allDatasets = datasets.map(dataset => {
-      return { datasetId: dataset.datasetId, datasetName: dataset.name, name: dataset.datasetSchemaName };
-    });
-
-    return allDatasets.map(dataset => ({
-      buttonClass: 'dataset',
-      buttonIcon: 'dataset',
-      caption: dataset.datasetName,
-      helpClassName: 'dataflow-dataset-help-step',
-      handleRedirect: () => onRedirect({ route: routes.DATASET, params: { dataflowId, datasetId: dataset.datasetId } }),
-      infoStatus: dataset.isReleased,
-      infoStatusIcon: true,
-      layout: 'defaultBigButton',
-      onWheel: onRedirect({ route: routes.DATASET, params: { dataflowId, datasetId: dataset.datasetId } }),
-      visibility: true //!isDesignStatus
-    }));
-  };
-
   const designDatasetButtons = isNil(dataflowState.data.designDatasets)
     ? []
     : dataflowState.data.designDatasets.map(newDatasetSchema => ({
@@ -135,7 +126,6 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
         caption: newDatasetSchema.datasetSchemaName,
         dataflowStatus: dataflowState.status,
         datasetSchemaInfo: dataflowState.updatedDatasetSchema,
-        enabled: true,
         handleRedirect: () =>
           onRedirect({ route: routes.DATASET_SCHEMA, params: { dataflowId, datasetId: newDatasetSchema.datasetId } }),
         helpClassName: 'dataflow-schema-help-step',
@@ -143,15 +133,12 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
         layout: 'defaultBigButton',
         onSaveName: onSaveName,
         placeholder: resources.messages['datasetSchemaNamePlaceholder'],
-        visibility: true //isDesignStatus
+        visibility: true
       }));
 
-  const bigButtonList = [
-    ...designDatasetButtons,
-    ...getDatasetsButtons(dataflowState?.data?.datasets),
-    newSchemaBigButton,
-    createDataCollection
-  ].map(button => <BigButton key={button.caption} {...button} />);
+  const bigButtonList = [...designDatasetButtons, newSchemaBigButton, createReferenceDatasets].map(button =>
+    button.visibility ? <BigButton key={button.caption} {...button} /> : null
+  );
 
   return (
     <Fragment>
@@ -182,7 +169,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
           header={'Release'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={onCreateReferenceDataset}
+          onConfirm={onAddReferenceDataset}
           onHide={() => handleDialogs({ dialog: 'isCreateReference', isVisible: false })}
           visible={dialogVisibility.isCreateReference}>
           Proceed release
