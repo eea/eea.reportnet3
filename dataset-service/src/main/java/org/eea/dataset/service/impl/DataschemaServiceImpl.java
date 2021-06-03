@@ -53,6 +53,8 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -288,6 +290,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     dataSetSchema.setTableSchemas(new ArrayList<>());
+    // if we are in a reference dataflow, all the schemas created on it have to be checked as
+    // reference dataset
+    DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
+    if (dataflow != null && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+      dataSetSchema.setReferenceDataset(true);
+    }
+
     schemasRepository.save(dataSetSchema);
     schemasRepository.updateDatasetSchemaWebForm(idDataSetSchema.toString(), new Webform());
     // create the rules schema

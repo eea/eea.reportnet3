@@ -464,6 +464,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // normal schemas. If this happens, convert the type Link to Text
     checkLinksInReferenceDatasets(referenceDatasets, referenceSchemasId);
 
+    // check if there are designs (or reference) to continue the process
+    NotificationVO notificationErrorVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .dataflowId(dataflowId).build();
+    if (Boolean.TRUE.equals(referenceDataflow) && referenceDatasets.isEmpty()) {
+      LOG_ERROR.error(
+          "No reference schemas in the dataflow {}. So error in the process to create the reference dataset",
+          dataflowId);
+      releaseNotification(EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT, notificationErrorVO);
+    } else if (Boolean.FALSE.equals(referenceDataflow) && designs.isEmpty()) {
+      LOG_ERROR.error("No design datasets in the dataflow {}. So error creating the DC",
+          dataflowId);
+      releaseNotification(EventType.ADD_DATACOLLECTION_FAILED_EVENT, notificationErrorVO);
+    }
+
     if (rulesOk) {
       // 2. Get the representatives who are going to provide data
       List<RepresentativeVO> representatives = representativeControllerZuul
