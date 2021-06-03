@@ -16,6 +16,7 @@ import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
@@ -90,8 +91,8 @@ const LinkSelector = withRouter(
     useEffect(() => {
       setIsLoading(true);
       const getReferenceDataflows = async () => {
-        const { data } = await DataflowService.all(userContext.contextRoles);
-        // const { data } = await DataflowService.referenced();
+        // const { data } = await DataflowService.all(userContext.contextRoles);
+        const { data } = await ReferenceDataflowService.all();
         const filteredDataflows = data.filter(dataflow => dataflow.id !== parseFloat(dataflowId));
         setReferenceDataflows(filteredDataflows);
       };
