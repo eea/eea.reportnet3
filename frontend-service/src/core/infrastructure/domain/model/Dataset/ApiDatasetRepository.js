@@ -96,8 +96,8 @@ const downloadExportDatasetFile = async (datasetId, fileName) =>
 const downloadExportFile = async (datasetId, fileName, providerId) =>
   await apiDataset.downloadExportFile(datasetId, fileName, providerId);
 
-const downloadFileData = async (dataflowId, datasetId, fieldId, providerId) =>
-  await apiDataset.downloadFileData(dataflowId, datasetId, fieldId, providerId);
+const downloadFileData = async (dataflowId, datasetId, fieldId, dataProviderId) =>
+  await apiDataset.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
 const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
   await apiDataset.downloadDatasetFileData(dataflowId, dataProviderId, fileName);

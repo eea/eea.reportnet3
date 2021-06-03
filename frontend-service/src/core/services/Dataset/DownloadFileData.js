@@ -1,2 +1,2 @@
-export const DownloadFileData = ({ datasetRepository }) => async (dataflowId, datasetId, fieldId, providerId) =>
-  datasetRepository.downloadFileData(dataflowId, datasetId, fieldId, providerId);
+export const DownloadFileData = ({ datasetRepository }) => async (dataflowId, datasetId, fieldId, dataProviderId) =>
+  datasetRepository.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
