@@ -263,6 +263,7 @@ export const WebformView = ({
     return (
       <WebformTable
         calculateSingle={calculateSingle}
+        dataProviderId={state.datasetSchema.dataProviderId}
         dataflowId={dataflowId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}

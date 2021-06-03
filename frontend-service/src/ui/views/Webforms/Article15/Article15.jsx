@@ -75,6 +75,7 @@ export const Article15 = ({ dataflowId, datasetId, isReporting, state }) => {
 
     return (
       <WebformTable
+        dataProviderId={state.datasetSchema.dataProviderId}
         dataflowId={dataflowId}
         datasetId={datasetId}
         isReporting={isReporting}
