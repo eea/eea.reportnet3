@@ -47,6 +47,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -324,8 +325,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean isCreation) {
     String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
         : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-    EventType failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
-        : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
+    DataFlowVO dataflow = getDataflowMetabase(dataflowId);
+    boolean referenceDataflow = false;
+    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+      referenceDataflow = true;
+    }
+    EventType failEvent = EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT;
+    if (!referenceDataflow) {
+      failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
+          : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
+    }
+
 
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();

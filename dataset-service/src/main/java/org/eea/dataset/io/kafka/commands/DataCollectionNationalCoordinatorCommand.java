@@ -7,11 +7,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -55,6 +58,10 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
 
   /**
@@ -129,11 +136,17 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
     }
 
     // Release the notification to end the process
+    EventType successEvent = null;
     Boolean isCreation =
         Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isCreation")));
-    EventType successEvent =
-        Boolean.TRUE.equals(isCreation) ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
-            : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+    if (dataflow != null && !TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+      successEvent = Boolean.TRUE.equals(isCreation) ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
+          : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
+    } else {
+      successEvent = EventType.REFERENCE_DATAFLOW_PROCESSED_EVENT;
+    }
+
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(successEvent, null,
           NotificationVO.builder()
