@@ -91,7 +91,6 @@ const LinkSelector = withRouter(
     useEffect(() => {
       setIsLoading(true);
       const getReferenceDataflows = async () => {
-        // const { data } = await DataflowService.all(userContext.contextRoles);
         const { data } = await ReferenceDataflowService.all();
         const filteredDataflows = data.filter(dataflow => dataflow.id !== parseFloat(dataflowId));
         setReferenceDataflows(filteredDataflows);

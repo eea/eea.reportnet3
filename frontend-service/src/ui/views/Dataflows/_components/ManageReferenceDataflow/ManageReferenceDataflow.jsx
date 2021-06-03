@@ -37,7 +37,7 @@ export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) 
         onCreate();
       }
     } catch (error) {
-      console.error('error :>> ', error);
+      console.log('error :>> ', error);
     } finally {
       setIsSending(false);
     }
