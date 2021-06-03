@@ -3,6 +3,11 @@
     @content;
   }
 }
+@mixin for-phone-landscape-up {
+  @media (min-width: 415px) {
+    @content;
+  }
+}
 @mixin for-tablet-portrait-up {
   @media (min-width: 600px) {
     @content;
