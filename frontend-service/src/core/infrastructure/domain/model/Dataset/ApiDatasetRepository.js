@@ -134,7 +134,6 @@ const errorsById = async (
     totalRecords: datasetErrorsDTO.data.totalRecords,
     totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
   });
-
   const errors = datasetErrorsDTO.data.errors.map(
     datasetErrorDTO =>
       datasetErrorDTO &&
@@ -144,6 +143,7 @@ const errorsById = async (
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         objectId: datasetErrorDTO.idObject,
+        ruleId: datasetErrorDTO.idRule,
         shortCode: datasetErrorDTO.shortCode,
         tableSchemaId: datasetErrorDTO.idTableSchema,
         tableSchemaName: datasetErrorDTO.nameTableSchema,
