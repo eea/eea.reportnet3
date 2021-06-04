@@ -176,13 +176,13 @@ const BigButtonListReference = withRouter(
 
         {dialogVisibility.isCreateReference && (
           <ConfirmDialog
-            header={'Release'}
+            header={resources.messages['createReferenceDatasetsDialogHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             onConfirm={onAddReferenceDataset}
             onHide={() => handleDialogs({ dialog: 'isCreateReference', isVisible: false })}
             visible={dialogVisibility.isCreateReference}>
-            Proceed release
+            {resources.messages['createReferenceDatasetsDialogMessage']}
           </ConfirmDialog>
         )}
       </Fragment>
