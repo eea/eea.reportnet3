@@ -27,7 +27,7 @@ import { Article13Utils } from './_functions/Utils/Article13Utils';
 import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
 import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils';
 
-export const Article13 = ({ dataflowId, datasetId, isReleasing, isReporting, state }) => {
+export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, isReporting, state }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;
   const { datasetSchema, datasetStatistics } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
@@ -378,6 +378,7 @@ export const Article13 = ({ dataflowId, datasetId, isReleasing, isReporting, sta
       {view === resources.messages['details'] ? (
         <WebformView
           data={article13State.data}
+          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
           datasetId={datasetId}
           datasetSchemaId={datasetSchema.datasetSchemaId}

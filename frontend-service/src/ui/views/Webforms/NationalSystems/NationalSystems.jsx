@@ -10,7 +10,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-export const NationalSystems = ({ dataflowId, datasetId, state }) => {
+export const NationalSystems = ({ dataProviderId, dataflowId, datasetId, state }) => {
   const resources = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;
@@ -63,7 +63,7 @@ export const NationalSystems = ({ dataflowId, datasetId, state }) => {
         return (
           <Fragment key={index}>
             <NationalSystemsTable
-              dataProviderId={datasetSchema.dataProviderId}
+              dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               datasetId={datasetId}
               errorMessages={getErrorMessages}

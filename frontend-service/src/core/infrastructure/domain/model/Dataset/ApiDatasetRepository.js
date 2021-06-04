@@ -259,7 +259,8 @@ const getMetaData = async datasetId => {
     datasetFeedbackStatus:
       !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),
     datasetSchemaId: datasetTableDataDTO.data.datasetSchema,
-    datasetSchemaName: datasetTableDataDTO.data.dataSetName
+    datasetSchemaName: datasetTableDataDTO.data.dataSetName,
+    dataProviderId: datasetTableDataDTO.data.dataProviderId
   });
 
   return datasetTableDataDTO;
