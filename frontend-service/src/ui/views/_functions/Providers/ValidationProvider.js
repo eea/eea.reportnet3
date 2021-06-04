@@ -78,6 +78,11 @@ const validationReducer = (state, { type, payload }) => {
         isFetchingData: payload.isFetchingData,
         updatedRuleId: payload.updatedRuleId
       };
+    case 'ON_SETTING_RULES_DESCRIPTION':
+      return {
+        ...state,
+        rulesDescription: payload
+      };
     default:
       return state;
   }
@@ -91,7 +96,8 @@ const initialState = {
   referenceId: null,
   reOpenOpener: false,
   ruleEdit: false,
-  updatedRuleId: null
+  updatedRuleId: null,
+  rulesDescription: []
 };
 
 export const ValidationProvider = ({ children }) => {
@@ -144,6 +150,12 @@ export const ValidationProvider = ({ children }) => {
           dispatch({
             type: 'ON_FETCHING_DATA',
             payload: { isFetchingData, updatedRuleId }
+          });
+        },
+        onSetRulesDescription: rules => {
+          dispatch({
+            type: 'ON_SETTING_RULES_DESCRIPTION',
+            payload: rules
           });
         }
       }}>

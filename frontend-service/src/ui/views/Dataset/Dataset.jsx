@@ -1016,10 +1016,12 @@ export const Dataset = withRouter(({ match, history }) => {
           <ValidationViewer
             datasetId={datasetId}
             datasetName={datasetName}
+            datasetSchemaId={datasetSchemaId}
             hasWritePermissions={hasWritePermissions}
             isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
+            reporting={true}
             schemaTables={schemaTables}
             tables={datasetSchemaAllTables}
             visible={validationsVisible}

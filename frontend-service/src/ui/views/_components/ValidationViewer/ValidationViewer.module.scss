@@ -87,3 +87,24 @@
     left: 0;
   }
 }
+
+.columnInfoButton {
+  border-radius: 50% !important;
+  width: 0.7em !important;
+  height: 0.7em !important;
+  font-size: 12pt !important;
+  color: var(--datatable-header-info-button-color) !important;
+  margin-left: 0.4rem !important;
+  background-color: var(--white) !important;
+}
+.ruleCodeTemplateWrapper {
+  display: flex;
+  justify-content: start;
+  .tooltipInfoLabel {
+    font-weight: bold;
+  }
+  .tooltipValueLabel {
+    color: var(--success-color-lighter);
+    font-weight: 600;
+  }
+}
