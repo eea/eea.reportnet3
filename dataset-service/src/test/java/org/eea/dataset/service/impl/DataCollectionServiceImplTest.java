@@ -378,6 +378,10 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -458,6 +462,10 @@ public class DataCollectionServiceImplTest {
     tableSchema.setRecordSchema(recordSchema);
     schema.setTableSchemas(Arrays.asList(tableSchema));
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
     dataCollectionService.createEmptyDataCollection(1L, new Date(), false, false, false, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
