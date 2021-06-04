@@ -33,6 +33,8 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { RecordUtils, TextUtils } from 'ui/views/_functions/Utils';
 
 export const NationalSystemsField = ({
+  dataProviderId,
+  dataflowId,
   datasetId,
   getTableErrors,
   nationalField,
@@ -126,7 +128,7 @@ export const NationalSystemsField = ({
 
   const onFileDownload = async (fileName, fieldId) => {
     try {
-      const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
+      const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
       DownloadFile(data, fileName);
     } catch (error) {

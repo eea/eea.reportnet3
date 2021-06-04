@@ -75,8 +75,16 @@ export const apiDataset = {
     return await HTTPRequester.download({ url });
   },
 
-  downloadFileData: async (datasetId, fieldId) => {
-    return await HTTPRequester.download({ url: getUrl(DatasetConfig.downloadFileData, { datasetId, fieldId }) });
+  downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId = null) => {
+    const url = dataProviderId
+      ? getUrl(DatasetConfig.downloadFileDataWithProviderId, {
+          dataflowId,
+          datasetId,
+          fieldId,
+          providerId: dataProviderId
+        })
+      : getUrl(DatasetConfig.downloadFileData, { dataflowId, datasetId, fieldId });
+    return await HTTPRequester.download({ url });
   },
 
   downloadReferenceDatasetFileData: async (dataflowId, fileName) => {
