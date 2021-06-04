@@ -60,6 +60,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const userContext = useContext(UserContext);
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [dataProviderId, setDataProviderId] = useState(null);
   const [dataflowName, setDataflowName] = useState('');
   const [dataset, setDataset] = useState({});
   const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
@@ -310,6 +311,7 @@ export const Dataset = withRouter(({ match, history }) => {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
       setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
+      setDataProviderId(metadata.dataProviderId);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
@@ -966,6 +968,7 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
+          dataProviderId={dataProviderId}
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
@@ -988,6 +991,7 @@ export const Dataset = withRouter(({ match, history }) => {
         />
       ) : (
         <Webforms
+          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
