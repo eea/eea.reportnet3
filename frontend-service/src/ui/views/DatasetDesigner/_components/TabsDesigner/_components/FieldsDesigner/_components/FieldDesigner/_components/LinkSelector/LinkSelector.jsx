@@ -19,13 +19,16 @@ import { DataflowService } from 'core/services/Dataflow';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
+
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 const LinkSelector = withRouter(
   ({
     datasetSchemaId,
+    fieldId,
+    fieldPreviousTypeValue,
     fields,
     hasMultipleValues = false,
     isExternalLink,
@@ -37,12 +40,12 @@ const LinkSelector = withRouter(
     match,
     mustBeUsed = false,
     onCancelSaveLink,
+    onHideSelector,
     onSaveLink,
     selectedLink,
     tableSchemaId
   }) => {
     const resources = useContext(ResourcesContext);
-    const userContext = useContext(UserContext);
 
     const [linkSelectorState, dispatchLinkSelector] = useReducer(linkSelectorReducer, {
       link: {
@@ -95,10 +98,14 @@ const LinkSelector = withRouter(
         const filteredDataflows = data.filter(dataflow => dataflow.id !== parseFloat(dataflowId));
         setReferenceDataflows(filteredDataflows);
       };
-      isEmpty(selectedLink) && setIsLoading(false);
 
-      if (isExternalLink) {
-        getReferenceDataflows();
+      getReferenceDataflows();
+      if (isExternalLink && !isNil(fieldPreviousTypeValue)) {
+        TextUtils.areEquals(fieldPreviousTypeValue.fieldType, 'LINK')
+          ? setIsLoading(false)
+          : isEmpty(selectedLink) && setIsLoading(false);
+      } else {
+        setIsLoading(false);
       }
     }, []);
 
@@ -200,7 +207,9 @@ const LinkSelector = withRouter(
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            if (!isNil(link) && !isNil(link.referencedField)) {
+            if (fieldId === '-1' || isNil(link) || isNil(link.referencedField)) {
+              onHideSelector();
+            } else {
               onCancelSaveLink({
                 link,
                 linkedTableConditional: !isNil(pkLinkedTableConditional) ? pkLinkedTableConditional.fieldSchemaId : '',
@@ -485,14 +494,18 @@ const LinkSelector = withRouter(
           header={isExternalLink ? resources.messages['externalLinkSelector'] : resources.messages['linkSelector']}
           modal={true}
           onHide={() => {
-            onCancelSaveLink({
-              link,
-              pkMustBeUsed,
-              pkHasMultipleValues,
-              linkedTableLabel: pkLinkedTableLabel?.fieldSchemaId,
-              linkedTableConditional: pkLinkedTableConditional?.fieldSchemaId,
-              masterTableConditional: pkMasterTableConditional?.fieldSchemaId
-            });
+            if (fieldId === '-1' || isNil(link) || isNil(link.referencedField)) {
+              onHideSelector();
+            } else {
+              onCancelSaveLink({
+                link,
+                pkMustBeUsed,
+                pkHasMultipleValues,
+                linkedTableLabel: pkLinkedTableLabel?.fieldSchemaId,
+                linkedTableConditional: pkLinkedTableConditional?.fieldSchemaId,
+                masterTableConditional: pkMasterTableConditional?.fieldSchemaId
+              });
+            }
             setIsVisible(false);
           }}
           style={{ width: '65%' }}
