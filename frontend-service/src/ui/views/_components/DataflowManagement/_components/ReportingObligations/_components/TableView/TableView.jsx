@@ -52,7 +52,7 @@ export const TableView = ({
       <FontAwesomeIcon
         aria-hidden={false}
         className={styles.linkIcon}
-        icon={AwesomeIcons('externalLink')}
+        icon={AwesomeIcons('externalUrl')}
         onMouseDown={() => window.open(`${RodUrl.obligations}${row.id}`)}
       />
     </div>

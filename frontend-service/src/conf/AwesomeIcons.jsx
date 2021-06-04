@@ -115,7 +115,7 @@ import {
   faSquare as farSquareRegular,
   faFilePdf as farFilePdf
 } from '@fortawesome/free-regular-svg-icons';
-import { faBuffer, faConnectdevelop } from '@fortawesome/free-brands-svg-icons';
+import { faBuffer, faConnectdevelop, faStaylinked } from '@fortawesome/free-brands-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
@@ -211,7 +211,7 @@ export const AwesomeIcons = icon => {
       return faExclamationCircle;
     case 'expanded':
       return faCaretDown;
-    case 'externalLink':
+    case 'externalUrl':
       return faExternalLinkAlt;
     case 'eye':
       return faEye;
@@ -413,6 +413,8 @@ export const AwesomeIcons = icon => {
       return faFlagCheckered;
     case 'clock':
       return faClock;
+    case 'externalLink':
+      return faStaylinked;
     case 'meteor':
       return faMeteor;
     default:
