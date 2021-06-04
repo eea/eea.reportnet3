@@ -2617,7 +2617,7 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       List<RecordValue> auxRecords = new ArrayList<>();
       for (RecordValue record : recordRepository.findOrderedNativeRecord(targetTable.getId(),
-          originDatasetId)) {
+          originDatasetId, null)) {
         RecordValue recordAux = new RecordValue();
         BeanUtils.copyProperties(recordAux, record);
         recordAux.setId(null);

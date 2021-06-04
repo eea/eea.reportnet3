@@ -26,6 +26,7 @@ import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * The Class ExcelWriterStrategy.
@@ -248,34 +249,40 @@ public class ExcelWriterStrategy implements WriterStrategy {
     }
     CellStyle cs = workbook.createCellStyle();
     cs.setWrapText(true);
-    for (RecordValue record : fileCommon.getRecordValues(datasetId, table.getIdTableSchema())) {
-      Row row = sheet.createRow(nRow++);
-      List<FieldValue> fields = new ArrayList<>(record.getFields());
-      int nextUnknownCellNumber = nHeaders;
+    Long totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema());
+    int batchSize = 50000 / fieldSchemas.size();
 
-      if (includeCountryCode) {
-        row.createCell(0).setCellValue(record.getDataProviderCode());
-      }
+    for (int numPage = 1; totalRecords >= 0; totalRecords = totalRecords - batchSize, numPage++) {
+      for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId,
+          table.getIdTableSchema(), PageRequest.of(numPage, batchSize))) {
+        Row row = sheet.createRow(nRow++);
+        List<FieldValue> fields = new ArrayList<>(record.getFields());
+        int nextUnknownCellNumber = nHeaders;
 
-      for (int i = 0; i < fields.size(); i++) {
-        FieldValue field = fields.get(i);
-        Integer cellNumber = indexMap.get(field.getIdFieldSchema());
-
-        if (cellNumber == null) {
-          cellNumber = nextUnknownCellNumber++;
+        if (includeCountryCode) {
+          row.createCell(0).setCellValue(record.getDataProviderCode());
         }
 
-        row.createCell(cellNumber).setCellValue(field.getValue());
+        for (int i = 0; i < fields.size(); i++) {
+          FieldValue field = fields.get(i);
+          Integer cellNumber = indexMap.get(field.getIdFieldSchema());
+
+          if (cellNumber == null) {
+            cellNumber = nextUnknownCellNumber++;
+          }
+
+          row.createCell(cellNumber).setCellValue(field.getValue());
+          if (errorsMap != null) {
+            Cell cell = row.createCell(cellNumber + 1);
+            cell.setCellStyle(cs);
+            cell.setCellValue(errorsMap.get(field.getId()));
+          }
+        }
         if (errorsMap != null) {
-          Cell cell = row.createCell(cellNumber + 1);
+          Cell cell = row.createCell(nHeaders - 1);
           cell.setCellStyle(cs);
-          cell.setCellValue(errorsMap.get(field.getId()));
+          cell.setCellValue(errorsMap.get(record.getId()));
         }
-      }
-      if (errorsMap != null) {
-        Cell cell = row.createCell(nHeaders - 1);
-        cell.setCellStyle(cs);
-        cell.setCellValue(errorsMap.get(record.getId()));
       }
     }
   }
