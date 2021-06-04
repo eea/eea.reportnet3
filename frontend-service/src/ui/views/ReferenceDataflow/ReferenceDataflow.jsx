@@ -141,6 +141,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
+  const referencingDataflowsDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
+    />
+  );
 
   function getLeftSidebarButtonsVisibility() {
     return {
@@ -179,7 +187,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       />
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
-          // footer={dataflowUsersListFooter}
+          footer={referencingDataflowsDialogFooter}
           header={resources.messages['referencingDataflowsDialogHeader']}
           onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
