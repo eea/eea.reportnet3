@@ -110,7 +110,8 @@ export const NationalSystemsField = ({
 
   const onEditorSubmitValue = async (field, option, value) => {
     const parsedValue =
-      field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
+      field.fieldType === 'MULTISELECT_CODELIST' ||
+      ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
         ? value.join(';')
         : value;
 

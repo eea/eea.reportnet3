@@ -1,4 +1,4 @@
-export const dataflowDataReducer = (state, { type, payload }) => {
+export const dataflowReducer = (state, { type, payload }) => {
   switch (type) {
     case 'MANAGE_DIALOGS':
       return {

@@ -480,7 +480,8 @@ const DataViewer = withRouter(
       record.dataRow.forEach(field => {
         if (
           field.fieldData.type === 'MULTISELECT_CODELIST' ||
-          (field.fieldData.type === 'LINK' && Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
+          ((field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK') &&
+            Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
         ) {
           if (
             !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
@@ -678,7 +679,8 @@ const DataViewer = withRouter(
               cell.field,
               field.id,
               field.type,
-              field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+              field.type === 'MULTISELECT_CODELIST' ||
+                ((field.type === 'LINK' || field.type === 'EXTERNAL_LINK') && Array.isArray(value))
                 ? value.join(';')
                 : value
             );

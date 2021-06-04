@@ -8,8 +8,8 @@ export const routes = {
   DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/provider/:representativeId',
   DATAFLOW: '/dataflow/:dataflowId',
   DATAFLOWS_ERROR: '/dataflows/error/:errorType',
-  DATAFLOWS: '/dataflows',
   DATAFLOWS_ID: '/dataflows/:dataflowId',
+  DATAFLOWS: '/dataflows',
   DATASET_SCHEMA: '/dataflow/:dataflowId/datasetSchema/:datasetId',
   DATASET: '/dataflow/:dataflowId/dataset/:datasetId',
   DOCUMENTS: '/dataflow/:dataflowId/documents',
@@ -20,10 +20,11 @@ export const routes = {
   PUBLIC_COUNTRIES: '/public/countries',
   PUBLIC_COUNTRY_INFORMATION_ID: '/public/countries/:countryCode',
   PUBLIC_COUNTRY_INFORMATION: '/public/country/:countryCode',
-  PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId',
   PUBLIC_DATAFLOW_INFORMATION_ID: '/public/dataflows/:dataflowId',
+  PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId',
   PUBLIC_DATAFLOWS: '/public/dataflows',
   REFERENCE_DATAFLOW: '/referenceDataflow/:referenceDataflowId',
+  REFERENCE_DATASET_SCHEMA: '/referenceDataflow/:dataflowId/datasetSchema/:datasetId',
   SETTINGS: '/settings',
   TEST_DATASETS: '/dataflow/:dataflowId/testDatasets'
 };
