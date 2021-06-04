@@ -100,11 +100,6 @@ const LinkSelector = withRouter(
       };
 
       getReferenceDataflows();
-      if (isExternalLink && !isNil(fieldPreviousTypeValue)) {
-        TextUtils.areEquals(fieldPreviousTypeValue.fieldType, 'LINK')
-          ? setIsLoading(false)
-          : isEmpty(selectedLink) && setIsLoading(false);
-      }
       setIsLoading(false);
     }, []);
 
