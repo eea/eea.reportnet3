@@ -273,7 +273,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
         // delete from the CataloguePK the entries if the schema has FK
-        dataschemaService.updatePkCatalogueDeletingSchema(datasetSchemaId);
+        dataschemaService.updatePkCatalogueDeletingSchema(datasetSchemaId, dataflowId);
 
         // delete the schema in Mongo
         dataschemaService.deleteDatasetSchema(datasetSchemaId, datasetId);
@@ -420,7 +420,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
 
       // Delete the Pk if needed from the catalogue, for all the fields of the table
-      dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId);
+      dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId, datasetId);
 
       // Delete the Uniques constraints in table
       dataschemaService.deleteUniquesConstraintFromTable(tableSchemaId);
@@ -579,7 +579,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
         }
 
-        DataType type = dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO);
+        DataType type =
+            dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO, datasetId);
 
         // Create query view
         // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
@@ -650,7 +651,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         datasetService.deleteFieldValues(datasetId, fieldSchemaId);
 
         // Delete the Pk if needed from the catalogue
-        dataschemaService.deleteFromPkCatalogue(fieldVO);
+        dataschemaService.deleteFromPkCatalogue(fieldVO, datasetId);
 
         // Delete the foreign relation between idDatasets in metabase, if needed
         dataschemaService.deleteForeignRelation(datasetId, fieldVO);
