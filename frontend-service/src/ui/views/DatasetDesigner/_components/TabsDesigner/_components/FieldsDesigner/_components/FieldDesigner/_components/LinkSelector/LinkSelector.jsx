@@ -104,9 +104,8 @@ const LinkSelector = withRouter(
         TextUtils.areEquals(fieldPreviousTypeValue.fieldType, 'LINK')
           ? setIsLoading(false)
           : isEmpty(selectedLink) && setIsLoading(false);
-      } else {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     }, []);
 
     useEffect(() => {
