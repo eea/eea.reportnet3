@@ -57,6 +57,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   const filterOptions = [{ type: 'input', properties: [{ name: 'name' }] }];
 
   const renderNameColumnTemplate = dataflow => <div>{dataflow.name}</div>;
+  const renderIdColumnTemplate = dataflow => <div>{dataflow.id}</div>;
 
   const renderDialogLayout = children => <div className={styles.modal}>{children}</div>;
 
@@ -83,6 +84,11 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
           rowsPerPageOptions={[5, 10, 15]}
           value={state.filteredData}>
           <Column body={renderNameColumnTemplate} header={resources.messages['referencingDataflowNameColumnLabel']} />
+          <Column
+            body={renderIdColumnTemplate}
+            header={resources.messages['referencingDataflowIdColumnLabel']}
+            style={{ width: '120px' }}
+          />
         </DataTable>
       )}
     </Fragment>
