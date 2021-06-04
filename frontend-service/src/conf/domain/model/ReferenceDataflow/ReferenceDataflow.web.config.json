@@ -1,5 +1,6 @@
 {
   "all": "/dataflow/referenceDataflows",
   "createDataflow": "/dataflow",
+  "getReferencingDataflows": "/referenceDataset/referenced/dataflow/{:referenceDataflowId}",
   "referenceDataflow": "/dataflow/{:referenceDataflowId}"
 }

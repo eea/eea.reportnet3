@@ -12,6 +12,9 @@ export const apiReferenceDataflow = {
     });
   },
 
+  getReferencingDataflows: async referenceDataflowId =>
+    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getReferencingDataflows, { referenceDataflowId }) }),
+
   referenceDataflow: async referenceDataflowId =>
     await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow, { referenceDataflowId }) })
 };

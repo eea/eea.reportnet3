@@ -279,6 +279,13 @@
           "key": "CREATE_DATA_COLLECTION_ERROR",
           "navigateTo": {
             "section": "DATAFLOW",
+            "parameters": ["referenceDataflowId"]
+          }
+        },
+        {
+          "key": "CREATE_REFERENCE_DATASETS_ERROR",
+          "navigateTo": {
+            "section": "REFERENCE_DATAFLOW",
             "parameters": ["dataflowId"]
           }
         },
