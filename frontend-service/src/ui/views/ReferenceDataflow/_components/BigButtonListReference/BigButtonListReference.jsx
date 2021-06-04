@@ -26,6 +26,7 @@ import { MetadataUtils } from 'ui/views/_functions/Utils';
 const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history, onSaveName, onUpdateData }) => {
   const [isDesignStatus, setIsDesignStatus] = useState(false);
   const [hasDatasets, setHasDatasets] = useState(false);
+  const [isCreatingReferenceDatasets, setIsCreatingReferenceDatasets] = useState(false);
 
   useEffect(() => {
     setIsDesignStatus(dataflowState.status === config.dataflowStatus.DESIGN);
@@ -65,7 +66,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
 
     notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
 
-    // setIsActiveButton(false);
+    setIsCreatingReferenceDatasets(true);
 
     try {
       return await DataCollectionService.createReference(dataflowId);
@@ -79,8 +80,7 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
         type: 'CREATE_REFERENCE_DATASETS_ERROR',
         content: { referenceDataflowId: dataflowId, dataflowName }
       });
-      //REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT  from BE
-      // setIsActiveButton(true);
+      setIsCreatingReferenceDatasets(false);
     }
   };
 
@@ -96,11 +96,14 @@ const BigButtonListReference = withRouter(({ dataflowId, dataflowState, history,
 
   const createReferenceDatasets = {
     buttonClass: 'newItem',
-    buttonIcon: 'siteMap',
+    buttonIcon: isCreatingReferenceDatasets ? 'spinner' : 'siteMap',
     enabled: hasDatasets,
-    buttonIconClass: 'siteMapDisabled',
+    buttonIconClass: isCreatingReferenceDatasets ? 'spinner' : hasDatasets ? 'siteMap' : 'siteMapDisabled',
     caption: resources.messages['createReferenceDatasetsBtnLabel'],
-    handleRedirect: () => handleDialogs({ dialog: 'isCreateReference', isVisible: true }),
+    handleRedirect:
+      hasDatasets && !isCreatingReferenceDatasets
+        ? () => handleDialogs({ dialog: 'isCreateReference', isVisible: true })
+        : () => {},
     helpClassName: 'dataflow-create-datacollection-help-step',
     layout: 'defaultBigButton',
     tooltip: !hasDatasets ? resources.messages['createReferenceDatasetsBtnTooltip'] : '',
