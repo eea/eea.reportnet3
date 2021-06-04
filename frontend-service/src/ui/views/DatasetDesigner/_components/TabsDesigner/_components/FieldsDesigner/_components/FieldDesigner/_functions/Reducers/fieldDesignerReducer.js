@@ -24,7 +24,16 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         fieldLinkValue: null,
         fieldPkMustBeUsed: false,
         fieldPkHasMultipleValues: false,
-        fieldFileProperties: { validExtensions: [], maxSize: 0 }
+        fieldFileProperties: { validExtensions: [], maxSize: 0 },
+        referencedField: null
+      };
+    case 'RESET_REFERENCED_FIELD':
+      return {
+        ...state,
+        referencedField: null,
+        fieldLinkValue: null,
+        fieldPkMustBeUsed: false,
+        fieldPkHasMultipleValues: false
       };
     case 'RESET_NEW_FIELD':
       return {
