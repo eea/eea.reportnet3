@@ -73,7 +73,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
     <Fragment>
       <Filters data={state.dataflows} getFilteredData={onLoadFilteredData} options={filterOptions} />
 
-      {state.filteredData === 0 ? (
+      {state.filteredData.length === 0 ? (
         <h3>{resources.messages['dataflowsNotMatchingFilter']}</h3>
       ) : (
         <DataTable
