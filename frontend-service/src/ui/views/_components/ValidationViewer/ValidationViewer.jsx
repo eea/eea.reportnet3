@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, memo, useContext, useEffect, useReducer, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 import PropTypes from 'prop-types';
 
@@ -16,12 +17,15 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
 import { InputSwitch } from 'ui/views/_components/InputSwitch';
+import ReactTooltip from 'react-tooltip';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
+import { ValidationService } from 'core/services/Validation';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { validationReducer } from './_functions/Reducers/validationReducer';
 
@@ -29,14 +33,17 @@ const ValidationViewer = memo(
   ({
     buttonsList = undefined,
     datasetId,
+    datasetSchemaId,
     isWebformView,
     levelErrorTypes,
     onSelectValidation,
+    reporting = false,
     schemaTables,
     tables,
     visible
   }) => {
     const resources = useContext(ResourcesContext);
+    const validationContext = useContext(ValidationContext);
 
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
@@ -102,7 +109,8 @@ const ValidationViewer = memo(
         },
         {
           id: 'shortCode',
-          header: resources.messages['ruleCode']
+          header: resources.messages['ruleCode'],
+          template: ruleCodeTemplate
         },
         {
           id: 'levelError',
@@ -114,9 +122,20 @@ const ValidationViewer = memo(
         }
       ];
 
-      let columnsArr = headers.map(col => (
-        <Column field={col.id} header={col.header} key={col.id} sortable={true} style={columnStyles(col.id)} />
-      ));
+      let columnsArr = headers.map(col => {
+        return !isNil(col.template) ? (
+          <Column
+            body={col.template}
+            field={col.id}
+            header={col.header}
+            key={col.id}
+            sortable={true}
+            style={columnStyles(col.id)}
+          />
+        ) : (
+          <Column field={col.id} header={col.header} key={col.id} sortable={true} style={columnStyles(col.id)} />
+        );
+      });
 
       columnsArr.push(
         <Column
@@ -157,7 +176,7 @@ const ValidationViewer = memo(
       }
 
       setColumns(columnsArr);
-    }, [grouped]);
+    }, [grouped, validationContext.rulesDescription]);
 
     useEffect(() => {
       if (visible) {
@@ -181,6 +200,12 @@ const ValidationViewer = memo(
       }
     }, [visible, grouped]);
 
+    useEffect(() => {
+      if (grouped && isEmpty(validationContext.rulesDescription)) {
+        onLoadRulesDescription();
+      }
+    }, [grouped]);
+
     const addTableSchemaId = tableErrors => {
       tableErrors.forEach(tableError => {
         const filteredTable = schemaTables.filter(schemaTable => schemaTable.name === tableError.tableSchemaName);
@@ -197,6 +222,57 @@ const ValidationViewer = memo(
       return style;
     };
 
+    const getTooltipMessage = column => {
+      const ruleInfo = validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === column.ruleId);
+      return (
+        <Fragment>
+          <span className={styles.tooltipInfoLabel}>{resources.messages['ruleName']}: </span>{' '}
+          <span className={styles.tooltipValueLabel}>{ruleInfo?.name}</span>
+          <br />
+          <span className={styles.tooltipInfoLabel}>{resources.messages['description']}: </span>
+          <span className={styles.tooltipValueLabel}>
+            {!isNil(ruleInfo?.description) && ruleInfo?.description !== ''
+              ? ruleInfo?.description
+              : resources.messages['noDescription']}
+          </span>
+        </Fragment>
+      );
+    };
+
+    const ruleCodeTemplate = recordData => {
+      if (!grouped) {
+        return recordData?.shortCode;
+      } else {
+        return (
+          <div className={styles.ruleCodeTemplateWrapper}>
+            <span>{recordData.shortCode}</span>
+            <span data-for={`infoCircleButton_${recordData.shortCode}`} data-tip>
+              <Button
+                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+                icon="infoCircle"
+              />
+            </span>
+            <ReactTooltip
+              effect="solid"
+              getContent={() =>
+                ReactDOMServer.renderToStaticMarkup(
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start'
+                    }}>
+                    {getTooltipMessage(recordData)}
+                  </div>
+                )
+              }
+              html={true}
+              id={`infoCircleButton_${recordData.shortCode}`}
+              place="top"></ReactTooltip>
+          </div>
+        );
+      }
+    };
     const onChangePage = event => {
       const isChangedPage = true;
       setNumberRows(event.rows);
@@ -377,6 +453,19 @@ const ValidationViewer = memo(
       } finally {
         setIsLoading(false);
       }
+    };
+
+    const onLoadRulesDescription = async () => {
+      const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
+      validationContext.onSetRulesDescription(
+        validationsServiceList?.validations?.map(validation => {
+          return {
+            id: validation.id,
+            description: validation.description,
+            name: validation.name
+          };
+        })
+      );
     };
 
     const onSort = event => {

@@ -1494,6 +1494,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <ValidationViewer
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}
+              datasetSchemaId={designerState.datasetSchemaId}
               hasWritePermissions={designerState.hasWritePermissions}
               isWebformView={designerState.viewType.webform}
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
