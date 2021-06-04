@@ -1129,6 +1129,10 @@
     "noReferencingDataflows": "There are no referencing dataflows",
     "referencingDataflowIdColumnLabel": "Id",
     "createReferenceDatasetsBtnTooltip": "There are no datasets in this dataflow",
-    "createReferenceDatasetsBtnLabel": "Create reference datasets"
+    "createReferenceDatasetsBtnLabel": "Create reference datasets",
+    "createReferenceDatasetsDialogHeader": "Create reference datasets",
+    "createReferenceDatasetsDialogMessage": "Do you want to create reference datasets?",
+    "referenceDataflowProcessFailedEvent": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
+    "referenceDataflowProcessedEvent": "Reference datasets created at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>"
   }
 }

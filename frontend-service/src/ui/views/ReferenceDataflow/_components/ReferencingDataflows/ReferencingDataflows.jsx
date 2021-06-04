@@ -59,14 +59,18 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   const renderNameColumnTemplate = dataflow => <div>{dataflow.name}</div>;
   const renderIdColumnTemplate = dataflow => <div>{dataflow.id}</div>;
 
-  const renderDialogLayout = children => <div className={styles.modal}>{children}</div>;
+  const renderDialogLayout = children => <div className={styles.modalSize}>{children}</div>;
 
   if (state.requestStatus === 'pending') {
-    return renderDialogLayout(<Spinner className={styles.middle} />);
+    return renderDialogLayout(<Spinner />);
   }
 
   if (state.requestStatus === 'resolved' && state.dataflows.length === 0) {
-    return renderDialogLayout(<h3 className={styles.message}>{resources.messages['noReferencingDataflows']}</h3>);
+    return renderDialogLayout(
+      <div className={styles.noReferencingWrap}>
+        <h3>{resources.messages['noReferencingDataflows']}</h3>
+      </div>
+    );
   }
 
   return renderDialogLayout(
@@ -74,7 +78,9 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
       <Filters data={state.dataflows} getFilteredData={onLoadFilteredData} options={filterOptions} />
 
       {state.filteredData.length === 0 ? (
-        <h3>{resources.messages['dataflowsNotMatchingFilter']}</h3>
+        <div className={styles.notMatchingWrap}>
+          <h3>{resources.messages['dataflowsNotMatchingFilter']}</h3>
+        </div>
       ) : (
         <DataTable
           first={state.pagination.first}
