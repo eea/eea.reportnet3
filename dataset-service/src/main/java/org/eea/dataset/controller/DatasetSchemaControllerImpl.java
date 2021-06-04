@@ -790,7 +790,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
       @PathVariable("idDataflow") Long idDataflow) {
 
@@ -854,7 +854,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraint the unique constraint
    */
   @Override
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')  OR secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   @PostMapping(value = "/createUniqueConstraint")
   public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
@@ -882,7 +882,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @param dataflowId the dataflow id
    */
   @Override
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
   public void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
       @PathVariable("dataflowId") Long dataflowId) {
@@ -899,7 +899,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @param uniqueConstraint the unique constraint
    */
   @Override
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
   public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
@@ -965,7 +965,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the simple schema
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
@@ -991,7 +991,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the table schemas ids
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId) AND secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<TableSchemaIdNameVO> getTableSchemasIds(@PathVariable("datasetId") Long datasetId,

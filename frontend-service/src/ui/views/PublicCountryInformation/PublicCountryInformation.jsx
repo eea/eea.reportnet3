@@ -366,7 +366,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           className={`p-breadcrumb-home ${styles.link}`}
           data-for="navigateTooltip"
           data-tip
-          icon={AwesomeIcons('externalLink')}
+          icon={AwesomeIcons('externalUrl')}
           onClick={e => {
             e.preventDefault();
             history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true));
@@ -394,7 +394,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     <span>
       {text}{' '}
       <a href={url} rel="noreferrer" target="_blank" title={text}>
-        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalLink')} />
+        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
       </a>
     </span>
   );

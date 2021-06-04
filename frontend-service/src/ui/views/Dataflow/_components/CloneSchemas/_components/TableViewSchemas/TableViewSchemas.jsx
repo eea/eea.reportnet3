@@ -73,7 +73,7 @@ export const TableViewSchemas = ({
       {row.name}
       <FontAwesomeIcon
         className={styles.linkIcon}
-        icon={AwesomeIcons('externalLink')}
+        icon={AwesomeIcons('externalUrl')}
         onMouseDown={() => handleRedirect(row.id)}
       />
     </div>

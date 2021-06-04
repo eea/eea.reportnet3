@@ -311,7 +311,8 @@ public interface DatasetController {
   @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   ResponseEntity<byte[]> getAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String fieldId);
+      @PathVariable("fieldId") String fieldId, @RequestParam(value = "dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
    * Update attachment.

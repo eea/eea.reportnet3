@@ -741,7 +741,7 @@ public class DataSetControllerImplTest {
     attachment.setFileName("test.txt");
     attachment.setContent(fileMock.getBytes());
     when(datasetService.getAttachment(Mockito.any(), Mockito.any())).thenReturn(attachment);
-    dataSetControllerImpl.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    dataSetControllerImpl.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", 1L, 1L);
     Mockito.verify(datasetService, times(1)).getAttachment(Mockito.any(), Mockito.any());
   }
 
@@ -755,7 +755,7 @@ public class DataSetControllerImplTest {
 
     doThrow(new EEAException()).when(datasetService).getAttachment(Mockito.any(), Mockito.any());
     try {
-      dataSetControllerImpl.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+      dataSetControllerImpl.getAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", 1L, 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;

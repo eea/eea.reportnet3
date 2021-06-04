@@ -51,8 +51,8 @@ public class EeaSecurityExpressionRootTest {
 
   @Test
   public void secondLevelAuthorize() {
-    Assert.assertTrue(eeaSecurityExpressionRoot.secondLevelAuthorize(DATAFLOW_ID,
-        ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER));
+    Assert.assertFalse(eeaSecurityExpressionRoot.secondLevelAuthorize(DATAFLOW_ID,
+        ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN));
   }
 
   @Test
@@ -77,7 +77,8 @@ public class EeaSecurityExpressionRootTest {
 
   @Test
   public void checkApiKeyTest() {
-    assertFalse(eeaSecurityExpressionRoot.checkApiKey(1L, 1L));
+    assertFalse(eeaSecurityExpressionRoot.checkApiKey(1L, 1L, 1L,
+        ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER));
   }
 
   @Test

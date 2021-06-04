@@ -274,6 +274,4 @@ public interface DatasetMetabaseController {
   List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndProviderId(
       @PathVariable("id") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId);
 
-
-
 }
