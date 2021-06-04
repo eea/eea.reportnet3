@@ -966,13 +966,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     final IFileExportContext context = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    List<byte[]> file =
-        context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode);
-    if (file == null) {
-      return null;
-    } else {
-      return file.get(0);
-    }
+    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false);
   }
 
 
@@ -1053,7 +1047,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     Boolean isLinkMultiselect = Boolean.FALSE;
-    if (DataType.LINK.equals(field.getType())) {
+    if (DataType.LINK.equals(field.getType()) || DataType.EXTERNAL_LINK.equals(field.getType())) {
       isLinkMultiselect = fieldSchema.get(LiteralConstants.PK_HAS_MULTIPLE_VALUES) != null
           && fieldSchema.getBoolean(LiteralConstants.PK_HAS_MULTIPLE_VALUES);
     }
@@ -1860,7 +1854,7 @@ public class DatasetServiceImpl implements DatasetService {
             tableSchema.getNameTableSchema(), tableSchema.getIdTableSchema(), originId,
             targetDataset.getId());
         processRecordPageWithFixedRecords(dictionaryIdFieldAttachment, targetTable,
-            datasetPartitionId, null, targetDataset.getId(), originId);
+            datasetPartitionId, null, targetDataset.getId(), originId, dataproviderVO);
       } else {
         Integer numberOfFieldsInRecord = tableSchema.getRecordSchema().getFieldSchema().size();
 
@@ -2567,7 +2561,7 @@ public class DatasetServiceImpl implements DatasetService {
             desingTable.getNameTableSchema(), desingTable.getIdTableSchema(), originDataset,
             targetDataset);
         processRecordPageWithFixedRecords(dictionaryIdFieldAttachment, targetTable,
-            datasetPartitionId, dictionaryOriginTargetObjectId, targetDataset, originDataset);
+            datasetPartitionId, dictionaryOriginTargetObjectId, targetDataset, originDataset, null);
       } else {
         // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
 
@@ -2614,11 +2608,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param targetDatasetId the target dataset id
    * @param originDatasetId the origin dataset id
+   * @param dataproviderVO the dataprovider VO
    */
   private void processRecordPageWithFixedRecords(
       Map<String, AttachmentValue> dictionaryIdFieldAttachment, TableValue targetTable,
       Long datasetPartitionId, Map<String, String> dictionaryOriginTargetObjectId,
-      Long targetDatasetId, Long originDatasetId) {
+      Long targetDatasetId, Long originDatasetId, DataProviderVO dataproviderVO) {
     try {
       List<RecordValue> auxRecords = new ArrayList<>();
       for (RecordValue record : recordRepository.findOrderedNativeRecord(targetTable.getId(),
@@ -2631,6 +2626,9 @@ public class DatasetServiceImpl implements DatasetService {
         if (dictionaryOriginTargetObjectId != null) {
           recordAux
               .setIdRecordSchema(dictionaryOriginTargetObjectId.get(recordAux.getIdRecordSchema()));
+        }
+        if (null != dataproviderVO) {
+          recordAux.setDataProviderCode(dataproviderVO.getCode());
         }
         List<FieldValue> fields = new ArrayList<>();
         for (FieldValue field : record.getFields()) {
@@ -2752,8 +2750,9 @@ public class DatasetServiceImpl implements DatasetService {
           value = fieldVO.getValue();
 
           // Sort values if there are multiple
-          if (DataType.MULTISELECT_CODELIST.equals(dataType) || (DataType.LINK.equals(dataType)
-              && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
+          if (DataType.MULTISELECT_CODELIST.equals(dataType)
+              || (DataType.LINK.equals(dataType) || DataType.EXTERNAL_LINK.equals(dataType)
+                  && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
             String[] values = value.trim().split("\\s*;\\s*");
             Arrays.sort(values);
             value = Arrays.stream(values).collect(Collectors.joining("; "));
@@ -3502,7 +3501,7 @@ public class DatasetServiceImpl implements DatasetService {
           .append(
               " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
           .append(
-              " select data_provider_code,id_table_schema,id_record,json_build_object('fieldName',\"fieldName\",'value',value) as fields from( ")
+              " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value) as fields from( ")
           .append(" select case ");
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
       for (TableSchema table : tableSchemaList) {
@@ -3521,7 +3520,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       query.append(String.format(
-          " end as \"fieldName\", fv.value as \"value\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table ) fieldsAux",
+          " end as \"fieldName\", fv.value as \"value\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
           datasetId, datasetId, datasetId));
       if (null != tableSchemaId || null != filterValue || null != columnName) {
         query.append(" where ")
@@ -3533,6 +3532,8 @@ public class DatasetServiceImpl implements DatasetService {
             .append(null != filterValue ? String.format(" value like '%s' and ", filterValue) : "");
         query.delete(query.lastIndexOf("and "), query.length() - 1);
       }
+      query.append(
+          ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ");
       String paginationPart = " offset %s limit %s ";
       if (null != offset && null != limit) {
         Integer offsetAux = (limit * offset) - limit;
@@ -3541,8 +3542,8 @@ public class DatasetServiceImpl implements DatasetService {
         }
         query.append(String.format(paginationPart, offsetAux, limit));
       }
-      query.append(
-          ") records group by id_table_schema,id_record,data_provider_code ) tablesAux group by id_table_schema ) as json ");
+      query.append(" ) tablesAux group by id_table_schema ) as json ");
+
       LOG.info("Query: {} ", query);
       // Delete the query log and the timestamp part later, once the tests are finished.
       outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());

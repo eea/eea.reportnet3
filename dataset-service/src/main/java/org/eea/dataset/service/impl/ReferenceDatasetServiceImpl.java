@@ -1,13 +1,19 @@
 package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eea.dataset.mapper.ReferenceDatasetMapper;
 import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.slf4j.Logger;
@@ -47,6 +53,14 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  /** The pk catalogue repository. */
+  @Autowired
+  private PkCatalogueRepository pkCatalogueRepository;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
 
   /**
    * Gets the reference dataset by dataflow id.
@@ -81,5 +95,25 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
     return referenceDatasetPublicMapper.entityListToClass(references);
   }
 
+  /**
+   * Gets the dataflows referenced.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataflows referenced
+   */
+  @Override
+  public Set<DataFlowVO> getDataflowsReferenced(Long dataflowId) {
 
+    Set<DataFlowVO> dataflows = new HashSet<>();
+    List<PkCatalogueSchema> catalogues = pkCatalogueRepository.findByDataflowId(dataflowId);
+    for (PkCatalogueSchema catalogue : catalogues) {
+      if (null != catalogue.getReferencedByDataflow()
+          && !catalogue.getReferencedByDataflow().isEmpty()) {
+        for (Long dataflowReferenced : catalogue.getReferencedByDataflow()) {
+          dataflows.add(dataflowControllerZuul.getMetabaseById(dataflowReferenced));
+        }
+      }
+    }
+    return dataflows;
+  }
 }

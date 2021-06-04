@@ -373,7 +373,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           field.setIdRecord(newRecordId);
           // check if the field has referencedField, but the type is no LINK, set the referenced
           // part as null
-          if (!DataType.LINK.equals(field.getType()) && null != field.getReferencedField()) {
+          if (!(DataType.LINK.equals(field.getType())
+              || DataType.EXTERNAL_LINK.equals(field.getType()))
+              && null != field.getReferencedField()) {
             field.setReferencedField(null);
           }
           record.getFieldSchema().add(field);
@@ -407,7 +409,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    */
   private void mapLinkResult(Long datasetId, Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations,
       FieldSchemaVO fieldVO, FieldSchema field) {
-    if (DataType.LINK.equals(field.getType())) {
+    if (DataType.LINK.equals(field.getType()) || DataType.EXTERNAL_LINK.equals(field.getType())) {
       List<FieldSchemaVO> listFK = new ArrayList<>();
       if (mapDatasetIdFKRelations.containsKey(datasetId)) {
         listFK = mapDatasetIdFKRelations.get(datasetId);
@@ -437,7 +439,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         if (dictionaryOriginTargetObjectId.containsKey(field.getIdRecord())) {
           field.setIdRecord(dictionaryOriginTargetObjectId.get(field.getIdRecord()));
         }
-        if (field.getReferencedField() != null && DataType.LINK.equals(field.getType())) {
+        if (field.getReferencedField() != null && (DataType.LINK.equals(field.getType())
+            || DataType.EXTERNAL_LINK.equals(field.getType()))) {
           referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the fieldVO updated with the objectIds of the cloned dataset, we modify the field to

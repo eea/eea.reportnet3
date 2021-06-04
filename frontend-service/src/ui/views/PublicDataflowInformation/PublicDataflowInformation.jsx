@@ -196,7 +196,7 @@ export const PublicDataflowInformation = withRouter(
             className={`p-breadcrumb-home ${styles.link}`}
             data-for="navigateTooltip"
             data-tip
-            icon={AwesomeIcons('externalLink')}
+            icon={AwesomeIcons('externalUrl')}
             onClick={e => {
               e.preventDefault();
               history.push(

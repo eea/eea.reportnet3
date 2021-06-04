@@ -119,7 +119,7 @@
     "countryCode": "Country code",
     "create": "Create",
     "createDataCollection": "Create data collections",
-    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, snapshots, etc). You will be able to manage new lead reporters, QC checks and external configurations.",
+    "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, snapshots, etc). You will be able to manage new lead reporters, QC checks and external integrations.",
     "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
     "createDataCollectionError": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "createDataCollectionInit": "Creating data collection",
@@ -904,7 +904,7 @@
     "text": "Text",
     "textFieldFormatRestriction": "Maximum of 10000 characters",
     "theme": "Theme",
-    "thereAreNoDatalows": "There are no pending dataflows",
+    "thereAreNoDataflows": "There are no pending dataflows",
     "title": "Title",
     "titleDashboard": "Error/Warning dashboard",
     "titleHeader": "Reportnet",
@@ -1109,8 +1109,16 @@
     "incompleteDataTooltip": "Incomplete data",
     "requesterNotMatchingFilter": "There are no requesters with the selected parameters",
     "reporterNotMatchingFilter": "There are no reporters with the selected parameters",
+    "referenceDataflows": "Reference dataflows",
+    "externalLinkSelector": "Select an External Link",
+    "externalLinkDialogNoReferenceDataflowMessage": "Please select a reference dataflow",
+    "referenceDataflow": "Reference dataflow",
+    "selectedReferenceDataflow": "Selected Reference Dataflow",
     "errorBoundaryTitle": "Sorry... An unexpected error occurred",
     "errorBoundaryMessageCopy": "Please click <strong>Copy to clipboard</strong> and submit this information to the helpdesk.",
-    "errorBoundaryMessageRefresh": "Press the Refresh button to continue."
+    "errorBoundaryMessageRefresh": "Press the Refresh button to continue.",
+    "referenceDataflowsListTab": "Reference Dataflows",
+    "referenceDataflowCrumbLabel": "Reference Dataflow",
+    "emptyDatasetSchemas": "The selected dataflow has no datasets"
   }
 }

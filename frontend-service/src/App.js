@@ -6,6 +6,7 @@ import { routes } from 'ui/routes';
 
 import { DataCollection } from 'ui/views/DataCollection';
 import { Dataflow } from 'ui/views/Dataflow';
+import { ReferenceDataflow } from 'ui/views/ReferenceDataflow';
 import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
 import { DataflowHelp } from 'ui/views/DataflowHelp/DataflowHelp';
 import { Dataflows } from 'ui/views/Dataflows';
@@ -100,6 +101,7 @@ const App = () => {
                               <PrivateRoute component={EUDataset} exact path={routes.EU_DATASET} />
                               <Route component={PrivacyStatement} exact path={routes.PRIVACY_STATEMENT} />
                               <PrivateRoute component={Settings} exact path={routes.SETTINGS} />
+                              <PrivateRoute component={ReferenceDataflow} exact path={routes.REFERENCE_DATAFLOW} />
                               <Route>
                                 <Redirect to={'/dataflows/error/notFound'} />
                               </Route>

@@ -72,6 +72,15 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
         referenced.setMasterConditionalFieldId(
             fieldSchema.getReferencedField().getMasterConditionalFieldId().toString());
       }
+      if (fieldSchema.getReferencedField().getDataflowId() != null) {
+        referenced.setDataflowId(fieldSchema.getReferencedField().getDataflowId());
+      }
+      if (StringUtils.isNotBlank(fieldSchema.getReferencedField().getTableSchemaName())) {
+        referenced.setTableSchemaName(fieldSchema.getReferencedField().getTableSchemaName());
+      }
+      if (StringUtils.isNotBlank(fieldSchema.getReferencedField().getFieldSchemaName())) {
+        referenced.setFieldSchemaName(fieldSchema.getReferencedField().getFieldSchemaName());
+      }
       fieldSchemaVO.setReferencedField(referenced);
     }
   }
@@ -103,6 +112,15 @@ public interface FieldSchemaNoRulesMapper extends IMapper<FieldSchema, FieldSche
           .isNotBlank(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId())) {
         referenced.setMasterConditionalFieldId(
             new ObjectId(fieldSchemaVO.getReferencedField().getMasterConditionalFieldId()));
+      }
+      if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
+        referenced.setDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+      }
+      if (StringUtils.isNotBlank(fieldSchemaVO.getReferencedField().getTableSchemaName())) {
+        referenced.setTableSchemaName(fieldSchemaVO.getReferencedField().getTableSchemaName());
+      }
+      if (StringUtils.isNotBlank(fieldSchemaVO.getReferencedField().getFieldSchemaName())) {
+        referenced.setFieldSchemaName(fieldSchemaVO.getReferencedField().getFieldSchemaName());
       }
       fieldSchema.setReferencedField(referenced);
     }

@@ -765,12 +765,30 @@ public class FileTreatmentHelperTest {
     dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
     dataSetMetabase.setDataSetName("file");
 
-    List<byte[]> expectedResult = null;
+    byte[] expectedResult = null;
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(
-        contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-            .thenReturn(expectedResult);
+    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.anyBoolean())).thenReturn(expectedResult);
     fileTreatmentHelper.exportDatasetFile(1L, "xslx");
+    Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
+  }
+
+  @Test
+  public void exportDatasetFilecsvTest() throws IOException, InvalidFileException, EEAException {
+    DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
+    dataSetMetabase.setDataflowId(1L);
+    dataSetMetabase.setDataProviderId(1L);
+    dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
+    dataSetMetabase.setDataSetName("file");
+
+    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
+    // when(
+    // contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
+    // .thenReturn(expectedResult);
+    when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn("603362319d49f04fce13b68f");
+    when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(new DataSetSchema()));
+    fileTreatmentHelper.exportDatasetFile(1L, "csv");
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
 

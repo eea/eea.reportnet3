@@ -452,8 +452,9 @@ public class RulesControllerImplTest {
    */
   @Test
   public void deleteRuleRequiredTest() {
-    rulesControllerImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", null);
-    Mockito.verify(rulesService, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any());
+    rulesControllerImpl.deleteRuleRequired("5e44110d6a9e3a270ce13fac", null, null);
+    Mockito.verify(rulesService, times(1)).deleteRuleRequired(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**

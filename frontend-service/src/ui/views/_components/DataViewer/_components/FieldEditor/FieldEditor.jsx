@@ -688,6 +688,7 @@ const FieldEditor = ({
       case 'ATTACHMENT':
         return false;
 
+      case 'EXTERNAL_LINK':
       case 'LINK':
         const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
         if (hasMultipleValues) {
