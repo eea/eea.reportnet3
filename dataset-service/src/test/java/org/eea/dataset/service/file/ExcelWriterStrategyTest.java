@@ -76,11 +76,13 @@ public class ExcelWriterStrategyTest {
     values.add(value);
     Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
-    Mockito.when(fileCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
+    Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(values);
     excelWriterStrategy.setMimeType("xls");
     excelWriterStrategy.writeFile(1L, 1L, "", true, false);
     excelWriterStrategy.getMimeType();
-    Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
+    Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),
+        Mockito.any());
     assertEquals("failed assertion", "xls", excelWriterStrategy.getMimeType());
   }
 
@@ -116,11 +118,13 @@ public class ExcelWriterStrategyTest {
     values.add(value);
     Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
-    Mockito.when(fileCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
+    Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(values);
     excelWriterStrategy.setMimeType("xlsx");
     excelWriterStrategy.writeFile(1L, 1L, "", false, false);
     excelWriterStrategy.getMimeType();
-    Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
+    Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),
+        Mockito.any());
     assertEquals("failed assertion", "xlsx", excelWriterStrategy.getMimeType());
   }
 
@@ -234,13 +238,15 @@ public class ExcelWriterStrategyTest {
     values.add(value);
     Mockito.when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataset);
     Mockito.when(fileCommon.findTableSchema(Mockito.any(), Mockito.any())).thenReturn(table);
-    Mockito.when(fileCommon.getRecordValues(1L, table.getIdTableSchema())).thenReturn(values);
+    Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(values);
     Mockito.when(fileCommon.getErrors(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(failedValidationsByIdDataset);
     excelWriterStrategy.setMimeType("xlsx");
     excelWriterStrategy.writeFile(1L, 1L, "", false, true);
     excelWriterStrategy.getMimeType();
-    Mockito.verify(fileCommon, times(1)).getRecordValues(Mockito.any(), Mockito.any());
+    Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),
+        Mockito.any());
     assertEquals("failed assertion", "xlsx", excelWriterStrategy.getMimeType());
 
   }
