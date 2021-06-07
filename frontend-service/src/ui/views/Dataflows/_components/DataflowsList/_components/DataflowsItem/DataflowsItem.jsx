@@ -117,6 +117,10 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
           <span>{`${resources.messages['obligationDataflowItem']}: `}</span>
           {itemContent.obligationTitle}
         </p>
+        <p>
+          <span>{`${resources.messages['obligationId']}: `}</span>
+          {itemContent.obligationId}
+        </p>
       </div>
     </Fragment>
   );
