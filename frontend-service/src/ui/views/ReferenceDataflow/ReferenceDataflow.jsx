@@ -247,7 +247,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
             addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
             columnHeader={resources.messages['requestersEmailColumn']}
-            // dataProviderId={dataProviderId}
             dataflowId={referenceDataflowId}
             deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
             deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
@@ -257,7 +256,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
             isUserRightManagementDialogVisible={dataflowState.isManageRequestersDialogVisible}
             placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
-            // representativeId={representativeId}
             roleOptions={requesterRoleOptionsOpenStatus}
             setIsUserRightManagementDialogVisible={setIsManageRequestersDialogVisible}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
