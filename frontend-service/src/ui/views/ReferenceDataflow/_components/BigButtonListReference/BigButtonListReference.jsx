@@ -269,13 +269,13 @@ const BigButtonListReference = withRouter(
 
         {dialogVisibility.isDeleteDataset && (
           <ConfirmDialog
-            header={resources.messages['createReferenceDatasetsDialogHeader']}
+            header={resources.messages['deleteReferenceDatasetDialogHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
             onConfirm={onDeleteDatasetSchema}
             onHide={() => handleDialogs({ dialog: 'isDeleteDataset', isVisible: false })}
             visible={dialogVisibility.isDeleteDataset}>
-            {'isDeleteDataset'}
+            {resources.messages['deleteReferenceDatasetDialogMessage']}
           </ConfirmDialog>
         )}
       </Fragment>
