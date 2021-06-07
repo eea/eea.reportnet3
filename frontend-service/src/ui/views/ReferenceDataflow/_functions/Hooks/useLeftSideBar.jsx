@@ -42,7 +42,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'infoCircle',
       isVisible: buttonsVisibility.propertiesBtn,
       label: 'properties',
-      // onClick: () => manageDialogs('isPropertiesDialogVisible', true),
+      onClick: () => manageDialogs('isPropertiesDialogVisible', true),
       title: 'properties'
     };
 

@@ -31,7 +31,7 @@ import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotific
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
-import { Dialog } from '../_components/Dialog/Dialog';
+import { Dialog } from 'ui/views/_components/Dialog/';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { ManageReferenceDataflow } from '../Dataflows/_components/ManageReferenceDataflow/ManageReferenceDataflow';
 
@@ -58,7 +58,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isManageRequestersDialogVisible: false,
     isUserRightManagementDialogVisible: false,
     isEditDialogVisible: false,
-    isApiKeyDialogVisible: false
+    isApiKeyDialogVisible: false,
+    isPropertiesDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -170,6 +171,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
     />
   );
+  const propertiesDataflowsDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isPropertiesDialogVisible', false)}
+    />
+  );
 
   const shareRightsFooterDialogFooter = (
     <div className={styles.buttonsRolesFooter}>
@@ -190,14 +199,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const requesterRoleOptionsOpenStatus = [
     { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
-    { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
-    { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
+    { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key }
   ];
 
   function getLeftSidebarButtonsVisibility() {
     return {
       apiKeyBtn: true,
-      editBtn: true,
+      editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
       manageRequestersBtn: dataflowState.status === config.dataflowStatus.DESIGN,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
@@ -231,6 +239,46 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         onUpdateData={refreshPage}
         setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
       />
+
+      {dataflowState.isPropertiesDialogVisible && (
+        <Dialog
+          footer={propertiesDataflowsDialogFooter}
+          header={resources.messages['properties']}
+          onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
+          visible={dataflowState.isPropertiesDialogVisible}>
+          <h3>{resources.messages['propertiesModalTitle']}</h3>
+          <p>
+            {resources.messages['propertiesModalDataflowNameLabel']}: {dataflowState.name}
+          </p>
+          <p>
+            {resources.messages['propertiesModalDataflowDescriptionLabel']}: {dataflowState.description}
+          </p>
+          <p>
+            {resources.messages['propertiesModalDataflowStatusLabel']}: {dataflowState.status}
+          </p>
+        </Dialog>
+      )}
+
+      {dataflowState.isEditDialogVisible && (
+        <ManageReferenceDataflow
+          dataflowId={referenceDataflowId}
+          isEditing
+          isVisible={dataflowState.isEditDialogVisible}
+          manageDialogs={manageDialogs}
+          metadata={{ name: dataflowState.name, description: dataflowState.description }}
+        />
+      )}
+
+      {dataflowState.isApiKeyDialogVisible && (
+        <ApiKeyDialog
+          // dataProviderId={dataProviderId}
+          dataflowId={referenceDataflowId}
+          isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
+          isCustodian={dataflowState.isCustodian}
+          manageDialogs={manageDialogs}
+          match={match}
+        />
+      )}
 
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
@@ -267,27 +315,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             userType={'requester'}
           />
         </Dialog>
-      )}
-
-      {dataflowState.isApiKeyDialogVisible && (
-        <ApiKeyDialog
-          // dataProviderId={dataProviderId}
-          dataflowId={referenceDataflowId}
-          isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
-          isCustodian={dataflowState.isCustodian}
-          manageDialogs={manageDialogs}
-          match={match}
-        />
-      )}
-
-      {dataflowState.isEditDialogVisible && (
-        <ManageReferenceDataflow
-          dataflowId={referenceDataflowId}
-          isEditing
-          isVisible={dataflowState.isEditDialogVisible}
-          manageDialogs={manageDialogs}
-          metadata={{ name: dataflowState.name, description: dataflowState.description }}
-        />
       )}
     </div>
   );
