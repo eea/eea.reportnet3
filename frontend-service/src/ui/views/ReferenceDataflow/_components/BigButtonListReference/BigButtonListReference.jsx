@@ -146,8 +146,6 @@ const BigButtonListReference = withRouter(
       ];
     };
 
-    console.log('dataflowState.data.referenceDatasets :>> ', dataflowState.data);
-
     const referenceDatasetModels = isNil(dataflowState.data.referenceDatasets)
       ? []
       : dataflowState.data.referenceDatasets.map(referenceDataset => {
@@ -159,15 +157,16 @@ const BigButtonListReference = withRouter(
             handleRedirect: () => {
               onRedirect({
                 route: routes.DATASET,
-                params: { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }
+                params: { dataflowId: dataflowId, datasetId: referenceDataset.datasetId }
               });
             },
             helpClassName: 'dataflow-dataset-container-help-step',
             model: [],
-            onWheel: onRedirect({
-              route: routes.DATASET,
-              params: { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }
-            }),
+            onWheel: () =>
+              onRedirect({
+                route: routes.DATASET,
+                params: { dataflowId: dataflowId, datasetId: referenceDataset.datasetId }
+              }),
             visibility: true
           };
         });

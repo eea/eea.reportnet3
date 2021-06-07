@@ -58,12 +58,6 @@ const parseDataflowDTO = dataflowDTO =>
 const all = async userData => {
   const dataflowsDTO = await apiReferenceDataflow.all(userData);
 
-  dataflowsDTO.data.forEach(dataflow => {
-    if (dataflow.status === config.dataflowStatus.OPEN) {
-      dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
-    }
-  });
-
   return dataflowsDTO;
 };
 
