@@ -181,7 +181,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resources.messages['cancel']}
-        onClick={() => manageDialogs(`isUserRightManagementDialogVisible`, false)}
+        onClick={() => manageDialogs(`isManageRequestersDialogVisible`, false)}
       />
     </div>
   );
