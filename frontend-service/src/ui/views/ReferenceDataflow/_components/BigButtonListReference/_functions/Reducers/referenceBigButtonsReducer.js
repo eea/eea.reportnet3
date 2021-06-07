@@ -6,6 +6,9 @@ export const referenceBigButtonsReducer = (state, { type, payload }) => {
     case 'GET_DELETE_INDEX':
       return { ...state, deleteIndex: payload.index };
 
+    case 'SET_IS_DATA_SCHEMA_CORRECT':
+      return { ...state, isCreateReferenceEnabled: payload.data };
+
     default:
       return state;
   }

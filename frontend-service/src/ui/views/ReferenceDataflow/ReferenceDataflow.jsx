@@ -238,6 +238,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         onSaveName={onSaveDatasetName}
         onUpdateData={refreshPage}
         setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
+        setUpdatedDatasetSchema={setUpdatedDatasetSchema}
       />
 
       {dataflowState.isPropertiesDialogVisible && (

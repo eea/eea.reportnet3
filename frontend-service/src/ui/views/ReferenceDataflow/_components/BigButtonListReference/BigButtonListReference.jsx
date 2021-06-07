@@ -1,7 +1,8 @@
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router';
 
 import isNil from 'lodash/isNil';
+import remove from 'lodash/remove';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -24,9 +25,18 @@ import { referenceBigButtonsReducer } from './_functions/Reducers/referenceBigBu
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
+import { DataflowService } from 'core/services/Dataflow';
 
 const BigButtonListReference = withRouter(
-  ({ dataflowId, dataflowState, history, onSaveName, onUpdateData, setIsCreatingReferenceDatasets }) => {
+  ({
+    dataflowId,
+    dataflowState,
+    history,
+    onSaveName,
+    onUpdateData,
+    setIsCreatingReferenceDatasets,
+    setUpdatedDatasetSchema
+  }) => {
     const { showLoading, hideLoading } = useContext(LoadingContext);
 
     const [isDesignStatus, setIsDesignStatus] = useState(false);
@@ -40,15 +50,20 @@ const BigButtonListReference = withRouter(
       setHasDatasets(dataflowState.data?.designDatasets?.length);
     }, [dataflowState.data.designDatasets]);
 
+    useLayoutEffect(() => {
+      onLoadSchemasValidations();
+    }, []);
+
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
 
     const [referenceBigButtonsState, referenceBigButtonsDispatch] = useReducer(referenceBigButtonsReducer, {
       deleteIndex: null,
-      dialogVisibility: { isCreateReference: false, isDeleteDataset: false, isNewDataset: false }
+      dialogVisibility: { isCreateReference: false, isDeleteDataset: false, isNewDataset: false },
+      isCreateReferenceEnabled: false
     });
 
-    const { dialogVisibility, deleteIndex } = referenceBigButtonsState;
+    const { deleteIndex, dialogVisibility, isCreateReferenceEnabled } = referenceBigButtonsState;
 
     const handleDialogs = ({ dialog, isVisible }) => {
       referenceBigButtonsDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
@@ -78,9 +93,11 @@ const BigButtonListReference = withRouter(
         );
         if (status >= 200 && status <= 299) {
           onUpdateData();
+          setUpdatedDatasetSchema(
+            remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== deleteIndex)
+          );
         }
       } catch (error) {
-        console.error(error.response);
         if (error.response.status === 401) {
           notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
         }
@@ -110,6 +127,11 @@ const BigButtonListReference = withRouter(
         });
         setIsCreatingReferenceDatasets(false);
       }
+    };
+
+    const onLoadSchemasValidations = async () => {
+      const { data } = await DataflowService.schemasValidation(dataflowId);
+      referenceBigButtonsDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { data } });
     };
 
     const newSchemaModel = [
@@ -174,20 +196,24 @@ const BigButtonListReference = withRouter(
     const createReferenceDatasets = {
       buttonClass: 'newItem',
       buttonIcon: dataflowState.isCreatingReferenceDatasets ? 'spinner' : 'siteMap',
-      enabled: hasDatasets,
       buttonIconClass: dataflowState.isCreatingReferenceDatasets
         ? 'spinner'
         : hasDatasets
         ? 'siteMap'
         : 'siteMapDisabled',
       caption: resources.messages['createReferenceDatasetsBtnLabel'],
+      enabled: hasDatasets && isCreateReferenceEnabled,
       handleRedirect:
-        hasDatasets && !dataflowState.isCreatingReferenceDatasets
+        hasDatasets && isCreateReferenceEnabled && !dataflowState.isCreatingReferenceDatasets
           ? () => handleDialogs({ dialog: 'isCreateReference', isVisible: true })
           : () => {},
       helpClassName: 'dataflow-create-datacollection-help-step',
       layout: 'defaultBigButton',
-      tooltip: !hasDatasets ? resources.messages['createReferenceDatasetsBtnTooltip'] : '',
+      tooltip: !hasDatasets
+        ? resources.messages['createReferenceDatasetsBtnTooltip']
+        : !isCreateReferenceEnabled
+        ? resources.messages['disabledCreateDataCollectionSchemasWithError']
+        : '',
       visibility: isDesignStatus
     };
 
@@ -269,6 +295,7 @@ const BigButtonListReference = withRouter(
 
         {dialogVisibility.isDeleteDataset && (
           <ConfirmDialog
+            classNameConfirm={'p-button-danger'}
             header={resources.messages['deleteReferenceDatasetDialogHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
