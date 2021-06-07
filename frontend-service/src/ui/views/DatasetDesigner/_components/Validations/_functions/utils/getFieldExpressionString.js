@@ -19,11 +19,11 @@ const printExpression = (expression, field) => {
           return getPrefixedFieldExpression({ expression, field, prefix: 'LEN' });
         case 'date':
           return getDateFormattedExpression({ expression, field, format: 'YYYY-MM-DD' });
-        case 'yearDate':
+        case 'year':
           return getPrefixedFieldExpression({ expression, field, prefix: 'Year' });
-        case 'monthDate':
+        case 'month':
           return getPrefixedFieldExpression({ expression, field, prefix: 'Month' });
-        case 'dayDate':
+        case 'day':
           return getPrefixedFieldExpression({ expression, field, prefix: 'Day' });
         case 'dateTime':
           return getDateFormattedExpression({ expression, field, format: 'YYYY-MM-DDHH:mm:ss' });

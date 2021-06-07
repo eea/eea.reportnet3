@@ -39,11 +39,11 @@ const printExpression = (expression, tabs) => {
             ...expressionParameters,
             expressionEnd: getDateFormattedField(expression.field2, 'YYYY-MM-DD')
           });
-        case 'yearDate':
+        case 'year':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });
-        case 'monthDate':
+        case 'month':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Month' });
-        case 'dayDate':
+        case 'day':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Day' });
         case 'dateTime':
           return getExpressionString({
@@ -68,11 +68,11 @@ const printExpression = (expression, tabs) => {
       switch (expression.operatorType) {
         case 'LEN':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'LEN' });
-        case 'yearDate':
+        case 'year':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });
-        case 'monthDate':
+        case 'month':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Month' });
-        case 'dayDate':
+        case 'day':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Day' });
         case 'yearDateTime':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });
