@@ -32,6 +32,8 @@ import { WebformRecordUtils } from 'ui/views/Webforms/_components/WebformTable/_
 
 export const WebformField = ({
   columnsSchema,
+  dataProviderId,
+  dataflowId,
   datasetId,
   datasetSchemaId,
   element,
@@ -105,7 +107,7 @@ export const WebformField = ({
 
   const onFileDownload = async (fileName, fieldId) => {
     try {
-      const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
+      const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
       DownloadFile(data, fileName);
     } catch (error) {

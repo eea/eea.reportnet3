@@ -23,6 +23,7 @@ import { WebformsUtils } from 'ui/views/Webforms/_functions/Utils/WebformsUtils'
 
 export const WebformTable = ({
   calculateSingle,
+  dataProviderId,
   dataflowId,
   datasetId,
   datasetSchemaId,
@@ -227,6 +228,7 @@ export const WebformTable = ({
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
       calculateSingle={calculateSingle}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
+      dataProviderId={dataProviderId}
       dataflowId={dataflowId}
       datasetId={datasetId}
       datasetSchemaId={datasetSchemaId}

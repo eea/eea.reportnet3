@@ -279,7 +279,21 @@
           "key": "CREATE_DATA_COLLECTION_ERROR",
           "navigateTo": {
             "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
+            "parameters": ["referenceDataflowId"]
+          }
+        },
+        {
+          "key": "CREATE_REFERENCE_DATASETS_ERROR",
+          "navigateTo": {
+            "section": "REFERENCE_DATAFLOW",
+            "parameters": ["referenceDataflowId"]
+          }
+        },
+        {
+          "key": "REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT",
+          "navigateTo": {
+            "section": "REFERENCE_DATAFLOW",
+            "parameters": ["referenceDataflowId"]
           }
         },
         {
@@ -836,6 +850,13 @@
           "navigateTo": {
             "section": "DATAFLOW",
             "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "REFERENCE_DATAFLOW_PROCESSED_EVENT",
+          "navigateTo": {
+            "section": "REFERENCE_DATAFLOW",
+            "parameters": ["referenceDataflowId"]
           }
         },
         {
