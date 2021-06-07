@@ -439,6 +439,13 @@ export const FieldDesigner = ({
   };
 
   const onLinkDropdownSelected = fieldType => {
+    if (
+      !isNil(fieldType) &&
+      !isNil(fieldDesignerState.fieldPreviousTypeValue) &&
+      !TextUtils.areEquals(fieldType, fieldDesignerState.fieldPreviousTypeValue.fieldType)
+    ) {
+      dispatchFieldDesigner({ type: 'RESET_REFERENCED_FIELD' });
+    }
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
     }
@@ -796,9 +803,12 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField: !isNil(referencedField)
-          ? parseReferenceField(referencedField)
-          : fieldDesignerState.fieldLinkValue,
+        referencedField:
+          TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
+            ? !isNil(referencedField)
+              ? parseReferenceField(referencedField)
+              : fieldDesignerState.fieldLinkValue
+            : null,
         required,
         type,
         validExtensions
@@ -1235,6 +1245,8 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
+          fieldId={fieldId}
+          fieldPreviousTypeValue={fieldDesignerState.fieldPreviousTypeValue}
           fields={fields}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isExternalLink={
@@ -1247,6 +1259,7 @@ export const FieldDesigner = ({
           masterTableConditional={fieldMasterTableConditional}
           mustBeUsed={fieldDesignerState.fieldPkMustBeUsed}
           onCancelSaveLink={onCancelSaveLink}
+          onHideSelector={() => dispatchFieldDesigner({ type: 'CANCEL_SELECT_LINK' })}
           onSaveLink={onSaveLink}
           selectedLink={fieldDesignerState.fieldLinkValue}
           tableSchemaId={tableSchemaId}

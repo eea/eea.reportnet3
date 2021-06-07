@@ -96,7 +96,8 @@ const downloadExportDatasetFile = async (datasetId, fileName) =>
 const downloadExportFile = async (datasetId, fileName, providerId) =>
   await apiDataset.downloadExportFile(datasetId, fileName, providerId);
 
-const downloadFileData = async (datasetId, fieldId) => await apiDataset.downloadFileData(datasetId, fieldId);
+const downloadFileData = async (dataflowId, datasetId, fieldId, dataProviderId) =>
+  await apiDataset.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
 const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
   await apiDataset.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
@@ -133,7 +134,6 @@ const errorsById = async (
     totalRecords: datasetErrorsDTO.data.totalRecords,
     totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
   });
-
   const errors = datasetErrorsDTO.data.errors.map(
     datasetErrorDTO =>
       datasetErrorDTO &&
@@ -143,6 +143,7 @@ const errorsById = async (
         levelError: datasetErrorDTO.levelError,
         message: datasetErrorDTO.message,
         objectId: datasetErrorDTO.idObject,
+        ruleId: datasetErrorDTO.idRule,
         shortCode: datasetErrorDTO.shortCode,
         tableSchemaId: datasetErrorDTO.idTableSchema,
         tableSchemaName: datasetErrorDTO.nameTableSchema,
@@ -258,7 +259,8 @@ const getMetaData = async datasetId => {
     datasetFeedbackStatus:
       !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),
     datasetSchemaId: datasetTableDataDTO.data.datasetSchema,
-    datasetSchemaName: datasetTableDataDTO.data.dataSetName
+    datasetSchemaName: datasetTableDataDTO.data.dataSetName,
+    dataProviderId: datasetTableDataDTO.data.dataProviderId
   });
 
   return datasetTableDataDTO;

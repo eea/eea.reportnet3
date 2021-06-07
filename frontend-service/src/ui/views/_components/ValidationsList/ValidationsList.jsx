@@ -129,7 +129,6 @@ const ValidationsList = withRouter(
       validationContext.onFetchingData(isFetchingData, updatedRuleId);
       try {
         const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
-
         if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
           validationsServiceList.validations.forEach(validation => {
             const additionalInfo = getAdditionalValidationInfo(
@@ -144,6 +143,15 @@ const ValidationsList = withRouter(
         }
 
         tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
+        validationContext.onSetRulesDescription(
+          validationsServiceList?.validations?.map(validation => {
+            return {
+              id: validation.id,
+              description: validation.description,
+              name: validation.name
+            };
+          })
+        );
       } catch (error) {
         console.error(error);
         notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' });

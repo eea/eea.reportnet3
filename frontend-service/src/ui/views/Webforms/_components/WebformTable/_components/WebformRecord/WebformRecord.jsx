@@ -30,6 +30,7 @@ export const WebformRecord = ({
   addingOnTableSchemaId,
   calculateSingle,
   columnsSchema,
+  dataProviderId,
   dataflowId,
   datasetId,
   datasetSchemaId,
@@ -246,6 +247,8 @@ export const WebformRecord = ({
                   ) : (
                     <WebformField
                       columnsSchema={columnsSchema}
+                      dataProviderId={dataProviderId}
+                      dataflowId={dataflowId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
@@ -356,6 +359,7 @@ export const WebformRecord = ({
                         addingOnTableSchemaId={addingOnTableSchemaId}
                         calculateSingle={calculateSingle}
                         columnsSchema={columnsSchema}
+                        dataProviderId={dataProviderId}
                         dataflowId={dataflowId}
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchemaId}

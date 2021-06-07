@@ -49,7 +49,7 @@ import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useRep
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
 
-export const Dataset = withRouter(({ match, history }) => {
+export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -60,6 +60,7 @@ export const Dataset = withRouter(({ match, history }) => {
   const userContext = useContext(UserContext);
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
+  const [dataProviderId, setDataProviderId] = useState(null);
   const [dataflowName, setDataflowName] = useState('');
   const [dataset, setDataset] = useState({});
   const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
@@ -119,7 +120,12 @@ export const Dataset = withRouter(({ match, history }) => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATASET, dataflowId, history, metaData });
+  useBreadCrumbs({
+    currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
+    dataflowId,
+    history,
+    metaData
+  });
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -310,6 +316,7 @@ export const Dataset = withRouter(({ match, history }) => {
       const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
       setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
+      setDataProviderId(metadata.dataProviderId);
     } catch (error) {
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
@@ -966,6 +973,7 @@ export const Dataset = withRouter(({ match, history }) => {
       )}
       {isTableView ? (
         <TabsSchema
+          dataProviderId={dataProviderId}
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
@@ -988,6 +996,7 @@ export const Dataset = withRouter(({ match, history }) => {
         />
       ) : (
         <Webforms
+          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
@@ -1012,10 +1021,12 @@ export const Dataset = withRouter(({ match, history }) => {
           <ValidationViewer
             datasetId={datasetId}
             datasetName={datasetName}
+            datasetSchemaId={datasetSchemaId}
             hasWritePermissions={hasWritePermissions}
             isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
+            reporting={true}
             schemaTables={schemaTables}
             tables={datasetSchemaAllTables}
             visible={validationsVisible}
