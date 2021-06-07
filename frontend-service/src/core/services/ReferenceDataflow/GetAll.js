@@ -1,1 +1,1 @@
-export const GetAll = ({ referenceDataflowRepository }) => async () => referenceDataflowRepository.all();
+export const GetAll = ({ referenceDataflowRepository }) => async userData => referenceDataflowRepository.all(userData);
