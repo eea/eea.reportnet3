@@ -16,25 +16,32 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
 
-export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) => {
+export const ManageReferenceDataflow = ({ dataflowId, isEditing, isVisible, manageDialogs, metadata, onManage }) => {
+  const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
+
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(isEditing ? metadata.description : '');
+  const [hasErrors, setHasErrors] = useState({ description: true, name: false });
   const [isSending, setIsSending] = useState(false);
-  const [name, setName] = useState('');
+  const [name, setName] = useState(isEditing ? metadata.name : '');
 
   const inputRef = useRef(null);
 
   useInputTextFocus(isVisible, inputRef);
 
-  const onCreateReferenceDataflow = async () => {
+  const onManageReferenceDataflow = async () => {
     setIsSending(true);
     try {
-      const { status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+      if (isEditing) {
+        const { status } = await ReferenceDataflowService.edit(dataflowId, description, name);
 
-      if (status >= 200 && status <= 299) {
-        onCreate();
+        if (status >= 200 && status <= 299) manageDialogs(dialogName, false);
+      } else {
+        const { status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+
+        if (status >= 200 && status <= 299) onManage();
       }
     } catch (error) {
       console.log('error :>> ', error);
@@ -50,13 +57,13 @@ export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) 
         disabled={isEmpty(name) || isEmpty(description) || isSending}
         icon={isSending ? 'spinnerAnimate' : 'save'}
         label={resources.messages['save']}
-        onClick={() => onCreateReferenceDataflow()}
+        onClick={() => onManageReferenceDataflow()}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs('isReferencedDataflowDialogVisible', false)}
+        onClick={() => manageDialogs(dialogName, false)}
       />
     </Fragment>
   );
@@ -65,21 +72,27 @@ export const ManageReferenceDataflow = ({ isVisible, manageDialogs, onCreate }) 
     <Dialog
       footer={renderDialogFooter()}
       header={'Reference dataflow'}
-      onHide={() => manageDialogs('isReferencedDataflowDialogVisible', false)}
+      onHide={() => manageDialogs(dialogName, false)}
       visible={isVisible}>
-      <InputText
-        onChange={event => setName(event.target.value)}
-        placeholder={resources.messages['createDataflowName']}
-        ref={inputRef}
-        value={name}
-      />
-      <InputTextarea
-        className={styles.inputTextArea}
-        onChange={event => setDescription(event.target.value)}
-        placeholder={resources.messages['createDataflowDescription']}
-        rows={10}
-        value={description}
-      />
+      <div className={`formField ${hasErrors.name ? 'error' : ''}`}>
+        <InputText
+          onChange={event => setName(event.target.value)}
+          onFocus={() => setHasErrors({ ...hasErrors, name: false })}
+          placeholder={resources.messages['createDataflowName']}
+          ref={inputRef}
+          value={name}
+        />
+      </div>
+      <div className={`formField ${hasErrors.description ? 'error' : ''}`}>
+        <InputTextarea
+          className={styles.inputTextArea}
+          onChange={event => setDescription(event.target.value)}
+          onFocus={() => setHasErrors({ ...hasErrors, description: false })}
+          placeholder={resources.messages['createDataflowDescription']}
+          rows={100}
+          value={description}
+        />
+      </div>
     </Dialog>
   );
 };

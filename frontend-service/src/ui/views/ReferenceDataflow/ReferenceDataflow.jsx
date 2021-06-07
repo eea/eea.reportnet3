@@ -32,6 +32,7 @@ import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { Dialog } from '../_components/Dialog/Dialog';
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { ManageReferenceDataflow } from '../Dataflows/_components/ManageReferenceDataflow/ManageReferenceDataflow';
 
 const ReferenceDataflow = withRouter(({ history, match }) => {
   const {
@@ -54,7 +55,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isReferencingDataflowsDialogVisible: false,
     isCreatingReferenceDatasets: false,
     isManageRequestersDialogVisible: false,
-    isUserRightManagementDialogVisible: false
+    isUserRightManagementDialogVisible: false,
+    isEditDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -263,6 +265,16 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             userType={'requester'}
           />
         </Dialog>
+      )}
+
+      {dataflowState.isEditDialogVisible && (
+        <ManageReferenceDataflow
+          dataflowId={referenceDataflowId}
+          isEditing
+          isVisible={dataflowState.isEditDialogVisible}
+          manageDialogs={manageDialogs}
+          metadata={{ name: dataflowState.name, description: dataflowState.description }}
+        />
       )}
     </div>
   );

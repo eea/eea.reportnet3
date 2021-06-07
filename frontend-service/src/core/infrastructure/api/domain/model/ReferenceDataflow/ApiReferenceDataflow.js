@@ -12,6 +12,12 @@ export const apiReferenceDataflow = {
     });
   },
 
+  edit: async (dataflowId, description, name) =>
+    await HTTPRequester.post({
+      url: getUrl(ReferenceDataflowConfig.createDataflow),
+      data: { description, id: dataflowId, name }
+    }),
+
   getReferencingDataflows: async referenceDataflowId =>
     await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getReferencingDataflows, { referenceDataflowId }) }),
 
