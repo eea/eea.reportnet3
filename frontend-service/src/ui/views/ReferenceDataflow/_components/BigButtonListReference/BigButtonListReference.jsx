@@ -10,11 +10,14 @@ import { routes } from 'ui/routes';
 import styles from './BigButtonListReference.module.scss';
 
 import { BigButton } from 'ui/views/_components/BigButton';
+import { Button } from 'ui/views/_components/Button';
+import { CloneSchemas } from 'ui/views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { NewDatasetSchemaForm } from 'ui/views/_components/NewDatasetSchemaForm';
 
 import { DataCollectionService } from 'core/services/DataCollection';
+import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
@@ -23,9 +26,10 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { referenceBigButtonsReducer } from './_functions/Reducers/referenceBigButtonsReducer';
 
+import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
+
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { MetadataUtils } from 'ui/views/_functions/Utils';
-import { DataflowService } from 'core/services/Dataflow';
 
 const BigButtonListReference = withRouter(
   ({
@@ -54,20 +58,66 @@ const BigButtonListReference = withRouter(
       onLoadSchemasValidations();
     }, []);
 
+    useCheckNotifications(
+      [
+        'COPY_DATASET_SCHEMA_COMPLETED_EVENT',
+        'COPY_DATASET_SCHEMA_FAILED_EVENT',
+        'COPY_DATASET_SCHEMA_NOT_FOUND_EVENT'
+      ],
+      setCloneLoading,
+      false
+    );
+
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
 
     const [referenceBigButtonsState, referenceBigButtonsDispatch] = useReducer(referenceBigButtonsReducer, {
+      cloneDataflow: { id: null, name: '' },
       deleteIndex: null,
       dialogVisibility: { isCreateReference: false, isDeleteDataset: false, isNewDataset: false },
+      isCloningStatus: false,
       isCreateReferenceEnabled: false
     });
 
-    const { deleteIndex, dialogVisibility, isCreateReferenceEnabled } = referenceBigButtonsState;
+    const {
+      cloneDataflow,
+      deleteIndex,
+      dialogVisibility,
+      isCloningStatus,
+      isCreateReferenceEnabled
+    } = referenceBigButtonsState;
 
     const handleDialogs = ({ dialog, isVisible }) => {
       referenceBigButtonsDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
     };
+
+    function setCloneLoading(value) {
+      referenceBigButtonsDispatch({ type: 'IS_CLONING_STATUS', payload: { status: value } });
+    }
+
+    const cloneDatasetSchemas = async () => {
+      handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false });
+      setCloneLoading(true);
+
+      notificationContext.add({
+        type: 'CLONE_DATASET_SCHEMAS_INIT',
+        content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowState.name }
+      });
+
+      try {
+        await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
+      } catch (error) {
+        console.error(error);
+        if (error.response.status === 423) {
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        } else {
+          notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
+        }
+      }
+    };
+
+    const getCloneDataflow = dataflow =>
+      referenceBigButtonsDispatch({ type: 'GET_DATAFLOW_TO_CLONE', payload: { dataflow } });
 
     const onToggleNewDatasetDialog = isVisible => handleDialogs({ dialog: 'isNewDataset', isVisible });
 
@@ -140,7 +190,11 @@ const BigButtonListReference = withRouter(
         icon: 'add',
         label: resources.messages['createNewEmptyDatasetSchema']
       },
-      { disabled: true, icon: 'clone', label: resources.messages['cloneSchemasFromDataflow'] },
+      {
+        command: () => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: true }),
+        icon: 'clone',
+        label: resources.messages['cloneSchemasFromDataflow']
+      },
       { disabled: true, icon: 'import', label: resources.messages['importSchema'] }
     ];
 
@@ -219,12 +273,12 @@ const BigButtonListReference = withRouter(
 
     const newSchemaBigButton = {
       buttonClass: 'newItem',
-      buttonIcon: 'plus',
-      buttonIconClass: 'newItemCross',
+      buttonIcon: isCloningStatus ? 'spinner' : 'plus',
+      buttonIconClass: isCloningStatus ? 'spinner' : 'newItemCross',
       caption: resources.messages['newSchema'],
       helpClassName: 'dataflow-new-schema-help-step',
-      layout: 'menuBigButton',
-      model: newSchemaModel,
+      layout: isCloningStatus ? 'defaultBigButton' : 'menuBigButton',
+      model: isCloningStatus ? [] : newSchemaModel,
       visibility: isDesignStatus
     };
 
@@ -278,6 +332,34 @@ const BigButtonListReference = withRouter(
               onUpdateData={onUpdateData}
               setNewDatasetDialog={onToggleNewDatasetDialog}
             />
+          </Dialog>
+        )}
+
+        {dialogVisibility.cloneDialogVisible && (
+          <Dialog
+            className={styles.dialog}
+            footer={
+              <Fragment>
+                <Button
+                  className="p-button-primary p-button-animated-blink"
+                  disabled={isNil(cloneDataflow.id)}
+                  icon={'plus'}
+                  label={resources.messages['cloneSelectedDataflow']}
+                  onClick={() => cloneDatasetSchemas()}
+                />
+                <Button
+                  className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+                  icon={'cancel'}
+                  label={resources.messages['close']}
+                  onClick={() => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false })}
+                />
+              </Fragment>
+            }
+            header={resources.messages['dataflowsList']}
+            onHide={() => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false })}
+            style={{ width: '95%' }}
+            visible={dialogVisibility.cloneDialogVisible}>
+            <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
           </Dialog>
         )}
 

@@ -9,6 +9,12 @@ export const referenceBigButtonsReducer = (state, { type, payload }) => {
     case 'SET_IS_DATA_SCHEMA_CORRECT':
       return { ...state, isCreateReferenceEnabled: payload.data };
 
+    case 'GET_DATAFLOW_TO_CLONE':
+      return { ...state, cloneDataflow: payload.dataflow };
+
+    case 'IS_CLONING_STATUS':
+      return { ...state, isCloningStatus: payload.status };
+
     default:
       return state;
   }
