@@ -8,8 +8,8 @@ import org.eea.dataset.mapper.ReferenceDatasetMapper;
 import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
-import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
-import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
+import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.ReferenceDatasetService;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -55,7 +55,7 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
 
   /** The pk catalogue repository. */
   @Autowired
-  private PkCatalogueRepository pkCatalogueRepository;
+  private DataflowReferencedRepository dataflowReferencedRepository;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -105,14 +105,10 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   public Set<DataFlowVO> getDataflowsReferenced(Long dataflowId) {
 
     Set<DataFlowVO> dataflows = new HashSet<>();
-    List<PkCatalogueSchema> catalogues = pkCatalogueRepository.findByDataflowId(dataflowId);
-    for (PkCatalogueSchema catalogue : catalogues) {
-      if (null != catalogue.getReferencedByDataflow()
-          && !catalogue.getReferencedByDataflow().isEmpty()) {
-        for (Long dataflowReferenced : catalogue.getReferencedByDataflow()) {
-          dataflows.add(dataflowControllerZuul.getMetabaseById(dataflowReferenced));
-        }
-      }
+    DataflowReferencedSchema referenced = dataflowReferencedRepository.findByDataflowId(dataflowId);
+    if (null != referenced && null != referenced.getReferencedByDataflow()) {
+      referenced.getReferencedByDataflow().stream()
+          .forEach(r -> dataflows.add(dataflowControllerZuul.getMetabaseById(r)));
     }
     return dataflows;
   }
