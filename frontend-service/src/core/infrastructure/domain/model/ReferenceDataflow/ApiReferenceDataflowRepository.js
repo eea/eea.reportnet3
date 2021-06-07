@@ -1,13 +1,13 @@
 import dayjs from 'dayjs';
-
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+
 import { apiReferenceDataflow } from 'core/infrastructure/api/domain/model/ReferenceDataflow';
 
-import { ReferenceDataflow } from 'core/domain/model/ReferenceDataflow/ReferenceDataflow';
-
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { ReferenceDataflow } from 'core/domain/model/ReferenceDataflow/ReferenceDataflow';
 
 const parseDatasetListDTO = datasetsDTO => {
   if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
@@ -58,10 +58,18 @@ const parseDataflowDTO = dataflowDTO =>
 const all = async userData => {
   const dataflowsDTO = await apiReferenceDataflow.all(userData);
 
+  dataflowsDTO.data.forEach(dataflow => {
+    if (dataflow.status === config.dataflowStatus.OPEN) {
+      dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
+    }
+  });
+
   return dataflowsDTO;
 };
 
 const create = async (name, description, type) => apiReferenceDataflow.create(name, description, type);
+
+const edit = async (dataflowId, description, name) => apiReferenceDataflow.edit(dataflowId, description, name);
 
 const getReferencingDataflows = async referenceDataflowId => {
   const referenceDataflowDTO = await apiReferenceDataflow.getReferencingDataflows(referenceDataflowId);
@@ -85,4 +93,4 @@ const referenceDataflow = async referenceDataflowId => {
   return referenceDataflowDTO;
 };
 
-export const ApiReferenceDataflowRepository = { all, create, getReferencingDataflows, referenceDataflow };
+export const ApiReferenceDataflowRepository = { all, create, edit, getReferencingDataflows, referenceDataflow };
