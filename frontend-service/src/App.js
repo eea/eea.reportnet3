@@ -108,6 +108,12 @@ const App = () => {
                               <Route component={PrivacyStatement} exact path={routes.PRIVACY_STATEMENT} />
                               <PrivateRoute component={Settings} exact path={routes.SETTINGS} />
                               <PrivateRoute component={ReferenceDataflow} exact path={routes.REFERENCE_DATAFLOW} />
+                              <PrivateRoute
+                                component={Dataset}
+                                componentProps={{ isReferenceDataset: true }}
+                                exact
+                                path={routes.REFERENCE_DATASET}
+                              />
                               <Route>
                                 <Redirect to={'/dataflows/error/notFound'} />
                               </Route>

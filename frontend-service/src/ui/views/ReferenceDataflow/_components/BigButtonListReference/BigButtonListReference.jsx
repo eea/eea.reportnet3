@@ -156,7 +156,7 @@ const BigButtonListReference = withRouter(
             caption: referenceDataset.datasetSchemaName,
             handleRedirect: () => {
               onRedirect({
-                route: routes.DATASET,
+                route: routes.REFERENCE_DATASET,
                 params: { dataflowId: dataflowId, datasetId: referenceDataset.datasetId }
               });
             },
@@ -164,7 +164,7 @@ const BigButtonListReference = withRouter(
             model: [],
             onWheel: () =>
               onRedirect({
-                route: routes.DATASET,
+                route: routes.REFERENCE_DATASET,
                 params: { dataflowId: dataflowId, datasetId: referenceDataset.datasetId }
               }),
             visibility: true

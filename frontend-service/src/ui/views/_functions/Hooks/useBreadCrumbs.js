@@ -36,6 +36,7 @@ export const useBreadCrumbs = ({
       label: resources.messages['dataflow']
     };
   };
+
   const getReferenceDataflowCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
@@ -75,6 +76,11 @@ export const useBreadCrumbs = ({
   };
 
   const getReferenceDatasetDesignerCrumb = () => ({
+    label: resources.messages['referenceDatasetDesigner'],
+    icon: 'pencilRuler'
+  });
+
+  const getReferenceDatasetCrumb = () => ({
     label: resources.messages['referenceDatasetDesigner'],
     icon: 'pencilRuler'
   });
@@ -272,6 +278,16 @@ export const useBreadCrumbs = ({
         getDataflowsCrumb(),
         getReferenceDataflowCrumb(),
         getReferenceDatasetDesignerCrumb()
+      ]);
+    }
+
+    console.log(`currentPage`, currentPage);
+    if (currentPage === CurrentPage.REFERENCE_DATASET) {
+      breadCrumbContext.add([
+        getHomeCrumb(),
+        getDataflowsCrumb(),
+        getReferenceDataflowCrumb(),
+        getReferenceDatasetCrumb()
       ]);
     }
   };
