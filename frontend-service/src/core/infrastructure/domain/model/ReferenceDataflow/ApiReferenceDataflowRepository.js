@@ -63,6 +63,9 @@ const all = async userData => {
 
 const create = async (name, description, type) => apiReferenceDataflow.create(name, description, type);
 
+const deleteReferenceDataflow = async referenceDataflowId =>
+  apiReferenceDataflow.deleteReferenceDataflow(referenceDataflowId);
+
 const edit = async (dataflowId, description, name) => apiReferenceDataflow.edit(dataflowId, description, name);
 
 const getReferencingDataflows = async referenceDataflowId => {
@@ -87,4 +90,11 @@ const referenceDataflow = async referenceDataflowId => {
   return referenceDataflowDTO;
 };
 
-export const ApiReferenceDataflowRepository = { all, create, edit, getReferencingDataflows, referenceDataflow };
+export const ApiReferenceDataflowRepository = {
+  all,
+  create,
+  deleteReferenceDataflow,
+  edit,
+  getReferencingDataflows,
+  referenceDataflow
+};
