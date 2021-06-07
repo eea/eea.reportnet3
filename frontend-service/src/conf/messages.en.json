@@ -1137,6 +1137,9 @@
     "propertiesModalTitle": "Reference Dataflow Details",
     "propertiesModalDataflowNameLabel": "Name",
     "propertiesModalDataflowDescriptionLabel": "Description",
-    "propertiesModalDataflowStatusLabel": "Status"
+    "propertiesModalDataflowStatusLabel": "Status",
+    "referenceDatasetBreadcrumb": "Reference Dataset",
+    "deleteReferenceDatasetDialogHeader": "Delete reference dataset",
+    "deleteReferenceDatasetDialogMessage": "Are you sure you want to delete the reference dataset schema?"
   }
 }

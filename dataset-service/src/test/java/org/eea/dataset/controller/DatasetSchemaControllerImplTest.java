@@ -872,7 +872,7 @@ public class DatasetSchemaControllerImplTest {
     fieldSchemaVO.setId("fieldSchemaId");
     fieldSchemaVO.setName("fieldName");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
-    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -901,7 +901,7 @@ public class DatasetSchemaControllerImplTest {
     fieldSchemaVO.setId("fieldSchemaId");
     fieldSchemaVO.setName("fieldName");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
-    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(DataType.TEXT);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -931,7 +931,7 @@ public class DatasetSchemaControllerImplTest {
     fieldSchemaVO.setId("fieldSchemaId");
     fieldSchemaVO.setName("fieldName");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
-    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(null);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -961,7 +961,7 @@ public class DatasetSchemaControllerImplTest {
     fieldSchemaVO.setId("fieldSchemaId");
     fieldSchemaVO.setName("fieldName");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
-    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(null);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -991,7 +991,7 @@ public class DatasetSchemaControllerImplTest {
     fieldSchemaVO.setId("fieldSchemaId");
     fieldSchemaVO.setName("fieldName");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
-    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any()))
+    Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(null);
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(true);

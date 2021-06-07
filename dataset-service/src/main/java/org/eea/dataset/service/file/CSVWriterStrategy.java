@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import com.opencsv.CSVWriter;
 import lombok.NoArgsConstructor;
 
@@ -54,6 +55,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
@@ -83,8 +85,8 @@ public class CSVWriterStrategy implements WriterStrategy {
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
-   * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
@@ -127,7 +129,6 @@ public class CSVWriterStrategy implements WriterStrategy {
       CSVWriter csvWriter, Long datasetId, boolean includeCountryCode) {
 
     List<FieldSchemaVO> fieldSchemas = fileCommon.getFieldSchemas(idTableSchema, dataSetSchema);
-    List<RecordValue> records = fileCommon.getRecordValues(datasetId, idTableSchema);
     Map<String, Integer> indexMap = new HashMap<>();
 
     // If we don't have fieldSchemas, return an empty file.
@@ -136,9 +137,7 @@ public class CSVWriterStrategy implements WriterStrategy {
       int nHeaders = setHeaders(fieldSchemas, indexMap, csvWriter, includeCountryCode);
 
       // If we don't have records, return a file only with headers.
-      if (records != null) {
-        setRecords(records, indexMap, nHeaders, csvWriter, includeCountryCode);
-      }
+      setRecords(indexMap, nHeaders, csvWriter, includeCountryCode, datasetId, idTableSchema);
     }
   }
 
@@ -175,33 +174,40 @@ public class CSVWriterStrategy implements WriterStrategy {
   /**
    * Sets the records.
    *
-   * @param records the records
    * @param indexMap the index map
    * @param nHeaders the n headers
    * @param csvWriter the csv writer
    * @param includeCountryCode the include country code
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    */
-  private void setRecords(List<RecordValue> records, Map<String, Integer> indexMap, int nHeaders,
-      CSVWriter csvWriter, boolean includeCountryCode) {
+  private void setRecords(Map<String, Integer> indexMap, int nHeaders, CSVWriter csvWriter,
+      boolean includeCountryCode, Long datasetId, String idTableSchema) {
 
-    for (RecordValue recordValue : records) {
-      List<FieldValue> fields = recordValue.getFields();
-      List<String> unknownColumns = new ArrayList<>();
-      String[] fieldsToWrite = new String[nHeaders];
+    Long totalRecords = fileCommon.countRecordsByTableSchema(idTableSchema);
+    int batchSize = 50000 / nHeaders;
 
-      if (includeCountryCode) {
-        fieldsToWrite[0] = recordValue.getDataProviderCode();
-      }
+    for (int numPage = 1; totalRecords >= 0; totalRecords = totalRecords - batchSize, numPage++) {
+      for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId, idTableSchema,
+          PageRequest.of(numPage, batchSize))) {
+        List<FieldValue> fields = record.getFields();
+        List<String> unknownColumns = new ArrayList<>();
+        String[] fieldsToWrite = new String[nHeaders];
 
-      for (FieldValue field : fields) {
-        if (null != field.getIdFieldSchema()) {
-          Integer index = indexMap.get(field.getIdFieldSchema());
-          fieldsToWrite[index] = field.getValue();
-        } else {
-          unknownColumns.add(field.getValue());
+        if (includeCountryCode) {
+          fieldsToWrite[0] = record.getDataProviderCode();
         }
+
+        for (FieldValue field : fields) {
+          if (null != field.getIdFieldSchema()) {
+            Integer index = indexMap.get(field.getIdFieldSchema());
+            fieldsToWrite[index] = field.getValue();
+          } else {
+            unknownColumns.add(field.getValue());
+          }
+        }
+        csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);
       }
-      csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);
     }
   }
 
