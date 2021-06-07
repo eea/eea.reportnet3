@@ -53,7 +53,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     updatedDatasetSchema: [],
     isReferencingDataflowsDialogVisible: false,
     isCreatingReferenceDatasets: false,
-    isManageRequestersDialogVisible: false
+    isManageRequestersDialogVisible: false,
+    isUserRightManagementDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -92,8 +93,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
   }
 
-  const setIsManageRequestersDialogVisible = isVisible => {
-    manageDialogs('isManageRequestersDialogVisible', isVisible);
+  const setIsUserRightManagementDialogVisible = isVisible => {
+    manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
 
   const onSaveDatasetName = async (value, index) => {
@@ -172,13 +173,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
         icon={'plus'}
         label={resources.messages['add']}
-        onClick={() => manageDialogs('isManageRequestersDialogVisible', true)}
+        onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resources.messages['cancel']}
-        onClick={() => manageDialogs(`isManageRequestersDialogVisible`, false)}
+        onClick={() => manageDialogs(`isUserRightManagementDialogVisible`, false)}
       />
     </div>
   );
@@ -254,10 +255,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
             editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
             getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
-            isUserRightManagementDialogVisible={dataflowState.isManageRequestersDialogVisible}
+            isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
             roleOptions={requesterRoleOptionsOpenStatus}
-            setIsUserRightManagementDialogVisible={setIsManageRequestersDialogVisible}
+            setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}
           />
