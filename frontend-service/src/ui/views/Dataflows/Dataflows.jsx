@@ -221,7 +221,7 @@ const Dataflows = withRouter(({ history, match }) => {
         <ManageReferenceDataflow
           isVisible={dataflowsState.isReferencedDataflowDialogVisible}
           manageDialogs={manageDialogs}
-          onCreate={onCreateReferenceDataflow}
+          onManage={onCreateReferenceDataflow}
         />
       )}
 

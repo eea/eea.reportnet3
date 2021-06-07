@@ -49,7 +49,7 @@ import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useRep
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
 
-export const Dataset = withRouter(({ match, history }) => {
+export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -120,7 +120,12 @@ export const Dataset = withRouter(({ match, history }) => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATASET, dataflowId, history, metaData });
+  useBreadCrumbs({
+    currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
+    dataflowId,
+    history,
+    metaData
+  });
 
   useEffect(() => {
     leftSideBarContext.removeModels();

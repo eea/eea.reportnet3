@@ -25,6 +25,7 @@ export const routes = {
   PUBLIC_DATAFLOWS: '/public/dataflows',
   REFERENCE_DATAFLOW: '/referenceDataflow/:referenceDataflowId',
   REFERENCE_DATASET_SCHEMA: '/referenceDataflow/:dataflowId/datasetSchema/:datasetId',
+  REFERENCE_DATASET: '/referenceDataflow/:dataflowId/dataset/:datasetId',
   SETTINGS: '/settings',
   TEST_DATASETS: '/dataflow/:dataflowId/testDatasets'
 };
