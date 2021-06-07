@@ -80,7 +80,7 @@ export const ManageReferenceDataflow = ({
         if (status >= 200 && status <= 299) onManage();
       }
     } catch (error) {
-      console.log('error :>> ', error);
+      console.error('error :', error);
     } finally {
       setIsSending(false);
     }
