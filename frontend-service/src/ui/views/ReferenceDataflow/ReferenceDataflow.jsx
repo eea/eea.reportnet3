@@ -275,7 +275,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           // dataProviderId={dataProviderId}
           dataflowId={referenceDataflowId}
           isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
-          isCustodian={dataflowState.isCustodian}
+          isCustodian={true}
           manageDialogs={manageDialogs}
           match={match}
         />
