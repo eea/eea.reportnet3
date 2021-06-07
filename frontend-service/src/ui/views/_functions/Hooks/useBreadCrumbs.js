@@ -81,8 +81,8 @@ export const useBreadCrumbs = ({
   });
 
   const getReferenceDatasetCrumb = () => ({
-    label: resources.messages['referenceDatasetDesigner'],
-    icon: 'pencilRuler'
+    label: resources.messages['referenceDataset'],
+    icon: 'howTo'
   });
 
   const getEuDatasetCrumb = () => {
@@ -281,7 +281,6 @@ export const useBreadCrumbs = ({
       ]);
     }
 
-    console.log(`currentPage`, currentPage);
     if (currentPage === CurrentPage.REFERENCE_DATASET) {
       breadCrumbContext.add([
         getHomeCrumb(),

@@ -124,7 +124,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
     dataflowId,
     history,
-    metaData
+    metaData,
+    referenceDataflowId: dataflowId
   });
 
   useEffect(() => {
@@ -842,8 +843,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        icon="dataset"
-        iconSize="3.5rem"
+        icon={isReferenceDataset ? 'howTo' : 'dataset'}
+        iconSize={isReferenceDataset ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
         subtitle={`${dataflowName} - ${datasetName}`}
         title={datasetSchemaName}
