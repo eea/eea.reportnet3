@@ -8,6 +8,7 @@ import styles from './ReferenceDataflow.module.scss';
 
 import { config } from 'conf';
 
+import { ApiKeyDialog } from 'ui/views/_components/ApiKeyDialog';
 import { BigButtonListReference } from './_components/BigButtonListReference';
 import { Button } from 'ui/views/_components/Button';
 import { MainLayout } from 'ui/views/_components/Layout';
@@ -56,7 +57,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isCreatingReferenceDatasets: false,
     isManageRequestersDialogVisible: false,
     isUserRightManagementDialogVisible: false,
-    isEditDialogVisible: false
+    isEditDialogVisible: false,
+    isApiKeyDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -265,6 +267,17 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             userType={'requester'}
           />
         </Dialog>
+      )}
+
+      {dataflowState.isApiKeyDialogVisible && (
+        <ApiKeyDialog
+          // dataProviderId={dataProviderId}
+          dataflowId={referenceDataflowId}
+          isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
+          isCustodian={dataflowState.isCustodian}
+          manageDialogs={manageDialogs}
+          match={match}
+        />
       )}
 
       {dataflowState.isEditDialogVisible && (

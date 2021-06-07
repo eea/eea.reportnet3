@@ -15,7 +15,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'settings',
       isVisible: buttonsVisibility.apiKeyBtn,
       label: 'sidebarApiKeyBtn',
-      // onClick: () => manageDialogs('isApiKeyDialogVisible', true),
+      onClick: () => manageDialogs('isApiKeyDialogVisible', true),
       title: 'sidebarApiKeyBtn'
     };
 
@@ -46,15 +46,6 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       title: 'properties'
     };
 
-    const showPublicInfoBtn = {
-      className: 'dataflow-showPublicInfo-help-step',
-      icon: 'lock',
-      isVisible: buttonsVisibility.showPublicInfoBtn,
-      label: 'publicStatusLeftSideBarButton',
-      // onClick: () => manageDialogs('isShowPublicInfoDialogVisible', true),
-      title: 'publicStatusLeftSideBarButton'
-    };
-
     const reportingDataflows = {
       className: 'dataflow-properties-help-step',
       icon: 'clone',
@@ -64,7 +55,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       title: 'leftBarReportingDataflowsButton'
     };
 
-    const allButtons = [propertiesBtn, editBtn, showPublicInfoBtn, apiKeyBtn, manageRequestersBtn, reportingDataflows];
+    const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRequestersBtn, reportingDataflows];
 
     leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
   }, [dataflowState.userRoles, dataflowState.status, dataflowState.datasetId]);
