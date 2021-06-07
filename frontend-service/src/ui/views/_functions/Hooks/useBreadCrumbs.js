@@ -281,7 +281,6 @@ export const useBreadCrumbs = ({
       ]);
     }
 
-    console.log(`currentPage`, currentPage);
     if (currentPage === CurrentPage.REFERENCE_DATASET) {
       breadCrumbContext.add([
         getHomeCrumb(),
