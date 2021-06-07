@@ -15,6 +15,7 @@ import { ReferencingDataflows } from './_components/ReferencingDataflows';
 import { routes } from 'ui/routes';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
+import { ShareRights } from 'ui/views/_components/ShareRights';
 
 import { DatasetService } from 'core/services/Dataset';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
@@ -51,7 +52,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     status: '',
     updatedDatasetSchema: [],
     isReferencingDataflowsDialogVisible: false,
-    isCreatingReferenceDatasets: false
+    isCreatingReferenceDatasets: false,
+    isManageRequestersDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -89,6 +91,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   function setIsCreatingReferenceDatasets(isCreatingReferenceDatasets) {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
   }
+
+  const setIsManageRequestersDialogVisible = isVisible => {
+    manageDialogs('isManageRequestersDialogVisible', isVisible);
+  };
 
   const onSaveDatasetName = async (value, index) => {
     try {
@@ -160,6 +166,29 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     />
   );
 
+  const shareRightsFooterDialogFooter = (
+    <div className={styles.buttonsRolesFooter}>
+      <Button
+        className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
+        icon={'plus'}
+        label={resources.messages['add']}
+        onClick={() => manageDialogs('isManageRequestersDialogVisible', true)}
+      />
+      <Button
+        className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
+        icon={'cancel'}
+        label={resources.messages['cancel']}
+        onClick={() => manageDialogs(`isManageRequestersDialogVisible`, false)}
+      />
+    </div>
+  );
+
+  const requesterRoleOptionsOpenStatus = [
+    { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
+    { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
+    { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
+  ];
+
   function getLeftSidebarButtonsVisibility() {
     return {
       apiKeyBtn: true,
@@ -188,6 +217,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
       </div>
+
       <BigButtonListReference
         className="dataflow-big-buttons-help-step"
         dataflowId={referenceDataflowId}
@@ -196,6 +226,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         onUpdateData={refreshPage}
         setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
       />
+
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
           footer={referencingDataflowsDialogFooter}
@@ -203,6 +234,35 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
           <ReferencingDataflows referenceDataflowId={referenceDataflowId} />
+        </Dialog>
+      )}
+
+      {dataflowState.isManageRequestersDialogVisible && (
+        <Dialog
+          footer={shareRightsFooterDialogFooter}
+          header={resources.messages['manageRequestersRights']}
+          onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+          visible={dataflowState.isManageRequestersDialogVisible}>
+          <ShareRights
+            addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
+            addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
+            columnHeader={resources.messages['requestersEmailColumn']}
+            // dataProviderId={dataProviderId}
+            dataflowId={referenceDataflowId}
+            deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
+            deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
+            deleteConfirmMessage={resources.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+            deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
+            editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
+            getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
+            isUserRightManagementDialogVisible={dataflowState.isManageRequestersDialogVisible}
+            placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
+            // representativeId={representativeId}
+            roleOptions={requesterRoleOptionsOpenStatus}
+            setIsUserRightManagementDialogVisible={setIsManageRequestersDialogVisible}
+            updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
+            userType={'requester'}
+          />
         </Dialog>
       )}
     </div>
