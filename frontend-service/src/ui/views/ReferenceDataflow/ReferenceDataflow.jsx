@@ -46,11 +46,12 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     data: {},
     description: '',
     designDatasetSchemas: [],
-    isDataUpdated: false,
+    refresh: false,
     name: '',
     status: '',
     updatedDatasetSchema: [],
-    isReferencingDataflowsDialogVisible: false
+    isReferencingDataflowsDialogVisible: false,
+    isCreatingReferenceDatasets: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -59,9 +60,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   useEffect(() => {
-    dataflowDispatch({ type: 'LOADING_STARTED' });
     onLoadReportingDataflow();
-  }, [dataflowState.isDataUpdated]);
+  }, [dataflowState.refresh]);
 
   useBreadCrumbs({
     currentPage: CurrentPage.REFERENCE_DATAFLOW,
@@ -72,11 +72,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs);
 
+  useCheckNotifications(['REFERENCE_DATAFLOW_PROCESSED_EVENT'], refreshPage);
+  useCheckNotifications(['REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT'], setIsCreatingReferenceDatasets, false);
+
   function manageDialogs(dialog, value, secondDialog, secondValue) {
     dataflowDispatch({
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
+  }
+
+  function refreshPage() {
+    dataflowDispatch({ type: 'REFRESH_PAGE' });
+  }
+
+  function setIsCreatingReferenceDatasets(isCreatingReferenceDatasets) {
+    dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
   }
 
   const onSaveDatasetName = async (value, index) => {
@@ -99,6 +110,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadReportingDataflow = async () => {
+    dataflowDispatch({ type: 'LOADING_STARTED' });
     let referenceDataflowResponse;
     try {
       referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
@@ -138,8 +150,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       history.push(getUrl(routes.DATAFLOWS));
     }
   };
-
-  const setIsDataUpdated = () => dataflowDispatch({ type: 'SET_IS_DATA_UPDATED' });
 
   const referencingDataflowsDialogFooter = (
     <Button
@@ -183,7 +193,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         dataflowId={referenceDataflowId}
         dataflowState={dataflowState}
         onSaveName={onSaveDatasetName}
-        onUpdateData={setIsDataUpdated}
+        onUpdateData={refreshPage}
+        setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
       />
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
