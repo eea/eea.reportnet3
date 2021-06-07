@@ -25,7 +25,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'edit',
       isVisible: buttonsVisibility.editBtn,
       label: 'edit',
-      // onClick: () => manageDialogs('isEditDialogVisible', true),
+      onClick: () => manageDialogs('isEditDialogVisible', true),
       title: 'edit'
     };
 
