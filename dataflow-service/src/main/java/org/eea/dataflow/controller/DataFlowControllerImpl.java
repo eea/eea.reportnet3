@@ -97,7 +97,6 @@ public class DataFlowControllerImpl implements DataFlowController {
       } else {
         result = dataflowService.getByIdWithRepresentativesFilteredByUserEmail(dataflowId);
       }
-
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -162,7 +161,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Reference Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,

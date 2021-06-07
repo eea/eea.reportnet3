@@ -212,23 +212,28 @@ public class DataflowServiceImpl implements DataflowService {
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
 
     // Get user's dataflows sorted by status and creation date
-    dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(
+    List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList()))
-        .forEach(dataflow -> {
-          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-          if (!map.isEmpty() && null != datasetsStatusList) {
-            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-          }
-          dataflowVOs.add(dataflowVO);
-        });
-    try {
-      getOpenedObligations(dataflowVOs);
-    } catch (FeignException e) {
-      LOG_ERROR.error("Error retrieving obligations for dataflows from user id {} due to reason {}",
-          userId, e.getMessage(), e);
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (null != idsResources && !idsResources.isEmpty()) {
+      dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources)
+          .forEach(dataflow -> {
+            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+            if (!map.isEmpty() && null != datasetsStatusList) {
+              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+            }
+            dataflowVOs.add(dataflowVO);
+          });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
     }
+
     return dataflowVOs;
   }
 
@@ -249,15 +254,34 @@ public class DataflowServiceImpl implements DataflowService {
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
 
-    // Get user's dataflows sorted by status and creation date
-    dataflowRepository.findReferenceByIdInOrderByStatusDescCreationDateDesc().forEach(dataflow -> {
-      DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-      List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-      if (!map.isEmpty() && null != datasetsStatusList) {
-        setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-      }
-      dataflowVOs.add(dataflowVO);
-    });
+    // First, get reference dataflows in DESIGN that the user has permission
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (null != idsResources && !idsResources.isEmpty()) {
+      dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+          TypeStatusEnum.DESIGN, idsResources).forEach(dataflow -> {
+            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+            if (!map.isEmpty() && null != datasetsStatusList) {
+              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+            }
+            dataflowVOs.add(dataflowVO);
+          });
+    }
+
+    // Second, get reference dataflows in DRAFT sorted by status and creation date
+    dataflowRepository
+        .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT)
+        .forEach(dataflow -> {
+          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+          if (!map.isEmpty() && null != datasetsStatusList) {
+            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+          }
+          dataflowVOs.add(dataflowVO);
+        });
+
 
     return dataflowVOs;
   }
