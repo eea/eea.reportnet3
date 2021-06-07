@@ -32,7 +32,7 @@ export const ManageReferenceDataflow = ({
   onManage
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
-  const isDesign = TextUtils.areEquals(metadata.status, config.dataflowStatus.DESIGN);
+  const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
