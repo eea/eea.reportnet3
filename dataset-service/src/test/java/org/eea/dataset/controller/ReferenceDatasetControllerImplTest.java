@@ -1,8 +1,11 @@
 package org.eea.dataset.controller;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.junit.Assert;
@@ -53,6 +56,13 @@ public class ReferenceDatasetControllerImplTest {
         .thenReturn(references);
     Assert.assertEquals(references,
         referenceDatasetControllerImpl.findReferenceDataSetPublicByDataflowId(1L));
+  }
+
+  @Test
+  public void findDataflowsReferencedByDataflowIdTest() {
+    Set<DataFlowVO> dataflows = new HashSet<>();
+    Assert.assertEquals(dataflows,
+        referenceDatasetControllerImpl.findDataflowsReferencedByDataflowId(1L));
   }
 
 }

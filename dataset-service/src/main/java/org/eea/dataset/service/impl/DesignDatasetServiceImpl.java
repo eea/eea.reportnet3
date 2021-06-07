@@ -46,9 +46,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class DesignDatasetServiceImpl.
@@ -446,9 +448,44 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         // with the fieldVO updated with the objectIds of the cloned dataset, we modify the field to
         // update all the things
         // related to the PK/FK
-        dataschemaController.updateFieldSchema(datasetId, field);
+        updateFieldSchema(datasetId, field);
       }
     });
+  }
+
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   */
+  private void updateFieldSchema(Long datasetId, FieldSchemaVO fieldSchemaVO) {
+    try {
+      String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
+      // Modify the register into the metabase fieldRelations
+      dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
+
+      // Clear the attachments if necessary
+      if (Boolean.TRUE.equals(
+          dataschemaService.checkClearAttachments(datasetId, datasetSchema, fieldSchemaVO))) {
+        datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
+      }
+
+      DataType type =
+          dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO, datasetId, true);
+
+
+      // After the update, we create the rules needed and change the type of the field if
+      // neccessary
+      dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+          datasetId);
+
+      // Add the Pk if needed to the catalogue
+      dataschemaService.addToPkCatalogue(fieldSchemaVO, datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
   }
 
 

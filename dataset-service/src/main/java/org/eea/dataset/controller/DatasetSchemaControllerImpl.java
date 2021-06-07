@@ -273,7 +273,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
 
         // delete from the CataloguePK the entries if the schema has FK
-        dataschemaService.updatePkCatalogueDeletingSchema(datasetSchemaId, dataflowId);
+        dataschemaService.updatePkCatalogueDeletingSchema(datasetSchemaId, datasetId);
 
         // delete the schema in Mongo
         dataschemaService.deleteDatasetSchema(datasetSchemaId, datasetId);
@@ -580,7 +580,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         }
 
         DataType type =
-            dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO, datasetId);
+            dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO, datasetId, false);
 
         // Create query view
         // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
