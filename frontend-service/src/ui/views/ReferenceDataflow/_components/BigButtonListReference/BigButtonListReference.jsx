@@ -146,6 +146,32 @@ const BigButtonListReference = withRouter(
       ];
     };
 
+    console.log('dataflowState.data.referenceDatasets :>> ', dataflowState.data);
+
+    const referenceDatasetModels = isNil(dataflowState.data.referenceDatasets)
+      ? []
+      : dataflowState.data.referenceDatasets.map(referenceDataset => {
+          return {
+            layout: 'defaultBigButton',
+            buttonClass: 'referenceDataset',
+            buttonIcon: 'howTo',
+            caption: referenceDataset.datasetSchemaName,
+            handleRedirect: () => {
+              onRedirect({
+                route: routes.DATASET,
+                params: { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }
+              });
+            },
+            helpClassName: 'dataflow-dataset-container-help-step',
+            model: [],
+            onWheel: onRedirect({
+              route: routes.DATASET,
+              params: { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }
+            }),
+            visibility: true
+          };
+        });
+
     const createReferenceDatasets = {
       buttonClass: 'newItem',
       buttonIcon: dataflowState.isCreatingReferenceDatasets ? 'spinner' : 'siteMap',
@@ -199,9 +225,12 @@ const BigButtonListReference = withRouter(
           visibility: true
         }));
 
-    const bigButtonList = [...designDatasetButtons, newSchemaBigButton, createReferenceDatasets].map(button =>
-      button.visibility ? <BigButton key={button.caption} {...button} /> : null
-    );
+    const bigButtonList = [
+      ...designDatasetButtons,
+      newSchemaBigButton,
+      createReferenceDatasets,
+      ...referenceDatasetModels
+    ].map(button => (button.visibility ? <BigButton key={button.caption} {...button} /> : null));
 
     return (
       <Fragment>
