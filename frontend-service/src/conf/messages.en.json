@@ -1133,6 +1133,13 @@
     "createReferenceDatasetsDialogHeader": "Create reference datasets",
     "createReferenceDatasetsDialogMessage": "Do you want to create reference datasets?",
     "referenceDataflowProcessFailedEvent": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
-    "referenceDataflowProcessedEvent": "Reference datasets created at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>"
+    "referenceDataflowProcessedEvent": "Reference datasets created at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
+    "propertiesModalTitle": "Reference Dataflow Details",
+    "propertiesModalDataflowNameLabel": "Name",
+    "propertiesModalDataflowDescriptionLabel": "Description",
+    "propertiesModalDataflowStatusLabel": "Status",
+    "referenceDatasetBreadcrumb": "Reference Dataset",
+    "deleteReferenceDatasetDialogHeader": "Delete reference dataset",
+    "deleteReferenceDatasetDialogMessage": "Are you sure you want to delete the reference dataset schema?"
   }
 }
