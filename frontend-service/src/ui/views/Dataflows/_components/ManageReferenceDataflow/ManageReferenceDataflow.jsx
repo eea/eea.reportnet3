@@ -103,7 +103,7 @@ export const ManageReferenceDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await ReferenceDataflowService.edit(dataflowId, description, name);
+        const { status } = await ReferenceDataflowService.edit(dataflowId, description, name, 'REFERENCE');
 
         if (status >= 200 && status <= 299) manageDialogs(dialogName, false);
       } else {

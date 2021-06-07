@@ -66,7 +66,8 @@ const create = async (name, description, type) => apiReferenceDataflow.create(na
 const deleteReferenceDataflow = async referenceDataflowId =>
   apiReferenceDataflow.deleteReferenceDataflow(referenceDataflowId);
 
-const edit = async (dataflowId, description, name) => apiReferenceDataflow.edit(dataflowId, description, name);
+const edit = async (dataflowId, description, name, type) =>
+  apiReferenceDataflow.edit(dataflowId, description, name, type);
 
 const getReferencingDataflows = async referenceDataflowId => {
   const referenceDataflowDTO = await apiReferenceDataflow.getReferencingDataflows(referenceDataflowId);
