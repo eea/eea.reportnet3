@@ -1134,7 +1134,6 @@
     "createReferenceDatasetsDialogMessage": "Do you want to create reference datasets?",
     "referenceDataflowProcessFailedEvent": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "referenceDataflowProcessedEvent": "Reference datasets created at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
-    "obligationId": "Id obligation",
     "propertiesModalTitle": "Reference Dataflow Details",
     "propertiesModalDataflowNameLabel": "Name",
     "propertiesModalDataflowDescriptionLabel": "Description",
@@ -1146,6 +1145,7 @@
     "editReferenceDataflowDialogHeader": "Edit reference dataflow",
     "createReferenceDataflowDialogHeader": "Create new reference dataflow",
     "createReferenceDatasetsInit": "Creating reference datasets",
-    "referenceDataflowsDraftInfo": "Select a dataflow in draft status"
+    "referenceDataflowsDraftInfo": "Select a dataflow in draft status",
+    "obligationId": "Id obligation"
   }
 }
