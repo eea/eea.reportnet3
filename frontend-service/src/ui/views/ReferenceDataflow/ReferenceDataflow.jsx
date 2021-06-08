@@ -80,7 +80,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs);
 
-  useCheckNotifications(['REFERENCE_DATAFLOW_PROCESSED_EVENT'], refreshPage);
+  useCheckNotifications(['REFERENCE_DATAFLOW_PROCESSED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'], refreshPage);
   useCheckNotifications(['REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT'], setIsCreatingReferenceDatasets, false);
 
   function manageDialogs(dialog, value, secondDialog, secondValue) {
