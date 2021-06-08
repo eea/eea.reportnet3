@@ -12,10 +12,10 @@ export const apiReferenceDataflow = {
     });
   },
 
-  edit: async (dataflowId, description, name) =>
+  edit: async (dataflowId, description, name, type) =>
     await HTTPRequester.update({
       url: getUrl(ReferenceDataflowConfig.createDataflow),
-      data: { description, id: dataflowId, name }
+      data: { description, id: dataflowId, name, type }
     }),
 
   deleteReferenceDataflow: async referenceDataflowId =>

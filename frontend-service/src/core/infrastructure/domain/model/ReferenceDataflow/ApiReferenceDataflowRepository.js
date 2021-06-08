@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -8,6 +9,58 @@ import { apiReferenceDataflow } from 'core/infrastructure/api/domain/model/Refer
 
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { ReferenceDataflow } from 'core/domain/model/ReferenceDataflow/ReferenceDataflow';
+
+import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
+
+const getUserRoleLabel = role => {
+  const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
+  return userRole?.label;
+};
+
+const getUserRoles = (userRoles = []) => {
+  const userRoleToDataflow = [];
+  userRoles.filter(userRol => !userRol.duplicatedRoles && userRoleToDataflow.push(userRol));
+
+  const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
+  const dataflowDuplicatedRoles = [];
+  for (const duplicatedRol of duplicatedRoles) {
+    if (dataflowDuplicatedRoles[duplicatedRol.id]) {
+      dataflowDuplicatedRoles[duplicatedRol.id].push(duplicatedRol);
+    } else {
+      dataflowDuplicatedRoles[duplicatedRol.id] = [duplicatedRol];
+    }
+  }
+
+  const dataflowPermissionsOrderConfig = {
+    1: config.permissions.roles.CUSTODIAN,
+    2: config.permissions.roles.STEWARD,
+    3: config.permissions.roles.OBSERVER,
+    4: config.permissions.roles.EDITOR_WRITE,
+    5: config.permissions.roles.EDITOR_READ,
+    6: config.permissions.roles.LEAD_REPORTER,
+    7: config.permissions.roles.NATIONAL_COORDINATOR,
+    8: config.permissions.roles.REPORTER_WRITE,
+    9: config.permissions.roles.REPORTER_READ
+  };
+
+  const dataflowPermissions = Object.values(dataflowPermissionsOrderConfig);
+
+  dataflowDuplicatedRoles.forEach(dataflowRoles => {
+    let rol = null;
+
+    dataflowPermissions.forEach(permission => {
+      dataflowRoles.forEach(dataflowRol => {
+        if (isNil(rol) && dataflowRol.userRole === permission.label) {
+          rol = dataflowRol;
+        }
+      });
+    });
+
+    userRoleToDataflow.push(rol);
+  });
+
+  return userRoleToDataflow;
+};
 
 const parseDatasetListDTO = datasetsDTO => {
   if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
@@ -55,8 +108,36 @@ const parseDataflowDTO = dataflowDTO =>
     userRole: dataflowDTO.userRole
   });
 
-const all = async userData => {
+const sortDataflows = dataflowDTOs => {
+  const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+  dataflows.sort((a, b) => {
+    const deadline_1 = a.expirationDate;
+    const deadline_2 = b.expirationDate;
+    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
+  });
+  return dataflows;
+};
+
+const all = async (userData = []) => {
   const dataflowsDTO = await apiReferenceDataflow.all(userData);
+  const userRoles = [];
+  const dataflows = [];
+
+  const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
+
+  dataflowsRoles.map((item, index) => {
+    const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
+    return (userRoles[index] = { id: parseInt(item.replace(/\D/g, '')), userRole: getUserRoleLabel(role) });
+  });
+
+  dataflowsDTO.data.forEach(dataflow => {
+    const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
+    const role = isDuplicated ? getUserRoles(userRoles) : userRoles;
+
+    dataflows.push({ ...dataflow, ...role.find(item => item.id === dataflow.id) });
+  });
+
+  dataflowsDTO.data = sortDataflows(dataflows);
 
   return dataflowsDTO;
 };
@@ -66,7 +147,8 @@ const create = async (name, description, type) => apiReferenceDataflow.create(na
 const deleteReferenceDataflow = async referenceDataflowId =>
   apiReferenceDataflow.deleteReferenceDataflow(referenceDataflowId);
 
-const edit = async (dataflowId, description, name) => apiReferenceDataflow.edit(dataflowId, description, name);
+const edit = async (dataflowId, description, name, type) =>
+  apiReferenceDataflow.edit(dataflowId, description, name, type);
 
 const getReferencingDataflows = async referenceDataflowId => {
   const referenceDataflowDTO = await apiReferenceDataflow.getReferencingDataflows(referenceDataflowId);
