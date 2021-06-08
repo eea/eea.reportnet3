@@ -130,7 +130,7 @@ const Dataflows = withRouter(({ history, match }) => {
         const { data } = await DataflowService.all(userContext.contextRoles);
         dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'dataflows' } });
       } else {
-        const { data } = await ReferenceDataflowService.all();
+        const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
         dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
     } catch (error) {
