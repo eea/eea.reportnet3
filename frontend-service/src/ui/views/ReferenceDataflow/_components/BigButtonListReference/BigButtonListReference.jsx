@@ -168,7 +168,7 @@ const BigButtonListReference = withRouter(
     const onAddReferenceDataset = async () => {
       handleDialogs({ dialog: 'isCreateReference', isVisible: false });
 
-      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
+      notificationContext.add({ type: 'CREATE_REFERENCE_DATASETS_INIT', content: {} });
 
       setIsCreatingReferenceDatasets(true);
 

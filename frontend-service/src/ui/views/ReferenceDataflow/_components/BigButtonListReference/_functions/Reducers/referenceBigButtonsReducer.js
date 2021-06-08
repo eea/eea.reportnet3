@@ -15,6 +15,12 @@ export const referenceBigButtonsReducer = (state, { type, payload }) => {
     case 'IS_CLONING_STATUS':
       return { ...state, isCloningStatus: payload.status };
 
+    case 'SET_IS_DESIGN_STATUS':
+      return { ...state, isDesignStatus: payload.isDesignStatus };
+
+    case 'SET_HAS_DATASETS':
+      return { ...state, hasDatasets: payload.hasDatasets };
+
     default:
       return state;
   }
