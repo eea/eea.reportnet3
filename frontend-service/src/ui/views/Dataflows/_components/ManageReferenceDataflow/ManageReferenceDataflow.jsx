@@ -28,7 +28,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 export const ManageReferenceDataflow = ({
   dataflowId,
   history,
-  isEditing,
+  isEditing = false,
   isVisible,
   manageDialogs,
   metadata,
@@ -143,8 +143,8 @@ export const ManageReferenceDataflow = ({
       <Button
         className="p-button-primary p-button-animated-blink"
         disabled={isEmpty(name) || isEmpty(description) || isSending}
-        icon={isSending ? 'spinnerAnimate' : 'save'}
-        label={resources.messages['save']}
+        icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
+        label={isEditing ? resources.messages['save'] : resources.messages['create']}
         onClick={() => onManageReferenceDataflow()}
       />
       <Button
@@ -160,7 +160,11 @@ export const ManageReferenceDataflow = ({
     <Fragment>
       <Dialog
         footer={renderDialogFooter()}
-        header={'Reference dataflow'}
+        header={
+          isEditing
+            ? resources.messages['editReferenceDataflowDialogHeader']
+            : resources.messages['createReferenceDataflowDialogHeader']
+        }
         onHide={() => manageDialogs(dialogName, false)}
         visible={isVisible}>
         <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
@@ -190,9 +194,9 @@ export const ManageReferenceDataflow = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name)}
-          header={resources.messages['updateDataCollectionHeader']}
+          header={resources.messages['deleteReferenceDataflowDialogHeader']}
           labelCancel={resources.messages['close']}
-          labelConfirm={resources.messages['create']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={onDeleteDataflow}
           onHide={() => setIsDeleteDialogVisible(false)}
           visible={isDeleteDialogVisible}>
