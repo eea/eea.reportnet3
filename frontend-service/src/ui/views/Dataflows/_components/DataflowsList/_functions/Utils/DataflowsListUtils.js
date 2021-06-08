@@ -6,6 +6,7 @@ const parseDataToFilter = (data, pinnedDataflows) => {
     legalInstrument: dataflow.obligation?.legalInstruments?.alias,
     name: dataflow.name,
     obligationTitle: dataflow.obligation?.title,
+    obligationId: dataflow.obligation?.obligationId?.toString(),
     pinned: pinnedDataflows.some(pinnedDataflow => pinnedDataflow === dataflow.id.toString()) ? 'pinned' : 'unpinned',
     reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
     status: dataflow.status,
