@@ -261,7 +261,7 @@ const BigButtonListReference = withRouter(
       buttonIcon: dataflowState.isCreatingReferenceDatasets ? 'spinner' : 'siteMap',
       buttonIconClass: dataflowState.isCreatingReferenceDatasets
         ? 'spinner'
-        : hasDatasets
+        : hasDatasets && isCreateReferenceEnabled
         ? 'siteMap'
         : 'siteMapDisabled',
       caption: resources.messages['createReferenceDatasetsBtnLabel'],
