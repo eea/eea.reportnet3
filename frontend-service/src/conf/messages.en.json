@@ -1145,6 +1145,7 @@
     "editReferenceDataflowDialogHeader": "Edit reference dataflow",
     "createReferenceDataflowDialogHeader": "Create new reference dataflow",
     "createReferenceDatasetsInit": "Creating reference datasets",
-    "referenceDataflowsDraftInfo": "Select a dataflow in draft status"
+    "referenceDataflowsDraftInfo": "Select a dataflow in draft status",
+    "obligationId": "Id obligation"
   }
 }
