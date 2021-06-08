@@ -143,7 +143,10 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
       { type: 'date', properties: [{ name: 'expirationDate' }] }
     ],
-    reference: [{ type: 'input', properties: [{ name: 'name' }, { name: 'description' }] }]
+    reference: [
+      { type: 'input', properties: [{ name: 'name' }, { name: 'description' }] },
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'pinned' }] }
+    ]
   };
 
   const renderDataflowItem = dataflow => {

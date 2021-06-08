@@ -2617,7 +2617,7 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       List<RecordValue> auxRecords = new ArrayList<>();
       for (RecordValue record : recordRepository.findOrderedNativeRecord(targetTable.getId(),
-          originDatasetId)) {
+          originDatasetId, null)) {
         RecordValue recordAux = new RecordValue();
         BeanUtils.copyProperties(recordAux, record);
         recordAux.setId(null);
@@ -3501,7 +3501,7 @@ public class DatasetServiceImpl implements DatasetService {
           .append(
               " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
           .append(
-              " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value) as fields from( ")
+              " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
           .append(" select case ");
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
       for (TableSchema table : tableSchemaList) {
@@ -3520,7 +3520,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       query.append(String.format(
-          " end as \"fieldName\", fv.value as \"value\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
+          " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
           datasetId, datasetId, datasetId));
       if (null != tableSchemaId || null != filterValue || null != columnName) {
         query.append(" where ")

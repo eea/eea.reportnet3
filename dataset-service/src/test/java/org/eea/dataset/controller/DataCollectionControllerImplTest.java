@@ -10,6 +10,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -101,8 +102,9 @@ public class DataCollectionControllerImplTest {
 
   @Test
   public void createEmptyDataCollectionTestException() {
-    Mockito.when(dataCollectionService.getDataflowStatus(Mockito.any()))
-        .thenReturn(TypeStatusEnum.DRAFT);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     try {
       DataCollectionVO dc = new DataCollectionVO();
@@ -118,22 +120,27 @@ public class DataCollectionControllerImplTest {
   public void createEmptyDataCollectionTest() {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    Mockito.when(dataCollectionService.getDataflowStatus(Mockito.any()))
-        .thenReturn(TypeStatusEnum.DESIGN);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
     Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
-        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+        Mockito.anyBoolean());
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
     dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc);
     Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
-        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+        Mockito.anyBoolean());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void updateDataCollectionTestException() {
-    Mockito.when(dataCollectionService.getDataflowStatus(Mockito.any()))
-        .thenReturn(TypeStatusEnum.DESIGN);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
+
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     try {
       DataCollectionVO dc = new DataCollectionVO();
@@ -150,13 +157,16 @@ public class DataCollectionControllerImplTest {
   public void updateDataCollectionTest() {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    Mockito.when(dataCollectionService.getDataflowStatus(Mockito.any()))
-        .thenReturn(TypeStatusEnum.DRAFT);
-    Mockito.doNothing().when(dataCollectionService).updateDataCollection(Mockito.any());
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
+    Mockito.doNothing().when(dataCollectionService).updateDataCollection(Mockito.any(),
+        Mockito.anyBoolean());
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
     dataCollectionControllerImpl.updateDataCollection(1L);
-    Mockito.verify(dataCollectionService, times(1)).updateDataCollection(Mockito.any());
+    Mockito.verify(dataCollectionService, times(1)).updateDataCollection(Mockito.any(),
+        Mockito.anyBoolean());
   }
 }

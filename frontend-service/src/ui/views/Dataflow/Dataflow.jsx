@@ -300,7 +300,7 @@ const Dataflow = withRouter(({ history, match }) => {
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
-        label={resources.messages['cancel']}
+        label={resources.messages['close']}
         onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
       />
     </div>

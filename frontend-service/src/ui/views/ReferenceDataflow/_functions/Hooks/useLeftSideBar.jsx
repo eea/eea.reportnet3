@@ -8,7 +8,6 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
   const leftSideBarContext = useContext(LeftSideBarContext);
 
   useLayoutEffect(() => {
-    // if (!isEmpty(dataflowState.userRoles)) {
     const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
     const apiKeyBtn = {
@@ -16,7 +15,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'settings',
       isVisible: buttonsVisibility.apiKeyBtn,
       label: 'sidebarApiKeyBtn',
-      // onClick: () => manageDialogs('isApiKeyDialogVisible', true),
+      onClick: () => manageDialogs('isApiKeyDialogVisible', true),
       title: 'sidebarApiKeyBtn'
     };
 
@@ -25,17 +24,8 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'edit',
       isVisible: buttonsVisibility.editBtn,
       label: 'edit',
-      // onClick: () => manageDialogs('isEditDialogVisible', true),
+      onClick: () => manageDialogs('isEditDialogVisible', true),
       title: 'edit'
-    };
-
-    const exportSchemaBtn = {
-      className: 'dataflow-export-schema-help-step',
-      icon: 'download',
-      isVisible: buttonsVisibility.exportBtn,
-      label: 'exportSchema',
-      // onClick: () => manageDialogs('isExportDialogVisible', true),
-      title: 'exportSchema'
     };
 
     const manageRequestersBtn = {
@@ -43,17 +33,8 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'userConfig',
       isVisible: buttonsVisibility.manageRequestersBtn,
       label: 'manageRequestersRights',
-      // onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
+      onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
       title: 'manageRequestersRights'
-    };
-
-    const manageReportersBtn = {
-      className: 'dataflow-manage-rights-help-step',
-      icon: 'userConfig',
-      isVisible: buttonsVisibility.manageReportersBtn,
-      label: 'manageReportersRights',
-      // onClick: () => manageDialogs('isManageReportersDialogVisible', true),
-      title: 'manageReportersRights'
     };
 
     const propertiesBtn = {
@@ -61,35 +42,8 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       icon: 'infoCircle',
       isVisible: buttonsVisibility.propertiesBtn,
       label: 'properties',
-      // onClick: () => manageDialogs('isPropertiesDialogVisible', true),
+      onClick: () => manageDialogs('isPropertiesDialogVisible', true),
       title: 'properties'
-    };
-
-    const releaseableBtn = {
-      className: 'dataflow-releasable-help-step',
-      icon: 'released',
-      isVisible: buttonsVisibility.releaseableBtn,
-      label: 'releasingLeftSideBarButton',
-      // onClick: () => manageDialogs('isReleaseableDialogVisible', true),
-      title: 'releasingLeftSideBarButton'
-    };
-
-    const showPublicInfoBtn = {
-      className: 'dataflow-showPublicInfo-help-step',
-      icon: 'lock',
-      isVisible: buttonsVisibility.showPublicInfoBtn,
-      label: 'publicStatusLeftSideBarButton',
-      // onClick: () => manageDialogs('isShowPublicInfoDialogVisible', true),
-      title: 'publicStatusLeftSideBarButton'
-    };
-
-    const userListBtn = {
-      className: 'dataflow-properties-help-step',
-      icon: 'users',
-      isVisible: buttonsVisibility.usersListBtn,
-      label: 'dataflowUsersList',
-      // onClick: () => manageDialogs('isUserListVisible', true),
-      title: 'dataflowUsersList'
     };
 
     const reportingDataflows = {
@@ -101,20 +55,8 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       title: 'leftBarReportingDataflowsButton'
     };
 
-    const allButtons = [
-      propertiesBtn,
-      editBtn,
-      releaseableBtn,
-      showPublicInfoBtn,
-      exportSchemaBtn,
-      apiKeyBtn,
-      manageReportersBtn,
-      manageRequestersBtn,
-      userListBtn,
-      reportingDataflows
-    ];
+    const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRequestersBtn, reportingDataflows];
 
     leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
-    // }
   }, [dataflowState.userRoles, dataflowState.status, dataflowState.datasetId]);
 };
