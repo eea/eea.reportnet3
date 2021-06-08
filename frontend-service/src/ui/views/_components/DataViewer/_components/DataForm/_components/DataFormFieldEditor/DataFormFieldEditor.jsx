@@ -426,11 +426,14 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const calculateCalendarPanelPosition = () => {
+  const calculateCalendarPanelPosition = element => {
     const {
       current: { panel }
     } = refDatetimeCalendar;
-    panel.style.top = `${panel.offsetTop + panel.offsetHeight / 2}px`;
+    const inputRect = element.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const top = `${inputRect.top + panelRect.height / 2}px`;
+    panel.style.top = top;
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
@@ -443,7 +446,7 @@ const DataFormFieldEditor = ({
         monthNavigator={true}
         onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
         onFocus={e => {
-          calculateCalendarPanelPosition();
+          calculateCalendarPanelPosition(e.currentTarget);
         }}
         showSeconds={true}
         showTime={true}
