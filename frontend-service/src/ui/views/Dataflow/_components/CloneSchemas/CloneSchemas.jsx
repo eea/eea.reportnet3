@@ -88,6 +88,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
 
   const onOpenDataflow = dataflowId => window.open(getUrl(routes.DATAFLOW, { dataflowId }, true));
 
+  const onOpenReferenceDataflow = referenceDataflowId =>
+    window.open(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true));
+
   const onSelectDataflow = dataflowData => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
   };
@@ -141,7 +144,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
       <TableViewSchemas
         checkedDataflow={cloneSchemasState.chosenDataflow}
         data={cloneSchemasState.filteredData}
-        handleRedirect={onOpenDataflow}
+        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
         isReferenceDataflow={isReferenceDataflow}
         onChangePagination={onChangePagination}
         onSelectDataflow={onSelectDataflow}
@@ -153,7 +156,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         checkedCard={cloneSchemasState.chosenDataflow}
         contentType={'Dataflows'}
         data={cloneSchemasState.filteredData}
-        handleRedirect={onOpenDataflow}
+        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
         isReferenceDataflow={isReferenceDataflow}
         onChangePagination={onChangePagination}
         onSelectCard={onSelectDataflow}
