@@ -273,6 +273,11 @@
         color: var(--statusBox-draft-color);
       }
 
+      .draft {
+        background-color: var(--statusBox-draft-bg);
+        color: var(--statusBox-draft-color);
+      }
+
       .enabled {
         background-color: var(--statusBox-true-bg);
         color: var(--statusBox-true-color);

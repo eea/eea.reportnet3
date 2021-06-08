@@ -1,2 +1,2 @@
-export const Edit = ({ referenceDataflowRepository }) => async (dataflowId, description, name) =>
-  referenceDataflowRepository.edit(dataflowId, description, name);
+export const Edit = ({ referenceDataflowRepository }) => async (dataflowId, description, name, type) =>
+  referenceDataflowRepository.edit(dataflowId, description, name, type);

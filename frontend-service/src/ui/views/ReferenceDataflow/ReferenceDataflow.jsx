@@ -33,7 +33,7 @@ import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { Dialog } from 'ui/views/_components/Dialog/';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { ManageReferenceDataflow } from '../Dataflows/_components/ManageReferenceDataflow/ManageReferenceDataflow';
+import { ManageReferenceDataflow } from 'ui/views/Dataflows/_components/ManageReferenceDataflow';
 
 const ReferenceDataflow = withRouter(({ history, match }) => {
   const {
@@ -44,22 +44,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
 
   const dataflowInitialState = {
-    requestStatus: 'idle',
-    error: null,
     data: {},
     description: '',
     designDatasetSchemas: [],
-    refresh: false,
-    name: '',
-    status: '',
-    updatedDatasetSchema: [],
-    isReferencingDataflowsDialogVisible: false,
-    isCreatingReferenceDatasets: false,
-    isManageRequestersDialogVisible: false,
-    isUserRightManagementDialogVisible: false,
-    isEditDialogVisible: false,
+    error: null,
     isApiKeyDialogVisible: false,
-    isPropertiesDialogVisible: false
+    isCreatingReferenceDatasets: false,
+    isEditDialogVisible: false,
+    isManageRequestersDialogVisible: false,
+    isPropertiesDialogVisible: false,
+    isReferencingDataflowsDialogVisible: false,
+    isUserRightManagementDialogVisible: false,
+    name: '',
+    refresh: false,
+    requestStatus: 'idle',
+    status: '',
+    updatedDatasetSchema: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -80,7 +80,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs);
 
-  useCheckNotifications(['REFERENCE_DATAFLOW_PROCESSED_EVENT'], refreshPage);
+  useCheckNotifications(['REFERENCE_DATAFLOW_PROCESSED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'], refreshPage);
   useCheckNotifications(['REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT'], setIsCreatingReferenceDatasets, false);
 
   function manageDialogs(dialog, value, secondDialog, secondValue) {
@@ -222,7 +222,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
+      <div className={`rep-col-12 rep-col-sm-12`}>
         <Title
           icon="clone"
           iconSize="4rem"
@@ -230,15 +230,17 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
       </div>
-
-      <BigButtonListReference
-        className="dataflow-big-buttons-help-step"
-        dataflowId={referenceDataflowId}
-        dataflowState={dataflowState}
-        onSaveName={onSaveDatasetName}
-        onUpdateData={refreshPage}
-        setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
-      />
+      <div className={`rep-col-12 rep-col-sm-12`}>
+        <BigButtonListReference
+          className="dataflow-big-buttons-help-step"
+          dataflowId={referenceDataflowId}
+          dataflowState={dataflowState}
+          onSaveName={onSaveDatasetName}
+          onUpdateData={refreshPage}
+          setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
+          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+        />
+      </div>
 
       {dataflowState.isPropertiesDialogVisible && (
         <Dialog
