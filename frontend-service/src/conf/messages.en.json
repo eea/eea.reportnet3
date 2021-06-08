@@ -1121,7 +1121,7 @@
     "referenceDataflowCrumbLabel": "Reference Dataflow",
     "emptyDatasetSchemas": "The selected dataflow has no datasets",
     "referenceDatasetDesigner": "Reference Dataset Designer",
-    "createReferenceDatasetsError": "Failed creating reference datasets at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
+    "createReferenceDatasetsError": "Failed creating reference datasets",
     "leftBarReportingDataflowsButton": "Referencing dataflows",
     "referencingDataflowsDialogHeader": "Referencing dataflows list",
     "referencingDataflowNameColumnLabel": "Dataflow name",
