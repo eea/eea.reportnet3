@@ -88,6 +88,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
 
   const onOpenDataflow = dataflowId => window.open(getUrl(routes.DATAFLOW, { dataflowId }, true));
 
+  const onOpenReferenceDataflow = referenceDataflowId =>
+    window.open(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true));
+
   const onSelectDataflow = dataflowData => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
   };
@@ -114,21 +117,35 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     return dataflowsToFilter;
   };
 
-  const filterOptions = [
-    {
-      type: 'input',
-      properties: [{ name: 'name' }, { name: 'description' }, { name: 'obligationTitle' }, { name: 'legalInstruments' }]
-    },
-    { type: 'multiselect', properties: [{ name: 'status' }] },
-    { type: 'date', properties: [{ name: 'expirationDate' }] }
-  ];
+  const filterOptions = isReferenceDataflow
+    ? [
+        {
+          type: 'input',
+          properties: [{ name: 'name' }, { name: 'description' }]
+        },
+        { type: 'multiselect', properties: [{ name: 'status' }] }
+      ]
+    : [
+        {
+          type: 'input',
+          properties: [
+            { name: 'name' },
+            { name: 'description' },
+            { name: 'obligationTitle' },
+            { name: 'legalInstruments' }
+          ]
+        },
+        { type: 'multiselect', properties: [{ name: 'status' }] },
+        { type: 'date', properties: [{ name: 'expirationDate' }] }
+      ];
 
   const renderData = () =>
     userContext.userProps.listView ? (
       <TableViewSchemas
         checkedDataflow={cloneSchemasState.chosenDataflow}
         data={cloneSchemasState.filteredData}
-        handleRedirect={onOpenDataflow}
+        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+        isReferenceDataflow={isReferenceDataflow}
         onChangePagination={onChangePagination}
         onSelectDataflow={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
@@ -139,7 +156,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         checkedCard={cloneSchemasState.chosenDataflow}
         contentType={'Dataflows'}
         data={cloneSchemasState.filteredData}
-        handleRedirect={onOpenDataflow}
+        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+        isReferenceDataflow={isReferenceDataflow}
         onChangePagination={onChangePagination}
         onSelectCard={onSelectDataflow}
         pagination={cloneSchemasState.pagination}

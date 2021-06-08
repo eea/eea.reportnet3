@@ -117,8 +117,8 @@ export const ManageReferenceDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
         const notification = isEditing
-          ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
-          : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
+          ? { type: 'REFERENCE_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
+          : { type: 'REFERENCE_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
         notificationContext.add(notification);
       }

@@ -17,6 +17,7 @@ export const TableViewSchemas = ({
   checkedDataflow,
   data,
   handleRedirect,
+  isReferenceDataflow,
   onChangePagination,
   onSelectDataflow,
   pagination,
@@ -31,14 +32,20 @@ export const TableViewSchemas = ({
   };
 
   const getOrderedFields = dataflows => {
-    const dataflowsWithPriority = [
-      { id: 'name', index: 0 },
-      { id: 'description', index: 1 },
-      { id: 'obligationTitle', index: 2 },
-      { id: 'legalInstruments', index: 3 },
-      { id: 'status', index: 4 },
-      { id: 'expirationDate', index: 5 }
-    ];
+    const dataflowsWithPriority = isReferenceDataflow
+      ? [
+          { id: 'name', index: 0 },
+          { id: 'description', index: 1 },
+          { id: 'status', index: 2 }
+        ]
+      : [
+          { id: 'name', index: 0 },
+          { id: 'description', index: 1 },
+          { id: 'obligationTitle', index: 2 },
+          { id: 'legalInstruments', index: 3 },
+          { id: 'status', index: 4 },
+          { id: 'expirationDate', index: 5 }
+        ];
 
     return dataflows
       .map(field => dataflowsWithPriority.filter(e => field === e.id))
