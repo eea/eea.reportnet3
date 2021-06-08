@@ -1141,6 +1141,11 @@
     "propertiesModalDataflowStatusLabel": "Status",
     "referenceDatasetBreadcrumb": "Reference Dataset",
     "deleteReferenceDatasetDialogHeader": "Delete reference dataset",
-    "deleteReferenceDatasetDialogMessage": "Are you sure you want to delete the reference dataset schema?"
+    "deleteReferenceDataflowDialogHeader": "Delete reference dataflow",
+    "deleteReferenceDatasetDialogMessage": "Are you sure you want to delete the reference dataset schema?",
+    "editReferenceDataflowDialogHeader": "Edit reference dataflow",
+    "createReferenceDataflowDialogHeader": "Create new reference dataflow",
+    "createReferenceDatasetsInit": "Creating reference datasets",
+    "referenceDataflowsDraftInfo": "Select a dataflow in draft status"
   }
 }

@@ -952,6 +952,9 @@
           "key": "CREATE_DATA_COLLECTION_INIT"
         },
         {
+          "key": "CREATE_REFERENCE_DATASETS_INIT"
+        },
+        {
           "key": "CLONE_DATASET_SCHEMAS_INIT"
         },
         {
