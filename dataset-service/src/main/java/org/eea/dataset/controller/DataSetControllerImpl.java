@@ -396,7 +396,7 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @DeleteMapping("/{id}/record/{recordId}")
   @LockMethod
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   public void deleteRecord(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @PathVariable("recordId") String recordId,
       @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK) {
