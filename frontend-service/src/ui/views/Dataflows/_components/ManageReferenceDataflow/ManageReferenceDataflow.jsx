@@ -195,7 +195,7 @@ export const ManageReferenceDataflow = ({
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name)}
           header={resources.messages['deleteReferenceDataflowDialogHeader']}
-          labelCancel={resources.messages['close']}
+          labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onDeleteDataflow}
           onHide={() => setIsDeleteDialogVisible(false)}
