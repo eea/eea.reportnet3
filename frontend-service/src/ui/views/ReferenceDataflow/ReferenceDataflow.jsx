@@ -222,7 +222,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   return layout(
     <div className="rep-row">
-      <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
+      <div className={`rep-col-12 rep-col-sm-12`}>
         <Title
           icon="clone"
           iconSize="4rem"
@@ -230,16 +230,17 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           title={dataflowState.name}
         />
       </div>
-
-      <BigButtonListReference
-        className="dataflow-big-buttons-help-step"
-        dataflowId={referenceDataflowId}
-        dataflowState={dataflowState}
-        onSaveName={onSaveDatasetName}
-        onUpdateData={refreshPage}
-        setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
-        setUpdatedDatasetSchema={setUpdatedDatasetSchema}
-      />
+      <div className={`rep-col-12 rep-col-sm-12`}>
+        <BigButtonListReference
+          className="dataflow-big-buttons-help-step"
+          dataflowId={referenceDataflowId}
+          dataflowState={dataflowState}
+          onSaveName={onSaveDatasetName}
+          onUpdateData={refreshPage}
+          setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
+          setUpdatedDatasetSchema={setUpdatedDatasetSchema}
+        />
+      </div>
 
       {dataflowState.isPropertiesDialogVisible && (
         <Dialog
