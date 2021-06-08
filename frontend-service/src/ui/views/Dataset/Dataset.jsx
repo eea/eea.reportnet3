@@ -49,7 +49,7 @@ import { useReporterDataset } from 'ui/views/_components/Snapshots/_hooks/useRep
 import { getUrl, TextUtils } from 'core/infrastructure/CoreUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'ui/views/_functions/Utils';
 
-export const Dataset = withRouter(({ match, history }) => {
+export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -120,7 +120,13 @@ export const Dataset = withRouter(({ match, history }) => {
     setMetaData(await getMetadata({ datasetId, dataflowId }));
   };
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATASET, dataflowId, history, metaData });
+  useBreadCrumbs({
+    currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
+    dataflowId,
+    history,
+    metaData,
+    referenceDataflowId: dataflowId
+  });
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -837,8 +843,8 @@ export const Dataset = withRouter(({ match, history }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        icon="dataset"
-        iconSize="3.5rem"
+        icon={isReferenceDataset ? 'howTo' : 'dataset'}
+        iconSize={isReferenceDataset ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
         subtitle={`${dataflowName} - ${datasetName}`}
         title={datasetSchemaName}

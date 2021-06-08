@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -30,8 +31,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+
 /**
- * The Class RestoreDataCollectionSnapshotCommandTest.
+ * The Class DataCollectionNationalCoordinatorCommandTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DataCollectionNationalCoordinatorCommandTest {
@@ -59,6 +61,10 @@ public class DataCollectionNationalCoordinatorCommandTest {
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataflow controller zuul. */
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
