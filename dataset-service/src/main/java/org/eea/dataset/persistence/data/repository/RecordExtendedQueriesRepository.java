@@ -78,5 +78,5 @@ public interface RecordExtendedQueriesRepository {
    * @return the list
    * @throws EEAException the EEA exception
    */
-  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId);
+  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable);
 }

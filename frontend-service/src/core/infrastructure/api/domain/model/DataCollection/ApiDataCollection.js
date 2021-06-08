@@ -19,7 +19,7 @@ const apiDataCollection = {
 
   createReference: async dataflowId => {
     return await HTTPRequester.post({
-      url: getUrl(DataCollectionConfig.createDataCollection),
+      url: getUrl(DataCollectionConfig.createReference),
       data: { idDataflow: dataflowId }
     });
   },

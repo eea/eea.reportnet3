@@ -16,15 +16,22 @@ import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
 const LinkSelector = withRouter(
   ({
     datasetSchemaId,
+    fieldId,
+    fieldPreviousTypeValue,
+    fields,
     hasMultipleValues = false,
+    isExternalLink,
     isLinkSelectorVisible,
     isReferenceDataset,
     linkedTableConditional,
@@ -33,23 +40,34 @@ const LinkSelector = withRouter(
     match,
     mustBeUsed = false,
     onCancelSaveLink,
+    onHideSelector,
     onSaveLink,
     selectedLink,
     tableSchemaId
   }) => {
     const resources = useContext(ResourcesContext);
+
     const [linkSelectorState, dispatchLinkSelector] = useReducer(linkSelectorReducer, {
       link: {
         ...selectedLink,
         referencedField: !isNil(selectedLink)
-          ? pick(selectedLink.referencedField, 'datasetSchemaId', 'fieldSchemaId', 'tableSchemaId')
+          ? pick(
+              selectedLink.referencedField,
+              'dataflowId',
+              'datasetSchemaId',
+              'fieldSchemaId',
+              'fieldSchemaName',
+              'tableSchemaId',
+              'tableSchemaName'
+            )
           : null
       },
       linkedTableFields: [],
       pkLinkedTableLabel: {},
       pkLinkedTableConditional: {},
       masterTableConditional: {},
-      masterTableFields: []
+      masterTableFields: [],
+      selectedReferenceDataflow: {}
     });
 
     const {
@@ -61,9 +79,11 @@ const LinkSelector = withRouter(
       masterTableFields
     } = linkSelectorState;
 
+    const [referenceDataflows, setReferenceDataflows] = useState([]);
     const [datasetSchemas, setDatasetSchemas] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(isLinkSelectorVisible);
+    const [isSaved, setIsSaved] = useState(false);
     const [pkHasMultipleValues, setPkHasMultipleValues] = useState(hasMultipleValues);
     const [pkMustBeUsed, setPkMustBeUsed] = useState(mustBeUsed);
 
@@ -71,23 +91,54 @@ const LinkSelector = withRouter(
       params: { dataflowId }
     } = match;
 
-    const [isSaved, setIsSaved] = useState(false);
-
     useEffect(() => {
-      const getDatasetSchemas = async () => {
-        setIsLoading(true);
-        const datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
-        setIsLoading(false);
-        if (isReferenceDataset) {
-          const filteredDatasets = datasetSchemasDTO.data.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
-          setDatasetSchemas(filteredDatasets);
-        } else {
-          setDatasetSchemas(datasetSchemasDTO.data);
-        }
+      setIsLoading(true);
+      const getReferenceDataflows = async () => {
+        const { data } = await ReferenceDataflowService.all();
+        const filteredDataflows = data.filter(dataflow => dataflow.id !== parseFloat(dataflowId));
+        setReferenceDataflows(filteredDataflows);
       };
 
-      getDatasetSchemas();
+      getReferenceDataflows();
+      setIsLoading(false);
     }, []);
+
+    useEffect(() => {
+      if (isExternalLink && !isEmpty(referenceDataflows) && !isNil(selectedLink) && !isEmpty(selectedLink)) {
+        dispatchLinkSelector({
+          type: 'SET_REFERENCE_DATAFLOW',
+          payload:
+            referenceDataflows.find(
+              referenceDataflow => referenceDataflow.id === selectedLink.referencedField.dataflowId
+            ) || {}
+        });
+      }
+    }, [referenceDataflows]);
+
+    useEffect(() => {
+      if (!isExternalLink) {
+        getDatasetSchemas();
+      } else if (isExternalLink && !isEmpty(linkSelectorState.selectedReferenceDataflow)) {
+        getDatasetSchemas();
+      }
+    }, [linkSelectorState.selectedReferenceDataflow]);
+
+    const getDatasetSchemas = async () => {
+      setIsLoading(true);
+      let datasetSchemasDTO;
+      if (isExternalLink && !isEmpty(linkSelectorState.selectedReferenceDataflow)) {
+        datasetSchemasDTO = await DataflowService.getAllSchemas(linkSelectorState.selectedReferenceDataflow.id);
+      } else {
+        datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+      }
+      setIsLoading(false);
+      if (isReferenceDataset) {
+        const filteredDatasets = datasetSchemasDTO.data.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
+        setDatasetSchemas(filteredDatasets);
+      } else {
+        setDatasetSchemas(datasetSchemasDTO.data);
+      }
+    };
 
     useEffect(() => {
       if (!isEmpty(datasetSchemas) && !isNil(selectedLink)) {
@@ -150,7 +201,9 @@ const LinkSelector = withRouter(
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
-            if (!isNil(link) && !isNil(link.referencedField)) {
+            if (fieldId === '-1' || isNil(link) || isNil(link.referencedField)) {
+              onHideSelector();
+            } else {
               onCancelSaveLink({
                 link,
                 linkedTableConditional: !isNil(pkLinkedTableConditional) ? pkLinkedTableConditional.fieldSchemaId : '',
@@ -171,7 +224,11 @@ const LinkSelector = withRouter(
       let masterFields = [];
       const linkedTable = datasetSchemas
         .find(datasetSchema => datasetSchema.datasetSchemaId === field.referencedField.datasetSchemaId)
-        .tables.find(table => table.tableSchemaId === field.referencedField.tableSchemaId);
+        ?.tables.find(table =>
+          !isExternalLink
+            ? table.tableSchemaId === field.referencedField.tableSchemaId
+            : table.tableSchemaName === field.referencedField.tableSchemaName
+        );
 
       linkedFields = linkedTable?.records[0]?.fields
         .filter(
@@ -189,11 +246,26 @@ const LinkSelector = withRouter(
         fieldSchemaId: ''
       });
 
-      const masterTable = datasetSchemas
-        .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
-        .tables.find(table => table.tableSchemaId === tableSchemaId);
-      masterFields = masterTable?.records[0].fields
-        .filter(
+      if (isExternalLink && !isNil(fields)) {
+        masterFields = getMasterFields(fields);
+      } else {
+        const masterTable = datasetSchemas
+          .find(datasetSchema => datasetSchema.datasetSchemaId === datasetSchemaId)
+          ?.tables.find(table => table.tableSchemaId === tableSchemaId);
+        masterFields = getMasterFields(masterTable?.records[0].fields);
+      }
+
+      masterFields?.unshift({
+        name: resources.messages['noneCodelist'],
+        fieldSchemaId: ''
+      });
+
+      dispatchLinkSelector({ type: 'SET_LINKED_AND_MASTER_FIELDS', payload: { linkedFields, masterFields } });
+    };
+
+    const getMasterFields = fields => {
+      const masterFields = fields
+        ?.filter(
           field =>
             !field.pk &&
             !['ATTACHMENT', 'POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
@@ -203,13 +275,7 @@ const LinkSelector = withRouter(
         .map(field => {
           return { fieldSchemaId: field.fieldId, name: field.name };
         });
-
-      masterFields?.unshift({
-        name: resources.messages['noneCodelist'],
-        fieldSchemaId: ''
-      });
-
-      dispatchLinkSelector({ type: 'SET_LINKED_AND_MASTER_FIELDS', payload: { linkedFields, masterFields } });
+      return masterFields;
     };
 
     const getOptions = datasetSchema =>
@@ -220,7 +286,7 @@ const LinkSelector = withRouter(
           if (
             !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(pkField.type)
           ) {
-            return {
+            const linkObj = {
               name: `${table.tableSchemaName} - ${pkField.name}`,
               value: `${table.tableSchemaName} - ${pkField.fieldId}`,
               referencedField: {
@@ -230,6 +296,12 @@ const LinkSelector = withRouter(
               },
               disabled: false
             };
+            if (isExternalLink) {
+              linkObj.referencedField.dataflowId = linkSelectorState.selectedReferenceDataflow.id;
+              linkObj.referencedField.fieldSchemaName = pkField.name;
+              linkObj.referencedField.tableSchemaName = table.tableSchemaName;
+            }
+            return linkObj;
           } else {
             return {
               name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
@@ -255,103 +327,156 @@ const LinkSelector = withRouter(
         }
       });
 
-    const renderLinkSelector = () => {
+    const renderExternalLinkSelector = () => {
       return (
-        <Fragment>
-          <div className={styles.schemaWrapper}>
-            {!isUndefined(datasetSchemas) &&
-              !isEmpty(datasetSchemas) &&
-              datasetSchemas.map((datasetSchema, i) => {
-                return (
-                  <ListBox
-                    key={`datasetSchema_${i}`}
-                    options={getOptions(datasetSchema)}
-                    onChange={e => {
-                      if (!isNil(e.value)) {
-                        dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
-                        getFields(e.value);
-                      }
-                    }}
-                    optionLabel="name"
-                    optionValue="value"
-                    title={datasetSchema.datasetSchemaName}
-                    value={link}></ListBox>
-                );
-              })}
+        <div className={styles.referenceDataflowsWrapper}>
+          <div
+            className={`${styles.referenceDataflowsDropdownTitle} ${
+              !isEmpty(linkSelectorState.selectedReferenceDataflow) && styles.selectedReferenceDataflowsDropdownTitle
+            }`}>
+            {!isEmpty(linkSelectorState.selectedReferenceDataflow) && (
+              <div>
+                <span
+                  className={
+                    styles.selectedReferenceDataflowLabel
+                  }>{`${resources.messages['selectedReferenceDataflow']}: `}</span>
+                <span>{linkSelectorState.selectedReferenceDataflow.name}</span>
+              </div>
+            )}
+            <div className={styles.referenceDataflowsDropdownWrapper}>
+              <label>{resources.messages['referenceDataflows']}</label>
+              <Dropdown
+                ariaLabel={'referenceDataflows'}
+                className={styles.referenceDataflowsDropdown}
+                name="referenceDataflowsDropdown"
+                onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
+                optionLabel="name"
+                options={referenceDataflows}
+                placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+                value={linkSelectorState.selectedReferenceDataflow}
+              />
+            </div>
           </div>
-          <div className={styles.selectedLinkFieldsWrapper}>
-            <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel="linkedTableLabel"
-              className={styles.fieldSelector}
-              inputId="linkedTableLabel"
-              name={resources.messages['linkedTableLabel']}
-              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_LABEL', payload: e.target.value })}
-              optionLabel="name"
-              options={linkedTableFields}
-              placeholder={resources.messages['linkedTableLabel']}
-              value={pkLinkedTableLabel}
-            />
-          </div>
-          <div className={styles.selectedLinkFieldsWrapper}>
-            <span htmlFor={'masterTableConditional'}>{resources.messages['masterTableConditional']}</span>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel="masterTableConditional"
-              className={styles.fieldSelector}
-              inputId="masterTableConditional"
-              name={resources.messages['masterTableConditional']}
-              onChange={e => dispatchLinkSelector({ type: 'SET_MASTER_TABLE_CONDITIONAL', payload: e.target.value })}
-              optionLabel="name"
-              options={masterTableFields}
-              placeholder={resources.messages['masterTableConditional']}
-              value={pkMasterTableConditional}
-            />
-            <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel="linkedTableConditional"
-              className={styles.fieldSelector}
-              inputId="linkedTableConditional"
-              name={resources.messages['linkedTableConditional']}
-              onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
-              optionLabel="name"
-              options={linkedTableFields}
-              placeholder={resources.messages['linkedTableConditional']}
-              value={pkLinkedTableConditional}
-            />
-          </div>
-          <div className={styles.selectedLinkWrapper}>
-            <span className={styles.switchTextInput} htmlFor={'pkMustBeUsed_check'}>
-              {resources.messages['pkValuesMustBeUsed']}
-            </span>
-            <Checkbox
-              checked={pkMustBeUsed}
-              id={'pkMustBeUsed_check'}
-              inputId={'pkMustBeUsed_check'}
-              label="Default"
-              onChange={e => setPkMustBeUsed(e.checked)}
-              style={{ width: '70px', marginLeft: '0.5rem' }}
-            />
-            <span className={styles.switchTextInput} htmlFor={'pkHasMultipleValues_check'}>
-              {resources.messages['pkHasMultipleValues']}
-            </span>
-            <Checkbox
-              checked={pkHasMultipleValues}
-              id={'pkHasMultipleValues_check'}
-              inputId={'pkHasMultipleValues_check'}
-              label="Default"
-              onChange={e => setPkHasMultipleValues(e.checked)}
-              style={{ width: '70px', marginLeft: '0.5rem' }}
-            />
-          </div>
-          <div className={styles.selectedLinkWrapper}>
-            <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
-            <span>{!isNil(link) ? link.name : ''}</span>
-          </div>
-        </Fragment>
+          {isEmpty(linkSelectorState.selectedReferenceDataflow) ? (
+            <p className={styles.chooseReferenceDataflowText}>
+              {resources.messages['externalLinkDialogNoReferenceDataflowMessage']}
+            </p>
+          ) : (
+            renderLinkSelector()
+          )}
+        </div>
       );
+    };
+
+    const renderLinkSelector = () => {
+      if (!datasetSchemas.length) {
+        return <p className={styles.chooseReferenceDataflowText}>{resources.messages['emptyDatasetSchemas']}</p>;
+      } else {
+        if (isExternalLink) {
+          const tabSchema = datasetSchemas
+            .find(datasetSchema => datasetSchema.datasetSchemaId === link.referencedField?.datasetSchemaId)
+            ?.tables.find(table => table.tableSchemaName === link.referencedField?.tableSchemaName);
+          if (!isNil(tabSchema)) {
+            link.referencedField.tableSchemaId = tabSchema.tableSchemaId;
+          }
+        }
+        return (
+          <Fragment>
+            <div className={`${styles.schemaWrapper} ${isExternalLink && styles.referenceDataflowSchemaWrapper}`}>
+              {!isUndefined(datasetSchemas) &&
+                !isEmpty(datasetSchemas) &&
+                datasetSchemas.map((datasetSchema, i) => {
+                  return (
+                    <ListBox
+                      key={`datasetSchema_${i}`}
+                      options={getOptions(datasetSchema)}
+                      onChange={e => {
+                        if (!isNil(e.value)) {
+                          dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
+                          getFields(e.value);
+                        }
+                      }}
+                      optionLabel="name"
+                      optionValue="value"
+                      title={datasetSchema.datasetSchemaName}
+                      value={link}></ListBox>
+                  );
+                })}
+            </div>
+            <div className={styles.selectedLinkFieldsWrapper}>
+              <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="linkedTableLabel"
+                className={styles.fieldSelector}
+                inputId="linkedTableLabel"
+                name={resources.messages['linkedTableLabel']}
+                onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_LABEL', payload: e.target.value })}
+                optionLabel="name"
+                options={linkedTableFields}
+                placeholder={resources.messages['linkedTableLabel']}
+                value={pkLinkedTableLabel}
+              />
+            </div>
+            <div className={styles.selectedLinkFieldsWrapper}>
+              <span htmlFor={'masterTableConditional'}>{resources.messages['masterTableConditional']}</span>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="masterTableConditional"
+                className={styles.fieldSelector}
+                inputId="masterTableConditional"
+                name={resources.messages['masterTableConditional']}
+                onChange={e => dispatchLinkSelector({ type: 'SET_MASTER_TABLE_CONDITIONAL', payload: e.target.value })}
+                optionLabel="name"
+                options={masterTableFields}
+                placeholder={resources.messages['masterTableConditional']}
+                value={pkMasterTableConditional}
+              />
+              <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="linkedTableConditional"
+                className={styles.fieldSelector}
+                inputId="linkedTableConditional"
+                name={resources.messages['linkedTableConditional']}
+                onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
+                optionLabel="name"
+                options={linkedTableFields}
+                placeholder={resources.messages['linkedTableConditional']}
+                value={pkLinkedTableConditional}
+              />
+            </div>
+            <div className={styles.selectedLinkWrapper}>
+              <span className={styles.switchTextInput} htmlFor={'pkMustBeUsed_check'}>
+                {resources.messages['pkValuesMustBeUsed']}
+              </span>
+              <Checkbox
+                checked={pkMustBeUsed}
+                id={'pkMustBeUsed_check'}
+                inputId={'pkMustBeUsed_check'}
+                label="Default"
+                onChange={e => setPkMustBeUsed(e.checked)}
+                style={{ width: '70px', marginLeft: '0.5rem' }}
+              />
+              <span className={styles.switchTextInput} htmlFor={'pkHasMultipleValues_check'}>
+                {resources.messages['pkHasMultipleValues']}
+              </span>
+              <Checkbox
+                checked={pkHasMultipleValues}
+                id={'pkHasMultipleValues_check'}
+                inputId={'pkHasMultipleValues_check'}
+                label="Default"
+                onChange={e => setPkHasMultipleValues(e.checked)}
+                style={{ width: '70px', marginLeft: '0.5rem' }}
+              />
+            </div>
+            <div className={styles.selectedLinkWrapper}>
+              <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
+              <span>{!isNil(link) ? link.name : ''}</span>
+            </div>
+          </Fragment>
+        );
+      }
     };
 
     return (
@@ -360,23 +485,33 @@ const LinkSelector = withRouter(
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
           footer={linkSelectorDialogFooter}
-          header={resources.messages['linkSelector']}
+          header={isExternalLink ? resources.messages['externalLinkSelector'] : resources.messages['linkSelector']}
           modal={true}
           onHide={() => {
-            onCancelSaveLink({
-              link,
-              pkMustBeUsed,
-              pkHasMultipleValues,
-              linkedTableLabel: pkLinkedTableLabel?.fieldSchemaId,
-              linkedTableConditional: pkLinkedTableConditional?.fieldSchemaId,
-              masterTableConditional: pkMasterTableConditional?.fieldSchemaId
-            });
+            if (fieldId === '-1' || isNil(link) || isNil(link.referencedField)) {
+              onHideSelector();
+            } else {
+              onCancelSaveLink({
+                link,
+                pkMustBeUsed,
+                pkHasMultipleValues,
+                linkedTableLabel: pkLinkedTableLabel?.fieldSchemaId,
+                linkedTableConditional: pkLinkedTableConditional?.fieldSchemaId,
+                masterTableConditional: pkMasterTableConditional?.fieldSchemaId
+              });
+            }
             setIsVisible(false);
           }}
-          style={{ minWidth: '55%' }}
+          style={{ width: '65%' }}
           visible={isVisible}
           zIndex={3003}>
-          {isLoading ? <Spinner className={styles.positioning} /> : renderLinkSelector()}
+          {isLoading ? (
+            <Spinner className={styles.positioning} />
+          ) : isExternalLink ? (
+            renderExternalLinkSelector()
+          ) : (
+            renderLinkSelector()
+          )}
         </Dialog>
       )
     );

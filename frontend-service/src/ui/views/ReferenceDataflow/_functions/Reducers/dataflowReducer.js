@@ -1,4 +1,4 @@
-export const dataflowDataReducer = (state, { type, payload }) => {
+export const dataflowReducer = (state, { type, payload }) => {
   switch (type) {
     case 'MANAGE_DIALOGS':
       return {
@@ -26,8 +26,11 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_DESIGN_DATASET_SCHEMAS':
       return { ...state, designDatasetSchemas: payload.designDatasets };
 
-    case 'SET_IS_DATA_UPDATED':
-      return { ...state, isDataUpdated: !state.isDataUpdated };
+    case 'REFRESH_PAGE':
+      return { ...state, refresh: !state.refresh };
+
+    case 'SET_IS_CREATING_REFERENCE_DATASETS':
+      return { ...state, isCreatingReferenceDatasets: payload.isCreatingReferenceDatasets };
 
     default: {
       throw new Error(`Unhandled action type: ${type}`);

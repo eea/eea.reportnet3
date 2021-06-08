@@ -26,19 +26,9 @@ public class PkCatalogueSchema {
   @Field(value = "idPk")
   private ObjectId idPk;
 
-  /** The dataflow id. */
-  @Field(value = "dataflowId")
-  private Long dataflowId;
-
   /** The referenced. */
   @Field(value = "referencedBy")
   private List<ObjectId> referenced;
-
-
-  /** The referenced by dataflow. */
-  @Field(value = "referencedByDataflow")
-  private List<Long> referencedByDataflow;
-
 
 
   /**

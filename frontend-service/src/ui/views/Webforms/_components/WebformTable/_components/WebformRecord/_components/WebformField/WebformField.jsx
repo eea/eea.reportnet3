@@ -32,6 +32,8 @@ import { WebformRecordUtils } from 'ui/views/Webforms/_components/WebformTable/_
 
 export const WebformField = ({
   columnsSchema,
+  dataProviderId,
+  dataflowId,
   datasetId,
   datasetSchemaId,
   element,
@@ -82,7 +84,7 @@ export const WebformField = ({
   const { getObjectiveOptions } = PaMsUtils;
 
   useEffect(() => {
-    if (element.fieldType === 'LINK') onFilter('', element);
+    if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
   }, [newRecord, isConditionalChanged]);
 
   const onAttach = async value => {
@@ -105,7 +107,7 @@ export const WebformField = ({
 
   const onFileDownload = async (fileName, fieldId) => {
     try {
-      const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
+      const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
       DownloadFile(data, fileName);
     } catch (error) {
@@ -199,7 +201,8 @@ export const WebformField = ({
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
     webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
     const parsedValue =
-      field.fieldType === 'MULTISELECT_CODELIST' || (field.fieldType === 'LINK' && Array.isArray(value))
+      field.fieldType === 'MULTISELECT_CODELIST' ||
+      ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
         ? value.join(';')
         : value;
 
@@ -320,34 +323,35 @@ export const WebformField = ({
             yearRange="1900:2100"
           />
         );
-        case 'DATETIME':
-          return (
-            <Calendar
-              appendTo={document.body}
-              dateFormat="yy-mm-dd"
-              id={field.fieldId}
-              monthNavigator={true}
-              onBlur={event => {
-                if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
-                else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
-              }}
-              onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
-              onFocus={event => {
-                changeDatePickerPosition(event.target.getBoundingClientRect().left);
-                onFocusField(event.target.value);
-              }}
-              onSelect={event => {
-                onFillField(field, option, formatDate(event.value, isNil(event.value)));
-                onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
-              }}
-              showSeconds={true}
-              showTime={true}
-              value={field.value}
-              yearNavigator={true}
-              yearRange="1900:2100"
-            />
-          );
+      case 'DATETIME':
+        return (
+          <Calendar
+            appendTo={document.body}
+            dateFormat="yy-mm-dd"
+            id={field.fieldId}
+            monthNavigator={true}
+            onBlur={event => {
+              if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
+              else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            }}
+            onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
+            onFocus={event => {
+              changeDatePickerPosition(event.target.getBoundingClientRect().left);
+              onFocusField(event.target.value);
+            }}
+            onSelect={event => {
+              onFillField(field, option, formatDate(event.value, isNil(event.value)));
+              onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
+            }}
+            showSeconds={true}
+            showTime={true}
+            value={field.value}
+            yearNavigator={true}
+            yearRange="1900:2100"
+          />
+        );
 
+      case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
           return (

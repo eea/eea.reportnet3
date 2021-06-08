@@ -1,18 +1,13 @@
 import dayjs from 'dayjs';
-import capitalize from 'lodash/capitalize';
-import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
-import orderBy from 'lodash/orderBy';
-import sortBy from 'lodash/sortBy';
+
+import { config } from 'conf';
 
 import { apiReferenceDataflow } from 'core/infrastructure/api/domain/model/ReferenceDataflow';
 
-import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
-import { ReferenceDataflow } from 'core/domain/model/ReferenceDataflow/ReferenceDataflow';
-
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
+import { ReferenceDataflow } from 'core/domain/model/ReferenceDataflow/ReferenceDataflow';
 
 const parseDatasetListDTO = datasetsDTO => {
   if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
@@ -68,6 +63,17 @@ const all = async userData => {
 
 const create = async (name, description, type) => apiReferenceDataflow.create(name, description, type);
 
+const deleteReferenceDataflow = async referenceDataflowId =>
+  apiReferenceDataflow.deleteReferenceDataflow(referenceDataflowId);
+
+const edit = async (dataflowId, description, name) => apiReferenceDataflow.edit(dataflowId, description, name);
+
+const getReferencingDataflows = async referenceDataflowId => {
+  const referenceDataflowDTO = await apiReferenceDataflow.getReferencingDataflows(referenceDataflowId);
+
+  return referenceDataflowDTO;
+};
+
 const sortDatasetTypeByName = (a, b) => {
   let datasetName_A = a.datasetSchemaName;
   let datasetName_B = b.datasetSchemaName;
@@ -79,10 +85,16 @@ const referenceDataflow = async referenceDataflowId => {
   const dataflow = parseDataflowDTO(referenceDataflowDTO.data);
   dataflow.datasets.sort(sortDatasetTypeByName);
   dataflow.designDatasets.sort(sortDatasetTypeByName);
-  // dataflow.referenceDatasets.sort(sortDatasetTypeByName);
   referenceDataflowDTO.data = dataflow;
 
   return referenceDataflowDTO;
 };
 
-export const ApiReferenceDataflowRepository = { all, create, referenceDataflow };
+export const ApiReferenceDataflowRepository = {
+  all,
+  create,
+  deleteReferenceDataflow,
+  edit,
+  getReferencingDataflows,
+  referenceDataflow
+};
