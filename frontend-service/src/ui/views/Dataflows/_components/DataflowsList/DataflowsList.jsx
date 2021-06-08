@@ -136,7 +136,8 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
           { name: 'name' },
           { name: 'description' },
           { name: 'legalInstrument' },
-          { name: 'obligationTitle' }
+          { name: 'obligationTitle' },
+          { name: 'obligationId' }
         ]
       },
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
