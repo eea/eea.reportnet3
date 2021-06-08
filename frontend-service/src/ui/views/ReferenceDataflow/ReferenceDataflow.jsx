@@ -33,7 +33,7 @@ import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { Dialog } from 'ui/views/_components/Dialog/';
 import { getUrl } from 'core/infrastructure/CoreUtils';
-import { ManageReferenceDataflow } from '../Dataflows/_components/ManageReferenceDataflow/ManageReferenceDataflow';
+import { ManageReferenceDataflow } from 'ui/views/Dataflows/_components/ManageReferenceDataflow';
 
 const ReferenceDataflow = withRouter(({ history, match }) => {
   const {
