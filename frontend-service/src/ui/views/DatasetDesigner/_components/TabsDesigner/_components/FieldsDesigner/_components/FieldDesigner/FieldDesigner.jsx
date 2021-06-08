@@ -1245,8 +1245,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
-          fieldId={fieldId}
-          fieldPreviousTypeValue={fieldDesignerState.fieldPreviousTypeValue}
+          fieldId={fieldId}          
           fields={fields}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isExternalLink={
