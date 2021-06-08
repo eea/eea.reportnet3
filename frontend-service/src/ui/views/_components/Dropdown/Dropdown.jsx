@@ -7,6 +7,7 @@ import { isNull } from 'lodash';
 import './Dropdown.scss';
 
 import DomHandler from 'ui/views/_functions/PrimeReact/DomHandler';
+import FilterUtils from 'ui/views/_functions/PrimeReact/FilterUtils';
 import ObjectUtils from 'ui/views/_functions/PrimeReact/ObjectUtils';
 import classNames from 'classnames';
 
@@ -31,7 +32,9 @@ export class Dropdown extends Component {
     disabled: false,
     editable: false,
     filter: false,
+    filterBy: null,
     filterInputAutoFocus: true,
+    filterMatchMode: 'contains',
     filterPlaceholder: null,
     id: null,
     inputClassName: null,
@@ -74,7 +77,9 @@ export class Dropdown extends Component {
     disabled: PropTypes.bool,
     editable: PropTypes.bool,
     filter: PropTypes.bool,
+    filterBy: PropTypes.string,
     filterInputAutoFocus: PropTypes.bool,
+    filterMatchMode: PropTypes.string,
     filterPlaceholder: PropTypes.string,
     id: PropTypes.string,
     inputClassName: PropTypes.string,
@@ -554,11 +559,18 @@ export class Dropdown extends Component {
     }
   }
 
-  filter(option) {
-    let filterValue = this.state.filter.trim().toLowerCase();
-    let optionLabel = this.getOptionLabel(option);
+  filter(options) {
+    let filterValue = this.state.filter.trim().toLocaleLowerCase(this.props.filterLocale);
+    let searchFields = this.props.filterBy ? this.props.filterBy.split(',') : [this.props.optionLabel || 'label'];
+    let items = FilterUtils.filter(
+      options,
+      searchFields,
+      filterValue,
+      this.props.filterMatchMode,
+      this.props.filterLocale
+    );
 
-    return optionLabel.toLowerCase().indexOf(filterValue.toLowerCase()) > -1;
+    return items && items.length ? items : null;
   }
 
   hasFilter() {
@@ -679,11 +691,7 @@ export class Dropdown extends Component {
     let items = this.props.options;
 
     if (items && this.hasFilter()) {
-      items =
-        items &&
-        items.filter(option => {
-          return this.filter(option);
-        });
+      items = this.filter(items);
     }
 
     if (items) {

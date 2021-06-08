@@ -493,7 +493,6 @@ const DataFormFieldEditor = ({
           currentValue={fieldValue}
           disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
           filter={true}
-          filterBy="itemType,value"
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           isLoadingData={isLoadingData}
           onChange={e => {

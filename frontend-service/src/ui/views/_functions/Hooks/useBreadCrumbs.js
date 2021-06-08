@@ -81,8 +81,8 @@ export const useBreadCrumbs = ({
   });
 
   const getReferenceDatasetCrumb = () => ({
-    label: resources.messages['referenceDatasetBreadcrumb'],
-    icon: 'pencilRuler'
+    label: resources.messages['referenceDataset'],
+    icon: 'howTo'
   });
 
   const getEuDatasetCrumb = () => {
