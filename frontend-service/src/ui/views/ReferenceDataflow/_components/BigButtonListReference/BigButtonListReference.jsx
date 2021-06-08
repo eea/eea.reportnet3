@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router';
 
 import isNil from 'lodash/isNil';
@@ -43,8 +43,15 @@ const BigButtonListReference = withRouter(
   }) => {
     const { showLoading, hideLoading } = useContext(LoadingContext);
 
-    const [isDesignStatus, setIsDesignStatus] = useState(false);
-    const [hasDatasets, setHasDatasets] = useState(false);
+    const [referenceBigButtonsState, referenceBigButtonsDispatch] = useReducer(referenceBigButtonsReducer, {
+      cloneDataflow: { id: null, name: '' },
+      deleteIndex: null,
+      dialogVisibility: { isCreateReference: false, isDeleteDataset: false, isNewDataset: false },
+      hasDatasets: false,
+      isCloningStatus: false,
+      isCreateReferenceEnabled: false,
+      isDesignStatus: false
+    });
 
     useEffect(() => {
       setIsDesignStatus(dataflowState.status === config.dataflowStatus.DESIGN);
@@ -71,21 +78,23 @@ const BigButtonListReference = withRouter(
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
 
-    const [referenceBigButtonsState, referenceBigButtonsDispatch] = useReducer(referenceBigButtonsReducer, {
-      cloneDataflow: { id: null, name: '' },
-      deleteIndex: null,
-      dialogVisibility: { isCreateReference: false, isDeleteDataset: false, isNewDataset: false },
-      isCloningStatus: false,
-      isCreateReferenceEnabled: false
-    });
-
     const {
       cloneDataflow,
       deleteIndex,
       dialogVisibility,
       isCloningStatus,
-      isCreateReferenceEnabled
+      isCreateReferenceEnabled,
+      isDesignStatus,
+      hasDatasets
     } = referenceBigButtonsState;
+
+    function setIsDesignStatus(isDesignStatus) {
+      referenceBigButtonsDispatch({ type: 'SET_IS_DESIGN_STATUS', payload: { isDesignStatus } });
+    }
+
+    function setHasDatasets(hasDatasets) {
+      referenceBigButtonsDispatch({ type: 'SET_HAS_DATASETS', payload: { hasDatasets } });
+    }
 
     const handleDialogs = ({ dialog, isVisible }) => {
       referenceBigButtonsDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
