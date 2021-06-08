@@ -114,14 +114,27 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     return dataflowsToFilter;
   };
 
-  const filterOptions = [
-    {
-      type: 'input',
-      properties: [{ name: 'name' }, { name: 'description' }, { name: 'obligationTitle' }, { name: 'legalInstruments' }]
-    },
-    { type: 'multiselect', properties: [{ name: 'status' }] },
-    { type: 'date', properties: [{ name: 'expirationDate' }] }
-  ];
+  const filterOptions = isReferenceDataflow
+    ? [
+        {
+          type: 'input',
+          properties: [{ name: 'name' }, { name: 'description' }]
+        },
+        { type: 'multiselect', properties: [{ name: 'status' }] }
+      ]
+    : [
+        {
+          type: 'input',
+          properties: [
+            { name: 'name' },
+            { name: 'description' },
+            { name: 'obligationTitle' },
+            { name: 'legalInstruments' }
+          ]
+        },
+        { type: 'multiselect', properties: [{ name: 'status' }] },
+        { type: 'date', properties: [{ name: 'expirationDate' }] }
+      ];
 
   const renderData = () =>
     userContext.userProps.listView ? (
