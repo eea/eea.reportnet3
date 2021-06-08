@@ -14,6 +14,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TableViewSchemas } from './_components/TableViewSchemas';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -23,7 +24,7 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
+export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow = false }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -68,8 +69,13 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const onLoadDataflows = async () => {
     try {
-      const { data } = await DataflowService.all(userContext.contextRoles);
-      cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+      if (isReferenceDataflow) {
+        const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
+        cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+      } else {
+        const { data } = await DataflowService.all(userContext.contextRoles);
+        cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+      }
     } catch (error) {
       console.error('onLoadDataflows error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });

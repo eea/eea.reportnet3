@@ -276,25 +276,13 @@
           }
         },
         {
-          "key": "CREATE_DATA_COLLECTION_ERROR",
-          "navigateTo": {
-            "section": "DATAFLOW",
-            "parameters": ["referenceDataflowId"]
-          }
+          "key": "CREATE_DATA_COLLECTION_ERROR"
         },
         {
-          "key": "CREATE_REFERENCE_DATASETS_ERROR",
-          "navigateTo": {
-            "section": "REFERENCE_DATAFLOW",
-            "parameters": ["referenceDataflowId"]
-          }
+          "key": "CREATE_REFERENCE_DATASETS_ERROR"
         },
         {
-          "key": "REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT",
-          "navigateTo": {
-            "section": "REFERENCE_DATAFLOW",
-            "parameters": ["referenceDataflowId"]
-          }
+          "key": "REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT"
         },
         {
           "key": "ADD_DATACOLLECTION_FAILED_EVENT",
@@ -853,11 +841,7 @@
           }
         },
         {
-          "key": "REFERENCE_DATAFLOW_PROCESSED_EVENT",
-          "navigateTo": {
-            "section": "REFERENCE_DATAFLOW",
-            "parameters": ["referenceDataflowId"]
-          }
+          "key": "REFERENCE_DATAFLOW_PROCESSED_EVENT"
         },
         {
           "key": "DATAFLOW_DELETE_SUCCESS"
