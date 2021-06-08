@@ -44,22 +44,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
 
   const dataflowInitialState = {
-    requestStatus: 'idle',
-    error: null,
     data: {},
     description: '',
     designDatasetSchemas: [],
-    refresh: false,
-    name: '',
-    status: '',
-    updatedDatasetSchema: [],
-    isReferencingDataflowsDialogVisible: false,
-    isCreatingReferenceDatasets: false,
-    isManageRequestersDialogVisible: false,
-    isUserRightManagementDialogVisible: false,
-    isEditDialogVisible: false,
+    error: null,
     isApiKeyDialogVisible: false,
-    isPropertiesDialogVisible: false
+    isCreatingReferenceDatasets: false,
+    isEditDialogVisible: false,
+    isManageRequestersDialogVisible: false,
+    isPropertiesDialogVisible: false,
+    isReferencingDataflowsDialogVisible: false,
+    isUserRightManagementDialogVisible: false,
+    name: '',
+    refresh: false,
+    requestStatus: 'idle',
+    status: '',
+    updatedDatasetSchema: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
