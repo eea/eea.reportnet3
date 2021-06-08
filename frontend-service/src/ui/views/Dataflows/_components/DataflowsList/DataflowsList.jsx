@@ -145,7 +145,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     ],
     reference: [
       { type: 'input', properties: [{ name: 'name' }, { name: 'description' }] },
-      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'pinned' }] }
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] }
     ]
   };
 

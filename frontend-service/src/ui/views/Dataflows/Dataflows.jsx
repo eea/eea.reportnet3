@@ -34,7 +34,7 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 import { CurrentPage, TextUtils } from 'ui/views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
-import { ManageReferenceDataflow } from './_components/ManageReferenceDataflow/ManageReferenceDataflow';
+import { ManageReferenceDataflow } from 'ui/views/_components/ManageReferenceDataflow';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {
