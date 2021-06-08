@@ -160,6 +160,7 @@
     }
   }
   @include for-big-desktop-up {
+    flex-wrap: nowrap;
     .input,
     .inputCheckbox {
       width: 100%;
