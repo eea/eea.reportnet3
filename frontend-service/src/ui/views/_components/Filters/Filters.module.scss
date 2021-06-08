@@ -153,13 +153,14 @@
   }
   @include for-desktop-up {
     justify-content: space-between;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     .input,
     .inputCheckbox {
       width: 25%;
     }
   }
   @include for-big-desktop-up {
+    flex-wrap: nowrap;
     .input,
     .inputCheckbox {
       width: 100%;

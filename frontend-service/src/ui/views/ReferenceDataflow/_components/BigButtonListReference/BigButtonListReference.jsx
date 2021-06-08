@@ -261,7 +261,7 @@ const BigButtonListReference = withRouter(
       buttonIcon: dataflowState.isCreatingReferenceDatasets ? 'spinner' : 'siteMap',
       buttonIconClass: dataflowState.isCreatingReferenceDatasets
         ? 'spinner'
-        : hasDatasets
+        : hasDatasets && isCreateReferenceEnabled
         ? 'siteMap'
         : 'siteMapDisabled',
       caption: resources.messages['createReferenceDatasetsBtnLabel'],
@@ -368,7 +368,7 @@ const BigButtonListReference = withRouter(
             onHide={() => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false })}
             style={{ width: '95%' }}
             visible={dialogVisibility.cloneDialogVisible}>
-            <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
+            <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} isReferenceDataflow />
           </Dialog>
         )}
 
