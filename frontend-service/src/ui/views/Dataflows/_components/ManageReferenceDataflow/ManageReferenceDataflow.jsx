@@ -141,7 +141,9 @@ export const ManageReferenceDataflow = ({
         )}
       </div>
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className={`p-button-primary ${
+          !isEmpty(name) && !isEmpty(description) && !isSending && 'p-button-animated-blink'
+        }`}
         disabled={isEmpty(name) || isEmpty(description) || isSending}
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
         label={isEditing ? resources.messages['save'] : resources.messages['create']}
