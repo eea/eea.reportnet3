@@ -71,7 +71,6 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
 
   const reorderDataflows = async (pinnedItem, isPinned) => {
     const inmUserProperties = { ...userContext.userProps };
-    console.log(dataToFilter);
     const inmPinnedDataflows = intersection(
       inmUserProperties.pinnedDataflows,
       [...dataToFilter.dataflows, ...dataToFilter.reference].map(data => data.id.toString())

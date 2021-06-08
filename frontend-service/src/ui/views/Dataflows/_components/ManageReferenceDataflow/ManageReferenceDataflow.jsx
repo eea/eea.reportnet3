@@ -152,7 +152,7 @@ export const ManageReferenceDataflow = ({
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
-        label={resources.messages['close']}
+        label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
         onClick={() => manageDialogs(dialogName, false)}
       />
     </Fragment>
