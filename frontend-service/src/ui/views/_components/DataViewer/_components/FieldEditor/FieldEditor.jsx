@@ -645,7 +645,7 @@ const FieldEditor = ({
               e.stopPropagation();
               saveCalendarDate(dateTime === '' ? '' : dayjs(dateTime).format('YYYY-MM-DD HH:mm:ss'), true);
             }}
-            showButtonBar={false}
+            showButtonBar={true}
             showSeconds={true}
             showTime={true}
             todayButtonClassName="p-button-primary"
