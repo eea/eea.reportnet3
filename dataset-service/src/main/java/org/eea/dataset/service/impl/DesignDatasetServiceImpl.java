@@ -25,7 +25,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -105,9 +104,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   @Autowired
   FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
-  /** The dataschema controller. */
-  @Autowired
-  private DatasetSchemaController dataschemaController;
 
   /** The rules controller zuul. */
   @Autowired
