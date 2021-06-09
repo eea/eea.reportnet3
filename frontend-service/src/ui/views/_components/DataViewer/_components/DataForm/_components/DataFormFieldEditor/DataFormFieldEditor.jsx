@@ -432,8 +432,9 @@ const DataFormFieldEditor = ({
     } = refDatetimeCalendar;
     const inputRect = element.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
-    const top = `${inputRect.top + panelRect.height / 2}px`;
+    const top = `${inputRect.top - panelRect.height / 2}px`;
     panel.style.top = top;
+    panel.style.position = 'fixed';
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
