@@ -72,7 +72,10 @@ const DataFormFieldEditor = ({
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
-        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid)[0]
+        ? crs.find(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid) || {
+            label: 'WGS84 - 4326',
+            value: 'EPSG:4326'
+          }
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     isMapDisabled: false,
     isMapOpen: false,

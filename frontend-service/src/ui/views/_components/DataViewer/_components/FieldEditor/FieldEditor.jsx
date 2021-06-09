@@ -63,9 +63,9 @@ const FieldEditor = ({
       RecordUtils.getCellInfo(colsSchema, cells.field).type
     )
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
-        ? crs.filter(
+        ? crs.find(
             crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid
-          )[0]
+          ) || { label: 'WGS84 - 4326', value: 'EPSG:4326' }
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
@@ -519,7 +519,7 @@ const FieldEditor = ({
                   optionLabel="label"
                   options={crs}
                   placeholder="Select a CRS"
-                  value={currentCRS}
+                  value={!isNil(currentCRS) ? currentCRS : { label: 'WGS84 - 4326', value: 'EPSG:4326' }}
                 />
                 <Button
                   className={`p-button-secondary-transparent button ${styles.mapButton}`}
