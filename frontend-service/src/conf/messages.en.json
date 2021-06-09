@@ -1121,7 +1121,6 @@
     "referenceDataflowCrumbLabel": "Reference Dataflow",
     "emptyDatasetSchemas": "The selected dataflow has no datasets",
     "referenceDatasetDesigner": "Reference Dataset Designer",
-    "createReferenceDatasetsError": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "leftBarReportingDataflowsButton": "Referencing dataflows",
     "referencingDataflowsDialogHeader": "Referencing dataflows list",
     "referencingDataflowNameColumnLabel": "Dataflow name",
@@ -1132,8 +1131,8 @@
     "createReferenceDatasetsBtnLabel": "Create reference datasets",
     "createReferenceDatasetsDialogHeader": "Create reference datasets",
     "createReferenceDatasetsDialogMessage": "Do you want to create reference datasets?",
-    "referenceDataflowProcessFailedEvent": "Failed creating reference datasets at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
-    "referenceDataflowProcessedEvent": "Reference datasets created at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
+    "referenceDataflowProcessFailedEvent": "Failed creating reference datasets at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
+    "referenceDataflowProcessedEvent": "Reference datasets created at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
     "propertiesModalTitle": "Reference Dataflow Details",
     "propertiesModalDataflowNameLabel": "Name",
     "propertiesModalDataflowDescriptionLabel": "Description",
@@ -1146,6 +1145,9 @@
     "createReferenceDataflowDialogHeader": "Create new reference dataflow",
     "createReferenceDatasetsInit": "Creating reference datasets",
     "referenceDataflowsDraftInfo": "Select a dataflow in draft status",
-    "obligationId": "Id obligation"
+    "obligationId": "Id obligation",
+    "createReferenceDatasetsError": "Failed creating reference datasets",
+    "referenceDataflowUpdatingError": "Failed updating reference dataflow",
+    "referenceDataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> reference dataflow"
   }
 }

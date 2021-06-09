@@ -73,7 +73,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = intersection(
       inmUserProperties.pinnedDataflows,
-      dataToFilter[visibleTab].map(data => data.id.toString())
+      [...dataToFilter.dataflows, ...dataToFilter.reference].map(data => data.id.toString())
     );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
@@ -145,7 +145,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     ],
     reference: [
       { type: 'input', properties: [{ name: 'name' }, { name: 'description' }] },
-      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'pinned' }] }
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] }
     ]
   };
 

@@ -117,8 +117,8 @@ export const ManageReferenceDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
         const notification = isEditing
-          ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
-          : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
+          ? { type: 'REFERENCE_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
+          : { type: 'REFERENCE_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
         notificationContext.add(notification);
       }
@@ -141,7 +141,9 @@ export const ManageReferenceDataflow = ({
         )}
       </div>
       <Button
-        className="p-button-primary p-button-animated-blink"
+        className={`p-button-primary ${
+          !isEmpty(name) && !isEmpty(description) && !isSending && 'p-button-animated-blink'
+        }`}
         disabled={isEmpty(name) || isEmpty(description) || isSending}
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
         label={isEditing ? resources.messages['save'] : resources.messages['create']}
@@ -150,7 +152,7 @@ export const ManageReferenceDataflow = ({
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
-        label={resources.messages['close']}
+        label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
         onClick={() => manageDialogs(dialogName, false)}
       />
     </Fragment>
