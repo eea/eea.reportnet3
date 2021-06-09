@@ -42,6 +42,7 @@ public interface ReportingDatasetRepository extends CrudRepository<ReportingData
    * Find by dataflow id and data provider id.
    *
    * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
    * @return the list
    */
   List<ReportingDataset> findByDataflowIdAndDataProviderId(Long dataflowId, Long dataProviderId);

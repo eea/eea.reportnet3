@@ -39,7 +39,7 @@ public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerComm
    * Perform action.
    *
    * @param eeaEventVO the eea event VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {

@@ -58,7 +58,7 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @param userMail the user mail
+   * @param email the email
    * @return true, if successful
    */
   @Query("SELECT distinct r from Representative r left JOIN FETCH r.leadReporters rep WHERE rep.email= :email AND  r.dataProvider.id= :dataProviderId AND r.dataflow.id= :dataflowId")

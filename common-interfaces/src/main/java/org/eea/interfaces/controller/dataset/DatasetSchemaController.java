@@ -317,6 +317,8 @@ public interface DatasetSchemaController {
    * Gets the table schemas ids.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the table schemas ids
    */
   @GetMapping(value = "/getTableSchemasIds/{datasetId}",

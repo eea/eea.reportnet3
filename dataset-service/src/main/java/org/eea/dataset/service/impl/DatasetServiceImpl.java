@@ -1435,7 +1435,6 @@ public class DatasetServiceImpl implements DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
-   * @return the ETL dataset VO
    */
   @Override
   @Transactional

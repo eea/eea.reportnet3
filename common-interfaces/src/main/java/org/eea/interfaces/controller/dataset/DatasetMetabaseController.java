@@ -108,6 +108,7 @@ public interface DatasetMetabaseController {
    * Gets the global statistics by dataschema id.
    *
    * @param dataschemaId the dataschema id
+   * @param dataflowId the dataflow id
    * @return the global statistics by dataschema id
    */
   @GetMapping(value = "/globalStatistics/dataflow/{dataflowId}/dataSchema/{dataschemaId}",
