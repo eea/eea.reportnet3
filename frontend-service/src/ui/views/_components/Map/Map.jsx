@@ -322,9 +322,13 @@ export const Map = ({
         return projectPoint(parsedGeoJsonData.geometry.coordinates);
       } else {
         let projectedCoordinates = [];
-        if (['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(geometryType)) {
+        if (['POLYGON', 'MULTILINESTRING'].includes(geometryType)) {
           projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(ring =>
             ring.map(coordinate => projectPoint(coordinate))
+          );
+        } else if (['MULTIPOLYGON'].includes(geometryType)) {
+          projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(polygon =>
+            polygon.map(ring => ring.map(coordinate => projectPoint(coordinate)))
           );
         } else {
           projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(coordinate => projectPoint(coordinate));
