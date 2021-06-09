@@ -267,9 +267,6 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param tableSchema the table schema
-   *
-   * @return the table VO
-   *
    * @throws EEAException the EEA exception
    */
   void saveTablePropagation(@DatasetId Long datasetId, TableSchemaVO tableSchema)
@@ -367,7 +364,6 @@ public interface DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
-   * @return the ETL dataset VO
    */
   void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName);

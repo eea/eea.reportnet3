@@ -175,8 +175,9 @@ public interface DataflowService {
   /**
    * Gets the public dataflow by id.
    *
+   * @param dataflowId the dataflow id
    * @return the public dataflow by id
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   DataflowPublicVO getPublicDataflowById(Long dataflowId) throws EEAException;
 
@@ -192,6 +193,7 @@ public interface DataflowService {
    * Gets the user roles.
    *
    * @param dataProviderId the data provider id
+   * @param dataflowList the dataflow list
    * @return the user roles
    */
   List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList);

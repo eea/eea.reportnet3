@@ -276,6 +276,11 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the ETL dataset VO
    */
   @GetMapping("/{datasetId}/etlExport")
@@ -306,6 +311,8 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param fieldId the field id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the attachment
    */
   @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
@@ -412,16 +419,18 @@ public interface DatasetController {
       @RequestParam("mimeType") String mimeType);
 
 
+
   /**
    * Download file.
    *
    * @param datasetId the dataset id
    * @param fileName the file name
-   * @return the response entity
+   * @param response the response
    */
   @GetMapping("/{datasetId}/downloadFile")
   void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
+
 
 
   /**

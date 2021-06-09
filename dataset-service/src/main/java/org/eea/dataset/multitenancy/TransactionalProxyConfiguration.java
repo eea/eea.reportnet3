@@ -14,10 +14,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TransactionalProxyConfiguration {
 
- 
+
   /**
    * Proxy dataset service dataset service.
    *
+   * @param datasetService the dataset service
    * @return the dataset service
    */
   @Bean
@@ -25,8 +26,7 @@ public class TransactionalProxyConfiguration {
   public DatasetService proxyDatasetService(
       @Qualifier("datasetService") DatasetService datasetService) {
     return (DatasetService) Proxy.newProxyInstance(
-        TransactionalProxyConfiguration.class.getClassLoader(),
-        new Class[]{DatasetService.class},
+        TransactionalProxyConfiguration.class.getClassLoader(), new Class[] {DatasetService.class},
         new ProxyMultitenantService<>(datasetService));
   }
 }

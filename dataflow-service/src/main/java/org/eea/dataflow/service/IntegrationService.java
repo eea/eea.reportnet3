@@ -87,6 +87,7 @@ public interface IntegrationService {
    *
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
    */
   void createDefaultIntegration(Long dataflowId, String datasetSchemaId) throws EEAException;
 
@@ -132,7 +133,6 @@ public interface IntegrationService {
    */
   void deleteSchemaIntegrations(String datasetSchemaId);
 
-
   /**
    * Execute external integration.
    *
@@ -140,9 +140,6 @@ public interface IntegrationService {
    * @param integrationId the integration id
    * @param operation the operation
    * @param replace the replace
-   *
-   * @return the execution result VO
-   *
    * @throws EEAException the EEA exception
    */
   void executeExternalIntegration(Long datasetId, Long integrationId,

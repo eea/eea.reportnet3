@@ -17,6 +17,7 @@ public interface IFileExportContext {
    * @param datasetId the partition id
    * @param idTableSchema the id table schema
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
    * @return the string
    * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
@@ -31,8 +32,8 @@ public interface IFileExportContext {
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
-   * @param idTableSchema the id table schema
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
    * @return the list
    * @throws InvalidFileException the invalid file exception
    * @throws IOException Signals that an I/O exception has occurred.
