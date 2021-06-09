@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.data.domain.Pageable;
 
@@ -219,4 +220,13 @@ public interface DataflowService {
    * @return the dataflows by data provider ids
    */
   List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds);
+
+  /**
+   * Checks if is reference dataflow draft.
+   *
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if is reference dataflow draft
+   */
+  boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
 }

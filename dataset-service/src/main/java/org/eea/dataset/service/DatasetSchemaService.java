@@ -157,11 +157,12 @@ public interface DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
    * @param datasetId the dataset id
+   * @param cloningOrImporting the cloning or importing
    * @return the type data
    * @throws EEAException the EEA exception
    */
-  DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO, Long datasetId)
-      throws EEAException;
+  DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO, Long datasetId,
+      boolean cloningOrImporting) throws EEAException;
 
   /**
    * Delete field schema.
@@ -326,10 +327,10 @@ public interface DatasetSchemaService {
    * Update pk catalogue deleting schema.
    *
    * @param idDatasetSchema the id dataset schema
-   * @param dataflowId the dataflow id
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  void updatePkCatalogueDeletingSchema(String idDatasetSchema, Long dataflowId) throws EEAException;
+  void updatePkCatalogueDeletingSchema(String idDatasetSchema, Long datasetId) throws EEAException;
 
 
   /**

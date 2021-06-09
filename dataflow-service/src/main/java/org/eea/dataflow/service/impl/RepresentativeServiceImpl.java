@@ -40,6 +40,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.expression.EeaSecurityExpressionRoot;
+import org.eea.security.jwt.utils.EntityAccessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +101,12 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The reference dataset controller zuul. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  /** The entity access service. */
+  @Autowired
+  private EntityAccessService entityAccessService;
+
+
 
   /**
    * The delimiter.
@@ -668,8 +675,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       if (null != representative) {
         Dataflow dataflow = representative.getDataflow();
         if (null != dataflow) {
-          EeaSecurityExpressionRoot eeaSecurityExpressionRoot = new EeaSecurityExpressionRoot(
-              SecurityContextHolder.getContext().getAuthentication(), userManagementControllerZull);
+          EeaSecurityExpressionRoot eeaSecurityExpressionRoot =
+              new EeaSecurityExpressionRoot(SecurityContextHolder.getContext().getAuthentication(),
+                  userManagementControllerZull, entityAccessService);
           isAuthorized = eeaSecurityExpressionRoot.secondLevelAuthorize(dataflow.getId(),
               ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN);
         }

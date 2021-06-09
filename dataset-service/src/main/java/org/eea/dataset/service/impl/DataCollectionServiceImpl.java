@@ -542,7 +542,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               datasetSchemaService.updateForeignRelation(reference.getId(), field,
                   reference.getDatasetSchema());
               DataType type = datasetSchemaService.updateFieldSchema(reference.getDatasetSchema(),
-                  field, reference.getId());
+                  field, reference.getId(), false);
               datasetSchemaService.propagateRulesAfterUpdateSchema(reference.getDatasetSchema(),
                   field, type, reference.getId());
             } catch (EEAException e) {

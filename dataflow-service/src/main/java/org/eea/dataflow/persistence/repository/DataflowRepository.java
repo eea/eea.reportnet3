@@ -76,8 +76,8 @@ public interface DataflowRepository
    * @return the list
    */
   @Modifying
-  @Query("select df from Dataflow df where df.id in :ids and df.type is null order by status, creationDate desc")
-  List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(List<Long> ids);
+  @Query("select df from Dataflow df where df.type is null and df.id IN :ids order by status, creationDate desc")
+  List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
 
   /**
@@ -86,8 +86,22 @@ public interface DataflowRepository
    * @return the list
    */
   @Modifying
-  @Query("select df from Dataflow df where df.type='REFERENCE' order by status, creationDate desc")
-  List<Dataflow> findReferenceByIdInOrderByStatusDescCreationDateDesc();
+  @Query("select df from Dataflow df where df.type='REFERENCE' and df.status=:status order by status, creationDate desc")
+  List<Dataflow> findReferenceByStatusInOrderByStatusDescCreationDateDesc(
+      @Param("status") TypeStatusEnum status);
+
+
+  /**
+   * Find reference by status and id in order by status desc creation date desc.
+   *
+   * @param status the status
+   * @param ids the ids
+   * @return the list
+   */
+  @Modifying
+  @Query("select df from Dataflow df where df.type='REFERENCE' and df.status=:status and df.id IN :ids order by status, creationDate desc")
+  List<Dataflow> findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+      @Param("status") TypeStatusEnum status, @Param("ids") List<Long> ids);
 
   /**
    * Gets the datasets status.
