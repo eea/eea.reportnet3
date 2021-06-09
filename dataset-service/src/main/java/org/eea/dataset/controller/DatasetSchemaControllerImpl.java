@@ -790,7 +790,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#idDataflow))")
   public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
       @PathVariable("idDataflow") Long idDataflow) {
 
