@@ -7,10 +7,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.security.jwt.utils.EntityAccessService;
 import org.eea.utils.LiteralConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
@@ -40,16 +42,24 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
   /** The user management controller zull. */
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The entity access service. */
+  private EntityAccessService entityAccessService;
+
+
+
   /**
    * Creates a new instance.
    *
    * @param authentication the {@link Authentication} to use. Cannot be null.
    * @param userManagementControllerZull the user management controller zull
+   * @param entityAccessService the entity access service
    */
   public EeaSecurityExpressionRoot(Authentication authentication,
-      UserManagementControllerZull userManagementControllerZull) {
+      UserManagementControllerZull userManagementControllerZull,
+      EntityAccessService entityAccessService) {
     super(authentication);
     this.userManagementControllerZull = userManagementControllerZull;
+    this.entityAccessService = entityAccessService;
   }
 
   /**
@@ -136,6 +146,18 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
           userManagementControllerZull.checkResourceAccessPermission(resource, accessScopeEnums);
     }
     return canAccess;
+  }
+
+
+  /**
+   * Check access reference entity.
+   *
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
+  public boolean checkAccessReferenceEntity(EntityClassEnum entity, Long entityId) {
+    return entityAccessService.isReferenceDataflowDraft(entity, entityId);
   }
 
 
