@@ -21,7 +21,8 @@ public interface ValidationRepositoryPaginated {
    * @param datasetId the dataset id
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc
@@ -37,7 +38,8 @@ public interface ValidationRepositoryPaginated {
    * @param datasetId the dataset id
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @return the long
    */
   Long countRecordsByFilter(Long datasetId, List<ErrorTypeEnum> levelErrorsFilter,
@@ -50,7 +52,8 @@ public interface ValidationRepositoryPaginated {
    * @param datasetId the dataset id
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @param pageable the pageable
    * @param headerField the header field
    * @param asc the asc

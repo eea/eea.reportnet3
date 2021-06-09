@@ -9,7 +9,20 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, status, subtitle, title, type }) => {
+export const Card = ({
+  card,
+  checked,
+  date,
+  handleRedirect,
+  icon,
+  id,
+  isReferenceDataflow,
+  onCheck,
+  status,
+  subtitle,
+  title,
+  type
+}) => {
   const resources = useContext(ResourcesContext);
 
   const isCloneSchemasView = type === 'cloneSchemas';
@@ -39,10 +52,12 @@ export const Card = ({ card, checked, date, handleRedirect, icon, id, onCheck, s
       </div>
 
       <div className={`${styles.date} ${styles[type]}`}>
-        <span>
-          {resources.messages[isCloneSchemasView ? 'date' : 'nextReportDue']}:
-          <span className={styles.dueDate}>{date}</span>
-        </span>
+        {!isReferenceDataflow && (
+          <span>
+            {resources.messages[isCloneSchemasView ? 'date' : 'nextReportDue']}:
+            <span className={styles.dueDate}>{date}</span>
+          </span>
+        )}
         {renderCardFooter()}
       </div>
     </div>

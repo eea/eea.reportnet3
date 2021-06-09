@@ -270,6 +270,7 @@ public class FileCommonUtils {
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   * @param datasetSchema the dataset schema
    * @return the errors
    */
   public FailedValidationsDatasetVO getErrors(Long datasetId, String idTableSchema,

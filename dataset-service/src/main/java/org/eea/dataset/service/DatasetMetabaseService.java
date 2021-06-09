@@ -239,8 +239,7 @@ public interface DatasetMetabaseService {
    * Update dataset status.
    *
    * @param datasetStatusMessageVO the dataset status message VO
-   * @return true, if successful
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   void updateDatasetStatus(DatasetStatusMessageVO datasetStatusMessageVO) throws EEAException;
 

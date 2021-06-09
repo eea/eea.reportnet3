@@ -145,6 +145,7 @@ public interface DataflowRepository
   /**
    * Find by id and available true.
    *
+   * @param dataflowId the dataflow id
    * @return the dataflow
    */
   Dataflow findByIdAndShowPublicInfoTrue(Long dataflowId);

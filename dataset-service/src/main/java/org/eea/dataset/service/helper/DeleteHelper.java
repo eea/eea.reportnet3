@@ -57,7 +57,6 @@ public class DeleteHelper {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
-   * @throws EEAException the EEA exception
    */
   @Async
   public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId) {
@@ -94,7 +93,6 @@ public class DeleteHelper {
    * Execute delete dataset process.
    *
    * @param datasetId the dataset id
-   * @throws EEAException the EEA exception
    */
   @Async
   public void executeDeleteDatasetProcess(final Long datasetId) {

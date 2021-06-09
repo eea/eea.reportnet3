@@ -1111,8 +1111,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param description the description
-   *
-   * @return the boolean
    */
   @Override
   public void updateDatasetSchemaDescription(String datasetSchemaId, String description) {
@@ -1124,7 +1122,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update dataset schema exportable.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param isExportable the is exportable
+   * @param availableInPublic the available in public
    */
   @Override
   public void updateDatasetSchemaExportable(String datasetSchemaId, boolean availableInPublic) {

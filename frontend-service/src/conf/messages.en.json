@@ -1146,6 +1146,8 @@
     "createReferenceDatasetsInit": "Creating reference datasets",
     "referenceDataflowsDraftInfo": "Select a dataflow in draft status",
     "obligationId": "Id obligation",
-    "createReferenceDatasetsError": "Failed creating reference datasets"
+    "createReferenceDatasetsError": "Failed creating reference datasets",
+    "referenceDataflowUpdatingError": "Failed updating reference dataflow",
+    "referenceDataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> reference dataflow"
   }
 }
