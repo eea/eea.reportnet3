@@ -1,3 +1,5 @@
+@import 'styles/mixins';
+
 .noObligations {
   color: var(--button-secondary-transparent-color-hover);
   font-weight: 450;
@@ -9,6 +11,9 @@
   grid-auto-flow: row;
   gap: 1em;
   margin-bottom: 2rem;
+  @include for-phone-only {
+    grid-template-columns: 48% 48%;
+  }
   @media (min-width: 620px) {
     grid-template-columns: 48% 48%;
   }
