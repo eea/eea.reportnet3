@@ -193,12 +193,12 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     }
   }
 
+
   /**
-   * Gets the data set id by dataflow id and schema id.
+   * Gets the data set id by schema id.
    *
-   * @param idDataflow the id dataflow
    * @param schemaId the schema id
-   * @return the data set id by dataflow id and schema id
+   * @return the data set id by schema id
    */
   @Override
   public List<ReportingDatasetVO> getDataSetIdBySchemaId(String schemaId) {

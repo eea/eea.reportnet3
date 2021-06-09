@@ -15,7 +15,8 @@ public interface WriterStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @param includeCountryCode the include country code
-   * @return the data set VO
+   * @param includeValidations the include validations
+   * @return the byte[]
    * @throws EEAException the EEA exception
    */
   byte[] writeFile(Long dataflowId, Long partitionId, String idTableSchema,

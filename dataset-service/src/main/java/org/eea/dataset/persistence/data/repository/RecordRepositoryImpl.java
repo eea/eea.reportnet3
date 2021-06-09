@@ -22,7 +22,6 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -558,7 +557,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param idTable the id table
    * @param datasetId the dataset id
    * @return the list
-   * @throws EEAException the EEA exception
+   * @throws HibernateException the hibernate exception
    */
   @Override
   @Transactional

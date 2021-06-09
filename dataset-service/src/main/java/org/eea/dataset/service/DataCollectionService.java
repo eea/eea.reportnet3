@@ -31,7 +31,7 @@ public interface DataCollectionService {
    *
    * @param datasetIds the dataset ids
    * @param dataflowId the dataflow id
-   * @param isBoolean the is boolean
+   * @param isCreation the is creation
    */
   void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId, boolean isCreation);
 

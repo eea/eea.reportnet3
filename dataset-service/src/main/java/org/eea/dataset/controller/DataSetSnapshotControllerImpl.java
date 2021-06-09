@@ -392,8 +392,8 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    * Obtain the dataset historic releases.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    * @return the list
-   * @throws EEAException
    */
   @Override
   @HystrixCommand

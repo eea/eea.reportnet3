@@ -720,6 +720,8 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param idField the id field
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the attachment
    */
   @Override

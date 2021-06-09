@@ -208,7 +208,7 @@ public interface RepresentativeController {
   /**
    * Find representatives by data flow id and provider id list.
    *
-   * @param dataflowIdList the dataflow id list
+   * @param dataflowId the dataflow id
    * @param providerIdList the provider id list
    * @return the list
    */

@@ -99,6 +99,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /**
    * Data source data source.
    *
+   * @param recordStoreControllerZuul the record store controller zuul
    * @return the data source
    */
 
@@ -137,6 +138,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /**
    * Data sets entity manager factory.
    *
+   * @param dataSource the data source
    * @return the local container entity manager factory bean
    */
   @Bean
@@ -177,6 +179,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /**
    * Data sets transaction manager.
    *
+   * @param emf the emf
    * @return the platform transaction manager
    */
   @Bean

@@ -155,12 +155,11 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
+
   /**
    * Update integration.
    *
    * @param integration the integration
-   *
-   * @return the response entity
    */
   @Override
   @HystrixCommand

@@ -57,11 +57,11 @@ public interface IntegrationController {
   void deleteIntegration(@PathVariable("integrationId") Long integrationId,
       @PathVariable("dataflowId") Long dataflowId);
 
+
   /**
    * Update integration.
    *
    * @param integration the integration
-   * @return the response entity
    */
   @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
   void updateIntegration(@RequestBody IntegrationVO integration);

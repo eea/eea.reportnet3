@@ -10,10 +10,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
 /**
- * Gets the referenced.
- *
- * @return the referenced
+ * The Class PkCatalogueSchema.
  */
 @Getter
 @Setter

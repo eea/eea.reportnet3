@@ -83,9 +83,9 @@ public class CSVWriterStrategy implements WriterStrategy {
    *
    * @param dataflowId the dataflow id
    * @param datasetId the dataset id
-   * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
-   * @return the byte[]
+   * @param includeValidations the include validations
+   * @return the list
    * @throws EEAException the EEA exception
    */
   @Override
