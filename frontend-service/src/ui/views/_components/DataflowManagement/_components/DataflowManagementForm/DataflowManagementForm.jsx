@@ -13,7 +13,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DataflowManagementForm = forwardRef(
-  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onSearch, onSubmit, refresh }, ref) => {
+  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, refresh }, ref) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
 
@@ -84,6 +84,7 @@ const DataflowManagementForm = forwardRef(
           } else {
             await DataflowService.create(name, description, data.obligation.id);
             onCreate();
+            onResetData();
           }
         } catch (error) {
           console.error('error', error);

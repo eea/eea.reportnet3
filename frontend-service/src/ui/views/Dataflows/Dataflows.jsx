@@ -113,15 +113,18 @@ const Dataflows = withRouter(({ history, match }) => {
     );
   }, [dataflowsState]);
 
-  useEffect(() => {
-    if (!isNil(userContext.contextRoles)) onLoadPermissions();
+  useLayoutEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      onLoadPermissions();
+      getDataflows();
+    }
   }, [userContext.contextRoles]);
 
   useLayoutEffect(() => {
     if (isEmpty(dataflowsState[tabId]) && !isNil(userContext.contextRoles)) {
       getDataflows();
     }
-  }, [tabId, userContext.contextRoles]);
+  }, [tabId]);
 
   const getDataflows = async () => {
     setLoading(true);
@@ -145,13 +148,11 @@ const Dataflows = withRouter(({ history, match }) => {
   const onCreateDataflow = () => {
     manageDialogs('isAddDialogVisible', false);
     onRefreshToken();
-    getDataflows();
   };
 
   const onCreateReferenceDataflow = () => {
     manageDialogs('isReferencedDataflowDialogVisible', false);
     onRefreshToken();
-    getDataflows();
   };
 
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
