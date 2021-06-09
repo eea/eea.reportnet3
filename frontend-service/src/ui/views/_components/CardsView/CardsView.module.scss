@@ -5,8 +5,20 @@
 }
 
 .cardWrap {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  display: grid;
+  grid-auto-flow: row;
+  gap: 1em;
   margin-bottom: 2rem;
+  @media (min-width: 620px) {
+    grid-template-columns: 48% 48%;
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: 32% 32% 32%;
+  }
+  @media (min-width: 1280px) {
+    grid-template-columns: 24% 24% 24% 24%;
+  }
+  @media (min-width: 1500px) {
+    grid-template-columns: 19% 19% 19% 19% 19%;
+  }
 }
