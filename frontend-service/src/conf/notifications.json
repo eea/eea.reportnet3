@@ -78,6 +78,9 @@
           "key": "DATAFLOW_CREATION_ERROR"
         },
         {
+          "key": "REFERENCE_DATAFLOW_CREATION_ERROR"
+        },
+        {
           "key": "SNAPSHOT_CREATION_ERROR",
           "navigateTo": {
             "section": "DATASET",
@@ -217,6 +220,13 @@
           }
         },
         {
+          "key": "REFERENCE_DATAFLOW_UPDATING_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOWS",
+            "parameters": ["dataflowName"]
+          }
+        },
+        {
           "key": "CREATE_BY_ID_DESIGNER_ERROR",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
@@ -276,11 +286,13 @@
           }
         },
         {
-          "key": "CREATE_DATA_COLLECTION_ERROR",
-          "navigateTo": {
-            "section": "DATAFLOW",
-            "parameters": ["dataflowId"]
-          }
+          "key": "CREATE_DATA_COLLECTION_ERROR"
+        },
+        {
+          "key": "CREATE_REFERENCE_DATASETS_ERROR"
+        },
+        {
+          "key": "REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT"
         },
         {
           "key": "ADD_DATACOLLECTION_FAILED_EVENT",
@@ -839,6 +851,9 @@
           }
         },
         {
+          "key": "REFERENCE_DATAFLOW_PROCESSED_EVENT"
+        },
+        {
           "key": "DATAFLOW_DELETE_SUCCESS"
         },
         {
@@ -929,6 +944,9 @@
 
         {
           "key": "CREATE_DATA_COLLECTION_INIT"
+        },
+        {
+          "key": "CREATE_REFERENCE_DATASETS_INIT"
         },
         {
           "key": "CLONE_DATASET_SCHEMAS_INIT"

@@ -688,6 +688,7 @@ const FieldEditor = ({
       case 'ATTACHMENT':
         return false;
 
+      case 'EXTERNAL_LINK':
       case 'LINK':
         const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
         if (hasMultipleValues) {
@@ -733,7 +734,6 @@ const FieldEditor = ({
               currentValue={RecordUtils.getCellValue(cells, cells.field)}
               disabled={isLoadingData}
               filter={true}
-              filterBy="itemType,value"
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={e => {

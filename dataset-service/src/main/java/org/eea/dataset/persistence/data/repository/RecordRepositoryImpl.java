@@ -516,8 +516,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the list
    * @throws SQLException the SQL exception
    */
-  private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId)
-      throws SQLException {
+  private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId,
+      Pageable pageable) throws SQLException {
     String stringQuery =
         "select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
             + "            from ( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value  from dataset_"
@@ -525,6 +525,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             + "                    order by fv.data_position ) as fieldsAux) "
             + "            from dataset_" + datasetId + ".record_value rv where rv.id_table= "
             + tableId + " order by rv.data_position";
+    String paginationPart = " offset %s limit %s ";
+
+    if (null != pageable && 0 != pageable.getPageNumber() && 0 != pageable.getPageSize()) {
+      Integer offsetAux =
+          (pageable.getPageSize() * pageable.getPageNumber()) - pageable.getPageSize();
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+      stringQuery = stringQuery + String.format(paginationPart, offsetAux, pageable.getPageSize());
+    }
     conn.setSchema("dataset_" + datasetId);
     List<RecordValue> records = new ArrayList<>();
     try (PreparedStatement stmt = conn.prepareStatement(stringQuery);
@@ -561,10 +571,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   @Override
   @Transactional
-  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId)
+  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable)
       throws HibernateException {
     Session session = (Session) entityManager.getDelegate();
-    return session.doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId));
+    return session
+        .doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId, pageable));
   }
 
 }

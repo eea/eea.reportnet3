@@ -15,6 +15,7 @@ import { TabsUtils } from 'ui/views/_functions/Utils/TabsUtils';
 export const TabsSchema = ({
   activeIndex = 0,
   buttonsList = undefined,
+  dataProviderId,
   hasWritePermissions = false,
   hasCountryCode,
   isExportable = true,
@@ -47,6 +48,7 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   buttonsList={buttonsList}
+                  dataProviderId={dataProviderId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
                   isExportable={isExportable}

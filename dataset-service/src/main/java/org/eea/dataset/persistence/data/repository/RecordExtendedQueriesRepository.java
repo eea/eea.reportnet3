@@ -76,5 +76,5 @@ public interface RecordExtendedQueriesRepository {
    * @param datasetId the dataset id
    * @return the list
    */
-  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId);
+  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable);
 }

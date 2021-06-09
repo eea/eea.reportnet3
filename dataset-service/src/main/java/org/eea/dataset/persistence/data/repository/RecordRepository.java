@@ -115,4 +115,13 @@ public interface RecordRepository
    */
   RecordValue findById(String id);
 
+  /**
+   * Count by table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  @Query("select count(r.id) from RecordValue r where r.tableValue.idTableSchema= :idTableSchema")
+  Long countByTableSchema(@Param("idTableSchema") String idTableSchema);
+
 }

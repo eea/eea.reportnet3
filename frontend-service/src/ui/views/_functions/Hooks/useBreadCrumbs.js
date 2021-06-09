@@ -36,6 +36,7 @@ export const useBreadCrumbs = ({
       label: resources.messages['dataflow']
     };
   };
+
   const getReferenceDataflowCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
@@ -73,6 +74,16 @@ export const useBreadCrumbs = ({
   const getDatasetDesignerCrumb = () => {
     return { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' };
   };
+
+  const getReferenceDatasetDesignerCrumb = () => ({
+    label: resources.messages['referenceDatasetDesigner'],
+    icon: 'pencilRuler'
+  });
+
+  const getReferenceDatasetCrumb = () => ({
+    label: resources.messages['referenceDataset'],
+    icon: 'howTo'
+  });
 
   const getEuDatasetCrumb = () => {
     return { label: resources.messages['euDataset'], icon: 'euDataset' };
@@ -259,6 +270,24 @@ export const useBreadCrumbs = ({
 
     if (currentPage === CurrentPage.REFERENCE_DATAFLOW) {
       breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getReferenceDataflowCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.REFERENCE_DATASET_DESIGNER) {
+      breadCrumbContext.add([
+        getHomeCrumb(),
+        getDataflowsCrumb(),
+        getReferenceDataflowCrumb(),
+        getReferenceDatasetDesignerCrumb()
+      ]);
+    }
+
+    if (currentPage === CurrentPage.REFERENCE_DATASET) {
+      breadCrumbContext.add([
+        getHomeCrumb(),
+        getDataflowsCrumb(),
+        getReferenceDataflowCrumb(),
+        getReferenceDatasetCrumb()
+      ]);
     }
   };
 

@@ -156,12 +156,11 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   *
+   * @param datasetId the dataset id
    * @return the type data
-   *
    * @throws EEAException the EEA exception
    */
-  DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
+  DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO, Long datasetId)
       throws EEAException;
 
   /**
@@ -281,10 +280,10 @@ public interface DatasetSchemaService {
    * Delete from pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException;
+  void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO, Long datasetId) throws EEAException;
 
   /**
    * Delete foreign relation.
@@ -327,10 +326,10 @@ public interface DatasetSchemaService {
    * Update pk catalogue deleting schema.
    *
    * @param idDatasetSchema the id dataset schema
-   *
+   * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException;
+  void updatePkCatalogueDeletingSchema(String idDatasetSchema, Long dataflowId) throws EEAException;
 
 
   /**
@@ -338,10 +337,11 @@ public interface DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId) throws EEAException;
+  void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId, Long datasetId)
+      throws EEAException;
 
 
   /**

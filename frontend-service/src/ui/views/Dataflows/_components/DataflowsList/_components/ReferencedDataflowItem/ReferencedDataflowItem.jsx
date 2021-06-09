@@ -75,15 +75,7 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
         <p>{dataflow.description}</p>
       </div>
 
-      <div className={`${styles.status}  dataflowList-status-help-step`}>
-        {!isNil(dataflow.reportingDatasetsStatus) && dataflow.status === 'OPEN' && (
-          <p>
-            <span>{`${resources.messages['deliveryStatus']}: `}</span>
-            {dataflow.reportingDatasetsStatus === 'PENDING'
-              ? resources.messages['draft'].toUpperCase()
-              : dataflow.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
-          </p>
-        )}
+      <div className={`${styles.status} ${styles[dataflow.status]}  dataflowList-status-help-step`}>
         <p>
           <span>{`${resources.messages['dataflowStatus']}: `}</span>
           {dataflow.status}

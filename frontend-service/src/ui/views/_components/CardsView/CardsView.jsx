@@ -16,6 +16,7 @@ export const CardsView = ({
   contentType,
   data,
   handleRedirect,
+  isReferenceDataflow,
   onChangePagination,
   onSelectCard,
   pagination,
@@ -61,8 +62,9 @@ export const CardsView = ({
               checked={checkedCard}
               date={card.dueDate || card.expirationDate}
               handleRedirect={handleRedirect}
-              icon="externalLink"
+              icon="externalUrl"
               id={card.id}
+              isReferenceDataflow={isReferenceDataflow}
               key={card.id}
               onCheck={onSelectCard}
               status={card.status}

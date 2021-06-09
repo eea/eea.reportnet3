@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './DataflowManagement.module.scss';
@@ -121,7 +122,7 @@ export const DataflowManagement = ({
     <Button
       className="p-button-secondary button-right-aligned p-button-animated-blink"
       icon="cancel"
-      label={resources.messages['cancel']}
+      label={isEditForm ? resources.messages['cancel'] : resources.messages['close']}
       onClick={() => action()}
     />
   );
@@ -139,8 +140,20 @@ export const DataflowManagement = ({
         )}
       </div>
       <Button
-        className={`p-button-primary ${!dataflowManagementState.isSubmitting ? 'p-button-animated-blink' : ''}`}
-        disabled={dataflowManagementState.isSubmitting}
+        className={`p-button-primary ${
+          !isEmpty(dataflowManagementState.name) &&
+          !isEmpty(dataflowManagementState.description) &&
+          !isNil(dataflowManagementState.obligation?.id) &&
+          !dataflowManagementState.isSubmitting
+            ? 'p-button-animated-blink'
+            : ''
+        }`}
+        disabled={
+          isEmpty(dataflowManagementState.name) ||
+          isEmpty(dataflowManagementState.description) ||
+          isNil(dataflowManagementState.obligation?.id) ||
+          dataflowManagementState.isSubmitting
+        }
         icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
         label={isEditForm ? resources.messages['save'] : resources.messages['create']}
         onClick={() => (dataflowManagementState.isSubmitting ? {} : onSave())}
