@@ -203,6 +203,7 @@ export const DataflowManagement = ({
             isEditForm={isEditForm}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
+            onResetData={onResetData}
             onSearch={() => manageDialogs('isRepObDialogVisible', true)}
             onSubmit={onSubmit}
             ref={formRef}
