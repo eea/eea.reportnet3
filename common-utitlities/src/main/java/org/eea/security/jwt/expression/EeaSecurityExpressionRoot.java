@@ -157,7 +157,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    * @return true, if successful
    */
   public boolean checkAccessReferenceEntity(EntityClassEnum entity, Long entityId) {
-    return entityAccessService.isReferenceDataflowDraft(entity, entityId);
+    return entityAccessService.isReferenceDataflowDraft(entity, entityId) && !isApiKey();
   }
 
 
