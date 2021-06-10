@@ -112,6 +112,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private static final String UPDATE_DATAFLOW_STATUS =
       "update dataflow set status = '%s', manual_acceptance = '%s', deadline_date = '%s' where id = %d";
 
+  /** The Constant UPDATE_REFERENCE_DATAFLOW_STATUS: {@value}. */
+  private static final String UPDATE_REFERENCE_DATAFLOW_STATUS =
+      "update dataflow set status = '%s', manual_acceptance = '%s' where id = %d";
+
   /** The Constant UPDATE_REPRESENTATIVE_HAS_DATASETS: {@value}. */
   private static final String UPDATE_REPRESENTATIVE_HAS_DATASETS =
       "update representative set has_datasets = %b where id = %d;";
@@ -260,6 +264,23 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   }
 
   /**
+   * Gets the dataflow metabase.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataflow metabase
+   */
+  @Override
+  public DataFlowVO getDataflowMetabase(Long dataflowId) {
+    try {
+      DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      return (dataflowVO != null) ? dataflowVO : null;
+    } catch (Exception e) {
+      LOG_ERROR.error("Error getting dataflow {} metabase", dataflowId, e);
+      return null;
+    }
+  }
+
+  /**
    * Gets the data collection id by dataflow id.
    *
    * @param idFlow the id flow
@@ -304,8 +325,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean isCreation) {
     String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
         : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-    EventType failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
-        : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
+    DataFlowVO dataflow = getDataflowMetabase(dataflowId);
+    boolean referenceDataflow = false;
+    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+      referenceDataflow = true;
+    }
+    EventType failEvent = EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT;
+    if (!referenceDataflow) {
+      failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
+          : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
+    }
+
 
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -328,11 +358,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * Update data collection.
    *
    * @param dataflowId the dataflow id
+   * @param referenceDataflow the reference dataflow
    */
   @Override
   @Async
-  public void updateDataCollection(Long dataflowId) {
-    manageDataCollection(dataflowId, null, false, false, false);
+  public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow);
   }
 
   /**
@@ -342,13 +373,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dueDate the due date
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param showPublicInfo the show public info
+   * @param referenceDataflow the reference dataflow
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
-      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
+      boolean referenceDataflow) {
 
-    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck);
+    manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
+        referenceDataflow);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
@@ -375,18 +410,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param isCreation the is creation
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param referenceDataflow the reference dataflow
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean stopAndNotifySQLErrors, boolean manualCheck) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
-    // new check: dataflow is Reference dataset?
-    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-    boolean referenceDataflow = false;
-    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
-      referenceDataflow = true;
-    }
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
@@ -434,6 +464,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // normal schemas. If this happens, convert the type Link to Text
     checkLinksInReferenceDatasets(referenceDatasets, referenceSchemasId);
 
+    // check if there are designs (or reference) to continue the process
+    NotificationVO notificationErrorVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .dataflowId(dataflowId).build();
+    if (Boolean.TRUE.equals(referenceDataflow) && referenceDatasets.isEmpty()) {
+      LOG_ERROR.error(
+          "No reference schemas in the dataflow {}. So error in the process to create the reference dataset",
+          dataflowId);
+      releaseNotification(EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT, notificationErrorVO);
+    } else if (Boolean.FALSE.equals(referenceDataflow) && designs.isEmpty()) {
+      LOG_ERROR.error("No design datasets in the dataflow {}. So error creating the DC",
+          dataflowId);
+      releaseNotification(EventType.ADD_DATACOLLECTION_FAILED_EVENT, notificationErrorVO);
+    }
+
     if (rulesOk) {
       // 2. Get the representatives who are going to provide data
       List<RepresentativeVO> representatives = representativeControllerZuul
@@ -446,9 +491,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
 
       // 3. Get the providers associated with representatives
-      List<DataProviderVO> dataProviders =
-          representativeControllerZuul.findDataProvidersByIds(representatives.stream()
-              .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+      List<DataProviderVO> dataProviders = new ArrayList<>();
+      if (!representatives.isEmpty()) {
+        dataProviders = representativeControllerZuul.findDataProvidersByIds(representatives.stream()
+            .map(RepresentativeVO::getDataProviderId).collect(Collectors.toList()));
+      }
 
       // 4. Map representatives to providers
       Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
@@ -494,8 +541,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             try {
               datasetSchemaService.updateForeignRelation(reference.getId(), field,
                   reference.getDatasetSchema());
-              DataType type =
-                  datasetSchemaService.updateFieldSchema(reference.getDatasetSchema(), field);
+              DataType type = datasetSchemaService.updateFieldSchema(reference.getDatasetSchema(),
+                  field, reference.getId(), false);
               datasetSchemaService.propagateRulesAfterUpdateSchema(reference.getDatasetSchema(),
                   field, type, reference.getId());
             } catch (EEAException e) {
@@ -575,10 +622,15 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     try {
       connection.setAutoCommit(false);
 
-      if (isCreation) {
+      if (isCreation && !referenceDataflow) {
         // 5. Set dataflow to DRAFT
         statement.addBatch(String.format(UPDATE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT, manualCheck,
             dueDate, dataflowId));
+      } else if (isCreation && referenceDataflow) {
+        // Set dataflow to DRAFT but keeping some attributes to null because we are in reference
+        // dataflow
+        statement.addBatch(String.format(UPDATE_REFERENCE_DATAFLOW_STATUS, TypeStatusEnum.DRAFT,
+            manualCheck, dataflowId));
       }
 
       for (RepresentativeVO representative : representatives) {
@@ -640,7 +692,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               persistReferenceDataset(statement, referenceDataset, time, dataflowId);
           referenceDatasetIds.add(referenceDatasetId);
           datasetIdsAndSchemaIds.put(referenceDatasetId, referenceDataset.getDatasetSchema());
-
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
@@ -662,8 +713,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<ReferenceDataset> references = referenceDatasetRepository.findByDataflowId(dataflowId);
         references.stream().forEach(r -> {
           referenceDatasetIds.add(r.getId());
+          for (RepresentativeVO representative : representatives) {
+            List<String> emails = representative.getLeadReporters().stream()
+                .map(LeadReporterVO::getEmail).collect(Collectors.toList());
+            if (emails.isEmpty()) {
+              referenceDatasetIdsEmails.put(r.getId(), null);
+            } else {
+              referenceDatasetIdsEmails.put(r.getId(), emails);
+            }
+          }
         });
       }
+
+
       createPermissions(datasetIdsEmails, referenceDatasetIdsEmails, dataCollectionIds,
           euDatasetIds, testDatasetIds, referenceDatasetIds, dataflowId, isCreation);
       // 9. Delete editors

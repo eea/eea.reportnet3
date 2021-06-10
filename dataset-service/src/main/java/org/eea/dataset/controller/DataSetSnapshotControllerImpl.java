@@ -113,7 +113,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
@@ -286,7 +286,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataschema/{idDatasetSchema}/dataset/{idDesignDataset}/create",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   public void createSchemaSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idDatasetSchema") String idDatasetSchema,
@@ -310,7 +310,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   public void restoreSchemaSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
@@ -342,7 +342,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   public void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) throws Exception {
     // Set the user name on the thread
@@ -392,13 +392,14 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    * Obtain the dataset historic releases.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    * @return the list
-   * @throws EEAException
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("(secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))) OR (checkApiKey(#dataflowId,0L) AND secondLevelAuthorize(#datasetId,'EUDATASET_CUSTODIAN'))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
+
   public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
     List<ReleaseVO> releases;
@@ -425,7 +426,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/historicReleasesRepresentative",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD'))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER')")
   public List<ReleaseVO> historicReleasesByRepresentative(
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("representativeId") Long representativeId) {

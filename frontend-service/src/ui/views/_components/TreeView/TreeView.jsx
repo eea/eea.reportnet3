@@ -21,7 +21,7 @@ import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-const TreeView = ({ className = '', columnOptions = {}, property, propertyName, rootProperty }) => {
+const TreeView = ({ className = '', columnOptions = {}, property, propertyName }) => {
   const dataTableRef = useRef();
   const initialTreeViewState = {
     filters: {
@@ -102,23 +102,27 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName, 
     }
   };
 
-  const referencedFieldTemplate = rowData => {
+  const referencedFieldTemplate = rowData => {    
     if (!isNil(rowData?.referencedField) && rowData?.referencedField !== '') {
       return (
         <div>
           <h5>{`${rowData.referencedField?.tableName} - ${rowData.referencedField?.fieldName}`}</h5>
-          <div>
-            <span className={styles.propertyValueTableName}>{`Linked label: `}</span>
-            <span>{`${rowData.referencedField?.linkedTableLabel ?? '-'}`}</span>
-          </div>
-          <div>
-            <span className={styles.propertyValueTableName}>{`Linked conditional: `}</span>
-            <span>{`${rowData.referencedField?.linkedTableConditional ?? '-'}`}</span>
-          </div>
-          <div>
-            <span className={styles.propertyValueTableName}>{`Master conditional: `}</span>
-            <span>{`${rowData.referencedField?.masterTableConditional ?? '-'}`}</span>
-          </div>
+          {rowData.type === 'LINK' && (
+            <Fragment>
+              <div>
+                <span className={styles.propertyValueTableName}>{`Linked label: `}</span>
+                <span>{`${rowData.referencedField?.linkedTableLabel ?? '-'}`}</span>
+              </div>
+              <div>
+                <span className={styles.propertyValueTableName}>{`Linked conditional: `}</span>
+                <span>{`${rowData.referencedField?.linkedTableConditional ?? '-'}`}</span>
+              </div>
+              <div>
+                <span className={styles.propertyValueTableName}>{`Master conditional: `}</span>
+                <span>{`${rowData.referencedField?.masterTableConditional ?? '-'}`}</span>
+              </div>
+            </Fragment>
+          )}
           <div>
             <span className={styles.propertyValueTableName}>{`Supports multiple values?`}</span>
             <FontAwesomeIcon
@@ -311,6 +315,7 @@ const getFieldTypeValue = value => {
     { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
     { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
     { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
+    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
     { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
   return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];

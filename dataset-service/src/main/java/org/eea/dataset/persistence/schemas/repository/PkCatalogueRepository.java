@@ -24,4 +24,6 @@ public interface PkCatalogueRepository extends MongoRepository<PkCatalogueSchema
    * @param idPk the id pk
    */
   void deleteByIdPk(ObjectId idPk);
+
+
 }

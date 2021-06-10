@@ -63,9 +63,9 @@ const FieldEditor = ({
       RecordUtils.getCellInfo(colsSchema, cells.field).type
     )
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
-        ? crs.filter(
+        ? crs.find(
             crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid
-          )[0]
+          ) || { label: 'WGS84 - 4326', value: 'EPSG:4326' }
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
@@ -194,12 +194,19 @@ const FieldEditor = ({
     }
   };
 
-  const calculateCalendarPanelPosition = () => {
-    if (record.dataRow?.length === 3 && !isCalendarVisible) {
+  const calculateCalendarPanelPosition = (element, fieldId) => {
+    const idx = colsSchema.map(e => e.field).indexOf(fieldId);
+    if (idx === record.dataRow?.length - 3 && !isCalendarVisible) {
       const {
         current: { panel }
       } = refDatetimeCalendar;
-      panel.style.left = `${panel.offsetLeft - panel.offsetWidth / 2}px`;
+      const inputRect = element.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      if (panelRect.right + panelRect.width > window.innerWidth) {
+        panel.style.offsetRight = `${window.innerWidth}px`;
+      } else {
+        panel.style.left = `${inputRect.left}px`;
+      }
     }
   };
 
@@ -519,7 +526,7 @@ const FieldEditor = ({
                   optionLabel="label"
                   options={crs}
                   placeholder="Select a CRS"
-                  value={currentCRS}
+                  value={!isNil(currentCRS) ? currentCRS : { label: 'WGS84 - 4326', value: 'EPSG:4326' }}
                 />
                 <Button
                   className={`p-button-secondary-transparent button ${styles.mapButton}`}
@@ -636,7 +643,7 @@ const FieldEditor = ({
             monthNavigator={true}
             onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
             onFocus={e => {
-              calculateCalendarPanelPosition();
+              calculateCalendarPanelPosition(e.currentTarget, cells.field);
               const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
               setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
               setIsCalendarVisible(true);
@@ -688,6 +695,7 @@ const FieldEditor = ({
       case 'ATTACHMENT':
         return false;
 
+      case 'EXTERNAL_LINK':
       case 'LINK':
         const hasMultipleValues = RecordUtils.getCellInfo(colsSchema, cells.field).pkHasMultipleValues;
         if (hasMultipleValues) {
@@ -733,7 +741,6 @@ const FieldEditor = ({
               currentValue={RecordUtils.getCellValue(cells, cells.field)}
               disabled={isLoadingData}
               filter={true}
-              filterBy="itemType,value"
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={e => {

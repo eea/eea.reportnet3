@@ -1,13 +1,19 @@
 package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eea.dataset.mapper.ReferenceDatasetMapper;
 import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
+import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.slf4j.Logger;
@@ -48,6 +54,15 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   private DatasetSchemaService datasetSchemaService;
 
 
+  /** The dataflow referenced repository. */
+  @Autowired
+  private DataflowReferencedRepository dataflowReferencedRepository;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
+
   /**
    * Gets the reference dataset by dataflow id.
    *
@@ -81,5 +96,21 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
     return referenceDatasetPublicMapper.entityListToClass(references);
   }
 
+  /**
+   * Gets the dataflows referenced.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataflows referenced
+   */
+  @Override
+  public Set<DataFlowVO> getDataflowsReferenced(Long dataflowId) {
 
+    Set<DataFlowVO> dataflows = new HashSet<>();
+    DataflowReferencedSchema referenced = dataflowReferencedRepository.findByDataflowId(dataflowId);
+    if (null != referenced && null != referenced.getReferencedByDataflow()) {
+      referenced.getReferencedByDataflow().stream()
+          .forEach(r -> dataflows.add(dataflowControllerZuul.getMetabaseById(r)));
+    }
+    return dataflows;
+  }
 }

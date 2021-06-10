@@ -10,9 +10,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Gets the referenced.
- *
- * @return the referenced
+ * The Class UniqueConstraintSchema.
  */
 @Getter
 @Setter

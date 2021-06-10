@@ -51,7 +51,7 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
    * Execute.
    *
    * @param eeaEventVO the eea event VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {

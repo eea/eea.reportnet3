@@ -23,7 +23,7 @@ public class ExtendedRulesSequenceRepositoryImpl implements ExtendedRulesSequenc
   /**
    * Creates the sequence.
    *
-   * @param ruleSchemaId the rule schema id
+   * @param datasetSchemaId the dataset schema id
    * @return the rule sequence
    */
   @Override
@@ -42,7 +42,7 @@ public class ExtendedRulesSequenceRepositoryImpl implements ExtendedRulesSequenc
   /**
    * Update sequence.
    *
-   * @param ruleSchemaId the rule schema id
+   * @param datasetSchemaId the dataset schema id
    * @return the long
    */
   @Override

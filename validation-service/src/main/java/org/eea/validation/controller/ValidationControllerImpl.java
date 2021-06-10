@@ -118,6 +118,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @return the failed validations by id dataset
    */
   @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN') OR checkAccessReferenceEntity('DATASET',#datasetId)")
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
       @PathVariable("id") Long datasetId,
@@ -173,6 +174,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER')")
   public FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
       @PathVariable("id") Long datasetId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,

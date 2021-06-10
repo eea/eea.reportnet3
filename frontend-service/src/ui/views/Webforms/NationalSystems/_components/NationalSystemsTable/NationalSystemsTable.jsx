@@ -17,7 +17,14 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { NationalSystemsTableUtils } from './_functions/Utils/NationalSystemsTableUtils';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, tables }) => {
+export const NationalSystemsTable = ({
+  dataProviderId,
+  dataflowId,
+  datasetId,
+  errorMessages,
+  schemaTables,
+  tables
+}) => {
   const { parseData } = NationalSystemsTableUtils;
   const { parseText } = TextUtils;
 
@@ -87,7 +94,13 @@ export const NationalSystemsTable = ({ datasetId, errorMessages, schemaTables, t
 
     return data.map((record, index) => (
       <Fragment key={index}>
-        <NationalSystemsRecord datasetId={datasetId} record={record} getTableErrors={getTableErrors} />
+        <NationalSystemsRecord
+          dataProviderId={dataProviderId}
+          dataflowId={dataflowId}
+          datasetId={datasetId}
+          record={record}
+          getTableErrors={getTableErrors}
+        />
       </Fragment>
     ));
   };

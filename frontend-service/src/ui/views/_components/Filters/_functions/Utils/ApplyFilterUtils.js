@@ -149,7 +149,7 @@ const onApplySearch = (data, searchBy = [], value, state, inputKeys, selectedKey
   ...data.filter(data => {
     const searchedParams = !isEmpty(searchBy) ? searchBy : getSearchKeys(data);
     const filteredData = [];
-    for (let index = 0; index < searchedParams.length; index++) {
+    for (let index = 0; index < searchedParams?.length; index++) {
       if (!isNil(data[searchedParams[index]])) {
         filteredData.push(data[searchedParams[index]].toString().toLowerCase().includes(value.toLowerCase()));
       }

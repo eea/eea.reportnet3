@@ -7,6 +7,8 @@ import java.util.Map;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -110,10 +112,19 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     Date date = dataCollectionVO.getDueDate();
     Long dataflowId = dataCollectionVO.getIdDataflow();
-    TypeStatusEnum status = dataCollectionService.getDataflowStatus(dataflowId);
+    // new check: dataflow is Reference dataset?
+    DataFlowVO dataflow = dataCollectionService.getDataflowMetabase(dataflowId);
+    boolean referenceDataflow = false;
+    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+      referenceDataflow = true;
+      showPublicInfo = false;
+      manualCheck = false;
+      stopAndNotifySQLErrors = false;
+    }
 
     // Continue if the dataflow exists and is DESIGN
-    if (date == null || dataflowId == null || !TypeStatusEnum.DESIGN.equals(status)) {
+    if (dataflow == null || (date == null && !referenceDataflow) || dataflowId == null
+        || !TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       Map<String, Object> createDataCollection = new HashMap<>();
       createDataCollection.put(LiteralConstants.SIGNATURE,
           LockSignature.CREATE_DATA_COLLECTION.getValue());
@@ -130,7 +141,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     // This method will release the lock
     dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-        manualCheck, showPublicInfo);
+        manualCheck, showPublicInfo, referenceDataflow);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 
@@ -150,9 +161,14 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") @LockCriteria(
           name = "dataflowId") Long dataflowId) {
 
-    TypeStatusEnum status = dataCollectionService.getDataflowStatus(dataflowId);
+    // new check: dataflow is Reference dataset?
+    DataFlowVO dataflow = dataCollectionService.getDataflowMetabase(dataflowId);
+    boolean referenceDataflow = false;
+    if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+      referenceDataflow = true;
+    }
 
-    if (!TypeStatusEnum.DRAFT.equals(status)) {
+    if (dataflow == null || !TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
 
       Map<String, Object> updateDataCollection = new HashMap<>();
       updateDataCollection.put(LiteralConstants.SIGNATURE,
@@ -168,7 +184,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    dataCollectionService.updateDataCollection(dataflowId);
+    dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
     LOG.info("DataCollection update for Dataflow {} started", dataflowId);
   }
 
