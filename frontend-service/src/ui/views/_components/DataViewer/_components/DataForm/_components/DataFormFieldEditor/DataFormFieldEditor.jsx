@@ -430,9 +430,13 @@ const DataFormFieldEditor = ({
     const {
       current: { panel }
     } = refDatetimeCalendar;
+
+    panel.style.display = 'block';
+
     const inputRect = element.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
     const top = `${inputRect.top - panelRect.height / 2}px`;
+
     panel.style.top = top;
     panel.style.position = 'fixed';
   };
