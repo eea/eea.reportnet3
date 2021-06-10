@@ -1148,6 +1148,8 @@
     "obligationId": "Id obligation",
     "createReferenceDatasetsError": "Failed creating reference datasets",
     "referenceDataflowUpdatingError": "Failed updating reference dataflow",
-    "referenceDataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> reference dataflow"
+    "referenceDataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> reference dataflow",
+    "loadingReferenceDataflowError": "Error loading reference dataflow",
+    "loadingReferencingDataflowsError": "Error loading referencing dataflows"
   }
 }
