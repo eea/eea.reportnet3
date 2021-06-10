@@ -1017,18 +1017,15 @@ const DataViewer = withRouter(
       return <div className={styles.iconTooltipWrapper}>{icons}</div>;
     };
 
-    const mapRender = () => {
-      console.log(records.crs);
-      return (
-        <Map
-          enabledDrawElements={records.drawElements}
-          geoJson={records.mapGeoJson}
-          geometryType={records.geometryType}
-          hasLegend={true}
-          onSelectPoint={onSelectPoint}
-          selectedCRS={records.crs}></Map>
-      );
-    };
+    const mapRender = () => (
+      <Map
+        enabledDrawElements={records.drawElements}
+        geoJson={records.mapGeoJson}
+        geometryType={records.geometryType}
+        hasLegend={true}
+        onSelectPoint={onSelectPoint}
+        selectedCRS={records.crs}></Map>
+    );
 
     const rowClassName = rowData => {
       let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
