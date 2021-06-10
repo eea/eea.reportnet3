@@ -30,8 +30,6 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    * Listen message.
    *
    * @param message the message
-   *
-   * @throws EEAException
    */
   @Override
   @KafkaListener(topics = "DATA_REPORTING_TOPIC")

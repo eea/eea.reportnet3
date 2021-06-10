@@ -41,12 +41,15 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -212,23 +215,28 @@ public class DataflowServiceImpl implements DataflowService {
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
 
     // Get user's dataflows sorted by status and creation date
-    dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(
+    List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList()))
-        .forEach(dataflow -> {
-          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-          if (!map.isEmpty() && null != datasetsStatusList) {
-            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-          }
-          dataflowVOs.add(dataflowVO);
-        });
-    try {
-      getOpenedObligations(dataflowVOs);
-    } catch (FeignException e) {
-      LOG_ERROR.error("Error retrieving obligations for dataflows from user id {} due to reason {}",
-          userId, e.getMessage(), e);
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (null != idsResources && !idsResources.isEmpty()) {
+      dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources)
+          .forEach(dataflow -> {
+            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+            if (!map.isEmpty() && null != datasetsStatusList) {
+              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+            }
+            dataflowVOs.add(dataflowVO);
+          });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
     }
+
     return dataflowVOs;
   }
 
@@ -249,15 +257,34 @@ public class DataflowServiceImpl implements DataflowService {
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
 
-    // Get user's dataflows sorted by status and creation date
-    dataflowRepository.findReferenceByIdInOrderByStatusDescCreationDateDesc().forEach(dataflow -> {
-      DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-      List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-      if (!map.isEmpty() && null != datasetsStatusList) {
-        setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-      }
-      dataflowVOs.add(dataflowVO);
-    });
+    // First, get reference dataflows in DESIGN that the user has permission
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (null != idsResources && !idsResources.isEmpty()) {
+      dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+          TypeStatusEnum.DESIGN, idsResources).forEach(dataflow -> {
+            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+            if (!map.isEmpty() && null != datasetsStatusList) {
+              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+            }
+            dataflowVOs.add(dataflowVO);
+          });
+    }
+
+    // Second, get reference dataflows in DRAFT sorted by status and creation date
+    dataflowRepository
+        .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT)
+        .forEach(dataflow -> {
+          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+          if (!map.isEmpty() && null != datasetsStatusList) {
+            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+          }
+          dataflowVOs.add(dataflowVO);
+        });
+
 
     return dataflowVOs;
   }
@@ -468,7 +495,9 @@ public class DataflowServiceImpl implements DataflowService {
       if (dataflowSave.isPresent()) {
         dataflowSave.get().setName(dataflowVO.getName());
         dataflowSave.get().setDescription(dataflowVO.getDescription());
-        dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
+        if (null != dataflowVO.getObligation()) {
+          dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
+        }
         dataflowSave.get().setReleasable(dataflowVO.isReleasable());
         dataflowSave.get().setShowPublicInfo(dataflowVO.isShowPublicInfo());
         dataflowRepository.save(dataflowSave.get());
@@ -720,6 +749,47 @@ public class DataflowServiceImpl implements DataflowService {
                     userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
                         .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()),
                     dataProviderIds));
+  }
+
+
+  /**
+   * Checks if is reference dataflow draft.
+   *
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if is reference dataflow draft
+   */
+  @Override
+  public boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId) {
+    boolean reference = false;
+    DataFlowVO dataflow = new DataFlowVO();
+    try {
+      switch (entity) {
+        case DATAFLOW:
+          dataflow = getMetabaseById(entityId);
+          if (TypeDataflowEnum.REFERENCE.equals(dataflow.getType())
+              && TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+            reference = true;
+          }
+          break;
+        case DATASET:
+          DataSetMetabaseVO dataset =
+              datasetMetabaseControllerZuul.findDatasetMetabaseById(entityId);
+          Long dataflowId = dataset.getDataflowId();
+          dataflow = getMetabaseById(dataflowId);
+          if (TypeDataflowEnum.REFERENCE.equals(dataflow.getType())
+              && TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+            reference = true;
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error knowing if the entity {} with id {} is reference. Message {}", entity,
+          entityId, e.getMessage(), e);
+    }
+    return reference;
   }
 
 
@@ -978,6 +1048,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
 
+
     // filter design datasets (schemas) showed to the user depending on permissions
     List<ResourceAccessVO> datasets =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA);
@@ -1035,6 +1106,14 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowVO.setEuDatasets(new ArrayList<>());
       dataflowVO.setTestDatasets(new ArrayList<>());
       dataflowVO.setReferenceDatasets(new ArrayList<>());
+    }
+
+    // special logic to REFERENCE DATAFLOWS that are in DRAFT status
+    if (TypeDataflowEnum.REFERENCE.equals(dataflowVO.getType())
+        && TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())
+        && dataflowVO.getReferenceDatasets().isEmpty()) {
+      dataflowVO.setReferenceDatasets(
+          referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(id));
     }
 
 

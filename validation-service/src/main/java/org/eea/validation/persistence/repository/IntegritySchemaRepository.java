@@ -36,7 +36,7 @@ public interface IntegritySchemaRepository extends MongoRepository<IntegritySche
   /**
    * Find by origin dataset schema id.
    *
-   * @param idFieldSchema the id field schema
+   * @param datasetSchemaId the dataset schema id
    * @return the list
    */
   @Query("{'$or': [{'originDatasetSchemaId' : ?0 }]}")
