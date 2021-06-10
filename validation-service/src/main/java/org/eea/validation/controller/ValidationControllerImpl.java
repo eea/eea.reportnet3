@@ -118,7 +118,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @return the failed validations by id dataset
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN') OR checkAccessReferenceEntity('DATASET',#datasetId)")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN') OR checkAccessReferenceEntity('DATASET',#datasetId)")
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
       @PathVariable("id") Long datasetId,
