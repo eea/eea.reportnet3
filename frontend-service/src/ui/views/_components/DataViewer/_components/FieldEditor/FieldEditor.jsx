@@ -194,12 +194,19 @@ const FieldEditor = ({
     }
   };
 
-  const calculateCalendarPanelPosition = () => {
-    if (record.dataRow?.length === 3 && !isCalendarVisible) {
+  const calculateCalendarPanelPosition = (element, fieldId) => {
+    const idx = colsSchema.map(e => e.field).indexOf(fieldId);
+    if (idx === record.dataRow?.length - 3 && !isCalendarVisible) {
       const {
         current: { panel }
       } = refDatetimeCalendar;
-      panel.style.left = `${panel.offsetLeft - panel.offsetWidth / 2}px`;
+      const inputRect = element.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      if (panelRect.right + panelRect.width > window.innerWidth) {
+        panel.style.offsetRight = `${window.innerWidth}px`;
+      } else {
+        panel.style.left = `${inputRect.left}px`;
+      }
     }
   };
 
@@ -636,7 +643,7 @@ const FieldEditor = ({
             monthNavigator={true}
             onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
             onFocus={e => {
-              calculateCalendarPanelPosition();
+              calculateCalendarPanelPosition(e.currentTarget, cells.field);
               const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
               setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
               setIsCalendarVisible(true);
