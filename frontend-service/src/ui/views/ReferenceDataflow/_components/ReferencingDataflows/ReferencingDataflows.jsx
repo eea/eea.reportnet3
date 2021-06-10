@@ -41,7 +41,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
         payload: { dataflows: referencingDataflowsResponse.data }
       });
     } catch (error) {
-      notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error });
+      notificationContext.add({ type: 'LOADING_REFERENCING_DATAFLOWS_ERROR', error });
     }
   };
 
