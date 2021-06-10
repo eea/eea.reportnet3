@@ -62,7 +62,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   const renderDialogLayout = children => <div className={styles.modalSize}>{children}</div>;
 
   if (state.requestStatus === 'pending') {
-    return renderDialogLayout(<Spinner />);
+    return renderDialogLayout(<Spinner className={styles.spinner} />);
   }
 
   if (state.requestStatus === 'resolved' && state.dataflows.length === 0) {
