@@ -1,5 +1,6 @@
 import { useContext, useLayoutEffect, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { routes } from 'ui/routes';
@@ -37,9 +38,15 @@ const useBigButtonList = ({
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
 
-    const isLeadReporterOfThisCountry = dataflowState.data?.representatives
-      ?.find(representative => representative.dataProviderId === dataProviderId)
-      .leadReporters?.some(leadReporter => leadReporter.account === userContext.email);
+    const representativeWithSameDataProviderID = dataflowState.data?.representatives?.find(
+      representative => representative.dataProviderId === dataProviderId
+    );
+
+    const isLeadReporterOfThisCountry = !isEmpty(representativeWithSameDataProviderID)
+      ? representativeWithSameDataProviderID.leadReporters?.some(
+          leadReporter => leadReporter.account === userContext.email
+        )
+      : false;
 
     return {
       feedback: isLeadReporterOfThisCountry && isReleased && isManualAcceptance,
