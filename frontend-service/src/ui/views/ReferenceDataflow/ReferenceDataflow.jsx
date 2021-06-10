@@ -68,7 +68,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   useEffect(() => {
-    onLoadReportingDataflow();
+    onLoadReferenceDataflow();
   }, [dataflowState.refresh]);
 
   useBreadCrumbs({
@@ -125,11 +125,11 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const onLoadReportingDataflow = async () => {
+  const onLoadReferenceDataflow = async () => {
     dataflowDispatch({ type: 'LOADING_STARTED' });
-    let referenceDataflowResponse;
+
     try {
-      referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
+      const referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
       const referenceDataflow = referenceDataflowResponse.data;
 
       dataflowDispatch({
@@ -162,7 +162,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: [] } });
       }
     } catch (error) {
-      notificationContext.add({ type: 'LOADING_ERROR', error });
+      notificationContext.add({ type: 'LOADING_REFERENCING_DATAFLOWS_ERROR', error });
       history.push(getUrl(routes.DATAFLOWS));
     }
   };
