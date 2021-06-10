@@ -53,7 +53,8 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
-  /** The pk catalogue repository. */
+
+  /** The dataflow referenced repository. */
   @Autowired
   private DataflowReferencedRepository dataflowReferencedRepository;
 

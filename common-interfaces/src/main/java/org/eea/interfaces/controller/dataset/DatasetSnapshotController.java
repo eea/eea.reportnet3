@@ -175,6 +175,7 @@ public interface DatasetSnapshotController {
    * Historic releases.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    * @return the list
    */
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -206,6 +207,8 @@ public interface DatasetSnapshotController {
    * Creates the release snapshots.
    *
    * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
    */
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)

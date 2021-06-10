@@ -127,6 +127,7 @@ public interface RecordStoreService {
    * @param datasetIdAndSchemaId the dataset id and schema id
    * @param dataflowId The DataCollection's dataflow.
    * @param isCreation the is creation
+   * @param isMaterialized the is materialized
    */
   void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation,
       boolean isMaterialized);

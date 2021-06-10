@@ -19,6 +19,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
+import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.junit.Before;
@@ -709,5 +710,10 @@ public class DataFlowControllerImplTest {
   public void getPublicDataflowsByCountry() {
     assertNull("assertion error",
         dataFlowControllerImpl.getPublicDataflowsByCountry("FR", 0, 10, "name", true));
+  }
+
+  @Test
+  public void accessReferenceEntityTest() {
+    dataFlowControllerImpl.accessReferenceEntity(EntityClassEnum.DATASET, 1L);
   }
 }

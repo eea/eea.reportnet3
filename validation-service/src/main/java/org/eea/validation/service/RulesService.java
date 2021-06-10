@@ -103,6 +103,7 @@ public interface RulesService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
+   * @param typeData the type data
    */
   void deleteRuleRequired(String datasetSchemaId, String referenceId, DataType typeData);
 
