@@ -20,6 +20,9 @@ export const dataflowReducer = (state, { type, payload }) => {
       return { ...state, requestStatus: 'rejected', error: payload.error };
     }
 
+    case 'ON_EDIT_DATAFLOW':
+      return { ...state, name: payload.name, description: payload.description };
+
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };
 

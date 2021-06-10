@@ -90,6 +90,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     });
   }
 
+  const onEditDataflow = (name, description) => {
+    dataflowDispatch({ type: 'ON_EDIT_DATAFLOW', payload: { description, name } });
+  };
+
   function refreshPage() {
     dataflowDispatch({ type: 'REFRESH_PAGE' });
   }
@@ -269,6 +273,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           isVisible={dataflowState.isEditDialogVisible}
           manageDialogs={manageDialogs}
           metadata={{ name: dataflowState.name, description: dataflowState.description, status: dataflowState.status }}
+          onEditDataflow={onEditDataflow}
         />
       )}
 
