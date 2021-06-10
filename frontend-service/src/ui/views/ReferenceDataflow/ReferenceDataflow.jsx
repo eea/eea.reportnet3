@@ -127,9 +127,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const onLoadReferenceDataflow = async () => {
     dataflowDispatch({ type: 'LOADING_STARTED' });
-    let referenceDataflowResponse;
+
     try {
-      referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
+      const referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
       const referenceDataflow = referenceDataflowResponse.data;
 
       dataflowDispatch({
