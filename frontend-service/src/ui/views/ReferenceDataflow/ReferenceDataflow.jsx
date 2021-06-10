@@ -68,7 +68,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   useEffect(() => {
-    onLoadReportingDataflow();
+    onLoadReferenceDataflow();
   }, [dataflowState.refresh]);
 
   useBreadCrumbs({
@@ -125,7 +125,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const onLoadReportingDataflow = async () => {
+  const onLoadReferenceDataflow = async () => {
     dataflowDispatch({ type: 'LOADING_STARTED' });
     let referenceDataflowResponse;
     try {
