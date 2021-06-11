@@ -448,3 +448,29 @@
     }
   }
 }
+
+.referenceDataflowsListFilters {
+  @extend .header;
+
+  .multiselectFilter {
+    width: 88% !important;
+  }
+
+  @include for-phone-only {
+    .buttonWrapper {
+      width: 100%;
+    }
+  }
+
+  @include for-tablet-portrait-up {
+    .buttonWrapper {
+      width: 100%;
+    }
+  }
+
+  @include for-big-desktop-up {
+    .buttonWrapper {
+      width: 20%;
+    }
+  }
+}

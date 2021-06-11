@@ -179,6 +179,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         )}
         {visibleTab === 'reference' && (
           <Filters
+            className={'referenceDataflowsListFilters'}
             data={dataToFilter['reference']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['reference']}
