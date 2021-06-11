@@ -13,6 +13,7 @@ import { Checkbox } from 'primereact/checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
+import ReactTooltip from 'react-tooltip';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -28,7 +29,6 @@ const LinkSelector = withRouter(
   ({
     datasetSchemaId,
     fieldId,
-    fieldPreviousTypeValue,
     fields,
     hasMultipleValues = false,
     isExternalLink,
@@ -95,7 +95,9 @@ const LinkSelector = withRouter(
       setIsLoading(true);
       const getReferenceDataflows = async () => {
         const { data } = await ReferenceDataflowService.all();
-        const filteredDataflows = data.filter(dataflow => dataflow.id !== parseFloat(dataflowId));
+        const filteredDataflows = data.filter(
+          dataflow => dataflow.id !== parseFloat(dataflowId) && TextUtils.areEquals(dataflow.status, 'DRAFT')
+        );
         setReferenceDataflows(filteredDataflows);
       };
 
@@ -327,6 +329,17 @@ const LinkSelector = withRouter(
         }
       });
 
+    const dataflowsTemplate = option => {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ margin: '.5em .25em 0 0.5em' }}>{option.name}</span>
+          <span style={{ margin: '.5em .25em 0 0.5em', fontSize: '8pt', fontStyle: 'italic' }}>
+            {option.description}
+          </span>
+        </div>
+      );
+    };
+
     const renderExternalLinkSelector = () => {
       return (
         <div className={styles.referenceDataflowsWrapper}>
@@ -345,14 +358,25 @@ const LinkSelector = withRouter(
             )}
             <div className={styles.referenceDataflowsDropdownWrapper}>
               <label>{resources.messages['referenceDataflows']}</label>
+              <Button
+                className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+                icon={'infoCircle'}
+                tooltip={resources.messages['referenceDataflowsDraftInfo']}
+                tooltipOptions={{ position: 'top' }}
+              />
               <Dropdown
                 ariaLabel={'referenceDataflows'}
                 className={styles.referenceDataflowsDropdown}
+                filter={true}
+                filterBy="name,description"
+                filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+                itemTemplate={dataflowsTemplate}
                 name="referenceDataflowsDropdown"
                 onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
                 optionLabel="name"
                 options={referenceDataflows}
                 placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+                showFilterClear={true}
                 value={linkSelectorState.selectedReferenceDataflow}
               />
             </div>

@@ -157,13 +157,10 @@ public class DataflowConfiguration implements WebMvcConfigurer {
   }
 
   /**
-   * Web mvc configurer configurer.
+   * Configure async support.
    *
-   * @param taskExecutor the task executor
-   * @param callableProcessingInterceptor the callable processing interceptor
-   * @return the web mvc configurer
+   * @param configurer the configurer
    */
-
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
     configurer.setDefaultTimeout(timeout).setTaskExecutor(streamTaskExecutor());

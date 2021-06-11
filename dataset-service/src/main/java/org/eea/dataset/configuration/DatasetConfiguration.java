@@ -128,6 +128,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /**
    * Data source data source.
    *
+   * @param recordStoreControllerZuul the record store controller zuul
    * @return the data source
    */
   @Bean
@@ -164,6 +165,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /**
    * Data sets entity manager factory.
    *
+   * @param dataSource the data source
    * @return the local container entity manager factory bean
    */
   @Bean
@@ -185,6 +187,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /**
    * Data sets transaction manager.
    *
+   * @param emf the emf
    * @return the platform transaction manager
    */
   @Bean
@@ -227,14 +230,12 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return executor;
   }
 
-  /**
-   * Web mvc configurer configurer.
-   *
-   * @param taskExecutor the task executor
-   * @param callableProcessingInterceptor the callable processing interceptor
-   * @return the web mvc configurer
-   */
 
+  /**
+   * Configure async support.
+   *
+   * @param configurer the configurer
+   */
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
     configurer.setDefaultTimeout(7200000).setTaskExecutor(streamTaskExecutor());

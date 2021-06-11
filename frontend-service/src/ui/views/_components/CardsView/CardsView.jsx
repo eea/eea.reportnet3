@@ -16,6 +16,7 @@ export const CardsView = ({
   contentType,
   data,
   handleRedirect,
+  isReferenceDataflow,
   onChangePagination,
   onSelectCard,
   pagination,
@@ -47,13 +48,11 @@ export const CardsView = ({
   const end = begin + cardsPerPage;
   const currentPosts = cards.slice(begin, end);
 
-  const stylesCardWrap = { justifyContent: currentPosts.length % 5 === 0 ? 'space-between' : 'flex-start' };
-
   return isEmpty(data) ? (
     <h3 className={styles.noObligations}>{resources.messages[`no${contentType}WithSelectedParameters`]}</h3>
   ) : (
     <Fragment>
-      <div className={styles.cardWrap} style={stylesCardWrap}>
+      <div className={styles.cardWrap}>
         {currentPosts.map(card => {
           return (
             <Card
@@ -63,6 +62,7 @@ export const CardsView = ({
               handleRedirect={handleRedirect}
               icon="externalUrl"
               id={card.id}
+              isReferenceDataflow={isReferenceDataflow}
               key={card.id}
               onCheck={onSelectCard}
               status={card.status}

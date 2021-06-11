@@ -72,7 +72,10 @@ const DataFormFieldEditor = ({
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
-        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid)[0]
+        ? crs.find(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid) || {
+            label: 'WGS84 - 4326',
+            value: 'EPSG:4326'
+          }
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     isMapDisabled: false,
     isMapOpen: false,
@@ -426,11 +429,19 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const calculateCalendarPanelPosition = () => {
+  const calculateCalendarPanelPosition = element => {
     const {
       current: { panel }
     } = refDatetimeCalendar;
-    panel.style.top = `${panel.offsetTop + panel.offsetHeight / 2}px`;
+
+    panel.style.display = 'block';
+
+    const inputRect = element.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const top = `${inputRect.top - panelRect.height / 2}px`;
+
+    panel.style.top = top;
+    panel.style.position = 'fixed';
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
@@ -443,7 +454,7 @@ const DataFormFieldEditor = ({
         monthNavigator={true}
         onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
         onFocus={e => {
-          calculateCalendarPanelPosition();
+          calculateCalendarPanelPosition(e.currentTarget);
         }}
         showSeconds={true}
         showTime={true}
@@ -493,7 +504,6 @@ const DataFormFieldEditor = ({
           currentValue={fieldValue}
           disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
           filter={true}
-          filterBy="itemType,value"
           filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           isLoadingData={isLoadingData}
           onChange={e => {

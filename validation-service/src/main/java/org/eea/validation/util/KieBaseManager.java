@@ -313,12 +313,11 @@ public class KieBaseManager {
   }
 
   /**
-   * Text rule and put disable if is the rule have not correct format.
+   * Validate with kiebase.
    *
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
    * @param notificationVO the notification VO
-   * @return true, if successful
    */
   @Async
   public void validateWithKiebase(String datasetSchemaId, Rule rule,

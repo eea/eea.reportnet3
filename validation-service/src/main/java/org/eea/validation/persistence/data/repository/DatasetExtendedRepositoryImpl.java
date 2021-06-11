@@ -251,7 +251,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    * Validate query.
    *
    * @param query the query
-   * @return the result set
+   * @param datasetId the dataset id
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   @Override

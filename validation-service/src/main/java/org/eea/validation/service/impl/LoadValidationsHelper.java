@@ -65,7 +65,8 @@ public class LoadValidationsHelper {
    * @param asc the asc
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @return the list validations
    * @throws EEAException the EEA exception
    */
@@ -134,7 +135,8 @@ public class LoadValidationsHelper {
    * @param pageable the pageable
    * @param levelErrorsFilter the level errors filter
    * @param typeEntitiesFilter the type entities filter
-   * @param originsFilter the origins filter
+   * @param tableFilter the table filter
+   * @param fieldValueFilter the field value filter
    * @param headerField the header field
    * @param asc the asc
    * @return the list group validations

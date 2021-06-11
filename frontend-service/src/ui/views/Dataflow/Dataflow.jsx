@@ -127,9 +127,12 @@ const Dataflow = withRouter(({ history, match }) => {
     userRole => userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
   );
 
+  const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
+
   const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
 
-  const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
+  const isInsideACountry =
+    !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner && !isObserver);
 
   const isOpenStatus = dataflowState.status === config.dataflowStatus.OPEN;
 
@@ -785,7 +788,6 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
-          isLeadReporterOfCountry={isLeadReporterOfCountry}
           match={match}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}

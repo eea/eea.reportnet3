@@ -34,7 +34,7 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 import { CurrentPage, TextUtils } from 'ui/views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
-import { ManageReferenceDataflow } from './_components/ManageReferenceDataflow/ManageReferenceDataflow';
+import { ManageReferenceDataflow } from 'ui/views/_components/ManageReferenceDataflow';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {
@@ -113,15 +113,18 @@ const Dataflows = withRouter(({ history, match }) => {
     );
   }, [dataflowsState]);
 
-  useEffect(() => {
-    if (!isNil(userContext.contextRoles)) onLoadPermissions();
+  useLayoutEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      onLoadPermissions();
+      getDataflows();
+    }
   }, [userContext.contextRoles]);
 
   useLayoutEffect(() => {
     if (isEmpty(dataflowsState[tabId]) && !isNil(userContext.contextRoles)) {
       getDataflows();
     }
-  }, [tabId, userContext.contextRoles]);
+  }, [tabId]);
 
   const getDataflows = async () => {
     setLoading(true);
@@ -130,7 +133,7 @@ const Dataflows = withRouter(({ history, match }) => {
         const { data } = await DataflowService.all(userContext.contextRoles);
         dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'dataflows' } });
       } else {
-        const { data } = await ReferenceDataflowService.all();
+        const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
         dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
     } catch (error) {
@@ -145,13 +148,11 @@ const Dataflows = withRouter(({ history, match }) => {
   const onCreateDataflow = () => {
     manageDialogs('isAddDialogVisible', false);
     onRefreshToken();
-    getDataflows();
   };
 
   const onCreateReferenceDataflow = () => {
     manageDialogs('isReferencedDataflowDialogVisible', false);
     onRefreshToken();
-    getDataflows();
   };
 
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });

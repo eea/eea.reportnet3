@@ -81,10 +81,9 @@ public class DocumentServiceImpl implements DocumentService {
    *
    * @param inputStream the input stream
    * @param contentType the content type
-   * @param filename the filename
+   * @param fileName the file name
    * @param documentVO the document VO
    * @param size the size
-   *
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */

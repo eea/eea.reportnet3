@@ -384,7 +384,6 @@ export const WebformField = ({
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
               disabled={isLoadingData}
               filter={true}
-              filterBy="itemType,value"
               filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={event => {

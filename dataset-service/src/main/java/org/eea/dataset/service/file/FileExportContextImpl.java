@@ -46,8 +46,8 @@ public class FileExportContextImpl implements IFileExportContext {
    *
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
-   * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
    * @return the list
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception

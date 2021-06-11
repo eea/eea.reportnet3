@@ -29,8 +29,9 @@ public class FileParseContextImpl implements IFileParseContext {
    * @param inputStream the input stream
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
+   * @param idTableSchema the id table schema
    * @return the data set VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public DataSetVO parse(InputStream inputStream, Long dataflowId, Long partitionId,

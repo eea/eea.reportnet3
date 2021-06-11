@@ -36,6 +36,7 @@ public interface DataCollectionController {
    *
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
+   * @param showPublicInfo the show public info
    * @param dataCollectionVO the data collection VO
    */
   @PostMapping("/create")
