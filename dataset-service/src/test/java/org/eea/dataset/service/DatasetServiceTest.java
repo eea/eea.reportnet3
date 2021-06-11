@@ -2981,9 +2981,6 @@ public class DatasetServiceTest {
     tSchema.setIdTableSchema(id);
     tSchema.setRecordSchema(rSchema);
     dsSchema.setTableSchemas(Arrays.asList(tSchema));
-    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
-        .thenReturn(id.toString());
-    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
     Mockito
         .when(recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
