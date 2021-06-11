@@ -56,7 +56,6 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @HystrixCommand
   @GetMapping(value = "/private/referencePublic/dataflow/{id}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("isAuthenticated()")
   public List<ReferenceDatasetPublicVO> findReferenceDataSetPublicByDataflowId(
       @PathVariable("id") Long dataflowId) {
     return referenceDatasetService.getReferenceDatasetPublicByDataflow(dataflowId);

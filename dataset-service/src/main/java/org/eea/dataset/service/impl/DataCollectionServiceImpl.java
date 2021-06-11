@@ -36,6 +36,7 @@ import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.dataset.service.model.IntegrityDataCollection;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -77,9 +78,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class DataCollectionServiceImpl.
@@ -446,7 +449,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<String> referenceSchemasId = new ArrayList<>();
     designs.stream().forEach(dataset -> {
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
-      if (schema.getReferenceDataset() != null && schema.getReferenceDataset()) {
+      if (schema != null && schema.getReferenceDataset() != null
+          && Boolean.TRUE.equals(schema.getReferenceDataset())) {
         referenceDatasets.add(dataset);
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
@@ -473,10 +477,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           "No reference schemas in the dataflow {}. So error in the process to create the reference dataset",
           dataflowId);
       releaseNotification(EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT, notificationErrorVO);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.NOT_REFERENCE_TO_PROCESS);
     } else if (Boolean.FALSE.equals(referenceDataflow) && designs.isEmpty()) {
       LOG_ERROR.error("No design datasets in the dataflow {}. So error creating the DC",
           dataflowId);
       releaseNotification(EventType.ADD_DATACOLLECTION_FAILED_EVENT, notificationErrorVO);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.NOT_DESIGN_TO_DATACOLLECTION);
     }
 
     if (rulesOk) {
