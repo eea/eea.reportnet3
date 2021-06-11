@@ -416,3 +416,35 @@
 :global .p-calendar {
   width: 100% !important;
 }
+
+.dataflowsListFilters {
+  @extend .header;
+
+  .multiselectFilter {
+    width: 100% !important;
+  }
+
+  @include for-phone-only {
+    .buttonWrapper {
+      width: 100%;
+    }
+  }
+  @include for-tablet-portrait-up {
+    .buttonWrapper {
+      width: 50%;
+    }
+  }
+
+  @include for-big-desktop-up {
+    flex-wrap: wrap;
+    .input,
+    .inputCheckbox {
+      width: 20%;
+      margin-bottom: 1.5rem;
+    }
+
+    .buttonWrapper {
+      width: 20%;
+    }
+  }
+}

@@ -169,6 +169,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       <div className="dataflowList-filters-help-step">
         {visibleTab === 'dataflows' && (
           <Filters
+            className={'dataflowsListFilters'}
             data={dataToFilter['dataflows']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['dataflows']}
