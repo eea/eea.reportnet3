@@ -55,7 +55,8 @@ public interface FMEController {
    *
    * @param datasetId the dataset id
    * @param providerId the provider id
-   * @return
+   * @param fileName the file name
+   * @return the response entity
    */
   @GetMapping(value = "/downloadExportFile")
   ResponseEntity<StreamingResponseBody> downloadExportFile(

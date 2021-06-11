@@ -19,6 +19,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+
   const validCharsRegex = new RegExp(/[a-zA-Z0-9_-\s()]/);
   const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s()]/);
 
@@ -100,13 +101,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
             content: { schemaName: datasetSchemaName }
           });
         } else {
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_CREATION_ERROR',
-            content: {
-              dataflowId,
-              dataflowName
-            }
-          });
+          notificationContext.add({ type: 'DATASET_SCHEMA_CREATION_ERROR', content: { dataflowId, dataflowName } });
           onCreate();
         }
       } finally {

@@ -64,6 +64,20 @@ function boolean isBlank(String value){
 	return !StringUtils.isBlank(value);
 } 
 
+//////////////////////////////////////////VALIDATION EMPTY POINT VALUE////////////////////////////////////////////////////////////
+function boolean isBlankPoint(FieldValue fieldValue){
+	if(fieldValue.getGeometry() != null) {
+		double[] aux = new double[] {0, 0};
+	    fieldValue.getGeometry().getPositions().getCoordinates(0, aux);
+	    if (aux[0] == 0 && aux[1] == 0) {
+	      return false;
+	    } else {
+	      return true;
+	    }
+    } else {
+    	return false;
+    }
+} 
 
 //////////////////////////////////////////VALIDATION BOOLEAN////////////////////////////////////////////////////////////
 function boolean isBoolean(String value){

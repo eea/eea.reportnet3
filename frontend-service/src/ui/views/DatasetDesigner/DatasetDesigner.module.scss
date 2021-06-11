@@ -5,7 +5,7 @@
   padding: 0.25rem;
 
   .exportSubmenu {
-    width: 15rem;
+    width: 16rem;
   }
 }
 .descriptionLabel {
@@ -70,6 +70,7 @@
   .datasetConfigurationButtons {
     display: flex;
     align-items: center;
+    margin-left: 1rem;
     > div {
       margin-right: 1rem;
     }

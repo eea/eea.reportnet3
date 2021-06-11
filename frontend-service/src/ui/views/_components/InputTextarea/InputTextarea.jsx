@@ -190,7 +190,8 @@ export class InputTextarea extends Component {
           onFocus={this.onFocus}
           onInput={this.onInput}
           onKeyUp={this.onKeyUp}
-          ref={input => (this.element = input)}></textarea>
+          ref={input => (this.element = input)}
+          rows={this.props.rows}></textarea>
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.placeholder}
         </label>

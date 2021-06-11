@@ -8,12 +8,10 @@
   grid-template-columns: 85% calc(15% - 1.5rem);
   grid-template-rows: 70% calc(30% - 1rem);
   height: 150px;
-  margin: 0.5rem;
   padding: 1rem;
   position: relative;
   row-gap: 1rem;
   transition: all 0.25s ease-in-out;
-  width: calc(100% / 5.5);
 
   &:hover {
     box-shadow: var(--card-item-box-shadow-hover);

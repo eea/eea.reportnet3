@@ -205,6 +205,7 @@ public interface DatasetSnapshotService {
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
    * @throws EEAException the EEA exception
    */
   void createReleaseSnapshots(Long dataflowId, Long dataProviderId, boolean restrictFromPublic)

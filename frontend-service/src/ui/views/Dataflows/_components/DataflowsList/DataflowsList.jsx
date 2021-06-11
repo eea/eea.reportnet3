@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
@@ -10,6 +10,8 @@ import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './_components/DataflowsItem';
 import { Filters } from 'ui/views/_components/Filters';
+import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
+import { Spinner } from 'ui/views/_components/Spinner';
 
 import { UserService } from 'core/services/User';
 
@@ -19,23 +21,25 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
 
-const DataflowsList = ({ className, content = [], description, isCustodian, title }) => {
+const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibleTab }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [dataToFilter, setDataToFilter] = useState(content);
-  const [filteredData, setFilteredData] = useState(dataToFilter);
-  const [filteredState, setFilteredState] = useState(false);
+  const [dataToFilter, setDataToFilter] = useState({
+    dataflows: content['dataflows'],
+    reference: content['reference']
+  });
+  const [filteredData, setFilteredData] = useState(dataToFilter[visibleTab]);
   const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const parsedDataflows = orderBy(
-      DataflowsListUtils.parseDataToFilter(content, userContext.userProps.pinnedDataflows),
+      DataflowsListUtils.parseDataToFilter(content[visibleTab], userContext.userProps.pinnedDataflows),
       ['pinned', 'expirationDate', 'status', 'id'],
       ['asc', 'asc', 'asc', 'asc']
     );
-    setDataToFilter(parsedDataflows);
+    setDataToFilter({ ...dataToFilter, [visibleTab]: parsedDataflows });
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
@@ -61,8 +65,6 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
     }
   };
 
-  const getFilteredSearched = value => setFilteredState(value);
-
   const isFilteredByPinned = () =>
     filteredData.filter(dataflow => dataflow.pinned === 'pinned').length === filteredData.length ||
     filteredData.filter(dataflow => dataflow.pinned === 'unpinned').length === filteredData.length;
@@ -71,7 +73,7 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = intersection(
       inmUserProperties.pinnedDataflows,
-      dataToFilter.map(data => data.id.toString())
+      [...dataToFilter.dataflows, ...dataToFilter.reference].map(data => data.id.toString())
     );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
@@ -107,49 +109,89 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
       const orderedPinned = orderedFilteredData.map(el => el.pinned);
       setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
 
-      const inmDataToFilter = [...dataToFilter];
-      const changedInitialData = inmDataToFilter.map(item => {
+      const inmDataToFilter = { ...dataToFilter };
+      const changedInitialData = inmDataToFilter[visibleTab].map(item => {
         if (item.id === pinnedItem.id) {
           item.pinned = isPinned ? 'pinned' : 'unpinned';
         }
         return item;
       });
 
-      setDataToFilter(
-        orderBy(changedInitialData, ['pinned', 'expirationDate', 'status', 'id'], ['asc', 'asc', 'asc', 'asc'])
-      );
+      setDataToFilter({
+        ...dataToFilter,
+        [visibleTab]: orderBy(
+          changedInitialData,
+          ['pinned', 'expirationDate', 'status', 'id'],
+          ['asc', 'asc', 'asc', 'asc']
+        )
+      });
     }
   };
 
-  const filterOptions = [
-    {
-      type: 'input',
-      properties: [{ name: 'name' }, { name: 'description' }, { name: 'legalInstrument' }, { name: 'obligationTitle' }]
-    },
-    { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
-    { type: 'date', properties: [{ name: 'expirationDate' }] }
-  ];
+  const filterOptions = {
+    dataflows: [
+      {
+        type: 'input',
+        properties: [
+          { name: 'name' },
+          { name: 'description' },
+          { name: 'legalInstrument' },
+          { name: 'obligationTitle' },
+          { name: 'obligationId' }
+        ]
+      },
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
+      { type: 'date', properties: [{ name: 'expirationDate' }] }
+    ],
+    reference: [
+      { type: 'input', properties: [{ name: 'name' }, { name: 'description' }] },
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'pinned' }] }
+    ]
+  };
+
+  const renderDataflowItem = dataflow => {
+    switch (visibleTab) {
+      case 'dataflows':
+        return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
+
+      case 'reference':
+        return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
+
+      default:
+        break;
+    }
+  };
+
+  if (isLoading) return <Spinner />;
 
   return (
     <div className={`${styles.wrap} ${className}`}>
-      {title && <h2>{title}</h2>}
-      <p>{description}</p>
       <div className="dataflowList-filters-help-step">
-        <Filters
-          data={dataToFilter}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredSearched}
-          options={filterOptions}
-          sortable={true}
-          sortCategory={'pinned'}
-        />
+        {visibleTab === 'dataflows' && (
+          <Filters
+            data={dataToFilter['dataflows']}
+            getFilteredData={onLoadFilteredData}
+            options={filterOptions['dataflows']}
+            sortCategory={'pinned'}
+            sortable={true}
+          />
+        )}
+        {visibleTab === 'reference' && (
+          <Filters
+            data={dataToFilter['reference']}
+            getFilteredData={onLoadFilteredData}
+            options={filterOptions['reference']}
+            sortCategory={'pinned'}
+            sortable={true}
+          />
+        )}
       </div>
 
       {!isEmpty(content) ? (
         !isEmpty(filteredData) ? (
           filteredData.map((dataflow, i) => (
             <Fragment key={dataflow.id}>
-              <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />
+              {renderDataflowItem(dataflow)}
               {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
             </Fragment>
           ))
@@ -157,7 +199,7 @@ const DataflowsList = ({ className, content = [], description, isCustodian, titl
           <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
         )
       ) : (
-        <div className={styles.noDataflows}>{resources.messages['thereAreNoDatalows']}</div>
+        <div className={styles.noDataflows}>{resources.messages['thereAreNoDataflows']}</div>
       )}
     </div>
   );

@@ -48,7 +48,7 @@ public class ImportDesignFailedEvent implements NotificableEventHandler {
    *
    * @param notificationVO the notification VO
    * @return the map
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {

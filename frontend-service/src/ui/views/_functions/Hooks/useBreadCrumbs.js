@@ -18,7 +18,8 @@ export const useBreadCrumbs = ({
   history,
   matchParams,
   metaData,
-  representativeId
+  representativeId,
+  referenceDataflowId
 }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
@@ -33,6 +34,15 @@ export const useBreadCrumbs = ({
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
       icon: 'clone',
       label: resources.messages['dataflow']
+    };
+  };
+
+  const getReferenceDataflowCrumb = () => {
+    return {
+      command: () => history.push(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
+      href: getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true),
+      icon: 'clone',
+      label: resources.messages['referenceDataflowCrumbLabel']
     };
   };
 
@@ -64,6 +74,16 @@ export const useBreadCrumbs = ({
   const getDatasetDesignerCrumb = () => {
     return { label: resources.messages['datasetDesigner'], icon: 'pencilRuler' };
   };
+
+  const getReferenceDatasetDesignerCrumb = () => ({
+    label: resources.messages['referenceDatasetDesigner'],
+    icon: 'pencilRuler'
+  });
+
+  const getReferenceDatasetCrumb = () => ({
+    label: resources.messages['referenceDataset'],
+    icon: 'howTo'
+  });
 
   const getEuDatasetCrumb = () => {
     return { label: resources.messages['euDataset'], icon: 'euDataset' };
@@ -100,7 +120,7 @@ export const useBreadCrumbs = ({
         command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
         href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
         label: representativeCrumbLabel,
-        icon: 'clone'
+        icon: 'representative'
       };
     }
 
@@ -246,6 +266,28 @@ export const useBreadCrumbs = ({
 
     if (currentPage === CurrentPage.TEST_DATASETS) {
       breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getTestDatasetsCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.REFERENCE_DATAFLOW) {
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getReferenceDataflowCrumb()]);
+    }
+
+    if (currentPage === CurrentPage.REFERENCE_DATASET_DESIGNER) {
+      breadCrumbContext.add([
+        getHomeCrumb(),
+        getDataflowsCrumb(),
+        getReferenceDataflowCrumb(),
+        getReferenceDatasetDesignerCrumb()
+      ]);
+    }
+
+    if (currentPage === CurrentPage.REFERENCE_DATASET) {
+      breadCrumbContext.add([
+        getHomeCrumb(),
+        getDataflowsCrumb(),
+        getReferenceDataflowCrumb(),
+        getReferenceDatasetCrumb()
+      ]);
     }
   };
 

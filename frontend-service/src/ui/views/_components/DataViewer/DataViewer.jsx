@@ -59,6 +59,7 @@ import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 
 const DataViewer = withRouter(
   ({
+    dataProviderId,
     hasCountryCode,
     hasWritePermissions,
     isDataflowOpen,
@@ -231,7 +232,7 @@ const DataViewer = withRouter(
 
     const onFileDownload = async (fileName, fieldId) => {
       try {
-        const { data } = await DatasetService.downloadFileData(datasetId, fieldId);
+        const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
         DownloadFile(data, fileName);
       } catch (error) {
@@ -479,7 +480,8 @@ const DataViewer = withRouter(
       record.dataRow.forEach(field => {
         if (
           field.fieldData.type === 'MULTISELECT_CODELIST' ||
-          (field.fieldData.type === 'LINK' && Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
+          ((field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK') &&
+            Array.isArray(field.fieldData[field.fieldData.fieldSchemaId]))
         ) {
           if (
             !isNil(field.fieldData[field.fieldData.fieldSchemaId]) &&
@@ -677,7 +679,8 @@ const DataViewer = withRouter(
               cell.field,
               field.id,
               field.type,
-              field.type === 'MULTISELECT_CODELIST' || (field.type === 'LINK' && Array.isArray(value))
+              field.type === 'MULTISELECT_CODELIST' ||
+                ((field.type === 'LINK' || field.type === 'EXTERNAL_LINK') && Array.isArray(value))
                 ? value.join(';')
                 : value
             );
@@ -1076,8 +1079,12 @@ const DataViewer = withRouter(
       .flat()
       .join(', ');
 
-    const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
-    ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+    const infoAttachTooltip = `<span style="font-weight: bold">${
+      resources.messages['supportedFileAttachmentsTooltip']
+    } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${getAttachExtensions || '*'}</span>
+    <span style="font-weight: bold">${
+      resources.messages['supportedFileAttachmentsMaxSizeTooltip']
+    } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${
       !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
         ? `${records.selectedMaxSize} ${resources.messages['MB']}`
         : resources.messages['maxSizeNotDefined']

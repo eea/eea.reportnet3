@@ -22,7 +22,6 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -371,7 +370,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
       for (SortField field : sortFields) {
         // we check if the field is link and look the linked type to sort in the table
-        if (field.getTypefield().equals(DataType.LINK)) {
+        if (DataType.LINK.equals(field.getTypefield())
+            || DataType.EXTERNAL_LINK.equals(field.getTypefield())) {
           Document documentField =
               schemasRepository.findFieldSchema(datasetSchemaId, field.getFieldName());
           Document documentReference = (Document) documentField.get("referencedField");
@@ -516,8 +516,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the list
    * @throws SQLException the SQL exception
    */
-  private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId)
-      throws SQLException {
+  private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId,
+      Pageable pageable) throws SQLException {
     String stringQuery =
         "select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
             + "            from ( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value  from dataset_"
@@ -525,6 +525,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             + "                    order by fv.data_position ) as fieldsAux) "
             + "            from dataset_" + datasetId + ".record_value rv where rv.id_table= "
             + tableId + " order by rv.data_position";
+    String paginationPart = " offset %s limit %s ";
+
+    if (null != pageable && 0 != pageable.getPageNumber() && 0 != pageable.getPageSize()) {
+      Integer offsetAux =
+          (pageable.getPageSize() * pageable.getPageNumber()) - pageable.getPageSize();
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+      stringQuery = stringQuery + String.format(paginationPart, offsetAux, pageable.getPageSize());
+    }
     conn.setSchema("dataset_" + datasetId);
     List<RecordValue> records = new ArrayList<>();
     try (PreparedStatement stmt = conn.prepareStatement(stringQuery);
@@ -557,14 +567,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param idTable the id table
    * @param datasetId the dataset id
    * @return the list
-   * @throws EEAException the EEA exception
+   * @throws HibernateException the hibernate exception
    */
   @Override
   @Transactional
-  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId)
+  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable)
       throws HibernateException {
     Session session = (Session) entityManager.getDelegate();
-    return session.doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId));
+    return session
+        .doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId, pageable));
   }
 
 }

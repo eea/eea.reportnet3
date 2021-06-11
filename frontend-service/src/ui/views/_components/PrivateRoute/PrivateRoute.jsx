@@ -13,7 +13,7 @@ import { RouteUtils } from 'ui/views/_functions/Utils';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { userStorage } from 'core/domain/model/User/UserStorage';
 
-export const PrivateRoute = ({ component: Component, location, path, parentPath }) => {
+export const PrivateRoute = ({ component: Component, componentProps = {}, location, parentPath, path }) => {
   const userContext = useContext(UserContext);
 
   const { parseParentPath } = RouteUtils;
@@ -22,15 +22,11 @@ export const PrivateRoute = ({ component: Component, location, path, parentPath 
     if (!isNil(parentPath) && path !== parentPath) {
       return (
         <Redirect
-          to={{
-            ...location,
-            pathname: parseParentPath(parentPath, location),
-            state: { from: props.location }
-          }}
+          to={{ ...location, pathname: parseParentPath(parentPath, location), state: { from: props.location } }}
         />
       );
     } else {
-      return <Component />;
+      return <Component {...props} {...componentProps} />;
     }
   };
 
@@ -46,14 +42,7 @@ export const PrivateRoute = ({ component: Component, location, path, parentPath 
         return (
           <Route
             path={path}
-            render={props => (
-              <Redirect
-                to={{
-                  pathname: routes.ACCESS_POINT,
-                  state: { from: props.location }
-                }}
-              />
-            )}
+            render={props => <Redirect to={{ pathname: routes.ACCESS_POINT, state: { from: props.location } }} />}
           />
         );
       }
@@ -67,14 +56,7 @@ export const PrivateRoute = ({ component: Component, location, path, parentPath 
           if (userStorage.hasToken() || !isUndefined(userContext.id)) {
             return checkRedirect(props);
           } else {
-            return (
-              <Redirect
-                to={{
-                  pathname: routes.ACCESS_POINT,
-                  state: { from: props.location }
-                }}
-              />
-            );
+            return <Redirect to={{ pathname: routes.ACCESS_POINT, state: { from: props.location } }} />;
           }
         }}
       />

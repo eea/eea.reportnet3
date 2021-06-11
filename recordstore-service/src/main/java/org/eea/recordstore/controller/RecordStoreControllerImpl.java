@@ -184,7 +184,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idSnapshot the id snapshot
    * @param idPartition the id partition
    * @param datasetType the dataset type
-   * @param user the user
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
    */

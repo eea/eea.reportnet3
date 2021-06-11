@@ -134,10 +134,11 @@ public interface RulesController {
    *
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
+   * @param typeData the type data
    */
   @PutMapping("/private/deleteRuleRequired")
   void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
-      @RequestParam("referenceId") String referenceId);
+      @RequestParam("referenceId") String referenceId, @RequestParam("typeData") DataType typeData);
 
   /**
    * Exists rule required.

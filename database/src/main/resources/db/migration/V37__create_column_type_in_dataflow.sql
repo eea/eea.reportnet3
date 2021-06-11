@@ -1,0 +1,1 @@
+ALTER TABLE public.dataflow ADD column if not exists "type" varchar NULL;

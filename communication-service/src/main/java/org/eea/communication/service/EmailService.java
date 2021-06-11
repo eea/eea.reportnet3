@@ -11,9 +11,7 @@ public interface EmailService {
   /**
    * Send simple message.
    *
-   * @param to the to
-   * @param subject the subject
-   * @param text the text
+   * @param emailVO the email VO
    */
   void sendMessage(EmailVO emailVO);
 

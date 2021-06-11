@@ -1,28 +1,42 @@
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import dayjs from 'dayjs';
+const getDateFormattedExpression = ({ expression, field, format }) => {
+  return `( ${field} ${expression.operatorValue} ${dayjs(expression.expressionValue).format(format)} )`;
+};
+const getPrefixedFieldExpression = ({ expression, field, prefix }) => {
+  return `( ${prefix}( ${field} ) ${expression.operatorValue} ${expression.expressionValue} )`;
+};
 
 const printExpression = (expression, field) => {
   if (!isNil(expression.operatorValue) && !isEmpty(expression.operatorValue)) {
-    if (expression.operatorType === 'LEN') {
-      return `( LEN( ${field} ) ${expression.operatorValue} ${expression.expressionValue} )`;
-    }
-
-    if (expression.operatorType === 'date') {
-      return `( ${field} ${expression.operatorValue} ${dayjs(expression.expressionValue).format('YYYY-MM-DD')} )`;
-    }
-    if (expression.operatorType === 'dateTime') {
-      return `( ${field} ${expression.operatorValue} ${dayjs(expression.expressionValue).format(
-        'YYYY-MM-DD HH:mm:ss'
-      )} )`;
-    }
-
     if (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL') {
       return `( ${field} ${expression.operatorValue} )`;
+    } else {
+      switch (expression.operatorType) {
+        case 'LEN':
+          return getPrefixedFieldExpression({ expression, field, prefix: 'LEN' });
+        case 'date':
+          return getDateFormattedExpression({ expression, field, format: 'YYYY-MM-DD' });
+        case 'year':
+          return getPrefixedFieldExpression({ expression, field, prefix: 'Year' });
+        case 'month':
+          return getPrefixedFieldExpression({ expression, field, prefix: 'Month' });
+        case 'day':
+          return getPrefixedFieldExpression({ expression, field, prefix: 'Day' });
+        case 'dateTime':
+          return getDateFormattedExpression({ expression, field, format: 'YYYY-MM-DDHH:mm:ss' });
+        case 'yearDateTime':
+          return getPrefixedFieldExpression({ expression, field, prefix: 'Year' });
+        case 'monthDateTime':
+          return getPrefixedFieldExpression({ expression, field, prefix: 'Month' });
+        case 'dayDateTime':
+          return getPrefixedFieldExpression({ expression, field, prefix: 'Day' });
+        default:
+          return `( ${field} ${expression.operatorValue} ${expression.expressionValue} )`;
+      }
     }
-
-    return `( ${field} ${expression.operatorValue} ${expression.expressionValue} )`;
   }
 
   return '';

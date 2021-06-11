@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -79,6 +80,14 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findDataflows();
+
+  /**
+   * Find reference dataflows.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findReferenceDataflows();
 
   /**
    * Adds the contributor.
@@ -158,6 +167,7 @@ public interface DataFlowController {
   /**
    * Gets the public dataflows.
    *
+   * @param dataflowId the dataflow id
    * @return the public dataflows
    */
 
@@ -199,4 +209,17 @@ public interface DataFlowController {
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
       @RequestParam(value = "sortField", required = false) String sortField,
       @RequestParam(value = "asc", defaultValue = "true") boolean asc);
+
+
+
+  /**
+   * Access reference entity.
+   *
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
+  @GetMapping("/private/isReferenceDataflowDraft/entity/{entity}/{entityId}")
+  boolean accessReferenceEntity(@PathVariable("entity") EntityClassEnum entity,
+      @PathVariable("entityId") Long entityId);
 }
