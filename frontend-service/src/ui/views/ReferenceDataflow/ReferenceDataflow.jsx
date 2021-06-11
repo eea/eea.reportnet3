@@ -162,7 +162,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: [] } });
       }
     } catch (error) {
-      notificationContext.add({ type: 'LOADING_REFERENCING_DATAFLOWS_ERROR', error });
+      notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error });
       history.push(getUrl(routes.DATAFLOWS));
     }
   };
