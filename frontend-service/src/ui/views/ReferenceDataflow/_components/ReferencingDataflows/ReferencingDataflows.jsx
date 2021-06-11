@@ -41,7 +41,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
         payload: { dataflows: referencingDataflowsResponse.data }
       });
     } catch (error) {
-      notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error });
+      notificationContext.add({ type: 'LOADING_REFERENCING_DATAFLOWS_ERROR', error });
     }
   };
 
@@ -62,7 +62,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   const renderDialogLayout = children => <div className={styles.modalSize}>{children}</div>;
 
   if (state.requestStatus === 'pending') {
-    return renderDialogLayout(<Spinner />);
+    return renderDialogLayout(<Spinner className={styles.spinner} />);
   }
 
   if (state.requestStatus === 'resolved' && state.dataflows.length === 0) {

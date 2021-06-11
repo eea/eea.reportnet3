@@ -1,5 +1,5 @@
 .modalSize {
-  height: 50vh;
+  min-height: 50vh;
 }
 .noReferencingWrap {
   width: 100%;
@@ -14,4 +14,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.spinner {
+  top: 45%;
+  left: 45%;
 }
