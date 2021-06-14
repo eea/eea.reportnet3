@@ -33,10 +33,11 @@ public interface ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie session
    * @param pageable the pageable
+   * @param onlyEmptyFields the only empty fields
    * @throws EEAException the EEA exception
    */
-  void validateFields(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable)
-      throws EEAException;
+  void validateFields(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable,
+      boolean onlyEmptyFields) throws EEAException;
 
 
   /**
@@ -217,5 +218,14 @@ public interface ValidationService {
    * @return the integer
    */
   Integer countFieldsDataset(@DatasetId Long datasetId);
+
+
+  /**
+   * Count empty fields dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
+  Integer countEmptyFieldsDataset(@DatasetId Long datasetId);
 
 }

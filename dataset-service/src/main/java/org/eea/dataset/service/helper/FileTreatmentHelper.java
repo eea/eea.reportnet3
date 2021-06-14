@@ -9,12 +9,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +29,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
-import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
@@ -41,8 +39,6 @@ import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
-import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
-import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -53,19 +49,17 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
+import org.eea.dataset.service.file.interfaces.IFileParseContext;
+import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
-import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
@@ -74,7 +68,6 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -138,33 +131,13 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /** The record store controller. */
-  @Autowired
-  private RecordStoreControllerZuul recordStoreControllerZuul;
-
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The data set mapper. */
-  @Autowired
-  private DataSetMapper dataSetMapper;
-
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
-
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
-
-  /** The record value id generator. */
-  @Autowired
-  private RecordValueIdGenerator recordValueIdGenerator;
-
-  /** The field value id generator. */
-  @Autowired
-  private FieldValueIdGenerator fieldValueIdGenerator;
 
   /** The record repository. */
   @Autowired
@@ -201,6 +174,10 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
+
+  /** The file parser factory. */
+  @Autowired
+  private IFileParserFactory fileParserFactory;
 
   /**
    * Initialize the executor service.
@@ -305,8 +282,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param schema the schema
    * @param multipartFile the multipart file
-   * @param delete the delete
-   *
+   * @param replace the replace
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
@@ -445,7 +421,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param files the files
    * @param originalFileName the original file name
    * @param integrationVO the integration VO
-   *
+   * @param replace the replace
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
@@ -532,6 +508,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetSchema the schema
    * @param files the files
    * @param originalFileName the original file name
+   * @param replace the replace
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
       List<File> files, String originalFileName, boolean replace) {
@@ -551,41 +528,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
 
-        DatasetValue dataset = parseFile(inputStream, datasetId, tableSchemaId, fileName);
-
-        if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
-          throw new EEAException("Error processing file " + fileName);
-        }
-
-        // Check if the table with idTableSchema has been populated already
-        Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
-        fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
-        LOG.info("RN3-Import - Filled tableId: datasetId={}, fileName={}", datasetId, fileName);
-
-        // Save empty table
-        if (null == oldTableId) {
-          LOG.info("RN3-Import - Saving table: datasetId={}, fileName={}", datasetId, fileName);
-          datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
-          LOG.info("RN3-Import - Table saved: datasetId={}, fileName={}", datasetId, fileName);
-        }
-
-        if (schemaContainsFixedRecords(datasetId, datasetSchema, tableSchemaId)) {
-          if (replace) {
-            ObjectId tableSchemaIdTemp = new ObjectId(tableSchemaId);
-            TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
-                .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
-                .findFirst().orElse(null);
-            if (tableSchema != null) {
-              updateRecordsWithConditions(dataset.getTableValues().get(0).getRecords(), datasetId,
-                  tableSchema);
-            }
-          }
-        } else {
-          storeRecords(datasetId, dataset.getTableValues().get(0).getRecords());
-        }
+        processFile(datasetId, fileName, inputStream, tableSchemaId, replace, datasetSchema);
 
         LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
-      } catch (IOException | SQLException | EEAException e) {
+      } catch (IOException | EEAException e) {
         LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
             tableSchemaId, e);
         error = e.getMessage();
@@ -763,225 +709,66 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
-   * Schema contains fixed records.
+   * Process file.
    *
    * @param datasetId the dataset id
-   * @param schema the schema
-   * @param tableSchemaId the table schema id
-   * @return true, if successful
-   */
-  private boolean schemaContainsFixedRecords(Long datasetId, DataSetSchema schema,
-      String tableSchemaId) {
-
-    boolean rtn = false;
-
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
-      if (null == tableSchemaId) {
-        for (TableSchema tableSchema : schema.getTableSchemas()) {
-          if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
-            rtn = true;
-            break;
-          }
-        }
-      } else {
-        for (TableSchema tableSchema : schema.getTableSchemas()) {
-          if (tableSchemaId.equals(tableSchema.getIdTableSchema().toString())) {
-            rtn = Boolean.TRUE.equals(tableSchema.getFixedNumber());
-            break;
-          }
-        }
-      }
-    }
-
-    return rtn;
-  }
-
-  /**
-   * Parses the file.
-   *
-   * @param inputStream the input stream
-   * @param datasetId the dataset id
-   * @param tableSchemaId the table schema id
    * @param fileName the file name
-   * @return the dataset value
+   * @param is the is
+   * @param idTableSchema the id table schema
+   * @return the data set VO
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private DatasetValue parseFile(InputStream inputStream, Long datasetId, String tableSchemaId,
-      String fileName) throws EEAException, IOException {
-    DataSetVO datasetVO =
-        datasetService.processFile(datasetId, fileName, inputStream, tableSchemaId);
-    datasetVO.setId(datasetId);
-    DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-    LOG.info("RN3-Import DataSetVO mapping completed: datasetId={}, tableSchemaId={}, fileName={}",
-        datasetId, tableSchemaId, fileName);
-    return dataset;
-  }
+  public void processFile(@DatasetId Long datasetId, String fileName, InputStream is,
+      String idTableSchema, boolean replace, DataSetSchema schema)
+      throws EEAException, IOException {
+    // obtains the file type from the extension
+    if (fileName == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NAME);
+    }
+    final String mimeType = datasetService.getMimetype(fileName);
+    // validates file types for the data load
+    validateFileType(mimeType);
 
-  /**
-   * Store records.
-   *
-   * @param datasetId the dataset id
-   * @param recordList the record list
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws SQLException the SQL exception
-   */
-  private void storeRecords(Long datasetId, List<RecordValue> recordList)
-      throws IOException, SQLException {
+    try {
+      // Get the partition for the partiton id
+      final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
 
-    String schema = LiteralConstants.DATASET_PREFIX + datasetId;
-    LOG.info("RN3-Import - Getting connections: datasetId={}", datasetId);
-    ConnectionDataVO connectionDataVO = recordStoreControllerZuul.getConnectionToDataset(schema);
+      // Get the dataFlowId from the metabase
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
 
-    LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
-    try (
-        PostgresBulkImporter recordsImporter = new PostgresBulkImporter(connectionDataVO, schema,
-            "record_value (ID, ID_RECORD_SCHEMA,ID_TABLE,DATASET_PARTITION_ID,DATA_PROVIDER_CODE) ",
-            importPath);
-        PostgresBulkImporter fieldsImporter = new PostgresBulkImporter(connectionDataVO, schema,
-            "field_value (ID, TYPE, VALUE, ID_FIELD_SCHEMA, ID_RECORD, GEOMETRY) ", importPath)) {
+      // create the right file parser for the file type
+      final IFileParseContext context = fileParserFactory.createContext(mimeType, datasetId);
 
-      LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
+      context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
+          schema);
 
-      for (RecordValue recordValue : recordList) {
-
-        String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
-        recordsImporter.addTuple(new Object[] {recordId, recordValue.getIdRecordSchema(),
-            recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
-            recordValue.getDataProviderCode()});
-
-        for (FieldValue fieldValue : recordValue.getFields()) {
-          String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
-          fieldsImporter.addTuple(new Object[] {fieldId, fieldValue.getType().getValue(),
-              fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
-        }
-      }
-
-      LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
-      recordsImporter.copy();
-      fieldsImporter.copy();
-      LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
+    } finally {
+      is.close();
     }
   }
 
   /**
-   * Update records with conditions.
+   * Validate file type.
    *
-   * @param recordList the record list
-   * @param datasetId the dataset id
-   * @param tableSchema the table schema
+   * @param mimeType the mime type
+   * @throws EEAException the EEA exception
    */
-  private void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
-      TableSchema tableSchema) {
-    LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
-    boolean readOnly =
-        tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
-    tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
-
-    // get list paginated of old records to modify
-    TableValue targetTable =
-        tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-    List<RecordValue> oldRecords =
-        recordRepository.findOrderedNativeRecord(targetTable.getId(), datasetId, null);
-    // sublist records to insert
-    List<RecordValue> recordsToSave = new ArrayList<>();
-
-    if (!readOnly) {
-      Iterator<RecordValue> itr = recordList.iterator();
-      for (RecordValue oldRecord : oldRecords) {
-        if (itr.hasNext()) {
-          refillFields(oldRecord, itr.next().getFields());
-        } else {
-          refillFields(oldRecord, null);
-        }
-        oldRecord.setTableValue(targetTable);
-        recordsToSave.add(oldRecord);
-      }
-    } else {
-      List<ObjectId> readOnlyFields =
-          tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
-              .map(FieldSchema::getIdFieldSchema).collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(oldRecords)
-          && readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
-        for (RecordValue oldRecord : oldRecords) {
-          Map<Integer, Integer> mapPosition =
-              mapPositionReadOnlyFieldsForReference(readOnlyFields, oldRecord, recordList.get(0));
-          findByReadOnlyRecords(mapPosition, oldRecord, recordList);
-          oldRecord.setTableValue(targetTable);
-          recordsToSave.add(oldRecord);
-        }
-      }
-    }
-    LOG.info("Import dataset table {} with {} number of records", tableSchema.getNameTableSchema(),
-        recordsToSave.size());
-
-    // save
-    datasetService.saveAllRecords(datasetId, recordsToSave);
-  }
-
-  /**
-   * Refill fields.
-   *
-   * @param oldRecord the old record
-   * @param fieldValues the field values
-   */
-  private void refillFields(RecordValue oldRecord, List<FieldValue> fieldValues) {
-    if (fieldValues != null) {
-      oldRecord.getFields().stream().forEach(oldField -> {
-        oldField.setValue(fieldValues.stream()
-            .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
-            .map(FieldValue::getValue).findFirst().orElse(""));
-        oldField.setRecord(oldRecord);
-      });
-    } else {
-      oldRecord.getFields().forEach(field -> field.setValue(""));
+  private void validateFileType(final String mimeType) throws EEAException {
+    // files that will be accepted: csv, xml, xls, xlsx
+    switch (mimeType) {
+      case "csv":
+        break;
+      case "xml":
+        break;
+      case "xls":
+        break;
+      case "xlsx":
+        break;
+      default:
+        throw new InvalidFileException(EEAErrorMessage.FILE_FORMAT);
     }
   }
-
-  /**
-   * Map position read only fields for reference.
-   *
-   * @param readOnlyFields the read only fields
-   * @param recordValue the record value
-   * @param newRecordValues the new record values
-   * @return the map
-   */
-  private Map<Integer, Integer> mapPositionReadOnlyFieldsForReference(List<ObjectId> readOnlyFields,
-      RecordValue recordValue, RecordValue newRecordValues) {
-    Map<Integer, Integer> mapPosition = new HashMap<>();
-    for (ObjectId id : readOnlyFields) {
-      mapPosition.put(
-          recordValue.getFields().stream().map(FieldValue::getIdFieldSchema)
-              .collect(Collectors.toList()).indexOf(id.toString()),
-          newRecordValues.getFields().stream().map(FieldValue::getIdFieldSchema)
-              .collect(Collectors.toList()).indexOf(id.toString()));
-    }
-    return mapPosition;
-  }
-
-  /**
-   * Find by read only records.
-   *
-   * @param readOnlyPositionFields the read only position fields
-   * @param oldRecord the old record
-   * @param recordList the record list
-   * @return the record value
-   */
-  private void findByReadOnlyRecords(Map<Integer, Integer> readOnlyPositionFields,
-      RecordValue oldRecord, List<RecordValue> recordList) {
-
-    RecordValue recordToUpdate = recordList.stream()
-        .filter(record -> readOnlyPositionFields.entrySet().stream()
-            .allMatch(entry -> record.getFields().get(entry.getValue()).getValue()
-                .equals(oldRecord.getFields().get(entry.getKey()).getValue())))
-        .findFirst().orElse(null);
-    if (recordToUpdate != null) {
-      refillFields(oldRecord, recordToUpdate.getFields());
-    }
-
-  }
-
 
   /**
    * Export dataset file.
@@ -1242,6 +1029,12 @@ public class FileTreatmentHelper implements DisposableBean {
     LOG.info("Data saved into dataset {}", datasetId);
   }
 
+  /**
+   * Gets the tables.
+   *
+   * @param datasetId the dataset id
+   * @return the tables
+   */
   @Transactional
   public List<TableSchema> getTables(Long datasetId) {
 
@@ -1323,7 +1116,8 @@ public class FileTreatmentHelper implements DisposableBean {
             .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
             .findFirst().orElse(null);
         if (tableSchema != null) {
-          updateRecordsWithConditions(tableValue.getRecords(), datasetId, tableSchema);
+          datasetService.updateRecordsWithConditions(tableValue.getRecords(), datasetId,
+              tableSchema);
         }
       }
       if (null == oldTableId) {

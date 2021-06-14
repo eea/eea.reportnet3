@@ -355,12 +355,15 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param pageable the pageable
+   * @param onlyEmptyFields the only empty fields
    */
   @Override
   @Transactional
-  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable) {
+  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable,
+      boolean onlyEmptyFields) {
 
-    Page<FieldValue> fields = fieldRepository.findAll(pageable);
+    Page<FieldValue> fields = onlyEmptyFields ? fieldRepository.findEmptyFields(pageable)
+        : fieldRepository.findAll(pageable);
     List<FieldValidation> fieldValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
@@ -619,8 +622,18 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public Integer countFieldsDataset(Long datasetId) {
-    return recordRepository.countFieldsDataset();
+    return fieldRepository.countFieldsDataset();
   }
 
+  /**
+   * Count empty fields dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
+  @Override
+  public Integer countEmptyFieldsDataset(Long datasetId) {
+    return fieldRepository.countEmptyFieldsDataset();
+  }
 
 }

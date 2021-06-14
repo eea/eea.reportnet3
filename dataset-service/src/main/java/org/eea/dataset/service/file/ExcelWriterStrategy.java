@@ -99,13 +99,13 @@ public class ExcelWriterStrategy implements WriterStrategy {
   public byte[] writeFile(Long dataflowId, Long datasetId, String tableSchemaId,
       boolean includeCountryCode, boolean includeValidations) throws EEAException {
 
-    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchemaVO dataset = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
-    TableSchemaVO table = fileCommon.findTableSchema(tableSchemaId, dataset);
+    TableSchemaVO table = fileCommon.findTableSchemaVO(tableSchemaId, dataset);
 
     // If the given idTableSchema exists, replace all tables with it
     if (null != table) {
@@ -150,7 +150,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     List<byte[]> byteList = new ArrayList<>();
 
-    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchemaVO dataset = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist

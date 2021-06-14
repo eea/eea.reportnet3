@@ -2,6 +2,7 @@ package org.eea.dataset.service.file;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,14 +15,14 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.eea.dataset.exception.InvalidFileException;
+import org.eea.dataset.persistence.data.domain.DatasetValue;
+import org.eea.dataset.persistence.data.domain.FieldValue;
+import org.eea.dataset.persistence.data.domain.RecordValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import lombok.NoArgsConstructor;
@@ -86,20 +87,21 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
-   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
    * @return the data set VO
-   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public DataSetVO parseFile(InputStream inputStream, Long dataflowId, Long partitionId,
-      String idTableSchema) throws EEAException {
+  public void parseFile(InputStream inputStream, Long dataflowId, Long partitionId,
+      String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema)
+      throws EEAException {
 
-    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchema dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
 
     try (Workbook workbook = WorkbookFactory.create(inputStream)) {
 
-      List<TableVO> tables = new ArrayList<>();
+      List<TableValue> tables = new ArrayList<>();
 
       if (null == idTableSchema) {
         LOG.info("Reading all Excel's file pages");
@@ -114,10 +116,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       }
 
       LOG.info("Finishing reading Exel file");
-      return createDataSetVO(dataSetSchema, tables);
-
-    } catch (EncryptedDocumentException | InvalidFormatException | IllegalArgumentException
-        | IOException e) {
+      createDataSet(dataSetSchema, tables, idTableSchema, fileName, replace, schema);
+    } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
   }
@@ -132,19 +132,20 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @return the table VO
    */
-  private TableVO createTable(Sheet sheet, String idTableSchema, DataSetSchemaVO dataSetSchema,
+  private TableValue createTable(Sheet sheet, String idTableSchema, DataSetSchema dataSetSchema,
       Long partitionId) {
 
-    TableVO tableVO = new TableVO();
+    TableValue table = new TableValue();
     Iterator<Row> rows = sheet.rowIterator();
     Row headersRow = rows.next();
-    List<FieldSchemaVO> headers = readHeaders(headersRow, idTableSchema, dataSetSchema);
-    List<RecordVO> records = readRecords(rows, headers, partitionId, idTableSchema, dataSetSchema);
+    List<FieldSchema> headers = readHeaders(headersRow, idTableSchema, dataSetSchema);
+    List<RecordValue> records =
+        readRecords(rows, headers, partitionId, idTableSchema, dataSetSchema, table);
 
-    tableVO.setRecords(records);
-    tableVO.setIdTableSchema(idTableSchema);
+    table.setRecords(records);
+    table.setIdTableSchema(idTableSchema);
 
-    return tableVO;
+    return table;
   }
 
   /**
@@ -156,20 +157,20 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @return the list
    */
-  private List<FieldSchemaVO> readHeaders(Row headersRow, String idTableSchema,
-      DataSetSchemaVO dataSetSchema) {
+  private List<FieldSchema> readHeaders(Row headersRow, String idTableSchema,
+      DataSetSchema dataSetSchema) {
 
     DataFormatter dataFormatter = new DataFormatter();
-    List<FieldSchemaVO> headers = new ArrayList<>();
+    List<FieldSchema> headers = new ArrayList<>();
 
     for (Cell cell : headersRow) {
 
       String value = dataFormatter.formatCellValue(cell);
-      FieldSchemaVO header = fileCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
+      FieldSchema header = fileCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
 
       if (header == null) {
-        header = new FieldSchemaVO();
-        header.setName(value);
+        header = new FieldSchema();
+        header.setHeaderName(value);
       }
 
       headers.add(header);
@@ -189,27 +190,28 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @return the list
    */
-  private List<RecordVO> readRecords(Iterator<Row> rows, List<FieldSchemaVO> headers,
-      Long partitionId, String idTableSchema, DataSetSchemaVO dataSetSchema) {
+  private List<RecordValue> readRecords(Iterator<Row> rows, List<FieldSchema> headers,
+      Long partitionId, String idTableSchema, DataSetSchema dataSetSchema, TableValue tableValue) {
 
     DataFormatter dataFormatter = new DataFormatter();
-    List<RecordVO> records = new ArrayList<>();
+    List<RecordValue> records = new ArrayList<>();
     int headersSize = headers.size();
 
     while (rows.hasNext()) {
 
       Row recordRow = rows.next();
-      RecordVO record = new RecordVO();
-      List<FieldVO> fields = new ArrayList<>();
+      RecordValue record = new RecordValue();
+      List<FieldValue> fields = new ArrayList<>();
       List<String> idSchema = new ArrayList<>();
 
       // Reads the same number of cells as headers we have
       for (int i = 0; i < headersSize; i++) {
         String value = dataFormatter.formatCellValue(recordRow.getCell(i));
-        FieldSchemaVO fieldSchemaVO = headers.get(i);
-        FieldVO field = new FieldVO();
-        field.setIdFieldSchema(fieldSchemaVO.getId());
-        field.setType(fieldSchemaVO.getType());
+        FieldSchema fieldSchema = headers.get(i);
+        FieldValue field = new FieldValue();
+        field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
+        field.setType(fieldSchema.getType());
+        field.setRecord(record);
         field.setValue(value);
         if (null == field.getType() && value.length() >= fieldMaxLength) {
           field.setValue(value.substring(0, fieldMaxLength));
@@ -251,6 +253,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       record.setIdRecordSchema(fileCommon.findIdRecord(idTableSchema, dataSetSchema));
       record.setDatasetPartitionId(partitionId);
       record.setDataProviderCode(providerCode);
+      record.setTableValue(tableValue);
       records.add(record);
     }
 
@@ -264,12 +267,12 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param fields the fields
    * @param idSchema the id schema
    */
-  private void setMissingField(List<FieldSchemaVO> headersSchema, final List<FieldVO> fields,
+  private void setMissingField(List<FieldSchema> headersSchema, final List<FieldValue> fields,
       List<String> idSchema) {
     headersSchema.stream().forEach(header -> {
-      if (!idSchema.contains(header.getId())) {
-        final FieldVO field = new FieldVO();
-        field.setIdFieldSchema(header.getId());
+      if (!idSchema.contains(header.getIdFieldSchema().toString())) {
+        final FieldValue field = new FieldValue();
+        field.setIdFieldSchema(header.getIdFieldSchema().toString());
         field.setType(header.getType());
         field.setValue("");
         fields.add(field);
@@ -285,16 +288,22 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @return the data set VO
    */
-  private DataSetVO createDataSetVO(DataSetSchemaVO dataSetSchema, List<TableVO> tables) {
+  private void createDataSet(DataSetSchema dataSetSchema, List<TableValue> tables,
+      String idTableSchema, String fileName, boolean replace, DataSetSchema schema) {
+    try {
 
-    DataSetVO dataset = new DataSetVO();
+      DatasetValue dataset = new DatasetValue();
 
-    dataset.setTableVO(tables);
+      dataset.setTableValues(tables);
 
-    if (dataSetSchema != null) {
-      dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema());
+      if (dataSetSchema != null) {
+        dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
+      }
+
+      fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace, schema,
+          dataset);
+    } catch (EEAException | IOException | SQLException e) {
+      LOG.error("error persisting excel file", e);
     }
-
-    return dataset;
   }
 }
