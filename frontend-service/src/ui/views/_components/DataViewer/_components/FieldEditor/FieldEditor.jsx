@@ -530,6 +530,7 @@ const FieldEditor = ({
                 />
                 <Button
                   className={`p-button-secondary-transparent button ${styles.mapButton}`}
+                  disabled={isMapDisabled}
                   icon="marker"
                   onClick={e => {
                     if (!isNil(onMapOpen)) {
