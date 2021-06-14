@@ -1,10 +1,12 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import { config } from 'conf';
 
-import styles from './MainLayout.module.css';
+import styles from './MainLayout.module.scss';
 
 import { EuFooter } from './_components/EuFooter';
 import { Footer } from './_components';
@@ -12,6 +14,7 @@ import { GlobalNotifications } from './_components/GlobalNotifications';
 import { Header } from './_components/Header';
 import { LeftSideBar } from 'ui/views/_components/LeftSideBar';
 
+import { ErrorBoundaryFallback } from 'ui/views/_components/ErrorBoundaryFallback';
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { NotificationsList } from './_components/NotificationsList';
@@ -22,10 +25,11 @@ import { UserService } from 'core/services/User';
 
 import { useSocket } from 'ui/views/_components/Layout/MainLayout/_hooks';
 
-const MainLayout = ({ children, isPublic = false }) => {
+export const MainLayout = withRouter(({ children, isPublic = false, history }) => {
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notifications = useContext(NotificationContext);
+
   const themeContext = useContext(ThemeContext);
   const userContext = useContext(UserContext);
 
@@ -163,27 +167,33 @@ const MainLayout = ({ children, isPublic = false }) => {
     setMainContentStyle(newMainContentStyle);
   };
 
+  const onResetErrorBoundary = () => {
+    history.go(0);
+  };
+
   useSocket();
   return (
-    <div id={styles.mainLayoutContainer}>
-      {isNotificationVisible && (
-        <NotificationsList
-          isNotificationVisible={isNotificationVisible}
-          setIsNotificationVisible={setIsNotificationVisible}
-        />
-      )}
-      <Header isPublic={isPublic} onMainContentStyleChange={onMainContentStyleChange} />
-      <div className={styles.mainContent} id="mainContent" style={mainContentStyle}>
-        <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
-        <div className={styles.pageContent} id="pageContent" style={pageContentStyle}>
-          {children}
-        </div>
-      </div>
+    <ErrorBoundary FallbackComponent={ErrorBoundaryFallback} onReset={onResetErrorBoundary}>
+      <div id={styles.mainLayoutContainer}>
+        {isNotificationVisible && (
+          <NotificationsList
+            isNotificationVisible={isNotificationVisible}
+            setIsNotificationVisible={setIsNotificationVisible}
+          />
+        )}
+        <Header isPublic={isPublic} onMainContentStyleChange={onMainContentStyleChange} />
+        <div className={styles.mainContent} id="mainContent" style={mainContentStyle}>
+          <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
 
-      <Footer leftMargin={margin} />
-      <EuFooter leftMargin={margin} />
-      <GlobalNotifications />
-    </div>
+          <div className={styles.pageContent} id="pageContent" style={pageContentStyle}>
+            {children}
+          </div>
+        </div>
+
+        <Footer leftMargin={margin} />
+        <EuFooter leftMargin={margin} />
+        <GlobalNotifications />
+      </div>
+    </ErrorBoundary>
   );
-};
-export { MainLayout };
+});

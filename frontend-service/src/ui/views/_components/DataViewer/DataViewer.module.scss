@@ -53,12 +53,21 @@
 .invisibleHeader {
   display: none;
 }
+
 .itemTable {
-  margin: 1rem;
+  > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    > table {
+      width: 95%;
+      margin: 0.5rem;
+    }
+  }
 }
-.itemTable > div > table {
-  width: 99%;
-}
+
 .readOnlyFields div {
   opacity: 0.5;
 }

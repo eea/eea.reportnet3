@@ -65,7 +65,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
                 buttons={[
                   {
                     className: `p-button-secondary-transparent`,
-                    icon: 'externalLink',
+                    icon: 'externalUrl',
                     tooltip: resources.messages['viewMore'],
                     onMouseDown: () =>
                       window.open(

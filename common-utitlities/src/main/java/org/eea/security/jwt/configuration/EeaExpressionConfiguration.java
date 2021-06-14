@@ -2,6 +2,7 @@ package org.eea.security.jwt.configuration;
 
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.security.jwt.expression.EeaMethodSecurityExpressionHandler;
+import org.eea.security.jwt.utils.EntityAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
@@ -19,6 +20,12 @@ public class EeaExpressionConfiguration extends GlobalMethodSecurityConfiguratio
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The entity access service. */
+  @Autowired
+  private EntityAccessService entityAccessService;
+
+
+
   /**
    * Creates the expression handler.
    *
@@ -26,7 +33,8 @@ public class EeaExpressionConfiguration extends GlobalMethodSecurityConfiguratio
    */
   @Override
   protected MethodSecurityExpressionHandler createExpressionHandler() {
-    return new EeaMethodSecurityExpressionHandler(userManagementControllerZull);
+    return new EeaMethodSecurityExpressionHandler(userManagementControllerZull,
+        entityAccessService);
   }
 
 }

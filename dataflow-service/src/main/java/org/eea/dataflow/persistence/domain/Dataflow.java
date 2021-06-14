@@ -16,6 +16,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -74,6 +75,11 @@ public class Dataflow {
   /** The show public info. */
   @Column(name = "SHOW_PUBLIC_INFO")
   private boolean showPublicInfo;
+
+  /** The type. */
+  @Column(name = "TYPE")
+  @Enumerated(EnumType.STRING)
+  private TypeDataflowEnum type;
 
   /** The submission agreement. */
   @OneToOne(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)

@@ -1,0 +1,21 @@
+.modalSize {
+  min-height: 50vh;
+}
+.noReferencingWrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.notMatchingWrap {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.spinner {
+  top: 45%;
+  left: 45%;
+}

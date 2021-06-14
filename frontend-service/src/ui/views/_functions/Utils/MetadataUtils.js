@@ -36,6 +36,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
   if (datasetId) {
     const datasetMetadata = await getDatasetMetadata(datasetId);
     metadata.dataset = {
+      dataProviderId: datasetMetadata.dataProviderId,
       datasetId,
       name: datasetMetadata.datasetSchemaName || ''
     };

@@ -13,10 +13,10 @@ export const apiDataflow = {
     });
   },
 
-  create: async (name, description, obligationId) => {
+  create: async (name, description, obligationId, type) => {
     return await HTTPRequester.post({
       url: getUrl(DataflowConfig.createDataflow),
-      data: { name, description, obligation: { obligationId }, releasable: true }
+      data: { name, description, obligation: { obligationId }, releasable: true, type }
     });
   },
 

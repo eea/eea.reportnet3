@@ -30,7 +30,7 @@ import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { RepresentativesList } from './_components/RepresentativesList';
-import { ShareRights } from './_components/ShareRights';
+import { ShareRights } from 'ui/views/_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Title } from 'ui/views/_components/Title';
 import { UserList } from 'ui/views/_components/UserList';
@@ -127,9 +127,12 @@ const Dataflow = withRouter(({ history, match }) => {
     userRole => userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
   );
 
+  const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
+
   const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
 
-  const isInsideACountry = !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner);
+  const isInsideACountry =
+    !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner && !isObserver);
 
   const isOpenStatus = dataflowState.status === config.dataflowStatus.OPEN;
 
@@ -300,7 +303,7 @@ const Dataflow = withRouter(({ history, match }) => {
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
-        label={resources.messages['cancel']}
+        label={resources.messages['close']}
         onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
       />
     </div>
@@ -785,7 +788,6 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
-          isLeadReporterOfCountry={isLeadReporterOfCountry}
           match={match}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}

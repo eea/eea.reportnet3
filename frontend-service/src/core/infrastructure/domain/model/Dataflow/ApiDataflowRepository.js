@@ -109,7 +109,9 @@ const all = async userData => {
   return dataflowsDTO;
 };
 
-const create = async (name, description, obligationId) => await apiDataflow.create(name, description, obligationId);
+const create = async (name, description, obligationId, type) => {
+  return await apiDataflow.create(name, description, obligationId, type);
+};
 
 const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
   await apiDataflow.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
@@ -290,7 +292,7 @@ const downloadById = async dataflowId => await apiDataflow.downloadById(dataflow
 
 const getAllSchemas = async dataflowId => {
   const datasetSchemasDTO = await apiDataflow.allSchemas(dataflowId);
-  const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {    
+  const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {
     const dataset = new Dataset({
       datasetSchemaDescription: datasetSchemaDTO.description,
       datasetSchemaId: datasetSchemaDTO.idDataSetSchema,

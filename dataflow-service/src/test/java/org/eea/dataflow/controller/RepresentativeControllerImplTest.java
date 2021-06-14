@@ -203,7 +203,7 @@ public class RepresentativeControllerImplTest {
     doThrow(new EEAException()).when(representativeService)
         .deleteDataflowRepresentative(Mockito.any());
     try {
-      representativeControllerImpl.deleteRepresentative(null);
+      representativeControllerImpl.deleteRepresentative(null, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getReason());
@@ -217,7 +217,7 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void deleteRepresentativeSuccessTest() throws EEAException {
-    representativeControllerImpl.deleteRepresentative(1L);
+    representativeControllerImpl.deleteRepresentative(1L, 0L);
     Mockito.verify(representativeService, times(1)).deleteDataflowRepresentative(Mockito.any());
   }
 

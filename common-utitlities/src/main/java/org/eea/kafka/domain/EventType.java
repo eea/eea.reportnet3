@@ -384,7 +384,15 @@ public enum EventType {
 
   /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
-      true);
+      true),
+
+  /** The reference dataflow processed event. */
+  REFERENCE_DATAFLOW_PROCESSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "reference_dataflow_processed_event", true),
+
+  /** The reference dataflow process failed event. */
+  REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "reference_dataflow_process_failed_event", true);
 
   /** The topic. */
   private String topic;

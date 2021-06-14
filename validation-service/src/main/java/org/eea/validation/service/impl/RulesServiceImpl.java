@@ -439,7 +439,11 @@ public class RulesServiceImpl implements RulesService {
     // we use that if to sort between a rule required and rule for any other type(Boolean,
     // number etc)
     Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
-    if (required) {
+
+    if (required && typeData.equals(DataType.POINT)) {
+      ruleList.add(AutomaticRules.createRequiredRulePoint(referenceId, typeEntityEnum,
+          "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
+    } else if (required) {
       ruleList.add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
           "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
     } else {
@@ -466,6 +470,7 @@ public class RulesServiceImpl implements RulesService {
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
           break;
+        case EXTERNAL_LINK:
         case LINK:
           // we call this method to find the tableschemaid because we want to create that validation
           // at TABLE level
@@ -602,8 +607,13 @@ public class RulesServiceImpl implements RulesService {
    * @param referenceId the reference id
    */
   @Override
-  public void deleteRuleRequired(String datasetSchemaId, String referenceId) {
-    rulesRepository.deleteRuleRequired(new ObjectId(datasetSchemaId), new ObjectId(referenceId));
+  public void deleteRuleRequired(String datasetSchemaId, String referenceId, DataType typeData) {
+    if (typeData.equals(DataType.POINT)) {
+      rulesRepository.deleteRulePointRequired(new ObjectId(datasetSchemaId),
+          new ObjectId(referenceId));
+    } else {
+      rulesRepository.deleteRuleRequired(new ObjectId(datasetSchemaId), new ObjectId(referenceId));
+    }
   }
 
   /**

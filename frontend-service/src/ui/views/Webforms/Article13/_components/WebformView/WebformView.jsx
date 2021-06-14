@@ -28,6 +28,7 @@ import { TextUtils } from 'ui/views/_functions/Utils';
 
 export const WebformView = ({
   data,
+  dataProviderId,
   dataflowId,
   datasetId,
   datasetSchemaId,
@@ -263,6 +264,7 @@ export const WebformView = ({
     return (
       <WebformTable
         calculateSingle={calculateSingle}
+        dataProviderId={dataProviderId}
         dataflowId={dataflowId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}

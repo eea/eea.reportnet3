@@ -10,6 +10,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
+import org.eea.security.jwt.utils.EntityAccessService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,9 @@ public class EeaSecurityExpressionRootTest {
   private EeaSecurityExpressionRoot eeaSecurityExpressionRoot;
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
+  @Mock
+  private EntityAccessService entityAccessService;
+
 
   private static final Long DATAFLOW_ID = 1l;
 
@@ -44,15 +48,15 @@ public class EeaSecurityExpressionRootTest {
 
     Mockito.reset(userManagementControllerZull);
 
-    eeaSecurityExpressionRoot =
-        new EeaSecurityExpressionRoot(authenticationToken, userManagementControllerZull);
+    eeaSecurityExpressionRoot = new EeaSecurityExpressionRoot(authenticationToken,
+        userManagementControllerZull, entityAccessService);
 
   }
 
   @Test
   public void secondLevelAuthorize() {
-    Assert.assertTrue(eeaSecurityExpressionRoot.secondLevelAuthorize(DATAFLOW_ID,
-        ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER));
+    Assert.assertFalse(eeaSecurityExpressionRoot.secondLevelAuthorize(DATAFLOW_ID,
+        ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN));
   }
 
   @Test
@@ -77,7 +81,8 @@ public class EeaSecurityExpressionRootTest {
 
   @Test
   public void checkApiKeyTest() {
-    assertFalse(eeaSecurityExpressionRoot.checkApiKey(1L, 1L));
+    assertFalse(eeaSecurityExpressionRoot.checkApiKey(1L, 1L, 1L,
+        ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER));
   }
 
   @Test

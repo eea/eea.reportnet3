@@ -179,7 +179,6 @@ public class RulesControllerImpl implements RulesController {
    *
    * @param datasetId the dataset id
    * @param ruleVO the rule VO
-   * @return the response entity
    */
   @Override
   @HystrixCommand
@@ -332,8 +331,9 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @PutMapping("/private/deleteRuleRequired")
   public void deleteRuleRequired(@RequestParam("datasetSchemaId") String datasetSchemaId,
-      @RequestParam("referenceId") String referenceId) {
-    rulesService.deleteRuleRequired(datasetSchemaId, referenceId);
+      @RequestParam("referenceId") String referenceId,
+      @RequestParam("typeData") DataType typeData) {
+    rulesService.deleteRuleRequired(datasetSchemaId, referenceId, typeData);
   }
 
   /**
@@ -469,8 +469,10 @@ public class RulesControllerImpl implements RulesController {
   /**
    * Validate sql rule data collection.
    *
-   * @param query the query
    * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleVO the rule VO
+   * @return true, if successful
    */
   @Override
   @PostMapping("/private/validateSqlRuleDataCollection")
@@ -503,7 +505,7 @@ public class RulesControllerImpl implements RulesController {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
-   * @param ruleVO the rule VO
+   * @param showNotification the show notification
    */
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")

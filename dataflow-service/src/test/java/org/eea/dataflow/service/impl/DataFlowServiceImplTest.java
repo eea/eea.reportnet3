@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -44,14 +45,17 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -982,6 +986,42 @@ public class DataFlowServiceImplTest {
   public void getPublicDataflowsByCountrySortReleaseDate() {
     assertNotNull("assertion error",
         dataflowServiceImpl.getPublicDataflowsByCountry("FR", "releaseDate", false, 0, 12));
+  }
+
+  @Test
+  public void isReferenceDataflowDraftDataflowTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(1L);
+    Mockito.when(dataflowRepository.findById(dataflow.getId())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    assertTrue(dataflowServiceImpl.isReferenceDataflowDraft(EntityClassEnum.DATAFLOW, 1L));
+  }
+
+  @Test
+  public void isReferenceDataflowDraftDatasetTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(1L);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataflowRepository.findById(dataflow.getId())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dataset);
+
+    assertTrue(dataflowServiceImpl.isReferenceDataflowDraft(EntityClassEnum.DATASET, 1L));
   }
 
 }

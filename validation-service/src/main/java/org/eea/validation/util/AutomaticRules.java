@@ -19,6 +19,23 @@ public class AutomaticRules {
 
   // we use that class to create a specifies rule for any of diferent automatic validation
 
+  /**
+   * Creates the required rule.
+   *
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   *
+   * @return the rule
+   */
+  public static Rule createRequiredRulePoint(String referenceId, EntityTypeEnum typeEntityEnum,
+      String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "isBlankPoint(this)",
+        "The value must not be missing or empty", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        description);
+  }
 
   /**
    * Creates the required rule.
@@ -171,10 +188,9 @@ public class AutomaticRules {
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
-   * @param codelistItems the code list items
+   * @param singleCodeListItems the single code list items
    * @param shortCode the short code
    * @param description the description
-   *
    * @return the list
    */
   public static List<Rule> createCodelistAutomaticRule(String referenceId,

@@ -14,6 +14,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import { TableViewSchemas } from './_components/TableViewSchemas';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -23,7 +24,7 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
+export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow = false }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -68,8 +69,13 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
 
   const onLoadDataflows = async () => {
     try {
-      const { data } = await DataflowService.all(userContext.contextRoles);
-      cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+      if (isReferenceDataflow) {
+        const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
+        cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+      } else {
+        const { data } = await DataflowService.all(userContext.contextRoles);
+        cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+      }
     } catch (error) {
       console.error('onLoadDataflows error: ', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -81,6 +87,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
   const onLoadFilteredData = data => cloneSchemasDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
   const onOpenDataflow = dataflowId => window.open(getUrl(routes.DATAFLOW, { dataflowId }, true));
+
+  const onOpenReferenceDataflow = referenceDataflowId =>
+    window.open(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true));
 
   const onSelectDataflow = dataflowData => {
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
@@ -108,21 +117,35 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
     return dataflowsToFilter;
   };
 
-  const filterOptions = [
-    {
-      type: 'input',
-      properties: [{ name: 'name' }, { name: 'description' }, { name: 'obligationTitle' }, { name: 'legalInstruments' }]
-    },
-    { type: 'multiselect', properties: [{ name: 'status' }] },
-    { type: 'date', properties: [{ name: 'expirationDate' }] }
-  ];
+  const filterOptions = isReferenceDataflow
+    ? [
+        {
+          type: 'input',
+          properties: [{ name: 'name' }, { name: 'description' }]
+        },
+        { type: 'multiselect', properties: [{ name: 'status' }] }
+      ]
+    : [
+        {
+          type: 'input',
+          properties: [
+            { name: 'name' },
+            { name: 'description' },
+            { name: 'obligationTitle' },
+            { name: 'legalInstruments' }
+          ]
+        },
+        { type: 'multiselect', properties: [{ name: 'status' }] },
+        { type: 'date', properties: [{ name: 'expirationDate' }] }
+      ];
 
   const renderData = () =>
     userContext.userProps.listView ? (
       <TableViewSchemas
         checkedDataflow={cloneSchemasState.chosenDataflow}
         data={cloneSchemasState.filteredData}
-        handleRedirect={onOpenDataflow}
+        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+        isReferenceDataflow={isReferenceDataflow}
         onChangePagination={onChangePagination}
         onSelectDataflow={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
@@ -133,7 +156,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow }) => {
         checkedCard={cloneSchemasState.chosenDataflow}
         contentType={'Dataflows'}
         data={cloneSchemasState.filteredData}
-        handleRedirect={onOpenDataflow}
+        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+        isReferenceDataflow={isReferenceDataflow}
         onChangePagination={onChangePagination}
         onSelectCard={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
