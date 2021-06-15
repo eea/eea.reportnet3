@@ -121,10 +121,10 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
       createSnapshotVO.setReleased(true);
       createSnapshotVO.setAutomatic(Boolean.TRUE);
-      TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+      TimeZone.setDefault(TimeZone.getTimeZone("CET"));
       Date ahora = new Date();
       SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      createSnapshotVO.setDescription("Release " + formateador.format(ahora));
+      createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
       Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
       datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
           dateRelease.toString());

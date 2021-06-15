@@ -97,7 +97,7 @@ public class ReceiptPDFGenerator {
     String text;
     ZoneId timeZone = ZoneId.of("CET");
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     PDPageContentStream contentStream = new PDPageContentStream(document, page);
     PDType0Font font;
     PDType0Font fontBold;
@@ -188,7 +188,8 @@ public class ReceiptPDFGenerator {
       y -= spaceBetweenLines + fontSize;
       printLinePDF(contentStream, dataset.getNameDatasetSchema(), font, fontSize, 133f, y);
       text = dateTimeFormatter
-          .format(ZonedDateTime.ofInstant(dataset.getDateReleased().toInstant(), timeZone));
+          .format(ZonedDateTime.ofInstant(dataset.getDateReleased().toInstant(), timeZone))
+          .concat(" CET");
       printLinePDF(contentStream, text, font, fontSize, 1672f, y);
       contentStream.addRect(133f, y - spaceBetweenLines / 2, 2213, 1f);
       contentStream.fill();
