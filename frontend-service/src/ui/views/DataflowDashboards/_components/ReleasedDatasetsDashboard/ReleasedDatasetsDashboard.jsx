@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReleasedDatasetsDashboard.module.css';
 
@@ -57,16 +57,8 @@ export const ReleasedDatasetsDashboard = dataflowId => {
     return {
       labels: data.labels,
       datasets: [
-        {
-          label: resources.messages['released'],
-          backgroundColor: colors.green400,
-          data: data.releasedData
-        },
-        {
-          label: resources.messages['unreleased'],
-          backgroundColor: colors.gray25,
-          data: data.unReleasedData
-        }
+        { label: resources.messages['released'], backgroundColor: colors.green400, data: data.releasedData },
+        { label: resources.messages['unreleased'], backgroundColor: colors.gray25, data: data.unReleasedData }
       ]
     };
   };
@@ -129,7 +121,7 @@ export const ReleasedDatasetsDashboard = dataflowId => {
       return (
         <div className={`${styles.chart_released}`}>
           {!isEmpty(updatedState.dashboardData) ? (
-            <>
+            <Fragment>
               <StatusList
                 filterDispatch={statusDispatcher}
                 filteredStatusTypes={updatedState.filterStatus}
@@ -137,22 +129,21 @@ export const ReleasedDatasetsDashboard = dataflowId => {
               />
 
               <Chart
-                type="bar"
                 data={updatedState.dashboardData}
-                options={releasedOptionsObject}
-                width="100%"
                 height="25%"
+                options={releasedOptionsObject}
+                type="bar"
+                width="100%"
               />
-            </>
+            </Fragment>
           ) : (
-            <>
-              <Chart type="bar" options={releasedOptionsObject} width="100%" height="25%" />
-            </>
+            <Chart height="25%" options={releasedOptionsObject} type="bar" width="100%" />
           )}
         </div>
       );
     }
   }
+
   return (
     <div>
       <h2>{resources.messages['emptyReleasedDashboard']}</h2>

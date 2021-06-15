@@ -32,6 +32,7 @@ export const ManageReferenceDataflow = ({
   isVisible,
   manageDialogs,
   metadata,
+  onEditDataflow,
   onManage
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
@@ -105,7 +106,10 @@ export const ManageReferenceDataflow = ({
       if (isEditing) {
         const { status } = await ReferenceDataflowService.edit(dataflowId, description, name, 'REFERENCE');
 
-        if (status >= 200 && status <= 299) manageDialogs(dialogName, false);
+        if (status >= 200 && status <= 299) {
+          manageDialogs(dialogName, false);
+          onEditDataflow(name, description);
+        }
       } else {
         const { status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
 

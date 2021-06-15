@@ -405,6 +405,9 @@ public class DataCollectionServiceImplTest {
     userRepresentationVO.setEmail("email@reportnet.net");
     design.setDataSetName("datasetName_");
     design.setDatasetSchema(new ObjectId().toString());
+    DesignDatasetVO design2 = new DesignDatasetVO();
+    design2.setDataSetName("datasetName2_");
+    design2.setDatasetSchema(new ObjectId().toString());
     representative.setId(1L);
     representative.setLeadReporters(leadReportersVO);
     representative.setDataProviderId(1L);
@@ -412,6 +415,7 @@ public class DataCollectionServiceImplTest {
     dataProvider.setId(1L);
     dataProvider.setLabel("label");
     designs.add(design);
+    designs.add(design2);
     representatives.add(representative);
     dataProviders.add(dataProvider);
     designsValue.add(designDataset);
@@ -448,6 +452,9 @@ public class DataCollectionServiceImplTest {
     DataSetSchemaVO schema = new DataSetSchemaVO();
     schema.setReferenceDataset(true);
     schema.setIdDataSetSchema(new ObjectId().toString());
+    DataSetSchemaVO schema2 = new DataSetSchemaVO();
+    schema2.setReferenceDataset(false);
+    schema2.setIdDataSetSchema(new ObjectId().toString());
     TableSchemaVO tableSchema = new TableSchemaVO();
     RecordSchemaVO recordSchema = new RecordSchemaVO();
     recordSchema.setIdRecordSchema(new ObjectId().toString());
@@ -461,7 +468,9 @@ public class DataCollectionServiceImplTest {
     recordSchema.setFieldSchema(Arrays.asList(fieldSchemaVO));
     tableSchema.setRecordSchema(recordSchema);
     schema.setTableSchemas(Arrays.asList(tableSchema));
+    schema2.setTableSchemas(Arrays.asList(tableSchema));
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema);
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema2);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
@@ -498,8 +507,14 @@ public class DataCollectionServiceImplTest {
   @Test
   public void createEmptyDataCollectionReleaseLockTest() throws SQLException {
     List<DesignDatasetVO> designs = new ArrayList<>();
+    DesignDatasetVO design = new DesignDatasetVO();
+    designs.add(design);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    schema.setReferenceDataset(false);
+
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);

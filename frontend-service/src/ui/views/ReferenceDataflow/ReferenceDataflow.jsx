@@ -68,7 +68,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   useEffect(() => {
-    onLoadReportingDataflow();
+    onLoadReferenceDataflow();
   }, [dataflowState.refresh]);
 
   useBreadCrumbs({
@@ -89,6 +89,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
   }
+
+  const onEditDataflow = (name, description) => {
+    dataflowDispatch({ type: 'ON_EDIT_DATAFLOW', payload: { description, name } });
+  };
 
   function refreshPage() {
     dataflowDispatch({ type: 'REFRESH_PAGE' });
@@ -121,11 +125,11 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const onLoadReportingDataflow = async () => {
+  const onLoadReferenceDataflow = async () => {
     dataflowDispatch({ type: 'LOADING_STARTED' });
-    let referenceDataflowResponse;
+
     try {
-      referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
+      const referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
       const referenceDataflow = referenceDataflowResponse.data;
 
       dataflowDispatch({
@@ -158,7 +162,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         dataflowDispatch({ type: 'SET_DESIGN_DATASET_SCHEMAS', payload: { designDatasets: [] } });
       }
     } catch (error) {
-      notificationContext.add({ type: 'LOADING_ERROR', error });
+      notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error });
       history.push(getUrl(routes.DATAFLOWS));
     }
   };
@@ -269,6 +273,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           isVisible={dataflowState.isEditDialogVisible}
           manageDialogs={manageDialogs}
           metadata={{ name: dataflowState.name, description: dataflowState.description, status: dataflowState.status }}
+          onEditDataflow={onEditDataflow}
         />
       )}
 

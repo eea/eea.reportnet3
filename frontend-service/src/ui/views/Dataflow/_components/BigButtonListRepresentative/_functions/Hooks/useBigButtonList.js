@@ -1,5 +1,6 @@
 import { useContext, useLayoutEffect, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { routes } from 'ui/routes';
@@ -14,7 +15,6 @@ const useBigButtonList = ({
   dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
-  isLeadReporterOfCountry,
   match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -38,11 +38,21 @@ const useBigButtonList = ({
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
 
+    const representativeWithSameDataProviderID = dataflowState.data?.representatives?.find(
+      representative => representative.dataProviderId === dataProviderId
+    );
+
+    const isLeadReporterOfThisCountry = !isEmpty(representativeWithSameDataProviderID)
+      ? representativeWithSameDataProviderID.leadReporters?.some(
+          leadReporter => leadReporter.account === userContext.email
+        )
+      : false;
+
     return {
-      feedback: isLeadReporterOfCountry && isReleased && isManualAcceptance,
+      feedback: isLeadReporterOfThisCountry && isReleased && isManualAcceptance,
       help: true,
-      receipt: isLeadReporterOfCountry && isReleased,
-      release: isLeadReporterOfCountry && !isTestDataset,
+      receipt: isLeadReporterOfThisCountry && isReleased,
+      release: isLeadReporterOfThisCountry && !isTestDataset,
       testDatasets: isTestDataset
     };
   };

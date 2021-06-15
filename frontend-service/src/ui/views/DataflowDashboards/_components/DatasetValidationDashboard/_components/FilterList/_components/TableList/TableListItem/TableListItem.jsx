@@ -12,10 +12,9 @@ const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters })
   return (
     <div className={styles.listItem}>
       <input
-        id={`${table.tableId}_${datasetSchemaId}`}
-        className={styles.checkbox}
-        type="checkbox"
         checked={isChecked}
+        className={styles.checkbox}
+        id={`${table.tableId}_${datasetSchemaId}`}
         onChange={e => {
           setIsChecked(e.target.checked);
           filterDispatch({
@@ -23,8 +22,9 @@ const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters })
             payload: { tableId: table.tableId }
           });
         }}
+        type="checkbox"
       />
-      <label htmlFor={`${table.tableId}_${datasetSchemaId}`} className={styles.labelItem}>
+      <label className={styles.labelItem} htmlFor={`${table.tableId}_${datasetSchemaId}`}>
         {table.tableName}
       </label>
     </div>

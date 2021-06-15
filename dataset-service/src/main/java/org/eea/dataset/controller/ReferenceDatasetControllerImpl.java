@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,6 +71,7 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @Override
   @HystrixCommand
   @GetMapping(value = "/referenced/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR checkAccessReferenceEntity('DATAFLOW',#id)")
   public Set<DataFlowVO> findDataflowsReferencedByDataflowId(@PathVariable("id") Long dataflowId) {
     return referenceDatasetService.getDataflowsReferenced(dataflowId);
   }

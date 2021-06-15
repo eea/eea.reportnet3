@@ -74,6 +74,19 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     return checkAuthorize(idEntity, objectAccessRoles) && !isApiKey();
   }
 
+
+  /**
+   * Second level authorize with api key.
+   *
+   * @param idEntity the id entity
+   * @param objectAccessRoles the object access roles
+   * @return true, if successful
+   */
+  public boolean secondLevelAuthorizeWithApiKey(Long idEntity,
+      ObjectAccessRoleEnum... objectAccessRoles) {
+    return checkAuthorize(idEntity, objectAccessRoles);
+  }
+
   /**
    * Check authorize.
    *

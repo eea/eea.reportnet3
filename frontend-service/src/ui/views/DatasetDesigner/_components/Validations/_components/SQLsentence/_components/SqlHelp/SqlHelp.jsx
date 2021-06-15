@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -7,8 +7,6 @@ import trim from 'lodash/trim';
 import styles from './SqlHelp.module.scss';
 
 import { SqlHelpListBox } from './_components/SqlHelpListBox';
-
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'core/services/Dataflow';
 
@@ -42,7 +40,6 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     tableSpinner: false,
     fieldSpinner: false
   };
-  const resourcesContext = useContext(ResourcesContext);
   const [state, dispatch] = useReducer(sqlHelpReducer, initState);
 
   const fetchData = async () => {
@@ -137,29 +134,29 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
   return (
     <div className={styles.wrapper}>
       <SqlHelpListBox
-        title="Dataset"
-        level="dataset"
-        selectedItem={state.selectedDataset}
-        options={state.datasets.datasetSchemaOptions}
-        onChange={onSelectDataset}
-        onAddHelpItem={onAddHelpItem}
         isSpinnerVisible={state.datasetSpinner}
+        level="dataset"
+        onAddHelpItem={onAddHelpItem}
+        onChange={onSelectDataset}
+        options={state.datasets.datasetSchemaOptions}
+        selectedItem={state.selectedDataset}
+        title="Dataset"
       />
       <SqlHelpListBox
-        title="Tables"
         level="table"
-        selectedItem={state.selectedTable}
-        options={state.tables}
-        onChange={onSelectTable}
         onAddHelpItem={onAddHelpItem}
+        onChange={onSelectTable}
+        options={state.tables}
+        selectedItem={state.selectedTable}
+        title="Tables"
       />
       <SqlHelpListBox
-        title="Fields"
         level="field"
-        selectedItem={state.selectedField}
-        options={state.fields}
-        onChange={onSelectField}
         onAddHelpItem={onAddHelpItem}
+        onChange={onSelectField}
+        options={state.fields}
+        selectedItem={state.selectedField}
+        title="Fields"
       />
     </div>
   );

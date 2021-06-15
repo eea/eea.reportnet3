@@ -72,7 +72,10 @@ const DataFormFieldEditor = ({
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
-        ? crs.filter(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid)[0]
+        ? crs.find(crsItem => crsItem.value === JSON.parse(fieldValue).properties.srid) || {
+            label: 'WGS84 - 4326',
+            value: 'EPSG:4326'
+          }
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     isMapDisabled: false,
     isMapOpen: false,
@@ -430,9 +433,13 @@ const DataFormFieldEditor = ({
     const {
       current: { panel }
     } = refDatetimeCalendar;
+
+    panel.style.display = 'block';
+
     const inputRect = element.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
     const top = `${inputRect.top - panelRect.height / 2}px`;
+
     panel.style.top = top;
     panel.style.position = 'fixed';
   };
@@ -584,6 +591,7 @@ const DataFormFieldEditor = ({
         />
         <Button
           className={`p-button-secondary-transparent button ${styles.mapButton}`}
+          disabled={map.isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
           tooltip={resources.messages['selectGeographicalDataOnMap']}

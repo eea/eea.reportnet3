@@ -145,7 +145,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     ],
     reference: [
       { type: 'input', properties: [{ name: 'name' }, { name: 'description' }] },
-      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] }
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'pinned' }] }
     ]
   };
 
@@ -169,6 +169,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       <div className="dataflowList-filters-help-step">
         {visibleTab === 'dataflows' && (
           <Filters
+            className={'dataflowsListFilters'}
             data={dataToFilter['dataflows']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['dataflows']}
@@ -178,6 +179,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         )}
         {visibleTab === 'reference' && (
           <Filters
+            className={'referenceDataflowsListFilters'}
             data={dataToFilter['reference']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['reference']}

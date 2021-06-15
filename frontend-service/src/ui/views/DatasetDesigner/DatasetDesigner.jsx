@@ -1126,7 +1126,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
-                  disabled={isDesignDatasetEditorRead || isDataflowOpen}
+                  disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
                   id={`reference_dataset_checkbox`}
                   inputId={`reference_dataset_checkbox`}
                   isChecked={designerState.referenceDataset}
@@ -1135,7 +1135,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 />
                 <label
                   onClick={() => {
-                    if (!isDesignDatasetEditorRead && !isDataflowOpen) {
+                    if (!isDesignDatasetEditorRead && !isDataflowOpen && !isReferenceDataset) {
                       designerDispatch({
                         type: 'SET_REFERENCE_DATASET',
                         payload: !designerState.referenceDataset
@@ -1550,12 +1550,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 role="checkbox"
               />
               <label htmlFor="replaceCheckbox">
-                <a
+                <span
+                  className={styles.replaceDataLabel}
                   onClick={() =>
                     designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                   }>
                   {resources.messages['replaceData']}
-                </a>
+                </span>
               </label>
             </div>
           </Dialog>

@@ -83,8 +83,12 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
       </div>
       <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
-          <span>{`${resources.messages['role']}: `}</span>
-          {dataflow.userRole}
+          {dataflow.userRole && (
+            <>
+              <span>{`${resources.messages['role']}: `}</span>
+              {dataflow.userRole}
+            </>
+          )}
         </p>
       </div>
     </Fragment>

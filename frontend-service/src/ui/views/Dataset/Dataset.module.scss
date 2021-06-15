@@ -70,6 +70,10 @@
   @include shadow-0em;
 }
 
+.replaceDataLabel {
+  cursor: pointer;
+}
+
 .switch {
   align-items: center;
   display: flex;
