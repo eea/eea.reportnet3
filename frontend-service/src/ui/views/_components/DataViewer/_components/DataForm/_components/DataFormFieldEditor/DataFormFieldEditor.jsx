@@ -591,6 +591,7 @@ const DataFormFieldEditor = ({
         />
         <Button
           className={`p-button-secondary-transparent button ${styles.mapButton}`}
+          disabled={map.isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
           tooltip={resources.messages['selectGeographicalDataOnMap']}

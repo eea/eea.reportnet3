@@ -911,7 +911,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
-      <label htmlFor={`${fieldId}_check_pk`} className="srOnly">
+      <label className="srOnly" htmlFor={`${fieldId}_check_pk`}>
         {resources.messages['pk']}
       </label>
       <Checkbox
@@ -928,7 +928,7 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
-      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
+      <label className="srOnly" htmlFor={`${fieldId}_check_required`}>
         {resources.messages['required']}
       </label>
       <Checkbox
@@ -943,7 +943,7 @@ export const FieldDesigner = ({
         onChange={e => onReadOnlyChange(e.checked)}
         style={{ width: '90px' }}
       />
-      <label htmlFor={`${fieldId}_check_required`} className="srOnly">
+      <label className="srOnly" htmlFor={`${fieldId}_check_required`}>
         {resources.messages['readOnly']}
       </label>
     </div>
@@ -1053,11 +1053,11 @@ export const FieldDesigner = ({
 
   const renderDeleteButton = () =>
     !addField ? (
-      <a
-        draggable={true}
+      <div
         className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
+        draggable={true}
         href="#"
         onClick={e => {
           e.preventDefault();
@@ -1069,7 +1069,7 @@ export const FieldDesigner = ({
         }}>
         <FontAwesomeIcon icon={AwesomeIcons('delete')} />
         <span className="srOnly">{resources.messages['deleteFieldLabel']}</span>
-      </a>
+      </div>
     ) : null;
 
   const renderInputs = () => (
@@ -1106,17 +1106,17 @@ export const FieldDesigner = ({
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
       />
-      <label htmlFor={fieldName} className="srOnly">
+      <label className="srOnly" htmlFor={fieldName}>
         {resources.messages['newFieldPlaceHolder']}
       </label>
       <InputTextarea
         autoFocus={false}
-        collapsedHeight={33}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
-        expandableOnClick={true}
         className={`${styles.inputFieldDescription} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
+        collapsedHeight={33}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        expandableOnClick={true}
         id={`${fieldName}_description`}
         key={fieldId}
         onBlur={e => {
@@ -1169,16 +1169,16 @@ export const FieldDesigner = ({
   return (
     <Fragment>
       <div
-        draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
+        draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         onDragEnd={e => {
           onFieldDragEnd(e);
         }}
         onDragEnter={e => {
           onFieldDragEnter(e);
         }}
-        onDragOver={onFieldDragOver}
         onDragLeave={onFieldDragLeave}
+        onDragOver={onFieldDragOver}
         onDragStart={e => {
           onFieldDragStart(e);
         }}

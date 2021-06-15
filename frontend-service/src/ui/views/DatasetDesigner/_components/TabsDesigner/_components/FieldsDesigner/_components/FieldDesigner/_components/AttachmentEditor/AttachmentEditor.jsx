@@ -61,7 +61,7 @@ const AttachmentEditor = ({
 
   const attachmentDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button label={resources.messages['save']} icon="check" onClick={() => setIsSaved(true)} />
+      <Button icon="check" label={resources.messages['save']} onClick={() => setIsSaved(true)} />
       <Button
         className="p-button-secondary button-right-aligned"
         icon="cancel"
@@ -77,7 +77,7 @@ const AttachmentEditor = ({
 
   const renderChips = () => {
     return (
-      <div onPaste={onPasteChips} className={styles.validExtensionsWrapper}>
+      <div className={styles.validExtensionsWrapper} onPaste={onPasteChips}>
         <div className={styles.inputTitleWrapper}>
           <span
             dangerouslySetInnerHTML={{
@@ -145,7 +145,7 @@ const AttachmentEditor = ({
             tooltip={resources.messages['plusFileSize']}
             tooltipOptions={{ position: 'bottom' }}
           />
-          <label htmlFor="maxFileSize" className="srOnly">
+          <label className="srOnly" htmlFor="maxFileSize">
             {resources.messages['supportedFileAttachmentsMaxSizeTooltip']}
           </label>
           <span className={styles.mbSpan}>{`${resources.messages['MB']} (${
