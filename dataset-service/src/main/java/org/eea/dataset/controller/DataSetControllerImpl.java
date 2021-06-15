@@ -475,14 +475,28 @@ public class DataSetControllerImpl implements DatasetController {
    * Delete import data.
    *
    * @param datasetId the data set id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   public void deleteImportData(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId) {
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
+
+    // Rest API only: Check if the dataflow belongs to the dataset
+    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+
     // This method will release the lock
     deleteHelper.executeDeleteDatasetProcess(datasetId);
   }
@@ -492,15 +506,29 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   public void deleteImportTable(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId) {
+      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
+
+
+    // Rest API only: Check if the dataflow belongs to the dataset
+    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
     // This method will release the lock
     deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
   }
