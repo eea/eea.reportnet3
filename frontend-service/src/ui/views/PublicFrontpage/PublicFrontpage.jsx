@@ -1,6 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
