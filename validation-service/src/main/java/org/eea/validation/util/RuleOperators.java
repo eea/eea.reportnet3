@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.hibernate.Hibernate;
 
 /** The Class RuleOperators. */
 public class RuleOperators {
@@ -37,6 +38,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean setEntity(RecordValue recordValue) {
+    Hibernate.initialize(recordValue.getFields());
     fields = recordValue.getFields();
     countryCode = recordValue.getDataProviderCode();
     if (null == countryCode) {

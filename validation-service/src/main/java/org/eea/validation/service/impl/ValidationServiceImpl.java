@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
@@ -331,17 +330,17 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable) {
 
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-    List<RecordValue> records = this.recordRepository.findAll(pageable).getContent();
+    List<RecordValue> records = recordRepository.findRecordsPageable(pageable);
     List<RecordValidation> recordValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
-      records.stream().filter(Objects::nonNull).forEach(row -> {
+      for (RecordValue row : records) {
         runRecordValidations(row, session);
         List<RecordValidation> validations = row.getRecordValidations();
-        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         recordValidations.addAll(validations);
-      });
+      }
       if (!recordValidations.isEmpty()) {
+        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         recordValidationRepository.saveAll(recordValidations);
       }
     } finally {
@@ -361,7 +360,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable,
       boolean onlyEmptyFields) {
-
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     Page<FieldValue> fields = onlyEmptyFields ? fieldRepository.findEmptyFields(pageable)
         : fieldRepository.findAll(pageable);
     List<FieldValidation> fieldValidations = new ArrayList<>();
@@ -470,12 +469,15 @@ public class ValidationServiceImpl implements ValidationService {
     for (RecordValidation recordValidation : recordValidations) {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(recordValidation.getRecordValue().getId());
+      if (recordValidation.getRecordValue() != null) {
+        error.setIdObject(recordValidation.getRecordValue().getId());
+        error
+            .setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
+      }
       error.setIdValidation(recordValidation.getValidation().getId());
       error.setLevelError(recordValidation.getValidation().getLevelError().name());
       error.setMessage(recordValidation.getValidation().getMessage());
       error.setNameTableSchema(recordValidation.getValidation().getTableName());
-      error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
       error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(recordValidation.getValidation().getValidationDate());
       error.setShortCode(recordValidation.getValidation().getShortCode());
