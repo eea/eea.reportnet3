@@ -12,6 +12,7 @@ import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 import Illustration from 'assets/images/logos/public_illustration.png';
 import logo from 'assets/images/logos/logo.png';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
@@ -20,7 +21,10 @@ import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { PublicCard } from '../_components/PublicCard/PublicCard';
 
-export const PublicFrontpage = ({ history }) => {
+import { ErrorUtils } from 'ui/views/_functions/Utils';
+
+export const PublicFrontpage = withRouter(({ history, match }) => {
+  const notificationContext = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
 
@@ -33,6 +37,16 @@ export const PublicFrontpage = ({ history }) => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
+
+  useEffect(() => {
+    if (!isNil(urlErrorType)) {
+      notificationContext.add({ type: ErrorUtils.parseErrorType(urlErrorType) });
+    }
+  }, []);
+
+  const {
+    params: { errorType: urlErrorType }
+  } = match;
 
   const handleRedirect = target => history.push(target);
 
@@ -224,4 +238,4 @@ export const PublicFrontpage = ({ history }) => {
       </div>
     </PublicLayout>
   );
-};
+});
