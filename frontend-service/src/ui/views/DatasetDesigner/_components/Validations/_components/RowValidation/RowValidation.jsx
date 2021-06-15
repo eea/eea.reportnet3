@@ -76,7 +76,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
-          key="tab1"
+          key="rowInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
@@ -90,7 +90,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         <TabPanel
           header={resourcesContext.messages.tabMenuExpression}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}
-          key="tab2"
+          key="rowExpressionTab"
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
           <ExpressionSelector
             componentName={componentName}
@@ -122,7 +122,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
-          key="tab1"
+          key="rowInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
