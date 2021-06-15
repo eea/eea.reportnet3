@@ -6,6 +6,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -89,4 +90,13 @@ public interface ValidationController {
           required = false) List<EntityTypeEnum> typeEntitiesFilter,
       @RequestParam(value = "tableFilter", required = false) String tableFilter,
       @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter);
+  
+  /**
+   * Export CSV file of grouped validations.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> exportValidationDataCSV(@PathVariable("dataflowId") Long dataflowId);
 }
