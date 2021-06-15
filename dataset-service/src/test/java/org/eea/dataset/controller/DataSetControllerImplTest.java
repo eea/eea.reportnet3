@@ -1143,19 +1143,56 @@ public class DataSetControllerImplTest {
 
   }
 
+
   @Test
   public void deleteImportDataTest() {
-    dataSetControllerImpl.deleteImportData(1L);
+    dataSetControllerImpl.deleteImportData(1L, null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong());
   }
 
   @Test
+  public void deleteImportDataRestApiTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    dataSetControllerImpl.deleteImportData(1L, 1L, 1L);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteImportDataRestApiForbiddenTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
+    try {
+      dataSetControllerImpl.deleteImportData(1L, 1L, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
   public void deleteImportTableTest() {
-    dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190");
+    dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
   }
 
+  @Test
+  public void deleteImportTableRestApiTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteImportTableRestApiForbiddenTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
+    try {
+      dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
 
   @Test
   public void exportDatasetTest() throws IOException, EEAException {
