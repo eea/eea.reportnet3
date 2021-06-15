@@ -275,7 +275,7 @@ class DropdownFilter extends Component {
         <ul>
           {fields.map((field, i) => (
             <li className={styles.selectNone} key={`parent_${field.key}`}>
-              <a
+              <div
                 className={!field.checked ? styles.isNotChecked : ''}
                 onClick={e => {
                   this.updateChecked(field.key);
@@ -303,7 +303,7 @@ class DropdownFilter extends Component {
                   )
                 ) : null}
                 {field.label}
-              </a>
+              </div>
             </li>
           ))}
         </ul>

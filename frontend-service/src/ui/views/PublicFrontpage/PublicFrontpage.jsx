@@ -144,20 +144,20 @@ export const PublicFrontpage = ({ history }) => {
                 <h3>Dataflow status</h3>
               </div>
               <div className={styles.showPublicData}>
-                <a
+                <div
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
                   <p>
                     <strong>View by obligation dataflow status and download reported data</strong>
                   </p>
-                </a>
-                <a
+                </div>
+                <div
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
                   <p>
                     <strong>View by country dataflow status and download reported data</strong>
                   </p>
-                </a>
+                </div>
               </div>
             </div>
             <div className={styles.currentDataflows}>

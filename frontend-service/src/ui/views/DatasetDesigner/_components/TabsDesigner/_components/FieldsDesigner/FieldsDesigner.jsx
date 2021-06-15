@@ -14,7 +14,6 @@ import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -65,7 +64,6 @@ export const FieldsDesigner = ({
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
   const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
@@ -238,7 +236,7 @@ export const FieldsDesigner = ({
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setTableDescriptionValue(initialTableDescription);
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
       updateTableDesign(isReadOnlyTable);
     }
@@ -401,18 +399,12 @@ export const FieldsDesigner = ({
     </ConfirmDialog>
   );
 
-  const renderAllFields = () => {
-    if (isLoading) {
-      return <Spinner className={styles.positioning} />;
-    } else {
-      return (
-        <Fragment>
-          {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-          {!viewType['tabularData'] && renderNewField()}
-        </Fragment>
-      );
-    }
-  };
+  const renderAllFields = () => (
+    <Fragment>
+      {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+      {!viewType['tabularData'] && renderNewField()}
+    </Fragment>
+  );
 
   const renderErrors = (errorTitle, error) => {
     return (

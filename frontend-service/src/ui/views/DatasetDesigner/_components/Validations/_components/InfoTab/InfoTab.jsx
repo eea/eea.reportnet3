@@ -74,7 +74,6 @@ export const InfoTab = ({
 
       setFieldsDropdown(
         <Dropdown
-          id={`${componentName}__field`}
           appendTo={document.body}
           disabled={
             creationFormState.candidateRule.automatic || validationContext.ruleEdit
@@ -82,10 +81,11 @@ export const InfoTab = ({
               : fieldDropdownOptions.disabled
           }
           filterPlaceholder={fieldDropdownOptions.placeholder}
-          placeholder={fieldDropdownOptions.placeholder}
+          id={`${componentName}__field`}
+          onChange={fieldDropdownOptions.onChange}
           optionLabel="label"
           options={fieldDropdownOptions.options}
-          onChange={fieldDropdownOptions.onChange}
+          placeholder={fieldDropdownOptions.placeholder}
           value={fieldDropdownOptions.value}
         />
       );
@@ -101,9 +101,9 @@ export const InfoTab = ({
     <div className={styles.section}>
       <div className={styles.fieldsGroup}>
         <div
+          className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}
           onBlur={() => onAddToClickedFields('table')}
-          onFocus={() => onDeleteFromClickedFields('table')}
-          className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
+          onFocus={() => onDeleteFromClickedFields('table')}>
           <label htmlFor="table">{resourcesContext.messages['table']}</label>
           <Dropdown
             appendTo={document.body}
@@ -195,8 +195,8 @@ export const InfoTab = ({
             id={`${componentName}__errorType`}
             onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
             optionLabel="label"
-            options={config.validations.errorLevels}
             optionValue="value"
+            options={config.validations.errorLevels}
             placeholder={resourcesContext.messages['errorTypePlaceholder']}
             value={creationFormState.candidateRule.errorLevel}
           />
