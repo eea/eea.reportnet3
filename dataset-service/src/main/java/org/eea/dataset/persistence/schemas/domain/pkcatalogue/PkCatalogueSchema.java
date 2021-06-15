@@ -10,10 +10,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
 /**
- * Gets the referenced.
- *
- * @return the referenced
+ * The Class PkCatalogueSchema.
  */
 @Getter
 @Setter
@@ -25,10 +24,6 @@ public class PkCatalogueSchema {
   @Id
   @Field(value = "idPk")
   private ObjectId idPk;
-
-  /** The name. */
-  @Field(value = "name")
-  private String name;
 
   /** The referenced. */
   @Field(value = "referencedBy")
@@ -42,7 +37,7 @@ public class PkCatalogueSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idPk, name, referenced);
+    return Objects.hash(idPk, referenced);
   }
 
   /**
@@ -60,8 +55,7 @@ public class PkCatalogueSchema {
       return false;
     }
     PkCatalogueSchema other = (PkCatalogueSchema) obj;
-    return Objects.equals(idPk, other.idPk) && Objects.equals(name, other.name)
-        && Objects.equals(referenced, other.referenced);
+    return Objects.equals(idPk, other.idPk) && Objects.equals(referenced, other.referenced);
   }
 
 }

@@ -166,7 +166,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    *
    * @param datasetId the dataset id
    * @param uuid the uuid
-   * @param numPag the num pag
+   * @param pages the pages
    * @param idTableSchema the id table schema
    * @param idFieldSchema the id field schema
    * @param typeField the type field

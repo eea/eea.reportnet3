@@ -60,7 +60,7 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils, TextUtils
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const DatasetDesigner = withRouter(({ history, match }) => {
+export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false, match }) => {
   const {
     params: { dataflowId, datasetId }
   } = match;
@@ -70,8 +70,9 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
+
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -174,7 +175,12 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
     snapshotState
   } = useDatasetDesigner(dataflowId, datasetId, designerState.datasetSchemaId);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATASET_DESIGNER, dataflowId, history });
+  useBreadCrumbs({
+    currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
+    dataflowId,
+    history,
+    referenceDataflowId: dataflowId
+  });
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -1120,7 +1126,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
-                  disabled={isDesignDatasetEditorRead || isDataflowOpen}
+                  disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
                   id={`reference_dataset_checkbox`}
                   inputId={`reference_dataset_checkbox`}
                   isChecked={designerState.referenceDataset}
@@ -1129,7 +1135,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
                 />
                 <label
                   onClick={() => {
-                    if (!isDesignDatasetEditorRead && !isDataflowOpen) {
+                    if (!isDesignDatasetEditorRead && !isDataflowOpen && !isReferenceDataset) {
                       designerDispatch({
                         type: 'SET_REFERENCE_DATASET',
                         payload: !designerState.referenceDataset
@@ -1488,6 +1494,7 @@ export const DatasetDesigner = withRouter(({ history, match }) => {
             <ValidationViewer
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}
+              datasetSchemaId={designerState.datasetSchemaId}
               hasWritePermissions={designerState.hasWritePermissions}
               isWebformView={designerState.viewType.webform}
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}

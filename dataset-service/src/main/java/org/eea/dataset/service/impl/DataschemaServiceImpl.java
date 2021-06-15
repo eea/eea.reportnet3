@@ -33,9 +33,11 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.domain.webform.Webform;
+import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -53,6 +55,8 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -263,6 +267,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private ZipUtils zipUtils;
 
 
+  /** The dataflow referenced repository. */
+  @Autowired
+  private DataflowReferencedRepository dataflowReferencedRepository;
+
+
   /**
    * The Constant FIELDSCHEMAS: {@value}.
    */
@@ -288,6 +297,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     dataSetSchema.setIdDataFlow(dataflowId);
     dataSetSchema.setIdDataSetSchema(idDataSetSchema);
     dataSetSchema.setTableSchemas(new ArrayList<>());
+    // if we are in a reference dataflow, all the schemas created on it have to be checked as
+    // reference dataset
+    DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
+    if (dataflow != null && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+      dataSetSchema.setReferenceDataset(true);
+    }
+
     schemasRepository.save(dataSetSchema);
     schemasRepository.updateDatasetSchemaWebForm(idDataSetSchema.toString(), new Webform());
     // create the rules schema
@@ -729,14 +745,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
-   *
+   * @param datasetId the dataset id
    * @return the type data
-   *
    * @throws EEAException the EEA exception
    */
   @Override
-  public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
-      throws EEAException {
+  public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
+      Long datasetId, boolean cloningOrImporting) throws EEAException {
 
     // we check if the field name already exist in schema
     if (null != fieldSchemaVO.getName()
@@ -753,7 +768,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
       if (fieldSchema != null) {
         // First of all, we update the previous data in the catalog
-        updatePreviousDataInCatalog(fieldSchema);
+        updatePreviousDataInCatalog(fieldSchema, datasetId, cloningOrImporting);
 
         // Update UniqueConstraints
         updateUniqueConstraints(datasetSchemaId, fieldSchemaVO, fieldSchema);
@@ -817,8 +832,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
     modifyValidExtensions(fieldSchemaVO, fieldSchema);
-    if (fieldSchemaVO.getReferencedField() != null
-        && DataType.LINK.equals(fieldSchemaVO.getType())) {
+    if (fieldSchemaVO.getReferencedField() != null && (DataType.LINK.equals(fieldSchemaVO.getType())
+        || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
       ReferencedFieldSchemaVO referencedField = fieldSchemaVO.getReferencedField();
       Document referenced = fillReferencedDocument(referencedField);
       fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
@@ -827,7 +842,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       updateIsPkReferencedInFieldSchema(referencedField.getIdDatasetSchema(),
           referencedField.getIdPk(), true);
     } else if (fieldSchema.get(LiteralConstants.REFERENCED_FIELD) != null
-        && !DataType.LINK.equals(fieldSchemaVO.getType())) {
+        && !(DataType.LINK.equals(fieldSchemaVO.getType())
+            || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
       // If the field is not a Link type, delete the referenced field to avoid problems
       fieldSchema.put(LiteralConstants.REFERENCED_FIELD, null);
     }
@@ -862,6 +878,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           new ObjectId(referencedField.getMasterConditionalFieldId()));
     } else {
       referenced.put("masterConditionalFieldId", null);
+    }
+    if (referencedField.getDataflowId() != null) {
+      referenced.put("dataflowId", referencedField.getDataflowId());
+    } else {
+      referenced.put("dataflowId", null);
+    }
+    if (StringUtils.isNotBlank(referencedField.getTableSchemaName())) {
+      referenced.put("tableSchemaName", referencedField.getTableSchemaName());
+    } else {
+      referenced.put("tableSchemaName", null);
+    }
+    if (StringUtils.isNotBlank(referencedField.getFieldSchemaName())) {
+      referenced.put("fieldSchemaName", referencedField.getFieldSchemaName());
+    } else {
+      referenced.put("fieldSchemaName", null);
     }
     return referenced;
   }
@@ -976,11 +1007,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update previous data in catalog.
    *
    * @param fieldSchema the field schema
-   *
+   * @param datasetId the dataset id
+   * @param cloningOrImporting the cloning or importing
    * @throws EEAException the EEA exception
    */
-  private void updatePreviousDataInCatalog(Document fieldSchema) throws EEAException {
-    if (DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
+  private void updatePreviousDataInCatalog(Document fieldSchema, Long datasetId,
+      boolean cloningOrImporting) throws EEAException {
+    if (DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+        || DataType.EXTERNAL_LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
       // Proceed to the changes needed. Remove the previous reference
       Document previousReferenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
       if (previousReferenced != null && previousReferenced.get("idPk") != null) {
@@ -998,6 +1032,23 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           // the only field that was FK
           if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
             updateIsPkReferencedInFieldSchema(previousIdDatasetReferenced, previousIdPk, false);
+          }
+
+          // update the dataflow catalogue too, but only if we are not in the cloning or importing
+          // process
+          if (!cloningOrImporting && previousReferenced.get("dataflowId") != null) {
+            Long dataflowId = Long.valueOf(previousReferenced.get("dataflowId").toString());
+            DataflowReferencedSchema dataflowReferenced =
+                dataflowReferencedRepository.findByDataflowId(dataflowId);
+            if (null != dataflowReferenced
+                && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+              dataflowReferenced.getReferencedByDataflow()
+                  .remove(datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+              dataflowReferencedRepository.deleteByDataflowId(dataflowId);
+              if (!dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+                dataflowReferencedRepository.save(dataflowReferenced);
+              }
+            }
           }
 
         }
@@ -1060,8 +1111,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param description the description
-   *
-   * @return the boolean
    */
   @Override
   public void updateDatasetSchemaDescription(String datasetSchemaId, String description) {
@@ -1073,7 +1122,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update dataset schema exportable.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param isExportable the is exportable
+   * @param availableInPublic the available in public
    */
   @Override
   public void updateDatasetSchemaExportable(String datasetSchemaId, boolean availableInPublic) {
@@ -1160,11 +1209,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
         }
       } else {
-        rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId());
+        rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId(),
+            fieldSchemaVO.getType());
       }
       // If the type is Link, delete and create again the rule, the field pkMustBeUsed maybe has
       // changed
-      if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+      if (DataType.LINK.equals(fieldSchemaVO.getType())
+          || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
         // Delete previous fk rule and insert it again
         rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
             fieldSchemaVO.getId());
@@ -1341,11 +1392,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Adds the to pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
+   * @param datasetId the dataset id
    */
   @Override
-  public void addToPkCatalogue(FieldSchemaVO fieldSchemaVO) {
+  public void addToPkCatalogue(FieldSchemaVO fieldSchemaVO, Long datasetId) {
 
-    if (fieldSchemaVO.getReferencedField() != null) {
+    if (fieldSchemaVO.getReferencedField() != null && (DataType.LINK.equals(fieldSchemaVO.getType())
+        || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
           .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
 
@@ -1359,6 +1412,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         catalogue.setReferenced(new ArrayList<>());
         catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
       }
+      Long dataflowId = datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId();
+
+      // insert the dataflow referenced from external link into the DataflowReferenced collection
+      if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
+        DataflowReferencedSchema dataflowReferenced = dataflowReferencedRepository
+            .findByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+        if (dataflowReferenced != null) {
+          if (null == dataflowReferenced.getReferencedByDataflow()) {
+            dataflowReferenced.setReferencedByDataflow(new ArrayList<>());
+          }
+          dataflowReferenced.getReferencedByDataflow().add(dataflowId);
+          dataflowReferencedRepository
+              .deleteByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+        } else {
+          dataflowReferenced = new DataflowReferencedSchema();
+          dataflowReferenced.setDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+          dataflowReferenced.setReferencedByDataflow(new ArrayList<>());
+          dataflowReferenced.getReferencedByDataflow().add(dataflowId);
+        }
+        dataflowReferencedRepository.save(dataflowReferenced);
+      }
       pkCatalogueRepository.save(catalogue);
     }
   }
@@ -1367,13 +1441,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Delete from pk catalogue.
    *
    * @param fieldSchemaVO the field schema VO
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO) throws EEAException {
+  public void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO, Long datasetId)
+      throws EEAException {
     // For fielSchemas that are PK
-    if (fieldSchemaVO.getPk() != null && !fieldSchemaVO.getPk()) {
+    if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
       PkCatalogueSchema catalogue =
           pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null) {
@@ -1381,12 +1456,27 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
     // For fieldSchemas that are FK
-    if (DataType.LINK.equals(fieldSchemaVO.getType())
+    if ((DataType.LINK.equals(fieldSchemaVO.getType())
+        || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))
         && fieldSchemaVO.getReferencedField() != null) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
           .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
       if (catalogue != null) {
         catalogue.getReferenced().remove(new ObjectId(fieldSchemaVO.getId()));
+        if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
+          DataflowReferencedSchema dataflowReferenced = dataflowReferencedRepository
+              .findByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+          if (null != dataflowReferenced
+              && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+            dataflowReferenced.getReferencedByDataflow()
+                .remove(datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+            dataflowReferencedRepository
+                .deleteByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+            if (!dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+              dataflowReferencedRepository.save(dataflowReferenced);
+            }
+          }
+        }
         pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
         pkCatalogueRepository.save(catalogue);
         // We need to update the field isReferenced from the PK referenced if this was the only
@@ -1444,8 +1534,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       String datasetSchemaId) {
     Document fieldSchema =
         schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
-    if (fieldSchema != null
-        && DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
+    if (fieldSchema != null && (DataType.LINK.getValue()
+        .equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+        || DataType.EXTERNAL_LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA)))) {
       // First of all, we delete the previous relation on the Metabase, if applies
       Document previousReferenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
       if (previousReferenced != null && previousReferenced.get("idPk") != null) {
@@ -1459,7 +1550,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     // If the type is Link, then we add the relation on the Metabase
     if (fieldSchemaVO.getType() != null
-        && DataType.LINK.getValue().equals(fieldSchemaVO.getType().getValue())) {
+        && (DataType.LINK.getValue().equals(fieldSchemaVO.getType().getValue())
+            || DataType.EXTERNAL_LINK.getValue().equals(fieldSchemaVO.getType().getValue()))) {
       this.addForeignRelation(idDatasetOrigin, fieldSchemaVO);
     }
   }
@@ -1522,18 +1614,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * update the catalogue one by one
    *
    * @param idDatasetSchema the id dataset schema
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updatePkCatalogueDeletingSchema(String idDatasetSchema) throws EEAException {
-
+  public void updatePkCatalogueDeletingSchema(String idDatasetSchema, Long datasetId)
+      throws EEAException {
+    Long dataflowId = datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId();
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(idDatasetSchema));
     if (dataschema.isPresent()) {
       for (TableSchema table : dataschema.get().getTableSchemas()) {
         for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
           if (field.getReferencedField() != null) {
-            updateCatalogueDeleting(field);
+            updateCatalogueDeleting(field,
+                datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+            // also delete from the dataflow reference catalogue if the field it's an external link
+            updateDataflowReferencedCatalogue(field, dataflowId);
           }
         }
       }
@@ -1544,10 +1640,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update catalogue deleting.
    *
    * @param field the field
-   *
+   * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void updateCatalogueDeleting(FieldSchema field) throws EEAException {
+  private void updateCatalogueDeleting(FieldSchema field, Long dataflowId) throws EEAException {
     PkCatalogueSchema catalogue =
         pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
     if (catalogue != null) {
@@ -1560,6 +1656,32 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         updateIsPkReferencedInFieldSchema(
             field.getReferencedField().getIdDatasetSchema().toString(),
             field.getReferencedField().getIdPk().toString(), false);
+        pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
+      }
+
+      // update or delete the dataflow referenced catalogue if required
+      updateDataflowReferencedCatalogue(field, dataflowId);
+    }
+  }
+
+
+  /**
+   * Update dataflow referenced catalogue.
+   *
+   * @param field the field
+   * @param dataflowId the dataflow id
+   */
+  private void updateDataflowReferencedCatalogue(FieldSchema field, Long dataflowId) {
+    if (DataType.EXTERNAL_LINK.equals(field.getType())
+        && field.getReferencedField().getDataflowId() != null) {
+      DataflowReferencedSchema dataflowReferenced =
+          dataflowReferencedRepository.findByDataflowId(field.getReferencedField().getDataflowId());
+      if (null != dataflowReferenced && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+        dataflowReferenced.getReferencedByDataflow().remove(dataflowId);
+        dataflowReferencedRepository.deleteByDataflowId(field.getReferencedField().getDataflowId());
+        if (!dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+          dataflowReferencedRepository.save(dataflowReferenced);
+        }
       }
     }
   }
@@ -1599,14 +1721,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId)
+  public void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId, Long datasetId)
       throws EEAException {
     TableSchema table = getTableSchema(tableSchemaId, datasetSchemaId);
     if (table != null && table.getRecordSchema() != null
         && table.getRecordSchema().getFieldSchema() != null) {
       table.getRecordSchema().getFieldSchema().forEach(field -> {
         try {
-          deleteFromPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
+          deleteFromPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field), datasetId);
         } catch (EEAException e) {
           LOG_ERROR.error("Error deleting the PK from the catalogue. Message: {}", e.getMessage(),
               e);
@@ -1632,12 +1754,33 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // After deleting the previous entries, we fill again the catalogue and references with the new
     // schema that has been restored
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(idDatasetSchema));
+    Long dataflowId = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
     if (dataschema.isPresent()) {
       for (TableSchema table : dataschema.get().getTableSchemas()) {
         for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
           if (field.getReferencedField() != null) {
-
             pkCatalogueMethod(idDataset, field);
+            // also, if the field it's external link, update the dataflow reference catalogue too
+            if (DataType.EXTERNAL_LINK.equals(field.getType())
+                && field.getReferencedField().getDataflowId() != null) {
+              DataflowReferencedSchema dataflowReferenced = dataflowReferencedRepository
+                  .findByDataflowId(field.getReferencedField().getDataflowId());
+
+              if (dataflowReferenced != null) {
+                if (null == dataflowReferenced.getReferencedByDataflow()) {
+                  dataflowReferenced.setReferencedByDataflow(new ArrayList<>());
+                }
+                dataflowReferenced.getReferencedByDataflow().add(dataflowId);
+                dataflowReferencedRepository
+                    .deleteByDataflowId(field.getReferencedField().getDataflowId());
+              } else {
+                dataflowReferenced = new DataflowReferencedSchema();
+                dataflowReferenced.setDataflowId(field.getReferencedField().getDataflowId());
+                dataflowReferenced.setReferencedByDataflow(new ArrayList<>());
+                dataflowReferenced.getReferencedByDataflow().add(dataflowId);
+              }
+              dataflowReferencedRepository.save(dataflowReferenced);
+            }
           }
         }
       }
@@ -2402,7 +2545,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           field.setIdRecord(newRecordId);
           // check if the field has referencedField, but the type is no LINK, set the referenced
           // part as null
-          if (!DataType.LINK.equals(field.getType()) && null != field.getReferencedField()) {
+          if (!(DataType.LINK.equals(field.getType())
+              || DataType.EXTERNAL_LINK.equals(field.getType()))
+              && null != field.getReferencedField()) {
             field.setReferencedField(null);
           }
           record.getFieldSchema().add(field);
@@ -2437,7 +2582,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void mapLinkResult(Long datasetId, Map<Long, List<FieldSchema>> mapDatasetIdFKRelations,
       FieldSchema fieldOrigin, FieldSchema fieldCreated) {
-    if (DataType.LINK.equals(fieldCreated.getType())) {
+    if (DataType.LINK.equals(fieldCreated.getType())
+        || DataType.EXTERNAL_LINK.equals(fieldCreated.getType())) {
       List<FieldSchema> listFK = new ArrayList<>();
       if (mapDatasetIdFKRelations.containsKey(datasetId)) {
         listFK = mapDatasetIdFKRelations.get(datasetId);
@@ -2472,7 +2618,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           field.setIdRecord(
               new ObjectId(dictionaryOriginTargetObjectId.get(field.getIdRecord().toString())));
         }
-        if (field.getReferencedField() != null && DataType.LINK.equals(field.getType())) {
+        if (field.getReferencedField() != null && (DataType.LINK.equals(field.getType())
+            || DataType.EXTERNAL_LINK.equals(field.getType()))) {
           referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the field updated with the objectIds of the imported dataset, we modify the field to
@@ -2482,11 +2629,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           String datasetSchemaId = getDatasetSchemaId(datasetId);
           updateForeignRelation(datasetId, fieldSchemaNoRulesMapper.entityToClass(field),
               datasetSchemaId);
-          DataType type =
-              updateFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.entityToClass(field));
+          DataType type = updateFieldSchema(datasetSchemaId,
+              fieldSchemaNoRulesMapper.entityToClass(field), datasetId, true);
           propagateRulesAfterUpdateSchema(datasetSchemaId,
               fieldSchemaNoRulesMapper.entityToClass(field), type, datasetId);
-          addToPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field));
+          addToPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field), datasetId);
         } catch (EEAException e) {
           LOG.error("Error importing the schema on the datasetId {} when there are links: {}",
               datasetId, e.getMessage(), e);

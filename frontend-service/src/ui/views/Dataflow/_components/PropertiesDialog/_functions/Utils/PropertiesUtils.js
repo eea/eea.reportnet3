@@ -15,7 +15,8 @@ const parseObligationsData = (data, format) => {
           reportingFrequency: data.obligations.reportingFrequency,
           nextReportDue: !isNil(data.obligations.expirationDate)
             ? dayjs(data.obligations.expirationDate).format(format)
-            : '-'
+            : '-',
+          id: data.obligations.obligationId
         }
       },
       {

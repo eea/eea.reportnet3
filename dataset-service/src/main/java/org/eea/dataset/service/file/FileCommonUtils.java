@@ -1,14 +1,20 @@
 package org.eea.dataset.service.file;
 
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -18,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,11 +48,18 @@ public class FileCommonUtils {
   @Autowired
   private RecordRepository recordRepository;
 
+  @Autowired
+  private TableRepository tableRepository;
+
   /**
    * The design dataset repository.
    */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
+
+  /** The validation controller. */
+  @Autowired
+  private ValidationControllerZuul validationController;
 
   /**
    * The Constant LOG.
@@ -251,5 +265,42 @@ public class FileCommonUtils {
     return designDatasetRepository.existsById(datasetId);
   }
 
+  /**
+   * Gets the errors.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param datasetSchema the dataset schema
+   * @return the errors
+   */
+  public FailedValidationsDatasetVO getErrors(Long datasetId, String idTableSchema,
+      DataSetSchemaVO datasetSchema) {
+    return validationController.getFailedValidationsByIdDataset(datasetId, 0, 1000000, null, true,
+        null, Arrays.asList(EntityTypeEnum.FIELD, EntityTypeEnum.RECORD),
+        getTableName(idTableSchema, datasetSchema), null);
+  }
 
+  /**
+   * Count records by table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  public Long countRecordsByTableSchema(String idTableSchema) {
+    return recordRepository.countByTableSchema(idTableSchema);
+  }
+
+  /**
+   * Gets the record values paginated.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @return the record values paginated
+   */
+  public List<RecordValue> getRecordValuesPaginated(@DatasetId Long datasetId, String idTableSchema,
+      Pageable pageable) {
+    return recordRepository.findOrderedNativeRecord(
+        tableRepository.findIdByIdTableSchema(idTableSchema), datasetId, pageable);
+  }
 }

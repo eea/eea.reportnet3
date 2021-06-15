@@ -16,17 +16,17 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
    */
   private final SecurityContext delegateSecurityContext;
 
-  private static final Logger LOG = LoggerFactory
-      .getLogger(ValidationDelegatingSecurityContextRunnable.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(ValidationDelegatingSecurityContextRunnable.class);
 
   /**
-   * Creates a new {@link ValidationDelegatingSecurityContextRunnable} with a specific {@link
-   * SecurityContext}.
+   * Creates a new {@link ValidationDelegatingSecurityContextRunnable} with a specific
+   * {@link SecurityContext}.
    *
-   * @param delegate the delegate {@link Runnable} to run with the specified {@link
-   *     SecurityContext}. Cannot be null.
-   * @param securityContext the {@link SecurityContext} to establish for the delegate {@link
-   *     Runnable}. Cannot be null.
+   * @param delegate the delegate {@link Runnable} to run with the specified
+   *        {@link SecurityContext}. Cannot be null.
+   * @param securityContext the {@link SecurityContext} to establish for the delegate
+   *        {@link Runnable}. Cannot be null.
    */
   public ValidationDelegatingSecurityContextRunnable(Runnable delegate,
       SecurityContext securityContext) {
@@ -44,8 +44,8 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
    * Creates a new {@link DelegatingSecurityContextRunnable} with the {@link SecurityContext} from
    * the {@link SecurityContextHolder}.
    *
-   * @param delegate the delegate {@link Runnable} to run under the current {@link
-   *     SecurityContext}. Cannot be null.
+   * @param delegate the delegate {@link Runnable} to run under the current {@link SecurityContext}.
+   *        Cannot be null.
    */
   public ValidationDelegatingSecurityContextRunnable(Runnable delegate) {
     this(delegate, SecurityContextHolder.getContext());
@@ -76,11 +76,12 @@ public class ValidationDelegatingSecurityContextRunnable implements Runnable {
   /**
    * Factory method for creating a {@link DelegatingSecurityContextRunnable}.
    *
-   * @param delegate the original {@link Runnable} that will be delegated to after establishing
-   *     a {@link SecurityContext} on the {@link SecurityContextHolder}. Cannot have null.
-   * @param securityContext the {@link SecurityContext} to establish before invoking the
-   *     delegate {@link Runnable}. If null, the current {@link SecurityContext} from the {@link
-   *     SecurityContextHolder} will be used.
+   * @param delegate the original {@link Runnable} that will be delegated to after establishing a
+   *        {@link SecurityContext} on the {@link SecurityContextHolder}. Cannot have null.
+   * @param securityContext the {@link SecurityContext} to establish before invoking the delegate
+   *        {@link Runnable}. If null, the current {@link SecurityContext} from the
+   *        {@link SecurityContextHolder} will be used.
+   * @return the runnable
    */
   public static Runnable create(Runnable delegate, SecurityContext securityContext) {
     Assert.notNull(delegate, "delegate cannot be  null");

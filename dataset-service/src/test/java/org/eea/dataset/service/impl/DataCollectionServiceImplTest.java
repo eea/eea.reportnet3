@@ -307,7 +307,7 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.updateDataCollection(1L);
+    dataCollectionService.updateDataCollection(1L, false);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -378,7 +378,11 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -401,6 +405,9 @@ public class DataCollectionServiceImplTest {
     userRepresentationVO.setEmail("email@reportnet.net");
     design.setDataSetName("datasetName_");
     design.setDatasetSchema(new ObjectId().toString());
+    DesignDatasetVO design2 = new DesignDatasetVO();
+    design2.setDataSetName("datasetName2_");
+    design2.setDatasetSchema(new ObjectId().toString());
     representative.setId(1L);
     representative.setLeadReporters(leadReportersVO);
     representative.setDataProviderId(1L);
@@ -408,6 +415,7 @@ public class DataCollectionServiceImplTest {
     dataProvider.setId(1L);
     dataProvider.setLabel("label");
     designs.add(design);
+    designs.add(design2);
     representatives.add(representative);
     dataProviders.add(dataProvider);
     designsValue.add(designDataset);
@@ -444,6 +452,9 @@ public class DataCollectionServiceImplTest {
     DataSetSchemaVO schema = new DataSetSchemaVO();
     schema.setReferenceDataset(true);
     schema.setIdDataSetSchema(new ObjectId().toString());
+    DataSetSchemaVO schema2 = new DataSetSchemaVO();
+    schema2.setReferenceDataset(false);
+    schema2.setIdDataSetSchema(new ObjectId().toString());
     TableSchemaVO tableSchema = new TableSchemaVO();
     RecordSchemaVO recordSchema = new RecordSchemaVO();
     recordSchema.setIdRecordSchema(new ObjectId().toString());
@@ -457,8 +468,14 @@ public class DataCollectionServiceImplTest {
     recordSchema.setFieldSchema(Arrays.asList(fieldSchemaVO));
     tableSchema.setRecordSchema(recordSchema);
     schema.setTableSchemas(Arrays.asList(tableSchema));
+    schema2.setTableSchemas(Arrays.asList(tableSchema));
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema);
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), false, false, false);
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema2);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), false, false, false, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -483,18 +500,24 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
   @Test
   public void createEmptyDataCollectionReleaseLockTest() throws SQLException {
     List<DesignDatasetVO> designs = new ArrayList<>();
+    DesignDatasetVO design = new DesignDatasetVO();
+    designs.add(design);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    schema.setReferenceDataset(false);
+
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
@@ -533,7 +556,7 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -577,7 +600,7 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -596,6 +619,26 @@ public class DataCollectionServiceImplTest {
     fkData.setFks(Arrays.asList(referenced));
     dataCollectionService.addForeignRelationsFromNewReportings(Arrays.asList(fkData));
     Mockito.verify(foreignRelationsRepository, times(1)).saveAll(Mockito.any());
+  }
+
+
+  @Test
+  public void getDataflowMetabaseTest() {
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setId(1L);
+    DataFlowVO dataflow2 = new DataFlowVO();
+    dataflow2.setStatus(TypeStatusEnum.DRAFT);
+    dataflow2.setId(1L);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflow);
+    Assert.assertEquals(dataflow2, dataCollectionService.getDataflowMetabase(1L));
+  }
+
+  @Test
+  public void getDataflowMetabaseExceptionTest() {
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
+        .thenThrow(new RuntimeException());
+    Assert.assertNull(dataCollectionService.getDataflowMetabase(1L));
   }
 
 }

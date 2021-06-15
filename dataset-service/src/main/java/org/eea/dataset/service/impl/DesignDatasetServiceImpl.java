@@ -25,7 +25,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -46,9 +45,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class DesignDatasetServiceImpl.
@@ -103,9 +104,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   @Autowired
   FieldSchemaNoRulesMapper fieldSchemaNoRulesMapper;
 
-  /** The dataschema controller. */
-  @Autowired
-  private DatasetSchemaController dataschemaController;
 
   /** The rules controller zuul. */
   @Autowired
@@ -373,7 +371,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
           field.setIdRecord(newRecordId);
           // check if the field has referencedField, but the type is no LINK, set the referenced
           // part as null
-          if (!DataType.LINK.equals(field.getType()) && null != field.getReferencedField()) {
+          if (!(DataType.LINK.equals(field.getType())
+              || DataType.EXTERNAL_LINK.equals(field.getType()))
+              && null != field.getReferencedField()) {
             field.setReferencedField(null);
           }
           record.getFieldSchema().add(field);
@@ -407,7 +407,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    */
   private void mapLinkResult(Long datasetId, Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations,
       FieldSchemaVO fieldVO, FieldSchema field) {
-    if (DataType.LINK.equals(field.getType())) {
+    if (DataType.LINK.equals(field.getType()) || DataType.EXTERNAL_LINK.equals(field.getType())) {
       List<FieldSchemaVO> listFK = new ArrayList<>();
       if (mapDatasetIdFKRelations.containsKey(datasetId)) {
         listFK = mapDatasetIdFKRelations.get(datasetId);
@@ -437,15 +437,51 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         if (dictionaryOriginTargetObjectId.containsKey(field.getIdRecord())) {
           field.setIdRecord(dictionaryOriginTargetObjectId.get(field.getIdRecord()));
         }
-        if (field.getReferencedField() != null && DataType.LINK.equals(field.getType())) {
+        if (field.getReferencedField() != null && (DataType.LINK.equals(field.getType())
+            || DataType.EXTERNAL_LINK.equals(field.getType()))) {
           referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the fieldVO updated with the objectIds of the cloned dataset, we modify the field to
         // update all the things
         // related to the PK/FK
-        dataschemaController.updateFieldSchema(datasetId, field);
+        updateFieldSchema(datasetId, field);
       }
     });
+  }
+
+
+  /**
+   * Update field schema.
+   *
+   * @param datasetId the dataset id
+   * @param fieldSchemaVO the field schema VO
+   */
+  private void updateFieldSchema(Long datasetId, FieldSchemaVO fieldSchemaVO) {
+    try {
+      String datasetSchema = dataschemaService.getDatasetSchemaId(datasetId);
+      // Modify the register into the metabase fieldRelations
+      dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
+
+      // Clear the attachments if necessary
+      if (Boolean.TRUE.equals(
+          dataschemaService.checkClearAttachments(datasetId, datasetSchema, fieldSchemaVO))) {
+        datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
+      }
+
+      DataType type =
+          dataschemaService.updateFieldSchema(datasetSchema, fieldSchemaVO, datasetId, true);
+
+
+      // After the update, we create the rules needed and change the type of the field if
+      // neccessary
+      dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
+          datasetId);
+
+      // Add the Pk if needed to the catalogue
+      dataschemaService.addToPkCatalogue(fieldSchemaVO, datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
   }
 
 

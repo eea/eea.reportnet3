@@ -100,7 +100,9 @@ export const Map = ({
   );
 
   const [currentCRS, setCurrentCRS] = useState(
-    !isNil(selectedCRS) ? crs.filter(crsItem => crsItem.value === selectedCRS)[0] : selectedCRS
+    !isNil(selectedCRS)
+      ? crs.find(crsItem => crsItem.value === selectedCRS) || { label: 'WGS84 - 4326', value: 'EPSG:4326' }
+      : selectedCRS
   );
 
   const [newPositionMarker, setNewPositionMarker] = useState();
@@ -306,11 +308,13 @@ export const Map = ({
     setCurrentTheme(selectedTheme);
   };
 
+  const getSRID = srid => (!['EPSG:4326', 'EPSG:4258', 'EPSG:3035'].includes(srid) ? 'EPSG:4326' : srid);
+
   const projectGeoJsonCoordinates = (geoJsonData, isCenter = false) => {
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
     const projectPoint = coordinate => {
       return proj4(
-        proj4(!isNil(parsedGeoJsonData) ? parsedGeoJsonData.properties.srid : currentCRS.value),
+        proj4(!isNil(parsedGeoJsonData) ? getSRID(parsedGeoJsonData.properties.srid) : currentCRS.value),
         proj4('EPSG:4326'),
         coordinate
       );
@@ -322,9 +326,13 @@ export const Map = ({
         return projectPoint(parsedGeoJsonData.geometry.coordinates);
       } else {
         let projectedCoordinates = [];
-        if (['POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING'].includes(geometryType)) {
+        if (['POLYGON', 'MULTILINESTRING'].includes(geometryType)) {
           projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(ring =>
             ring.map(coordinate => projectPoint(coordinate))
+          );
+        } else if (['MULTIPOLYGON'].includes(geometryType)) {
+          projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(polygon =>
+            polygon.map(ring => ring.map(coordinate => projectPoint(coordinate)))
           );
         } else {
           projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(coordinate => projectPoint(coordinate));

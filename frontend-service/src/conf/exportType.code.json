@@ -15,10 +15,13 @@
       "code": "xlsx"
     },
     {
+      "text": "XLSX (.xlsx with validations)",
+      "code": "xlsx+validations"
+    },
+    {
       "text": "ZIP (XLSX + attachments)",
       "code": "zip+xlsx"
-    }
-    ,
+    },
     {
       "text": "ZIP (CSV for each table)",
       "code": "zip+csv"

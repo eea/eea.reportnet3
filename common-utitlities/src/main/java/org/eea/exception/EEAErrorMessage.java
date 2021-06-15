@@ -331,6 +331,14 @@ public final class EEAErrorMessage {
   public static final String USER_AND_COUNTRY_EXIST =
       "Email and country already exist in this dataflow";
 
+  /** The Constant NOT_DESIGN_TO_DATACOLLECTION: {@value}. */
+  public static final String NOT_DESIGN_TO_DATACOLLECTION =
+      "There aren't design datasets to create to datacollection";
+
+  /** The Constant NOT_REFERENCE_TO_PROCESS: {@value}. */
+  public static final String NOT_REFERENCE_TO_PROCESS =
+      "There aren't reference datasets to process";
+
   /**
    * Instantiates a new EEA error message.
    */

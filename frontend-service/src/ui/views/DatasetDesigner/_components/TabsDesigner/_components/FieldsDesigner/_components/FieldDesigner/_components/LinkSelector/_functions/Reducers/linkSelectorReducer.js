@@ -32,6 +32,12 @@ export const linkSelectorReducer = (state, { type, payload }) => {
         ...state,
         pkMasterTableConditional: payload
       };
+
+    case 'SET_REFERENCE_DATAFLOW':
+      return {
+        ...state,
+        selectedReferenceDataflow: payload
+      };
     default:
       return state;
   }

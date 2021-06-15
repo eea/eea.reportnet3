@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -16,6 +17,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
+import ReactTooltip from 'react-tooltip';
 import { TextUtils, RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
@@ -193,39 +195,74 @@ export const useSetColumns = (
   };
 
   const getTooltipMessage = column => {
-    return !isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)
-      ? `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
-        <span style="font-weight:bold">Description:</span> ${
-          !isNil(column.description) && column.description !== ''
-            ? column.description
-            : resources.messages['noDescription']
-        }<br/><span style="font-weight:bold">${
-          column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']
-        }: </span>
-        ${column.codelistItems
-          .map(codelistItem =>
-            !isEmpty(codelistItem) && codelistItem.length > 15 ? `${codelistItem.substring(0, 15)}...` : codelistItem
-          )
-          .join('; ')}`
-      : `<span style="font-weight:bold">Type:</span> ${RecordUtils.getFieldTypeValue(column.type)}
-      <span style="font-weight:bold">Description:</span> ${
-        !isNil(column.description) && column.description !== '' && column.description.length > 35
-          ? column.description.substring(0, 35)
-          : isNil(column.description) || column.description === ''
-          ? resources.messages['noDescription']
-          : column.description
-      }${
-          column.type === 'ATTACHMENT'
-            ? `<br/><span style="font-weight:bold">${resources.messages['validExtensions']}</span> ${
-                !isEmpty(column.validExtensions) ? column.validExtensions.join(', ') : '*'
-              }
-    <span style="font-weight:bold">${resources.messages['maxFileSize']}</span> ${
-                !isNil(column.maxSize) && column.maxSize.toString() !== '0'
-                  ? `${column.maxSize} ${resources.messages['MB']}`
-                  : resources.messages['maxSizeNotDefined']
-              }`
-            : ''
-        }`;
+    if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
+      return (
+        <>
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {RecordUtils.getFieldTypeValue(column.type)}
+          </span>
+          <br />
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {!isNil(column.description) && column.description !== ''
+              ? column.description
+              : resources.messages['noDescription']}
+          </span>
+          <br />
+          <span style={{ fontWeight: 'bold' }}>
+            {column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']}:{' '}
+          </span>
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {column.codelistItems
+              .map(codelistItem =>
+                !isEmpty(codelistItem) && codelistItem.length > 15
+                  ? `${codelistItem.substring(0, 15)}...`
+                  : codelistItem
+              )
+              .join('; ')}
+          </span>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {RecordUtils.getFieldTypeValue(column.type)}
+          </span>
+          <br />
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
+          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+            {!isNil(column.description) && column.description !== '' && column.description.length > 35
+              ? `${column.description.substring(0, 35)}...`
+              : isNil(column.description) || column.description === ''
+              ? resources.messages['noDescription']
+              : column.description}
+          </span>
+          {column.type === 'ATTACHMENT' ? (
+            <>
+              <br />
+              <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
+              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+                {!isEmpty(column.validExtensions)
+                  ? column.validExtensions.map(extension => `.${extension}`).join(', ')
+                  : '*'}
+              </span>
+              <br />
+              <span style={{ fontWeight: 'bold' }}>{resources.messages['maxFileSize']}</span>
+              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
+                {!isNil(column.maxSize) && column.maxSize.toString() !== '0'
+                  ? ` ${column.maxSize} ${resources.messages['MB']}`
+                  : resources.messages['maxSizeNotDefined']}
+              </span>
+            </>
+          ) : (
+            ''
+          )}
+        </>
+      );
+    }
   };
 
   const dataTemplate = (rowData, column) => {
@@ -253,7 +290,8 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+                (!isNil(field.fieldData[column.field]) &&
+                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
               ? !Array.isArray(field.fieldData[column.field])
                 ? splitByChar(field.fieldData[column.field], ';')
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
@@ -293,7 +331,8 @@ export const useSetColumns = (
               : (!isNil(field.fieldData[column.field]) &&
                   field.fieldData[column.field] !== '' &&
                   field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) && field.fieldData.type === 'LINK')
+                (!isNil(field.fieldData[column.field]) &&
+                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
               ? !Array.isArray(field.fieldData[column.field])
                 ? splitByChar(field.fieldData[column.field], ';')
                     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
@@ -351,15 +390,32 @@ export const useSetColumns = (
                 />
               )}
               {column.header}
-              <Button
-                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
-                icon="infoCircle"
-                onClick={() => {
-                  onShowFieldInfo(column.header, true);
-                }}
-                tooltip={getTooltipMessage(column)}
-                tooltipOptions={{ position: 'top' }}
-              />
+              <span data-for={`infoCircleButton_${i}`} data-tip>
+                <Button
+                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
+                  icon="infoCircle"
+                  onClick={() => {
+                    onShowFieldInfo(column.header, true);
+                  }}
+                />
+              </span>
+              <ReactTooltip
+                effect="solid"
+                getContent={() =>
+                  ReactDOMServer.renderToStaticMarkup(
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start'
+                      }}>
+                      {getTooltipMessage(column)}
+                    </div>
+                  )
+                }
+                html={true}
+                id={`infoCircleButton_${i}`}
+                place="top"></ReactTooltip>
             </Fragment>
           }
           key={column.field}

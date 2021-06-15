@@ -5,6 +5,19 @@ import dayjs from 'dayjs';
 
 import { getSelectedFieldById } from './getSelectedFieldById';
 
+const getDateFormattedField = (field, format) => {
+  return dayjs(field).format(format);
+};
+const getPrefixedExpression = ({ expression, tabs, prefix, expressionEnd }) => {
+  return `( ${prefix}( ${getSelectedFieldById(expression.field1, tabs).label} ) ${
+    expression.operatorValue
+  } ${expressionEnd} )`;
+};
+
+const getExpressionString = ({ expression, tabs, expressionEnd = '' }) => {
+  return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${expressionEnd} )`;
+};
+
 const printExpression = (expression, tabs) => {
   if (
     !isNil(expression.operatorValue) &&
@@ -12,37 +25,71 @@ const printExpression = (expression, tabs) => {
     !isNil(expression.field2) &&
     expression.field2 !== ''
   ) {
-    if (expression.operatorType === 'LEN') {
-      if (expression.valueTypeSelector !== 'value') {
-        return `( LEN( ${getSelectedFieldById(expression.field1, tabs).label} ) ${expression.operatorValue} ${
-          getSelectedFieldById(expression.field2, tabs).label
-        } )`;
+    if (expression.valueTypeSelector === 'value') {
+      const expressionParameters = {
+        expression,
+        tabs,
+        expressionEnd: expression.field2
+      };
+      switch (expression.operatorType) {
+        case 'LEN':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'LEN' });
+        case 'date':
+          return getExpressionString({
+            ...expressionParameters,
+            expressionEnd: getDateFormattedField(expression.field2, 'YYYY-MM-DD')
+          });
+        case 'year':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });
+        case 'month':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Month' });
+        case 'day':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Day' });
+        case 'dateTime':
+          return getExpressionString({
+            ...expressionParameters,
+            expressionEnd: getDateFormattedField(expression.field2, 'YYYY-MM-DD HH:mm:ss')
+          });
+        case 'yearDateTime':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });
+        case 'monthDateTime':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Month' });
+        case 'dayDateTime':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Day' });
+        default:
+          return getExpressionString({ ...expressionParameters });
       }
-      return `( LEN( ${getSelectedFieldById(expression.field1, tabs).label} ) ${expression.operatorValue} ${
-        expression.field2
-      } )`;
+    } else {
+      const expressionParameters = {
+        expression,
+        tabs,
+        expressionEnd: getSelectedFieldById(expression.field2, tabs).label
+      };
+      switch (expression.operatorType) {
+        case 'LEN':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'LEN' });
+        case 'year':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });
+        case 'month':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Month' });
+        case 'day':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Day' });
+        case 'yearDateTime':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });
+        case 'monthDateTime':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Month' });
+        case 'dayDateTime':
+          return getPrefixedExpression({ ...expressionParameters, prefix: 'Day' });
+        default:
+          return getExpressionString({ ...expressionParameters });
+      }
     }
-
-    if (expression.valueTypeSelector !== 'value') {
-      return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${
-        getSelectedFieldById(expression.field2, tabs).label
-      } )`;
-    }
-
-    let field2Value = expression.field2;
-    if (expression.operatorType === 'date') {
-      field2Value = dayjs(expression.field2).format('YYYY-MM-DD');
-    } else if (expression.operatorType === 'dateTime') {
-      field2Value = dayjs(expression.field2).format('YYYY-MM-DD HH:mm:ss');
-    }
-
-    return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue} ${field2Value} )`;
   } else if (
     !isNil(expression.operatorValue) &&
     !isEmpty(expression.operatorValue) &&
     (expression.operatorValue === 'IS NULL' || expression.operatorValue === 'IS NOT NULL')
   ) {
-    return `( ${getSelectedFieldById(expression.field1, tabs).label} ${expression.operatorValue}  )`;
+    return getExpressionString({ expression, tabs });
   }
   return '';
 };

@@ -30,7 +30,7 @@ public interface SimpleDataSchemaMapper extends IMapper<DataSetSchema, SimpleDat
   /**
    * Entity to class.
    *
-   * @param model the model
+   * @param tableSchema the table schema
    * @return the field schema VO
    */
   @Mapping(source = "nameTableSchema", target = "tableName")

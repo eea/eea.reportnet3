@@ -33,8 +33,8 @@ export const getRowExpressionFromDTO = (expression, allExpressions, parentUnion)
   if (isObject(expression.params[1])) {
     newExpression.operatorType = getExpressionOperatorType(expression.params[1].operator, 'row');
     if (
-      newExpression.operatorType === 'date' ||
-      (newExpression.operatorType === 'dateTime' && newExpression.valueTypeSelector === 'value')
+      (newExpression.operatorType === 'date' || newExpression.operatorType === 'dateTime') &&
+      newExpression.valueTypeSelector === 'value'
     ) {
       newExpression.field2 = new Date(expression.params[1].params[0]);
     } else {
@@ -43,8 +43,8 @@ export const getRowExpressionFromDTO = (expression, allExpressions, parentUnion)
   } else {
     newExpression.operatorType = getExpressionOperatorType(expression.operator, 'row');
     if (
-      newExpression.operatorType === 'date' ||
-      (newExpression.operatorType === 'dateTime' && newExpression.valueTypeSelector === 'value')
+      (newExpression.operatorType === 'date' || newExpression.operatorType === 'dateTime') &&
+      newExpression.valueTypeSelector === 'value'
     ) {
       newExpression.field2 = new Date(expression.params[1]);
     } else {

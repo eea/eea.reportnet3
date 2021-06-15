@@ -7,6 +7,9 @@ import org.eea.dataset.mapper.ReferenceDatasetMapper;
 import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
+import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -36,6 +39,12 @@ public class ReferenceDatasetServiceImplTest {
   @Mock
   private ReferenceDatasetPublicMapper referenceDatasetPublicMapper;
 
+  @Mock
+  private DataflowReferencedRepository dataflowReferencedRepository;
+
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
+
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
@@ -61,6 +70,17 @@ public class ReferenceDatasetServiceImplTest {
         .thenReturn(references);
     referenceDatasetService.getReferenceDatasetPublicByDataflow(1L);
     Mockito.verify(referenceDatasetRepository, times(1)).findByDataflowId(Mockito.any());
+  }
+
+  @Test
+  public void getDataflowsReferencedTest() {
+    DataflowReferencedSchema dataflow = new DataflowReferencedSchema();
+    dataflow.setReferencedByDataflow(new ArrayList<>());
+    dataflow.getReferencedByDataflow().add(1L);
+    Mockito.when(dataflowReferencedRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(dataflow);
+    referenceDatasetService.getDataflowsReferenced(1L);
+    Mockito.verify(dataflowControllerZuul, times(1)).getMetabaseById(Mockito.any());
   }
 
 }

@@ -15,6 +15,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
+import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -56,8 +57,8 @@ export const FieldsDesigner = ({
   const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState();
-  const [indexToDelete, setIndexToDelete] = useState();
   const [fieldToDeleteType, setFieldToDeleteType] = useState();
+  const [indexToDelete, setIndexToDelete] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
@@ -87,7 +88,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(fields)) {
       setIsCodelistOrLink(
         fields.filter(field =>
-          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
+          ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
         ).length > 0
       );
     }
@@ -97,11 +98,14 @@ export const FieldsDesigner = ({
     setIsCodelistOrLink(
       fields.filter(field => {
         return (
-          ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase()) &&
-          field.fieldId !== fieldId
+          ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(
+            field.type.toUpperCase()
+          ) && field.fieldId !== fieldId
         );
       }).length > 0 ||
-        ['CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'ATTACHMENT'].includes(selectedField.fieldType.toUpperCase())
+        ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(
+          selectedField.fieldType.toUpperCase()
+        )
     );
   };
 
@@ -138,7 +142,11 @@ export const FieldsDesigner = ({
       type,
       validExtensions
     });
-    onChangeFields(inmFields, TextUtils.areEquals(type, 'LINK'), table.tableSchemaId);
+    onChangeFields(
+      inmFields,
+      TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK'),
+      table.tableSchemaId
+    );
     setFields(inmFields);
   };
 
@@ -246,7 +254,11 @@ export const FieldsDesigner = ({
       if (status >= 200 && status <= 299) {
         const inmFields = [...fields];
         inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(inmFields, TextUtils.areEquals(deletedFieldType, 'LINK'), table.tableSchemaId);
+        onChangeFields(
+          inmFields,
+          TextUtils.areEquals(deletedFieldType, 'LINK') || TextUtils.areEquals(deletedFieldType, 'EXTERNAL_LINK'),
+          table.tableSchemaId
+        );
         setFields(inmFields);
       }
     } catch (error) {
@@ -277,33 +289,42 @@ export const FieldsDesigner = ({
     const link = {};
     let tableSchema = '';
 
-    if (!isNil(datasetSchemas)) {
-      datasetSchemas.forEach(schema => {
-        if (!isNil(schema.tables)) {
-          schema.tables.forEach(table => {
-            if (!table.addTab && !isNil(table.records)) {
-              table.records.forEach(record => {
-                if (!isNil(record.fields)) {
-                  record.fields.forEach(field => {
-                    if (!isNil(field) && field.fieldId === referencedField.idPk) {
-                      link.name = `${table.tableSchemaName} - ${field.name}`;
-                      link.value = `${table.tableSchemaName} - ${field.fieldId}`;
-                      link.disabled = false;
-                      tableSchema = table.tableSchemaId;
-                    }
-                  });
-                }
-              });
-            }
+    datasetSchemas?.forEach(schema => {
+      schema.tables?.forEach(table => {
+        !table.addTab &&
+          table.records?.forEach(record => {
+            record.fields?.forEach(field => {
+              if (field?.fieldId === referencedField.idPk) {
+                link.name = `${table.tableSchemaName} - ${field.name}`;
+                link.value = `${table.tableSchemaName} - ${field.fieldId}`;
+                link.disabled = false;
+                tableSchema = table.tableSchemaId;
+              }
+            });
           });
-        }
       });
-    }
+    });
 
     link.referencedField = {
       datasetSchemaId: referencedField.idDatasetSchema,
       fieldSchemaId: referencedField.idPk,
       tableSchemaId: tableSchema
+    };
+    return link;
+  };
+
+  const getExternalReferencedFieldName = referencedField => {
+    const link = {};
+    link.name = `${referencedField.tableSchemaName} - ${referencedField.fieldSchemaName}`;
+    link.value = `${referencedField.tableSchemaName} - ${referencedField.idPk}`;
+    link.disabled = false;
+
+    link.referencedField = {
+      dataflowId: referencedField.dataflowId,
+      datasetSchemaId: referencedField.idDatasetSchema,
+      fieldSchemaId: referencedField.idPk,
+      fieldSchemaName: referencedField.fieldSchemaName,
+      tableSchemaName: referencedField.tableSchemaName
     };
     return link;
   };
@@ -423,6 +444,7 @@ export const FieldsDesigner = ({
           fieldRequired={false}
           fieldType=""
           fieldValue=""
+          fields={fields}
           hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
@@ -458,7 +480,13 @@ export const FieldsDesigner = ({
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldId={field.fieldId}
-                fieldLink={!isNull(field.referencedField) ? getReferencedFieldName(field.referencedField) : null}
+                fieldLink={
+                  !isNull(field.referencedField)
+                    ? !TextUtils.areEquals(field.type, 'external_link')
+                      ? getReferencedFieldName(field.referencedField)
+                      : getExternalReferencedFieldName(field.referencedField)
+                    : null
+                }
                 fieldLinkedTableConditional={
                   !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
                 }
@@ -472,6 +500,7 @@ export const FieldsDesigner = ({
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
+                fields={fields}
                 fieldType={field.type}
                 fieldValue={field.value}
                 hasPK={fields.filter(field => field.pk).length > 0}
