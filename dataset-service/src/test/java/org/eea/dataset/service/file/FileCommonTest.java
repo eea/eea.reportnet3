@@ -171,10 +171,10 @@ public class FileCommonTest {
    * @throws EEAException
    */
   @Test
-  public void testGetDataSetSchema() throws EEAException {
+  public void testGetDataSetSchemaVO() throws EEAException {
     when(dataSetSchemaService.getDataSchemaByDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(dataset);
-    assertEquals("fail", dataset, fileCommon.getDataSetSchema(1L, 1L));
+    assertEquals("fail", dataset, fileCommon.getDataSetSchemaVO(1L, 1L));
   }
 
 

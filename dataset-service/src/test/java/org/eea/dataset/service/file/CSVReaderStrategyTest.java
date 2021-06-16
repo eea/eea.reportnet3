@@ -65,9 +65,10 @@ public class CSVReaderStrategyTest {
     ArrayList<TableSchema> tables = new ArrayList<>();
     ArrayList<FieldSchema> fields = new ArrayList<>();
     dataSet = new DataSetSchema();
+    dataSet.setIdDataSetSchema(new ObjectId());
     TableSchema table = new TableSchema();
     table.setNameTableSchema("tabla1");
-    table.setIdTableSchema(new ObjectId());
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
     table.setFixedNumber(false);
     RecordSchema record = new RecordSchema();
     record.setIdRecordSchema(new ObjectId());
@@ -92,13 +93,17 @@ public class CSVReaderStrategyTest {
    */
   @Test
   public void testParseFile() throws EEAException {
-
-    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    when(fileCommon.isDesignDataset(Mockito.any())).thenReturn(false);
+    // when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
-        Mockito.any(DataSetSchema.class))).thenReturn(new FieldSchema());
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
         dataSet);
-    Mockito.verify(fileCommon, times(1)).findIdFieldSchema(Mockito.any(), Mockito.any(),
+    Mockito.verify(fileCommon, times(3)).findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class));
   }
 
@@ -115,7 +120,7 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    // when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
     csvReaderStrategy.parseFile(input, 1L, null, null, null, csv, false, dataSet);
   }
 

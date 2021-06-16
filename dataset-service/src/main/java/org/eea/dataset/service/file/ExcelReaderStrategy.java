@@ -97,8 +97,6 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema)
       throws EEAException {
 
-    DataSetSchema dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
-
     try (Workbook workbook = WorkbookFactory.create(inputStream)) {
 
       List<TableValue> tables = new ArrayList<>();
@@ -106,18 +104,18 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       if (null == idTableSchema) {
         LOG.info("Reading all Excel's file pages");
         for (Sheet sheet : workbook) {
-          tables.add(
-              createTable(sheet, fileCommon.getIdTableSchema(sheet.getSheetName(), dataSetSchema),
-                  dataSetSchema, partitionId));
+          tables.add(createTable(sheet, fileCommon.getIdTableSchema(sheet.getSheetName(), schema),
+              schema, partitionId));
         }
       } else {
         LOG.info("Reading the first Excel's file page");
-        tables.add(createTable(workbook.getSheetAt(0), idTableSchema, dataSetSchema, partitionId));
+        tables.add(createTable(workbook.getSheetAt(0), idTableSchema, schema, partitionId));
       }
 
       LOG.info("Finishing reading Exel file");
-      createDataSet(dataSetSchema, tables, idTableSchema, fileName, replace, schema);
-    } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
+      createDataSet(schema, tables, idTableSchema, fileName, replace, schema);
+    } catch (EncryptedDocumentException | InvalidFormatException | IOException
+        | IllegalArgumentException e) {
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
   }

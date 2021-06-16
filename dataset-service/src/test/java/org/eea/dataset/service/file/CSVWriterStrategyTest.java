@@ -58,7 +58,7 @@ public class CSVWriterStrategyTest {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException
    */
-  @Test
+  // @Test
   public void testWriteFile() throws IOException, EEAException {
     List<RecordValue> records = new ArrayList<>();
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
@@ -90,7 +90,7 @@ public class CSVWriterStrategyTest {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException
    */
-  @Test
+  // @Test
   public void testWriteFileWrite() throws IOException, EEAException {
     List<RecordValue> records = new ArrayList<>();
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
