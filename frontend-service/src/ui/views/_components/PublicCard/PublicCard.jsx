@@ -61,9 +61,7 @@ export const PublicCard = ({
     return (
       <div className={styles.content}>
         <div className={styles.text}>
-          <h3 className={`${styles.title} ${styles.link}`} title={title.text}>
-            {title.text}
-          </h3>
+          <h3 className={`${styles.title} ${styles.link}`}>{title.text}</h3>
           <h4 className={styles.subtitle} data-for={idTooltip} data-tip>
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>

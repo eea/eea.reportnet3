@@ -375,6 +375,9 @@ export const Filters = ({
             {resources.messages[property]}
           </label>
         </span>
+        <label className="srOnly" htmlFor={inputId}>
+          {resources.messages[property]}
+        </label>
       </span>
     );
   };
@@ -473,6 +476,9 @@ export const Filters = ({
           {resources.messages[property]}
         </label>
       </span>
+      <label className="srOnly" htmlFor={`${property}_input`}>
+        {resources.messages[property]}
+      </label>
     </span>
   );
 
