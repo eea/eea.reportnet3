@@ -31,6 +31,10 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
 
+  const {
+    params: { errorType: urlErrorType }
+  } = match;
+
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
   useEffect(() => {
@@ -45,11 +49,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
     if (!isNil(urlErrorType)) {
       notificationContext.add({ type: ErrorUtils.parseErrorType(urlErrorType) });
     }
-  }, []);
-
-  const {
-    params: { errorType: urlErrorType }
-  } = match;
+  }, [urlErrorType]);
 
   const handleRedirect = target => history.push(target);
 
