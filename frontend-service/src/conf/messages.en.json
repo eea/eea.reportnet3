@@ -860,7 +860,7 @@
     "releasingLeftSideBarButton": "Releasing status",
     "rename": "Rename",
     "replaceData": "Replace data",
-    "reporterEmptyUserRightList": "There are no reporters created for the dataflow.",
+    "reporterEmptyUserRightList": "There are no reporters added for the dataflow.",
     "reporterNotMatchingFilter": "There are no reporters with the selected parameters",
     "reportersEmailColumn": "Reporter email",
     "reportersRightsDialogConfirmDeleteHeader": "Delete reporter",
