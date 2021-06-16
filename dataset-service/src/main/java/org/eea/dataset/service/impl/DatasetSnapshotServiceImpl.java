@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -286,6 +287,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
+      TimeZone.setDefault(TimeZone.getTimeZone("CET"));
       snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
       snap.setDescription(createSnapshotVO.getDescription());
       DataSetMetabase dataset = new DataSetMetabase();
@@ -593,6 +595,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()) {
       // 1. Create the snapshot in the metabase
       SnapshotSchema snap = new SnapshotSchema();
+      TimeZone.setDefault(TimeZone.getTimeZone("CET"));
       snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
       snap.setDescription(description);
       DesignDataset designDataset = new DesignDataset();
