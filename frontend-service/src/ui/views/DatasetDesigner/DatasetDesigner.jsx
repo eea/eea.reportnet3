@@ -295,7 +295,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
-    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
+    const internalExtensionsList = config.exportTypes.exportDatasetTypes.map(type => {
       const extensionsTypes = !isNil(type.code) && type.code.split('+');
       return {
         command: () => onExportDataInternalExtension(type.code),
@@ -321,20 +321,49 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
-      payload: { exportList: internalExtensionList.concat(externalIntegrationsNames) }
+      payload: { exportList: internalExtensionsList.concat(externalIntegrationsNames) }
     });
   };
 
   const getImportList = () => {
+    const internalExtensionsList = config.importTypes.importDatasetTypes.map(type => {
+      const extensionsTypes = !isNil(type.code) && type.code.split('+');
+      return {
+        command: () => {
+          manageDialogs('isImportDatasetDialogVisible', true);
+          designerDispatch({
+            type: 'GET_SELECTED_IMPORT_EXTENSION',
+            payload: { selectedImportExtension: type.code }
+          });
+        },
+        icon: extensionsTypes[0],
+        label: type.text
+      };
+    });
+
     const { externalOperationsList } = designerState;
 
-    const importFromFile = [
-      {
-        command: () => manageDialogs('isImportDatasetDialogVisible', true),
-        icon: 'upload',
-        label: resources.messages['importFromFile']
-      }
-    ];
+    const importFromFile = !isEmpty(externalOperationsList.import)
+      ? [
+          {
+            label: resources.messages['customImports'],
+            items: externalOperationsList.import.map(type => {
+              return {
+                command: () => {
+                  manageDialogs('isImportDatasetDialogVisible', true);
+                  designerDispatch({
+                    type: 'GET_SELECTED_IMPORT_EXTENSION',
+                    payload: { selectedImportExtension: type.fileExtension }
+                  });
+                  setImportSelectedIntegrationId(type.id);
+                },
+                icon: type.fileExtension,
+                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+              };
+            })
+          }
+        ]
+      : [];
 
     const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
       ? [
@@ -353,7 +382,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         ]
       : [];
 
-    designerDispatch({ type: 'GET_IMPORT_LIST', payload: { importList: importFromFile.concat(importOtherSystems) } });
+    designerDispatch({
+      type: 'GET_IMPORT_LIST',
+      payload: { importList: internalExtensionsList.concat(importFromFile).concat(importOtherSystems) }
+    });
   };
 
   const getFileExtensions = async () => {
@@ -1208,11 +1240,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
                 icon={'import'}
                 label={resources.messages['importDataset']}
-                onClick={
-                  !isEmpty(designerState.externalOperationsList.importOtherSystems)
-                    ? event => importMenuRef.current.show(event)
-                    : () => manageDialogs('isImportDatasetDialogVisible', true)
-                }
+                onClick={event => importMenuRef.current.show(event)}
               />
               {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
                 <Menu id="importDataSetMenu" model={designerState.importButtonsList} popup={true} ref={importMenuRef} />
