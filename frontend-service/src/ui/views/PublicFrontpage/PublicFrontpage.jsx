@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -37,7 +37,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!themeContext.headerCollapse) {
       setContentStyles({ marginTop: `${config.theme.cookieConsentHeight + 6}px` });
     } else {
