@@ -283,7 +283,6 @@ public class ValidationHelperTest {
     rules.setRules(Arrays.asList(rule));
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rules);
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
-    Mockito.when(validationService.countFieldsDataset(Mockito.eq(1l))).thenReturn(1);
 
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -87,7 +86,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/dataset/create/{datasetName}")
+  @PostMapping(value = "/private/dataset/create/{datasetName}")
   public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
     try {
@@ -126,7 +125,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/connections")
+  @GetMapping(value = "/private/connections")
   public List<ConnectionDataVO> getDataSetConnections() {
     List<ConnectionDataVO> vo = null;
     try {
@@ -162,9 +161,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
       LOG.info("The user set on threadPropertiesManager is {}",
           ThreadPropertiesManager.getVariable("user"));
-      Date dateReleasing = null;
       if (StringUtils.isNotBlank(dateRelease)) {
-        dateReleasing = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
+        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
       }
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease);
       LOG.info("Snapshot created");
