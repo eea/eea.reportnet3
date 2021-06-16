@@ -8,6 +8,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,9 +75,11 @@ public class CSVWriterStrategyTest {
     fieldSchemas.add(fieldSchema);
     Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(records);
-    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
+    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any(DataSetSchemaVO.class)))
+        .thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "", true, false);
-    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(), Mockito.any());
+    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(),
+        Mockito.any(DataSetSchemaVO.class));
     Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
@@ -105,9 +108,11 @@ public class CSVWriterStrategyTest {
     fieldSchemas.add(fieldSchema);
     Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(records);
-    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any())).thenReturn(fieldSchemas);
+    Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any(DataSetSchemaVO.class)))
+        .thenReturn(fieldSchemas);
     csvWriterStrategy.writeFile(1L, 1L, "", false, false);
-    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(), Mockito.any());
+    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(),
+        Mockito.any(DataSetSchemaVO.class));
     Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),
         Mockito.any());
   }

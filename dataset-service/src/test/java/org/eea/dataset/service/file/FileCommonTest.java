@@ -162,12 +162,12 @@ public class FileCommonTest {
    */
   @Test
   public void getIdTableSchemaNull3() {
-    assertNull("fail", fileCommon.getIdTableSchema(ID, null));
+    assertNull("fail", fileCommon.getIdTableSchema(ID, (DataSetSchemaVO) null));
   }
 
   /**
    * Test get data set schema.
-   * 
+   *
    * @throws EEAException
    */
   @Test
@@ -220,13 +220,13 @@ public class FileCommonTest {
 
   @Test
   public void findFieldSchemasTest() {
-    ArrayList fields = new ArrayList<>();
+    List<FieldSchemaVO> fields = new ArrayList<>();
     fields.add(fieldSchema);
     assertEquals("fail", fields, fileCommon.findFieldSchemas(ID, dataset));
   }
 
   @Test
   public void findFieldSchemasNullTest() {
-    assertEquals("fail", null, fileCommon.findFieldSchemas(ID, null));
+    assertEquals("fail", null, fileCommon.findFieldSchemas(ID, (DataSetSchemaVO) null));
   }
 }

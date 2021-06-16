@@ -464,8 +464,7 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
 
-    Page<RecordValue> page = new PageImpl<>(records);
-    when(recordRepository.findAll(Mockito.any(Pageable.class))).thenReturn(page);
+    when(recordRepository.findRecordsPageable(Mockito.any(Pageable.class))).thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
 
@@ -501,7 +500,7 @@ public class ValidationServiceTest {
     when(fieldRepository.findAll(Mockito.any(Pageable.class))).thenReturn(page);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
-    validationServiceImpl.validateFields(1L, kieBase, PageRequest.of(0, 5000));
+    validationServiceImpl.validateFields(1L, kieBase, PageRequest.of(0, 5000), false);
 
   }
 
@@ -893,7 +892,7 @@ public class ValidationServiceTest {
    */
   @Test
   public void countFieldsDatasetTest() {
-    when(recordRepository.countFieldsDataset()).thenReturn(1);
+    when(fieldRepository.countFieldsDataset()).thenReturn(1);
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
 
@@ -958,6 +957,12 @@ public class ValidationServiceTest {
       assertEquals(EEAErrorMessage.VALIDATION_SESSION_ERROR, e.getLocalizedMessage());
       throw e;
     }
+  }
+
+  @Test
+  public void countEmptyFieldsDatasetTestSuccess() throws EEAException {
+    when(fieldRepository.countEmptyFieldsDataset()).thenReturn(1);
+    assertEquals((Integer) 1, validationServiceImpl.countEmptyFieldsDataset(1L));
   }
 
 }
