@@ -170,4 +170,13 @@ public interface IntegrationController {
    */
   @PostMapping("/private/createIntegrations")
   void createIntegrations(@RequestBody List<IntegrationVO> integrations);
+
+  /**
+   * Find integration by id.
+   *
+   * @param integrationId the integration id
+   * @return the integration VO
+   */
+  @GetMapping("/private/findIntegration/{integrationId}")
+  IntegrationVO findIntegrationById(@RequestParam("integrationId") Long integrationId);
 }

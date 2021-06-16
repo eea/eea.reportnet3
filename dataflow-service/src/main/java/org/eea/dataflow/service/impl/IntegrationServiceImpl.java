@@ -479,19 +479,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     lockService.removeLockByCriteria(insertRecordsMultitable);
   }
 
-  /**
-   * Creates the lock with signature.
-   *
-   * @param lockSignature the lock signature
-   * @param mapCriteria the map criteria
-   * @param userName the user name
-   * @throws EEAException the EEA exception
-   */
-  private void createLockWithSignature(Map<String, Object> lockCriteria) throws EEAException {
-    String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    lockService.createLock(new Timestamp(System.currentTimeMillis()), user, LockType.METHOD,
-        lockCriteria);
-  }
+
 
   /**
    * Adds the locks.
@@ -538,5 +526,43 @@ public class IntegrationServiceImpl implements IntegrationService {
     createLockWithSignature(deleteDatasetValues);
     createLockWithSignature(importFileData);
     createLockWithSignature(insertRecordsMultitable);
+  }
+
+
+
+  /**
+   * Gets the integration.
+   *
+   * @param integrationId the integration id
+   * @return the integration
+   */
+  @Override
+  public IntegrationVO getIntegration(Long integrationId) {
+
+    IntegrationVO integrationVO = null;
+    Integration integration = integrationRepository.findById(integrationId).orElse(null);
+    if (null != integration) {
+      integrationVO = integrationMapper.entityToClass(integration);
+    }
+
+    if (null == integrationVO) {
+      LOG_ERROR.error("No integration: integrationId={}", integrationId);
+    }
+    return integrationVO;
+  }
+
+
+  /**
+   * Creates the lock with signature.
+   *
+   * @param lockSignature the lock signature
+   * @param mapCriteria the map criteria
+   * @param userName the user name
+   * @throws EEAException the EEA exception
+   */
+  private void createLockWithSignature(Map<String, Object> lockCriteria) throws EEAException {
+    String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    lockService.createLock(new Timestamp(System.currentTimeMillis()), user, LockType.METHOD,
+        lockCriteria);
   }
 }

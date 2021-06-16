@@ -171,4 +171,13 @@ public interface IntegrationService {
   void addLocks(Long datasetId) throws EEAException;
 
 
+  /**
+   * Gets the integration.
+   *
+   * @param integrationId the integration id
+   * @return the integration
+   */
+  IntegrationVO getIntegration(Long integrationId);
+
+
 }
