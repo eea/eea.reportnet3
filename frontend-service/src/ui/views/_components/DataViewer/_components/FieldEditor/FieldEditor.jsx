@@ -204,7 +204,9 @@ const FieldEditor = ({
       const inputRect = element.getBoundingClientRect();
       const panelRect = panel.getBoundingClientRect();
       if (panelRect.right + panelRect.width > window.innerWidth) {
-        panel.style.offsetRight = `${window.innerWidth}px`;
+        panel.style.left = `${
+          inputRect.left - (Number(panelRect.width) - (Number(inputRect.right) - Number(inputRect.left)))
+        }px`;
       } else {
         panel.style.left = `${inputRect.left}px`;
       }
