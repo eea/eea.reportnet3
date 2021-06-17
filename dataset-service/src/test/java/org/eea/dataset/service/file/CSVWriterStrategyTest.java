@@ -40,7 +40,7 @@ public class CSVWriterStrategyTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.initMocks(this);
-    ReflectionTestUtils.setField(csvWriterStrategy, "delimiter", '|');
+    ReflectionTestUtils.setField(csvWriterStrategy, "delimiter", ',');
   }
 
   /**
@@ -48,7 +48,7 @@ public class CSVWriterStrategyTest {
    */
   @Test
   public void csvWriterStrategyTest() {
-    CSVWriterStrategy test = new CSVWriterStrategy('|', fileCommon);
+    CSVWriterStrategy test = new CSVWriterStrategy(',', fileCommon);
     assertNotNull("failed assertion", test);
   }
 

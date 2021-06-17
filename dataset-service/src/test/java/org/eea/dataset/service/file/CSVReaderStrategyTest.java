@@ -57,8 +57,8 @@ public class CSVReaderStrategyTest {
   @Before
   public void initMocks() throws IOException {
     MockitoAnnotations.initMocks(this);
-    ReflectionTestUtils.setField(csvReaderStrategy, "delimiter", '|');
-    String csv = "campo_1|campo_2|campo_3\r\n" + "B|C|D\r\n" + "\"I|I\"|I|I";
+    ReflectionTestUtils.setField(csvReaderStrategy, "delimiter", ',');
+    String csv = "campo_1,campo_2,campo_3\r\n" + "B,C,D\r\n" + "\"I,I\",I,I";
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
@@ -116,7 +116,7 @@ public class CSVReaderStrategyTest {
    */
   @Test(expected = InvalidFileException.class)
   public void testParseException() throws IOException, EEAException {
-    String csv = "\n TABLA1|B|C|D\r\n" + "TABLA1|\"I|I\"|I|I\r\n";
+    String csv = "\n TABLA1,B,C,D\r\n" + "TABLA1,\"I,I\",I,I\r\n";
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
