@@ -1243,7 +1243,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 onClick={event => importMenuRef.current.show(event)}
               />
               {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                <Menu id="importDataSetMenu" model={designerState.importButtonsList} popup={true} ref={importMenuRef} />
+                <Menu
+                  className={styles.menuWrapper}
+                  id="importDataSetMenu"
+                  model={designerState.importButtonsList}
+                  popup={true}
+                  ref={importMenuRef}
+                />
               )}
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
@@ -1256,7 +1262,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 onClick={event => exportMenuRef.current.show(event)}
               />
               <Menu
-                className={styles.exportSubmenu}
+                className={styles.menuWrapper}
                 id="exportDataSetMenu"
                 model={designerState.exportButtonsList}
                 popup={true}
