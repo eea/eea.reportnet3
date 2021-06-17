@@ -175,6 +175,7 @@ export const ManageReferenceDataflow = ({
         visible={isVisible}>
         <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
           <InputText
+            id="dataflowName"
             onChange={event => setName(event.target.value)}
             onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
             placeholder={resources.messages['createDataflowName']}
@@ -186,6 +187,7 @@ export const ManageReferenceDataflow = ({
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
+            id="dataflowDescription"
             onChange={event => setDescription(event.target.value)}
             onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
             placeholder={resources.messages['createDataflowDescription']}
@@ -216,14 +218,13 @@ export const ManageReferenceDataflow = ({
           <p>
             <InputText
               className={`${styles.inputText}`}
+              id="deleteDataflow"
               maxLength={255}
+              name={resources.messages['deleteDataflowButton']}
               onChange={event => setDeleteInput(event.target.value)}
               ref={deleteInputRef}
               value={deleteInput}
             />
-            <label className="srOnly" htmlFor="deleteDataflow">
-              {resources.messages['deleteDataflowButton']}
-            </label>
           </p>
         </ConfirmDialog>
       )}

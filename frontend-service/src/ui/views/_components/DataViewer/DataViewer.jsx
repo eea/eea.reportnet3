@@ -1041,9 +1041,18 @@ const DataViewer = withRouter(
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
             <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
           ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
-            <Chips className={styles.chips} disabled={true} pasteSeparator=";" value={rowData.value.split(';')}></Chips>
+            <Chips
+              className={styles.chips}
+              disabled={true}
+              name="Multiple/Single select items"
+              pasteSeparator=";"
+              value={rowData.value.split(';')}></Chips>
           ) : rowData.field === 'Valid extensions' ? (
-            <Chips className={styles.chips} disabled={true} value={rowData.value.split(',')}></Chips>
+            <Chips
+              className={styles.chips}
+              disabled={true}
+              name="Valid extensions"
+              value={rowData.value.split(',')}></Chips>
           ) : rowData.field === 'Maximum file size' ? (
             `${rowData.value} ${resources.messages['MB']}`
           ) : (

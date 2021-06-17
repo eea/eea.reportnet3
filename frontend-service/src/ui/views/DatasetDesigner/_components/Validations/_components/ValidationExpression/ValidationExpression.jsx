@@ -228,6 +228,7 @@ const ValidationExpression = ({
           <span className={styles.inputStringMatch}>
             <InputText
               disabled={isDisabled}
+              id="expressionValueStringMatch"
               onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
               placeholder={resourcesContext.messages.value}
               ref={inputStringMatchRef}
@@ -250,6 +251,7 @@ const ValidationExpression = ({
         return (
           <InputText
             disabled={isDisabled}
+            id="expressionValueNumberMatch"
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
@@ -262,6 +264,7 @@ const ValidationExpression = ({
           <InputText
             disabled={isDisabled}
             format="false"
+            id="expressionValueNumberDecimal"
             keyfilter={valueKeyFilter}
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
@@ -274,6 +277,7 @@ const ValidationExpression = ({
         <InputText
           disabled={isDisabled}
           format="false"
+          id="expressionValueNumber"
           keyfilter={valueKeyFilter}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
@@ -330,6 +334,7 @@ const ValidationExpression = ({
     return (
       <InputText
         disabled={isDisabled}
+        id="expressionValueDate"
         keyfilter={valueKeyFilter}
         onChange={e => {
           onUpdateExpressionField('expressionValue', e.target.value);

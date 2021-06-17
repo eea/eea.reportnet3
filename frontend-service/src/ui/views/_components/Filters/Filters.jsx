@@ -462,6 +462,7 @@ export const Filters = ({
         <InputText
           className={styles.inputFilter}
           id={`${property}_input`}
+          name={resources.messages[property]}
           onChange={event => onFilterData(property, event.target.value)}
           value={filterState.filterBy[property] ? filterState.filterBy[property] : ''}
         />
@@ -476,9 +477,6 @@ export const Filters = ({
           {resources.messages[property]}
         </label>
       </span>
-      <label className="srOnly" htmlFor={`${property}_input`}>
-        {resources.messages[property]}
-      </label>
     </span>
   );
 
@@ -501,14 +499,14 @@ export const Filters = ({
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <MultiSelect
-        ariaLabelledBy={property}
+        ariaLabelledBy={`${property}_input`}
         checkAllHeader={resources.messages['checkAllFilter']}
         className={styles.multiselectFilter}
         filter={showInput}
         headerClassName={styles.selectHeader}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
-        inputId={property}
+        inputId={`${property}_input`}
         isFilter
         itemTemplate={selectTemplate}
         label={resources.messages[property]}

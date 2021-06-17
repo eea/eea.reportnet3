@@ -943,7 +943,7 @@ export const FieldDesigner = ({
         onChange={e => onReadOnlyChange(e.checked)}
         style={{ width: '90px' }}
       />
-      <label className="srOnly" htmlFor={`${fieldId}_check_required`}>
+      <label className="srOnly" htmlFor={`${fieldId}_check_readOnly`}>
         {resources.messages['readOnly']}
       </label>
     </div>
@@ -1083,6 +1083,7 @@ export const FieldDesigner = ({
         id={fieldName}
         keyfilter="schemaTableFields"
         maxLength={60}
+        name={resources.messages['newFieldPlaceHolder']}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
@@ -1106,9 +1107,6 @@ export const FieldDesigner = ({
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
       />
-      <label className="srOnly" htmlFor={fieldName}>
-        {resources.messages['newFieldPlaceHolder']}
-      </label>
       <InputTextarea
         autoFocus={false}
         className={`${styles.inputFieldDescription} ${
@@ -1245,7 +1243,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
-          fieldId={fieldId}          
+          fieldId={fieldId}
           fields={fields}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isExternalLink={

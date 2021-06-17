@@ -1154,6 +1154,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   }}>
                   {resources.messages['referenceDataset']}
                 </label>
+                <label className="srOnly" htmlFor="reference_dataset_checkbox">
+                  {resources.messages['referenceDataset']}
+                </label>
               </div>
               <div>
                 <Checkbox
@@ -1183,6 +1186,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     marginRight: '6px',
                     opacity: isDesignDatasetEditorRead ? 0.5 : 1
                   }}>
+                  {resources.messages['availableInPublicView']}
+                </label>
+                <label className="srOnly" htmlFor="available_in_public_view_checkbox">
                   {resources.messages['availableInPublicView']}
                 </label>
               </div>

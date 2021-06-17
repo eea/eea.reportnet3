@@ -413,7 +413,6 @@ const LinkSelector = withRouter(
                   return (
                     <ListBox
                       key={`datasetSchema_${i}`}
-                      options={getOptions(datasetSchema)}
                       onChange={e => {
                         if (!isNil(e.value)) {
                           dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
@@ -422,6 +421,7 @@ const LinkSelector = withRouter(
                       }}
                       optionLabel="name"
                       optionValue="value"
+                      options={getOptions(datasetSchema)}
                       title={datasetSchema.datasetSchemaName}
                       value={link}></ListBox>
                   );
