@@ -5,7 +5,6 @@ import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 
 import styles from './DatasetDesigner.module.scss';
 
@@ -137,6 +136,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     referenceDataset: false,
     refresh: false,
     replaceData: false,
+    selectedImportExtension: null,
     schemaTables: [],
     tabs: [],
     uniqueConstraintsList: [],
@@ -405,11 +405,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     }
   };
 
-  const getImportExtensions = ['.zip']
-    .concat(designerState.externalOperationsList.import.map(file => `.${file.fileExtension}`))
-    .join(', ')
-    .toLowerCase();
-
   const getMetadata = async ids => {
     try {
       return await MetadataUtils.getMetadata(ids);
@@ -436,9 +431,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     designerDispatch({ type: 'SET_IS_TABLE_CREATED', payload: { isTableCreated } });
   };
 
-  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
-    getImportExtensions.split(', ')
-  ).join(', ')}`;
+  const validExtensions = `.${designerState.selectedImportExtension}`;
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${validExtensions}`;
 
   const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
@@ -1542,7 +1537,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
-            accept={getImportExtensions}
+            accept={validExtensions}
             chooseLabel={resources.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
