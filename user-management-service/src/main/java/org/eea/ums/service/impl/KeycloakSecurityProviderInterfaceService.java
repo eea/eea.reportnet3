@@ -428,11 +428,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource,
       ResourceTypeEnum resourceType) {
-    // we get all groups
-    GroupInfo[] groups = keycloakConnectorService.getGroups();
+
+
     List<ResourceInfoVO> resourceReturn = new ArrayList<>();
     // ge create the resource that we are looking for it to filter
     String resourceToContain = resourceType + "-" + idResource.toString() + "-";
+    // we get the groups
+    GroupInfo[] groups = keycloakConnectorService.getGroupsWithSearch(resourceToContain);
 
     // we do a for and find the data that we need
     if (null != groups && groups.length > 0) {
