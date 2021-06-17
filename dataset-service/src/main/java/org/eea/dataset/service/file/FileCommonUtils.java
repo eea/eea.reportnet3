@@ -181,7 +181,7 @@ public class FileCommonUtils {
     if (null != tablesSchema) {
       for (TableSchemaVO tableSchema : tablesSchema) {
         if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
-          idTable = tableSchema.getIdTableSchema().toString();
+          idTable = tableSchema.getIdTableSchema();
         }
       }
     }
@@ -315,24 +315,6 @@ public class FileCommonUtils {
       return recordSchema.getFieldSchema();
     }
     return null;
-  }
-
-  /**
-   * Gets the data set schema.
-   *
-   * @param dataflowId the dataflow id
-   * @param datasetId the dataset id
-   * @return the data set schema
-   * @throws EEAException the EEA exception
-   */
-  public DataSetSchema getDataSetSchema(Long dataflowId, Long datasetId) throws EEAException {
-    DataSetSchema dataSetSchema = null;
-    // get dataset schema from mongo DB
-    if (null != dataflowId) {
-      schemasRepository.findByIdDataSetSchema(
-          new ObjectId(dataSetMetabaseRepository.findById(datasetId).get().getDatasetSchema()));
-    }
-    return dataSetSchema;
   }
 
   /**
