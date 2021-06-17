@@ -71,6 +71,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const validationContext = useContext(ValidationContext);
 
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState();
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
@@ -1542,7 +1543,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
             dialogHeader={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
-            dialogOnHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
+            dialogOnHide={() => {
+              manageDialogs('isImportDatasetDialogVisible', false);
+              setImportSelectedIntegrationId(null);
+            }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
             fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
@@ -1554,9 +1558,16 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
-              datasetId: datasetId
-            })}`}
+            url={`${window.env.REACT_APP_BACKEND}${
+              isNil(importSelectedIntegrationId)
+                ? getUrl(DatasetConfig.importFileDataset, {
+                    datasetId: datasetId
+                  })
+                : getUrl(DatasetConfig.importFileDatasetExternal, {
+                    datasetId: datasetId,
+                    integrationId: importSelectedIntegrationId
+                  })
+            }`}
           />
         )}
 
