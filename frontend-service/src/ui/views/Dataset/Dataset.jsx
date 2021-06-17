@@ -677,42 +677,18 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       selectedRuleId: ''
     });
 
-  const onSelectValidation = (
-    tableSchemaId,
-    posIdRecord,
-    selectedRecordErrorId,
-    selectedRuleId,
-    grouped = true,
-    selectedRuleMessage = '',
-    selectedRuleLevelError = ''
-  ) => {
-    if (grouped) {
-      setDataViewerOptions({
-        ...dataViewerOptions,
-        isGroupedValidationDeleted: false,
-        isGroupedValidationSelected: true,
-        recordPositionId: -1,
-        selectedRecordErrorId: -1,
-        selectedRuleId,
-        selectedRuleLevelError,
-        selectedRuleMessage,
-        tableSchemaId
-      });
-    } else {
-      setDataViewerOptions({
-        ...dataViewerOptions,
-        activeIndex: tableSchemaId,
-        isGroupedValidationDeleted: false,
-        isGroupedValidationSelected: false,
-        isValidationSelected: true,
-        recordPositionId: posIdRecord,
-        selectedRecordErrorId,
-        selectedRuleId: '',
-        selectedRuleLevelError: '',
-        selectedRuleMessage: '',
-        tableSchemaId
-      });
-    }
+  const onSelectValidation = (tableSchemaId, selectedRuleId, selectedRuleMessage = '', selectedRuleLevelError = '') => {
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      isGroupedValidationDeleted: false,
+      isGroupedValidationSelected: true,
+      recordPositionId: -1,
+      selectedRecordErrorId: -1,
+      selectedRuleId,
+      selectedRuleLevelError,
+      selectedRuleMessage,
+      tableSchemaId
+    });
 
     onSetVisible(setValidationsVisible, false);
   };

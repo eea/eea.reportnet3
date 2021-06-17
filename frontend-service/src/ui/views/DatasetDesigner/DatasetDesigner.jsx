@@ -671,46 +671,20 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       }
     });
 
-  const onSelectValidation = (
-    tableSchemaId,
-    posIdRecord,
-    selectedRecordErrorId,
-    selectedRuleId,
-    grouped = true,
-    selectedRuleMessage = '',
-    selectedRuleLevelError = ''
-  ) => {
-    if (grouped) {
-      designerDispatch({
-        type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
-        payload: {
-          ...dataViewerOptions,
-          isGroupedValidationDeleted: false,
-          isGroupedValidationSelected: true,
-          recordPositionId: -1,
-          selectedRuleId,
-          selectedRuleLevelError,
-          selectedRuleMessage,
-          tableSchemaId
-        }
-      });
-    } else {
-      designerDispatch({
-        type: 'SET_DATAVIEWER_OPTIONS',
-        payload: {
-          ...dataViewerOptions,
-          isGroupedValidationDeleted: false,
-          isGroupedValidationSelected: false,
-          isValidationSelected: true,
-          recordPositionId: posIdRecord,
-          selectedRecordErrorId,
-          selectedRuleId: '',
-          selectedRuleLevelError: '',
-          selectedRuleMessage: '',
-          tableSchemaId
-        }
-      });
-    }
+  const onSelectValidation = (tableSchemaId, selectedRuleId, selectedRuleMessage = '', selectedRuleLevelError = '') => {
+    designerDispatch({
+      type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
+      payload: {
+        ...dataViewerOptions,
+        isGroupedValidationDeleted: false,
+        isGroupedValidationSelected: true,
+        recordPositionId: -1,
+        selectedRuleId,
+        selectedRuleLevelError,
+        selectedRuleMessage,
+        tableSchemaId
+      }
+    });
   };
 
   const onTabChange = table =>
