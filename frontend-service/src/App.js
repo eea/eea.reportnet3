@@ -114,8 +114,9 @@ const App = () => {
                                 exact
                                 path={routes.REFERENCE_DATASET}
                               />
+                              <Route component={PublicFrontpage} exact path={routes.ACCESS_POINT_ERROR} />
                               <Route>
-                                <Redirect to={'/dataflows/error/notFound'} />
+                                <Redirect to={'/error/notFound'} />
                               </Route>
                             </Switch>
                           </ScrollToTop>

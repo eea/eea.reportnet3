@@ -76,7 +76,8 @@ const FieldEditor = ({
       ? !MapUtils.checkValidCoordinates(
           RecordUtils.getCellValue(cells, cells.field) !== ''
             ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
-            : ''
+            : '',
+          true
         )
       : true
   );
@@ -203,7 +204,9 @@ const FieldEditor = ({
       const inputRect = element.getBoundingClientRect();
       const panelRect = panel.getBoundingClientRect();
       if (panelRect.right + panelRect.width > window.innerWidth) {
-        panel.style.offsetRight = `${window.innerWidth}px`;
+        panel.style.left = `${
+          inputRect.left - (Number(panelRect.width) - (Number(inputRect.right) - Number(inputRect.left)))
+        }px`;
       } else {
         panel.style.left = `${inputRect.left}px`;
       }
@@ -217,12 +220,12 @@ const FieldEditor = ({
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
         geoJson.properties.srid = crs.value;
-        setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates));
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates, true));
         return JSON.stringify(geoJson);
       } else {
-        setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates, true));
         if (checkCoordinates) {
-          geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates)
+          geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates, true)
             ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
             : [];
         } else {
@@ -532,7 +535,7 @@ const FieldEditor = ({
                   className={`p-button-secondary-transparent button ${styles.mapButton}`}
                   disabled={isMapDisabled}
                   icon="marker"
-                  onClick={e => {
+                  onClick={() => {
                     if (!isNil(onMapOpen)) {
                       onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
                     }
