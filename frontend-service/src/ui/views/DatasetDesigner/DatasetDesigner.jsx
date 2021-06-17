@@ -1238,15 +1238,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 label={resources.messages['importDataset']}
                 onClick={event => importMenuRef.current.show(event)}
               />
-              {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                <Menu
-                  className={styles.menuWrapper}
-                  id="importDataSetMenu"
-                  model={designerState.importButtonsList}
-                  popup={true}
-                  ref={importMenuRef}
-                />
-              )}
+              <Menu
+                className={styles.menuWrapper}
+                id="importDataSetMenu"
+                model={designerState.importButtonsList}
+                popup={true}
+                ref={importMenuRef}
+              />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
