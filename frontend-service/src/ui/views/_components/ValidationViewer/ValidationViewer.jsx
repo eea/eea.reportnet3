@@ -54,7 +54,7 @@ const ValidationViewer = memo(
       levelError: []
     });
     const [filtered, setFiltered] = useState(false);
-    const [filteredData, setFilteredData] = useState([]);
+    const [, setFilteredData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
@@ -318,18 +318,6 @@ const ValidationViewer = memo(
           totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
         }
       });
-
-      // const { data } = await DatasetService.errorsById(
-      //   datasetId,
-      //   pageNums,
-      //   numberRows,
-      //   sortField,
-      //   sortOrder,
-      //   fieldValueFilter,
-      //   levelErrorsFilter,
-      //   typeEntitiesFilter,
-      //   tablesFilter
-      // );
 
       validationDispatch({
         type: 'SET_TOTALS_ERRORS',
