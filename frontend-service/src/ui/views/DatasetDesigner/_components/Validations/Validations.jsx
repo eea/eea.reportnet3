@@ -10,14 +10,14 @@ export const Validations = ({ datasetSchema, datasetSchemas, tabs, datasetId }) 
   const validationContext = useContext(ValidationContext);
 
   if (validationContext.level === 'field') {
-    return <FieldValidation tabs={tabs} datasetId={datasetId} />;
+    return <FieldValidation datasetId={datasetId} tabs={tabs} />;
   }
 
   if (validationContext.level === 'row') {
-    return <RowValidation tabs={tabs} datasetId={datasetId} />;
+    return <RowValidation datasetId={datasetId} tabs={tabs} />;
   }
 
   return (
-    <TableValidation tabs={tabs} datasetId={datasetId} datasetSchema={datasetSchema} datasetSchemas={datasetSchemas} />
+    <TableValidation datasetId={datasetId} datasetSchema={datasetSchema} datasetSchemas={datasetSchemas} tabs={tabs} />
   );
 };

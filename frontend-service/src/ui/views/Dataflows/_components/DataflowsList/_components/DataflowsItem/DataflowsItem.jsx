@@ -16,6 +16,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 import { routes } from 'ui/routes';
 
 const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }) => {
@@ -68,7 +69,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         <p>
           <span>{`${resources.messages['deliveryDate']}: `}</span>
           <span className={`${styles.dateBlock}`}>
-            {itemContent.expirationDate == '-'
+            {TextUtils.areEquals(itemContent.expirationDate, '-')
               ? resources.messages['pending']
               : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
           </span>
@@ -76,7 +77,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`} data-tip data-for={idTooltip}>
+        <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
           {itemContent.name}
         </h3>
         <p>{itemContent.description}</p>
