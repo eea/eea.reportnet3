@@ -81,7 +81,7 @@ public class DataFlowControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testFindByIdDataFlowIncorrect() {
     try {
-      dataFlowControllerImpl.findById(null);
+      dataFlowControllerImpl.findById(null, null);
     } catch (ResponseStatusException ex) {
       assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
@@ -99,8 +99,8 @@ public class DataFlowControllerImplTest {
   public void testFindByIdEEAExcep() throws EEAException {
     when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any()))
         .thenThrow(EEAException.class);
-    dataFlowControllerImpl.findById(1L);
-    assertEquals("fail", null, dataFlowControllerImpl.findById(1L));
+    dataFlowControllerImpl.findById(1L, null);
+    assertEquals("fail", null, dataFlowControllerImpl.findById(1L, null));
   }
 
   /**
@@ -112,8 +112,8 @@ public class DataFlowControllerImplTest {
   public void testFindById() throws EEAException {
     when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any()))
         .thenReturn(dataflowVO);
-    dataFlowControllerImpl.findById(1L);
-    assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L));
+    dataFlowControllerImpl.findById(1L, null);
+    assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L, null));
   }
 
 
