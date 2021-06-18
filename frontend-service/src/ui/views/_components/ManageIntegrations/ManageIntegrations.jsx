@@ -357,9 +357,9 @@ export const ManageIntegrations = ({
         </label>
         <div className={styles.checkboxWrapper}>
           <Checkbox
+            checked={manageIntegrationsState.notificationRequired}
             id={'notificationRequired'}
             inputId={'notificationRequired'}
-            isChecked={manageIntegrationsState.notificationRequired}
             label={'notificationRequired'}
             onChange={event => {
               onChangeNotificationRequiredCheckboxEvent(event.checked, option);

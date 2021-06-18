@@ -9,7 +9,7 @@ import { config } from 'conf/';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
-import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'ui/views/_components/InputText';
@@ -349,8 +349,8 @@ const ValidationExpression = ({
     <li className={styles.expression}>
       <span className={styles.group}>
         <Checkbox
+          checked={expressionValues.group}
           disabled={isDisabled}
-          isChecked={expressionValues.group}
           onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
         />
       </span>

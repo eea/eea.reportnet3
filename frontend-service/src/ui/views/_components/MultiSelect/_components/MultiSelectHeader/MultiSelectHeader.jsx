@@ -1,6 +1,6 @@
 import { useContext, useRef } from 'react';
 
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -59,7 +59,7 @@ export const MultiSelectHeader = ({
       );
     } else
       return (
-        <span className={headerClassName} id="selectAllFilter" onClick={event => onToggleAll(event)}>
+        <span className={headerClassName} id={`selectAllFilter_${id}`} onClick={event => onToggleAll(event)}>
           {allChecked ? notCheckAllHeader : checkAllHeader}
         </span>
       );
@@ -80,8 +80,8 @@ export const MultiSelectHeader = ({
 
       {clearButton && (
         <button className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
-          <span className="p-multiselect-close-icon pi pi-times" id="clearFilter" />
-          <span className="srOnly" htmlFor="clearFilter">
+          <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
+          <span className="srOnly" htmlFor={`clearFilter_${id}`}>
             {resources.messages['clearFilter']}
           </span>
         </button>

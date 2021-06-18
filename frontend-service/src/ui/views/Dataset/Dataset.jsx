@@ -1086,9 +1086,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
           <div className={styles.checkboxWrapper}>
             <Checkbox
+              checked={replaceData}
               id="replaceCheckbox"
               inputId="replaceCheckbox"
-              isChecked={replaceData}
               onChange={() => setReplaceData(!replaceData)}
               role="checkbox"
             />

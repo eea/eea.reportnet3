@@ -369,9 +369,7 @@ export const Filters = ({
               }}
             />
           )}
-          <label
-            className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label}
-            htmlFor={property}>
+          <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={inputId}>
             {resources.messages[property]}
           </label>
         </span>
@@ -393,9 +391,9 @@ export const Filters = ({
       />
       <span className={styles.checkbox}>
         <Checkbox
+          checked={filterState.matchMode}
           id={`matchMode_checkbox`}
           inputId={`matchMode_checkbox`}
-          isChecked={filterState.matchMode}
           onChange={() => onToggleMatchMode()}
           role="checkbox"
         />
@@ -413,9 +411,9 @@ export const Filters = ({
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
             <Checkbox
+              checked={getCheckboxFilterState(property)}
               id={property}
               inputId={property}
-              isChecked={getCheckboxFilterState(property)}
               label={property}
               onChange={() => onChangeCheckboxFilter(property)}
               style={{ marginRight: '50px' }}
@@ -473,7 +471,7 @@ export const Filters = ({
             onClick={() => onFilterData(property, '')}
           />
         )}
-        <label className={styles.label} htmlFor={property}>
+        <label className={styles.label} htmlFor={`${property}_input`}>
           {resources.messages[property]}
         </label>
       </span>

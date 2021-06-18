@@ -9,7 +9,7 @@ import pick from 'lodash/pick';
 import styles from './LinkSelector.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';

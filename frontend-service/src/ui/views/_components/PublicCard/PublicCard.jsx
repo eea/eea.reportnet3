@@ -36,7 +36,12 @@ export const PublicCard = ({
     <Fragment>
       <span>{text} </span>
       <a href={url} onClick={e => onOpenTab(e, url)} rel="noreferrer" target="_blank" title={text}>
-        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
+        <FontAwesomeIcon
+          aria-hidden={false}
+          aria-label={text}
+          className="p-breadcrumb-home"
+          icon={AwesomeIcons('externalUrl')}
+        />
       </a>
     </Fragment>
   );

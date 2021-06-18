@@ -622,6 +622,7 @@ export class MultiSelect extends Component {
         <MultiSelectPanel
           appendTo={this.props.appendTo}
           header={header}
+          label={this.props.label}
           onClick={this.onPanelClick}
           ref={el => (this.panel = el)}
           scrollHeight={this.props.scrollHeight}>
