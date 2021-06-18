@@ -625,7 +625,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     stringQuery.append(totalRecords).append(" 'records', json_agg(records)) as tables ")
         .append(" from ( ")
         .append(
-            " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
+            " select * from ( select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
         .append(
             " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
         .append(" select case ");
@@ -656,16 +656,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
     stringQuery.append(
-        ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ");
-    String paginationPart = " offset %s limit %s ";
-    if (null != offset && null != limit) {
-      Integer offsetAux = (limit * offset) - limit;
-      if (offsetAux < 0) {
-        offsetAux = 0;
-      }
-      stringQuery.append(String.format(paginationPart, offsetAux, limit));
-    }
-    stringQuery.append(" ) tablesAux ");
+        ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position )recordAux2 ");
     if (null != filterValue || null != columnName) {
       stringQuery.append(
           " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
@@ -676,6 +667,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
       stringQuery.append(" ) ");
     }
+    String paginationPart = " offset %s limit %s ";
+    if (null != offset && null != limit) {
+      Integer offsetAux = (limit * offset) - limit;
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+      stringQuery.append(String.format(paginationPart, offsetAux, limit));
+    }
+    stringQuery.append(" ) tablesAux ");
     stringQuery.append(" group by id_table_schema ) as json ");
     LOG.info("Query: {} ", stringQuery);
     Query query = entityManager.createNativeQuery(stringQuery.toString());
