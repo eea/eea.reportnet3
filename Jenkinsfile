@@ -142,7 +142,7 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'develop1'
+                branch 'release/v3.0.4.0-RC4'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-eea-altia', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
@@ -182,7 +182,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+                   return BRANCH_NAME == "develop" || BRANCH_NAME == "release/v3.0.4.0-RC4"
                 }
             }
             parallel {
@@ -301,7 +301,7 @@ pipeline {
         stage('Cleaning docker images'){
           when {
             expression {
-              return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+              return BRANCH_NAME == "develop" || BRANCH_NAME == "release/v3.0.4.0-RC4"
             }
           }
           steps {
