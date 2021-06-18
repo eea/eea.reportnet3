@@ -118,7 +118,7 @@ export const TableRelationsSelector = ({
             <span>{resources.messages['datasetReferenceMustBeUsed']}</span>
             <Checkbox
               checked={creationFormState.candidateRule.relations.isDoubleReferenced}
-              inputId={'isDoubleReferenced_check'}
+              inputId="isDoubleReferenced_check"
               label="Default"
               onChange={e => onDoubleReferencedChange(e.checked)}
               style={{ width: '70px', marginLeft: '0.5rem', marginTop: '5px' }}

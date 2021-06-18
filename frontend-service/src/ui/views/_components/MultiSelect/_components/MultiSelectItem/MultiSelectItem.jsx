@@ -52,7 +52,7 @@ export const MultiSelectItem = ({
       {!disabled && (
         <div className="p-checkbox p-component">
           <div className={checkboxClassName}>
-            <span className={checkboxIcon}></span>
+            <span aria-label="Select all" className={checkboxIcon}></span>
           </div>
         </div>
       )}

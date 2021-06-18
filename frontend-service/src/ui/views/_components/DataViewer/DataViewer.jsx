@@ -904,7 +904,8 @@ const DataViewer = withRouter(
           <div className={styles.addAnotherOneWrapper}>
             <Checkbox
               checked={addAnotherOne}
-              id={`addAnother`}
+              id="addAnother"
+              inputId="addAnother"
               onChange={() => setAddAnotherOne(!addAnotherOne)}
               role="checkbox"
             />

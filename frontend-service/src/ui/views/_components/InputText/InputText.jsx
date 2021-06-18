@@ -129,6 +129,7 @@ export class InputText extends Component {
         {this.props.required ? (
           <div style={{ position: relative, width: 0, height: 0 }}>
             <FontAwesomeIcon
+              aria-label="required"
               icon={AwesomeIcons('infoCircle')}
               style={{
                 color: 'var(--errors)',

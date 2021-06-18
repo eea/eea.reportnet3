@@ -5,6 +5,7 @@ import Tooltip from 'primereact/tooltip';
 
 export class Checkbox extends Component {
   static defaultProps = {
+    ariaLabel: null,
     ariaLabelledBy: null,
     checked: false,
     className: null,
@@ -24,6 +25,7 @@ export class Checkbox extends Component {
   };
 
   static propTypes = {
+    ariaLabel: PropTypes.string,
     ariaLabelledBy: PropTypes.string,
     checked: PropTypes.bool,
     className: PropTypes.string,
@@ -141,6 +143,7 @@ export class Checkbox extends Component {
         style={this.props.style}>
         <div className="p-hidden-accessible">
           <input
+            aria-label={this.props.ariaLabel}
             aria-labelledby={this.props.ariaLabelledBy}
             defaultChecked={this.props.checked}
             disabled={this.props.disabled}
@@ -157,6 +160,7 @@ export class Checkbox extends Component {
         </div>
         <div
           aria-checked={this.props.checked}
+          aria-label={this.props.ariaLabel}
           aria-labelledby={this.props.ariaLabelledBy}
           className={boxClass}
           ref={el => (this.box = el)}

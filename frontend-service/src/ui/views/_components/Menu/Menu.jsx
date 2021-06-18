@@ -89,7 +89,7 @@ class Menu extends Component {
 
   renderMenuitem(item, index) {
     return (
-      <li key={index} className={'p-menuitem'}>
+      <li className={'p-menuitem'} key={index}>
         <span
           className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null}`}
           onClick={e => {
@@ -101,7 +101,7 @@ class Menu extends Component {
             }
           }}
           disabled={item.disabled}>
-          {!isNil(item.icon) && <FontAwesomeIcon icon={AwesomeIcons(item.icon)} />}
+          {!isNil(item.icon) && <FontAwesomeIcon icon={AwesomeIcons(item.icon)} role="presentation" />}
           <span>{item.label}</span>
         </span>
       </li>

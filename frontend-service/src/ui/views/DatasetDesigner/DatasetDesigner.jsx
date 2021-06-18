@@ -1126,14 +1126,16 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
+                  ariaLabelledBy="reference_dataset_label"
                   checked={designerState.referenceDataset}
                   disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
-                  id={`reference_dataset_checkbox`}
-                  inputId={`reference_dataset_checkbox`}
+                  id="reference_dataset_checkbox"
+                  inputId="reference_dataset_checkbox"
                   onChange={e => onChangeReferenceDataset(e.checked)}
                   role="checkbox"
                 />
                 <label
+                  id="reference_dataset_label"
                   onClick={() => {
                     if (!isDesignDatasetEditorRead && !isDataflowOpen && !isReferenceDataset) {
                       designerDispatch({
@@ -1160,14 +1162,16 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               </div>
               <div>
                 <Checkbox
+                  ariaLabelledBy="available_in_public_view_label"
                   checked={designerState.availableInPublic}
                   disabled={isDesignDatasetEditorRead}
-                  id={`available_in_public_view_checkbox`}
-                  inputId={`available_in_public_view_checkbox`}
+                  id="available_in_public_view_checkbox"
+                  inputId="available_in_public_view_checkbox"
                   onChange={e => onChangeAvailableInPublicView(e.checked)}
                   role="checkbox"
                 />
                 <label
+                  id="available_in_public_view_label"
                   onClick={() => {
                     if (!isDesignDatasetEditorRead) {
                       designerDispatch({

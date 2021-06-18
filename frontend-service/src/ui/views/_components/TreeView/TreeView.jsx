@@ -126,6 +126,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
           <div>
             <span className={styles.propertyValueTableName}>{`Supports multiple values?`}</span>
             <FontAwesomeIcon
+              aria-label={rowData.referencedField?.pkHasMultipleValues ? 'True' : 'False'}
               icon={AwesomeIcons(rowData.referencedField?.pkHasMultipleValues ? 'check' : 'cross')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
@@ -133,6 +134,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
           <div>
             <span className={styles.propertyValueTableName}>{`All PK values must be used on link?`}</span>
             <FontAwesomeIcon
+              aria-label={rowData.referencedField?.pkMustBeUsed ? 'True' : 'False'}
               icon={AwesomeIcons(rowData.referencedField?.pkMustBeUsed ? 'check' : 'cross')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
@@ -328,6 +330,7 @@ const itemTemplate = (rowData, key) => {
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       {rowData[key] === 'true' ? (
         <FontAwesomeIcon
+          aria-label={key}
           icon={AwesomeIcons('check')}
           style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
         />
@@ -342,6 +345,7 @@ const typeTemplate = rowData => {
       <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>
       <FontAwesomeIcon
         icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)}
+        role="presentation"
         style={{ marginLeft: 'auto', color: 'var(--treeview-table-icon-color)' }}
       />
     </div>

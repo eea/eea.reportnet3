@@ -119,6 +119,7 @@ const TreeViewExpandableItem = ({
         }}>
         {!isUndefined(items) & (items.length > 0) ? (
           <FontAwesomeIcon
+            aria-label={resources.messages[isOpen ? 'collapse' : 'expand']}
             icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
             onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
             style={{

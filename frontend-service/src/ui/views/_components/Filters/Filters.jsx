@@ -392,8 +392,8 @@ export const Filters = ({
       <span className={styles.checkbox}>
         <Checkbox
           checked={filterState.matchMode}
-          id={`matchMode_checkbox`}
-          inputId={`matchMode_checkbox`}
+          id="matchMode_checkbox"
+          inputId="matchMode_checkbox"
           onChange={() => onToggleMatchMode()}
           role="checkbox"
         />
@@ -435,7 +435,7 @@ export const Filters = ({
         className={styles.dropdownFilter}
         filter={FiltersUtils.getOptionsTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
-        id={property}
+        id={`${property}_dropdown`}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
         label={resources.messages[property]}
