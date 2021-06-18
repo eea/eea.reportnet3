@@ -200,7 +200,9 @@ export const BigButton = ({
         <InputText
           autoFocus={true}
           className={`${styles.inputText}`}
+          id="editName"
           key={index}
+          name={resources.messages['editDatasetSchemaName']}
           onBlur={e => {
             onInputSave(e.target.value.trim(), index);
             setButtonsTitle(e.target.value.trim());

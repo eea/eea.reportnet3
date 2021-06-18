@@ -336,6 +336,7 @@ const Tab = ({
             <InputText
               autoFocus={true}
               className={`${styles.p_tabview_input_design} tabInput`}
+              id="editTableName"
               key={index}
               keyfilter="schemaTableFields"
               maxLength={60}

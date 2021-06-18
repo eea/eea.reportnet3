@@ -226,9 +226,6 @@ const Chips = ({
           ref={inputElement}
           type="text"
         />
-        <label className="srOnly" htmlFor={name}>
-          {name}
-        </label>
       </li>
     );
   };

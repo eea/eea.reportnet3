@@ -9,7 +9,7 @@ import pick from 'lodash/pick';
 import styles from './LinkSelector.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
@@ -413,7 +413,6 @@ const LinkSelector = withRouter(
                   return (
                     <ListBox
                       key={`datasetSchema_${i}`}
-                      options={getOptions(datasetSchema)}
                       onChange={e => {
                         if (!isNil(e.value)) {
                           dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
@@ -422,6 +421,7 @@ const LinkSelector = withRouter(
                       }}
                       optionLabel="name"
                       optionValue="value"
+                      options={getOptions(datasetSchema)}
                       title={datasetSchema.datasetSchemaName}
                       value={link}></ListBox>
                   );

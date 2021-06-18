@@ -357,9 +357,9 @@ export const ManageIntegrations = ({
         </label>
         <div className={styles.checkboxWrapper}>
           <Checkbox
+            checked={manageIntegrationsState.notificationRequired}
             id={'notificationRequired'}
             inputId={'notificationRequired'}
-            isChecked={manageIntegrationsState.notificationRequired}
             label={'notificationRequired'}
             onChange={event => {
               onChangeNotificationRequiredCheckboxEvent(event.checked, option);
@@ -470,6 +470,7 @@ export const ManageIntegrations = ({
   const renderEditorInput = (option, parameter, id) => {
     return (
       <InputText
+        id={`editor_${parameter}`}
         onBlur={event => onBlurParameter(id, option, event)}
         onChange={event => onChangeParameter(event.target.value, option, id)}
         onKeyPress={event => onEditKeyDown(event, id, option)}

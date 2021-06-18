@@ -34,9 +34,9 @@ export const TableView = ({
   const onLoadCheckButton = row => (
     <div className={styles.checkColumn}>
       <Checkbox
+        checked={checkedObligation.id === row.id}
         id={`${row.id}_checkbox`}
         inputId={`${row.id}_checkbox`}
-        isChecked={checkedObligation.id === row.id}
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />

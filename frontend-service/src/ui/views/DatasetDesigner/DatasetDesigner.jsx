@@ -1154,10 +1154,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
+                  checked={designerState.referenceDataset}
                   disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
                   id={`reference_dataset_checkbox`}
                   inputId={`reference_dataset_checkbox`}
-                  isChecked={designerState.referenceDataset}
                   onChange={e => onChangeReferenceDataset(e.checked)}
                   role="checkbox"
                 />
@@ -1182,13 +1182,16 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   }}>
                   {resources.messages['referenceDataset']}
                 </label>
+                <label className="srOnly" htmlFor="reference_dataset_checkbox">
+                  {resources.messages['referenceDataset']}
+                </label>
               </div>
               <div>
                 <Checkbox
+                  checked={designerState.availableInPublic}
                   disabled={isDesignDatasetEditorRead}
                   id={`available_in_public_view_checkbox`}
                   inputId={`available_in_public_view_checkbox`}
-                  isChecked={designerState.availableInPublic}
                   onChange={e => onChangeAvailableInPublicView(e.checked)}
                   role="checkbox"
                 />
@@ -1211,6 +1214,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     marginRight: '6px',
                     opacity: isDesignDatasetEditorRead ? 0.5 : 1
                   }}>
+                  {resources.messages['availableInPublicView']}
+                </label>
+                <label className="srOnly" htmlFor="available_in_public_view_checkbox">
                   {resources.messages['availableInPublicView']}
                 </label>
               </div>
@@ -1579,9 +1585,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
             <div className={styles.checkboxWrapper}>
               <Checkbox
+                checked={designerState.replaceData}
                 id="replaceCheckbox"
                 inputId="replaceCheckbox"
-                isChecked={designerState.replaceData}
                 onChange={() =>
                   designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                 }

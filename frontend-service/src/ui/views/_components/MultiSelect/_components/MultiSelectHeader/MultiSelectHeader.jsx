@@ -1,6 +1,6 @@
 import { useContext, useRef } from 'react';
 
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { InputText } from 'ui/views/_components/InputText';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -15,6 +15,7 @@ export const MultiSelectHeader = ({
   filterPlaceholder,
   filterValue,
   headerClassName,
+  id,
   isPanelVisible,
   notCheckAllHeader,
   onClose,
@@ -45,6 +46,7 @@ export const MultiSelectHeader = ({
         <div className="p-multiselect-filter-container">
           <InputText
             className="p-inputtext p-component"
+            id="multiselectFilter"
             onChange={event => onFilterEvent(event)}
             placeholder={filterPlaceholder}
             ref={filterRef}
@@ -57,7 +59,7 @@ export const MultiSelectHeader = ({
       );
     } else
       return (
-        <span className={headerClassName} id="selectAll" onClick={event => onToggleAll(event)}>
+        <span className={headerClassName} id={`selectAllFilter_${id}`} onClick={event => onToggleAll(event)}>
           {allChecked ? notCheckAllHeader : checkAllHeader}
         </span>
       );
@@ -67,8 +69,9 @@ export const MultiSelectHeader = ({
     <div className="p-multiselect-header" style={{ padding: '0.5rem' }}>
       <Checkbox
         aria-checked={allChecked}
-        ariaLabelledBy="selectAll"
+        ariaLabelledBy={`selectAll_${id}`}
         checked={allChecked}
+        inputId={`selectAll_${id}`}
         onChange={event => onToggleAllEvent(event)}
         role="checkbox"
       />
@@ -77,8 +80,10 @@ export const MultiSelectHeader = ({
 
       {clearButton && (
         <button className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
-          <span className="p-multiselect-close-icon pi pi-times" />
-          <span className="srOnly">{resources.messages['clearFilter']}</span>
+          <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
+          <span className="srOnly" htmlFor={`clearFilter_${id}`}>
+            {resources.messages['clearFilter']}
+          </span>
         </button>
       )}
     </div>
