@@ -71,7 +71,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const validationContext = useContext(ValidationContext);
 
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
-  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState();
+  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
@@ -389,6 +389,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     });
   };
 
+  const validImportExtensions = `.${designerState.selectedImportExtension}`;
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
+
   const getFileExtensions = async () => {
     try {
       const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, designerState.datasetSchemaId);
@@ -431,10 +435,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const setIsTableCreated = isTableCreated => {
     designerDispatch({ type: 'SET_IS_TABLE_CREATED', payload: { isTableCreated } });
   };
-
-  const validExtensions = `.${designerState.selectedImportExtension}`;
-
-  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${validExtensions}`;
 
   const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
@@ -1536,7 +1536,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
-            accept={validExtensions}
+            accept={validImportExtensions}
             chooseLabel={resources.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
