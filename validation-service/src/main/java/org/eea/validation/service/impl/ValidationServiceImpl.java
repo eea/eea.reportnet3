@@ -1,24 +1,39 @@
 package org.eea.validation.service.impl;
 
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Future;
+
 import javax.transaction.Transactional;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.GroupValidationVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
@@ -39,6 +54,7 @@ import org.eea.validation.persistence.data.repository.RecordValidationRepository
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
+import org.eea.validation.persistence.data.repository.ValidationRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.service.ValidationService;
@@ -50,10 +66,15 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import com.opencsv.CSVWriter;
 
 /**
  * The Class ValidationService.
@@ -65,6 +86,12 @@ public class ValidationServiceImpl implements ValidationService {
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  
+  /**
+   * The delimiter.
+   */
+  @Value("${loadDataDelimiter}")
+  private char delimiter;
 
   /**
    * The kie base manager.
@@ -125,6 +152,10 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
+  
+  /** The validation repository. */
+  @Autowired
+  private ValidationRepository validationRepository;
 
   /**
    * The kafka sender utils.
@@ -143,10 +174,50 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private DatasetSchemaControllerZuul datasetSchemaController;
+  
+  /** The dataset controller zuul. */
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
 
   /** The rules error utils. */
   @Autowired
   private RulesErrorUtils rulesErrorUtils;
+  
+  /** The rules service */
+  @Autowired
+  private RulesServiceImpl ruleservice;
+  
+  /** The Constant ENTITY: {@value}. */
+  private static final String ENTITY = "Entity";
+
+  /** The Constant TABLE: {@value}. */
+  private static final String TABLE = "Table";
+  
+  /** The Constant FIELD: {@value}. */
+  private static final String FIELD = "Field";
+  
+  /** The Constant CODE: {@value}. */
+  private static final String CODE = "Code";
+  
+  /** The Constant CODE: {@value}. */
+  private static final String CODENAME = "QC Name";
+  
+  /** The Constant CODE: {@value}. */
+  private static final String CODEDESC = "QC Description";
+  
+  /** The Constant LEVELERROR: {@value}. */
+  private static final String LEVELERROR = "Level error";
+  
+  /** The Constant MESSAGE: {@value}. */
+  private static final String MESSAGE = "Message";
+  
+  /** The Constant NUMBEROFRECORDS: {@value}. */
+  private static final String NUMBEROFRECORDS = "Number of records";
+  
+  /** The path public file. */
+  @Value("${validationExportPathFile}")
+  private String pathPublicFile;
+
 
   /**
    * Gets the element lenght.
@@ -621,6 +692,163 @@ public class ValidationServiceImpl implements ValidationService {
   public Integer countFieldsDataset(Long datasetId) {
     return recordRepository.countFieldsDataset();
   }
+  
+  /**
+   * Export data validation CSV file.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Async
+  @Override
+  public void exportValidationFile(Long datasetId) throws EEAException, IOException 
+  {
+	  DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);  
+	  //pathPublicFile = "C:/importFilesPublic/"; //Should be replaced with Consul variable
+	  
+	  String composedFileName =  "dataset-" + datasetId + "-validations";
+	  
+	  File fileFolderProvider = new File(pathPublicFile, composedFileName);
+	  String nameFile = composedFileName + "." + "csv";
+	  
+	  fileFolderProvider.mkdirs();
+	  
+	   // Send notification
+	   NotificationVO notificationVO = NotificationVO.builder()
+	        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+	        .datasetName(nameFile).datasetType(datasetType).build();
+	  
+	  // we create the csv
+	  StringWriter writer = new StringWriter();
+	  try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) 
+	  {
+    	
+		  List<String> headers = new ArrayList<>();
+		  headers.add(ENTITY);
+		  headers.add(TABLE);
+		  headers.add(FIELD);
+		  headers.add(CODE);
+		  headers.add(CODENAME);
+		  headers.add(CODEDESC);
+		  headers.add(LEVELERROR);
+		  headers.add(MESSAGE);
+		  headers.add(NUMBEROFRECORDS);
+      
+		  csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      	int nHeaders = 9;
+      	String[] fieldsToWrite = new String[nHeaders];
+      
+      	RulesSchemaVO rulesVO = null;
+      
+      try 
+      {
+    	  DatasetValue dataset = getDatasetValuebyId(datasetId);
+    	  FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
+    	  
+    	  validations.setErrors(new ArrayList<>());
+    	  validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
+    	  validations.setIdDataset(datasetId);
+
+    	  validations.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false));
+    	  
+    	  validations.setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
+    	        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false).size()));
+          
+          
+          if (CollectionUtils.isEmpty(validations.getErrors())) 
+          {
+        	  for(int i = 0; i < nHeaders; i++)
+        		  fieldsToWrite[i] = "";
+
+            csvWriter.writeNext(fieldsToWrite);
+          }
+          
+          else
+          {
+		      for (Object error : validations.getErrors()) 
+		      {
+		    	    GroupValidationVO castedError = (GroupValidationVO) error;
+		            rulesVO = ruleservice.getActiveRulesSchemaByDatasetId(dataset.getIdDatasetSchema());
+		            List<RuleVO> rules = rulesVO.getRules();
+		            
+		            RuleVO ruleVO = rules.stream().filter(rule -> rule.getShortCode().equals(castedError.getShortCode())).findFirst().orElse(new RuleVO());
+		            
+		            fieldsToWrite[0] = castedError.getTypeEntity().toString();
+		            fieldsToWrite[1] = castedError.getNameTableSchema();
+		            fieldsToWrite[2] = castedError.getNameFieldSchema();
+		            fieldsToWrite[3] = castedError.getShortCode();
+		            fieldsToWrite[4] = ruleVO.getRuleName();
+		            fieldsToWrite[5] = ruleVO.getDescription();
+		            fieldsToWrite[6] = castedError.getLevelError().toString();
+		            fieldsToWrite[7] = castedError.getMessage();
+		            fieldsToWrite[8] = castedError.getNumberOfRecords().toString();
+
+		            csvWriter.writeNext(fieldsToWrite);
+		         }
+          }
+      }
+      
+      catch (EEAException e) {LOG_ERROR.error(e.getMessage());}
+    }
+    
+    catch (IOException e) 
+    {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT, null,
+                notificationVO);
+        LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+    }
+
+    // Once read we convert it to string
+    String csv = writer.getBuffer().toString();
+    byte[] file = csv.getBytes();
+
+    File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), nameFile);
+    
+    try (OutputStream out = new FileOutputStream(fileWrite.toString())) 
+    {
+        out.write(file);
+     }
+    
 
 
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT, null,
+        notificationVO);
+  }
+  
+  
+  /**
+   * Download exported file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public File downloadExportedFile(Long datasetId, String fileName)
+      throws IOException 
+  {
+	DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId); 
+	// Send notification
+	NotificationVO notificationVO = NotificationVO.builder()
+	        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+	        .datasetName(fileName).datasetType(datasetType).build();
+	
+    // we compound the route and create the file
+    File file = new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
+    if (!file.exists()) 
+    {
+        try {
+			kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT, null,
+			        notificationVO);
+		} 
+        
+        catch (EEAException e) { e.printStackTrace(); }
+      LOG_ERROR.error(
+          "Trying to download a file generated during the export dataset validation data process but the file is not found");
+    }
+    return file;
+  }
 }

@@ -1,6 +1,8 @@
 package org.eea.validation.service;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -217,5 +219,27 @@ public interface ValidationService {
    * @return the integer
    */
   Integer countFieldsDataset(@DatasetId Long datasetId);
+  
+  /**
+   * Exports validation data file.
+   *
+   * @param datasetId the dataset id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void exportValidationFile(@DatasetId Long datasetId) throws EEAException, IOException;
+  
+  
+  /**
+   * Download validation exported file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  File downloadExportedFile(Long datasetId, String fileName) throws IOException;
 
 }

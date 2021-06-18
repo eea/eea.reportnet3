@@ -1,7 +1,16 @@
 package org.eea.validation.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -22,17 +31,25 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * The Class ValidationServiceController.
@@ -48,6 +65,8 @@ public class ValidationControllerImpl implements ValidationController {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationControllerImpl.class);
+  
+  String pathPublicFile = "C:/importFilesPublic/";
 
   /**
    * The validation service.
@@ -63,8 +82,7 @@ public class ValidationControllerImpl implements ValidationController {
   /** The load validations helper. */
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
-
-
+ 
 
   /**
    * Validate data set data. The lock should be released on
@@ -212,6 +230,66 @@ public class ValidationControllerImpl implements ValidationController {
 
     return validations;
   }
+  
+  /**
+   * Export CSV file of grouped validations.
+   *
+   * @param datasetId the dataset id
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_CUSTODIAN')")
+  @PostMapping(value = "/export/{datasetId}")
+  public void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId) 
+  {
+	    LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
+	    try {
+			validationService.exportValidationFile(datasetId);
+		} 
+	    catch (EEAException e) 
+	    {
+			e.printStackTrace();
+		} 
+	    catch (IOException e)
+	    {
+			e.printStackTrace();
+		}
+   }
+  
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @GetMapping(value = "/downloadFile/{datasetId}",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  public void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
+      HttpServletResponse response) {
+    try {
+      LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
+          datasetId, fileName);
+      File file = validationService.downloadExportedFile(datasetId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+      // copy from in to out
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+      // delete the file after downloading it
+      FileUtils.forceDelete(file);
+    } catch (IOException e) {
+      LOG_ERROR.error(
+          "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
+          datasetId, fileName, e.getMessage());
+    }
 
 
+  }
 }
