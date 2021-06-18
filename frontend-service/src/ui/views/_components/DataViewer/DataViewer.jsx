@@ -1044,14 +1044,14 @@ const DataViewer = withRouter(
             <Chips
               className={styles.chips}
               disabled={true}
-              name="Multiple/Single select items"
+              name={resources.messages['multipleSingleMessage']}
               pasteSeparator=";"
               value={rowData.value.split(';')}></Chips>
           ) : rowData.field === 'Valid extensions' ? (
             <Chips
               className={styles.chips}
               disabled={true}
-              name="Valid extensions"
+              name={resources.messages['validExtensionsShort']}
               value={rowData.value.split(',')}></Chips>
           ) : rowData.field === 'Maximum file size' ? (
             `${rowData.value} ${resources.messages['MB']}`

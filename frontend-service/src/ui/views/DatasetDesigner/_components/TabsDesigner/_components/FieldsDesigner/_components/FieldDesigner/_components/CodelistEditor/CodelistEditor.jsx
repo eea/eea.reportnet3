@@ -77,7 +77,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
           errorMessage={resources.messages['duplicatedItem']}
           forbiddenChar={true}
           inputClassName={styles.codelistChips}
-          name="Multiple/Single select items"
+          name={resources.messages['multipleSingleMessage']}
           onChange={e => setCodelistItems(e.value)}
           pasteSeparator=";"
           showErrorMessage={true}
