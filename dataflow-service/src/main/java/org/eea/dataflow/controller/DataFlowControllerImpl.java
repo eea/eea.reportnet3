@@ -339,7 +339,8 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     if (status == HttpStatus.OK) {
       try {
-        dataflowService.createDataFlow(dataFlowVO);
+        Long dataflowId = dataflowService.createDataFlow(dataFlowVO);
+        message = dataflowId.toString();
       } catch (EEAException e) {
         LOG_ERROR.error("Create dataflow failed. ", e.getCause());
         message = e.getMessage();
