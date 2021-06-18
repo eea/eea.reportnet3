@@ -719,7 +719,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  public void processFile(@DatasetId Long datasetId, String fileName, InputStream is,
+  private void processFile(@DatasetId Long datasetId, String fileName, InputStream is,
       String idTableSchema, boolean replace, DataSetSchema schema)
       throws EEAException, IOException {
     // obtains the file type from the extension
