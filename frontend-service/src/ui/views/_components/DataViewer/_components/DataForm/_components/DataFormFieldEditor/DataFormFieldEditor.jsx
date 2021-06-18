@@ -400,6 +400,7 @@ const DataFormFieldEditor = ({
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
+        name={column.header}
         onChange={e => onChangeForm(field, e.target.value, isConditional)}
         ref={inputRef}
         style={{ width: '35%' }}
@@ -539,6 +540,7 @@ const DataFormFieldEditor = ({
         <InputText
           className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
           disabled={(column.readOnly && reporting) || isSaving}
+          id="coordinates"
           keyfilter={RecordUtils.getFilter(type)}
           onBlur={e =>
             onChangeForm(

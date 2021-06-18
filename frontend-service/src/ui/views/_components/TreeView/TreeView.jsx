@@ -102,7 +102,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
     }
   };
 
-  const referencedFieldTemplate = rowData => {    
+  const referencedFieldTemplate = rowData => {
     if (!isNil(rowData?.referencedField) && rowData?.referencedField !== '') {
       return (
         <div>
@@ -290,7 +290,9 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
 
 const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
-const codelistTemplate = rowData => <Chips disabled={true} pasteSeparator=";" value={rowData.codelistItems}></Chips>;
+const codelistTemplate = rowData => (
+  <Chips disabled={true} name="Multiple/single selected items" pasteSeparator=";" value={rowData.codelistItems}></Chips>
+);
 
 const getFieldTypeValue = value => {
   const fieldTypes = [

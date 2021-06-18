@@ -8,14 +8,13 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 
-import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -500,9 +499,9 @@ export const FieldsDesigner = ({
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
-                fields={fields}
                 fieldType={field.type}
                 fieldValue={field.value}
+                fields={fields}
                 hasPK={fields.filter(field => field.pk).length > 0}
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}

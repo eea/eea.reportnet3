@@ -235,13 +235,11 @@ export const DataflowManagement = ({
               className={`${styles.inputText}`}
               id={'deleteDataflow'}
               maxLength={255}
+              name={resources.messages['deleteDataflowButton']}
               onChange={event => onConfirmDeleteDataflow(event)}
               ref={deleteInputRef}
               value={state.deleteInput}
             />
-            <label className="srOnly" htmlFor="deleteDataflow">
-              {resources.messages['deleteDataflowButton']}
-            </label>
           </p>
         </ConfirmDialog>
       )}

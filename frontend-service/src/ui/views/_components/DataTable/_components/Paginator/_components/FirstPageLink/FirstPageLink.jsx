@@ -18,8 +18,10 @@ export class FirstPageLink extends Component {
 
     return (
       <button className={className} disabled={this.props.disabled} onClick={this.props.onClick} type="button">
-        <span className="p-paginator-icon pi pi-step-backward"></span>
-        <span className="srOnly">First page</span>
+        <span className="p-paginator-icon pi pi-step-backward" id="firstPage"></span>
+        <span className="srOnly" htmlFor="firstPage">
+          First page
+        </span>
       </button>
     );
   }

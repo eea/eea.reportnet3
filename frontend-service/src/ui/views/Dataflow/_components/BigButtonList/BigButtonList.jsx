@@ -156,9 +156,9 @@ export const BigButtonList = ({
   const checkShowPublicInfo = (
     <div style={{ float: 'left' }}>
       <Checkbox
+        checked={showPublicInfo}
         id={`show_public_info_checkbox`}
         inputId={`show_public_info_checkbox`}
-        isChecked={showPublicInfo}
         onChange={e => setShowPublicInfo(e.checked)}
         role="checkbox"
       />

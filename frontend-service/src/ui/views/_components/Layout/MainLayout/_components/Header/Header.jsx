@@ -115,9 +115,9 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   const checkDoNotRemember = (
     <div style={{ float: 'left' }}>
       <Checkbox
+        checked={doNotRemember}
         id={`do_not_remember_checkbox`}
         inputId={`do_not_remember_checkbox`}
-        isChecked={doNotRemember}
         onChange={e => setDoNotRemember(e.checked)}
         role="checkbox"
       />
@@ -162,6 +162,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
 
   const themeSwitcher = isLocalEnvironment() && !isPublic && (
     <InputSwitch
+      aria-label={resources.messages['toggleDarkTheme']}
       checked={themeContext.currentTheme === 'dark'}
       onChange={e => {
         userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
@@ -241,7 +242,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         e.preventDefault();
         userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
       }}>
-      <FontAwesomeIcon aria-hidden={false} className={styles.logoutButton} icon={AwesomeIcons('logout')} />
+      <FontAwesomeIcon
+        aria-hidden={false}
+        aria-label="Logout"
+        className={styles.logoutButton}
+        icon={AwesomeIcons('logout')}
+      />
     </div>
   );
 
