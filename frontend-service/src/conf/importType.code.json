@@ -1,13 +1,7 @@
 {
-  "importTableTypes": [
-    {
-      "text": "CSV (.csv)",
-      "code": "csv"
-    }
-  ],
   "importDatasetTypes": [
     {
-      "text": "ZIP (.zip)",
+      "text": "ZIP (CSV for each table)",
       "code": "zip"
     }
   ]
