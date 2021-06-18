@@ -1,5 +1,6 @@
 export const routes = {
   ACCESS_POINT: '/',
+  ACCESS_POINT_ERROR: '/error/:errorType',
   CODELISTS: '/codelists',
   DASHBOARDS: '/dataflow/:dataflowId/dashboards',
   DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',

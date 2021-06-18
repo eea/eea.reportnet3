@@ -1550,12 +1550,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 role="checkbox"
               />
               <label htmlFor="replaceCheckbox">
-                <a
+                <span
+                  className={styles.replaceDataLabel}
                   onClick={() =>
                     designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                   }>
                   {resources.messages['replaceData']}
-                </a>
+                </span>
               </label>
             </div>
           </Dialog>

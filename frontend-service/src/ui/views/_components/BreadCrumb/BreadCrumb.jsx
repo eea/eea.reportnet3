@@ -59,7 +59,7 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
         const separator = index === model.length - 1 ? null : onLoadSeparator();
 
         return (
-          <Fragment key={item.label + '_' + index}>
+          <Fragment key={item.label}>
             {menuitem}
             {separator}
           </Fragment>
