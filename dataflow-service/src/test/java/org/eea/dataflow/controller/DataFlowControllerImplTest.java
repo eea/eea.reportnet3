@@ -377,9 +377,9 @@ public class DataFlowControllerImplTest {
     dataflowVO.setDescription("description");
     dataflowVO.setName("name");
     dataflowVO.setObligation(obligation);
-    doNothing().when(dataflowService).createDataFlow(dataflowVO);
+    Mockito.when(dataflowService.createDataFlow(dataflowVO)).thenReturn(1L);
     ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
-    assertEquals("", value.getBody());
+    assertEquals("1", value.getBody());
     assertEquals(HttpStatus.OK, value.getStatusCode());
   }
 

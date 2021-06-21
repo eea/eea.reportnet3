@@ -442,11 +442,12 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @return the long
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void createDataFlow(DataFlowVO dataflowVO) throws EEAException {
+  public Long createDataFlow(DataFlowVO dataflowVO) throws EEAException {
     Dataflow dataFlowSaved;
     // we find if the name of this dataflow exist
     if (dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()).isPresent()) {
@@ -473,6 +474,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    return dataFlowSaved.getId();
   }
 
   /**

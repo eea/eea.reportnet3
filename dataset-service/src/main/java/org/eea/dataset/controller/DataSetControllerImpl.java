@@ -194,6 +194,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -206,9 +207,10 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId) {
     try {
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace);
+      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId);
     } catch (EEAException e) {
       LOG_ERROR.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
           tableSchemaId, file.getOriginalFilename());
@@ -229,6 +231,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -239,7 +242,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -247,7 +251,8 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace);
+      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace,
+          integrationId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
@@ -261,6 +266,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param providerId the provider id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -271,7 +277,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -279,7 +286,7 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, null, file, replace);
+      importFileData(datasetId, dataflowId, providerId, null, file, replace, integrationId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
