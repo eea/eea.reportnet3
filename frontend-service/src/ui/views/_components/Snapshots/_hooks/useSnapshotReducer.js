@@ -2,12 +2,7 @@ import { useContext } from 'react';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-const useSnapshotReducer = (
-  setIsSnapshotDialogVisible,
-  onCreateSnapshot,
-  onDeleteSnapshot,
-  onRestoreSnapshot
-) => {
+const useSnapshotReducer = (setIsSnapshotDialogVisible, onCreateSnapshot, onDeleteSnapshot, onRestoreSnapshot) => {
   const resources = useContext(ResourcesContext);
 
   const snapshotReducer = (state, { type, payload }) => {
@@ -61,7 +56,19 @@ const useSnapshotReducer = (
           ...state,
           isConfirmDisabled: true
         };
-
+      case 'ON_SNAPSHOT_RESET':
+        return {
+          ...state,
+          action: () => {},
+          apiCall: '',
+          createdAt: '',
+          description: '',
+          dialogConfirmMessage: '',
+          dialogConfirmQuestion: '',
+          dialogMessage: '',
+          isConfirmDisabled: false,
+          snapShotId: ''
+        };
       default:
         return state;
     }
