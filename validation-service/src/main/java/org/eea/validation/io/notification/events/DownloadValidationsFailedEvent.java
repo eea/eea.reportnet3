@@ -10,6 +10,9 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class DownloadValidationsFailedEvent.
+ */
 @Component
 public class DownloadValidationsFailedEvent implements NotificableEventHandler 
 {

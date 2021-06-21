@@ -3,16 +3,16 @@ package org.eea.validation.io.notification.events;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class DownloadValidationsCompletedEvent.
+ */
 @Component
-public class DownloadValidationsCompletedEvent implements NotificableEventHandler 
-{
+public class DownloadValidationsCompletedEvent implements NotificableEventHandler {
 
 
   /**
@@ -33,8 +33,7 @@ public class DownloadValidationsCompletedEvent implements NotificableEventHandle
    * @throws EEAException the EEA exception
    */
   @Override
-  public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException 
-  {
+  public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long datasetId = notificationVO.getDatasetId();
     String nameFile = notificationVO.getFileName();
 
