@@ -79,7 +79,7 @@ class Menu extends Component {
 
     return (
       <Fragment key={submenu.label + '_' + index}>
-        <li aria-disabled={submenu.disabled} className={className} role="presentation" style={submenu.style}>
+        <li className={className} role="presentation" style={submenu.style}>
           {submenu.label}
         </li>
         {items}
@@ -92,6 +92,7 @@ class Menu extends Component {
       <li className={'p-menuitem'} key={index}>
         <span
           className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null}`}
+          disabled={item.disabled}
           onClick={e => {
             e.preventDefault();
             if (!item.disabled) {
@@ -99,8 +100,7 @@ class Menu extends Component {
             } else {
               this.setState(state => ({ ...state, menuClick: true }));
             }
-          }}
-          disabled={item.disabled}>
+          }}>
           {!isNil(item.icon) && <FontAwesomeIcon icon={AwesomeIcons(item.icon)} role="presentation" />}
           <span>{item.label}</span>
         </span>

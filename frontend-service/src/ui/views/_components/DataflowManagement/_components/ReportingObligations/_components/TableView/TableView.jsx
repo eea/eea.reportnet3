@@ -34,15 +34,13 @@ export const TableView = ({
   const onLoadCheckButton = row => (
     <div className={styles.checkColumn}>
       <Checkbox
+        ariaLabel={resources.messages['selectedObligation']}
         checked={checkedObligation.id === row.id}
         id={`${row.id}_checkbox`}
         inputId={`${row.id}_checkbox`}
         onChange={() => onSelectObl(row)}
         role="checkbox"
       />
-      <label className="srOnly" htmlFor={`${row.id}_checkbox`}>
-        {resources.messages['selectedObligation']}
-      </label>
     </div>
   );
 

@@ -1157,6 +1157,7 @@
     "validExtensionsShort": "Valid extensions",
     "moveField": "Move field",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "goToLink": "Go to link"
   }
 }
