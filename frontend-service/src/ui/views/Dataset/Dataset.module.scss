@@ -4,7 +4,7 @@
   margin-bottom: 0.5rem;
   padding: 0.25rem;
 
-  .exportSubmenu {
+  .menuWrapper {
     width: 16rem;
   }
 }
@@ -68,6 +68,10 @@
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   @include shadow-0em;
+}
+
+.replaceDataLabel {
+  cursor: pointer;
 }
 
 .switch {

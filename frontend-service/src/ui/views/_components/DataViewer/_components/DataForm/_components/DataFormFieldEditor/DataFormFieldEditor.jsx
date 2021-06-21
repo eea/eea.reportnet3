@@ -96,7 +96,8 @@ const DataFormFieldEditor = ({
         dispatchMap({
           type: 'TOGGLE_MAP_DISABLED',
           payload: !MapUtils.checkValidCoordinates(
-            fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''
+            fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : '',
+            true
           )
         });
       }
@@ -209,7 +210,7 @@ const DataFormFieldEditor = ({
           MapUtils.checkValidCoordinates(coords)
         );
       }
-      dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coords) });
+      dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coords, true) });
       dispatchMap({ type: 'DISPLAY_COORDINATE_ERROR', payload: !MapUtils.checkValidCoordinates(coords, true) });
       return JSON.stringify(geoJson);
     }
@@ -291,7 +292,9 @@ const DataFormFieldEditor = ({
   };
 
   const projectCoordinates = (coordinates, newCRS) => {
-    return proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates);
+    return MapUtils.checkValidCoordinates(coordinates)
+      ? proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates)
+      : coordinates;
   };
 
   const renderCodelistDropdown = (field, fieldValue) => {
@@ -397,6 +400,7 @@ const DataFormFieldEditor = ({
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
+        name={column.header}
         onChange={e => onChangeForm(field, e.target.value, isConditional)}
         ref={inputRef}
         style={{ width: '35%' }}
@@ -536,6 +540,7 @@ const DataFormFieldEditor = ({
         <InputText
           className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
           disabled={(column.readOnly && reporting) || isSaving}
+          id="coordinates"
           keyfilter={RecordUtils.getFilter(type)}
           onBlur={e =>
             onChangeForm(
@@ -591,6 +596,7 @@ const DataFormFieldEditor = ({
         />
         <Button
           className={`p-button-secondary-transparent button ${styles.mapButton}`}
+          disabled={map.isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
           tooltip={resources.messages['selectGeographicalDataOnMap']}

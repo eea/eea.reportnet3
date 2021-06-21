@@ -21,6 +21,7 @@ export class InputText extends Component {
     id: null,
     keyfilter: null,
     maxLength: 10000,
+    name: '',
     onInput: null,
     onKeyPress: null,
     required: false,
@@ -35,6 +36,7 @@ export class InputText extends Component {
     id: PropTypes.string,
     keyfilter: PropTypes.any,
     maxLength: PropTypes.number,
+    name: PropTypes.string,
     onInput: PropTypes.func,
     onKeyPress: PropTypes.func,
     required: PropTypes.bool,
@@ -127,6 +129,7 @@ export class InputText extends Component {
         {this.props.required ? (
           <div style={{ position: relative, width: 0, height: 0 }}>
             <FontAwesomeIcon
+              aria-label="required"
               icon={AwesomeIcons('infoCircle')}
               style={{
                 color: 'var(--errors)',
@@ -137,6 +140,9 @@ export class InputText extends Component {
             />
           </div>
         ) : null}
+        <label className="srOnly" htmlFor={this.props.id}>
+          {this.props.name || this.props.placeholder || this.props.id}
+        </label>
       </Fragment>
     );
   }

@@ -8,15 +8,13 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
-import { Spinner } from 'ui/views/_components/Spinner';
 
-import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -65,7 +63,6 @@ export const FieldsDesigner = ({
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
   const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
@@ -238,7 +235,7 @@ export const FieldsDesigner = ({
   const onKeyChange = event => {
     if (event.key === 'Escape') {
       setTableDescriptionValue(initialTableDescription);
-    } else if (event.key == 'Enter') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
       updateTableDesign(isReadOnlyTable);
     }
@@ -401,18 +398,12 @@ export const FieldsDesigner = ({
     </ConfirmDialog>
   );
 
-  const renderAllFields = () => {
-    if (isLoading) {
-      return <Spinner className={styles.positioning} />;
-    } else {
-      return (
-        <Fragment>
-          {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-          {!viewType['tabularData'] && renderNewField()}
-        </Fragment>
-      );
-    }
-  };
+  const renderAllFields = () => (
+    <Fragment>
+      {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
+      {!viewType['tabularData'] && renderNewField()}
+    </Fragment>
+  );
 
   const renderErrors = (errorTitle, error) => {
     return (
@@ -508,9 +499,9 @@ export const FieldsDesigner = ({
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
-                fields={fields}
                 fieldType={field.type}
                 fieldValue={field.value}
+                fields={fields}
                 hasPK={fields.filter(field => field.pk).length > 0}
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}
@@ -637,10 +628,12 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_readOnly_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['readOnlyTable']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_readOnly_label`}
               checked={isReadOnlyTable || isReferenceDataset}
               className={styles.fieldDesignerItem}
               disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
@@ -649,17 +642,16 @@ export const FieldsDesigner = ({
               label="Default"
               onChange={e => onChangeIsReadOnly(e.checked)}
             />
-            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_readOnly`}>
-              {resources.messages['readOnlyTable']}
-            </label>
           </div>
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_to_prefill_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['prefilled']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_to_prefill_label`}
               checked={toPrefill || fixedNumber || isReferenceDataset}
               className={styles.fieldDesignerItem}
               disabled={
@@ -670,17 +662,16 @@ export const FieldsDesigner = ({
               label="Default"
               onChange={e => onChangeToPrefill(e.checked)}
             />
-            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_to_prefill`}>
-              {resources.messages['prefilled']}
-            </label>
           </div>
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_fixed_number_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['fixedNumber']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_fixed_number_label`}
               checked={fixedNumber}
               className={styles.fieldDesignerItem}
               disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
@@ -696,10 +687,12 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_not_empty_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['notEmpty']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_not_empty_label`}
               checked={notEmpty}
               className={styles.fieldDesignerItem}
               disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}

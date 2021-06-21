@@ -16,6 +16,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
+import { TextUtils } from 'ui/views/_functions/Utils';
 import { routes } from 'ui/routes';
 
 const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }) => {
@@ -43,6 +44,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         </Link>
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
+            aria-label={resources.messages['pinDataflow']}
             className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
             icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
             onClick={async () => {
@@ -61,14 +63,14 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
   return layout(
     <Fragment>
       <div className={`${styles.icon}`}>
-        <FontAwesomeIcon icon={AwesomeIcons('clone')} />
+        <FontAwesomeIcon icon={AwesomeIcons('clone')} role="presentation" />
       </div>
 
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
         <p>
           <span>{`${resources.messages['deliveryDate']}: `}</span>
           <span className={`${styles.dateBlock}`}>
-            {itemContent.expirationDate == '-'
+            {TextUtils.areEquals(itemContent.expirationDate, '-')
               ? resources.messages['pending']
               : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
           </span>
@@ -76,7 +78,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`} data-tip data-for={idTooltip}>
+        <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
           {itemContent.name}
         </h3>
         <p>{itemContent.description}</p>

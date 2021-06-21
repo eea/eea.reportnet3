@@ -65,7 +65,7 @@
   },
   {
     "key": "config/application/loadDataDelimiter",
-    "value": "fA=="
+    "value": "LA=="
   },
   {
     "key": "config/dataset/spring.jpa.hibernate.show-sql",

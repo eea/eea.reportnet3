@@ -34,19 +34,23 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
     const className = !isUndefined(item.className) || !isEmpty(item.className) ? item.className : '';
     return (
       <li className={className} role="menuitem" style={item.style}>
-        <a
+        <span
           className="p-menuitem-link"
-          href={item.href || ''}
           onClick={event => {
             event.preventDefault();
             onItemClick(event, item);
           }}
           target={item.target}>
           {!isNil(item.icon) && (
-            <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons(item.icon)} />
+            <FontAwesomeIcon
+              aria-hidden={false}
+              aria-label={item.label}
+              className="p-breadcrumb-home"
+              icon={AwesomeIcons(item.icon)}
+            />
           )}
-          <span className="p-menuitem-text">{item.label ? item.label : <span className="srOnly">home</span>}</span>
-        </a>
+          <span className="p-menuitem-text">{item.label ? item.label : <span className="srOnly">Home</span>}</span>
+        </span>
       </li>
     );
   };
@@ -59,7 +63,7 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
         const separator = index === model.length - 1 ? null : onLoadSeparator();
 
         return (
-          <Fragment key={item.label + '_' + index}>
+          <Fragment key={item.label}>
             {menuitem}
             {separator}
           </Fragment>
@@ -73,7 +77,7 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
   };
 
   const onLoadSeparator = () => {
-    return <li className="p-breadcrumb-chevron pi pi-chevron-right"></li>;
+    return <li className="p-breadcrumb-chevron pi pi-chevron-right" role="presentation"></li>;
   };
 
   return (

@@ -86,15 +86,15 @@ const ListBoxItem = ({
     let content = template ? template(option) : label;
     return (
       <li
-        className={className}
-        onClick={onClickListBoxItem}
-        onTouchEnd={onTouchEndListBoxItem}
-        onKeyDown={onKeyDownListBoxItem}
-        tabIndex={tabIndex}
         aria-label={label}
+        aria-selected={selected}
+        className={className}
         key={label}
+        onClick={onClickListBoxItem}
+        onKeyDown={onKeyDownListBoxItem}
+        onTouchEnd={onTouchEndListBoxItem}
         role="option"
-        aria-selected={selected}>
+        tabIndex={tabIndex}>
         {content}
       </li>
     );

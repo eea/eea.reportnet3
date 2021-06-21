@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -76,7 +76,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
-          key="tab1"
+          key="rowInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
@@ -90,7 +90,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
         <TabPanel
           header={resourcesContext.messages.tabMenuExpression}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}
-          key="tab2"
+          key="rowExpressionTab"
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
           <ExpressionSelector
             componentName={componentName}
@@ -122,6 +122,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
+          key="rowInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
             componentName={componentName}
@@ -318,7 +319,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
 
-      if (candidateRule.expressionType == 'ifThenClause') {
+      if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
         setExpressionsFieldsTypes(candidateRule.expressionsThen, candidateRule.table, tabs);
       }
@@ -709,25 +710,22 @@ export const RowValidation = ({ datasetId, tabs }) => {
     </div>
   );
 
-  const dialogLayout = children => (
-    <Fragment>
-      {validationContext.isVisible && (
-        <Dialog
-          className={styles.dialog}
-          footer={renderRowQCsFooter}
-          header={
-            validationContext.ruleEdit
-              ? resourcesContext.messages.editRowConstraint
-              : resourcesContext.messages.createRowConstraint
-          }
-          onHide={() => onHide()}
-          style={{ width: '975px' }}
-          visible={validationContext.isVisible}>
-          {children}
-        </Dialog>
-      )}
-    </Fragment>
-  );
+  const dialogLayout = children =>
+    validationContext.isVisible && (
+      <Dialog
+        className={styles.dialog}
+        footer={renderRowQCsFooter}
+        header={
+          validationContext.ruleEdit
+            ? resourcesContext.messages.editRowConstraint
+            : resourcesContext.messages.createRowConstraint
+        }
+        onHide={() => onHide()}
+        style={{ width: '975px' }}
+        visible={validationContext.isVisible}>
+        {children}
+      </Dialog>
+    );
 
   return dialogLayout(
     <form>
