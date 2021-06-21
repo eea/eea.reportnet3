@@ -718,8 +718,9 @@ public class ValidationServiceImpl implements ValidationService {
     // We create the CSV
     StringWriter stringWriter = new StringWriter();
 
-    try (CSVWriter csvWriter = new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+    try (CSVWriter csvWriter =
+        new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
       // Creates an array list containing all the column names from the CSV defined as constants
       List<String> headers = new ArrayList<>();
@@ -854,10 +855,11 @@ public class ValidationServiceImpl implements ValidationService {
       }
 
       catch (EEAException e) {
-        e.printStackTrace();
+        LOG_ERROR.error(
+            "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: {} + filename: {} + message: {} ",
+            datasetId, fileName, e.getMessage());
       }
-      LOG_ERROR.error(
-          "Trying to download a file generated during the export dataset validation data process but the file is not found");
+
     }
     return file;
   }
