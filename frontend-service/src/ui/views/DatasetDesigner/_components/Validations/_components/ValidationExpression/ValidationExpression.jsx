@@ -9,7 +9,7 @@ import { config } from 'conf/';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
-import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'ui/views/_components/InputText';
@@ -228,6 +228,7 @@ const ValidationExpression = ({
           <span className={styles.inputStringMatch}>
             <InputText
               disabled={isDisabled}
+              id="expressionValueStringMatch"
               onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
               placeholder={resourcesContext.messages.value}
               ref={inputStringMatchRef}
@@ -250,6 +251,7 @@ const ValidationExpression = ({
         return (
           <InputText
             disabled={isDisabled}
+            id="expressionValueNumberMatch"
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
             placeholder={resourcesContext.messages.value}
             value={expressionValues.expressionValue}
@@ -262,6 +264,7 @@ const ValidationExpression = ({
           <InputText
             disabled={isDisabled}
             format="false"
+            id="expressionValueNumberDecimal"
             keyfilter={valueKeyFilter}
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
@@ -274,6 +277,7 @@ const ValidationExpression = ({
         <InputText
           disabled={isDisabled}
           format="false"
+          id="expressionValueNumber"
           keyfilter={valueKeyFilter}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
@@ -330,6 +334,7 @@ const ValidationExpression = ({
     return (
       <InputText
         disabled={isDisabled}
+        id="expressionValueDate"
         keyfilter={valueKeyFilter}
         onChange={e => {
           onUpdateExpressionField('expressionValue', e.target.value);
@@ -344,8 +349,8 @@ const ValidationExpression = ({
     <li className={styles.expression}>
       <span className={styles.group}>
         <Checkbox
+          checked={expressionValues.group}
           disabled={isDisabled}
-          isChecked={expressionValues.group}
           onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
         />
       </span>

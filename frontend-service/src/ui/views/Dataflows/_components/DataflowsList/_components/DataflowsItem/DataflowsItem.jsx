@@ -44,6 +44,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         </Link>
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
+            aria-label={resources.messages['pinDataflow']}
             className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
             icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
             onClick={async () => {
@@ -62,7 +63,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
   return layout(
     <Fragment>
       <div className={`${styles.icon}`}>
-        <FontAwesomeIcon icon={AwesomeIcons('clone')} />
+        <FontAwesomeIcon icon={AwesomeIcons('clone')} role="presentation" />
       </div>
 
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>

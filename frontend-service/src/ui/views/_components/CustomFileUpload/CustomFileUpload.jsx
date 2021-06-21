@@ -377,9 +377,9 @@ export const CustomFileUpload = ({
     return (
       <div className={styles.checkboxWrapper}>
         <Checkbox
+          checked={state.replace}
           id="replaceCheckbox"
           inputId="replaceCheckbox"
-          isChecked={state.replace}
           onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}
           role="checkbox"
         />

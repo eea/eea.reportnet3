@@ -25,6 +25,7 @@ export class RowsPerPageDropdown extends Component {
         <Dropdown
           appendTo={document.body}
           ariaLabel={'rowsPerPage'}
+          name={'rowsPerPage'}
           onChange={this.props.onChange}
           options={options}
           value={this.props.value}

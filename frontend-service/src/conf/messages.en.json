@@ -1150,6 +1150,15 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "editDatasetSchemaName": "Edit dataset schema name",
+    "pinDataflow": "Pin/unpin the dataflow",
+    "multipleSingleMessage": "Multiple/Single select items",
+    "validExtensionsShort": "Valid extensions",
+    "customImports": "Custom imports",
+    "moveField": "Move field",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "goToLink": "Go to link"
   }
 }
