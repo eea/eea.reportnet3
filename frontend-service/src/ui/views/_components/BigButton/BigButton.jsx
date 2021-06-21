@@ -169,7 +169,7 @@ export const BigButton = ({
           !enabled && styles.bigButtonDisabled
         }`}>
         <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
         {model && !isEmpty(model) && (
           <DropdownButton
@@ -248,7 +248,7 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <span onClick={event => menuBigButtonRef.current.show(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
         <DropDownMenu model={model} ref={menuBigButtonRef} />
       </div>

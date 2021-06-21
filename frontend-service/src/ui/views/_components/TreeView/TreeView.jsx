@@ -6,6 +6,7 @@ import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './TreeView.module.scss';
 
@@ -14,7 +15,7 @@ import { Chips } from 'ui/views/_components/Chips';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { MultiSelect } from 'primereact/multiselect';
+import { MultiSelect } from 'ui/views/_components/MultiSelect';
 import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
 import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
@@ -45,26 +46,24 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
       !isUndefined(columnOptions[propertyName]['filterType']['multiselect']) &&
       !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field])
     ) {
+      const id = uniqueId();
       return (
-        <>
-          <MultiSelect
-            ariaLabelledBy={propertyName}
-            itemTemplate={
-              !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['class']) &&
-              !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['subclass'])
-                ? multiselectItemTemplate
-                : null
-            }
-            onChange={e => onFilterChange(e, field)}
-            options={columnOptions[propertyName]['filterType']['multiselect'][field]}
-            style={{ width: '100%' }}
-            value={treeViewState.filters[field]}
-            valuesSeparator=";"
-          />
-          <label className="srOnly" id={propertyName}>
-            {propertyName}
-          </label>
-        </>
+        <MultiSelect
+          ariaLabelledBy={`${propertyName}_${id}_input`}
+          id={`${propertyName}_${id}`}
+          inputId={`${propertyName}_${id}_input`}
+          itemTemplate={
+            !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['class']) &&
+            !isUndefined(columnOptions[propertyName]['filterType']['multiselect'][field][0]['subclass'])
+              ? multiselectItemTemplate
+              : null
+          }
+          onChange={e => onFilterChange(e, field)}
+          options={columnOptions[propertyName]['filterType']['multiselect'][field]}
+          style={{ width: '100%' }}
+          value={treeViewState.filters[field]}
+          valuesSeparator=";"
+        />
       );
     }
   };
@@ -126,6 +125,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
           <div>
             <span className={styles.propertyValueTableName}>{`Supports multiple values?`}</span>
             <FontAwesomeIcon
+              aria-label={rowData.referencedField?.pkHasMultipleValues ? 'True' : 'False'}
               icon={AwesomeIcons(rowData.referencedField?.pkHasMultipleValues ? 'check' : 'cross')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
@@ -133,6 +133,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
           <div>
             <span className={styles.propertyValueTableName}>{`All PK values must be used on link?`}</span>
             <FontAwesomeIcon
+              aria-label={rowData.referencedField?.pkMustBeUsed ? 'True' : 'False'}
               icon={AwesomeIcons(rowData.referencedField?.pkMustBeUsed ? 'check' : 'cross')}
               style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
             />
@@ -328,6 +329,7 @@ const itemTemplate = (rowData, key) => {
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       {rowData[key] === 'true' ? (
         <FontAwesomeIcon
+          aria-label={key}
           icon={AwesomeIcons('check')}
           style={{ float: 'center', color: 'var(--treeview-table-icon-color)' }}
         />
@@ -342,6 +344,7 @@ const typeTemplate = rowData => {
       <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>
       <FontAwesomeIcon
         icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)}
+        role="presentation"
         style={{ marginLeft: 'auto', color: 'var(--treeview-table-icon-color)' }}
       />
     </div>

@@ -245,7 +245,7 @@ const Tab = ({
           top: !isUndefined(tabRef.current) ? `${tabRef.current.offsetTop - 15}px` : '100px',
           zIndex: 9999
         }}>
-        <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowDown')} />
+        <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowDown')} role="presentation" />
       </div>
       <div
         style={{
@@ -260,7 +260,7 @@ const Tab = ({
             : '100px',
           zIndex: 9999
         }}>
-        <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} />
+        <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} role="presentation" />
       </div>
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}

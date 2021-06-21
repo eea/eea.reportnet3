@@ -69,7 +69,7 @@ export const MultiSelectHeader = ({
     <div className="p-multiselect-header" style={{ padding: '0.5rem' }}>
       <Checkbox
         aria-checked={allChecked}
-        ariaLabelledBy={`selectAll_${id}`}
+        aria-label={`selectAll_${id}`}
         checked={allChecked}
         inputId={`selectAll_${id}`}
         onChange={event => onToggleAllEvent(event)}

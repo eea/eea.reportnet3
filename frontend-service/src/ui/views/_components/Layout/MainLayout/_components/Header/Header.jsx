@@ -116,8 +116,8 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     <div style={{ float: 'left' }}>
       <Checkbox
         checked={doNotRemember}
-        id={`do_not_remember_checkbox`}
-        inputId={`do_not_remember_checkbox`}
+        id="do_not_remember_checkbox"
+        inputId="do_not_remember_checkbox"
         onChange={e => setDoNotRemember(e.checked)}
         role="checkbox"
       />

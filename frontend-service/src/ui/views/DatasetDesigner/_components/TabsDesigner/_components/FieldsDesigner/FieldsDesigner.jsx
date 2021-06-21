@@ -628,10 +628,12 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_readOnly_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['readOnlyTable']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_readOnly_label`}
               checked={isReadOnlyTable || isReferenceDataset}
               className={styles.fieldDesignerItem}
               disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
@@ -640,17 +642,16 @@ export const FieldsDesigner = ({
               label="Default"
               onChange={e => onChangeIsReadOnly(e.checked)}
             />
-            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_readOnly`}>
-              {resources.messages['readOnlyTable']}
-            </label>
           </div>
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_to_prefill_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['prefilled']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_to_prefill_label`}
               checked={toPrefill || fixedNumber || isReferenceDataset}
               className={styles.fieldDesignerItem}
               disabled={
@@ -661,17 +662,16 @@ export const FieldsDesigner = ({
               label="Default"
               onChange={e => onChangeToPrefill(e.checked)}
             />
-            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_to_prefill`}>
-              {resources.messages['prefilled']}
-            </label>
           </div>
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_fixed_number_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['fixedNumber']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_fixed_number_label`}
               checked={fixedNumber}
               className={styles.fieldDesignerItem}
               disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
@@ -687,10 +687,12 @@ export const FieldsDesigner = ({
           <div>
             <span
               className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_not_empty_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
               {resources.messages['notEmpty']}
             </span>
             <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_not_empty_label`}
               checked={notEmpty}
               className={styles.fieldDesignerItem}
               disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}

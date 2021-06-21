@@ -60,15 +60,13 @@ export const TableViewSchemas = ({
     return (
       <div className={styles.checkColumn}>
         <Checkbox
+          ariaLabel={resources.messages['selectedDataflow']}
           checked={checkedDataflow.id === row.id}
           id={`${row.id}_checkbox`}
           inputId={`${row.id}_checkbox`}
           onChange={() => onSelectDataflow(row)}
           role="checkbox"
         />
-        <label className="srOnly" htmlFor={`${row.id}_checkbox`}>
-          {resources.messages['selectedDataflow']}
-        </label>
       </div>
     );
   };
@@ -79,6 +77,7 @@ export const TableViewSchemas = ({
     <div className={styles.titleColum}>
       {row.name}
       <FontAwesomeIcon
+        aria-label={resources.messages['goToLink']}
         className={styles.linkIcon}
         icon={AwesomeIcons('externalUrl')}
         onMouseDown={() => handleRedirect(row.id)}

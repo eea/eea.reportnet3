@@ -476,8 +476,8 @@ const LinkSelector = withRouter(
               </span>
               <Checkbox
                 checked={pkMustBeUsed}
-                id={'pkMustBeUsed_check'}
-                inputId={'pkMustBeUsed_check'}
+                id="pkMustBeUsed_check"
+                inputId="pkMustBeUsed_check"
                 label="Default"
                 onChange={e => setPkMustBeUsed(e.checked)}
                 style={{ width: '70px', marginLeft: '0.5rem' }}
@@ -487,8 +487,8 @@ const LinkSelector = withRouter(
               </span>
               <Checkbox
                 checked={pkHasMultipleValues}
-                id={'pkHasMultipleValues_check'}
-                inputId={'pkHasMultipleValues_check'}
+                id="pkHasMultipleValues_check"
+                inputId="pkHasMultipleValues_check"
                 label="Default"
                 onChange={e => setPkHasMultipleValues(e.checked)}
                 style={{ width: '70px', marginLeft: '0.5rem' }}
