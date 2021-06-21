@@ -1155,6 +1155,7 @@
     "pinDataflow": "Pin/unpin the dataflow",
     "multipleSingleMessage": "Multiple/Single select items",
     "validExtensionsShort": "Valid extensions",
+    "customImports": "Custom imports",
     "moveField": "Move field",
     "expand": "Expand",
     "collapse": "Collapse",
