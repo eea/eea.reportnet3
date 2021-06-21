@@ -34,6 +34,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   const onCreateSnapshot = async () => {
     try {
       await SnapshotService.createByIdDesigner(datasetId, datasetSchemaId, snapshotState.description);
+      snapshotDispatch({ type: 'ON_SNAPSHOT_RESET' });
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
