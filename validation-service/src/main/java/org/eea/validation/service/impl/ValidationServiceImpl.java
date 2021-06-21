@@ -705,90 +705,84 @@ public class ValidationServiceImpl implements ValidationService {
   public void exportValidationFile(Long datasetId) throws EEAException, IOException 
   {
 	  DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);  
-	  //pathPublicFile = "C:/importFilesPublic/"; //Should be replaced with Consul variable
 	  
 	  String composedFileName =  "dataset-" + datasetId + "-validations";
+	  String nameFile = composedFileName + "." + "csv";
 	  
 	  File fileFolderProvider = new File(pathPublicFile, composedFileName);
-	  String nameFile = composedFileName + "." + "csv";
 	  
 	  fileFolderProvider.mkdirs();
 	  
-	   // Send notification
+	   // Create notification VO
 	   NotificationVO notificationVO = NotificationVO.builder()
 	        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
 	        .datasetName(nameFile).datasetType(datasetType).build();
 	  
-	  // we create the csv
+	  // We create the CSV
 	  StringWriter writer = new StringWriter();
+	  
 	  try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) 
 	  {
     	
 		  List<String> headers = new ArrayList<>();
-		  headers.add(ENTITY);
-		  headers.add(TABLE);
-		  headers.add(FIELD);
-		  headers.add(CODE);
-		  headers.add(CODENAME);
-		  headers.add(CODEDESC);
-		  headers.add(LEVELERROR);
-		  headers.add(MESSAGE);
-		  headers.add(NUMBEROFRECORDS);
+		  headers.add(ENTITY);  headers.add(TABLE); headers.add(FIELD);
+		  headers.add(CODE); headers.add(CODENAME); headers.add(CODEDESC);
+		  headers.add(LEVELERROR);  headers.add(MESSAGE);  headers.add(NUMBEROFRECORDS);
       
 		  csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-      	int nHeaders = 9;
-      	String[] fieldsToWrite = new String[nHeaders];
+		  int nHeaders = 9;
+		  String[] fieldsToWrite = new String[nHeaders];
       
-      	RulesSchemaVO rulesVO = null;
+		  RulesSchemaVO rulesVO = null;
       
-      try 
-      {
-    	  DatasetValue dataset = getDatasetValuebyId(datasetId);
-    	  FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
-    	  
-    	  validations.setErrors(new ArrayList<>());
-    	  validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
-    	  validations.setIdDataset(datasetId);
-
-    	  validations.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false));
-    	  
-    	  validations.setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
-    	        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false).size()));
-          
-          
-          if (CollectionUtils.isEmpty(validations.getErrors())) 
-          {
-        	  for(int i = 0; i < nHeaders; i++)
-        		  fieldsToWrite[i] = "";
-
-            csvWriter.writeNext(fieldsToWrite);
-          }
-          
-          else
-          {
-		      for (Object error : validations.getErrors()) 
-		      {
-		    	    GroupValidationVO castedError = (GroupValidationVO) error;
-		            rulesVO = ruleservice.getActiveRulesSchemaByDatasetId(dataset.getIdDatasetSchema());
-		            List<RuleVO> rules = rulesVO.getRules();
-		            
-		            RuleVO ruleVO = rules.stream().filter(rule -> rule.getShortCode().equals(castedError.getShortCode())).findFirst().orElse(new RuleVO());
-		            
-		            fieldsToWrite[0] = castedError.getTypeEntity().toString();
-		            fieldsToWrite[1] = castedError.getNameTableSchema();
-		            fieldsToWrite[2] = castedError.getNameFieldSchema();
-		            fieldsToWrite[3] = castedError.getShortCode();
-		            fieldsToWrite[4] = ruleVO.getRuleName();
-		            fieldsToWrite[5] = ruleVO.getDescription();
-		            fieldsToWrite[6] = castedError.getLevelError().toString();
-		            fieldsToWrite[7] = castedError.getMessage();
-		            fieldsToWrite[8] = castedError.getNumberOfRecords().toString();
-
-		            csvWriter.writeNext(fieldsToWrite);
-		         }
-          }
-      }
+	      try 
+	      {
+	    	  DatasetValue dataset = getDatasetValuebyId(datasetId);
+	    	  FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
+	    	  
+	    	  validations.setErrors(new ArrayList<>());
+	    	  validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
+	    	  validations.setIdDataset(datasetId);
+	
+	    	  validations.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false));
+	    	  
+	    	  validations.setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
+	    	        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false).size()));
+	          
+	          
+	          if (CollectionUtils.isEmpty(validations.getErrors())) 
+	          {
+	        	  for(int i = 0; i < nHeaders; i++)
+	        		  fieldsToWrite[i] = "";
+	
+	            csvWriter.writeNext(fieldsToWrite);
+	          }
+	          
+	          else
+	          {
+			      for (Object error : validations.getErrors()) 
+			      {
+			    	    GroupValidationVO castedError = (GroupValidationVO) error;
+			            rulesVO = ruleservice.getActiveRulesSchemaByDatasetId(dataset.getIdDatasetSchema());
+			            List<RuleVO> rules = rulesVO.getRules();
+			            
+			            RuleVO ruleVO = rules.stream().filter(rule -> rule.getShortCode().equals(castedError.getShortCode())).findFirst().orElse(new RuleVO());
+			            
+			            fieldsToWrite[0] = castedError.getTypeEntity().toString();
+			            fieldsToWrite[1] = castedError.getNameTableSchema();
+			            fieldsToWrite[2] = castedError.getNameFieldSchema();
+			            fieldsToWrite[3] = castedError.getShortCode();
+			            fieldsToWrite[4] = ruleVO.getRuleName();
+			            fieldsToWrite[5] = ruleVO.getDescription();
+			            fieldsToWrite[6] = castedError.getLevelError().toString();
+			            fieldsToWrite[7] = castedError.getMessage();
+			            fieldsToWrite[8] = castedError.getNumberOfRecords().toString();
+	
+			            csvWriter.writeNext(fieldsToWrite);
+			         }
+	           }
+	      	}
       
       catch (EEAException e) {LOG_ERROR.error(e.getMessage());}
     }
@@ -801,20 +795,17 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     // Once read we convert it to string
-    String csv = writer.getBuffer().toString();
-    byte[] file = csv.getBytes();
+	  String csv = writer.getBuffer().toString();
+	  byte[] file = csv.getBytes();
 
-    File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), nameFile);
+	  File fileWrite = new File(new File(pathPublicFile, composedFileName), nameFile);
     
-    try (OutputStream out = new FileOutputStream(fileWrite.toString())) 
-    {
-        out.write(file);
-     }
-    
-
-
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT, null,
-        notificationVO);
+	  try (OutputStream out = new FileOutputStream(fileWrite.toString())) 
+	  {
+	     out.write(file);
+		  kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT, null,
+			        notificationVO);
+	  }
   }
   
   
