@@ -442,6 +442,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @return the long
    * @throws EEAException the EEA exception
    */
   @Override

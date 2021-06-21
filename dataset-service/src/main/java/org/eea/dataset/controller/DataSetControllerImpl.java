@@ -231,6 +231,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -265,6 +266,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param providerId the provider id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
