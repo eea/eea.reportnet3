@@ -1154,6 +1154,7 @@
     "editDatasetSchemaName": "Edit dataset schema name",
     "pinDataflow": "Pin/unpin the dataflow",
     "multipleSingleMessage": "Multiple/Single select items",
-    "validExtensionsShort": "Valid extensions"
+    "validExtensionsShort": "Valid extensions",
+    "customImports": "Custom imports"
   }
 }
