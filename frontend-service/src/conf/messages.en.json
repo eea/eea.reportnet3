@@ -1152,7 +1152,7 @@
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
     "editDatasetSchemaName": "Edit dataset schema name",
-    "pinDataflow": "Pin/unpin the dataflow",
+    "pinDataflow": "Pin the dataflow",
     "multipleSingleMessage": "Multiple/Single select items",
     "validExtensionsShort": "Valid extensions",
     "customImports": "Custom imports",
@@ -1161,6 +1161,7 @@
     "collapse": "Collapse",
     "goToLink": "Go to link",
     "snapshotsEmtpyDescription": "Empty description",
-    "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters"
+    "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters",
+    "pinDataflowMessage": "Check this to mark as pinned your new dataflow"
   }
 }
