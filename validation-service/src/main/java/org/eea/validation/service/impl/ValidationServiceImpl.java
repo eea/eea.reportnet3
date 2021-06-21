@@ -13,9 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Future;
-
 import javax.transaction.Transactional;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
@@ -73,7 +71,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import com.opencsv.CSVWriter;
 
 /**
@@ -86,7 +83,7 @@ public class ValidationServiceImpl implements ValidationService {
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-  
+
   /**
    * The delimiter.
    */
@@ -152,7 +149,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
-  
+
   /** The validation repository. */
   @Autowired
   private ValidationRepository validationRepository;
@@ -174,7 +171,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Autowired
   private DatasetSchemaControllerZuul datasetSchemaController;
-  
+
   /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
@@ -182,38 +179,38 @@ public class ValidationServiceImpl implements ValidationService {
   /** The rules error utils. */
   @Autowired
   private RulesErrorUtils rulesErrorUtils;
-  
+
   /** The rules service */
   @Autowired
   private RulesServiceImpl ruleservice;
-  
+
   /** The Constant ENTITY: {@value}. */
   private static final String ENTITY = "Entity";
 
   /** The Constant TABLE: {@value}. */
   private static final String TABLE = "Table";
-  
+
   /** The Constant FIELD: {@value}. */
   private static final String FIELD = "Field";
-  
+
   /** The Constant CODE: {@value}. */
   private static final String CODE = "Code";
-  
+
   /** The Constant CODE: {@value}. */
   private static final String CODENAME = "QC Name";
-  
+
   /** The Constant CODE: {@value}. */
   private static final String CODEDESC = "QC Description";
-  
+
   /** The Constant LEVELERROR: {@value}. */
   private static final String LEVELERROR = "Level error";
-  
+
   /** The Constant MESSAGE: {@value}. */
   private static final String MESSAGE = "Message";
-  
+
   /** The Constant NUMBEROFRECORDS: {@value}. */
   private static final String NUMBEROFRECORDS = "Number of records";
-  
+
   /** The path public file. */
   @Value("${validationExportPathFile}")
   private String pathPublicFile;
@@ -692,7 +689,7 @@ public class ValidationServiceImpl implements ValidationService {
   public Integer countFieldsDataset(Long datasetId) {
     return recordRepository.countFieldsDataset();
   }
-  
+
   /**
    * Export data validation CSV file.
    *
@@ -702,113 +699,135 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Async
   @Override
-  public void exportValidationFile(Long datasetId) throws EEAException, IOException 
-  {
-	  DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);  
-	  
-	  String composedFileName =  "dataset-" + datasetId + "-validations";
-	  String nameFile = composedFileName + "." + "csv";
-	  
-	  File fileFolderProvider = new File(pathPublicFile, composedFileName);
-	  
-	  fileFolderProvider.mkdirs();
-	  
-	   // Create notification VO
-	   NotificationVO notificationVO = NotificationVO.builder()
-	        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-	        .datasetName(nameFile).datasetType(datasetType).build();
-	  
-	  // We create the CSV
-	  StringWriter writer = new StringWriter();
-	  
-	  try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) 
-	  {
-    	
-		  List<String> headers = new ArrayList<>();
-		  headers.add(ENTITY);  headers.add(TABLE); headers.add(FIELD);
-		  headers.add(CODE); headers.add(CODENAME); headers.add(CODEDESC);
-		  headers.add(LEVELERROR);  headers.add(MESSAGE);  headers.add(NUMBEROFRECORDS);
-      
-		  csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-		  int nHeaders = 9;
-		  String[] fieldsToWrite = new String[nHeaders];
-      
-		  RulesSchemaVO rulesVO = null;
-      
-	      try 
-	      {
-	    	  DatasetValue dataset = getDatasetValuebyId(datasetId);
-	    	  FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
-	    	  
-	    	  validations.setErrors(new ArrayList<>());
-	    	  validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
-	    	  validations.setIdDataset(datasetId);
-	
-	    	  validations.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false));
-	    	  
-	    	  validations.setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
-	    	        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false).size()));
-	          
-	          
-	          if (CollectionUtils.isEmpty(validations.getErrors())) 
-	          {
-	        	  for(int i = 0; i < nHeaders; i++)
-	        		  fieldsToWrite[i] = "";
-	
-	            csvWriter.writeNext(fieldsToWrite);
-	          }
-	          
-	          else
-	          {
-			      for (Object error : validations.getErrors()) 
-			      {
-			    	    GroupValidationVO castedError = (GroupValidationVO) error;
-			            rulesVO = ruleservice.getActiveRulesSchemaByDatasetId(dataset.getIdDatasetSchema());
-			            List<RuleVO> rules = rulesVO.getRules();
-			            
-			            RuleVO ruleVO = rules.stream().filter(rule -> rule.getShortCode().equals(castedError.getShortCode())).findFirst().orElse(new RuleVO());
-			            
-			            fieldsToWrite[0] = castedError.getTypeEntity().toString();
-			            fieldsToWrite[1] = castedError.getNameTableSchema();
-			            fieldsToWrite[2] = castedError.getNameFieldSchema();
-			            fieldsToWrite[3] = castedError.getShortCode();
-			            fieldsToWrite[4] = ruleVO.getRuleName();
-			            fieldsToWrite[5] = ruleVO.getDescription();
-			            fieldsToWrite[6] = castedError.getLevelError().toString();
-			            fieldsToWrite[7] = castedError.getMessage();
-			            fieldsToWrite[8] = castedError.getNumberOfRecords().toString();
-	
-			            csvWriter.writeNext(fieldsToWrite);
-			         }
-	           }
-	      	}
-      
-      catch (EEAException e) {LOG_ERROR.error(e.getMessage());}
-    }
-    
-    catch (IOException e) 
-    {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT, null,
-                notificationVO);
-        LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+  public void exportValidationFile(Long datasetId) throws EEAException, IOException {
+    DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
+
+    // Sets the validation file name and it's root directory
+    String composedFileName = "dataset-" + datasetId + "-validations";
+    String fileNameWithExtension = composedFileName + "." + "csv";
+
+    File fileFolder = new File(pathPublicFile, composedFileName);
+
+    fileFolder.mkdirs();
+
+    // Creates notification VO and passes the datasetID, the filename and the datasetType
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .datasetName(fileNameWithExtension).datasetType(datasetType).build();
+
+    // We create the CSV
+    StringWriter stringWriter = new StringWriter();
+
+    try (CSVWriter csvWriter = new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+
+      // Creates an array list containing all the column names from the CSV defined as constants
+      List<String> headers = new ArrayList<>();
+      headers.add(ENTITY);
+      headers.add(TABLE);
+      headers.add(FIELD);
+      headers.add(CODE);
+      headers.add(CODENAME);
+      headers.add(CODEDESC);
+      headers.add(LEVELERROR);
+      headers.add(MESSAGE);
+      headers.add(NUMBEROFRECORDS);
+
+      // Writes the column names into the CSV Writer and sets the array String to headers size so it
+      // only writes at most the number of columns as variables per row
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = 9;
+      String[] fieldsToWrite = new String[nHeaders];
+
+      RulesSchemaVO rulesVO = null;
+
+      try {
+        DatasetValue dataset = getDatasetValuebyId(datasetId);
+        FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
+
+        // Recovers the errors from the dataset Validations and the total records so we can cycle
+        // through them later
+        validations.setErrors(new ArrayList<>());
+        validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
+        validations.setIdDataset(datasetId);
+
+        validations.setErrors(validationRepository.findGroupRecordsByFilter(datasetId,
+            new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false));
+
+        validations
+            .setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
+                new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false).size()));
+
+
+        if (CollectionUtils.isEmpty(validations.getErrors())) {
+          for (int i = 0; i < nHeaders; i++)
+            fieldsToWrite[i] = "";
+
+          csvWriter.writeNext(fieldsToWrite);
+        }
+
+        else {
+          for (Object error : validations.getErrors()) {
+            // Casts validations.getErrors which is List<?> to an Object so we can later cast it to
+            // GroupValidationVO which allows us to set the error properties
+
+            GroupValidationVO castedError = (GroupValidationVO) error;
+            rulesVO = ruleservice.getActiveRulesSchemaByDatasetId(dataset.getIdDatasetSchema());
+            List<RuleVO> ruleListVO = rulesVO.getRules();
+
+            // Compares the current error shortCode with all the active rules shortCode for the
+            // current dataSet to check which rule caused the error to occur
+            RuleVO ruleVO = ruleListVO.stream()
+                .filter(rule -> rule.getShortCode().equals(castedError.getShortCode())).findFirst()
+                .orElse(new RuleVO());
+
+            // Sets all the data which is later going to be writed into the CSV
+
+            fieldsToWrite[0] = castedError.getTypeEntity().toString();
+            fieldsToWrite[1] = castedError.getNameTableSchema();
+            fieldsToWrite[2] = castedError.getNameFieldSchema();
+            fieldsToWrite[3] = castedError.getShortCode();
+            fieldsToWrite[4] = ruleVO.getRuleName();
+            fieldsToWrite[5] = ruleVO.getDescription();
+            fieldsToWrite[6] = castedError.getLevelError().toString();
+            fieldsToWrite[7] = castedError.getMessage();
+            fieldsToWrite[8] = castedError.getNumberOfRecords().toString();
+
+            csvWriter.writeNext(fieldsToWrite);
+          }
+        }
+      }
+
+      // If any of the exceptions is catched, throws the notification of failed event
+      catch (EEAException e) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
+            null, notificationVO);
+        LOG_ERROR.error(e.getMessage());
+      }
     }
 
-    // Once read we convert it to string
-	  String csv = writer.getBuffer().toString();
-	  byte[] file = csv.getBytes();
+    catch (IOException e) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
+          null, notificationVO);
+      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+    }
 
-	  File fileWrite = new File(new File(pathPublicFile, composedFileName), nameFile);
-    
-	  try (OutputStream out = new FileOutputStream(fileWrite.toString())) 
-	  {
-	     out.write(file);
-		  kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT, null,
-			        notificationVO);
-	  }
+    // Convert the writer data to a bytes array to write it into a file
+    String csv = stringWriter.getBuffer().toString();
+    byte[] file = csv.getBytes();
+
+    File fileWrite = new File(new File(pathPublicFile, composedFileName), fileNameWithExtension);
+
+    // Tries to write the data obtained into the file, if it's successful, throws a notification
+    // event completed
+    try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
+      out.write(file);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT,
+          null, notificationVO);
+    }
   }
-  
-  
+
+
   /**
    * Download exported file.
    *
@@ -818,25 +837,25 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public File downloadExportedFile(Long datasetId, String fileName)
-      throws IOException 
-  {
-	DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId); 
-	// Send notification
-	NotificationVO notificationVO = NotificationVO.builder()
-	        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-	        .datasetName(fileName).datasetType(datasetType).build();
-	
+  public File downloadExportedFile(Long datasetId, String fileName) throws IOException {
+    DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
+    // Send notification
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .datasetName(fileName).datasetType(datasetType).build();
+
     // we compound the route and create the file
-    File file = new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
-    if (!file.exists()) 
-    {
-        try {
-			kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT, null,
-			        notificationVO);
-		} 
-        
-        catch (EEAException e) { e.printStackTrace(); }
+    File file =
+        new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
+    if (!file.exists()) {
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
+            null, notificationVO);
+      }
+
+      catch (EEAException e) {
+        e.printStackTrace();
+      }
       LOG_ERROR.error(
           "Trying to download a file generated during the export dataset validation data process but the file is not found");
     }
