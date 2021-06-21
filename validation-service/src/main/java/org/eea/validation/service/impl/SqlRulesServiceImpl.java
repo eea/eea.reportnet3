@@ -129,7 +129,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .error("The QC Rule is disabled").build();
 
     String query = proccessQuery(datasetId, rule.getSqlSentence());
-
+    
     if (validateRule(query, datasetId, rule, Boolean.TRUE)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
@@ -323,10 +323,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
     boolean isSQLCorrect = true;
+    List<String> listOfId = new ArrayList<String>();
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
+    	listOfId = getListOfDatasetsOnQuery(query);
+    	// ***************************************
+    	// AHORA TENGO QUE VERIFICAR SI ESOS DATASETS PERTENECEN AL DATAFLOW O A LOS DATAFLOW REFERENCIADOS
+    	// ***************************************
+    	// LLAMAR AL DATAFLOW => Existe!! un dataflow get by id dataset
         try {
           checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
         } catch (EEAInvalidSQLException e) {
@@ -591,7 +597,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private String proccessQuery(Long datasetId, String query) {
 
     if (query.contains(DATASET)) {
-      Map<String, Long> datasetSchemasMap = getListOfDatasetsOnQuery(query);
+      Map<String, Long> datasetSchemasMap = getMapOfDatasetsOnQuery(query);
       DatasetTypeEnum datasetType = datasetMetabaseController.getType(datasetId);
       Long dataflowId =
           datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
@@ -763,7 +769,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @return the list of datasets on query
    */
-  private Map<String, Long> getListOfDatasetsOnQuery(String query) {
+  private Map<String, Long> getMapOfDatasetsOnQuery(String query) {
     Map<String, Long> datasetSchamasMap = new HashMap<>();
     String[] palabras = query.split("\\s+");
     for (String palabra : palabras) {
@@ -784,4 +790,21 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     return datasetSchamasMap;
   }
+  /**
+   * Gets a list with the id of the query datasets
+   * @param query the query
+   * @return Gets a list with the id of the query datasets
+   */
+  private List<String> getListOfDatasetsOnQuery(String query){
+	  List<String> datasetsIdList = new ArrayList<>();
+	  String[] palabras = query.split("\\s+");
+	  for(String palabra : palabras) {
+		  if(palabra.contains(DATASET)) {
+			  String datasetId = palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
+			  datasetsIdList.add(datasetId);
+		  }
+	  }
+	  return datasetsIdList;
+  }
+  
 }
