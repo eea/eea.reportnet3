@@ -49,7 +49,7 @@ public class ExternalImportReportingFailedEvent implements NotificableEventHandl
     Long dataflowId = notificationVO.getDataflowId();
     String datasetName =
         dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
-    String dataflowName = dataflowService.getById(dataflowId).getName();
+    String dataflowName = dataflowService.getMetabaseById(dataflowId).getName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
