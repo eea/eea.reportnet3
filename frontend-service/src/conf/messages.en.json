@@ -1159,6 +1159,8 @@
     "moveField": "Move field",
     "expand": "Expand",
     "collapse": "Collapse",
-    "goToLink": "Go to link"
+    "goToLink": "Go to link",
+    "snapshotsEmtpyDescription": "Empty description",
+    "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters"
   }
 }
