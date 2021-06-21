@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import styles from './Footer.module.scss';
@@ -12,36 +12,34 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
-export const Footer = withRouter(({ history, leftMargin }) => {
+export const Footer = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
 
   return (
-    <Fragment>
-      <div className={styles.Footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.reportnetLogo}>
-            <a href="https://www.eea.europa.eu/" className={styles.title} title={resources.messages['eea']}>
-              <img height="50px" src={eeaLogo} alt={resources.messages['eea']} className={styles.appLogo} />
-            </a>
-          </div>
-          <div className={styles.reportnetLogo}>
-            <a
-              href={getUrl(routes.ACCESS_POINT)}
-              className={styles.title}
-              title={resources.messages['titleHeader']}
-              onClick={e => {
-                e.preventDefault();
-                history.push(getUrl(routes.ACCESS_POINT));
-              }}>
-              <img height="50px" src={logo} alt="Reportnet" className={styles.appLogo} />
-              <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
-            </a>
-          </div>
-          <div className={styles.helpDesk}>
-            <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>
-          </div>
+    <div className={styles.Footer}>
+      <div className={styles.footerContent}>
+        <div className={styles.reportnetLogo}>
+          <a className={styles.title} href="https://www.eea.europa.eu/" title={resources.messages['eea']}>
+            <img alt={resources.messages['eea']} className={styles.appLogo} height="50px" src={eeaLogo} />
+          </a>
+        </div>
+        <div className={styles.reportnetLogo}>
+          <a
+            className={styles.title}
+            href={getUrl(routes.ACCESS_POINT)}
+            onClick={e => {
+              e.preventDefault();
+              history.push(getUrl(routes.ACCESS_POINT));
+            }}
+            title={resources.messages['titleHeader']}>
+            <img alt="Reportnet app logo" className={styles.appLogo} height="50px" src={logo} />
+            <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
+          </a>
+        </div>
+        <div className={styles.helpDesk}>
+          <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>
         </div>
       </div>
-    </Fragment>
+    </div>
   );
 });

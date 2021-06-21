@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import styles from './SnapshotSliderBar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { InputText } from 'ui/views/_components/InputText';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -110,15 +111,13 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
                 hasError ? ' error' : ''
               }`}>
-              <input
+              <InputText
                 autoComplete="off"
                 className={styles.formField}
                 id="createSnapshotDescription"
                 maxLength={255}
                 name="createSnapshotDescription"
-                onBlur={e => !hasCorrectDescriptionLength(e.target.value) && setHasError(true)}
                 onChange={e => setInputValue(e.target.value)}
-                onFocus={() => setHasError(false)}
                 onKeyDown={e => onPressEnter(e)}
                 placeholder={resources.messages.createSnapshotPlaceholder}
                 type="text"
@@ -130,6 +129,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               <div className={styles.createButtonWrapper}>
                 <Button
                   className={`${styles.createSnapshotButton} rp-btn secondary`}
+                  disabled={!hasCorrectDescriptionLength(inputValue)}
                   icon="plus"
                   onClick={() => onConfirmClick()}
                   tooltip={resources.messages.createSnapshotTooltip}

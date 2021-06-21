@@ -333,6 +333,7 @@ const FieldEditor = ({
       case 'TEXT':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={textCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -350,6 +351,7 @@ const FieldEditor = ({
         return (
           <InputTextarea
             collapsedHeight={75}
+            id={cells.field}
             maxLength={textCharacters}
             moveCaretToEnd={true}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -365,6 +367,7 @@ const FieldEditor = ({
       case 'RICH_TEXT':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={richTextCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -381,6 +384,7 @@ const FieldEditor = ({
       case 'NUMBER_INTEGER':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={longCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -396,6 +400,7 @@ const FieldEditor = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={decimalCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -412,6 +417,7 @@ const FieldEditor = ({
         return (
           <div className={styles.pointWrapper}>
             <InputText
+              id={cells.field}
               keyfilter={RecordUtils.getFilter(type)}
               onBlur={e => {
                 onEditorSubmitValue(
@@ -669,6 +675,7 @@ const FieldEditor = ({
       case 'EMAIL':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={emailCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -684,6 +691,7 @@ const FieldEditor = ({
       case 'URL':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={urlCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -814,6 +822,7 @@ const FieldEditor = ({
       default:
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}

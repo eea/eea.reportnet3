@@ -96,6 +96,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                         aria-hidden={false}
                         className={styles.emailIcon}
                         icon={AwesomeIcons('envelope')}
+                        role="presentation"
                       />
                     </div>
                     <h4>Need any help?</h4>
@@ -111,6 +112,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                         aria-hidden={false}
                         className={styles.emailIcon}
                         icon={AwesomeIcons('lightPdf')}
+                        role="presentation"
                       />
                     </div>
                     <h4>Support documents:</h4>

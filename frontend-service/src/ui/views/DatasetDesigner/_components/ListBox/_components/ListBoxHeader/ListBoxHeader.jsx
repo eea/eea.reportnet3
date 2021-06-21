@@ -13,7 +13,7 @@ const ListBoxHeader = ({ filter = null, disabled = false, onFilter = null }) => 
   return (
     <div className="p-listbox-header">
       <div className="p-listbox-filter-container">
-        <InputText disabled={disabled} onChange={onFilterListBoxHeader} type="text" value={filter} />
+        <InputText disabled={disabled} id="listboxFilter" onChange={onFilterListBoxHeader} type="text" value={filter} />
         <span className="p-listbox-filter-icon pi pi-search"></span>
       </div>
     </div>
