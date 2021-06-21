@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.UUID;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +32,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,11 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 /**
  * The Class ValidationServiceController.
@@ -65,8 +58,6 @@ public class ValidationControllerImpl implements ValidationController {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationControllerImpl.class);
-  
-  String pathPublicFile = "C:/importFilesPublic/";
 
   /**
    * The validation service.
@@ -82,7 +73,7 @@ public class ValidationControllerImpl implements ValidationController {
   /** The load validations helper. */
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
- 
+
 
   /**
    * Validate data set data. The lock should be released on
@@ -230,7 +221,7 @@ public class ValidationControllerImpl implements ValidationController {
 
     return validations;
   }
-  
+
   /**
    * Export CSV file of grouped validations.
    *
@@ -241,22 +232,16 @@ public class ValidationControllerImpl implements ValidationController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_CUSTODIAN')")
   @PostMapping(value = "/export/{datasetId}")
-  public void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId) 
-  {
-	    LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
-	    try {
-			validationService.exportValidationFile(datasetId);
-		} 
-	    catch (EEAException e) 
-	    {
-			e.printStackTrace();
-		} 
-	    catch (IOException e)
-	    {
-			e.printStackTrace();
-		}
-   }
-  
+  public void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId) {
+    LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
+    try {
+      validationService.exportValidationFile(datasetId);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error exporting validation data from the dataset {}.  Message: {}",
+          datasetId, e.getMessage());
+    }
+  }
+
   /**
    * Download file.
    *
