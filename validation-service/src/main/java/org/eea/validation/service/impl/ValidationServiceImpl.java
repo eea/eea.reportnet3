@@ -744,7 +744,10 @@ public class ValidationServiceImpl implements ValidationService {
       int nHeaders = 9;
       String[] fieldsToWrite = new String[nHeaders];
 
-      fillValidationDataCSV(datasetId, nHeaders, fieldsToWrite, csvWriter, notificationVO);
+      if (getDatasetValuebyId(datasetId) != null)
+        fillValidationDataCSV(datasetId, nHeaders, fieldsToWrite, csvWriter, notificationVO);
+      else
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, creatingFileError);
 
     }
 
