@@ -336,15 +336,23 @@ public class FileTreatmentHelper implements DisposableBean {
            */
 
           // IntegrationVO integrationVO = getIntegrationVO(schema, "csv");
-          IntegrationVO integrationVO = null;
+          IntegrationVO integrationVO;
+
 
           List<File> files = unzipAndStore(folder, saveLocationPath, zip);
 
           // Queue import tasks for stored files
           if (!files.isEmpty()) {
             wipeData(datasetId, null, replace);
-            IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-            queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO,
+            // IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
+            if (null == integrationId) {
+              integrationVO = null;
+            } else {
+              // Look for an integration for the given kind of file.
+              // integrationVO = getIntegrationVO(schema, multipartFileMimeType);
+              integrationVO = getIntegrationVO(integrationId);
+            }
+            queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
                 replace);
           } else {
             releaseLock(datasetId);
