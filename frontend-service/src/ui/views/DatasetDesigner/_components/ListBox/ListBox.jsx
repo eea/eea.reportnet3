@@ -13,6 +13,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
 
 const ListBox = ({
+  ariaLabel = null,
   ariaLabelledBy = null,
   className = null,
   dataKey = null,
@@ -257,7 +258,12 @@ const ListBox = ({
               <Spinner style={{ top: 0, left: 0, maxWidth: '15%' }} />
             </div>
           ) : (
-            <ul aria-multiselectable={multiple} className="p-listbox-list" role="listbox" style={listStyle}>
+            <ul
+              aria-label={ariaLabel}
+              aria-multiselectable={multiple}
+              className="p-listbox-list"
+              role="listbox"
+              style={listStyle}>
               {items}
             </ul>
           )}
@@ -285,6 +291,7 @@ ListBox.propTypes = {
   tabIndex: PropTypes.string,
   tooltip: PropTypes.string,
   tooltipOptions: PropTypes.object,
+  ariaLabel: PropTypes.string,
   ariaLabelledBy: PropTypes.string,
   onChange: PropTypes.func
 };
