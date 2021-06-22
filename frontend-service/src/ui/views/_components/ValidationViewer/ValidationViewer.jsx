@@ -419,18 +419,6 @@ const ValidationViewer = memo(
       }
     };
 
-    // const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
-    //   setIsLoading(true);
-    //   try {
-    //     const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
-    //     return errorPosition.data;
-    //   } catch (error) {
-    //     console.error('error', error);
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-
     const onLoadRulesDescription = async () => {
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
       validationContext.onSetRulesDescription(

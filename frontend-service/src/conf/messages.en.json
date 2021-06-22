@@ -1150,6 +1150,11 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "downloadValidationsButtonLabel": "Download validations",
+    "downloadValidationsStart": "Generating validations file",
+    "downloadValidationsError": "Failed downloading validations",
+    "automaticallyDownloadValidationsFile": "Validations file generated successfully",
+    "downloadValidationsFileError": "Failed downloading validations file"
   }
 }

@@ -37,6 +37,7 @@ import { Webforms } from 'ui/views/Webforms';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { IntegrationService } from 'core/services/Integration';
+import { ValidationService } from 'core/services/Validation';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -93,6 +94,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
+  const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -198,6 +200,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
       setIsLoadingFile(false);
+    }
+
+    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
+      setIsDownloadingValidations(false);
     }
   }, [notificationContext.hidden]);
 
@@ -477,6 +483,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT'
     ],
     setIsLoadingFile,
+    false
+  );
+
+  useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
+    setIsDownloadingValidations,
     false
   );
 
@@ -799,13 +811,34 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       </div>
     );
 
+  const onDownloadValidations = async () => {
+    setIsDownloadingValidations(true);
+    notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
+
+    try {
+      await ValidationService.generateFile(datasetId);
+    } catch (error) {
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
+
+      setIsDownloadingValidations(false);
+    }
+  };
+
   const renderValidationsFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setValidationsVisible(false)}
-    />
+    <div className={styles.validationsFooter}>
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={isDownloadingValidations ? 'spinnerAnimate' : 'export'}
+        label={resources.messages['downloadValidationsButtonLabel']}
+        onClick={onDownloadValidations}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setValidationsVisible(false)}
+      />
+    </div>
   );
 
   if (isLoading) return layout(<Spinner />);
