@@ -250,8 +250,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @param response the response
    */
   @Override
-  @GetMapping(value = "/downloadFile/{datasetId}",
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @GetMapping(value = "/downloadFile/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   public void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response) {
@@ -269,10 +268,15 @@ public class ValidationControllerImpl implements ValidationController {
       in.close();
       // delete the file after downloading it
       FileUtils.forceDelete(file);
-    } catch (IOException e) {
+    } catch (IOException | ResponseStatusException e) {
       LOG_ERROR.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
           datasetId, fileName, e.getMessage());
+
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
+          "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s + message: %s ",
+          datasetId, fileName, e.getMessage()), e);
+
     }
 
 

@@ -108,7 +108,7 @@ public interface ValidationController {
    * @param fileName the file name
    * @param response the response
    */
-  @GetMapping("/downloadFile/{datasetId}/")
+  @GetMapping("/downloadFile/{datasetId}")
   void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
 

@@ -113,6 +113,11 @@ public class ValidationServiceImpl implements ValidationService {
   /** The Constant NUMBEROFRECORDS: {@value}. */
   private static final String NUMBEROFRECORDS = "Number of records";
 
+  /** The Constant NUMBEROFRECORDS: {@value}. */
+  private static final String EXCEPTIONERRORSTRING =
+      "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s";
+
+
   /**
    * The delimiter.
    */
@@ -773,6 +778,13 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
+  /**
+   * Gets the validations by dataset value.
+   *
+   * @param dataset the dataset
+   * @param datasetId the dataset id
+   * @return the validations by dataset value
+   */
   private FailedValidationsDatasetVO getValidationsByDatasetValue(DatasetValue dataset,
       Long datasetId) {
     FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
@@ -793,6 +805,14 @@ public class ValidationServiceImpl implements ValidationService {
     return validations;
   }
 
+  /**
+   * Fill validation error data.
+   *
+   * @param error the error
+   * @param dataset the dataset
+   * @param nHeaders the n headers
+   * @return the string[]
+   */
   private String[] fillValidationErrorData(GroupValidationVO error, DatasetValue dataset,
       int nHeaders) {
     RulesSchemaVO rulesVO =
@@ -821,6 +841,16 @@ public class ValidationServiceImpl implements ValidationService {
     return fieldsToWrite;
   }
 
+  /**
+   * Fill validation data CSV.
+   *
+   * @param datasetId the dataset id
+   * @param nHeaders the n headers
+   * @param fieldsToWrite the fields to write
+   * @param csvWriter the csv writer
+   * @param notificationVO the notification VO
+   * @throws EEAException the EEA exception
+   */
   private void fillValidationDataCSV(Long datasetId, int nHeaders, String[] fieldsToWrite,
       CSVWriter csvWriter, NotificationVO notificationVO) throws EEAException {
     try {
@@ -868,40 +898,20 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
-  public File downloadExportedFile(Long datasetId, String fileName) throws IOException {
-    DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
-
-    String errorString = String.format(
-        "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
-        datasetId, fileName);
-    // Send notification
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .error(errorString).fileName(fileName).datasetType(datasetType).build();
+  public File downloadExportedFile(Long datasetId, String fileName)
+      throws IOException, ResponseStatusException {
 
     // we compound the route and create the file
     File file =
         new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
     if (!file.exists()) {
-      try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
-            null, notificationVO);
-      }
 
-      catch (EEAException e) {
-        LOG_ERROR.error(
-            "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: {} + filename: {} + message: {} ",
-            datasetId, fileName, e.getMessage());
-
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, String.format(
-            "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s + message: %s ",
-            datasetId, fileName, e.getMessage()), e);
-      }
-
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, errorString);
+      LOG_ERROR.error(String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
     }
 
-    else
-      return file;
+    return file;
+
   }
 }
