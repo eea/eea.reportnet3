@@ -30,6 +30,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const defaultLayout = (
     <>
       <FontAwesomeIcon
+        aria-label={title}
         className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
         icon={AwesomeIcons(icon)}
       />
@@ -40,6 +41,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
     <>
       <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
         <FontAwesomeIcon
+          aria-label={resourcesContext.messages['notifications']}
           className={`${styles.leftSideBarUserIcon} ${animate ? styles.leftSideBarElementNotification : ''}`}
           icon={AwesomeIcons(icon)}
         />
