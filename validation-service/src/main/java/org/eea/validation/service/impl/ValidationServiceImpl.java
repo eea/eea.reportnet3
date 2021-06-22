@@ -779,6 +779,32 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   /**
+   * Download exported file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public File downloadExportedFile(Long datasetId, String fileName)
+      throws IOException, ResponseStatusException {
+
+    // we compound the route and create the file
+    File file =
+        new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
+    if (!file.exists()) {
+
+      LOG_ERROR.error(String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
+    }
+
+    return file;
+
+  }
+
+  /**
    * Gets the validations by dataset value.
    *
    * @param dataset the dataset
@@ -888,30 +914,4 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-
-  /**
-   * Download exported file.
-   *
-   * @param datasetId the dataset id
-   * @param fileName the file name
-   * @return the file
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  public File downloadExportedFile(Long datasetId, String fileName)
-      throws IOException, ResponseStatusException {
-
-    // we compound the route and create the file
-    File file =
-        new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
-    if (!file.exists()) {
-
-      LOG_ERROR.error(String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
-    }
-
-    return file;
-
-  }
 }
