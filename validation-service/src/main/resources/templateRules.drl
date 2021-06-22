@@ -186,6 +186,24 @@ function boolean isPhone(String value){
 function boolean isGeometry(FieldValue fieldValue){
 	return FKValidationUtils.isGeometry(fieldValue);
 }
+
+///////////////////////////////////////VALIDATION GEOMETRY TYPES CHECK EPSG AND SRID///////////////////////////////////////////////////////
+function boolean checkEPSGSRID(FieldValue fieldValue){
+	if(fieldValue.getGeometry() != null) {
+		//Obtain the SRID code removing all other characters from geojson
+		String aux = fieldValue.getValue().split("srid")[1].replace("\"","").replace(":","").replace("}","");
+	    switch(aux) {
+			case "4326":
+			case "4258":
+			case "3035":
+	        	return true;
+			default:
+				return false;
+	    }
+    } else {
+    	return false;
+    }
+}
  
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
  
