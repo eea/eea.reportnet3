@@ -84,11 +84,42 @@ public class ValidationServiceImpl implements ValidationService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant ENTITY: {@value}. */
+  private static final String ENTITY = "Entity";
+
+  /** The Constant TABLE: {@value}. */
+  private static final String TABLE = "Table";
+
+  /** The Constant FIELD: {@value}. */
+  private static final String FIELD = "Field";
+
+  /** The Constant CODE: {@value}. */
+  private static final String CODE = "Code";
+
+  /** The Constant CODE: {@value}. */
+  private static final String CODENAME = "QC Name";
+
+  /** The Constant CODE: {@value}. */
+  private static final String CODEDESC = "QC Description";
+
+  /** The Constant LEVELERROR: {@value}. */
+  private static final String LEVELERROR = "Level error";
+
+  /** The Constant MESSAGE: {@value}. */
+  private static final String MESSAGE = "Message";
+
+  /** The Constant NUMBEROFRECORDS: {@value}. */
+  private static final String NUMBEROFRECORDS = "Number of records";
+
   /**
    * The delimiter.
    */
   @Value("${loadDataDelimiter}")
   private char delimiter;
+
+  /** The path public file. */
+  @Value("${validationExportPathFile}")
+  private String pathPublicFile;
 
   /**
    * The kie base manager.
@@ -183,38 +214,6 @@ public class ValidationServiceImpl implements ValidationService {
   /** The rules service */
   @Autowired
   private RulesServiceImpl ruleservice;
-
-  /** The Constant ENTITY: {@value}. */
-  private static final String ENTITY = "Entity";
-
-  /** The Constant TABLE: {@value}. */
-  private static final String TABLE = "Table";
-
-  /** The Constant FIELD: {@value}. */
-  private static final String FIELD = "Field";
-
-  /** The Constant CODE: {@value}. */
-  private static final String CODE = "Code";
-
-  /** The Constant CODE: {@value}. */
-  private static final String CODENAME = "QC Name";
-
-  /** The Constant CODE: {@value}. */
-  private static final String CODEDESC = "QC Description";
-
-  /** The Constant LEVELERROR: {@value}. */
-  private static final String LEVELERROR = "Level error";
-
-  /** The Constant MESSAGE: {@value}. */
-  private static final String MESSAGE = "Message";
-
-  /** The Constant NUMBEROFRECORDS: {@value}. */
-  private static final String NUMBEROFRECORDS = "Number of records";
-
-  /** The path public file. */
-  @Value("${validationExportPathFile}")
-  private String pathPublicFile;
-
 
   /**
    * Gets the element lenght.
