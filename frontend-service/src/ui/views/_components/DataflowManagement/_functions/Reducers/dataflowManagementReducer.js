@@ -18,6 +18,9 @@ export const dataflowManagementReducer = (state, { type, payload }) => {
     case 'RESET_STATE':
       return (state = payload.resetData);
 
+    case 'TOGGLE_PIN':
+      return { ...state, pinDataflow: payload };
+
     default:
       return state;
   }

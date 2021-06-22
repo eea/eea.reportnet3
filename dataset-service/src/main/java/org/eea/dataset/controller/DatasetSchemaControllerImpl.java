@@ -770,7 +770,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     // Recover the designs datasets of the dataflowId given. And then, for each design dataset
     // executes a validation.
     // At the first wrong design dataset, it stops and returns false. Otherwise it returns true
-    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
+    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
     Boolean isValid = false;
     if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
       isValid = dataflow.getDesignDatasets().parallelStream().noneMatch(

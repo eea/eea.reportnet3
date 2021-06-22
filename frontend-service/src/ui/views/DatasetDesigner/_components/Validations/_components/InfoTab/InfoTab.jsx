@@ -6,7 +6,7 @@ import { config } from 'conf';
 
 import styles from './InfoTab.module.scss';
 
-import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
 
@@ -149,8 +149,8 @@ export const InfoTab = ({
         <div className={`${styles.field} ${styles.qcEnabled} formField `}>
           <label htmlFor="QcActive">{resourcesContext.messages['qcEnabled']}</label>
           <Checkbox
+            checked={creationFormState.candidateRule.active}
             id={`${componentName}__active`}
-            isChecked={creationFormState.candidateRule.active}
             onChange={e => onInfoFieldChange('active', e.checked)}
           />
         </div>

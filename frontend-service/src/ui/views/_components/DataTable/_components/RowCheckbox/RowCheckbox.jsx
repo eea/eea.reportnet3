@@ -21,7 +21,7 @@ export const RowCheckbox = props => {
   return (
     <div className="p-checkbox p-component">
       <div className="p-hidden-accessible">
-        <input type="checkbox" />
+        <input aria-label="Select all" type="checkbox" />
       </div>
       <div className={className} onClick={onClick}>
         <span className={iconClassName} />

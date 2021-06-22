@@ -12,7 +12,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'ui/views/_components/Button';
 import { Calendar } from 'ui/views/_components/Calendar';
-import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'ui/views/_components/InputText';
@@ -531,8 +531,8 @@ const ComparisonExpression = ({
       <span className={styles.group}>
         <FontAwesomeIcon icon={AwesomeIcons('link')} />
         <Checkbox
+          checked={expressionValues.group}
           disabled={disabledFields.union}
-          isChecked={expressionValues.group}
           onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
         />
       </span>

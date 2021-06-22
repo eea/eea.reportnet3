@@ -851,7 +851,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
 
     ReleaseReceiptVO receipt = new ReleaseReceiptVO();
-    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId);
+    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
     receipt.setIdDataflow(dataflowId);
     receipt.setDataflowName(dataflow.getName());
     receipt.setObligationId(dataflow.getObligation().getObligationId());
