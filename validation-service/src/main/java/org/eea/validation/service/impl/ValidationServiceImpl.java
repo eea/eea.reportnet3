@@ -706,6 +706,9 @@ public class ValidationServiceImpl implements ValidationService {
     // Sets the validation file name and it's root directory
     String composedFileName = "dataset-" + datasetId + "-validations";
     String fileNameWithExtension = composedFileName + "." + "csv";
+    String creatingFileError =
+        String.format("Failed generating CSV file with name %s using datasetID %s",
+            fileNameWithExtension, datasetId);
 
     File fileFolder = new File(pathPublicFile, composedFileName);
 
@@ -714,7 +717,7 @@ public class ValidationServiceImpl implements ValidationService {
     // Creates notification VO and passes the datasetID, the filename and the datasetType
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .fileName(fileNameWithExtension).datasetType(datasetType).build();
+        .fileName(fileNameWithExtension).datasetType(datasetType).error(creatingFileError).build();
 
     // We create the CSV
     StringWriter stringWriter = new StringWriter();
@@ -864,10 +867,14 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public File downloadExportedFile(Long datasetId, String fileName) throws IOException {
     DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
+
+    String errorString = String.format(
+        "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
+        datasetId, fileName);
     // Send notification
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .fileName(fileName).datasetType(datasetType).build();
+        .error(errorString).fileName(fileName).datasetType(datasetType).build();
 
     // we compound the route and create the file
     File file =
@@ -888,7 +895,10 @@ public class ValidationServiceImpl implements ValidationService {
             datasetId, fileName, e.getMessage()), e);
       }
 
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, errorString);
     }
-    return file;
+
+    else
+      return file;
   }
 }

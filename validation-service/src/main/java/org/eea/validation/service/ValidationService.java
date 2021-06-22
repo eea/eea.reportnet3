@@ -219,7 +219,7 @@ public interface ValidationService {
    * @return the integer
    */
   Integer countFieldsDataset(@DatasetId Long datasetId);
-  
+
   /**
    * Exports validation data file.
    *
@@ -229,8 +229,8 @@ public interface ValidationService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void exportValidationFile(@DatasetId Long datasetId) throws EEAException, IOException;
-  
-  
+
+
   /**
    * Download validation exported file.
    *
