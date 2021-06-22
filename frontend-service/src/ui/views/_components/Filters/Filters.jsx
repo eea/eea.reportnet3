@@ -411,6 +411,7 @@ export const Filters = ({
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
             <Checkbox
+              ariaLabel={resources.messages[property]}
               checked={getCheckboxFilterState(property)}
               id={property}
               inputId={property}
