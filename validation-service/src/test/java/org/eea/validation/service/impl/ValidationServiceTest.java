@@ -76,7 +76,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ValidationServiceTest.
  */
@@ -1016,7 +1015,7 @@ public class ValidationServiceTest {
     dataSetMetabase.setDataSetName("file");
     dataSetMetabase.setId(1L);
 
-    
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
