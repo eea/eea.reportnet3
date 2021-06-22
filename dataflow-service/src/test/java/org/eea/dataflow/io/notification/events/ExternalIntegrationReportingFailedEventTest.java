@@ -44,7 +44,7 @@ public class ExternalIntegrationReportingFailedEventTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataSetMetabaseVO);
     Mockito.when(dataSetMetabaseVO.getDataSetName()).thenReturn("datasetName");
-    Mockito.when(dataflowService.getById(Mockito.anyLong())).thenReturn(dataFlowVO);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
     Mockito.when(dataFlowVO.getName()).thenReturn("dataflowName");
     Assert.assertEquals(5, externalIntegrationFailedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L).build()).size());

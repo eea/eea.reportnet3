@@ -80,6 +80,7 @@ public interface DatasetController {
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Deprecated
   @PostMapping("{id}/loadTableData/{idTableSchema}")
@@ -87,7 +88,8 @@ public interface DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam(value = "replace", required = false) boolean replace);
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId);
 
   /**
    * Load dataset data.
@@ -97,6 +99,7 @@ public interface DatasetController {
    * @param providerId the provider id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Deprecated
   @PostMapping("{id}/loadDatasetData")
@@ -104,7 +107,8 @@ public interface DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace);
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId);
 
   /**
    * Gets the position from any object id.
@@ -173,19 +177,27 @@ public interface DatasetController {
    * Delete import data.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
   @DeleteMapping("/{datasetId}/deleteImportData")
-  void deleteImportData(@PathVariable("datasetId") Long datasetId);
+  void deleteImportData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
    * Delete import table.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
   void deleteImportTable(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("tableSchemaId") String tableSchemaId);
+      @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
    * Export file.
@@ -375,6 +387,7 @@ public interface DatasetController {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @PostMapping("/{datasetId}/importFileData")
   void importFileData(@PathVariable("datasetId") Long datasetId,
@@ -382,7 +395,8 @@ public interface DatasetController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace);
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId);
 
 
   /**
