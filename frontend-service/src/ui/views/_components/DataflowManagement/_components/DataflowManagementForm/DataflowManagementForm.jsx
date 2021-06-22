@@ -180,7 +180,7 @@ const DataflowManagementForm = forwardRef(
           </div>
 
           <div className={`${styles.search}`}>
-            <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
+            <Button icon="search" label={resources.messages['searchObligations']} onClick={onSearch} />
             <input
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               id="searchObligation"
