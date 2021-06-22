@@ -652,7 +652,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
-
+      value.put(LiteralConstants.USER,
+          SecurityContextHolder.getContext().getAuthentication().getName());
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
           .datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(originalFileName).error(error)
