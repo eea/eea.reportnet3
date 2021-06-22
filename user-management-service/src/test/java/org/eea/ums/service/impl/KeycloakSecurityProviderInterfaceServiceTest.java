@@ -318,7 +318,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroupsWithSearch(Mockito.anyString())).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.addUserToUserGroup("user1",
         "DATAFLOW-1-DATA_CUSTODIAN");
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).addUserToGroup("user1",
@@ -337,7 +337,7 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroupsWithSearch(Mockito.anyString())).thenReturn(groupInfos);
     when(keycloakConnectorService.getGroupDetail("idGroupInfo")).thenReturn(groupInfo);
 
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
@@ -366,9 +366,10 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroupsWithSearch(Mockito.anyString())).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.deleteResourceInstances(resourceInfoVOs);
-    Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
+    Mockito.verify(keycloakConnectorService, Mockito.times(1))
+        .getGroupsWithSearch(Mockito.anyString());
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
   }
 
@@ -385,9 +386,10 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId("idGroupInfo");
     groupInfo.setName("Dataflow-1-DATA_CUSTODIAN");
     groupInfos[0] = groupInfo;
-    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroupsWithSearch(Mockito.anyString())).thenReturn(groupInfos);
     keycloakSecurityProviderInterfaceService.deleteResourceInstancesByName(resourceNames);
-    Mockito.verify(keycloakConnectorService, Mockito.times(1)).getGroups();
+    Mockito.verify(keycloakConnectorService, Mockito.times(1))
+        .getGroupsWithSearch(Mockito.anyString());
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).deleteGroupDetail("idGroupInfo");
   }
 
@@ -704,7 +706,8 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setId(groupName);
     groups[0] = groupInfo;
 
-    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groups);
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.anyString()))
+        .thenReturn(groups);
     keycloakSecurityProviderInterfaceService.addContributorToUserGroup(contributor, userMail,
         groupName);
 

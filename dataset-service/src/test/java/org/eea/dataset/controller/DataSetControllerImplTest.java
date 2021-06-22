@@ -1100,10 +1100,10 @@ public class DataSetControllerImplTest {
   @Test
   public void importFileDataTest() throws EEAException {
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean());
-    dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true);
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any());
+    dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true, 1L);
     Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean());
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any());
   }
 
   /**
@@ -1115,10 +1115,10 @@ public class DataSetControllerImplTest {
   public void importFileDataExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
     Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     try {
-      dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true);
+      dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true, 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
       throw e;
@@ -1143,19 +1143,56 @@ public class DataSetControllerImplTest {
 
   }
 
+
   @Test
   public void deleteImportDataTest() {
-    dataSetControllerImpl.deleteImportData(1L);
+    dataSetControllerImpl.deleteImportData(1L, null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong());
   }
 
   @Test
+  public void deleteImportDataRestApiTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    dataSetControllerImpl.deleteImportData(1L, 1L, 1L);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteImportDataRestApiForbiddenTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
+    try {
+      dataSetControllerImpl.deleteImportData(1L, 1L, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
   public void deleteImportTableTest() {
-    dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190");
+    dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
   }
 
+  @Test
+  public void deleteImportTableRestApiTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteImportTableRestApiForbiddenTest() {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
+    try {
+      dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
 
   @Test
   public void exportDatasetTest() throws IOException, EEAException {

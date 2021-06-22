@@ -37,10 +37,13 @@ public interface DataFlowController {
    * Find by id.
    *
    * @param dataflowId the dataflow id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the data flow VO
    */
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId);
+  DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
    * Find by status.

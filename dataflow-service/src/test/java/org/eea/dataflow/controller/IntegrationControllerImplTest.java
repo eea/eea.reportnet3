@@ -386,4 +386,13 @@ public class IntegrationControllerImplTest {
     }
   }
 
+
+  @Test
+  public void findIntegrationByIdTest() throws EEAException {
+    IntegrationVO integration = new IntegrationVO();
+    integration.setId(1L);
+    Mockito.when(integrationService.getIntegration(Mockito.anyLong())).thenReturn(integration);
+    assertEquals(integration, integrationControllerImpl.findIntegrationById(1L));
+  }
+
 }

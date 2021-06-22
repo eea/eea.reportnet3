@@ -42,6 +42,9 @@ export const designerReducer = (state, { type, payload }) => {
         metaData: payload.metaData
       };
 
+    case 'GET_SELECTED_IMPORT_EXTENSION':
+      return { ...state, selectedImportExtension: payload.selectedImportExtension };
+
     case 'GET_UNIQUES':
       return { ...state, uniqueConstraintsList: payload.data };
 
