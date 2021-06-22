@@ -1157,7 +1157,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   ariaLabelledBy="reference_dataset_label"
                   checked={designerState.referenceDataset}
                   disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
-                  id="reference_dataset_checkbox"
+                  id="reference_dataset"
                   inputId="reference_dataset_checkbox"
                   onChange={e => onChangeReferenceDataset(e.checked)}
                   role="checkbox"
@@ -1193,7 +1193,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   ariaLabelledBy="available_in_public_view_label"
                   checked={designerState.availableInPublic}
                   disabled={isDesignDatasetEditorRead}
-                  id="available_in_public_view_checkbox"
+                  id="available_in_public_view"
                   inputId="available_in_public_view_checkbox"
                   onChange={e => onChangeAvailableInPublicView(e.checked)}
                   role="checkbox"
