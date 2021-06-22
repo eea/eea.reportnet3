@@ -141,7 +141,7 @@ export class InputText extends Component {
           </div>
         ) : null}
         <label className="srOnly" htmlFor={this.props.id}>
-          {this.props.name || this.props.placeholder || this.props.id}
+          {this.props.name !== '' ? this.props.name : this.props.placeholder || this.props.id}
         </label>
       </Fragment>
     );

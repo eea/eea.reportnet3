@@ -1075,7 +1075,7 @@ export const FieldDesigner = ({
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}
-        id={fieldName}
+        id={fieldName !== '' ? fieldName : 'newField'}
         keyfilter="schemaTableFields"
         maxLength={60}
         name={resources.messages['newFieldPlaceHolder']}
