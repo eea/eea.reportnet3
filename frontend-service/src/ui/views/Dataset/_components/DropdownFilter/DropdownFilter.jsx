@@ -280,7 +280,10 @@ class DropdownFilter extends Component {
                 onClick={e => {
                   this.updateChecked(field.key);
                 }}>
-                <FontAwesomeIcon icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')} />
+                <FontAwesomeIcon
+                  icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')}
+                  role="presentation"
+                />
                 {this.props.showLevelErrorIcons ? (
                   !TextUtils.areEquals(field.label, 'SELECT ALL') && !TextUtils.areEquals(field.label, 'CORRECT') ? (
                     <IconTooltip
