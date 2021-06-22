@@ -1,0 +1,13 @@
+.p-growl {
+  top: 70px;
+  opacity: 0.9;
+  filter: alpha(opacity=90);
+  width: 25em !important;
+}
+.p-growl.p-component.p-growl-topright {
+  z-index: 5100 !important;
+}
+
+.p-growl-topright {
+  top: 75px !important;
+}
