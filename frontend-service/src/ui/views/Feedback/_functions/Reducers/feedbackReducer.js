@@ -65,6 +65,11 @@ export const feedbackReducer = (state, { type, payload }) => {
         messages: !isNil(payload) ? state.messages : [],
         currentPage: !isNil(payload) ? state.currentPage : 0
       };
+    case 'TOGGLE_FILE_UPLOAD_VISIBILITY':
+      return {
+        ...state,
+        importFileDialogVisible: payload
+      };
     case 'ON_UPDATE_MESSAGE':
       return {
         ...state,

@@ -55,6 +55,17 @@
           }
         }
       }
+      .attachFileMessageButton {
+        width: 8%;
+        height: 48px;
+        margin: 0 0.5rem;
+        align-self: flex-start;
+        @media (max-width: 320px) {
+          :global .pi-comment {
+            display: none;
+          }
+        }
+      }
       @media (max-width: 468px) {
         .sendMessageTextarea {
           width: 70%;
