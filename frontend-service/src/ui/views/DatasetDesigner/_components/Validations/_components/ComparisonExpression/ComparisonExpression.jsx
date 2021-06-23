@@ -318,7 +318,7 @@ const ComparisonExpression = ({
     }
     return (
       <span
-        className={`${styles.operatorValue} formField ${printRequiredFieldError('valueTypeSelector')}`}
+        className={`${styles.valueFieldType} formField ${printRequiredFieldError('valueTypeSelector')}`}
         onBlur={() => onAddToClickedFields('valueTypeSelector')}>
         <Dropdown
           appendTo={document.body}
