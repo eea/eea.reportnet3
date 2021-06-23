@@ -1162,6 +1162,7 @@
     "goToLink": "Go to link",
     "snapshotsEmtpyDescription": "Empty description",
     "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters",
-    "pinDataflowMessage": "Check to mark as pinned your new dataflow"
+    "pinDataflowMessage": "Check to mark as pinned your new dataflow",
+    "thereAreNoReferenceDataflows": "There are no reference dataflows"
   }
 }
