@@ -338,7 +338,7 @@ export const Feedback = withRouter(({ match, history }) => {
               <Button
                 className={`${
                   (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
-                }  p-button-secondary ${styles.attachFileMessageButton}`}
+                } p-button-secondary ${styles.attachFileMessageButton}`}
                 disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
                 icon="clipboard"
                 iconPos="right"

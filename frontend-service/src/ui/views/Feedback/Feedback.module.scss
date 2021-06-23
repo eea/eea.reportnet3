@@ -27,16 +27,18 @@
     flex-basis: 100%;
   }
   .listMessagesWrapper {
-    width: 50%;
+    align-items: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
     font-weight: bold;
+    width: 50%;
+    margin-left: 0.5rem;
 
     .sendMessageWrapper {
-      display: flex;
       align-items: center;
+      display: flex;
+      margin-top: 0.5rem;
       width: 100%;
       .sendMessageTextarea {
         width: 90%;

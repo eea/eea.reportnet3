@@ -129,6 +129,7 @@ export const ListMessages = ({
             hasSeparator={
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
+            isAttachment={i % 2 === 1}
             key={uniqueId('message_')}
             message={message}
           />

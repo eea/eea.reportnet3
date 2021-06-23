@@ -16,6 +16,44 @@
       .datetime {
         color: var(--gray-5);
       }
+      .messageAttachment {
+        background-color: var(--c-corporate-blue-lighter);
+        border-radius: 6px;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 14rem;
+        span {
+          color: var(--white);
+        }
+        .downloadFileButton {
+          margin-left: auto;
+          span {
+            &:first-child {
+              display: none;
+            }
+            &:nth-child(2) {
+              font-size: 18pt;
+            }
+          }
+        }
+        .messageAttachmentFile {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: baseline;
+          svg {
+            color: var(--white);
+            font-size: 16pt;
+          }
+        }
+        .messageAttachmentFileData {
+          span {
+            color: var(--gray-15);
+            font-size: 8pt;
+          }
+        }
+      }
     }
     @media (max-width: 468px) {
       margin-right: 10px;
@@ -33,6 +71,44 @@
       }
       .datetime {
         color: var(--gray-75);
+      }
+      .messageAttachment {
+        background-color: var(--c-lilac-200);
+        border-radius: 6px;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 14rem;
+        span {
+          color: var(--c-black-400);
+        }
+        .downloadFileButton {
+          margin-left: auto;
+          span {
+            &:first-child {
+              display: none;
+            }
+            &:nth-child(2) {
+              font-size: 18pt;
+            }
+          }
+        }
+        .messageAttachmentFile {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: baseline;
+          svg {
+            color: var(--c-black-400);
+            font-size: 16pt;
+          }
+        }
+        .messageAttachmentFileData {
+          span {
+            color: var(--gray-15);
+            font-size: 8pt;
+          }
+        }
       }
     }
     @media (max-width: 468px) {
