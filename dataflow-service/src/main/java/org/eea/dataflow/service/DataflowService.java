@@ -119,7 +119,7 @@ public interface DataflowService {
    * @param dataflowVO the dataflow VO
    * @throws EEAException the EEA exception
    */
-  void createDataFlow(DataFlowVO dataflowVO) throws EEAException;
+  Long createDataFlow(DataFlowVO dataflowVO) throws EEAException;
 
 
   /**

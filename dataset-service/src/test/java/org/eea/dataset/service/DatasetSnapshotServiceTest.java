@@ -799,7 +799,8 @@ public class DatasetSnapshotServiceTest {
     dataflowVO.setName("name");
     dataflowVO.setReportingDatasets(datasets);
     dataflowVO.setObligation(obligationVO);
-    Mockito.when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.findById(Mockito.any(), Mockito.any()))
+        .thenReturn(dataflowVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);

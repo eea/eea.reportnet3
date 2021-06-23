@@ -398,4 +398,18 @@ public class IntegrationControllerImpl implements IntegrationController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
+  /**
+   * Find integration by id.
+   *
+   * @param integrationId the integration id
+   * @return the integration VO
+   */
+  @Override
+  @GetMapping("/private/findIntegration/{integrationId}")
+  @ApiOperation(value = "Find Integration using his id", hidden = true)
+  public IntegrationVO findIntegrationById(@ApiParam(value = "Integration Id",
+      example = "1") @RequestParam("integrationId") Long integrationId) {
+    return integrationService.getIntegration(integrationId);
+  }
 }
