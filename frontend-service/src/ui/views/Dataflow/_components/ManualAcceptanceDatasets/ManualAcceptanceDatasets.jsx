@@ -102,7 +102,9 @@ export const ManualAcceptanceDatasets = ({
 
   const isReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      {rowData.isReleased ? (
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
+      ) : null}
     </div>
   );
 
@@ -170,6 +172,7 @@ export const ManualAcceptanceDatasets = ({
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
+          summary={'Manual acceptance'}
           totalRecords={manualAcceptanceDatasetsState.filteredData.length}
           value={manualAcceptanceDatasetsState.filteredData}>
           {renderColumns(manualAcceptanceDatasetsState.filteredData)}
