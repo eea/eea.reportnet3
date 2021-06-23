@@ -1,9 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -103,9 +101,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       createSnapshotVO.setReleased(true);
       createSnapshotVO.setAutomatic(Boolean.TRUE);
       TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-      Date ahora = new Date();
-      SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      createSnapshotVO.setDescription("Release " + formateador.format(ahora));
+      createSnapshotVO.setDescription("Release " + dateRelease + " CET");
 
       datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease);
     } else {

@@ -12,7 +12,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 import { Button } from 'ui/views/_components/Button';
-import { Growl } from 'primereact/growl';
+import { Growl } from 'ui/views/_components/Growl';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { Menu } from 'ui/views/_components/Menu';
 import { Spinner } from 'ui/views/_components/Spinner';
