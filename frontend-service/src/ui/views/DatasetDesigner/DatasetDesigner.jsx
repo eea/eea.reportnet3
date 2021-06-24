@@ -99,6 +99,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       selectedRuleId: '',
       selectedRuleLevelError: '',
       selectedRuleMessage: '',
+      selectedTableSchemaId: null,
       tableSchemaId: QuerystringUtils.getUrlParamValue('tab')
     },
     exportButtonsList: [],
@@ -719,7 +720,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           selectedRuleId,
           selectedRuleLevelError,
           selectedRuleMessage,
-          tableSchemaId
+          tableSchemaId,
+          selectedTableSchemaId: tableSchemaId
         }
       });
     } else {
@@ -735,7 +737,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           selectedRuleId: '',
           selectedRuleLevelError: '',
           selectedRuleMessage: '',
-          tableSchemaId
+          tableSchemaId,
+          selectedTableSchemaId: tableSchemaId
         }
       });
     }
@@ -1418,6 +1421,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             selectedRuleId={dataViewerOptions.selectedRuleId}
             selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
             selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+            selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
             setActiveTableSchemaId={tabSchemaId =>
               designerDispatch({
                 type: 'SET_DATAVIEWER_OPTIONS',

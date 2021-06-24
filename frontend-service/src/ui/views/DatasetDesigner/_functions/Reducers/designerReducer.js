@@ -154,7 +154,8 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
-          tableSchemaId: payload.tableSchemaId
+          tableSchemaId: payload.tableSchemaId,
+          selectedTableSchemaId: payload.selectedTableSchemaId
         },
         isValidationViewerVisible: false
       };
@@ -173,7 +174,8 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
-          tableSchemaId: payload.tableSchemaId
+          tableSchemaId: payload.tableSchemaId,
+          selectedTableSchemaId: payload.selectedTableSchemaId
         },
         isValidationViewerVisible: false
       };

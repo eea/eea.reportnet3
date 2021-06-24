@@ -82,6 +82,7 @@ const DataViewer = withRouter(
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
+    selectedTableSchemaId,
     showWriteButtons,
     tableFixedNumber,
     tableHasErrors,
@@ -391,7 +392,7 @@ const DataViewer = withRouter(
           nRows,
           fields,
           levelErrorValidations,
-          groupedRules
+          tableId === selectedTableSchemaId ? groupedRules : undefined
         );
 
         if (!isEmpty(data.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
@@ -1119,8 +1120,8 @@ const DataViewer = withRouter(
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={isExportable}
-          isFilterValidationsActive={isFilterValidationsActive}
           isFilterable={isFilterable}
+          isFilterValidationsActive={isFilterValidationsActive}
           isGroupedValidationSelected={isGroupedValidationSelected}
           isLoading={isLoading}
           isValidationSelected={isValidationSelected}
@@ -1133,6 +1134,7 @@ const DataViewer = withRouter(
           records={records}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
+          selectedTableSchemaId={selectedTableSchemaId}
           setColumns={setColumns}
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportTableDialogVisible={setImportTableDialogVisible}
