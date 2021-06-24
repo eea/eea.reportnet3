@@ -520,7 +520,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTIPOLYGON, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -534,7 +534,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.POINT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -548,7 +548,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTIPOINT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -562,7 +562,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.LINESTRING, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -576,7 +576,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTILINESTRING, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -590,7 +590,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.POLYGON, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
@@ -604,7 +604,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.GEOMETRYCOLLECTION, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   /**

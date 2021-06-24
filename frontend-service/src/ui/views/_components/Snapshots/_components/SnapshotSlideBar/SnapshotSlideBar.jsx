@@ -4,6 +4,8 @@ import { useContext, useEffect, useState } from 'react';
 import styles from './SnapshotSliderBar.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import ReactTooltip from 'react-tooltip';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -13,13 +15,13 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
 
 const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
-  const [hasError, setHasError] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-  const [slideBarStyle, setSlideBarStyle] = useState({});
-
   const dialogContext = useContext(DialogContext);
   const resources = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
+
+  const [hasError, setHasError] = useState(false);
+  const [slideBarStyle, setSlideBarStyle] = useState({});
+  const [inputValue, setInputValue] = useState(snapshotContext.snapshotState.description);
 
   const isVisible = snapshotContext.isSnapshotsBarVisible;
   const setIsVisible = snapshotContext.setIsSnapshotsBarVisible;
@@ -31,6 +33,12 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
       setInputValue('');
     }
   }, [isVisible, isSnapshotDialogVisible]);
+
+  useEffect(() => {
+    if (snapshotContext.snapshotState.description === '') {
+      setInputValue('');
+    }
+  }, [snapshotContext.snapshotState.description]);
 
   useEffect(() => {
     showScrollingBar();
@@ -77,7 +85,6 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
           description: inputValue
         }
       });
-      setInputValue('');
       setHasError(false);
     } else {
       setHasError(true);
@@ -110,32 +117,39 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
                 hasError ? ' error' : ''
               }`}>
-              <input
+              <InputTextarea
                 autoComplete="off"
                 className={styles.formField}
+                collapsedHeight={90}
                 id="createSnapshotDescription"
                 maxLength={255}
                 name="createSnapshotDescription"
-                onBlur={e => !hasCorrectDescriptionLength(e.target.value) && setHasError(true)}
                 onChange={e => setInputValue(e.target.value)}
-                onFocus={() => setHasError(false)}
                 onKeyDown={e => onPressEnter(e)}
                 placeholder={resources.messages.createSnapshotPlaceholder}
+                rows={10}
                 type="text"
                 value={inputValue}
               />
               <label className="srOnly" htmlFor="createSnapshotDescription">
                 {resources.messages['createSnapshotPlaceholder']}
               </label>
-              <div className={styles.createButtonWrapper}>
+              <div className={styles.createButtonWrapper} data-for="saveCopy" data-tip>
                 <Button
                   className={`${styles.createSnapshotButton} rp-btn secondary`}
+                  disabled={!hasCorrectDescriptionLength(inputValue)}
                   icon="plus"
                   onClick={() => onConfirmClick()}
-                  tooltip={resources.messages.createSnapshotTooltip}
                   type="submit"
                 />
               </div>
+              <ReactTooltip className={styles.tooltip} effect="solid" id="saveCopy" place="left">
+                {inputValue.length === 0
+                  ? resources.messages['snapshotsEmtpyDescription']
+                  : inputValue.length > 255
+                  ? resources.messages['snapshotsWrongLengthDescription']
+                  : resources.messages.createSnapshotTooltip}
+              </ReactTooltip>
             </div>
           </div>
         </div>

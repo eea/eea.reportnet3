@@ -169,7 +169,7 @@ export const BigButton = ({
           !enabled && styles.bigButtonDisabled
         }`}>
         <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
         {model && !isEmpty(model) && (
           <DropdownButton
@@ -200,7 +200,9 @@ export const BigButton = ({
         <InputText
           autoFocus={true}
           className={`${styles.inputText}`}
+          id="editName"
           key={index}
+          name={resources.messages['editDatasetSchemaName']}
           onBlur={e => {
             onInputSave(e.target.value.trim(), index);
             setButtonsTitle(e.target.value.trim());
@@ -246,7 +248,7 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <span onClick={event => menuBigButtonRef.current.show(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
         <DropDownMenu model={model} ref={menuBigButtonRef} />
       </div>

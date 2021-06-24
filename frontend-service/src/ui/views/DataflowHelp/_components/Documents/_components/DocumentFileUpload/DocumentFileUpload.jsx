@@ -199,7 +199,7 @@ const DocumentFileUpload = ({
           <input
             id={'descriptionDocumentFileUpload'}
             maxLength={255}
-            name="description"
+            name={resources.messages['description']}
             onBlur={() => checkInputForErrors('description')}
             onChange={e => {
               e.persist();

@@ -5,7 +5,6 @@ import { withRouter } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 
 import styles from './Dataset.module.scss';
 
@@ -95,6 +94,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
+  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
+  const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
@@ -184,15 +185,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   }, [userContext, isDataLoaded, tableSchemaColumns]);
 
   useEffect(() => {
-    if (isEmpty(externalOperationsList.export)) {
-      setExportButtonsList(internalExtensions);
-    } else {
-      setExportButtonsList(internalExtensions.concat(externalIntegrationsNames));
-    }
+    setExportButtonsList(
+      isEmpty(externalOperationsList.export) ? internalExtensions : internalExtensions.concat(externalIntegrationsNames)
+    );
   }, [datasetName, externalOperationsList.export]);
 
   useEffect(() => {
-    setImportButtonsList(importFromFile.concat(importFromOtherSystems));
+    setImportButtonsList(internalImportExtensionsList.concat(importFromFile).concat(importFromOtherSystems));
   }, [externalOperationsList.import]);
 
   useEffect(() => {
@@ -261,27 +260,56 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     parseExportIntegrationsNames(exportOperationsList.map(element => element.name));
   };
 
-  const importFromFile = [
-    {
-      label: resources.messages['importFromFile'],
-      icon: 'upload',
-      command: () => setIsImportDatasetDialogVisible(true)
-    }
-  ];
+  const internalImportExtensionsList = config.importTypes.importDatasetTypes.map(type => {
+    const extensionsTypes = !isNil(type.code) && type.code.split('+');
+    return {
+      command: () => {
+        setIsImportDatasetDialogVisible(true);
+        setImportSelectedIntegrationExtension(type.code);
+      },
+      icon: extensionsTypes[0],
+      label: type.text
+    };
+  });
 
-  const importFromOtherSystems = [
-    {
-      label: resources.messages['importPreviousData'],
-      items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
-        label: importOtherSystem.name,
-        icon: 'upload',
-        command: () => {
-          setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
-          setIsImportOtherSystemsDialogVisible(true);
+  const importFromFile = !isEmpty(externalOperationsList.import)
+    ? [
+        {
+          label: resources.messages['customImports'],
+          items: externalOperationsList.import.map(type => {
+            return {
+              command: () => {
+                setIsImportDatasetDialogVisible(true);
+                setImportSelectedIntegrationId(type.id);
+                setImportSelectedIntegrationExtension(type.fileExtension);
+              },
+              icon: type.fileExtension,
+              label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+            };
+          })
         }
-      }))
-    }
-  ];
+      ]
+    : [];
+
+  const importFromOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
+    ? [
+        {
+          label: resources.messages['importPreviousData'],
+          items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
+            label: importOtherSystem.name,
+            icon: 'upload',
+            command: () => {
+              setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
+              setIsImportOtherSystemsDialogVisible(true);
+            }
+          }))
+        }
+      ]
+    : [];
+
+  const validImportExtensions = `.${importSelectedIntegrationExtension}`;
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = !isNil(type.code) && type.code.split('+');
@@ -774,15 +802,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     });
   };
 
-  const getImportExtensions = ['.zip']
-    .concat(externalOperationsList.import.map(file => `.${file.fileExtension}`))
-    .join(', ')
-    .toLowerCase();
-
-  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
-    getImportExtensions.split(', ')
-  ).join(', ')}`;
-
   const renderDashboardFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -861,15 +880,15 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
                   disabled={!hasWritePermissions}
                   icon={'import'}
                   label={resources.messages['importDataset']}
-                  onClick={
-                    !isEmpty(externalOperationsList.importOtherSystems)
-                      ? event => importMenuRef.current.show(event)
-                      : () => setIsImportDatasetDialogVisible(true)
-                  }
+                  onClick={event => importMenuRef.current.show(event)}
                 />
-                {!isEmpty(externalOperationsList.importOtherSystems) && (
-                  <Menu id="importDataSetMenu" model={importButtonsList} popup={true} ref={importMenuRef} />
-                )}
+                <Menu
+                  className={styles.menuWrapper}
+                  id="importDataSetMenu"
+                  model={importButtonsList}
+                  popup={true}
+                  ref={importMenuRef}
+                />
               </Fragment>
             )}
             <Button
@@ -880,7 +899,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
-              className={styles.exportSubmenu}
+              className={styles.menuWrapper}
               id="exportDataSetMenu"
               model={exportButtonsList}
               popup={true}
@@ -911,8 +930,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
                 !datasetHasErrors ? null : 'p-button-animated-blink'
-              }`}
-              disabled={!datasetHasErrors}
+              }`}              
               icon={'warning'}
               iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}
@@ -1053,12 +1071,15 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
-          accept={getImportExtensions}
+          accept={validImportExtensions}
           chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
           dialogHeader={`${resources.messages['uploadDataset']}${datasetName}`}
-          dialogOnHide={() => setIsImportDatasetDialogVisible(false)}
+          dialogOnHide={() => {
+            setIsImportDatasetDialogVisible(false);
+            setImportSelectedIntegrationId(null);
+          }}
           dialogVisible={isImportDatasetDialogVisible}
           fileLimit={1}
           infoTooltip={infoExtensionsTooltip}
@@ -1070,9 +1091,16 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           onError={onImportDatasetError}
           onUpload={onUpload}
           replaceCheck={true}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
-            datasetId: datasetId
-          })}`}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(importSelectedIntegrationId)
+              ? getUrl(DatasetConfig.importFileDataset, {
+                  datasetId: datasetId
+                })
+              : getUrl(DatasetConfig.importFileDatasetExternal, {
+                  datasetId: datasetId,
+                  integrationId: importSelectedIntegrationId
+                })
+          }`}
         />
       )}
 
@@ -1086,9 +1114,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
           <div className={styles.checkboxWrapper}>
             <Checkbox
+              checked={replaceData}
               id="replaceCheckbox"
               inputId="replaceCheckbox"
-              isChecked={replaceData}
               onChange={() => setReplaceData(!replaceData)}
               role="checkbox"
             />

@@ -109,7 +109,7 @@ const Documents = ({
         <Icon icon="spinnerAnimate" />
       ) : (
         <div>
-          <FontAwesomeIcon icon={AwesomeIcons(rowData.category)} />
+          <FontAwesomeIcon aria-label={resources.messages['downloadFile']} icon={AwesomeIcons(rowData.category)} />
         </div>
       )}
     </span>
@@ -151,7 +151,13 @@ const Documents = ({
   );
 
   const isPublicColumnTemplate = rowData => (
-    <span>{rowData.isPublic ? <FontAwesomeIcon icon={AwesomeIcons('check')} /> : ''}</span>
+    <span>
+      {rowData.isPublic ? (
+        <FontAwesomeIcon aria-label={resources.messages['documentIsPublic']} icon={AwesomeIcons('check')} />
+      ) : (
+        ''
+      )}
+    </span>
   );
 
   const onCancelDialog = () => {

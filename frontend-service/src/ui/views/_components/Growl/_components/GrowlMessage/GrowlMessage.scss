@@ -1,0 +1,109 @@
+.p-growl-item-container {
+  margin: 0 0 1em 0;
+  -webkit-box-shadow: var(--growl-box-shadow);
+  -moz-box-shadow: var(--growl-box-shadow);
+  box-shadow: var(--growl-box-shadow);
+  word-break: break-word;
+}
+
+.p-growl-item-container a {
+  color: var(--c-corporate-blue);
+  text-decoration: none;
+}
+.p-growl-item-container a:hover {
+  color: var(--c-corporate-blue-lighter);
+}
+.p-growl-item-container a:active {
+  color: var(--c-corporate-blue-lighter);
+}
+.p-growl-item-container a:visited {
+  color: var(--c-corporate-blue);
+}
+
+.p-growl-item-container {
+  border-style: solid;
+  border-width: 0 0 0 5px;
+  border-radius: 4px;
+}
+
+.p-growl-title {
+  font-weight: bold;
+  display: block;
+  font-size: 11pt;
+}
+
+.p-growl-title-info {
+  color: var(--growl-info-border-color);
+}
+.p-growl-title-warn {
+  color: var(--growl-warn-border-color);
+}
+.p-growl-title-error {
+  color: var(--growl-error-border-color);
+}
+.p-growl-title-success {
+  color: var(--growl-success-border-color);
+}
+
+.p-growl-item {
+  padding: 1em;
+}
+.p-growl-item .p-growl-message {
+  margin: 0 0 0 4em;
+}
+.p-growl-item .p-growl-image {
+  font-size: 2.571em;
+  cursor: pointer;
+}
+.p-growl-message-info {
+  background-color: var(--growl-info-bg);
+  border-color: var(--growl-info-border-color);
+  color: var(--growl-info-color);
+}
+.p-growl-message-info {
+  .p-growl-image {
+    color: var(--growl-info-icon-color);
+  }
+}
+.p-growl-message-success {
+  background-color: var(--growl-success-bg);
+  border-color: var(--growl-success-border-color);
+  color: var(--growl-success-color);
+}
+.p-growl-message-success {
+  .p-growl-image {
+    color: var(--growl-success-icon-color);
+  }
+}
+.p-growl-message-warn {
+  background-color: var(--growl-warning-bg);
+  border-color: var(--growl-warning-border-color);
+  color: var(--growl-warning-color);
+}
+.p-growl-message-warn {
+  .p-growl-image {
+    color: var(--growl-warning-icon-color);
+  }
+}
+
+.p-growl-message-error {
+  background-color: var(--growl-error-bg);
+  border-color: var(--growl-error-border-color);
+  color: var(--growl-error-color);
+}
+.p-growl-message-error {
+  .p-growl-image {
+    color: var(--growl-error-icon-color);
+  }
+}
+
+.p-growl-icon-close {
+  color: var(--growl-close-icon-color);
+}
+.p-growl-icon-close-icon {
+  font-size: 16pt !important;
+}
+
+.p-growl-details {
+  color: var(--growl-details-message-color);
+}

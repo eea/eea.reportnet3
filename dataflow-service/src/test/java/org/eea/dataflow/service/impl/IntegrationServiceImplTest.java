@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
@@ -41,6 +42,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
+
 
 /**
  * The Class IntegrationServiceImplTest.
@@ -467,5 +469,23 @@ public class IntegrationServiceImplTest {
     integrationService.addLocks(0L);
     Mockito.verify(lockService, times(7)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any());
+  }
+
+
+  @Test
+  public void getIntegrationById() {
+    IntegrationVO integrationVO = new IntegrationVO();
+    InternalOperationParameters parameter = new InternalOperationParameters();
+    parameter.setParameter(IntegrationParams.FILE_EXTENSION);
+    parameter.setValue("csv");
+    Integration integration = new Integration();
+    integration.setId(1L);
+    integration.setInternalParameters(Arrays.asList(parameter));
+
+
+    Mockito.when(integrationRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(integration));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+    Assert.assertEquals(integrationVO, integrationService.getIntegration(1L));
   }
 }
