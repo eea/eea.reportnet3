@@ -38,10 +38,15 @@
   display: table-row;
 }
 
-.p-fileupload-row > div {
-  display: table-cell;
-  padding: 0.5em 1em;
-  vertical-align: middle;
+.p-fileupload-row {
+  > div {
+    display: table-cell;
+    padding: 0.5em 1em;
+    vertical-align: middle;
+  }
+  div {
+    color: var(--main-font-color);
+  }
 }
 
 .p-fileupload-content .p-progressbar {

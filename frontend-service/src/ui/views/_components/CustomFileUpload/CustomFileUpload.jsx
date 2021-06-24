@@ -322,7 +322,7 @@ export const CustomFileUpload = ({
   };
 
   const renderChooseButton = () => {
-    let className = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left');
+    let className = classNames('p-button p-button-primary p-fileupload-choose p-component p-button-text-icon-left');
 
     return (
       <span className={styles.chooseButton}>
@@ -372,7 +372,7 @@ export const CustomFileUpload = ({
           );
 
           return (
-            <div className="p-fileupload-row" key={file.name + file.type + file.size}>
+            <div className={styles['p-fileupload-row']} key={file.name + file.type + file.size}>
               {preview}
               {fileName}
               {size}
