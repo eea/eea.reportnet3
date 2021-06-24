@@ -78,6 +78,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     selectedRuleId: '',
     selectedRuleLevelError: '',
     selectedRuleMessage: '',
+    selectedTableSchemaId: null,
     tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
@@ -727,6 +728,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       selectedRuleId,
       selectedRuleLevelError,
       selectedRuleMessage,
+      selectedTableSchemaId: tableSchemaId,
       tableSchemaId
     });
 
@@ -939,7 +941,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
                 !datasetHasErrors ? null : 'p-button-animated-blink'
-              }`}              
+              }`}
               icon={'warning'}
               iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}
@@ -1018,6 +1020,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           selectedRuleId={dataViewerOptions.selectedRuleId}
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+          selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
           tableSchemaColumns={tableSchemaColumns}
           tableSchemaId={dataViewerOptions.tableSchemaId}
           tables={tableSchema}
