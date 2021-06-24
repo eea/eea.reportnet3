@@ -35,6 +35,8 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
@@ -185,6 +188,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant FIELD_SCHEMA: {@value}. */
   private static final String FIELD_SCHEMA = "fieldSchema";
+
+  /** The Constant TABLE_NAME: {@value}. */
+  private static final String TABLE_NAME = "tableName";
+
+  /** The Constant TOTAL_RECORDS: {@value}. */
+  private static final String TOTAL_RECORDS = "totalRecords";
+
+  /** The Constant RECORDS: {@value}. */
+  private static final String RECORDS = "records";
+
+
 
   /**
    * Find by table value with order.
@@ -504,6 +518,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param conn the conn
    * @param tableId the table id
    * @param datasetId the dataset id
+   * @param pageable the pageable
    * @return the list
    * @throws SQLException the SQL exception
    */
@@ -557,6 +572,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    *
    * @param idTable the id table
    * @param datasetId the dataset id
+   * @param pageable the pageable
    * @return the list
    * @throws HibernateException the hibernate exception
    */
@@ -572,9 +588,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * Find and generate ETL json.
    *
-   * @param stringQuery the string query
+   * @param datasetId the dataset id
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the string
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
@@ -685,10 +707,50 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     } catch (NoResultException nre) {
       LOG.info("no result, ignore message");
     }
-    if (null == result) {
-      result = "";
+    if (null == result || result.toString().equals(("{\"tables\" : null}"))) {
+      result = returnigJsonWithNoData(datasetSchemaId, tableSchemaList, tableSchemaId);
     }
     return result.toString();
+  }
+
+
+  /**
+   * Returnig json with no data.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaList the table schema list
+   * @param tableSchemaId the table schema id
+   * @return the string
+   */
+  @SuppressWarnings("unchecked")
+  private String returnigJsonWithNoData(String datasetSchemaId, List<TableSchema> tableSchemaList,
+      String tableSchemaId) {
+    JSONObject tables = new JSONObject();
+    JSONArray jsonArray = new JSONArray();
+    String tableName = "";
+    if (null != tableSchemaList) {
+      if (null != tableSchemaId) {
+        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+        if (tableSchema != null) {
+          tableName = (String) tableSchema.get("nameTableSchema");
+          JSONObject jsonTable = new JSONObject();
+          jsonTable.put(TABLE_NAME, tableName);
+          jsonTable.put(TOTAL_RECORDS, 0);
+          jsonTable.put(RECORDS, new JSONArray());
+          jsonArray.add(jsonTable);
+        }
+      } else {
+        for (TableSchema tableAux : tableSchemaList) {
+          JSONObject jsonTable = new JSONObject();
+          jsonTable.put(TABLE_NAME, tableAux.getNameTableSchema());
+          jsonTable.put(TOTAL_RECORDS, 0);
+          jsonTable.put(RECORDS, new JSONArray());
+          jsonArray.add(jsonTable);
+        }
+      }
+    }
+    tables.put("tables", jsonArray);
+    return tables.toString();
   }
 
   /**
