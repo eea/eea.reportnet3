@@ -30,6 +30,10 @@ import lombok.NoArgsConstructor;
 /**
  * The Class ExcelReaderStrategy.
  */
+
+/**
+ * Instantiates a new excel reader strategy.
+ */
 @NoArgsConstructor
 public class ExcelReaderStrategy implements ReaderStrategy {
 
@@ -53,9 +57,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    */
   private static final Logger LOG = LoggerFactory.getLogger(ExcelReaderStrategy.class);
 
-  /**
-   * the provider Code
-   */
+  /** the provider Code. */
   private String providerCode;
 
   /**
@@ -72,6 +74,14 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     this.providerCode = "";
   }
 
+  /**
+   * Instantiates a new excel reader strategy.
+   *
+   * @param fileCommon the file common
+   * @param datasetId the dataset id
+   * @param fieldMaxLength the field max length
+   * @param providerCode the provider code
+   */
   public ExcelReaderStrategy(FileCommonUtils fileCommon, Long datasetId, int fieldMaxLength,
       String providerCode) {
     this.fileCommon = fileCommon;
@@ -89,6 +99,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param idTableSchema the id table schema
    * @param datasetId the dataset id
    * @param fileName the file name
+   * @param replace the replace
+   * @param schema the schema
    * @return the data set VO
    * @throws EEAException the EEA exception
    */
@@ -185,7 +197,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
    * @param dataSetSchema the data set schema
-   *
+   * @param tableValue the table value
    * @return the list
    */
   private List<RecordValue> readRecords(Iterator<Row> rows, List<FieldSchema> headers,
@@ -283,7 +295,10 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    *
    * @param dataSetSchema the data set schema
    * @param tables the tables
-   *
+   * @param idTableSchema the id table schema
+   * @param fileName the file name
+   * @param replace the replace
+   * @param schema the schema
    * @return the data set VO
    */
   private void createDataSet(DataSetSchema dataSetSchema, List<TableValue> tables,

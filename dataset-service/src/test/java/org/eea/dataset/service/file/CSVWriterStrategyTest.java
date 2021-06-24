@@ -56,7 +56,7 @@ public class CSVWriterStrategyTest {
    * Test write file.
    *
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   // @Test
   public void testWriteFile() throws IOException, EEAException {
@@ -88,7 +88,7 @@ public class CSVWriterStrategyTest {
    * Test write file write.
    *
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   // @Test
   public void testWriteFileWrite() throws IOException, EEAException {

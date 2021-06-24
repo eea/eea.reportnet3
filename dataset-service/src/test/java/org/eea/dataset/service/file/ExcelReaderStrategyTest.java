@@ -127,7 +127,7 @@ public class ExcelReaderStrategyTest {
    * @throws EncryptedDocumentException the encrypted document exception
    * @throws InvalidFormatException the invalid format exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   // @Test
   public void testParseFile()
@@ -142,6 +142,14 @@ public class ExcelReaderStrategyTest {
         (DataSetSchema) Mockito.any());
   }
 
+  /**
+   * Test parse file not null.
+   *
+   * @throws EncryptedDocumentException the encrypted document exception
+   * @throws InvalidFormatException the invalid format exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   // @Test
   public void testParseFileNotNull()
       throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
@@ -161,7 +169,7 @@ public class ExcelReaderStrategyTest {
    * @throws EncryptedDocumentException the encrypted document exception
    * @throws InvalidFormatException the invalid format exception
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   // @Test
   public void testParseFile2()
@@ -171,6 +179,11 @@ public class ExcelReaderStrategyTest {
         (DataSetSchema) Mockito.any());
   }
 
+  /**
+   * Test parse all pages.
+   *
+   * @throws EEAException the EEA exception
+   */
   // @Test
   public void testParseAllPages() throws EEAException {
     excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, null, null, false, dataSet);
@@ -182,7 +195,7 @@ public class ExcelReaderStrategyTest {
    * Test parse file exception.
    *
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test(expected = InvalidFileException.class)
   public void testParseFileException() throws IOException, EEAException {

@@ -185,6 +185,7 @@ public class FileTreatmentHelperTest {
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The file parser factory. */
   @Mock
   private FileParserFactory fileParserFactory;
 
@@ -750,6 +751,13 @@ public class FileTreatmentHelperTest {
   }
 
 
+  /**
+   * Export dataset file xlsx test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportDatasetFileXlsxTest() throws IOException, InvalidFileException, EEAException {
     DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
@@ -766,6 +774,13 @@ public class FileTreatmentHelperTest {
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
 
+  /**
+   * Export dataset filecsv test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportDatasetFilecsvTest() throws IOException, InvalidFileException, EEAException {
     DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
@@ -1031,6 +1046,9 @@ public class FileTreatmentHelperTest {
     Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * After tests.
+   */
   @After
   public void afterTests() {
     File file = new File("./dataset-1");

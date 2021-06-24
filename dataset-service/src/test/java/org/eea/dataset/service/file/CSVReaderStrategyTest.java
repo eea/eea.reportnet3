@@ -25,7 +25,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /*** The Class CSVReaderStrategyTest. */
-
 @RunWith(MockitoJUnitRunner.class)
 public class CSVReaderStrategyTest {
 
@@ -89,7 +88,7 @@ public class CSVReaderStrategyTest {
   /**
    * Test parse file.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testParseFile() throws EEAException {
@@ -112,7 +111,7 @@ public class CSVReaderStrategyTest {
    * Test parse exception.
    *
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test(expected = InvalidFileException.class)
   public void testParseException() throws IOException, EEAException {
