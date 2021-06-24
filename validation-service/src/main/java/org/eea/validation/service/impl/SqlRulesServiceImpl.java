@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
+//import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 /**
  * The Class SqlRulesServiceImpl.
  */
@@ -103,6 +103,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
+  
+  //@Autowired
+  //private DataSetControllerZuul datasetController;
 
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
@@ -323,22 +326,21 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
     boolean isSQLCorrect = true;
-    List<String> listOfId = new ArrayList<String>();
+    List<String> listOfIds = new ArrayList<String>();
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
-    	listOfId = getListOfDatasetsOnQuery(query);
-    	// ***************************************
-    	// AHORA TENGO QUE VERIFICAR SI ESOS DATASETS PERTENECEN AL DATAFLOW O A LOS DATAFLOW REFERENCIADOS
-    	// ***************************************
-    	// LLAMAR AL DATAFLOW => Existe!! un dataflow get by id dataset
-        try {
-          checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
-        } catch (EEAInvalidSQLException e) {
-          LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
-          isSQLCorrect = false;
-        }
+    	if(checkDatasetFromSameDataflow(datasetId, query)) {
+    		try {
+    			checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
+    		} catch (EEAInvalidSQLException e) {
+    			LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
+    	        isSQLCorrect = false;
+    	    }
+    	} else {
+    		isSQLCorrect = false;
+    	}
       } else {
         isSQLCorrect = false;
       }
@@ -805,6 +807,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 		  }
 	  }
 	  return datasetsIdList;
+  }
+  
+  /**
+   * Check datasets on the query belongs to the same dataflow
+   * @param datasetId
+   * @param query
+   * @return the boolean
+   */
+  private boolean checkDatasetFromSameDataflow(Long datasetId, String query) {
+	boolean isSQLCorrect = true;
+	List<String> listOfIds = new ArrayList<String>();
+	listOfIds = getListOfDatasetsOnQuery(query);
+  	Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+  	Long idDataFlowFromDatasetOnQuery;
+  	for(String id : listOfIds) {
+  		idDataFlowFromDatasetOnQuery = datasetMetabaseController.findDatasetMetabaseById(Long.parseLong(id)).getDataflowId();
+  		if(dataflowId != idDataFlowFromDatasetOnQuery) {
+  			isSQLCorrect = false;
+  		}
+  	}
+  	return isSQLCorrect;
   }
   
 }
