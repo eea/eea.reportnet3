@@ -343,7 +343,7 @@ public class FileTreatmentHelper implements DisposableBean {
         if (!files.isEmpty()) {
           wipeData(datasetId, null, replace);
           queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
-              replace);
+              replace, multipartFileMimeType);
         } else {
           releaseLock(datasetId);
           throw new EEAException("Empty zip file");
@@ -361,7 +361,7 @@ public class FileTreatmentHelper implements DisposableBean {
         // Queue import task for the stored file
         wipeData(datasetId, tableSchemaId, replace);
         queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
-            replace);
+            replace, multipartFileMimeType);
       }
 
     } catch (FeignException | IOException e) {
@@ -427,16 +427,17 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param originalFileName the original file name
    * @param integrationVO the integration VO
    * @param replace the replace
+   * @param mimeType the mime type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace)
-      throws IOException, EEAException {
+      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
+      String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
       for (File file : files) {
-        fmeFileProcess(datasetId, file, integrationVO);
+        fmeFileProcess(datasetId, file, integrationVO, mimeType);
       }
     } else {
       importExecutorService.submit(() -> {
@@ -455,13 +456,13 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param file the file
    * @param integrationVO the integration VO
-   *
+   * @param mimeType the mime type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
    */
-  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO)
-      throws IOException, EEAException {
+  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO,
+      String mimeType) throws IOException, EEAException {
 
     LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
     boolean error = false;
@@ -479,7 +480,8 @@ public class FileTreatmentHelper implements DisposableBean {
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
           || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
-              .equals(integrationVO.getOperation())) {
+              .equals(integrationVO.getOperation())
+          || "zip".equalsIgnoreCase(mimeType)) {
         Map<String, Object> importFileData = new HashMap<>();
         importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
         importFileData.put(LiteralConstants.DATASETID, datasetId);
