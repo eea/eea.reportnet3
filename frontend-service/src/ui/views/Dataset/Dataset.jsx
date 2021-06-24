@@ -939,8 +939,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
                 !datasetHasErrors ? null : 'p-button-animated-blink'
-              }`}
-              disabled={!datasetHasErrors}
+              }`}              
               icon={'warning'}
               iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}

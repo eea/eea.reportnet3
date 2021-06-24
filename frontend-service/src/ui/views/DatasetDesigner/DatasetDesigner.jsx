@@ -1312,7 +1312,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors || isDataflowOpen || isDesignDatasetEditorRead}
                 icon={'warning'}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
