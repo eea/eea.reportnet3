@@ -210,7 +210,17 @@ public class CollaborationServiceImpl implements CollaborationService {
           || authorities.contains(new SimpleGrantedAuthority(
               ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(dataflowId)));
 
+      boolean custodianSteward = authorities
+          .contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)));
+      if (custodianSteward) {
+        direction = false;
+      }
+
       boolean authorizedSender = false;
+
       if (direction) {
         authorizedSender = datasetIds.stream()
             .anyMatch(datasetId -> authorities
@@ -220,9 +230,10 @@ public class CollaborationServiceImpl implements CollaborationService {
                     ObjectAccessRoleEnum.DATASET_REPORTER_READ.getAccessRole(datasetId)))
                 || authorities.contains(new SimpleGrantedAuthority(
                     ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(datasetId))));
+
       }
 
-      if (!direction || authorizedSender) {
+      if (custodianSteward || authorizedSender) {
         return direction;
       }
     }
