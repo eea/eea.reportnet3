@@ -495,7 +495,8 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
-    FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+    FileUtils.forceDelete(new File(new File(importPath, datasetId.toString()), file.getName()));
+
 
     if (error) {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
