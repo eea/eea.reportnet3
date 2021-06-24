@@ -26,6 +26,13 @@
   .flexBasisProvider {
     flex-basis: 100%;
   }
+  .dragAndDropFileMessage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 18pt;
+    font-weight: bold;
+  }
   .listMessagesWrapper {
     align-items: center;
     display: flex;
@@ -34,7 +41,6 @@
     font-weight: bold;
     width: 50%;
     margin-left: 0.5rem;
-
     .sendMessageWrapper {
       align-items: center;
       display: flex;

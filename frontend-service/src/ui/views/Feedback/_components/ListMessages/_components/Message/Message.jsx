@@ -9,12 +9,17 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ReactTooltip from 'react-tooltip';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 export const Message = ({
-  attachment = { fileName: 'test.csv', fileSize: '23Mb' },
+  attachment = {
+    fileExtension: 'csv',
+    fileName: 'A very very long file name to see how is displayed test.csv',
+    fileSize: '23Mb'
+  },
   hasSeparator,
   isAttachment = true,
   message
@@ -56,8 +61,13 @@ export const Message = ({
       <div className={styles.messageAttachment}>
         <div className={styles.messageAttachmentFile}>
           <div>
-            <FontAwesomeIcon icon={AwesomeIcons('file')} role="presentation" />
-            <span>{attachment.fileName}</span>
+            <FontAwesomeIcon icon={AwesomeIcons(attachment.fileExtension)} role="presentation" />
+            <span data-for="fileName" data-tip>
+              {attachment.fileName.length > 45 ? `${attachment.fileName.substring(0, 45)}...` : attachment.fileName}
+            </span>
+            <ReactTooltip effect="solid" id="fileName" place="top">
+              {attachment.fileName}
+            </ReactTooltip>
           </div>
           <Button
             className={`p-button-animated-right-blink p-button-secondary-transparent ${styles.downloadFileButton}`}
@@ -69,9 +79,8 @@ export const Message = ({
             tooltipOptions={{ position: 'top' }}
           />
         </div>
-
         <div className={styles.messageAttachmentFileData}>
-          <span>{`.${attachment.fileName.split('.')[1].toUpperCase()} `}</span>
+          <span>{`.${attachment.fileExtension.toUpperCase()} `}</span>
           <span>{attachment.fileSize}</span>
         </div>
       </div>

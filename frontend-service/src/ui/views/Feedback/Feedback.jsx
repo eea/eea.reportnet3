@@ -48,8 +48,10 @@ export const Feedback = withRouter(({ match, history }) => {
     currentPage: 0,
     dataflowName: '',
     dataProviders: [],
+    draggedFiles: null,
     importFileDialogVisible: false,
     isCustodian: undefined,
+    isDragging: false,
     isLoading: false,
     isSending: false,
     messages: [],
@@ -63,8 +65,10 @@ export const Feedback = withRouter(({ match, history }) => {
     currentPage,
     dataflowName,
     dataProviders,
+    draggedFiles,
     importFileDialogVisible,
     isCustodian,
+    isDragging,
     isLoading,
     isSending,
     messages,
@@ -181,6 +185,31 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
   };
 
+  const onDrop = event => {
+    console.log('EE');
+    let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
+    dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
+    console.log(files);
+    event.currentTarget.style.border = '';
+    event.currentTarget.style.opacity = '';
+  };
+
+  const onDragLeave = event => {
+    dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
+    event.currentTarget.style.border = '';
+    event.currentTarget.style.opacity = '';
+    // event.currentTarget.innerText = '';
+    event.preventDefault();
+  };
+
+  const onDragOver = event => {
+    if (isCustodian) {
+      dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: true });
+      event.currentTarget.style.border = 'var(--drag-and-drop-div-wide-border)';
+      event.currentTarget.style.opacity = 'var(--drag-and-drop-div-low-opacity)';
+    }
+  };
+
   const onImportFileError = async ({ xhr }) => {
     if (xhr.status === 423) {
       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -262,6 +291,7 @@ export const Feedback = withRouter(({ match, history }) => {
     //     datasetName
     //   }
     // });
+    dispatchFeedback({ type: 'RESET_DRAGGED_FILES' });
   };
 
   const layout = children => {
@@ -294,10 +324,18 @@ export const Feedback = withRouter(({ match, history }) => {
               value={selectedDataProvider}></ListBox>
           </div>
         )}
+        {isCustodian && !isEmpty(selectedDataProvider) && isDragging && (
+          <span className={styles.dragAndDropFileMessage}>{resources.messages['dragAndDropFileMessage']}</span>
+        )}
         <div
           className={`${styles.listMessagesWrapper} ${
             isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
-          }`}>
+          }`}
+          onDragLeave={isCustodian && !isEmpty(selectedDataProvider) && onDragLeave}
+          onDragOver={isCustodian && !isEmpty(selectedDataProvider) && onDragOver}
+          onDrop={isCustodian && !isEmpty(selectedDataProvider) && onDrop}
+          // onDragStart={onDragStart}
+        >
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             className={`feedback-messages-help-step`}
@@ -363,13 +401,14 @@ export const Feedback = withRouter(({ match, history }) => {
       </div>
       {importFileDialogVisible && (
         <CustomFileUpload
-          accept=".csv"
+          accept="*"
           chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
           dialogHeader={`${resources.messages['uploadAttachment']} to ${selectedDataProvider.label}`}
           dialogOnHide={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false })}
           dialogVisible={importFileDialogVisible}
+          draggedFiles={draggedFiles}
           fileLimit={1}
           infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} any`}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
@@ -379,7 +418,6 @@ export const Feedback = withRouter(({ match, history }) => {
           name="file"
           onError={onImportFileError}
           onUpload={onUpload}
-          replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(FeedbackConfig.importFile, {
             dataflowId,
             providerId:
