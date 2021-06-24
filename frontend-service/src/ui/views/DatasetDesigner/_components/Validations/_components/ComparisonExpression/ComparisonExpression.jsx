@@ -41,6 +41,7 @@ const ComparisonExpression = ({
 
   const resourcesContext = useContext(ResourcesContext);
   const inputStringMatchRef = useRef(null);
+  const refDatetimeCalendar = useRef(null);
 
   const [clickedFields, setClickedFields] = useState([]);
   const [disabledFields, setDisabledFields] = useState({});
@@ -356,6 +357,21 @@ const ComparisonExpression = ({
     }
   };
 
+  const calculateCalendarPanelPosition = element => {
+    const {
+      current: { panel }
+    } = refDatetimeCalendar;
+
+    panel.style.display = 'block';
+
+    const inputRect = element.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const top = `${inputRect.top - panelRect.height / 2}px`;
+
+    panel.style.top = top;
+    panel.style.position = 'fixed';
+  };
+
   const buildValueInput = () => {
     const { operatorType, operatorValue, field2 } = expressionValues;
 
@@ -368,8 +384,12 @@ const ComparisonExpression = ({
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
           id={uniqueId(componentName)}
+          inputRef={refDatetimeCalendar}
           monthNavigator={true}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
+          onFocus={e => {
+            calculateCalendarPanelPosition(e.currentTarget);
+          }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
           showSeconds={showSeconds}
