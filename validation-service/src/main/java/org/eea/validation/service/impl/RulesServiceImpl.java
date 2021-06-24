@@ -534,6 +534,11 @@ public class RulesServiceImpl implements RulesService {
         case GEOMETRYCOLLECTION:
           ruleList.add(AutomaticRules.createGeometryAutomaticRule(typeData, referenceId,
               typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+          // add additional rule for the EPSG SRID check
+          shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+          ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckEPSGSRID(typeData,
+              referenceId, typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
+              FT_DESCRIPTION + typeData));
           break;
         default:
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());
