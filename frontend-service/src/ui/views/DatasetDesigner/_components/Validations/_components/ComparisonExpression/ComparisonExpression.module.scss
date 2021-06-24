@@ -2,8 +2,10 @@
 
 .expression {
   display: flex;
-  --unionWidth: 80px;
+  --unionWidth: 78px;
   --operatorsWidth: 130px;
+  --operatorValueWidth: 120px;
+  --valueFieldTypeWidth: 80px;
   --fieldsGap: 0.5rem;
   list-style: none !important;
   :global .p-dropdown {
@@ -29,24 +31,33 @@
   .union {
     width: var(--unionWidth);
     :global .p-dropdown {
-      width: 100%;
+      width: var(--unionWidth);
     }
   }
   .operatorType {
     width: var(--operatorsWidth);
     :global .p-dropdown {
-      width: 100%;
+      width: var(--operatorsWidth);
     }
   }
   .operatorValue {
-    width: var(--operatorsWidth);
+    width: var(--operatorValueWidth);
     :global .p-dropdown {
-      width: 100%;
+      width: var(--operatorValueWidth);
+    }
+  }
+  .valueFieldType {
+    width: var(--valueFieldTypeWidth);
+    :global .p-dropdown {
+      width: var(--valueFieldTypeWidth);
     }
   }
   .expressionValue {
     flex: 1 auto;
-    :global .p-dropdown {
+    width: 100%;
+    :global .p-input,
+    :global .p-dropdown,
+    :global .p-inputnumber {
       width: 100%;
     }
   }
