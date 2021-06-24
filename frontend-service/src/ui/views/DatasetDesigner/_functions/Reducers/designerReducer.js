@@ -211,6 +211,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_UPDATE_TABS':
       return { ...state, schemaTables: payload.data, tabs: payload.tabs };
 
+    case 'SET_IS_DOWNLOADING_VALIDATIONS':
+      return { ...state, isDownloadingValidations: payload.isDownloadingValidations };
+
     default:
       return state;
   }

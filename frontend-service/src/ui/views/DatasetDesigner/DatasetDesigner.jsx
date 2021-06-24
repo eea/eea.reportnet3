@@ -41,12 +41,13 @@ import { Webforms } from 'ui/views/Webforms';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { IntegrationService } from 'core/services/Integration';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
+import { ValidationService } from 'core/services/Validation';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'ui/views/_functions/Contexts/SnapshotContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { designerReducer } from './_functions/Reducers/designerReducer';
@@ -112,6 +113,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isDataflowOpen: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
+    isDownloadingValidations: false,
     isImportDatasetDialogVisible: false,
     isImportOtherSystemsDialogVisible: false,
     isIntegrationListDialogVisible: false,
@@ -259,6 +261,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
       setIsLoadingFile(false);
+    }
+
+    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
+      setIsDownloadingValidations(false);
     }
   }, [notificationContext.hidden]);
 
@@ -610,6 +616,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setIsLoadingFile,
     false
   );
+
+  useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
+    setIsDownloadingValidations,
+    false
+  );
+
   useCheckNotifications(
     ['VALIDATE_RULES_COMPLETED_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
     setSqlValidationRunning,
@@ -700,48 +713,21 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       }
     });
 
-  const onSelectValidation = (
-    tableSchemaId,
-    posIdRecord,
-    selectedRecordErrorId,
-    selectedRuleId,
-    grouped = true,
-    selectedRuleMessage = '',
-    selectedRuleLevelError = ''
-  ) => {
-    if (grouped) {
-      designerDispatch({
-        type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
-        payload: {
-          ...dataViewerOptions,
-          isGroupedValidationDeleted: false,
-          isGroupedValidationSelected: true,
-          recordPositionId: -1,
-          selectedRuleId,
-          selectedRuleLevelError,
-          selectedRuleMessage,
-          tableSchemaId,
-          selectedTableSchemaId: tableSchemaId
-        }
-      });
-    } else {
-      designerDispatch({
-        type: 'SET_DATAVIEWER_OPTIONS',
-        payload: {
-          ...dataViewerOptions,
-          isGroupedValidationDeleted: false,
-          isGroupedValidationSelected: false,
-          isValidationSelected: true,
-          recordPositionId: posIdRecord,
-          selectedRecordErrorId,
-          selectedRuleId: '',
-          selectedRuleLevelError: '',
-          selectedRuleMessage: '',
-          tableSchemaId,
-          selectedTableSchemaId: tableSchemaId
-        }
-      });
-    }
+  const onSelectValidation = (tableSchemaId, selectedRuleId, selectedRuleMessage = '', selectedRuleLevelError = '') => {
+    designerDispatch({
+      type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
+      payload: {
+        ...dataViewerOptions,
+        isGroupedValidationDeleted: false,
+        isGroupedValidationSelected: true,
+        recordPositionId: -1,
+        selectedRuleId,
+        selectedRuleLevelError,
+        selectedRuleMessage,
+        selectedTableSchemaId: tableSchemaId,
+        tableSchemaId,
+      }
+    });
   };
 
   const onTabChange = table =>
@@ -945,13 +931,38 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     </Fragment>
   );
 
+  function setIsDownloadingValidations(isDownloadingValidations) {
+    designerDispatch({ type: 'SET_IS_DOWNLOADING_VALIDATIONS', payload: { isDownloadingValidations } });
+  }
+
+  const onDownloadValidations = async () => {
+    setIsDownloadingValidations(true);
+    notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
+
+    try {
+      await ValidationService.generateFile(datasetId);
+    } catch (error) {
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
+
+      setIsDownloadingValidations(false);
+    }
+  };
+
   const renderValidationsFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => manageDialogs('isValidationViewerVisible', false)}
-    />
+    <div className={styles.validationsFooter}>
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={designerState.isDownloadingValidations ? 'spinnerAnimate' : 'export'}
+        label={resources.messages['downloadValidationsButtonLabel']}
+        onClick={onDownloadValidations}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => manageDialogs('isValidationViewerVisible', false)}
+      />
+    </div>
   );
 
   const renderRadioButtons = () => {
@@ -1530,7 +1541,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             footer={renderValidationsFooter}
             header={resources.messages['titleValidations']}
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
-            style={{ width: '80%' }}
+            style={{ width: '90%' }}
             visible={designerState.isValidationViewerVisible}>
             <ValidationViewer
               datasetId={datasetId}
