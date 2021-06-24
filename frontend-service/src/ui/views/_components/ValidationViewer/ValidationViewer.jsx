@@ -523,19 +523,6 @@ const ValidationViewer = memo(
       }
     ];
 
-    const refreshData = () => {
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        fieldValueFilter,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        tablesFilter
-      );
-    };
-
     if (isLoading) {
       return (
         <div className={styles.spinner}>
@@ -559,22 +546,6 @@ const ValidationViewer = memo(
               validations
               validationsAllTypesFilters={validationsAllTypesFilters}
             />
-
-            <div className="p-toolbar-group-right">
-              <div className={styles.switchDivInput}>
-                <div className={styles.switchDiv}>
-                  <Button
-                    className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
-                      isLoading ? 'p-button-animated-spin' : ''
-                    }`}
-                    disabled={false}
-                    icon={'refresh'}
-                    label={resources.messages['refresh']}
-                    onClick={refreshData}
-                  />
-                </div>
-              </div>
-            </div>
           </Toolbar>
         )}
         {!isEmpty(fetchedData) ? (

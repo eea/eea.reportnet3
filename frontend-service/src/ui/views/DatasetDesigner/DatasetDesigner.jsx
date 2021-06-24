@@ -1539,7 +1539,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             footer={renderValidationsFooter}
             header={resources.messages['titleValidations']}
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
-            style={{ width: '80%' }}
+            style={{ width: '90%' }}
             visible={designerState.isValidationViewerVisible}>
             <ValidationViewer
               datasetId={datasetId}

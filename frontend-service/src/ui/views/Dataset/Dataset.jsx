@@ -1045,7 +1045,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           footer={renderValidationsFooter}
           header={resources.messages['titleValidations']}
           onHide={() => onSetVisible(setValidationsVisible, false)}
-          style={{ width: '80%' }}
+          style={{ width: '90%' }}
           visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
