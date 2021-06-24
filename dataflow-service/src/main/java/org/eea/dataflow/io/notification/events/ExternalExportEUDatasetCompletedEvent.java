@@ -47,7 +47,7 @@ public class ExternalExportEUDatasetCompletedEvent implements NotificableEventHa
 
     Long dataflowId = notificationVO.getDataflowId();
     Long datasetId = notificationVO.getDatasetId();
-    String dataflowName = dataflowService.getById(dataflowId).getName();
+    String dataflowName = dataflowService.getMetabaseById(dataflowId).getName();
     String datasetName =
         datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
     Map<String, Object> notification = new HashMap<>();

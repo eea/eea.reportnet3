@@ -9,23 +9,31 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -46,10 +54,12 @@ import org.eea.validation.persistence.data.repository.RecordValidationRepository
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
+import org.eea.validation.persistence.data.repository.ValidationRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.RulesErrorUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +75,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class ValidationServiceTest.
@@ -243,6 +256,20 @@ public class ValidationServiceTest {
   @Mock
   private RulesErrorUtils rulesErrorUtils;
 
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
+
+  /** The validation repository. */
+  @Mock
+  private ValidationRepository validationRepository;
+
+  /** The rule service impl. */
+  @Mock
+  private RulesServiceImpl ruleServiceImpl;
+
   /**
    * Inits the mocks.
    */
@@ -311,6 +338,11 @@ public class ValidationServiceTest {
 
     idList = new ArrayList<>();
     idList.add(1L);
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
 
   }
 
@@ -942,6 +974,64 @@ public class ValidationServiceTest {
   }
 
   /**
+   * Export validation data CSV.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void exportValidationDataCSV() throws IOException, EEAException {
+    DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
+
+    // We create the error list and populate it with one error
+
+    FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
+    List<GroupValidationVO> errorList = new ArrayList<>();
+    GroupValidationVO error = new GroupValidationVO();
+
+    error.setTypeEntity(EntityTypeEnum.TABLE);
+    error.setNameTableSchema("Table");
+    error.setNameFieldSchema("Field");
+    error.setShortCode("FML");
+    error.setLevelError(ErrorTypeEnum.WARNING);
+    error.setMessage("Mensaje de error");
+    error.setNumberOfRecords(4);
+
+    errorList.add(error);
+    validations.setErrors(errorList);
+
+    // We create a rule and assign it a shortcode which is going to be compared with the error to
+    // check if the rule caused the error itself
+
+    RulesSchemaVO rulesSchemaVO = new RulesSchemaVO();
+    List<RuleVO> rulesVO = new ArrayList<>();
+    RuleVO ruleVO = new RuleVO();
+
+    ruleVO.setShortCode("FML");
+    rulesVO.add(ruleVO);
+    rulesSchemaVO.setRules(rulesVO);
+
+    dataSetMetabase.setDataflowId(1L);
+    dataSetMetabase.setDataProviderId(1L);
+    dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
+    dataSetMetabase.setDataSetName("file");
+    dataSetMetabase.setId(1L);
+
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+
+    when(validationRepository.findGroupRecordsByFilter(Mockito.anyLong(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.anyBoolean())).thenReturn(errorList);
+    when(ruleServiceImpl.getActiveRulesSchemaByDatasetId(Mockito.any())).thenReturn(rulesSchemaVO);
+    validationServiceImpl.exportValidationFile(1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Load rules knowledge base exception.
    *
    * @throws EEAException the EEA exception
@@ -956,6 +1046,16 @@ public class ValidationServiceTest {
     } catch (Exception e) {
       assertEquals(EEAErrorMessage.VALIDATION_SESSION_ERROR, e.getLocalizedMessage());
       throw e;
+    }
+  }
+  
+  @After
+  public void afterTests() {
+    File file = new File("./dataset-1-validations");
+    try {
+      FileUtils.deleteDirectory(file);
+    } catch (IOException e) {
+
     }
   }
 

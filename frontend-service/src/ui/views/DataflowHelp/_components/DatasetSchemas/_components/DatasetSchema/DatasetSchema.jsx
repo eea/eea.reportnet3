@@ -167,13 +167,14 @@ const DatasetSchema = ({
       case 'POLYGON':
       case 'MULTIPOLYGON':
         return (
-          <a
+          <span
             href="https://geojsonlint.com/"
             rel="noreferrer"
             target="_blank"
             title={resources.messages['geomTypeHelpTooltip']}>
             <FontAwesomeIcon
               aria-hidden={false}
+              aria-label={resources.messages['geomTypeHelpTooltip']}
               className="p-breadcrumb-home"
               data-for="geometricTypeTooltip"
               data-tip
@@ -182,7 +183,7 @@ const DatasetSchema = ({
             <ReactTooltip className={styles.tooltipClass} effect="solid" id="geometricTypeTooltip" place="top">
               <span>{resources.messages['geomTypeHelpTooltip']}</span>
             </ReactTooltip>
-          </a>
+          </span>
         );
       default:
         return '';

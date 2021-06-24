@@ -362,6 +362,23 @@ public class AutomaticRules {
   }
 
   /**
+   * Creates the geometry automatic rule check EPSGSRID.
+   *
+   * @param typeData the type data
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createGeometryAutomaticRuleCheckEPSGSRID(DataType typeData, String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String shortCode, String description) {
+    return composeRule(referenceId, typeEntityEnum, nameRule, "checkEPSGSRID(this)",
+        "Unsupported SRID", ErrorTypeEnum.ERROR.getValue(), shortCode, description);
+  }
+
+  /**
    * Creates the unique constraint automatic rule.
    *
    * @param referenceId the reference id

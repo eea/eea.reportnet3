@@ -275,7 +275,7 @@ public class FileTreatmentHelperTest {
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -378,7 +378,7 @@ public class FileTreatmentHelperTest {
             .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
         .thenReturn("fieldId");
 
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -434,12 +434,12 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("xls");
     // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     // Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-        .thenReturn(integrationVOs);
+    Mockito.when(integrationController.findIntegrationById(Mockito.anyLong()))
+        .thenReturn(integrationVO);
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -459,7 +459,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, 1L);
     } catch (EEAException e) {
       Assert.assertEquals(
           "Dataset not reportable: datasetId=1, tableSchemaId=5cf0e9b3b793310e9ceca190",
@@ -499,7 +499,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true);
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, 1L);
     } catch (EEAException e) {
       Assert.assertEquals("Folder for dataset 1 already exists", e.getMessage());
       throw e;
@@ -538,7 +538,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true);
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, 1L);
     } catch (EEAException e) {
       Assert.assertEquals(returningException, e.getCause());
       throw e;
@@ -639,7 +639,7 @@ public class FileTreatmentHelperTest {
     Mockito
         .when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -741,7 +741,7 @@ public class FileTreatmentHelperTest {
         .when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 

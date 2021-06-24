@@ -1,0 +1,8 @@
+{
+  "importDatasetTypes": [
+    {
+      "text": "ZIP (CSV for each table)",
+      "code": "zip"
+    }
+  ]
+}

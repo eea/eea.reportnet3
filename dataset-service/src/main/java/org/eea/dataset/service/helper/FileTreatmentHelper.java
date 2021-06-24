@@ -207,11 +207,11 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
-   *
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
-      boolean replace) throws EEAException {
+      boolean replace, Long integrationId) throws EEAException {
 
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
 
@@ -236,7 +236,7 @@ public class FileTreatmentHelper implements DisposableBean {
           SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
-    fileManagement(datasetId, tableSchemaId, schema, file, replace);
+    fileManagement(datasetId, tableSchemaId, schema, file, replace, integrationId);
   }
 
   /**
@@ -283,10 +283,11 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param schema the schema
    * @param multipartFile the multipart file
    * @param replace the replace
+   * @param integrationId the integration id
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      MultipartFile multipartFile, boolean replace) throws EEAException {
+      MultipartFile multipartFile, boolean replace, Long integrationId) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
@@ -312,15 +313,23 @@ public class FileTreatmentHelper implements DisposableBean {
            */
 
           // IntegrationVO integrationVO = getIntegrationVO(schema, "csv");
-          IntegrationVO integrationVO = null;
+          IntegrationVO integrationVO;
+
 
           List<File> files = unzipAndStore(folder, saveLocationPath, zip);
 
           // Queue import tasks for stored files
           if (!files.isEmpty()) {
             wipeData(datasetId, null, replace);
-            IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-            queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO,
+            // IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
+            if (null == integrationId) {
+              integrationVO = null;
+            } else {
+              // Look for an integration for the given kind of file.
+              // integrationVO = getIntegrationVO(schema, multipartFileMimeType);
+              integrationVO = getIntegrationVO(integrationId);
+            }
+            queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
                 replace);
           } else {
             releaseLock(datasetId);
@@ -339,11 +348,13 @@ public class FileTreatmentHelper implements DisposableBean {
          */
 
         IntegrationVO integrationVO;
-        if ("csv".equalsIgnoreCase(multipartFileMimeType)) {
+        // if ("csv".equalsIgnoreCase(multipartFileMimeType)) {
+        if (null == integrationId) {
           integrationVO = null;
         } else {
           // Look for an integration for the given kind of file.
-          integrationVO = getIntegrationVO(schema, multipartFileMimeType);
+          // integrationVO = getIntegrationVO(schema, multipartFileMimeType);
+          integrationVO = getIntegrationVO(integrationId);
         }
 
         // Store the file in the persistence volume
@@ -470,7 +481,9 @@ public class FileTreatmentHelper implements DisposableBean {
       integrationVO.setExternalParameters(externalParameters);
 
       // Remove the lock so FME will not encounter it while calling back importFileData
-      if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))) {
+      if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
+          || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
+              .equals(integrationVO.getOperation())) {
         Map<String, Object> importFileData = new HashMap<>();
         importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
         importFileData.put(LiteralConstants.DATASETID, datasetId);
@@ -585,7 +598,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
-
+      value.put(LiteralConstants.USER,
+          SecurityContextHolder.getContext().getAuthentication().getName());
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
           .datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(originalFileName).error(error)
@@ -673,6 +687,17 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     return rtn;
+  }
+
+
+  /**
+   * Gets the integration VO.
+   *
+   * @param integrationId the integration id
+   * @return the integration VO
+   */
+  private IntegrationVO getIntegrationVO(Long integrationId) {
+    return integrationController.findIntegrationById(integrationId);
   }
 
   /**
