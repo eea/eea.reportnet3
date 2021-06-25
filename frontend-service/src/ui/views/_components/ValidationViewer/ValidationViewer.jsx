@@ -38,6 +38,7 @@ const ValidationViewer = memo(
     onSelectValidation,
     reporting = false,
     schemaTables,
+    switchToTabularData = () => {},
     tables,
     visible
   }) => {
@@ -472,6 +473,7 @@ const ValidationViewer = memo(
     };
 
     const onRowSelect = async event => {
+      switchToTabularData();
       switch (event.data.entityType) {
         case 'FIELD':
         case 'RECORD':
@@ -527,6 +529,14 @@ const ValidationViewer = memo(
       return (
         <div className={styles.spinner}>
           <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
+    }
+
+    if (isEmpty(fetchedData) && !filtered) {
+      return (
+        <div className={styles.emptyValidationsWrapper}>
+          <h3>{resources.messages['emptyValidations']}</h3>
         </div>
       );
     }

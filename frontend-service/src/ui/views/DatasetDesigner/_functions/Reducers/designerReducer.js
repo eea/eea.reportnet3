@@ -183,6 +183,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_EXPORT_DATASET_FILE_TYPE':
       return { ...state, exportDatasetFileType: payload.fileType };
 
+    case 'SET_IS_VALIDATIONS_TABULAR_VIEW':
+      return { ...state, isValidationsTabularView: payload.isValidationsTabularView };
+
     case 'SET_IS_VALIDATION_SELECTED':
       return {
         ...state,

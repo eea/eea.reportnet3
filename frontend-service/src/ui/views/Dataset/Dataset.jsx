@@ -116,6 +116,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isTableView, setIsTableView] = useState(true);
   const [webformData, setWebformData] = useState(null);
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
+  const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -825,12 +826,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <TabularSwitch
             className={styles.tabularSwitch}
             elements={[resources.messages['tabularDataView'], resources.messages['webform']]}
+            isValidationsTabularView={isValidationsTabularView}
             onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
+            setIsValidationsTabularView={setIsValidationsTabularView}
             value={resources.messages['webform']}
           />
         </div>
       </div>
     );
+
+  const switchToTabularData = () => {
+    setIsTableView(true);
+    setIsValidationsTabularView(true);
+  };
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
@@ -1059,6 +1067,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             onSelectValidation={onSelectValidation}
             reporting={true}
             schemaTables={schemaTables}
+            switchToTabularData={switchToTabularData}
             tables={datasetSchemaAllTables}
             visible={validationsVisible}
           />

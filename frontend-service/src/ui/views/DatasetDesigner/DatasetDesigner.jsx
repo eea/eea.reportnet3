@@ -152,7 +152,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
     },
     webform: null,
-    selectedWebform: undefined
+    selectedWebform: undefined,
+    isValidationsTabularView: false
   });
 
   const {
@@ -725,7 +726,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         selectedRuleLevelError,
         selectedRuleMessage,
         selectedTableSchemaId: tableSchemaId,
-        tableSchemaId,
+        tableSchemaId
       }
     });
   };
@@ -935,6 +936,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     designerDispatch({ type: 'SET_IS_DOWNLOADING_VALIDATIONS', payload: { isDownloadingValidations } });
   }
 
+  function setIsValidationsTabularView(isValidationsTabularView) {
+    designerDispatch({ type: 'SET_IS_VALIDATIONS_TABULAR_VIEW', payload: { isValidationsTabularView } });
+  }
+
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
     notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
@@ -965,17 +970,27 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     </div>
   );
 
+  const switchToTabularData = () => {
+    designerDispatch({
+      type: 'SET_VIEW_MODE',
+      payload: { value: 'tabularData' }
+    });
+    setIsValidationsTabularView(true);
+  };
+
   const renderRadioButtons = () => {
     return (
       <TabularSwitch
         elements={Object.keys(designerState.viewType).map(view => resources.messages[`${view}View`])}
         getIsTableCreated={setIsTableCreated}
         isTableCreated={designerState.isTableCreated}
+        isValidationsTabularView={designerState.isValidationsTabularView}
         onChange={switchView => {
           const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
           onChangeView(views[camelCase(switchView)]);
           changeMode(views[camelCase(switchView)]);
         }}
+        setIsValidationsTabularView={setIsValidationsTabularView}
         value={
           QuerystringUtils.getUrlParamValue('view') !== ''
             ? resources.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
@@ -991,12 +1006,14 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         elements={[resources.messages['designView'], resources.messages['tabularDataView']]}
         getIsTableCreated={setIsTableCreated}
         isTableCreated={designerState.isTableCreated}
+        isValidationsTabularView={designerState.isValidationsTabularView}
         onChange={switchView =>
           designerDispatch({
             type: 'SET_VIEW_MODE',
             payload: { value: switchView === 'Design' ? 'design' : 'tabularData' }
           })
         }
+        setIsValidationsTabularView={setIsValidationsTabularView}
         value={
           QuerystringUtils.getUrlParamValue('view') !== ''
             ? resources.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
@@ -1552,6 +1569,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               levelErrorTypes={designerState.datasetSchema.levelErrorTypes}
               onSelectValidation={onSelectValidation}
               schemaTables={designerState.schemaTables}
+              switchToTabularData={switchToTabularData}
               tables={designerState.datasetSchema.tables}
               visible={designerState.isValidationViewerVisible}
             />

@@ -9,6 +9,12 @@
     }
   }
 }
+.emptyValidationsWrapper {
+  min-height: 60vh !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .invisibleHeader {
   display: none;
