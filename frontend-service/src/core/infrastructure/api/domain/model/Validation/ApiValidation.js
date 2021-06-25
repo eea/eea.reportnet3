@@ -8,6 +8,7 @@ export const apiValidation = {
       url: getUrl(ValidationConfig.create, { datasetId: datasetSchemaId }),
       data: validationRule
     }),
+
   deleteById: async (datasetSchemaId, ruleId) =>
     await HTTPRequester.delete({
       url: getUrl(ValidationConfig.delete, {
@@ -15,12 +16,25 @@ export const apiValidation = {
         ruleId
       })
     }),
+
+  downloadFile: async (datasetId, fileName) =>
+    await HTTPRequester.get({
+      url: getUrl(ValidationConfig.downloadFile, { datasetId, fileName })
+    }),
+
+  generateFile: async datasetId => {
+    return await HTTPRequester.post({
+      url: getUrl(ValidationConfig.generateFile, { datasetId })
+    });
+  },
+
   getAll: async datasetSchemaId =>
     await HTTPRequester.get({
       url: getUrl(ValidationConfig.getAll, {
         datasetSchemaId
       })
     }),
+
   update: async (datasetId, validation) => {
     let url = getUrl(ValidationConfig.update, { datasetId });
     if (validation.automatic) {
