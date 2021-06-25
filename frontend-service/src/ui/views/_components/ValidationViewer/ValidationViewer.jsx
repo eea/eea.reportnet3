@@ -566,7 +566,7 @@ const ValidationViewer = memo(
             lazy={true}
             loading={isLoading}
             onPage={onChangePage}
-            onRowSelect={isWebformView ? () => {} : onRowSelect}
+            onRowSelect={onRowSelect}
             onSort={onSort}
             paginator={true}
             paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
