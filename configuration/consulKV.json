@@ -65,6 +65,10 @@
   },
   {
     "key": "config/application/loadDataDelimiter",
+    "value": "fA=="
+  },
+  {
+    "key": "config/application/exportDataDelimiter",
     "value": "LA=="
   },
   {

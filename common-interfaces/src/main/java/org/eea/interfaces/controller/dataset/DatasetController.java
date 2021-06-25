@@ -390,7 +390,8 @@ public interface DatasetController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace);
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "delimiter", required = false) String delimiter);
 
 
   /**

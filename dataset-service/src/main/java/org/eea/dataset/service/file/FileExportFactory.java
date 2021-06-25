@@ -21,7 +21,7 @@ public class FileExportFactory implements IFileExportFactory {
   @Autowired
   private FileCommonUtils fileCommon;
 
-  @Value("${loadDataDelimiter}")
+  @Value("${exportDataDelimiter}")
   private char delimiter;
 
   /**

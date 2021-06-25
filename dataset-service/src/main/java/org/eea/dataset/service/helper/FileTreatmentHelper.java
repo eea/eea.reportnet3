@@ -211,7 +211,12 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
-      boolean replace) throws EEAException {
+      boolean replace, String delimiter) throws EEAException {
+
+    if (delimiter != null && delimiter.length() > 1) {
+      LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
+      throw new EEAException("the size of the delimiter cannot be greater than 1");
+    }
 
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
 
@@ -236,7 +241,7 @@ public class FileTreatmentHelper implements DisposableBean {
           SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
-    fileManagement(datasetId, tableSchemaId, schema, file, replace);
+    fileManagement(datasetId, tableSchemaId, schema, file, replace, delimiter);
   }
 
   /**
@@ -286,7 +291,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      MultipartFile multipartFile, boolean replace) throws EEAException {
+      MultipartFile multipartFile, boolean replace, String delimiter) throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
@@ -321,7 +326,7 @@ public class FileTreatmentHelper implements DisposableBean {
             wipeData(datasetId, null, replace);
             IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
             queueImportProcess(datasetId, null, schema, files, originalFileName, copyIntegrationVO,
-                replace);
+                replace, delimiter);
           } else {
             releaseLock(datasetId);
             throw new EEAException("Empty zip file");
@@ -356,7 +361,7 @@ public class FileTreatmentHelper implements DisposableBean {
         // Queue import task for the stored file
         wipeData(datasetId, tableSchemaId, replace);
         queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
-            replace);
+            replace, delimiter);
       }
 
     } catch (FeignException | IOException e) {
@@ -427,14 +432,15 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws FeignException the feign exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace)
-      throws IOException, EEAException {
+      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
+      String delimiter) throws IOException, EEAException {
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO);
     } else {
       importExecutorService.submit(() -> {
         try {
-          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace);
+          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
+              delimiter);
         } catch (Exception e) {
           LOG_ERROR.error("RN3-Import: Unexpected error", e);
         }
@@ -511,7 +517,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param replace the replace
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
-      List<File> files, String originalFileName, boolean replace) {
+      List<File> files, String originalFileName, boolean replace, String delimiter) {
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
     String error = null;
@@ -528,7 +534,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
 
-        processFile(datasetId, fileName, inputStream, tableSchemaId, replace, datasetSchema);
+        processFile(datasetId, fileName, inputStream, tableSchemaId, replace, datasetSchema,
+            delimiter);
 
         LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
       } catch (IOException | EEAException e) {
@@ -720,7 +727,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public void processFile(@DatasetId Long datasetId, String fileName, InputStream is,
-      String idTableSchema, boolean replace, DataSetSchema schema)
+      String idTableSchema, boolean replace, DataSetSchema schema, String delimiter)
       throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
@@ -738,7 +745,8 @@ public class FileTreatmentHelper implements DisposableBean {
       final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
 
       // create the right file parser for the file type
-      final IFileParseContext context = fileParserFactory.createContext(mimeType, datasetId);
+      final IFileParseContext context =
+          fileParserFactory.createContext(mimeType, datasetId, delimiter);
 
       context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
           schema);

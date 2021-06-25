@@ -2,7 +2,6 @@ package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -53,7 +52,7 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNotNull("is null", fileParserFactory.createContext("csv", 1L));
+    assertNotNull("is null", fileParserFactory.createContext("csv", 1L, ","));
   }
 
   /**
@@ -68,7 +67,7 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNotNull("is null", fileParserFactory.createContext("xls", 1L));
+    assertNotNull("is null", fileParserFactory.createContext("xls", 1L, null));
   }
 
   /**
@@ -83,7 +82,7 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNotNull("is null", fileParserFactory.createContext("xlsx", 1L));
+    assertNotNull("is null", fileParserFactory.createContext("xlsx", 1L, null));
   }
 
   /**
@@ -98,7 +97,7 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNull("is null", fileParserFactory.createContext("xml", 1L));
+    assertNull("is null", fileParserFactory.createContext("xml", 1L, null));
   }
 
   /**
@@ -113,7 +112,7 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNull("is null", fileParserFactory.createContext("xx", 1L));
+    assertNull("is null", fileParserFactory.createContext("xx", 1L, null));
   }
 
 }
