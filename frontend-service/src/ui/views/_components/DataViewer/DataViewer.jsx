@@ -903,8 +903,9 @@ const DataViewer = withRouter(
         {isNewRecord && (
           <div className={styles.addAnotherOneWrapper}>
             <Checkbox
-              id={`addAnother`}
-              isChecked={addAnotherOne}
+              checked={addAnotherOne}
+              id="addAnother"
+              inputId="addAnother"
               onChange={() => setAddAnotherOne(!addAnotherOne)}
               role="checkbox"
             />
@@ -1041,9 +1042,18 @@ const DataViewer = withRouter(
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
             <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
           ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
-            <Chips className={styles.chips} disabled={true} pasteSeparator=";" value={rowData.value.split(';')}></Chips>
+            <Chips
+              className={styles.chips}
+              disabled={true}
+              name={resources.messages['multipleSingleMessage']}
+              pasteSeparator=";"
+              value={rowData.value.split(';')}></Chips>
           ) : rowData.field === 'Valid extensions' ? (
-            <Chips className={styles.chips} disabled={true} value={rowData.value.split(',')}></Chips>
+            <Chips
+              className={styles.chips}
+              disabled={true}
+              name={resources.messages['validExtensionsShort']}
+              value={rowData.value.split(',')}></Chips>
           ) : rowData.field === 'Maximum file size' ? (
             `${rowData.value} ${resources.messages['MB']}`
           ) : (

@@ -98,6 +98,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param replace the replace
+   * @param schema the schema
    * @return the data set VO
    * @throws EEAException the EEA exception
    */
@@ -113,9 +117,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Read lines.
    *
    * @param inputStream the input stream
-   * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param replace the replace
+   * @param dataSetSchema the data set schema
    * @return the data set VO
    * @throws EEAException the EEA exception
    */
@@ -213,13 +220,13 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Sanitize and create data set.
    *
    * @param partitionId the partition id
-   * @param tableVO the table VO
+   * @param table the table
    * @param tables the tables
    * @param values the values
    * @param headers the headers
    * @param idTableSchema the id table schema
    * @param idRecordSchema the id record schema
-   * @param fieldSchemaVOS the field schema VOS
+   * @param fieldSchemas the field schemas
    * @param isDesignDataset the is design dataset
    * @param isFixedNumberOfRecords the is fixed number of records
    */
@@ -293,7 +300,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * Gets the field names.
    *
    * @param tableSchemaId the table schema id
-   * @param dataSetSchemaVO the data set schema VO
+   * @param dataSetSchema the data set schema
    * @return the field names
    */
   private List<String> getFieldNames(String tableSchemaId, DataSetSchema dataSetSchema) {
@@ -316,14 +323,14 @@ public class CSVReaderStrategy implements ReaderStrategy {
   /**
    * Adds the record to table.
    *
-   * @param tableVO the table VO
+   * @param table the table
    * @param tables the tables
    * @param values the values
    * @param partitionId the partition id
    * @param headers the headers
    * @param idTableSchema the id table schema
    * @param idRecordSchema the id record schema
-   * @param fieldSchemaVOS the field schema VOS
+   * @param fieldSchemas the field schemas
    * @param isDesignDataset the is design dataset
    * @param isFixedNumberOfRecords the is fixed number of records
    */
@@ -353,9 +360,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param idTableSchema the id table schema
    * @param headers the headers
    * @param idRecordSchema the id record schema
-   * @param fieldSchemaVOS the field schema VOS
+   * @param fieldSchemas the field schemas
    * @param isDesignDataset the is design dataset
    * @param isFixedNumberOfRecords the is fixed number of records
+   * @param tableValue the table value
    * @return the list
    */
   private List<RecordValue> createRecords(final List<String> values, final Long partitionId,
@@ -384,6 +392,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param headersSchema the headers schema
    * @param isDesignDataset the is design dataset
    * @param isFixedNumberOfRecords the is fixed number of records
+   * @param record the record
    * @return the list
    */
   private List<FieldValue> createFields(final List<String> values, List<FieldSchema> headers,

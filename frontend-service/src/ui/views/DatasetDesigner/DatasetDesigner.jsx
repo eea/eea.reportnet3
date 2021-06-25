@@ -5,7 +5,6 @@ import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import uniq from 'lodash/uniq';
 
 import styles from './DatasetDesigner.module.scss';
 
@@ -72,6 +71,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const validationContext = useContext(ValidationContext);
 
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
@@ -137,6 +137,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     referenceDataset: false,
     refresh: false,
     replaceData: false,
+    selectedImportExtension: null,
     schemaTables: [],
     tabs: [],
     uniqueConstraintsList: [],
@@ -295,7 +296,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const getExportList = () => {
     const { externalOperationsList } = designerState;
 
-    const internalExtensionList = config.exportTypes.exportDatasetTypes.map(type => {
+    const internalExtensionsList = config.exportTypes.exportDatasetTypes.map(type => {
       const extensionsTypes = !isNil(type.code) && type.code.split('+');
       return {
         command: () => onExportDataInternalExtension(type.code),
@@ -321,20 +322,49 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
     designerDispatch({
       type: 'GET_EXPORT_LIST',
-      payload: { exportList: internalExtensionList.concat(externalIntegrationsNames) }
+      payload: { exportList: internalExtensionsList.concat(externalIntegrationsNames) }
     });
   };
 
   const getImportList = () => {
+    const internalExtensionsList = config.importTypes.importDatasetTypes.map(type => {
+      const extensionsTypes = !isNil(type.code) && type.code.split('+');
+      return {
+        command: () => {
+          manageDialogs('isImportDatasetDialogVisible', true);
+          designerDispatch({
+            type: 'GET_SELECTED_IMPORT_EXTENSION',
+            payload: { selectedImportExtension: type.code }
+          });
+        },
+        icon: extensionsTypes[0],
+        label: type.text
+      };
+    });
+
     const { externalOperationsList } = designerState;
 
-    const importFromFile = [
-      {
-        command: () => manageDialogs('isImportDatasetDialogVisible', true),
-        icon: 'upload',
-        label: resources.messages['importFromFile']
-      }
-    ];
+    const importFromFile = !isEmpty(externalOperationsList.import)
+      ? [
+          {
+            label: resources.messages['customImports'],
+            items: externalOperationsList.import.map(type => {
+              return {
+                command: () => {
+                  manageDialogs('isImportDatasetDialogVisible', true);
+                  designerDispatch({
+                    type: 'GET_SELECTED_IMPORT_EXTENSION',
+                    payload: { selectedImportExtension: type.fileExtension }
+                  });
+                  setImportSelectedIntegrationId(type.id);
+                },
+                icon: type.fileExtension,
+                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+              };
+            })
+          }
+        ]
+      : [];
 
     const importOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
       ? [
@@ -353,8 +383,15 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         ]
       : [];
 
-    designerDispatch({ type: 'GET_IMPORT_LIST', payload: { importList: importFromFile.concat(importOtherSystems) } });
+    designerDispatch({
+      type: 'GET_IMPORT_LIST',
+      payload: { importList: internalExtensionsList.concat(importFromFile).concat(importOtherSystems) }
+    });
   };
+
+  const validImportExtensions = `.${designerState.selectedImportExtension}`;
+
+  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
 
   const getFileExtensions = async () => {
     try {
@@ -372,11 +409,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
   };
-
-  const getImportExtensions = ['.zip']
-    .concat(designerState.externalOperationsList.import.map(file => `.${file.fileExtension}`))
-    .join(', ')
-    .toLowerCase();
 
   const getMetadata = async ids => {
     try {
@@ -403,10 +435,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const setIsTableCreated = isTableCreated => {
     designerDispatch({ type: 'SET_IS_TABLE_CREATED', payload: { isTableCreated } });
   };
-
-  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${uniq(
-    getImportExtensions.split(', ')
-  ).join(', ')}`;
 
   const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
@@ -1126,14 +1154,16 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
+                  ariaLabelledBy="reference_dataset_label"
+                  checked={designerState.referenceDataset}
                   disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
-                  id={`reference_dataset_checkbox`}
-                  inputId={`reference_dataset_checkbox`}
-                  isChecked={designerState.referenceDataset}
+                  id="reference_dataset"
+                  inputId="reference_dataset_checkbox"
                   onChange={e => onChangeReferenceDataset(e.checked)}
                   role="checkbox"
                 />
                 <label
+                  id="reference_dataset_label"
                   onClick={() => {
                     if (!isDesignDatasetEditorRead && !isDataflowOpen && !isReferenceDataset) {
                       designerDispatch({
@@ -1154,17 +1184,22 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   }}>
                   {resources.messages['referenceDataset']}
                 </label>
+                <label className="srOnly" htmlFor="reference_dataset_checkbox">
+                  {resources.messages['referenceDataset']}
+                </label>
               </div>
               <div>
                 <Checkbox
+                  ariaLabelledBy="available_in_public_view_label"
+                  checked={designerState.availableInPublic}
                   disabled={isDesignDatasetEditorRead}
-                  id={`available_in_public_view_checkbox`}
-                  inputId={`available_in_public_view_checkbox`}
-                  isChecked={designerState.availableInPublic}
+                  id="available_in_public_view"
+                  inputId="available_in_public_view_checkbox"
                   onChange={e => onChangeAvailableInPublicView(e.checked)}
                   role="checkbox"
                 />
                 <label
+                  id="available_in_public_view_label"
                   onClick={() => {
                     if (!isDesignDatasetEditorRead) {
                       designerDispatch({
@@ -1183,6 +1218,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     marginRight: '6px',
                     opacity: isDesignDatasetEditorRead ? 0.5 : 1
                   }}>
+                  {resources.messages['availableInPublicView']}
+                </label>
+                <label className="srOnly" htmlFor="available_in_public_view_checkbox">
                   {resources.messages['availableInPublicView']}
                 </label>
               </div>
@@ -1208,15 +1246,15 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
                 icon={'import'}
                 label={resources.messages['importDataset']}
-                onClick={
-                  !isEmpty(designerState.externalOperationsList.importOtherSystems)
-                    ? event => importMenuRef.current.show(event)
-                    : () => manageDialogs('isImportDatasetDialogVisible', true)
-                }
+                onClick={event => importMenuRef.current.show(event)}
               />
-              {!isEmpty(designerState.externalOperationsList.importOtherSystems) && (
-                <Menu id="importDataSetMenu" model={designerState.importButtonsList} popup={true} ref={importMenuRef} />
-              )}
+              <Menu
+                className={styles.menuWrapper}
+                id="importDataSetMenu"
+                model={designerState.importButtonsList}
+                popup={true}
+                ref={importMenuRef}
+              />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
@@ -1228,7 +1266,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 onClick={event => exportMenuRef.current.show(event)}
               />
               <Menu
-                className={styles.exportSubmenu}
+                className={styles.menuWrapper}
                 id="exportDataSetMenu"
                 model={designerState.exportButtonsList}
                 popup={true}
@@ -1262,7 +1300,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     ? 'p-button-animated-blink'
                     : null
                 }`}
-                disabled={!designerState.datasetStatistics.datasetErrors || isDataflowOpen || isDesignDatasetEditorRead}
                 icon={'warning'}
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
@@ -1508,12 +1545,15 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
-            accept={getImportExtensions}
+            accept={validImportExtensions}
             chooseLabel={resources.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
             dialogHeader={`${resources.messages['uploadDataset']}${designerState.datasetSchemaName}`}
-            dialogOnHide={() => manageDialogs('isImportDatasetDialogVisible', false)}
+            dialogOnHide={() => {
+              manageDialogs('isImportDatasetDialogVisible', false);
+              setImportSelectedIntegrationId(null);
+            }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
             fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
@@ -1525,9 +1565,16 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileDataset, {
-              datasetId: datasetId
-            })}`}
+            url={`${window.env.REACT_APP_BACKEND}${
+              isNil(importSelectedIntegrationId)
+                ? getUrl(DatasetConfig.importFileDataset, {
+                    datasetId: datasetId
+                  })
+                : getUrl(DatasetConfig.importFileDatasetExternal, {
+                    datasetId: datasetId,
+                    integrationId: importSelectedIntegrationId
+                  })
+            }`}
           />
         )}
 
@@ -1541,9 +1588,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
             <div className={styles.checkboxWrapper}>
               <Checkbox
+                checked={designerState.replaceData}
                 id="replaceCheckbox"
                 inputId="replaceCheckbox"
-                isChecked={designerState.replaceData}
                 onChange={() =>
                   designerDispatch({ type: 'SET_REPLACE_DATA', payload: { value: !designerState.replaceData } })
                 }

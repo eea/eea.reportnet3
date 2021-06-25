@@ -298,12 +298,15 @@ public class DatasetServiceTest {
   @Mock
   private PkCatalogueRepository pkCatalogueRepository;
 
+  /** The test dataset repository. */
   @Mock
   private TestDatasetRepository testDatasetRepository;
 
+  /** The reference dataset repository. */
   @Mock
   private ReferenceDatasetRepository referenceDatasetRepository;
 
+  /** The output stream. */
   @Mock
   private OutputStream outputStream;
 
@@ -1480,9 +1483,8 @@ public class DatasetServiceTest {
    * Gets the field values referenced test number.
    *
    * @return the field values referenced test number
-   * @throws PSQLException
-   * @throws EEAException
-   *
+   * @throws PSQLException the PSQL exception
+   * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    */
   @Test
@@ -1516,8 +1518,8 @@ public class DatasetServiceTest {
    * Gets the field values referenced label test.
    *
    * @return the field values referenced label test
-   * @throws PSQLException
-   * @throws EEAException
+   * @throws PSQLException the PSQL exception
+   * @throws EEAException the EEA exception
    */
   @Test
   public void getFieldValuesReferencedLabelTest() throws PSQLException, EEAException {
@@ -1815,7 +1817,7 @@ public class DatasetServiceTest {
   /**
    * Etl export dataset dataset schema id exception test.
    *
-   * @throws EEAException the EEA exception
+   * @throws Exception the exception
    */
   // @Test(expected = EEAException.class)
   // public void etlExportDatasetDatasetSchemaIdExceptionTest() throws EEAException {
@@ -2315,6 +2317,11 @@ public class DatasetServiceTest {
     assertEquals(DatasetTypeEnum.EUDATASET, datasetService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the dataset type test test.
+   *
+   * @return the dataset type test test
+   */
   @Test
   public void getDatasetTypeTestTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -2747,6 +2754,11 @@ public class DatasetServiceTest {
 
 
 
+  /**
+   * Initialize dataset reference test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void initializeDatasetReferenceTest() throws EEAException {
     DesignDataset desingDataset = new DesignDataset();
@@ -2818,6 +2830,12 @@ public class DatasetServiceTest {
 
 
 
+  /**
+   * Download file exception test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void downloadFileExceptionTest() throws IOException, EEAException {
     try {
@@ -2828,6 +2846,12 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Etl export dataset test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void etlExportDatasetTest() throws IOException, EEAException {
     ObjectId id = new ObjectId();
@@ -2847,6 +2871,11 @@ public class DatasetServiceTest {
     Mockito.verify(outputStream, times(1)).flush();
   }
 
+  /**
+   * Creates the lock with signature test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createLockWithSignatureTest() throws EEAException {
     datasetService.createLockWithSignature(LockSignature.EMPTY, new HashMap<>(), "");
@@ -2854,11 +2883,21 @@ public class DatasetServiceTest {
         Mockito.any());
   }
 
+  /**
+   * Gets the schema if reportable null test.
+   *
+   * @return the schema if reportable null test
+   */
   @Test
   public void getSchemaIfReportableNullTest() {
     assertNull(datasetService.getSchemaIfReportable(0L, new ObjectId().toString()));
   }
 
+  /**
+   * Gets the schema if reportable desing test.
+   *
+   * @return the schema if reportable desing test
+   */
   @Test
   public void getSchemaIfReportableDesingTest() {
     ObjectId id = new ObjectId();
@@ -2871,6 +2910,11 @@ public class DatasetServiceTest {
     assertNull(datasetService.getSchemaIfReportable(0L, id.toString()));
   }
 
+  /**
+   * Gets the schema if reportable draft test.
+   *
+   * @return the schema if reportable draft test
+   */
   @Test
   public void getSchemaIfReportableDraftTest() {
     ObjectId id = new ObjectId();
@@ -2889,6 +2933,11 @@ public class DatasetServiceTest {
     assertEquals(schema, datasetService.getSchemaIfReportable(0L, id.toString()));
   }
 
+  /**
+   * Gets the schema if reportable draft null test.
+   *
+   * @return the schema if reportable draft null test
+   */
   @Test
   public void getSchemaIfReportableDraftNullTest() {
     ObjectId id = new ObjectId();
@@ -2907,6 +2956,9 @@ public class DatasetServiceTest {
     assertNull(datasetService.getSchemaIfReportable(0L, id.toString()));
   }
 
+  /**
+   * Check any schema available test.
+   */
   @Test
   public void checkAnySchemaAvailableTest() {
     DataSetMetabase datasetMetabase = new DataSetMetabase();

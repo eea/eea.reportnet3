@@ -85,6 +85,7 @@
   --c-black-200: #b1b3b3;
   --c-black-100: #d0d0ce;
   /* pink */
+  --c-pink-light: #f2d4d7;
   --c-pink: #e97780;
   --c-dark-pink: #d66670;
   /* individuals */
@@ -101,11 +102,12 @@
   --c-chart-warning: #ffcc00;
   --c-chart-error: #cc3300;
   --c-custom-gray: #c8c8c8;
-  --c-growl-info-blue: #8bc3ed;
-  --c-growl-info-darker-blue: #61a8df;
-  --c-growl-success-darker-green: #7fc27f;
-  --c-growl-warning-darker-yellow: #ceaf00;
-  --c-growl-error-darker-red: #a1424a;
+  --c-growl-info-blue: #cae5fc;
+  --c-growl-info-darker-blue: #5b94d4;
+  --c-growl-success-darker-green: #5d854a;
+  --c-growl-success-lighter-green: #d5e7cf;
+  --c-growl-warning-darker-yellow: #ceaf33;
+  --c-growl-error-darker-red: #ca4b33;
   /* level error statusbox colors */
   --statusBox-blocker-bg: 194, 200, 207;
   --statusBox-blocker-color: 0, 0, 0;
@@ -267,20 +269,22 @@
   --growl-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
   --growl-info-bg: var(--c-growl-info-blue);
   --growl-info-color: var(--black);
-  --growl-info-icon-color: var(--black);
+  --growl-info-icon-color: var(--c-growl-info-darker-blue);
   --growl-info-border-color: var(--c-growl-info-darker-blue);
-  --growl-success-bg: var(--success-color-lighter);
+  --growl-success-bg: var(--c-growl-success-lighter-green);
   --growl-success-color: var(--black);
-  --growl-success-icon-color: var(--black);
-  --growl-success-border-color: var(--c-growl-success-darker-blue);
+  --growl-success-icon-color: var(--c-growl-success-darker-green);
+  --growl-success-border-color: var(--c-growl-success-darker-green);
   --growl-warning-bg: var(--c-corporate-yellow);
   --growl-warning-color: var(--black);
-  --growl-warning-icon-color: var(--black);
-  --growl-info-border-color: var(--c-growl-warning-darker-yellow);
-  --growl-error-bg: var(--c-pink);
+  --growl-warning-icon-color: var(--c-growl-warning-darker-yellow);
+  --growl-warning-border-color: var(--c-growl-warning-darker-yellow);
+  --growl-error-bg: var(--c-pink-light);
   --growl-error-color: var(--black);
-  --growl-error-icon-color: var(--black);
-  --growl-info-border-color: var(--c-growl-error-darker-error);
+  --growl-error-icon-color: var(--c-growl-error-darker-red);
+  --growl-error-border-color: var(--c-growl-error-darker-red);
+  --growl-close-icon-color: var(--gray-75);
+  --growl-details-message-color: var(--gray-110);
 
   /* Inputtext */
   --inputtext-color: var(--main-font-color);

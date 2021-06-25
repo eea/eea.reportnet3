@@ -185,6 +185,7 @@ public class FileTreatmentHelperTest {
   @Mock
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The file parser factory. */
   @Mock
   private FileParserFactory fileParserFactory;
 
@@ -213,7 +214,7 @@ public class FileTreatmentHelperTest {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  // @Test
+  @Test
   public void importFileDataCsvTest() throws EEAException, IOException {
 
     FieldValue fieldValue = new FieldValue();
@@ -260,18 +261,10 @@ public class FileTreatmentHelperTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(datasetSchema);
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
-    doNothing().when(fileTreatmentHelper).processFile(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
-    Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
-        .thenReturn(null);
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
@@ -279,18 +272,11 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
-        .thenReturn(new ConnectionDataVO());
-    Mockito
-        .when(recordValueIdGenerator
-            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
-        .thenReturn("recordId");
-    Mockito
-        .when(fieldValueIdGenerator
-            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
-        .thenReturn("fieldId");
-
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, null);
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.of(new PartitionDataSetMetabase()));
+    when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -370,8 +356,8 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
         .thenReturn("csv").thenReturn("txt").thenReturn("csv");
     Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong());
-    doNothing().when(fileTreatmentHelper).processFile(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    // doNothing().when(fileTreatmentHelper).processFile(Mockito.anyLong(), Mockito.any(),
+    // Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
     Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
         .thenReturn(1L);
@@ -393,7 +379,7 @@ public class FileTreatmentHelperTest {
             .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
         .thenReturn("fieldId");
 
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, null);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -449,12 +435,12 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("xls");
     // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     // Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    Mockito.when(integrationController.findAllIntegrationsByCriteria(Mockito.any()))
-        .thenReturn(integrationVOs);
+    Mockito.when(integrationController.findIntegrationById(Mockito.anyLong()))
+        .thenReturn(integrationVO);
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, null);
+    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -474,7 +460,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, null);
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, 1L);
     } catch (EEAException e) {
       Assert.assertEquals(
           "Dataset not reportable: datasetId=1, tableSchemaId=5cf0e9b3b793310e9ceca190",
@@ -514,7 +500,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, null);
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, 1L);
     } catch (EEAException e) {
       Assert.assertEquals("Folder for dataset 1 already exists", e.getMessage());
       throw e;
@@ -553,7 +539,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, null);
+      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, 1L);
     } catch (EEAException e) {
       Assert.assertEquals(returningException, e.getCause());
       throw e;
@@ -637,8 +623,8 @@ public class FileTreatmentHelperTest {
         .thenReturn(datasetSchema);
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
-    doNothing().when(fileTreatmentHelper).processFile(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    // doNothing().when(fileTreatmentHelper).processFile(Mockito.anyLong(), Mockito.any(),
+    // Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
     Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
@@ -654,7 +640,7 @@ public class FileTreatmentHelperTest {
     Mockito
         .when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, null);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -739,8 +725,8 @@ public class FileTreatmentHelperTest {
         .thenReturn(datasetSchema);
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("csv");
-    doNothing().when(fileTreatmentHelper).processFile(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    // doNothing().when(fileTreatmentHelper).processFile(Mockito.anyLong(), Mockito.any(),
+    // Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.when(dataSetMapper.classToEntity(Mockito.any())).thenReturn(datasetValue);
     Mockito.when(datasetService.findTableIdByTableSchema(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
@@ -756,7 +742,7 @@ public class FileTreatmentHelperTest {
         .when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(recordValues);
     Mockito.when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(2L);
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, null);
+    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
@@ -765,6 +751,13 @@ public class FileTreatmentHelperTest {
   }
 
 
+  /**
+   * Export dataset file xlsx test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportDatasetFileXlsxTest() throws IOException, InvalidFileException, EEAException {
     DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
@@ -781,6 +774,13 @@ public class FileTreatmentHelperTest {
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
 
+  /**
+   * Export dataset filecsv test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws InvalidFileException the invalid file exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportDatasetFilecsvTest() throws IOException, InvalidFileException, EEAException {
     DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
@@ -911,27 +911,10 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = EEAException.class)
   public void testProcessFileThrowException() throws Exception {
-    final MockMultipartFile fileNoExtension =
-        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    fileTreatmentHelper.processFile(null, "fileOriginal", fileNoExtension.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Test process filename null throw exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFilenameNullThrowException() throws Exception {
-    final MockMultipartFile fileNoExtension =
-        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    fileTreatmentHelper.processFile(null, null, fileNoExtension.getInputStream(), null, true,
-        new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    // fileTreatmentHelper.processFile(null, "fileOriginal", fileNoExtension.getInputStream(), null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -941,12 +924,11 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = EEAException.class)
   public void testProcessFileBadExtensionThrowException() throws Exception {
-    final MockMultipartFile fileBadExtension =
-        new MockMultipartFile("file", "fileOriginal.doc", "doc", "content".getBytes());
-    fileTreatmentHelper.processFile(1L, "fileOriginal.doc", fileBadExtension.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    new MockMultipartFile("file", "fileOriginal.doc", "doc", "content".getBytes());
+    // fileTreatmentHelper.processFile(1L, "fileOriginal.doc", fileBadExtension.getInputStream(),
+    // null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -956,12 +938,10 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = EEAException.class)
   public void testProcessFileThrowException2() throws Exception {
-    final MockMultipartFile fileNoExtension =
-        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    fileTreatmentHelper.processFile(1L, "fileOriginal", fileNoExtension.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
+    // fileTreatmentHelper.processFile(1L, "fileOriginal", fileNoExtension.getInputStream(), null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -971,8 +951,7 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = IOException.class)
   public void testProcessFileEmptyDataset() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(fileParserFactory.createContext(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -980,10 +959,9 @@ public class FileTreatmentHelperTest {
     doNothing().when(context).parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
-    fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    // fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -993,14 +971,12 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabase() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
+    new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    // fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1010,14 +986,12 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabaseXml() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.xml", "xml", "content".getBytes());
+    new MockMultipartFile("file", "fileOriginal.xml", "xml", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    // fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1027,14 +1001,12 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabaseXls() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.xls", "xls", "content".getBytes());
+    new MockMultipartFile("file", "fileOriginal.xls", "xls", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    // fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
 
   }
 
@@ -1045,14 +1017,12 @@ public class FileTreatmentHelperTest {
    */
   // @Test(expected = EEAException.class)
   public void testProcessFileEmptyPartitionMetabaseXlsx() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.xlsx", "xlsx", "content".getBytes());
+    new MockMultipartFile("file", "fileOriginal.xlsx", "xlsx", "content".getBytes());
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.empty());
-    fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
-        true, new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    // fileTreatmentHelper.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null,
+    // true, new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1062,8 +1032,7 @@ public class FileTreatmentHelperTest {
    */
   // @Test
   public void testProcessFileSuccessUpdateTable() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
@@ -1074,12 +1043,14 @@ public class FileTreatmentHelperTest {
     dataSetVO.setId(1L);
     doNothing().when(context).parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    fileTreatmentHelper.processFile(1L, "fileOriginal.csv", file.getInputStream(), "", true,
-        new DataSetSchema(), null);
-    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any(),
-        Mockito.any());
+    // fileTreatmentHelper.processFile(1L, "fileOriginal.csv", file.getInputStream(), "", true,
+    // new DataSetSchema());
+    Mockito.verify(fileParserFactory, times(1)).createContext(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * After tests.
+   */
   @After
   public void afterTests() {
     File file = new File("./dataset-1");

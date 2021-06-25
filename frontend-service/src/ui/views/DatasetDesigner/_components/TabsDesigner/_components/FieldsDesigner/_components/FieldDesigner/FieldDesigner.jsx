@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AttachmentEditor } from './_components/AttachmentEditor';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
-import { Checkbox } from 'primereact/checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
@@ -767,7 +767,7 @@ export const FieldDesigner = ({
     } else {
       return (
         <div className="p-clearfix">
-          <FontAwesomeIcon icon={AwesomeIcons(option.fieldTypeIcon)} />
+          <FontAwesomeIcon icon={AwesomeIcons(option.fieldTypeIcon)} role="presentation" />
           <span style={{ margin: '.5em .25em 0 0.5em' }}>{option.value}</span>
         </div>
       );
@@ -882,6 +882,7 @@ export const FieldDesigner = ({
     <div className="requiredAndPKCheckboxes">
       {!addField ? (
         <FontAwesomeIcon
+          aria-label={resources.messages['moveField']}
           icon={AwesomeIcons('move')}
           style={{ width: '32px', opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
         />
@@ -889,6 +890,7 @@ export const FieldDesigner = ({
         <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
       )}
       <Checkbox
+        ariaLabel={resources.messages['pk']}
         checked={fieldDesignerState.fieldPKValue}
         className={`${styles.checkPK} datasetSchema-pk-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -911,10 +913,8 @@ export const FieldDesigner = ({
         }}
         style={{ width: '35px' }}
       />
-      <label className="srOnly" htmlFor={`${fieldId}_check_pk`}>
-        {resources.messages['pk']}
-      </label>
       <Checkbox
+        ariaLabel={resources.messages['required']}
         checked={fieldDesignerState.fieldRequiredValue}
         className={`${styles.checkRequired} datasetSchema-required-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -928,10 +928,8 @@ export const FieldDesigner = ({
         }}
         style={{ width: '70px' }}
       />
-      <label className="srOnly" htmlFor={`${fieldId}_check_required`}>
-        {resources.messages['required']}
-      </label>
       <Checkbox
+        ariaLabel={resources.messages['readOnly']}
         checked={fieldDesignerState.fieldReadOnlyValue}
         className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -943,9 +941,6 @@ export const FieldDesigner = ({
         onChange={e => onReadOnlyChange(e.checked)}
         style={{ width: '90px' }}
       />
-      <label className="srOnly" htmlFor={`${fieldId}_check_required`}>
-        {resources.messages['readOnly']}
-      </label>
     </div>
   );
 
@@ -1067,7 +1062,7 @@ export const FieldDesigner = ({
           event.preventDefault();
           event.stopPropagation();
         }}>
-        <FontAwesomeIcon icon={AwesomeIcons('delete')} />
+        <FontAwesomeIcon aria-label={resources.messages['deleteFieldLabel']} icon={AwesomeIcons('delete')} />
         <span className="srOnly">{resources.messages['deleteFieldLabel']}</span>
       </div>
     ) : null;
@@ -1080,9 +1075,10 @@ export const FieldDesigner = ({
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}
-        id={fieldName}
+        id={fieldName !== '' ? fieldName : 'newField'}
         keyfilter="schemaTableFields"
         maxLength={60}
+        name={resources.messages['newFieldPlaceHolder']}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
@@ -1106,9 +1102,6 @@ export const FieldDesigner = ({
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
       />
-      <label className="srOnly" htmlFor={fieldName}>
-        {resources.messages['newFieldPlaceHolder']}
-      </label>
       <InputTextarea
         autoFocus={false}
         className={`${styles.inputFieldDescription} ${
@@ -1245,7 +1238,7 @@ export const FieldDesigner = ({
       {fieldDesignerState.isLinkSelectorVisible ? (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
-          fieldId={fieldId}          
+          fieldId={fieldId}
           fields={fields}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
           isExternalLink={

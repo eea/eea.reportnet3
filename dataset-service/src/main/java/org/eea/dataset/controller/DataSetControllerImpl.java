@@ -194,12 +194,13 @@ public class DataSetControllerImpl implements DatasetController {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @PostMapping("/{datasetId}/importFileData")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   public void importFileData(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
@@ -207,9 +208,10 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter) {
     try {
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, delimiter);
+      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId, delimiter);
     } catch (EEAException e) {
       LOG_ERROR.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
           tableSchemaId, file.getOriginalFilename());
@@ -230,6 +232,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -240,7 +243,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -248,7 +252,8 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace, null);
+      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace,
+          integrationId,null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
@@ -262,6 +267,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param providerId the provider id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -272,7 +278,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -280,7 +287,7 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, null, file, replace, null);
+      importFileData(datasetId, dataflowId, providerId, null, file, replace, integrationId, null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
