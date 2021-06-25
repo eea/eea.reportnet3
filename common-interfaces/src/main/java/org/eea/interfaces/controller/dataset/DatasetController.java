@@ -388,6 +388,7 @@ public interface DatasetController {
    * @param file the file
    * @param replace the replace
    * @param integrationId the integration id
+   * @param delimiter the delimiter
    */
   @PostMapping("/{datasetId}/importFileData")
   void importFileData(@PathVariable("datasetId") Long datasetId,
@@ -456,7 +457,7 @@ public interface DatasetController {
    * @return the response entity
    */
   @GetMapping("/exportPublicFile/dataflow/{dataflowId}")
-  public ResponseEntity<InputStreamResource> exportReferenceDatasetFile(
-      @PathVariable Long dataflowId, @RequestParam String fileName);
+  ResponseEntity<InputStreamResource> exportReferenceDatasetFile(@PathVariable Long dataflowId,
+      @RequestParam String fileName);
 
 }
