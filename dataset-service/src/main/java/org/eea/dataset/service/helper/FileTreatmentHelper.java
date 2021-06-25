@@ -768,6 +768,9 @@ public class FileTreatmentHelper implements DisposableBean {
       context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
           schema);
 
+    } catch (Exception e) {
+      LOG.error("error processing file", e);
+      throw e;
     } finally {
       is.close();
     }

@@ -3520,7 +3520,6 @@ public class DatasetServiceImpl implements DatasetService {
     LOG.info("Import dataset table {} with {} number of records", tableSchema.getNameTableSchema(),
         recordsToSave.size());
 
-    // save
     saveAllRecords(datasetId, recordsToSave);
   }
 
