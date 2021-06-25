@@ -321,11 +321,8 @@ public class FileTreatmentHelper implements DisposableBean {
       String originalFileName = multipartFile.getOriginalFilename();
       String multipartFileMimeType = datasetService.getMimetype(originalFileName);
 
-      if (!folder.mkdirs()) {
-        releaseLock(datasetId);
-        throw new EEAException("Folder for dataset " + datasetId + " already exists");
-      }
 
+      folder.mkdirs();
       List<File> files = new ArrayList<>();
       IntegrationVO integrationVO;
       if (null == integrationId) {
