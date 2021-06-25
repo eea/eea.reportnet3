@@ -38,6 +38,7 @@ public class RuleOperators {
    * @return true, if successful
    */
   public static boolean setEntity(RecordValue recordValue) {
+    // Avoid persistent bag errors when records validation batch is too big
     Hibernate.initialize(recordValue.getFields());
     fields = recordValue.getFields();
     countryCode = recordValue.getDataProviderCode();
