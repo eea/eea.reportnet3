@@ -786,6 +786,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onUpload = async () => {
     setIsImportDatasetDialogVisible(false);
+    setImportSelectedIntegrationId(null);
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
