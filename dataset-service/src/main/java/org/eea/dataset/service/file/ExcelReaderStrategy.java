@@ -126,7 +126,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
 
       LOG.info("Finishing reading Exel file");
       createDataSet(schema, tables, idTableSchema, fileName, replace, schema);
-    } catch (EncryptedDocumentException | InvalidFormatException | IOException
+    } catch (EncryptedDocumentException | InvalidFormatException | IOException | SQLException
         | IllegalArgumentException e) {
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
@@ -300,9 +300,11 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param replace the replace
    * @param schema the schema
    * @return the data set VO
+   * @throws Exception
    */
   private void createDataSet(DataSetSchema dataSetSchema, List<TableValue> tables,
-      String idTableSchema, String fileName, boolean replace, DataSetSchema schema) {
+      String idTableSchema, String fileName, boolean replace, DataSetSchema schema)
+      throws EEAException, IOException, SQLException {
     try {
 
       DatasetValue dataset = new DatasetValue();
@@ -317,6 +319,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
           dataset);
     } catch (EEAException | IOException | SQLException e) {
       LOG.error("error persisting excel file", e);
+      throw e;
     }
   }
 }

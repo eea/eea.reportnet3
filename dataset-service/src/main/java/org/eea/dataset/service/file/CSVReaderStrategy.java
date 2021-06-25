@@ -32,8 +32,16 @@ import lombok.NoArgsConstructor;
 /**
  * Instantiates a new CSV reader strategy.
  */
+
+/**
+ * Instantiates a new CSV reader strategy.
+ */
 @NoArgsConstructor
 public class CSVReaderStrategy implements ReaderStrategy {
+
+
+  /** The Constant BATCH_RECORDS_SAVE. */
+  private static final int BATCH_RECORDS_SAVE = 1000;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -174,7 +182,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
         sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
             idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
         numLines++;
-        if (numLines == 1000) {
+        if (numLines == BATCH_RECORDS_SAVE) {
           dataset.setTableValues(tables);
           // Set the dataSetSchemaId of MongoDB
           dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
