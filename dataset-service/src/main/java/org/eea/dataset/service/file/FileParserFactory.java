@@ -54,7 +54,7 @@ public class FileParserFactory implements IFileParserFactory {
    * @return the i file parse contextd
    */
   @Override
-  public IFileParseContext createContext(String mimeType, Long datasetId) {
+  public IFileParseContext createContext(String mimeType, Long datasetId, String delimiterValue) {
     FileParseContextImpl context = null;
 
     // Obtain the data provider code to insert into the record
@@ -67,8 +67,10 @@ public class FileParserFactory implements IFileParserFactory {
 
     switch (mimeType.toLowerCase()) {
       case "csv":
-        context = new FileParseContextImpl(new CSVReaderStrategy(delimiter, fileCommon, datasetId,
-            fieldMaxLength, provider.getCode()));
+
+        context = new FileParseContextImpl(
+            new CSVReaderStrategy(delimiterValue != null ? delimiterValue.charAt(0) : delimiter,
+                fileCommon, datasetId, fieldMaxLength, provider.getCode()));
         break;
       case "xml":
         // Fill it with the xml strategy
