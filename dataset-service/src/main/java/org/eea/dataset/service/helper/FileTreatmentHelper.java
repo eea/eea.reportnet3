@@ -66,6 +66,7 @@ import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -409,8 +410,9 @@ public class FileTreatmentHelper implements DisposableBean {
       String filePath = file.getCanonicalPath();
 
       // Prevent Zip Slip attack or skip if the entry is a directory
-      if ((entryName.split("/").length > 1) || !"csv".equalsIgnoreCase(mimeType)
-          || entry.isDirectory() || !filePath.startsWith(saveLocationPath + File.separator)) {
+      if ((entryName.split("/").length > 1)
+          || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+          || !filePath.startsWith(saveLocationPath + File.separator)) {
         LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
         entry = zip.getNextEntry();
         continue;
@@ -793,14 +795,14 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void validateFileType(final String mimeType) throws EEAException {
     // files that will be accepted: csv, xml, xls, xlsx
-    switch (mimeType) {
-      case "csv":
+    switch (FileTypeEnum.valueOf(mimeType)) {
+      case CSV:
         break;
-      case "xml":
+      case XML:
         break;
-      case "xls":
+      case XLS:
         break;
-      case "xlsx":
+      case XLSX:
         break;
       default:
         throw new InvalidFileException(EEAErrorMessage.FILE_FORMAT);
@@ -837,7 +839,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     try {
       Map<String, byte[]> contents = new HashMap<>();
-      if (extension.equalsIgnoreCase("csv")) {
+      if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
         List<TableSchema> tablesSchema = getTables(datasetId);
         List<byte[]> dataFile =
             context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
@@ -847,14 +849,14 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       } else {
         byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
-            extension.equalsIgnoreCase("validations"));
+            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()));
         contents.put(null, dataFile);
       }
 
       Boolean includeZip = false;
       // If the length after splitting the file type arrives it's more than 1, then there's a
       // zip+xlsx type
-      if (type.length > 1 && !extension.equalsIgnoreCase("validations")) {
+      if (type.length > 1 && !extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue())) {
         includeZip = true;
       }
       generateFile(datasetId, extension, contents, includeZip, datasetType);
@@ -958,8 +960,8 @@ public class FileTreatmentHelper implements DisposableBean {
             nameFileXlsxCsv =
                 entry.getKey().substring(entry.getKey().indexOf("_") + 1, entry.getKey().length());
           }
-          if ("validations".equals(mimeType)) {
-            mimeType = "xlsx";
+          if (FileTypeEnum.VALIDATIONS.getValue().equals(mimeType)) {
+            mimeType = FileTypeEnum.XLSX.getValue();
           }
           // Adding the xlsx/csv file to the zip
           ZipEntry e = new ZipEntry(nameFileXlsxCsv + "." + mimeType);
@@ -972,8 +974,8 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     // only the xlsx file
     else {
-      if ("validations".equals(mimeType)) {
-        mimeType = "xlsx";
+      if (FileTypeEnum.VALIDATIONS.getValue().equals(mimeType)) {
+        mimeType = FileTypeEnum.XLSX.getValue();
       }
       nameFile = nameDataset + "." + mimeType;
       File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);

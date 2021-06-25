@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -307,7 +308,7 @@ public class IntegrationServiceImplTest {
     IntegrationVO integrationVO = new IntegrationVO();
     InternalOperationParameters parameter = new InternalOperationParameters();
     parameter.setParameter(IntegrationParams.FILE_EXTENSION);
-    parameter.setValue("csv");
+    parameter.setValue(FileTypeEnum.CSV.getValue());
     Integration integration = new Integration();
     integration.setId(1L);
     integration.setInternalParameters(Arrays.asList(parameter));
@@ -477,7 +478,7 @@ public class IntegrationServiceImplTest {
     IntegrationVO integrationVO = new IntegrationVO();
     InternalOperationParameters parameter = new InternalOperationParameters();
     parameter.setParameter(IntegrationParams.FILE_EXTENSION);
-    parameter.setValue("csv");
+    parameter.setValue(FileTypeEnum.CSV.getValue());
     Integration integration = new Integration();
     integration.setId(1L);
     integration.setInternalParameters(Arrays.asList(parameter));

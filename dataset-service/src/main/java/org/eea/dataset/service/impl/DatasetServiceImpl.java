@@ -104,6 +104,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -3070,7 +3071,7 @@ public class DatasetServiceImpl implements DatasetService {
 
         try {
           // 1º we create
-          byte[] file = exportFile(datasetToFile.getId(), "xlsx", null);
+          byte[] file = exportFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null);
           // we save the file in its files
           if (null != file) {
             String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
@@ -3406,7 +3407,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     try {
       // create the excel file
-      byte[] file = exportFile(dataset.getId(), "xlsx", null);
+      byte[] file = exportFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null);
       // we save the file in its files
       if (null != file) {
         String nameFileUnique = String.format("%s", datasetDesingName);

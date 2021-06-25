@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -701,7 +702,7 @@ public class ValidationServiceImpl implements ValidationService {
     return fieldRepository.countFieldsDataset();
   }
 
-    /**
+  /**
    * Count empty fields dataset.
    *
    * @param datasetId the dataset id
@@ -711,7 +712,7 @@ public class ValidationServiceImpl implements ValidationService {
   public Integer countEmptyFieldsDataset(Long datasetId) {
     return fieldRepository.countEmptyFieldsDataset();
   }
-  
+
   /**
    * Export data validation CSV file.
    *
@@ -726,7 +727,7 @@ public class ValidationServiceImpl implements ValidationService {
 
     // Sets the validation file name and it's root directory
     String composedFileName = "dataset-" + datasetId + "-validations";
-    String fileNameWithExtension = composedFileName + "." + "csv";
+    String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
     String creatingFileError =
         String.format("Failed generating CSV file with name %s using datasetID %s",
             fileNameWithExtension, datasetId);

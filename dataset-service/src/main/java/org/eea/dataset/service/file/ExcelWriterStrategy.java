@@ -19,6 +19,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -188,11 +189,11 @@ public class ExcelWriterStrategy implements WriterStrategy {
    */
   private Workbook createWorkbook() throws IOException {
 
-    switch (mimeType) {
-      case "xls":
+    switch (FileTypeEnum.valueOf(mimeType)) {
+      case XLS:
         return new HSSFWorkbook();
-      case "xlsx":
-      case "validations":
+      case XLSX:
+      case VALIDATIONS:
         return new XSSFWorkbook();
       default:
         throw new IOException("Unknow MIME type: " + mimeType);

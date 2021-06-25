@@ -6,6 +6,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +53,7 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNotNull("is null", fileParserFactory.createContext("csv", 1L, ","));
+    assertNotNull("is null", fileParserFactory.createContext(FileTypeEnum.CSV.getValue(), 1L, ","));
   }
 
   /**
@@ -67,7 +68,8 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNotNull("is null", fileParserFactory.createContext("xls", 1L, null));
+    assertNotNull("is null",
+        fileParserFactory.createContext(FileTypeEnum.XLS.getValue(), 1L, null));
   }
 
   /**
@@ -82,7 +84,8 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNotNull("is null", fileParserFactory.createContext("xlsx", 1L, null));
+    assertNotNull("is null",
+        fileParserFactory.createContext(FileTypeEnum.XLSX.getValue(), 1L, null));
   }
 
   /**
@@ -97,7 +100,7 @@ public class FileParserFactoryTest {
     provider.setCode("Test");
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(provider);
-    assertNull("is null", fileParserFactory.createContext("xml", 1L, null));
+    assertNull("is null", fileParserFactory.createContext(FileTypeEnum.XML.getValue(), 1L, null));
   }
 
   /**

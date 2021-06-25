@@ -93,6 +93,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -1143,7 +1144,8 @@ public class DatasetServiceTest {
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
         Mockito.anyBoolean())).thenReturn(expectedResult);
-    assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
+    assertEquals("not equals", expectedResult,
+        datasetService.exportFile(1L, FileTypeEnum.CSV.getValue(), ""));
   }
 
   /**
@@ -2146,8 +2148,8 @@ public class DatasetServiceTest {
    */
   @Test
   public void testUpdateAttachment() throws EEAException, IOException {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    final MockMultipartFile file = new MockMultipartFile("file", "fileOriginal.csv",
+        FileTypeEnum.CSV.getValue(), "content".getBytes());
     Document fieldSchema = new Document();
     fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
     FieldValue field = new FieldValue();

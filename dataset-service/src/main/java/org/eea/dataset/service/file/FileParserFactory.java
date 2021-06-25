@@ -6,6 +6,7 @@ import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -65,18 +66,18 @@ public class FileParserFactory implements IFileParserFactory {
     }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
-    switch (mimeType.toLowerCase()) {
-      case "csv":
+    switch (FileTypeEnum.valueOf(mimeType.toLowerCase())) {
+      case CSV:
 
         context = new FileParseContextImpl(
             new CSVReaderStrategy(delimiterValue != null ? delimiterValue.charAt(0) : delimiter,
                 fileCommon, datasetId, fieldMaxLength, provider.getCode()));
         break;
-      case "xml":
+      case XML:
         // Fill it with the xml strategy
         break;
-      case "xls":
-      case "xlsx":
+      case XLS:
+      case XLSX:
         context = new FileParseContextImpl(
             new ExcelReaderStrategy(fileCommon, datasetId, fieldMaxLength, provider.getCode()));
         break;
