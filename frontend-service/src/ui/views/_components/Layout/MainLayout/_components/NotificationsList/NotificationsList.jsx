@@ -11,6 +11,7 @@ import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { DataTable } from 'ui/views/_components/DataTable';
+import { LevelError } from 'ui/views/_components/LevelError';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -32,7 +33,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       },
       {
         id: 'messageLevel',
-        header: resources.messages['notificationLevel']
+        header: resources.messages['notificationLevel'],
+        template: notificationLevelTemplate
       },
       {
         id: 'date',
@@ -40,18 +42,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       },
       {
         id: 'redirectionUrl',
-        header: resources.messages['action']
+        header: resources.messages['action'],
+        template: linkTemplate
       }
     ];
 
     let columnsArray = headers.map(col => (
-      <Column
-        body={col.id === 'redirectionUrl' ? linkTemplate : null}
-        field={col.id}
-        header={col.header}
-        key={col.id}
-        sortable={true}
-      />
+      <Column body={col.template} field={col.id} header={col.header} key={col.id} sortable={true} />
     ));
 
     setColumns(columnsArray);
@@ -118,6 +115,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       )
     );
   };
+
+  const notificationLevelTemplate = rowData => (
+    <div className={styles.notificationLevelTemplateWrapper}>
+      <LevelError type={rowData.messageLevel.toLowerCase()} />
+    </div>
+  );
 
   return (
     isNotificationVisible && (

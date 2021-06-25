@@ -6,8 +6,9 @@ import isUndefined from 'lodash/isUndefined';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
+import { LevelError } from 'ui/views/_components/LevelError';
 
-import styles from './DropdownFilter.module.css';
+import styles from './DropdownFilter.module.scss';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -281,6 +282,7 @@ class DropdownFilter extends Component {
                   this.updateChecked(field.key);
                 }}>
                 <FontAwesomeIcon
+                  className={styles.checkboxIcon}
                   icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')}
                   role="presentation"
                 />
@@ -305,7 +307,8 @@ class DropdownFilter extends Component {
                       }}></span>
                   )
                 ) : null}
-                {field.label}
+                <LevelError type={field.label.toLowerCase()} />
+                {/* {field.label} */}
               </div>
             </li>
           ))}

@@ -86,7 +86,7 @@
     "columnInfoName": "Name",
     "columnInfoType": "Type",
     "comment": "Comment",
-    "comparisonValueFieldSelector": "Value type",
+    "comparisonValueFieldSelector": "Type",
     "completedDataflowText": "These are the completed dataflows",
     "completedDataflowTitle": "Completed dataflows",
     "configureWebform": "Configure webform",
@@ -1162,6 +1162,13 @@
     "goToLink": "Go to link",
     "snapshotsEmtpyDescription": "Empty description",
     "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters",
-    "pinDataflowMessage": "Check to mark as pinned your new dataflow"
+    "pinDataflowMessage": "Check to mark as pinned your new dataflow",
+    "notFieldToSelect": "No Field",
+    "thereAreNoReferenceDataflows": "There are no reference dataflows",
+    "downloadValidationsButtonLabel": "Download validations",
+    "downloadValidationsStart": "Generating validations file",
+    "downloadValidationsError": "Failed downloading validations",
+    "automaticallyDownloadValidationsFile": "Validations file generated successfully",
+    "downloadValidationsFileError": "Failed downloading validations file"
   }
 }

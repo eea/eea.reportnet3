@@ -26,7 +26,6 @@
   "importFileDataset": "/dataset/{:datasetId}/importFileData",
   "importFileDatasetExternal": "/dataset/{:datasetId}/importFileData?integrationId={:integrationId}",
   "importFileTable": "/dataset/{:datasetId}/importFileData?tableSchemaId={:tableSchemaId}",
-  "listValidations": "/validation/listValidations/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}",
   "listGroupedValidations": "/validation/listGroupValidations/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}",
   "loadStatistics": "/datasetmetabase/{:datasetId}/loadStatistics",
   "orderFieldSchemaDesign": "/dataschema/{:datasetId}/fieldSchema/order",

@@ -12,6 +12,7 @@ import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { LevelError } from 'ui/views/_components/LevelError';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -579,11 +580,7 @@ export const Filters = ({
 
   const selectTemplate = option => {
     if (!isNil(option.type)) {
-      return (
-        <span className={`${styles[option.type.toString().toLowerCase()]} ${styles.statusBox}`}>
-          {option.type.toString().toUpperCase()}
-        </span>
-      );
+      return <LevelError type={option.type} />;
     }
   };
 
