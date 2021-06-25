@@ -55,15 +55,14 @@ export const feedbackReducer = (state, { type, payload }) => {
       return {
         ...state,
         currentPage: payload.length === 50 ? 1 : 0,
-        messages: payload.length !== state.messages.length ? payload : state.messages,
+        messages: payload,
         isLoading: false
       };
     case 'SET_SELECTED_DATAPROVIDER':
       return {
         ...state,
         selectedDataProvider: payload,
-        messages: !isNil(payload) ? state.messages : [],
-        currentPage: !isNil(payload) ? state.currentPage : 0
+        currentPage: !isNil(payload) && !isNil(payload.currentPage) ? state.currentPage : 0
       };
     case 'ON_UPDATE_MESSAGE':
       return {
@@ -80,6 +79,8 @@ export const feedbackReducer = (state, { type, payload }) => {
         ...state,
         newMessageAdded: payload
       };
+    case 'RESET_MESSAGES':
+      return { ...state, messages: payload };
     default:
       return state;
   }

@@ -34,6 +34,7 @@ export const TabsSchema = ({
   selectedRecordErrorId,
   selectedRuleId,
   selectedRuleLevelError,
+  selectedTableSchemaId,
   selectedRuleMessage,
   showWriteButtons = true,
   tableSchemaId,
@@ -68,6 +69,7 @@ export const TabsSchema = ({
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}
+                  selectedTableSchemaId={selectedTableSchemaId}
                   showWriteButtons={showWriteButtons}
                   tableFixedNumber={table.fixedNumber}
                   tableHasErrors={table.hasErrors}
