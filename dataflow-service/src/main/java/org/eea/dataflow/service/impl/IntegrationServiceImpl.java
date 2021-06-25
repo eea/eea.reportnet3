@@ -412,6 +412,14 @@ public class IntegrationServiceImpl implements IntegrationService {
             datasetId, integrations.get(0));
         throw new EEAException("Error executing external integration");
       }
+      // remove import file lock to avoid the importFile call from fme gets the 423 lock error
+      if (IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
+          .equals(integrationVO.getOperation())) {
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
+      }
     }
   }
 
