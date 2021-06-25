@@ -1569,7 +1569,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(importSelectedIntegrationId)
                 ? getUrl(DatasetConfig.importFileDataset, {
-                    datasetId: datasetId
+                    datasetId: datasetId,
+                    delimiter: `${resources.messages['importDelimiter']}`
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {
                     datasetId: datasetId,
