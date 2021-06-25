@@ -21,6 +21,7 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -90,7 +91,7 @@ public class ZipUtilsTest {
     designs.add(design);
 
     Map<String, String> internalParameters = new HashMap<>();
-    internalParameters.put(IntegrationParams.FILE_EXTENSION, "xls");
+    internalParameters.put(IntegrationParams.FILE_EXTENSION, FileTypeEnum.XLS.getValue());
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.setInternalParameters(internalParameters);
     integrationVO.setOperation(IntegrationOperationTypeEnum.IMPORT);

@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
  */
 public class RecordRepositoryPaginatedImpl implements RecordRepositoryPaginated {
 
+  /** The Constant QUERY_UNSORTERED: {@value}. */
+  private static final String QUERY_UNSORTERED =
+      "SELECT rv from RecordValue rv INNER JOIN rv.tableValue tv order by rv.dataPosition";
   /**
    * The entity manager.
    */
@@ -46,6 +49,21 @@ public class RecordRepositoryPaginatedImpl implements RecordRepositoryPaginated 
         "SELECT rv from RecordValue rv INNER JOIN FETCH rv.fields WHERE rv.id in :ids");
     query2.setParameter("ids", ids);
     return query2.getResultList();
+  }
+
+  /**
+   * Find all records.
+   *
+   * @param pageable the pageable
+   * @return the list
+   */
+  public List<RecordValue> findRecordsPageable(Pageable pageable) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED);
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+    }
+    return query.getResultList();
   }
 
 }
