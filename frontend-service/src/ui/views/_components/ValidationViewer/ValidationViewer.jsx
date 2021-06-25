@@ -16,9 +16,10 @@ import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
-import ReactTooltip from 'react-tooltip';
+import { LevelError } from 'ui/views/_components/LevelError';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import ReactTooltip from 'react-tooltip';
 
 import { DatasetService } from 'core/services/Dataset';
 import { ValidationService } from 'core/services/Validation';
@@ -113,7 +114,8 @@ const ValidationViewer = memo(
         },
         {
           id: 'levelError',
-          header: resources.messages['levelError']
+          header: resources.messages['levelError'],
+          template: levelErrorTemplate
         },
         {
           id: 'message',
@@ -234,6 +236,12 @@ const ValidationViewer = memo(
         </Fragment>
       );
     };
+
+    const levelErrorTemplate = recordData => (
+      <div className={styles.levelErrorTemplateWrapper}>
+        <LevelError type={recordData.levelError} />
+      </div>
+    );
 
     const ruleCodeTemplate = recordData => {
       return (

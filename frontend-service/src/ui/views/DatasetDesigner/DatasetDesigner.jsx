@@ -773,6 +773,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
+    setImportSelectedIntegrationId(null);
     try {
       const {
         dataflow: { name: dataflowName },
