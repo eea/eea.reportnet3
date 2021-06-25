@@ -1,5 +1,7 @@
 package org.eea.interfaces.vo.dataset.enums;
 
+import java.util.Arrays;
+
 
 public enum FileTypeEnum {
 
@@ -35,4 +37,9 @@ public enum FileTypeEnum {
     return value;
   }
 
+
+  public static FileTypeEnum getEnum(String value) {
+    return Arrays.stream(FileTypeEnum.values()).filter(m -> m.value.equals(value)).findAny()
+        .orElse(null);
+  }
 }

@@ -795,7 +795,7 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void validateFileType(final String mimeType) throws EEAException {
     // files that will be accepted: csv, xml, xls, xlsx
-    switch (FileTypeEnum.valueOf(mimeType)) {
+    switch (FileTypeEnum.getEnum(mimeType)) {
       case CSV:
         break;
       case XML:

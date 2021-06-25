@@ -7,6 +7,8 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory implements IFileParserFactory {
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
   /**
    * The parse common.
    */
@@ -65,24 +69,27 @@ public class FileParserFactory implements IFileParserFactory {
       providerId = metabase.getDataProviderId();
     }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+    try {
+      switch (FileTypeEnum.getEnum(mimeType.toLowerCase())) {
+        case CSV:
 
-    switch (FileTypeEnum.valueOf(mimeType.toLowerCase())) {
-      case CSV:
-
-        context = new FileParseContextImpl(
-            new CSVReaderStrategy(delimiterValue != null ? delimiterValue.charAt(0) : delimiter,
-                fileCommon, datasetId, fieldMaxLength, provider.getCode()));
-        break;
-      case XML:
-        // Fill it with the xml strategy
-        break;
-      case XLS:
-      case XLSX:
-        context = new FileParseContextImpl(
-            new ExcelReaderStrategy(fileCommon, datasetId, fieldMaxLength, provider.getCode()));
-        break;
-      default:
-        break;
+          context = new FileParseContextImpl(
+              new CSVReaderStrategy(delimiterValue != null ? delimiterValue.charAt(0) : delimiter,
+                  fileCommon, datasetId, fieldMaxLength, provider.getCode()));
+          break;
+        case XML:
+          // Fill it with the xml strategy
+          break;
+        case XLS:
+        case XLSX:
+          context = new FileParseContextImpl(
+              new ExcelReaderStrategy(fileCommon, datasetId, fieldMaxLength, provider.getCode()));
+          break;
+        default:
+          break;
+      }
+    } catch (NullPointerException e) {
+      LOG_ERROR.error("Bad mimeType: {}", mimeType, e);
     }
     return context;
   }

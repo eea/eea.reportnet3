@@ -188,15 +188,18 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private Workbook createWorkbook() throws IOException {
-
-    switch (FileTypeEnum.valueOf(mimeType)) {
-      case XLS:
-        return new HSSFWorkbook();
-      case XLSX:
-      case VALIDATIONS:
-        return new XSSFWorkbook();
-      default:
-        throw new IOException("Unknow MIME type: " + mimeType);
+    try {
+      switch (FileTypeEnum.getEnum(mimeType)) {
+        case XLS:
+          return new HSSFWorkbook();
+        case XLSX:
+        case VALIDATIONS:
+          return new XSSFWorkbook();
+        default:
+          throw new IOException("Unknow MIME type: " + mimeType);
+      }
+    } catch (NullPointerException e) {
+      throw new IOException("Unknow MIME type: " + mimeType);
     }
   }
 

@@ -36,7 +36,7 @@ public class FileExportFactory implements IFileExportFactory {
   public IFileExportContext createContext(String mimeType) {
     FileExportContextImpl context = null;
 
-    switch (FileTypeEnum.valueOf(mimeType.toLowerCase())) {
+    switch (FileTypeEnum.getEnum(mimeType.toLowerCase())) {
       case CSV:
         context = new FileExportContextImpl(new CSVWriterStrategy(delimiter, fileCommon));
         break;
