@@ -124,15 +124,17 @@ export const ListMessages = ({
             <Spinner className={styles.lazyLoadingSpinner} />
           </div>
         )}
-        {messages.map((message, i) => (
-          <Message
-            hasSeparator={
-              i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
-            }
-            key={uniqueId('message_')}
-            message={message}
-          />
-        ))}
+        {messages.map((message, i) => {
+          return (
+            <Message
+              hasSeparator={
+                i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
+              }
+              key={uniqueId('message_')}
+              message={message}
+            />
+          );
+        })}
       </div>
     );
   };
