@@ -583,7 +583,9 @@ const ValidationViewer = memo(
             {columns}
           </DataTable>
         ) : (
-          <div className={styles.emptyFilteredData}>{resources.messages['noValidationsWithSelectedParameters']}</div>
+          <div className={styles.emptyFilteredData}>
+            <h3>{resources.messages['noValidationsWithSelectedParameters']}</h3>
+          </div>
         )}
       </div>
     );
