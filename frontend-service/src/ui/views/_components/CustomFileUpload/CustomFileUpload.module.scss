@@ -36,6 +36,11 @@
 
 .p-fileupload-row {
   display: table-row;
+  div {
+    label {
+      font-size: 11pt;
+    }
+  }
 }
 
 .p-fileupload-row {
@@ -182,4 +187,8 @@
 .dialogFooter {
   display: flex;
   justify-content: space-between;
+}
+.iconPreview {
+  font-size: 20pt;
+  color: var(--main-font-color);
 }

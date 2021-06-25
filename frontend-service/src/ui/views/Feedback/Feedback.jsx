@@ -409,12 +409,9 @@ export const Feedback = withRouter(({ match, history }) => {
           dialogOnHide={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false })}
           dialogVisible={importFileDialogVisible}
           draggedFiles={draggedFiles}
-          fileLimit={1}
           infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} any`}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
-          mode="advanced"
-          multiple={false}
           name="file"
           onError={onImportFileError}
           onUpload={onUpload}

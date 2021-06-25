@@ -572,7 +572,6 @@ export const WebformField = ({
           dialogHeader={resources.messages['uploadAttachment']}
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
-          fileLimit={1}
           infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
@@ -581,8 +580,6 @@ export const WebformField = ({
               ? element.maxSize * 1000 * 1024
               : config.MAX_ATTACHMENT_SIZE
           }
-          mode="advanced"
-          multiple={false}
           name="file"
           onError={onUploadFileError}
           onUpload={onAttach}

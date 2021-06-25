@@ -1268,12 +1268,9 @@ const DataViewer = withRouter(
             dialogHeader={`${resources.messages['uploadTable']}${tableName}`}
             dialogOnHide={() => setImportTableDialogVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
             dialogVisible={importTableDialogVisible}
-            fileLimit={1}
             infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
-            mode="advanced"
-            multiple={false}
             name="file"
             onError={onImportTableError}
             onUpload={onUpload}
@@ -1294,7 +1291,6 @@ const DataViewer = withRouter(
             dialogHeader={`${resources.messages['uploadAttachment']}`}
             dialogOnHide={() => setIsAttachFileVisible(false)}
             dialogVisible={isAttachFileVisible}
-            fileLimit={1}
             infoTooltip={infoAttachTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
@@ -1303,8 +1299,6 @@ const DataViewer = withRouter(
                 ? records.selectedMaxSize * 1000 * 1024
                 : config.MAX_ATTACHMENT_SIZE
             }
-            mode="advanced"
-            multiple={false}
             name="file"
             onUpload={onAttach}
             operation="PUT"

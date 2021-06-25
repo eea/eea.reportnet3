@@ -5,9 +5,11 @@ import classNames from 'classnames';
 
 import styles from './CustomFileUpload.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
@@ -136,7 +138,18 @@ export const CustomFileUpload = ({
     _files.current = state.files || [];
     let cFiles = event.dataTransfer ? event.dataTransfer.files : event.target.files;
 
-    if (fileLimit > 1) {
+    if (fileLimit === 1) {
+      let file = cFiles[0];
+      if (!isFileSelected(file)) {
+        if (validate(file)) {
+          if (isImage(file)) {
+            file.objectURL = window.URL.createObjectURL(file);
+          }
+          _files.current = [];
+          _files.current.push(file);
+        }
+      }
+    } else {
       for (let i = 0; i < cFiles.length; i++) {
         let file = cFiles[i];
 
@@ -147,17 +160,6 @@ export const CustomFileUpload = ({
             }
             _files.current.push(file);
           }
-        }
-      }
-    } else {
-      let file = cFiles[0];
-      if (!isFileSelected(file)) {
-        if (validate(file)) {
-          if (isImage(file)) {
-            file.objectURL = window.URL.createObjectURL(file);
-          }
-          _files.current = [];
-          _files.current.push(file);
         }
       }
     }
@@ -362,9 +364,25 @@ export const CustomFileUpload = ({
             <div>
               <img alt={file.name} role="presentation" src={file.objectURL} width={previewWidth} />
             </div>
-          ) : null;
-          let fileName = <div>{file.name}</div>;
-          let size = <div>{formatSize(file.size)}</div>;
+          ) : (
+            <div>
+              <FontAwesomeIcon
+                className={styles.iconPreview}
+                icon={AwesomeIcons(file.name.split('.')[1])}
+                role="presentation"
+              />
+            </div>
+          );
+          let fileName = (
+            <div>
+              <label>{file.name}</label>
+            </div>
+          );
+          let size = (
+            <div>
+              <label>{formatSize(file.size)}</label>
+            </div>
+          );
           let removeButton = (
             <div>
               <Button icon="cancel" onClick={() => remove(index)} type="button" />
