@@ -56,7 +56,7 @@ const ValidationViewer = memo(
       levelError: []
     });
     const [filtered, setFiltered] = useState(false);
-    const [, setFilteredData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
