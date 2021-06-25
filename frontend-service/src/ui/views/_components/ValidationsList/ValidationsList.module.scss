@@ -127,6 +127,11 @@
   color: var(--statusBox-warning-color);
 }
 
+.notificationLevelTemplateWrapper {
+  display: flex;
+  justify-content: center;
+}
+
 @keyframes spinnerAnimation {
   from {
     transform: rotate(0deg);
