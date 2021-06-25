@@ -19,7 +19,6 @@ import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
-import { DataflowService } from 'core/services/Dataflow';
 import { IntegrationService } from 'core/services/Integration';
 import { UniqueConstraintsService } from 'core/services/UniqueConstraints';
 import { ValidationService } from 'core/services/Validation';
@@ -340,12 +339,21 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       isCustodian && (
         <Toolbar className={styles.datasetSchemasToolbar}>
           <div className="p-toolbar-group-right">
+            {/* <Button
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+              icon={collapseAll ? 'angleDown' : 'ang'}
+              label={resources.messages['refresh']}
+              onClick={async () => {
+                setIsLoading(true);
+                await onLoadDatasetsSchemas();
+                setIsLoading(false);
+              }}
+            /> */}
             <Button
-              className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                 isLoading ? 'p-button-animated-spin' : ''
               }`}
-              disabled={false}
-              icon={'refresh'}
+              icon="refresh"
               label={resources.messages['refresh']}
               onClick={async () => {
                 setIsLoading(true);

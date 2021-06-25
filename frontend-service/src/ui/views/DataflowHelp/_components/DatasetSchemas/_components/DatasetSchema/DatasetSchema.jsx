@@ -9,8 +9,9 @@ import styles from './DatasetSchema.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DatasetSchema = ({
   designDataset,

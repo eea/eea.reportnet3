@@ -39,6 +39,11 @@
   font-weight: bold;
 }
 
+.levelErrorTemplateWrapper {
+  display: flex;
+  justify-content: center;
+}
+
 .slider-enter {
   height: 0px;
 }

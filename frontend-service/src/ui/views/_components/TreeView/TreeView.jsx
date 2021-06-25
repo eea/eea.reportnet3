@@ -91,12 +91,14 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
   const levelErrorTemplate = rowData => {
     if (!isNil(rowData.levelError)) {
       return (
-        <span
-          className={`${columnOptions['levelErrorTypes']['class']} ${columnOptions['levelErrorTypes']['subClasses']
-            .filter(cl => cl.toUpperCase().includes(rowData.levelError.toString().toUpperCase()))
-            .join(' ')}`}>
-          {rowData.levelError}
-        </span>
+        <div className={styles.levelErrorTemplateWrapper}>
+          <span
+            className={`${columnOptions['levelErrorTypes']['class']} ${columnOptions['levelErrorTypes']['subClasses']
+              .filter(cl => cl.toUpperCase().includes(rowData.levelError.toString().toUpperCase()))
+              .join(' ')}`}>
+            {rowData.levelError}
+          </span>
+        </div>
       );
     }
   };

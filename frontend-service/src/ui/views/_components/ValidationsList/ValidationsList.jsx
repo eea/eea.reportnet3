@@ -420,7 +420,7 @@ const ValidationsList = withRouter(
     );
 
     const levelErrorTemplate = rowData => (
-      <div className={styles.notificationLevelTemplateWrapper}>
+      <div className={styles.levelErrorTemplateWrapper}>
         <LevelError type={rowData.levelError.toLowerCase()} />
       </div>
     );
