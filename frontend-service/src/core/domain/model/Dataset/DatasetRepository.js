@@ -18,8 +18,6 @@ export const DatasetRepository = {
   downloadFileData: () => Promise.reject('[DatasetRepository#downloadFileData] must be implemented'),
   downloadReferenceDatasetFileData: () =>
     Promise.reject('[DatasetRepository#downloadReferenceDatasetFileData] must be implemented'),
-  errorPositionByObjectId: () => Promise.reject('[DatasetRepository#errorPositionByObjectId] must be implemented'),
-  errorsById: () => Promise.reject('[DatasetRepository#errorsById] must be implemented'),
   errorStatisticsById: () => Promise.reject('[DatasetRepository#errorStatisticsById] must be implemented'),
   exportDataById: () => Promise.reject('[DatasetRepository#exportDataById] must be implemented'),
   exportDatasetDataExternal: () => Promise.reject('[DatasetRepository#exportDatasetDataExternal] must be implemented'),
