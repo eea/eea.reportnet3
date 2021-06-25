@@ -305,64 +305,32 @@ public class FileTreatmentHelper implements DisposableBean {
       String originalFileName = multipartFile.getOriginalFilename();
       String multipartFileMimeType = datasetService.getMimetype(originalFileName);
 
-      if (!folder.mkdirs()) {
-        releaseLock(datasetId);
-        throw new EEAException("Folder for dataset " + datasetId + " already exists");
-      }
 
+      folder.mkdirs();
+      List<File> files = new ArrayList<>();
+      IntegrationVO integrationVO;
+      if (null == integrationId) {
+        integrationVO = null;
+      } else {
+        integrationVO = getIntegrationVO(integrationId);
+      }
       if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
-
-          /*
-           * TODO. Since ZIP and CSV files are temporally disabled to be imported from FME, we do
-           * not need to look for a matching integration.
-           */
-
-          // IntegrationVO integrationVO = getIntegrationVO(schema, "csv");
-          IntegrationVO integrationVO;
-
-
-          List<File> files = unzipAndStore(folder, saveLocationPath, zip);
-
-          // Queue import tasks for stored files
-          if (!files.isEmpty()) {
-            wipeData(datasetId, null, replace);
-            // IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-            if (null == integrationId) {
-              integrationVO = null;
-            } else {
-              // Look for an integration for the given kind of file.
-              // integrationVO = getIntegrationVO(schema, multipartFileMimeType);
-              integrationVO = getIntegrationVO(integrationId);
-            }
-            queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
-                replace, delimiter);
-          } else {
-            releaseLock(datasetId);
-            throw new EEAException("Empty zip file");
-          }
+          files = unzipAndStore(folder, saveLocationPath, zip);
         }
 
-      } else {
-
-        File file = new File(folder, originalFileName);
-        List<File> files = new ArrayList<>();
-
-        /*
-         * TOOD. Since ZIP and CSV files are temporally disabled to be imported from FME, we do not
-         * need to look for a matching integration.
-         */
-
-        IntegrationVO integrationVO;
-        // if ("csv".equalsIgnoreCase(multipartFileMimeType)) {
-        if (null == integrationId) {
-          integrationVO = null;
+        // Queue import tasks for stored files
+        if (!files.isEmpty()) {
+          wipeData(datasetId, null, replace);
+          queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
+                replace, delimiter,multipartFileMimeType);
         } else {
-          // Look for an integration for the given kind of file.
-          // integrationVO = getIntegrationVO(schema, multipartFileMimeType);
-          integrationVO = getIntegrationVO(integrationId);
+          releaseLock(datasetId);
+          throw new EEAException("Empty zip file");
         }
+      } else {
+        File file = new File(folder, originalFileName);
 
         // Store the file in the persistence volume
         try (FileOutputStream output = new FileOutputStream(file)) {
@@ -374,7 +342,7 @@ public class FileTreatmentHelper implements DisposableBean {
         // Queue import task for the stored file
         wipeData(datasetId, tableSchemaId, replace);
         queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
-            replace, delimiter);
+            replace, delimiter, multipartFileMimeType);
       }
 
     } catch (FeignException | IOException e) {
@@ -441,15 +409,18 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param originalFileName the original file name
    * @param integrationVO the integration VO
    * @param replace the replace
+   * @param mimeType the mime type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
-      String delimiter) throws IOException, EEAException {
+      String delimiter,String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
-      fmeFileProcess(datasetId, files.get(0), integrationVO);
+      for (File file : files) {
+        fmeFileProcess(datasetId, file, integrationVO, mimeType);
+      }
     } else {
       importExecutorService.submit(() -> {
         try {
@@ -468,13 +439,13 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param file the file
    * @param integrationVO the integration VO
-   *
+   * @param mimeType the mime type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
    */
-  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO)
-      throws IOException, EEAException {
+  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO,
+      String mimeType) throws IOException, EEAException {
 
     LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
     boolean error = false;
@@ -492,7 +463,8 @@ public class FileTreatmentHelper implements DisposableBean {
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
           || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
-              .equals(integrationVO.getOperation())) {
+              .equals(integrationVO.getOperation())
+          || "zip".equalsIgnoreCase(mimeType)) {
         Map<String, Object> importFileData = new HashMap<>();
         importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
         importFileData.put(LiteralConstants.DATASETID, datasetId);
@@ -508,7 +480,8 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
-    FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+    FileUtils.forceDelete(new File(new File(importPath, datasetId.toString()), file.getName()));
+
 
     if (error) {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
@@ -632,71 +605,6 @@ public class FileTreatmentHelper implements DisposableBean {
     } catch (EEAException e) {
       LOG_ERROR.error("RN3-Import file error", e);
     }
-  }
-
-  /**
-   * Integration VO copy constructor.
-   *
-   * @param integrationVO the integration VO
-   *
-   * @return the integration VO
-   */
-  private IntegrationVO integrationVOCopyConstructor(IntegrationVO integrationVO) {
-
-    IntegrationVO rtn = null;
-
-    if (null != integrationVO) {
-      Map<String, String> oldInternalParameters = integrationVO.getInternalParameters();
-      Map<String, String> newInternalParameters = new HashMap<>();
-      for (Map.Entry<String, String> entry : oldInternalParameters.entrySet()) {
-        newInternalParameters.put(entry.getKey(), entry.getValue());
-      }
-
-      rtn = new IntegrationVO();
-      rtn.setId(integrationVO.getId());
-      rtn.setName(integrationVO.getName());
-      rtn.setDescription(integrationVO.getDescription());
-      rtn.setTool(integrationVO.getTool());
-      rtn.setOperation(integrationVO.getOperation());
-      rtn.setInternalParameters(newInternalParameters);
-    }
-
-    return rtn;
-  }
-
-  /**
-   * Gets the integration VO.
-   *
-   * @param datasetSchema the dataset schema
-   * @param mimeType the mime type
-   *
-   * @return the integration VO
-   */
-  private IntegrationVO getIntegrationVO(DataSetSchema datasetSchema, String mimeType) {
-
-    IntegrationVO rtn = null;
-
-    // Create the IntegrationVO used as criteria.
-    String datasetSchemaId = datasetSchema.getIdDataSetSchema().toString();
-    String dataflowId = datasetSchema.getIdDataFlow().toString();
-    Map<String, String> internalParameters = new HashMap<>();
-    internalParameters.put(IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
-    internalParameters.put(IntegrationParams.DATAFLOW_ID, dataflowId);
-    IntegrationVO criteria = new IntegrationVO();
-    criteria.setInternalParameters(internalParameters);
-
-    // Find all integrations matching the criteria.
-    for (IntegrationVO integrationVO : integrationController
-        .findAllIntegrationsByCriteria(criteria)) {
-      if (IntegrationOperationTypeEnum.IMPORT.equals(integrationVO.getOperation())
-          && mimeType.equalsIgnoreCase(
-              integrationVO.getInternalParameters().get(IntegrationParams.FILE_EXTENSION))) {
-        rtn = integrationVO;
-        break;
-      }
-    }
-
-    return rtn;
   }
 
 
