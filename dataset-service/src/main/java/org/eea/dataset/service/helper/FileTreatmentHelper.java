@@ -211,7 +211,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
-      boolean replace, Long integrationId, String delmiter) throws EEAException {
+      boolean replace, Long integrationId, String delimiter) throws EEAException {
 
     if (delimiter != null && delimiter.length() > 1) {
       LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
@@ -292,7 +292,8 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter) throws EEAException {
+      MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter)
+      throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
