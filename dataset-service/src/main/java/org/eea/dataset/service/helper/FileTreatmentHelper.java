@@ -321,8 +321,11 @@ public class FileTreatmentHelper implements DisposableBean {
       String originalFileName = multipartFile.getOriginalFilename();
       String multipartFileMimeType = datasetService.getMimetype(originalFileName);
 
+      if (!folder.mkdirs()) {
+        releaseLock(datasetId);
+        throw new EEAException("Folder for dataset " + datasetId + " already exists");
+      }
 
-      folder.mkdirs();
       List<File> files = new ArrayList<>();
       IntegrationVO integrationVO;
       if (null == integrationId) {
@@ -330,7 +333,7 @@ public class FileTreatmentHelper implements DisposableBean {
       } else {
         integrationVO = getIntegrationVO(integrationId);
       }
-      if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
+      if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
           files = unzipAndStore(folder, saveLocationPath, zip);
@@ -433,9 +436,7 @@ public class FileTreatmentHelper implements DisposableBean {
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
       String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
-      for (File file : files) {
-        fmeFileProcess(datasetId, file, integrationVO, mimeType);
-      }
+      fmeFileProcess(datasetId, files.get(0), integrationVO, mimeType);
     } else {
       importExecutorService.submit(() -> {
         try {
@@ -494,7 +495,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
-    FileUtils.forceDelete(new File(new File(importPath, datasetId.toString()), file.getName()));
+    FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
 
 
     if (error) {
