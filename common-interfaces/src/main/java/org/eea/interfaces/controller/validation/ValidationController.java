@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.validation;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -8,6 +9,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -89,4 +91,25 @@ public interface ValidationController {
           required = false) List<EntityTypeEnum> typeEntitiesFilter,
       @RequestParam(value = "tableFilter", required = false) String tableFilter,
       @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter);
+
+  /**
+   * Export CSV file of grouped validations.
+   *
+   * @param datasetId the dataset id
+   * @return the response entity
+   */
+  @PostMapping(value = "/export/{datasetId}")
+  void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @GetMapping("/downloadFile/{datasetId}")
+  void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
+      HttpServletResponse response);
+
 }

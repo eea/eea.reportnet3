@@ -1,18 +1,18 @@
 package org.eea.dataset.service.file;
 
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.RecordSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +25,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /*** The Class CSVReaderStrategyTest. */
-
 @RunWith(MockitoJUnitRunner.class)
 public class CSVReaderStrategyTest {
 
@@ -47,7 +46,7 @@ public class CSVReaderStrategyTest {
 
 
   /** The data set. */
-  private DataSetSchemaVO dataSet;
+  private DataSetSchema dataSet;
 
   /**
    * Inits the mocks.
@@ -62,18 +61,19 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    ArrayList<TableSchemaVO> tables = new ArrayList<>();
-    ArrayList<FieldSchemaVO> fields = new ArrayList<>();
-    dataSet = new DataSetSchemaVO();
-    TableSchemaVO table = new TableSchemaVO();
+    ArrayList<TableSchema> tables = new ArrayList<>();
+    ArrayList<FieldSchema> fields = new ArrayList<>();
+    dataSet = new DataSetSchema();
+    dataSet.setIdDataSetSchema(new ObjectId());
+    TableSchema table = new TableSchema();
     table.setNameTableSchema("tabla1");
-    table.setIdTableSchema("-");
+    table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
     table.setFixedNumber(false);
-    RecordSchemaVO record = new RecordSchemaVO();
-    record.setIdRecordSchema("");
-    FieldSchemaVO fschema = new FieldSchemaVO();
-    fschema.setName("campo_1");
-    fschema.setId("");
+    RecordSchema record = new RecordSchema();
+    record.setIdRecordSchema(new ObjectId());
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
     fschema.setReadOnly(false);
     fields.add(fschema);
     record.setFieldSchema(fields);
@@ -88,16 +88,22 @@ public class CSVReaderStrategyTest {
   /**
    * Test parse file.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void testParseFile() throws EEAException {
-
-    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
-    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new FieldSchemaVO());
-    DataSetVO result = csvReaderStrategy.parseFile(input, 1L, 1L, "-");
-    assertNotNull("is null", result);
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    when(fileCommon.isDesignDataset(Mockito.any())).thenReturn(false);
+    // when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
+    csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
+        dataSet);
+    Mockito.verify(fileCommon, times(3)).findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class));
   }
 
 
@@ -105,7 +111,7 @@ public class CSVReaderStrategyTest {
    * Test parse exception.
    *
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test(expected = InvalidFileException.class)
   public void testParseException() throws IOException, EEAException {
@@ -113,8 +119,8 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
-    csvReaderStrategy.parseFile(input, 1L, null, null);
+    // when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
+    csvReaderStrategy.parseFile(input, 1L, null, null, null, csv, false, dataSet);
   }
 
 

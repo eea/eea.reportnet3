@@ -381,6 +381,14 @@ public enum EventType {
   /** The export dataset completed event. */
   EXPORT_DATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_dataset_completed_event", true),
+  
+  /** The download dataset validations completed event. */
+  DOWNLOAD_VALIDATIONS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_validations_completed_event", true),
+  
+  /** The download dataset validations failed event. */
+  DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_validations_failed_event", true),
 
   /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
