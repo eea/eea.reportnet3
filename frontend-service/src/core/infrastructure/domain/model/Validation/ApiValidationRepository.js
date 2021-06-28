@@ -83,6 +83,8 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
 
 const deleteById = async (datasetSchemaId, ruleId) => await apiValidation.deleteById(datasetSchemaId, ruleId);
 
+const downloadFile = async (datasetId, fileName) => await apiValidation.downloadFile(datasetId, fileName);
+
 const getAll = async (datasetSchemaId, reporting = false) => {
   const validationsListDTO = await apiValidation.getAll(datasetSchemaId);
   if (isUndefined(validationsListDTO.data) || isEmpty(validationsListDTO.data.rules)) {
@@ -102,6 +104,8 @@ const getAll = async (datasetSchemaId, reporting = false) => {
 
   return validationsList;
 };
+
+const generateFile = async datasetId => await apiValidation.generateFile(datasetId);
 
 const update = async (datasetId, validationRule) => {
   const { expressions } = validationRule;
@@ -188,9 +192,11 @@ const updateDatasetRule = async (datasetId, validationRule) => {
 
 export const ApiValidationRepository = {
   create,
-  createTableRule,
   createRowRule,
+  createTableRule,
   deleteById,
+  downloadFile,
+  generateFile,
   getAll,
   update,
   updateDatasetRule,

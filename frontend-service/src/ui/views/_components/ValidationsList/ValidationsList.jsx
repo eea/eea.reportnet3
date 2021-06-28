@@ -18,6 +18,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
+import { LevelError } from 'ui/views/_components/LevelError';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { ValidationService } from 'core/services/Validation';
@@ -419,7 +420,9 @@ const ValidationsList = withRouter(
     );
 
     const levelErrorTemplate = rowData => (
-      <span className={`${styles.levelError} ${styles[rowData.levelError.toLowerCase()]}`}>{rowData.levelError}</span>
+      <div className={styles.levelErrorTemplateWrapper}>
+        <LevelError type={rowData.levelError.toLowerCase()} />
+      </div>
     );
 
     const renderColumns = validations => {

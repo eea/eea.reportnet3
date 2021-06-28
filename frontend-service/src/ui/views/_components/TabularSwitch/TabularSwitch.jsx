@@ -15,7 +15,9 @@ const TabularSwitch = ({
   getIsTableCreated = () => {},
   isTableCreated,
   onChange,
-  value = ''
+  value = '',
+  isValidationsTabularView,
+  setIsValidationsTabularView = () => {}
 }) => {
   const { onSwitchAnimate, parseViews } = TabularSwitchUtils;
 
@@ -30,6 +32,13 @@ const TabularSwitch = ({
       onSwitchView(value);
     }
   }, [isTableCreated]);
+
+  useEffect(() => {
+    if (isValidationsTabularView) {
+      onSwitchView('Tabular data');
+    }
+    setIsValidationsTabularView(false);
+  }, [isValidationsTabularView]);
 
   const onSwitchView = element => {
     const viewType = { ...views };
