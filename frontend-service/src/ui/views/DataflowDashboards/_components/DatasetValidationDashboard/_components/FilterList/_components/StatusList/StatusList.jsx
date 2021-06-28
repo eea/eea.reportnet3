@@ -4,6 +4,8 @@ import colors from 'conf/colors.json';
 
 import styles from './StatusList.module.scss';
 
+import { LevelError } from 'ui/views/_components/LevelError';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const StatusList = ({ datasetSchemaId, filterDispatch, levelErrors, statusFilters }) => {
@@ -28,7 +30,7 @@ const StatusList = ({ datasetSchemaId, filterDispatch, levelErrors, statusFilter
           type="checkbox"
         />
         <label className={styles.labelItem} htmlFor={`${errorLevelLower}_${datasetSchemaId}`}>
-          {resources.messages[errorLevelLower]}
+          <LevelError type={errorLevelLower} />
         </label>
       </li>
     );
