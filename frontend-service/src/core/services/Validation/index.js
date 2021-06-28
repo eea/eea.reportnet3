@@ -2,6 +2,8 @@ import { Create } from './Create';
 import { CreateRowRule } from './CreateRowRule';
 import { CreateTableRule } from './CreateTableRule';
 import { Delete } from './Delete';
+import { DownloadFile } from './DownloadFile';
+import { GenerateFile } from './GenerateFile';
 import { GetAll } from './GetAll';
 import { Update } from './Update';
 import { UpdateDatasetRule } from './UpdateDatasetRule';
@@ -14,6 +16,8 @@ export const ValidationService = {
   createRowRule: CreateRowRule({ validationRepository }),
   createTableRule: CreateTableRule({ validationRepository }),
   deleteById: Delete({ validationRepository }),
+  downloadFile: DownloadFile({ validationRepository }),
+  generateFile: GenerateFile({ validationRepository }),
   getAll: GetAll({ validationRepository }),
   update: Update({ validationRepository }),
   updateDatasetRule: UpdateDatasetRule({ validationRepository }),

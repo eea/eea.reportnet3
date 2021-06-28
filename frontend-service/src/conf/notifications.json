@@ -286,6 +286,9 @@
           }
         },
         {
+          "key": "DOWNLOAD_VALIDATIONS_ERROR"
+        },
+        {
           "key": "CREATE_DATA_COLLECTION_ERROR"
         },
         {
@@ -652,6 +655,9 @@
           "key": "DOWNLOAD_EXPORT_DATASET_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_VALIDATIONS_FILE_ERROR"
+        },
+        {
           "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
         },
         {
@@ -922,6 +928,9 @@
         },
         {
           "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
+        },
+        {
+          "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
         }
       ]
     },
@@ -967,6 +976,9 @@
           "key": "EXPORT_DATASET_DATA"
         },
         {
+          "key": "DOWNLOAD_VALIDATIONS_START"
+        },
+        {
           "key": "DATASET_IMPORT_INIT"
         },
         {
@@ -1001,6 +1013,8 @@
   "hiddenNotifications": [
     "EXPORT_DATASET_COMPLETED_EVENT",
     "EXPORT_DATASET_FAILED_EVENT",
+    "DOWNLOAD_VALIDATIONS_COMPLETED_EVENT",
+    "DOWNLOAD_VALIDATIONS_FAILED_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",

@@ -121,7 +121,7 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * The delimiter.
    */
-  @Value("${loadDataDelimiter}")
+  @Value("${exportDataDelimiter}")
   private char delimiter;
 
   /** The path public file. */
@@ -902,10 +902,8 @@ public class ValidationServiceImpl implements ValidationService {
 
 
       if (CollectionUtils.isEmpty(validations.getErrors())) {
-        for (int i = 0; i < nHeaders; i++)
-          fieldsToWrite[i] = "";
-
-        csvWriter.writeNext(fieldsToWrite);
+        LOG_ERROR.error(
+            "Tried to create validations export from an empty validations dataset so it delivered an empty file.");
       }
 
       else {
@@ -917,7 +915,7 @@ public class ValidationServiceImpl implements ValidationService {
 
           fieldsToWrite = fillValidationErrorData(castedError, dataset, nHeaders);
 
-          csvWriter.writeNext(fieldsToWrite);
+          csvWriter.writeNext(fieldsToWrite, false);
         }
       }
     }
