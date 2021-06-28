@@ -93,6 +93,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -298,12 +299,15 @@ public class DatasetServiceTest {
   @Mock
   private PkCatalogueRepository pkCatalogueRepository;
 
+  /** The test dataset repository. */
   @Mock
   private TestDatasetRepository testDatasetRepository;
 
+  /** The reference dataset repository. */
   @Mock
   private ReferenceDatasetRepository referenceDatasetRepository;
 
+  /** The output stream. */
   @Mock
   private OutputStream outputStream;
 
@@ -392,149 +396,7 @@ public class DatasetServiceTest {
     MockitoAnnotations.initMocks(this);
   }
 
-  /**
-   * Test process file throw exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileThrowException() throws Exception {
-    final MockMultipartFile fileNoExtension =
-        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    datasetService.processFile(null, "fileOriginal", fileNoExtension.getInputStream(), null);
-  }
 
-  /**
-   * Test process filename null throw exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFilenameNullThrowException() throws Exception {
-    final MockMultipartFile fileNoExtension =
-        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    datasetService.processFile(null, null, fileNoExtension.getInputStream(), null);
-  }
-
-  /**
-   * Test process file bad extension throw exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileBadExtensionThrowException() throws Exception {
-    final MockMultipartFile fileBadExtension =
-        new MockMultipartFile("file", "fileOriginal.doc", "doc", "content".getBytes());
-    datasetService.processFile(1L, "fileOriginal.doc", fileBadExtension.getInputStream(), null);
-  }
-
-  /**
-   * Test process file throw exception 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileThrowException2() throws Exception {
-    final MockMultipartFile fileNoExtension =
-        new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    datasetService.processFile(1L, "fileOriginal", fileNoExtension.getInputStream(), null);
-  }
-
-  /**
-   * Test process file empty dataset.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = IOException.class)
-  public void testProcessFileEmptyDataset() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
-    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(null);
-
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-  }
-
-  /**
-   * Test process file empty partition metabase.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileEmptyPartitionMetabase() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "cvs", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-  }
-
-  /**
-   * Test process file empty partition metabase xml.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileEmptyPartitionMetabaseXml() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.xml", "xml", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-  }
-
-  /**
-   * Test process file empty partition metabase xls.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileEmptyPartitionMetabaseXls() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.xls", "xls", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-  }
-
-  /**
-   * Test process file empty partition metabase xlsx.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = EEAException.class)
-  public void testProcessFileEmptyPartitionMetabaseXlsx() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.xlsx", "xlsx", "content".getBytes());
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.empty());
-    datasetService.processFile(1L, file.getOriginalFilename(), file.getInputStream(), null);
-  }
-
-  /**
-   * Test process file success update table.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testProcessFileSuccessUpdateTable() throws Exception {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
-
-    when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
-        Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-
-    when(fileParserFactory.createContext(Mockito.any(), Mockito.any())).thenReturn(context);
-    final DataSetVO dataSetVO = new DataSetVO();
-    dataSetVO.setId(1L);
-    when(context.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(dataSetVO);
-    assertEquals(dataSetVO,
-        datasetService.processFile(1L, "fileOriginal.csv", file.getInputStream(), ""));
-  }
 
   /**
    * Test save all records.
@@ -1282,7 +1144,8 @@ public class DatasetServiceTest {
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
         Mockito.anyBoolean())).thenReturn(expectedResult);
-    assertEquals("not equals", expectedResult, datasetService.exportFile(1L, "csv", ""));
+    assertEquals("not equals", expectedResult,
+        datasetService.exportFile(1L, FileTypeEnum.CSV.getValue(), ""));
   }
 
   /**
@@ -1622,9 +1485,8 @@ public class DatasetServiceTest {
    * Gets the field values referenced test number.
    *
    * @return the field values referenced test number
-   * @throws PSQLException
-   * @throws EEAException
-   *
+   * @throws PSQLException the PSQL exception
+   * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    */
   @Test
@@ -1658,8 +1520,8 @@ public class DatasetServiceTest {
    * Gets the field values referenced label test.
    *
    * @return the field values referenced label test
-   * @throws PSQLException
-   * @throws EEAException
+   * @throws PSQLException the PSQL exception
+   * @throws EEAException the EEA exception
    */
   @Test
   public void getFieldValuesReferencedLabelTest() throws PSQLException, EEAException {
@@ -1957,7 +1819,7 @@ public class DatasetServiceTest {
   /**
    * Etl export dataset dataset schema id exception test.
    *
-   * @throws EEAException the EEA exception
+   * @throws Exception the exception
    */
   // @Test(expected = EEAException.class)
   // public void etlExportDatasetDatasetSchemaIdExceptionTest() throws EEAException {
@@ -2286,8 +2148,8 @@ public class DatasetServiceTest {
    */
   @Test
   public void testUpdateAttachment() throws EEAException, IOException {
-    final MockMultipartFile file =
-        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    final MockMultipartFile file = new MockMultipartFile("file", "fileOriginal.csv",
+        FileTypeEnum.CSV.getValue(), "content".getBytes());
     Document fieldSchema = new Document();
     fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
     FieldValue field = new FieldValue();
@@ -2457,6 +2319,11 @@ public class DatasetServiceTest {
     assertEquals(DatasetTypeEnum.EUDATASET, datasetService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the dataset type test test.
+   *
+   * @return the dataset type test test
+   */
   @Test
   public void getDatasetTypeTestTest() {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -2889,6 +2756,11 @@ public class DatasetServiceTest {
 
 
 
+  /**
+   * Initialize dataset reference test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void initializeDatasetReferenceTest() throws EEAException {
     DesignDataset desingDataset = new DesignDataset();
@@ -2960,6 +2832,12 @@ public class DatasetServiceTest {
 
 
 
+  /**
+   * Download file exception test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void downloadFileExceptionTest() throws IOException, EEAException {
     try {
@@ -2970,6 +2848,12 @@ public class DatasetServiceTest {
     }
   }
 
+  /**
+   * Etl export dataset test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void etlExportDatasetTest() throws IOException, EEAException {
     ObjectId id = new ObjectId();
@@ -2989,6 +2873,11 @@ public class DatasetServiceTest {
     Mockito.verify(outputStream, times(1)).flush();
   }
 
+  /**
+   * Creates the lock with signature test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createLockWithSignatureTest() throws EEAException {
     datasetService.createLockWithSignature(LockSignature.EMPTY, new HashMap<>(), "");
@@ -2996,11 +2885,21 @@ public class DatasetServiceTest {
         Mockito.any());
   }
 
+  /**
+   * Gets the schema if reportable null test.
+   *
+   * @return the schema if reportable null test
+   */
   @Test
   public void getSchemaIfReportableNullTest() {
     assertNull(datasetService.getSchemaIfReportable(0L, new ObjectId().toString()));
   }
 
+  /**
+   * Gets the schema if reportable desing test.
+   *
+   * @return the schema if reportable desing test
+   */
   @Test
   public void getSchemaIfReportableDesingTest() {
     ObjectId id = new ObjectId();
@@ -3013,6 +2912,11 @@ public class DatasetServiceTest {
     assertNull(datasetService.getSchemaIfReportable(0L, id.toString()));
   }
 
+  /**
+   * Gets the schema if reportable draft test.
+   *
+   * @return the schema if reportable draft test
+   */
   @Test
   public void getSchemaIfReportableDraftTest() {
     ObjectId id = new ObjectId();
@@ -3031,6 +2935,11 @@ public class DatasetServiceTest {
     assertEquals(schema, datasetService.getSchemaIfReportable(0L, id.toString()));
   }
 
+  /**
+   * Gets the schema if reportable draft null test.
+   *
+   * @return the schema if reportable draft null test
+   */
   @Test
   public void getSchemaIfReportableDraftNullTest() {
     ObjectId id = new ObjectId();
@@ -3049,6 +2958,9 @@ public class DatasetServiceTest {
     assertNull(datasetService.getSchemaIfReportable(0L, id.toString()));
   }
 
+  /**
+   * Check any schema available test.
+   */
   @Test
   public void checkAnySchemaAvailableTest() {
     DataSetMetabase datasetMetabase = new DataSetMetabase();

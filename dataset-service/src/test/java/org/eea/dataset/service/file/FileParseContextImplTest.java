@@ -1,10 +1,10 @@
 package org.eea.dataset.service.file;
 
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
 import java.io.IOException;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Class FileParseContextImplTest.
@@ -42,17 +43,18 @@ public class FileParseContextImplTest {
 
   /**
    * Test parse.
-   * 
+   *
    * @throws EEAException
+   * @throws IOException
    */
   @Test
-  public void testParse() throws EEAException {
-    Mockito
-        .when(readerStrategy.parseFile(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new DataSetVO());
-    DataSetVO result =
-        fileParseContext.parse(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    assertNotNull("is null", result);
+  public void testParse() throws EEAException, IOException {
+    MultipartFile file = Mockito.mock(MultipartFile.class);
+    fileParseContext.parse(file.getInputStream(), 1L, 1L, "", 1L, "file", true,
+        new DataSetSchema());
+    Mockito.verify(readerStrategy, times(1)).parseFile(Mockito.any(), Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any(), Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.any());
   }
 
 }
