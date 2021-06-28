@@ -129,7 +129,7 @@ public class ExcelReaderStrategyTest {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testParseFile()
       throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
 
