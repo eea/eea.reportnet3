@@ -931,7 +931,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
                 !datasetHasErrors ? null : 'p-button-animated-blink'
-              }`}              
+              }`}
               icon={'warning'}
               iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}
@@ -1096,7 +1096,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             isNil(importSelectedIntegrationId)
               ? getUrl(DatasetConfig.importFileDataset, {
                   datasetId: datasetId,
-                  delimiter: `${resources.messages['importDelimiter']}`
+                  delimiter: `${config.IMPORT_FILE_DELIMITER}`
                 })
               : getUrl(DatasetConfig.importFileDatasetExternal, {
                   datasetId: datasetId,
