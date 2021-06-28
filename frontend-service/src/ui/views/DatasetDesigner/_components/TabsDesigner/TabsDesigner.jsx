@@ -50,13 +50,14 @@ export const TabsDesigner = withRouter(
     onHideSelectGroupedValidation,
     onLoadTableData,
     onTabChange,
-    onUpdateTable,
     onUpdateSchema,
+    onUpdateTable,
     recordPositionId,
     selectedRecordErrorId,
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
+    selectedTableSchemaId,
     setActiveTableSchemaId,
     tableSchemaId,
     viewType
@@ -420,6 +421,7 @@ export const TabsDesigner = withRouter(
                         selectedRuleId={selectedRuleId}
                         selectedRuleLevelError={selectedRuleLevelError}
                         selectedRuleMessage={selectedRuleMessage}
+                        selectedTableSchemaId={selectedTableSchemaId}
                         table={tabs[i]}
                         viewType={viewType}
                       />

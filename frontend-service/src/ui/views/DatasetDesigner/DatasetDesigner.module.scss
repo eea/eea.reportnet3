@@ -122,3 +122,8 @@
   transform: rotate(-90deg) scale(1.25) !important;
   transition: 0.08s auto;
 }
+
+.validationsFooter {
+  display: flex;
+  justify-content: space-between;
+}

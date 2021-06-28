@@ -93,40 +93,6 @@ export const apiDataset = {
     });
   },
 
-  errorPositionByObjectId: async (objectId, datasetId, entityType) => {
-    return await HTTPRequester.get({
-      url: getUrl(DatasetConfig.validationViewer, { datasetId, entityType, objectId })
-    });
-  },
-
-  errorsById: async (
-    datasetId,
-    pageNum,
-    pageSize,
-    sortField,
-    asc,
-    fieldValueFilter,
-    levelErrorsFilter,
-    typeEntitiesFilter,
-    tablesFilter
-  ) => {
-    if (asc === -1) {
-      asc = 0;
-    }
-    return await HTTPRequester.get({
-      url: getUrl(DatasetConfig.listValidations, {
-        asc,
-        datasetId,
-        fieldValueFilter,
-        levelErrorsFilter,
-        pageNum,
-        pageSize,
-        sortField,
-        tableFilter: tablesFilter,
-        typeEntitiesFilter
-      })
-    });
-  },
 
   exportDataById: async (datasetId, fileType) => {
     return await HTTPRequester.download({

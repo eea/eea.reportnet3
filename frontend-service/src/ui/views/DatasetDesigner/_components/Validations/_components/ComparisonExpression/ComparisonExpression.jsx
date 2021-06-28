@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -53,6 +53,7 @@ const ComparisonExpression = ({
   const [tableFields, setTableFields] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
+  const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages.selectField);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
@@ -65,8 +66,8 @@ const ComparisonExpression = ({
 
   useEffect(() => {
     setValueTypeSelectorOptions([
-      { label: 'field', value: 'field' },
-      { label: 'value', value: 'value' }
+      { label: 'Field', value: 'field' },
+      { label: 'Value', value: 'value' }
     ]);
   }, []);
 
@@ -207,6 +208,15 @@ const ComparisonExpression = ({
       onExpressionsErrors(expressionId, false);
     }
   }, [clickedFields, showRequiredFields]);
+
+  useLayoutEffect(() => {
+    let fieldPlaceholder = resourcesContext.messages.selectField;
+
+    if (secondFieldOptions.length === 0 && expressionValues.valueTypeSelector === 'field') {
+      fieldPlaceholder = resourcesContext.messages.notFieldToSelect;
+    }
+    setValueFieldPlaceholder(fieldPlaceholder);
+  }, [expressionValues.operatorType, expressionValues.valueTypeSelector]);
 
   const printRequiredFieldError = field => {
     let conditions = false;
@@ -350,7 +360,7 @@ const ComparisonExpression = ({
           onChange={e => onUpdateExpressionField('field2', e.value.value)}
           optionLabel="label"
           options={secondFieldOptions}
-          placeholder={resourcesContext.messages.selectField}
+          placeholder={valueFieldPlaceholder}
           value={first(secondFieldOptions.filter(option => option.value === expressionValues.field2))}
         />
       );

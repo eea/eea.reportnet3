@@ -16,11 +16,10 @@ import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
-import { InputSwitch } from 'ui/views/_components/InputSwitch';
 import { LevelError } from 'ui/views/_components/LevelError';
-import ReactTooltip from 'react-tooltip';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import ReactTooltip from 'react-tooltip';
 
 import { DatasetService } from 'core/services/Dataset';
 import { ValidationService } from 'core/services/Validation';
@@ -40,6 +39,7 @@ const ValidationViewer = memo(
     onSelectValidation,
     reporting = false,
     schemaTables,
+    switchToTabularData = () => {},
     tables,
     visible
   }) => {
@@ -58,7 +58,6 @@ const ValidationViewer = memo(
     const [filtered, setFiltered] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
-    const [grouped, setGrouped] = useState(true);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
@@ -166,19 +165,18 @@ const ValidationViewer = memo(
       columnsArr.push(
         <Column className={styles.invisibleHeader} field="ruleId" header={resources.messages['ruleId']} key="ruleId" />
       );
-      if (grouped) {
-        columnsArr.push(
-          <Column
-            field="numberOfRecords"
-            header={resources.messages['numberOfRecords']}
-            key="numberOfRecords"
-            sortable={true}
-          />
-        );
-      }
+
+      columnsArr.push(
+        <Column
+          field="numberOfRecords"
+          header={resources.messages['numberOfRecords']}
+          key="numberOfRecords"
+          sortable={true}
+        />
+      );
 
       setColumns(columnsArr);
-    }, [grouped, validationContext.rulesDescription]);
+    }, [validationContext.rulesDescription]);
 
     useEffect(() => {
       if (visible) {
@@ -200,13 +198,11 @@ const ValidationViewer = memo(
           fetchData('', sortOrder, 0, numberRows, [], [], [], []);
         }
       }
-    }, [visible, grouped]);
+    }, [visible]);
 
     useEffect(() => {
-      if (grouped && isEmpty(validationContext.rulesDescription)) {
-        onLoadRulesDescription();
-      }
-    }, [grouped]);
+      onLoadRulesDescription();
+    }, []);
 
     const addTableSchemaId = tableErrors => {
       tableErrors.forEach(tableError => {
@@ -248,38 +244,34 @@ const ValidationViewer = memo(
     );
 
     const ruleCodeTemplate = recordData => {
-      if (!grouped) {
-        return recordData?.shortCode;
-      } else {
-        return (
-          <div className={styles.ruleCodeTemplateWrapper}>
-            <span>{recordData.shortCode}</span>
-            <span data-for={`infoCircleButton_${recordData.shortCode}`} data-tip>
-              <Button
-                className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                icon="infoCircle"
-              />
-            </span>
-            <ReactTooltip
-              effect="solid"
-              getContent={() =>
-                ReactDOMServer.renderToStaticMarkup(
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start'
-                    }}>
-                    {getTooltipMessage(recordData)}
-                  </div>
-                )
-              }
-              html={true}
-              id={`infoCircleButton_${recordData.shortCode}`}
-              place="top"></ReactTooltip>
-          </div>
-        );
-      }
+      return (
+        <div className={styles.ruleCodeTemplateWrapper}>
+          <span>{recordData.shortCode}</span>
+          <span data-for={`infoCircleButton_${recordData.shortCode}`} data-tip>
+            <Button
+              className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
+              icon="infoCircle"
+            />
+          </span>
+          <ReactTooltip
+            effect="solid"
+            getContent={() =>
+              ReactDOMServer.renderToStaticMarkup(
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start'
+                  }}>
+                  {getTooltipMessage(recordData)}
+                </div>
+              )
+            }
+            html={true}
+            id={`infoCircleButton_${recordData.shortCode}`}
+            place="top"></ReactTooltip>
+        </div>
+      );
     };
     const onChangePage = event => {
       const isChangedPage = true;
@@ -315,41 +307,26 @@ const ValidationViewer = memo(
 
       let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
 
-      if (grouped) {
-        const { data } = await DatasetService.groupedErrorsById(
-          datasetId,
-          pageNums,
-          numberRows,
-          sortField,
-          sortOrder,
-          fieldValueFilter,
-          levelErrorsFilter,
-          typeEntitiesFilter,
-          tablesFilter
-        );
-        datasetErrors = data;
-        addTableSchemaId(datasetErrors.errors);
-        validationDispatch({
-          type: 'SET_TOTAL_GROUPED_ERRORS',
-          payload: {
-            totalErrors: datasetErrors.totalErrors,
-            totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
-          }
-        });
-      } else {
-        const { data } = await DatasetService.errorsById(
-          datasetId,
-          pageNums,
-          numberRows,
-          sortField,
-          sortOrder,
-          fieldValueFilter,
-          levelErrorsFilter,
-          typeEntitiesFilter,
-          tablesFilter
-        );
-        datasetErrors = data;
-      }
+      const { data } = await DatasetService.groupedErrorsById(
+        datasetId,
+        pageNums,
+        numberRows,
+        sortField,
+        sortOrder,
+        fieldValueFilter,
+        levelErrorsFilter,
+        typeEntitiesFilter,
+        tablesFilter
+      );
+      datasetErrors = data;
+      addTableSchemaId(datasetErrors.errors);
+      validationDispatch({
+        type: 'SET_TOTAL_GROUPED_ERRORS',
+        payload: {
+          totalErrors: datasetErrors.totalErrors,
+          totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
+        }
+      });
 
       validationDispatch({
         type: 'SET_TOTALS_ERRORS',
@@ -451,18 +428,6 @@ const ValidationViewer = memo(
       }
     };
 
-    const onLoadErrorPosition = async (objectId, datasetId, entityType) => {
-      setIsLoading(true);
-      try {
-        const errorPosition = await DatasetService.errorPositionByObjectId(objectId, datasetId, entityType);
-        return errorPosition.data;
-      } catch (error) {
-        console.error('error', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     const onLoadRulesDescription = async () => {
       const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
       validationContext.onSetRulesDescription(
@@ -516,54 +481,20 @@ const ValidationViewer = memo(
     };
 
     const onRowSelect = async event => {
-      if (!grouped) {
-        switch (event.data.entityType) {
-          case 'FIELD':
-          case 'RECORD':
-            const datasetError = await onLoadErrorPosition(event.data.objectId, datasetId, event.data.entityType);
-            onSelectValidation(event.data.tableSchemaId, datasetError.position, datasetError.recordId, '', false);
-            break;
+      switchToTabularData();
+      switch (event.data.entityType) {
+        case 'FIELD':
+        case 'RECORD':
+          onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+          break;
+        case 'TABLE':
+          if (event.data.shortCode.substring(0, 2) === 'TU' && event.data.message.startsWith('Uniqueness')) {
+            onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+          }
+          break;
 
-          case 'TABLE':
-            onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
-            break;
-
-          default:
-            break;
-        }
-      } else {
-        switch (event.data.entityType) {
-          case 'FIELD':
-          case 'RECORD':
-            onSelectValidation(
-              event.data.tableSchemaId,
-              -1,
-              -1,
-              event.data.ruleId,
-              true,
-              event.data.message,
-              event.data.levelError
-            );
-            break;
-          case 'TABLE':
-            if (event.data.shortCode.substring(0, 2) === 'TU' && event.data.message.startsWith('Uniqueness')) {
-              onSelectValidation(
-                event.data.tableSchemaId,
-                -1,
-                -1,
-                event.data.ruleId,
-                true,
-                event.data.message,
-                event.data.levelError
-              );
-            } else {
-              onSelectValidation(event.data.tableSchemaId, -1, -1, '', false);
-            }
-            break;
-
-          default:
-            break;
-        }
+        default:
+          break;
       }
     };
 
@@ -573,9 +504,9 @@ const ValidationViewer = memo(
           ? `${resources.messages['filtered']}: ${totalFilteredRecords} | `
           : ''}
         {resources.messages['totalRecords']} {totalRecords}{' '}
-        {`${resources.messages['records'].toLowerCase()}${
-          grouped ? ` (${resources.messages['totalErrors'].toLowerCase()}${totalErrors})` : ''
-        }`}
+        {`${resources.messages['records'].toLowerCase()}${` (${resources.messages[
+          'totalErrors'
+        ].toLowerCase()}${totalErrors})`}`}
         {filtered && totalRecords === totalFilteredRecords ? ` (${resources.messages['filtered'].toLowerCase()})` : ''}
       </Fragment>
     );
@@ -602,23 +533,18 @@ const ValidationViewer = memo(
       }
     ];
 
-    const refreshData = () => {
-      onLoadErrors(
-        firstRow,
-        numberRows,
-        sortField,
-        sortOrder,
-        fieldValueFilter,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        tablesFilter
-      );
-    };
-
     if (isLoading) {
       return (
         <div className={styles.spinner}>
           <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
+    }
+
+    if (isEmpty(fetchedData) && !filtered) {
+      return (
+        <div className={styles.emptyValidationsWrapper}>
+          <h3>{resources.messages['emptyValidations']}</h3>
         </div>
       );
     }
@@ -638,30 +564,6 @@ const ValidationViewer = memo(
               validations
               validationsAllTypesFilters={validationsAllTypesFilters}
             />
-
-            <div className="p-toolbar-group-right">
-              <div className={styles.switchDivInput}>
-                <div className={styles.switchDiv}>
-                  <span className={styles.switchTextInput}>{resources.messages['ungrouped']}</span>
-                  <InputSwitch
-                    checked={grouped}
-                    onChange={e => setGrouped(e.value)}
-                    tooltip={resources.messages['toggleGroup']}
-                    tooltipOptions={{ position: 'bottom' }}
-                  />
-                  <span className={styles.switchTextInput}>{resources.messages['grouped']}</span>
-                  <Button
-                    className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
-                      isLoading ? 'p-button-animated-spin' : ''
-                    }`}
-                    disabled={false}
-                    icon={'refresh'}
-                    label={resources.messages['refresh']}
-                    onClick={refreshData}
-                  />
-                </div>
-              </div>
-            </div>
           </Toolbar>
         )}
         {!isEmpty(fetchedData) ? (
@@ -672,7 +574,7 @@ const ValidationViewer = memo(
             lazy={true}
             loading={isLoading}
             onPage={onChangePage}
-            onRowSelect={isWebformView ? () => {} : onRowSelect}
+            onRowSelect={onRowSelect}
             onSort={onSort}
             paginator={true}
             paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
@@ -689,7 +591,9 @@ const ValidationViewer = memo(
             {columns}
           </DataTable>
         ) : (
-          <div className={styles.emptyFilteredData}>{resources.messages['noValidationsWithSelectedParameters']}</div>
+          <div className={styles.emptyFilteredData}>
+            <h3>{resources.messages['noValidationsWithSelectedParameters']}</h3>
+          </div>
         )}
       </div>
     );
