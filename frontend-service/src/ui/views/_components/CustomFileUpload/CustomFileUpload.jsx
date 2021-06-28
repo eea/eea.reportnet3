@@ -237,7 +237,7 @@ export const CustomFileUpload = ({
     let nUrl = url;
 
     if (replaceCheck) {
-      nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
+      nUrl += nUrl.lastIndexOf('?') !== -1 ? '&' : '?';
       nUrl += 'replace=' + state.replace;
     }
 
