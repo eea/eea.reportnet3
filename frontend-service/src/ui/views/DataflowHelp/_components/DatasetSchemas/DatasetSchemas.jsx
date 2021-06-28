@@ -27,6 +27,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [expandAll, setExpandAll] = useState(true);
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
@@ -319,6 +320,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         {datasetsSchemas.map((designDataset, i) => (
           <DatasetSchema
             designDataset={designDataset}
+            expandAll={expandAll}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
             index={i}
             isCustodian={isCustodian}
@@ -338,17 +340,13 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     return (
       isCustodian && (
         <Toolbar className={styles.datasetSchemasToolbar}>
-          <div className="p-toolbar-group-right">
-            {/* <Button
+          <div className="p-toolbar-group-left">
+            <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              icon={collapseAll ? 'angleDown' : 'ang'}
-              label={resources.messages['refresh']}
-              onClick={async () => {
-                setIsLoading(true);
-                await onLoadDatasetsSchemas();
-                setIsLoading(false);
-              }}
-            /> */}
+              icon={expandAll ? 'angleRight' : 'angleDown'}
+              label={expandAll ? resources.messages['collapseAll'] : resources.messages['expandAll']}
+              onClick={() => setExpandAll(!expandAll)}
+            />
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                 isLoading ? 'p-button-animated-spin' : ''

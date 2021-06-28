@@ -16,12 +16,14 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 const DatasetSchema = ({
   designDataset,
   extensionsOperationsList = [],
+  expandAll,
   index,
   onGetReferencedFieldName,
   uniqueList = [],
   validationList
 }) => {
   const resources = useContext(ResourcesContext);
+
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       const parsedDesignDataset = parseDesignDataset(
@@ -121,10 +123,11 @@ const DatasetSchema = ({
           <TreeView
             columnOptions={columnOptions}
             excludeBottomBorder={false}
+            expandAll={expandAll}
             key={index}
             property={parsedDesignDataset}
-            propertyName={''}
-            rootProperty={''}
+            propertyName=""
+            rootProperty=""
           />
         </div>
       );

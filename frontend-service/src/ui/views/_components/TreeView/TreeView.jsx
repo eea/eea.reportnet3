@@ -22,7 +22,7 @@ import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
-const TreeView = ({ className = '', columnOptions = {}, property, propertyName }) => {
+const TreeView = ({ className = '', columnOptions = {}, expandAll = true, property, propertyName }) => {
   const dataTableRef = useRef();
   const initialTreeViewState = {
     filters: {
@@ -33,6 +33,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
     },
     options: {}
   };
+
   const [treeViewState, dispatchTreeView] = useReducer(treeViewReducer, initialTreeViewState);
 
   const onFilterChange = (event, field) => {
@@ -258,7 +259,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
           </Fragment>
         ) : (
           <TreeViewExpandableItem
-            expanded={true}
+            expanded={expandAll}
             items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}>
             {!isUndefined(columnOptions[propertyName]) &&
             !isUndefined(columnOptions[propertyName]['groupable']) &&
@@ -278,6 +279,7 @@ const TreeView = ({ className = '', columnOptions = {}, property, propertyName }
                     }
                     columnOptions={columnOptions}
                     excludeBottomBorder={index === length - 1}
+                    expandAll={expandAll}
                     key={uuid.v4()}
                     property={proper}
                     propertyName={Object.getOwnPropertyNames(property)[index]}
