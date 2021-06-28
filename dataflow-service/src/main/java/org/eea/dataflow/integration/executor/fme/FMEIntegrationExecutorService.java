@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.dataflow.integration.executor.fme;
 
@@ -30,6 +30,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -142,7 +143,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
     if (IntegrationOperationTypeEnum.EXPORT.equals(integrationOperationTypeEnum)) {
       String extension = integration.getInternalParameters().get(IntegrationParams.FILE_EXTENSION);
-      extension = null != extension ? extension.toLowerCase() : "xlsx";
+      extension = null != extension ? extension.toLowerCase() : FileTypeEnum.XLSX.getValue();
       fileName = LocalDateTime.now().toString("yyyyMMddhhmmss") + "." + extension;
     }
 

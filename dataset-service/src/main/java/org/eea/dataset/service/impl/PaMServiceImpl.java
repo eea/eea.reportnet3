@@ -517,7 +517,7 @@ public class PaMServiceImpl implements PaMService {
       throws EEAException {
     Map<String, String> schemaIds = new HashMap<>();
     // GET ID'S tables
-    DataSetSchemaVO schema = fileCommonUtils.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchemaVO schema = fileCommonUtils.getDataSetSchemaVO(dataflowId, datasetId);
     String tablePamsId = fileCommonUtils.getIdTableSchema(PaMConstants.PAMS, schema);
     String table1Id = fileCommonUtils.getIdTableSchema(PaMConstants.TABLE_1, schema);
     String entitiesId = fileCommonUtils.getIdTableSchema(PaMConstants.ENTITIES, schema);
