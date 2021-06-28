@@ -1816,100 +1816,6 @@ public class DatasetServiceTest {
     Mockito.verify(schemasRepository, times(1)).findByIdDataSetSchema(Mockito.any());
   }
 
-  /**
-   * Etl export dataset dataset schema id exception test.
-   *
-   * @throws Exception the exception
-   */
-  // @Test(expected = EEAException.class)
-  // public void etlExportDatasetDatasetSchemaIdExceptionTest() throws EEAException {
-  // Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any())).thenReturn(null);
-  // try {
-  // datasetService.etlExportDataset(1L);
-  // } catch (EEAException e) {
-  // assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
-  // throw e;
-  // }
-  // }
-
-  /**
-   * Etl export dataset dataset schema exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  // @Test(expected = EEAException.class)
-  // public void etlExportDatasetDatasetSchemaExceptionTest() throws EEAException {
-  //
-  // Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
-  // .thenReturn("5cf0e9b3b793310e9ceca190");
-  // Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-  // try {
-  // datasetService.etlExportDataset(1L);
-  // } catch (EEAException e) {
-  // assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND,
-  // new ObjectId("5cf0e9b3b793310e9ceca190")), e.getMessage());
-  // throw e;
-  // }
-  // }
-
-  /**
-   * Etl export dataset test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  // @Test
-  // public void etlExportDatasetTest() throws EEAException {
-  //
-  // DataSetSchema datasetSchema = new DataSetSchema();
-  // List<TableSchema> tableSchemas = new ArrayList<>();
-  // TableSchema tableSchema = new TableSchema();
-  // RecordSchema recordSchema = new RecordSchema();
-  // List<FieldSchema> fieldSchemas = new ArrayList<>();
-  // FieldSchema fieldSchema = new FieldSchema();
-  // List<RecordValue> recordValues = new ArrayList<>();
-  // RecordValue recordValue = new RecordValue();
-  // List<FieldValue> fieldValues = new ArrayList<>();
-  // FieldValue fieldValue = new FieldValue();
-  // datasetSchema.setTableSchemas(tableSchemas);
-  // tableSchemas.add(tableSchema);
-  // tableSchema.setIdTableSchema(new ObjectId());
-  // tableSchema.setNameTableSchema("nameTableSchema");
-  // tableSchema.setRecordSchema(recordSchema);
-  // recordSchema.setFieldSchema(fieldSchemas);
-  // fieldSchemas.add(fieldSchema);
-  // fieldSchema.setHeaderName("headerName");
-  // fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-  // recordValues.add(recordValue);
-  // recordValue.setFields(fieldValues);
-  // fieldValues.add(fieldValue);
-  // fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
-  // fieldValue.setValue("value");
-  //
-  // ETLDatasetVO etlDatasetVO = new ETLDatasetVO();
-  // List<ETLTableVO> etlTableVOs = new ArrayList<>();
-  // ETLTableVO etlTableVO = new ETLTableVO();
-  // List<ETLRecordVO> etlRecordVOs = new ArrayList<>();
-  // ETLRecordVO etlRecordVO = new ETLRecordVO();
-  // List<ETLFieldVO> etlFieldVOs = new ArrayList<>();
-  // ETLFieldVO etlFieldVO = new ETLFieldVO();
-  // etlDatasetVO.setTables(etlTableVOs);
-  // etlTableVOs.add(etlTableVO);
-  // etlTableVO.setTableName("nameTableSchema");
-  // etlTableVO.setRecords(etlRecordVOs);
-  // etlRecordVOs.add(etlRecordVO);
-  // etlRecordVO.setFields(etlFieldVOs);
-  // etlFieldVOs.add(etlFieldVO);
-  // etlFieldVO.setFieldName("headerName");
-  // etlFieldVO.setValue("value");
-  //
-  // Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
-  // .thenReturn("5cf0e9b3b793310e9ceca190");
-  // Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
-  // Mockito.when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
-  // .thenReturn(recordValues);
-  //
-  // Assert.assertEquals(etlDatasetVO, datasetService.etlExportDataset(1L));
-  // }
 
   /**
    * Update records null test.
@@ -2754,7 +2660,58 @@ public class DatasetServiceTest {
     Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
   }
 
+  @Test
+  public void initializeDatasetFixedRecordsSucessTest() throws EEAException {
+    DesignDataset desingDataset = new DesignDataset();
+    desingDataset.setId(2L);
+    desingDataset.setDatasetSchema("5cf0e9b3b793310e9ceca190");
+    DataSetSchema schema = new DataSetSchema();
+    schema.setIdDataSetSchema(new ObjectId());
+    TableSchema desingTableSchema = new TableSchema();
+    desingTableSchema.setToPrefill(Boolean.TRUE);
+    desingTableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca191"));
+    desingTableSchema.setFixedNumber(true);
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId("5cf0e9b3b793310e9ceca192"));
+    List<FieldSchema> fieldSchemas = new ArrayList<>();
+    FieldSchema fieldSchema = new FieldSchema();
+    fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca193"));
+    fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
+    fieldSchemas.add(fieldSchema);
+    recordSchema.setFieldSchema(fieldSchemas);
+    desingTableSchema.setRecordSchema(recordSchema);
+    List<TableSchema> desingTableSchemas = new ArrayList<>();
+    desingTableSchemas.add(desingTableSchema);
+    schema.setTableSchemas(desingTableSchemas);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    List<RecordValue> recordDesignValues = new ArrayList<>();
+    RecordValue record = new RecordValue();
+    TableValue table = new TableValue();
+    table.setId(1L);
+    record.setTableValue(table);
+    record.setIdRecordSchema(recordSchema.getIdRecordSchema().toString());
+    recordDesignValues.add(record);
+    when(tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(desingDataset));
+    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(recordDesignValues);
+    List<FieldValue> fieldValues = new ArrayList<>();
+    FieldValue field = new FieldValue();
+    field.setType(DataType.ATTACHMENT);
+    field.setId("0A07FD45F1CD7965A2B0F13E57948A13");
+    field.setRecord(record);
+    record.setFields(fieldValues);
+    fieldValues.add(field);
+    AttachmentValue attachment = new AttachmentValue();
+    attachment.setFieldValue(field);
+    when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
 
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
+  }
 
   /**
    * Initialize dataset reference test.

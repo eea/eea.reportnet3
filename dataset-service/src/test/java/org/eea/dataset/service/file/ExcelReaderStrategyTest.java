@@ -1,9 +1,12 @@
 package org.eea.dataset.service.file;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -17,7 +20,9 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -117,6 +122,7 @@ public class ExcelReaderStrategyTest {
     table.setRecordSchema(record);
     tables.add(table);
     dataSet.setTableSchemas(tables);
+    dataSet.setIdDataSetSchema(new ObjectId());
 
     fileIn = new ByteArrayInputStream(outStream.toByteArray());
   }
@@ -128,18 +134,24 @@ public class ExcelReaderStrategyTest {
    * @throws InvalidFormatException the invalid format exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
+   * @throws SQLException the SQL exception
    */
   @Test
-  public void testParseFile()
-      throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
+  public void parseFileTest() throws EncryptedDocumentException, InvalidFormatException,
+      IOException, EEAException, SQLException {
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    fschema.setType(DataType.DATE);
+    new DataSetSchemaVO();
 
-    DataSetSchemaVO dataset = new DataSetSchemaVO();
-
-    Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any())).thenReturn(dataset);
-    excelReaderStrategy.parseFile(fileIn, 1L, 1L, "5d0c822ae1ccd34cfcd97e20", null, null, false,
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
+    excelReaderStrategy.parseFile(fileIn, 1L, 1L, "5d0c822ae1ccd34cfcd97e20", 1L, null, false,
         dataSet);
-    Mockito.verify(fileCommon, times(1)).getIdTableSchema(Mockito.any(),
-        (DataSetSchema) Mockito.any());
+    Mockito.verify(fileCommon, times(1)).persistImportedDataset(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -149,47 +161,24 @@ public class ExcelReaderStrategyTest {
    * @throws InvalidFormatException the invalid format exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
+   * @throws SQLException the SQL exception
    */
-  // @Test
-  public void testParseFileNotNull()
-      throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
-    DataSetSchemaVO dataset = new DataSetSchemaVO();
-    Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any())).thenReturn(dataset);
-    Mockito.when(
-        fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(), (DataSetSchema) Mockito.any()))
-        .thenReturn(new FieldSchema());
-    excelReaderStrategy.parseFile(fileIn, 1L, 1L, "", null, null, false, dataSet);
-    Mockito.verify(fileCommon, times(1)).getIdTableSchema(Mockito.any(),
-        (DataSetSchema) Mockito.any());
+  @Test
+  public void parseFileNullTest() throws EncryptedDocumentException, InvalidFormatException,
+      IOException, EEAException, SQLException {
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    new DataSetSchemaVO();
+
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
+    excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, 1L, null, false, dataSet);
+    Mockito.verify(fileCommon, times(1)).persistImportedDataset(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
-  /**
-   * Test parse file 2.
-   *
-   * @throws EncryptedDocumentException the encrypted document exception
-   * @throws InvalidFormatException the invalid format exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException the EEA exception
-   */
-  // @Test
-  public void testParseFile2()
-      throws EncryptedDocumentException, InvalidFormatException, IOException, EEAException {
-    excelReaderStrategy.parseFile(fileIn, 1L, 1L, "", null, null, false, dataSet);
-    Mockito.verify(fileCommon, times(1)).getIdTableSchema(Mockito.any(),
-        (DataSetSchema) Mockito.any());
-  }
-
-  /**
-   * Test parse all pages.
-   *
-   * @throws EEAException the EEA exception
-   */
-  // @Test
-  public void testParseAllPages() throws EEAException {
-    excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, null, null, false, dataSet);
-    Mockito.verify(fileCommon, times(1)).getIdTableSchema(Mockito.any(),
-        (DataSetSchema) Mockito.any());
-  }
 
   /**
    * Test parse file exception.
@@ -198,7 +187,7 @@ public class ExcelReaderStrategyTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = InvalidFileException.class)
-  public void testParseFileException() throws IOException, EEAException {
+  public void parseFileExceptionTest() throws IOException, EEAException {
     XSSFWorkbook workbook = new XSSFWorkbook();
 
     ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -213,6 +202,28 @@ public class ExcelReaderStrategyTest {
         dataSet);
     Mockito.verify(fileCommon, times(1)).getIdTableSchema(Mockito.any(),
         (DataSetSchema) Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void parseFileException2Test() throws EncryptedDocumentException, InvalidFormatException,
+      IOException, EEAException, SQLException {
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    new DataSetSchemaVO();
+
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
+    doThrow(new EEAException("error persisting excel file")).when(fileCommon)
+        .persistImportedDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+            Mockito.any(), Mockito.any());
+    try {
+      excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, 1L, null, false, dataSet);
+    } catch (EEAException e) {
+      Assert.assertEquals("not equals", "error persisting excel file", e.getMessage());
+      throw e;
+    }
   }
 
 }
