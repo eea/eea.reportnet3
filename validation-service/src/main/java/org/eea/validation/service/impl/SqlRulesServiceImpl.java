@@ -48,7 +48,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-//import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+// AÑADIDO POR MI
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 /**
  * The Class SqlRulesServiceImpl.
  */
@@ -100,12 +103,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
 
+  @Autowired
+  private DataFlowControllerZuul dataFlowController;
+  
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
-  
-  //@Autowired
-  //private DataSetControllerZuul datasetController;
 
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
@@ -331,7 +334,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
-    	if(checkDatasetFromSameDataflow(datasetId, query)) {
+    	if(checkDatasetFromSameDataflow(datasetId, query) || checkDatasetFromReferenceDataflow(query)) {
     		try {
     			checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
     		} catch (EEAInvalidSQLException e) {
@@ -828,6 +831,30 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   		}
   	}
   	return isSQLCorrect;
+  }
+  
+  /**
+   * Check if the query datasets belong to any reference dataflow
+   * @param query
+   * @return the boolean
+   */
+  private boolean checkDatasetFromReferenceDataflow(String query) {
+	  boolean isSQLCorrect = true;
+	  
+	  List<String> listOfIds = new ArrayList<String>();
+	  listOfIds = getListOfDatasetsOnQuery(query);
+	  List<DataFlowVO> referencesDataflow = dataFlowController.findReferenceDataflows();
+	  for(DataFlowVO referenceDataflow : referencesDataflow) {
+		  List<ReferenceDatasetVO> referenceDatasets = referenceDataflow.getReferenceDatasets();
+		  for(ReferenceDatasetVO dataset : referenceDatasets) {
+			  for(String id : listOfIds) {
+				  if(Long.parseLong(id) != dataset.getId()) {
+					  isSQLCorrect = false;
+				  }
+			  }
+		  }
+	  } 
+	  return isSQLCorrect;
   }
   
 }
