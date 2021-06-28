@@ -19,6 +19,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -99,13 +100,13 @@ public class ExcelWriterStrategy implements WriterStrategy {
   public byte[] writeFile(Long dataflowId, Long datasetId, String tableSchemaId,
       boolean includeCountryCode, boolean includeValidations) throws EEAException {
 
-    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchemaVO dataset = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
-    TableSchemaVO table = fileCommon.findTableSchema(tableSchemaId, dataset);
+    TableSchemaVO table = fileCommon.findTableSchemaVO(tableSchemaId, dataset);
 
     // If the given idTableSchema exists, replace all tables with it
     if (null != table) {
@@ -150,7 +151,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     List<byte[]> byteList = new ArrayList<>();
 
-    DataSetSchemaVO dataset = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchemaVO dataset = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
@@ -187,15 +188,18 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private Workbook createWorkbook() throws IOException {
-
-    switch (mimeType) {
-      case "xls":
-        return new HSSFWorkbook();
-      case "xlsx":
-      case "validations":
-        return new XSSFWorkbook();
-      default:
-        throw new IOException("Unknow MIME type: " + mimeType);
+    try {
+      switch (FileTypeEnum.getEnum(mimeType)) {
+        case XLS:
+          return new HSSFWorkbook();
+        case XLSX:
+        case VALIDATIONS:
+          return new XSSFWorkbook();
+        default:
+          throw new IOException("Unknow MIME type: " + mimeType);
+      }
+    } catch (NullPointerException e) {
+      throw new IOException("Unknow MIME type: " + mimeType);
     }
   }
 

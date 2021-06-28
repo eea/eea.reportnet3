@@ -36,6 +36,7 @@ import { Webforms } from 'ui/views/Webforms';
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
 import { IntegrationService } from 'core/services/Integration';
+import { ValidationService } from 'core/services/Validation';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -77,6 +78,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     selectedRuleId: '',
     selectedRuleLevelError: '',
     selectedRuleMessage: '',
+    selectedTableSchemaId: null,
     tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
@@ -92,6 +94,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
+  const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
@@ -113,6 +116,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isTableView, setIsTableView] = useState(true);
   const [webformData, setWebformData] = useState(null);
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
+  const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -197,6 +201,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
       setIsLoadingFile(false);
+    }
+
+    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
+      setIsDownloadingValidations(false);
     }
   }, [notificationContext.hidden]);
 
@@ -508,6 +516,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     false
   );
 
+  useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
+    setIsDownloadingValidations,
+    false
+  );
+
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
@@ -705,42 +719,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       selectedRuleId: ''
     });
 
-  const onSelectValidation = (
-    tableSchemaId,
-    posIdRecord,
-    selectedRecordErrorId,
-    selectedRuleId,
-    grouped = true,
-    selectedRuleMessage = '',
-    selectedRuleLevelError = ''
-  ) => {
-    if (grouped) {
-      setDataViewerOptions({
-        ...dataViewerOptions,
-        isGroupedValidationDeleted: false,
-        isGroupedValidationSelected: true,
-        recordPositionId: -1,
-        selectedRecordErrorId: -1,
-        selectedRuleId,
-        selectedRuleLevelError,
-        selectedRuleMessage,
-        tableSchemaId
-      });
-    } else {
-      setDataViewerOptions({
-        ...dataViewerOptions,
-        activeIndex: tableSchemaId,
-        isGroupedValidationDeleted: false,
-        isGroupedValidationSelected: false,
-        isValidationSelected: true,
-        recordPositionId: posIdRecord,
-        selectedRecordErrorId,
-        selectedRuleId: '',
-        selectedRuleLevelError: '',
-        selectedRuleMessage: '',
-        tableSchemaId
-      });
-    }
+  const onSelectValidation = (tableSchemaId, selectedRuleId, selectedRuleMessage = '', selectedRuleLevelError = '') => {
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      isGroupedValidationDeleted: false,
+      isGroupedValidationSelected: true,
+      recordPositionId: -1,
+      selectedRecordErrorId: -1,
+      selectedRuleId,
+      selectedRuleLevelError,
+      selectedRuleMessage,
+      selectedTableSchemaId: tableSchemaId,
+      tableSchemaId
+    });
 
     onSetVisible(setValidationsVisible, false);
   };
@@ -786,6 +777,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onUpload = async () => {
     setIsImportDatasetDialogVisible(false);
+    setImportSelectedIntegrationId(null);
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
@@ -835,20 +827,48 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <TabularSwitch
             className={styles.tabularSwitch}
             elements={[resources.messages['tabularDataView'], resources.messages['webform']]}
+            isValidationsTabularView={isValidationsTabularView}
             onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
+            setIsValidationsTabularView={setIsValidationsTabularView}
             value={resources.messages['webform']}
           />
         </div>
       </div>
     );
 
+  const switchToTabularData = () => {
+    setIsTableView(true);
+    setIsValidationsTabularView(true);
+  };
+
+  const onDownloadValidations = async () => {
+    setIsDownloadingValidations(true);
+    notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
+
+    try {
+      await ValidationService.generateFile(datasetId);
+    } catch (error) {
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
+
+      setIsDownloadingValidations(false);
+    }
+  };
+
   const renderValidationsFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setValidationsVisible(false)}
-    />
+    <div className={styles.validationsFooter}>
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={isDownloadingValidations ? 'spinnerAnimate' : 'export'}
+        label={resources.messages['downloadValidationsButtonLabel']}
+        onClick={onDownloadValidations}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => setValidationsVisible(false)}
+      />
+    </div>
   );
 
   if (isLoading) return layout(<Spinner />);
@@ -930,7 +950,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
                 !datasetHasErrors ? null : 'p-button-animated-blink'
-              }`}              
+              }`}
               icon={'warning'}
               iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}
@@ -1009,6 +1029,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           selectedRuleId={dataViewerOptions.selectedRuleId}
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+          selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
           tableSchemaColumns={tableSchemaColumns}
           tableSchemaId={dataViewerOptions.tableSchemaId}
           tables={tableSchema}
@@ -1035,7 +1056,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           footer={renderValidationsFooter}
           header={resources.messages['titleValidations']}
           onHide={() => onSetVisible(setValidationsVisible, false)}
-          style={{ width: '80%' }}
+          style={{ width: '90%' }}
           visible={validationsVisible}>
           <ValidationViewer
             datasetId={datasetId}
@@ -1047,6 +1068,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             onSelectValidation={onSelectValidation}
             reporting={true}
             schemaTables={schemaTables}
+            switchToTabularData={switchToTabularData}
             tables={datasetSchemaAllTables}
             visible={validationsVisible}
           />
@@ -1094,7 +1116,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           url={`${window.env.REACT_APP_BACKEND}${
             isNil(importSelectedIntegrationId)
               ? getUrl(DatasetConfig.importFileDataset, {
-                  datasetId: datasetId
+                  datasetId: datasetId,
+                  delimiter: `${config.IMPORT_FILE_DELIMITER}`
                 })
               : getUrl(DatasetConfig.importFileDatasetExternal, {
                   datasetId: datasetId,

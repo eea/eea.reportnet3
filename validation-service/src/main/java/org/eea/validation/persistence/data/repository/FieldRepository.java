@@ -2,6 +2,8 @@ package org.eea.validation.persistence.data.repository;
 
 import java.util.List;
 import org.eea.validation.persistence.data.domain.FieldValue;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -47,5 +49,29 @@ public interface FieldRepository
   @Query("SELECT fv from FieldValue fv WHERE  fv.id in (:ids) ")
   List<FieldValue> findByIds(@Param("ids") List<String> ids);
 
+  /**
+   * Count fields dataset.
+   *
+   * @return the integer
+   */
+  @Query(nativeQuery = true, value = "SELECT count(*) from field_value")
+  Integer countFieldsDataset();
+
+  /**
+   * Count empty fields dataset.
+   *
+   * @return the integer
+   */
+  @Query(nativeQuery = true, value = "SELECT count(*) from field_value WHERE value=''")
+  Integer countEmptyFieldsDataset();
+
+  /**
+   * Find empty fields.
+   *
+   * @param pageable the pageable
+   * @return the page
+   */
+  @Query("SELECT fv from FieldValue fv WHERE value='' ")
+  Page<FieldValue> findEmptyFields(Pageable pageable);
 
 }

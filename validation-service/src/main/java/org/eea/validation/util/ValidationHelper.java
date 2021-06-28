@@ -12,10 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -34,6 +36,9 @@ import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
+import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.model.ValidationProcessVO;
 import org.kie.api.KieBase;
@@ -111,6 +116,9 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The rules repository. */
+  @Autowired
+  private RulesRepository rulesRepository;
 
   /**
    * Instantiates a new file loader helper.
@@ -237,6 +245,9 @@ public class ValidationHelper implements DisposableBean {
    */
   public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
     // Initialize process as coordinator
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    RulesSchema rules =
+        rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
     initializeProcess(processId, true, released);
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
@@ -246,12 +257,26 @@ public class ValidationHelper implements DisposableBean {
     LOG.info("Collecting Table Validation tasks");
     releaseTableValidation(datasetId, processId);
     LOG.info("Collecting Record Validation tasks");
-    releaseRecordsValidation(datasetId, processId);
+    if (rules.getRules().stream().anyMatch(rule -> EntityTypeEnum.RECORD.equals(rule.getType()))) {
+      releaseRecordsValidation(datasetId, processId);
+    }
     LOG.info("Collecting Field Validation tasks");
-    releaseFieldsValidation(datasetId, processId);
+
+    releaseFieldsValidation(datasetId, processId, !filterEmptyFields(rules.getRules()));
     startProcess(processId);
   }
 
+
+  /**
+   * Filter empty fields.
+   *
+   * @param rules the rules
+   * @return true, if successful
+   */
+  private boolean filterEmptyFields(List<Rule> rules) {
+    return rules.stream().anyMatch(rule -> !"isBlank(value)".equals(rule.getWhenCondition())
+        && EntityTypeEnum.FIELD.equals(rule.getType()));
+  }
 
   /**
    * Reduce pending tasks for the given processId.
@@ -445,14 +470,16 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    * @param uuId the uu id
+   * @param fullCountFields the full count fields
    */
-  private void releaseFieldsValidation(Long datasetId, String uuId) {
+  private void releaseFieldsValidation(Long datasetId, String uuId, boolean onlyEmptyFields) {
     int i = 0;
     if (fieldBatchSize != 0) {
       for (Integer totalFields =
-          validationService.countFieldsDataset(datasetId); totalFields >= 0; totalFields =
-              totalFields - fieldBatchSize) {
-        releaseFieldValidation(datasetId, uuId, i++);
+          onlyEmptyFields ? validationService.countEmptyFieldsDataset(datasetId)
+              : validationService.countFieldsDataset(datasetId); totalFields >= 0; totalFields =
+                  totalFields - fieldBatchSize) {
+        releaseFieldValidation(datasetId, uuId, i++, onlyEmptyFields);
       }
     }
   }
@@ -546,13 +573,16 @@ public class ValidationHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param processId the uuid
    * @param numPag the numPag
+   * @param onlyEmptyFields the only empty fields
    */
-  private void releaseFieldValidation(final Long datasetId, final String processId, int numPag) {
+  private void releaseFieldValidation(final Long datasetId, final String processId, int numPag,
+      boolean onlyEmptyFields) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put("uuid", processId);
     value.put("numPag", numPag);
     value.put("user", processesMap.get(processId).getRequestingUser());
+    value.put("onlyEmptyFields", onlyEmptyFields);
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
 
 

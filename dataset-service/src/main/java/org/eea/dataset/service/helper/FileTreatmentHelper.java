@@ -9,12 +9,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +29,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
-import org.eea.dataset.mapper.DataSetMapper;
+import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
@@ -41,8 +39,6 @@ import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
-import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
-import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -53,28 +49,26 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
+import org.eea.dataset.service.file.interfaces.IFileParseContext;
+import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
-import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -138,33 +132,13 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IntegrationControllerZuul integrationController;
 
-  /** The record store controller. */
-  @Autowired
-  private RecordStoreControllerZuul recordStoreControllerZuul;
-
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The data set mapper. */
-  @Autowired
-  private DataSetMapper dataSetMapper;
-
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
-
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
-
-  /** The record value id generator. */
-  @Autowired
-  private RecordValueIdGenerator recordValueIdGenerator;
-
-  /** The field value id generator. */
-  @Autowired
-  private FieldValueIdGenerator fieldValueIdGenerator;
 
   /** The record repository. */
   @Autowired
@@ -202,6 +176,10 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The file parser factory. */
+  @Autowired
+  private IFileParserFactory fileParserFactory;
+
   /**
    * Initialize the executor service.
    */
@@ -234,7 +212,12 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
-      boolean replace, Long integrationId) throws EEAException {
+      boolean replace, Long integrationId, String delimiter) throws EEAException {
+
+    if (delimiter != null && delimiter.length() > 1) {
+      LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
+      throw new EEAException("the size of the delimiter cannot be greater than 1");
+    }
 
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
 
@@ -259,7 +242,7 @@ public class FileTreatmentHelper implements DisposableBean {
           SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
-    fileManagement(datasetId, tableSchemaId, schema, file, replace, integrationId);
+    fileManagement(datasetId, tableSchemaId, schema, file, replace, integrationId, delimiter);
   }
 
   /**
@@ -310,7 +293,8 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      MultipartFile multipartFile, boolean replace, Long integrationId) throws EEAException {
+      MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter)
+      throws EEAException {
 
     try (InputStream input = multipartFile.getInputStream()) {
 
@@ -326,59 +310,30 @@ public class FileTreatmentHelper implements DisposableBean {
         throw new EEAException("Folder for dataset " + datasetId + " already exists");
       }
 
-      if ("zip".equalsIgnoreCase(multipartFileMimeType)) {
+      List<File> files = new ArrayList<>();
+      IntegrationVO integrationVO;
+      if (null == integrationId) {
+        integrationVO = null;
+      } else {
+        integrationVO = getIntegrationVO(integrationId);
+      }
+      if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
-
-          /*
-           * TODO. Since ZIP and CSV files are temporally disabled to be imported from FME, we do
-           * not need to look for a matching integration.
-           */
-
-          // IntegrationVO integrationVO = getIntegrationVO(schema, "csv");
-          IntegrationVO integrationVO;
-
-
-          List<File> files = unzipAndStore(folder, saveLocationPath, zip);
-
-          // Queue import tasks for stored files
-          if (!files.isEmpty()) {
-            wipeData(datasetId, null, replace);
-            // IntegrationVO copyIntegrationVO = integrationVOCopyConstructor(integrationVO);
-            if (null == integrationId) {
-              integrationVO = null;
-            } else {
-              // Look for an integration for the given kind of file.
-              // integrationVO = getIntegrationVO(schema, multipartFileMimeType);
-              integrationVO = getIntegrationVO(integrationId);
-            }
-            queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
-                replace);
-          } else {
-            releaseLock(datasetId);
-            throw new EEAException("Empty zip file");
-          }
+          files = unzipAndStore(folder, saveLocationPath, zip);
         }
 
-      } else {
-
-        File file = new File(folder, originalFileName);
-        List<File> files = new ArrayList<>();
-
-        /*
-         * TOOD. Since ZIP and CSV files are temporally disabled to be imported from FME, we do not
-         * need to look for a matching integration.
-         */
-
-        IntegrationVO integrationVO;
-        // if ("csv".equalsIgnoreCase(multipartFileMimeType)) {
-        if (null == integrationId) {
-          integrationVO = null;
+        // Queue import tasks for stored files
+        if (!files.isEmpty()) {
+          wipeData(datasetId, null, replace);
+          queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
+                replace, delimiter,multipartFileMimeType);
         } else {
-          // Look for an integration for the given kind of file.
-          // integrationVO = getIntegrationVO(schema, multipartFileMimeType);
-          integrationVO = getIntegrationVO(integrationId);
+          releaseLock(datasetId);
+          throw new EEAException("Empty zip file");
         }
+      } else {
+        File file = new File(folder, originalFileName);
 
         // Store the file in the persistence volume
         try (FileOutputStream output = new FileOutputStream(file)) {
@@ -390,7 +345,7 @@ public class FileTreatmentHelper implements DisposableBean {
         // Queue import task for the stored file
         wipeData(datasetId, tableSchemaId, replace);
         queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
-            replace);
+            replace, delimiter, multipartFileMimeType);
       }
 
     } catch (FeignException | IOException e) {
@@ -426,8 +381,9 @@ public class FileTreatmentHelper implements DisposableBean {
       String filePath = file.getCanonicalPath();
 
       // Prevent Zip Slip attack or skip if the entry is a directory
-      if ((entryName.split("/").length > 1) || !"csv".equalsIgnoreCase(mimeType)
-          || entry.isDirectory() || !filePath.startsWith(saveLocationPath + File.separator)) {
+      if ((entryName.split("/").length > 1)
+          || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+          || !filePath.startsWith(saveLocationPath + File.separator)) {
         LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
         entry = zip.getNextEntry();
         continue;
@@ -456,19 +412,21 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param originalFileName the original file name
    * @param integrationVO the integration VO
    * @param replace the replace
+   * @param mimeType the mime type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
-      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace)
-      throws IOException, EEAException {
+      List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
+      String delimiter,String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
-      fmeFileProcess(datasetId, files.get(0), integrationVO);
+      fmeFileProcess(datasetId, files.get(0), integrationVO, mimeType);
     } else {
       importExecutorService.submit(() -> {
         try {
-          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace);
+          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
+              delimiter);
         } catch (Exception e) {
           LOG_ERROR.error("RN3-Import: Unexpected error", e);
         }
@@ -482,13 +440,13 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param file the file
    * @param integrationVO the integration VO
-   *
+   * @param mimeType the mime type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    * @throws FeignException the feign exception
    */
-  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO)
-      throws IOException, EEAException {
+  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO,
+      String mimeType) throws IOException, EEAException {
 
     LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
     boolean error = false;
@@ -506,7 +464,8 @@ public class FileTreatmentHelper implements DisposableBean {
       // Remove the lock so FME will not encounter it while calling back importFileData
       if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
           || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
-              .equals(integrationVO.getOperation())) {
+              .equals(integrationVO.getOperation())
+          || "zip".equalsIgnoreCase(mimeType)) {
         Map<String, Object> importFileData = new HashMap<>();
         importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
         importFileData.put(LiteralConstants.DATASETID, datasetId);
@@ -523,6 +482,7 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+
 
     if (error) {
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
@@ -547,7 +507,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param replace the replace
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
-      List<File> files, String originalFileName, boolean replace) {
+      List<File> files, String originalFileName, boolean replace, String delimiter) {
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
     String error = null;
@@ -564,41 +524,11 @@ public class FileTreatmentHelper implements DisposableBean {
 
         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
 
-        DatasetValue dataset = parseFile(inputStream, datasetId, tableSchemaId, fileName);
-
-        if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
-          throw new EEAException("Error processing file " + fileName);
-        }
-
-        // Check if the table with idTableSchema has been populated already
-        Long oldTableId = datasetService.findTableIdByTableSchema(datasetId, tableSchemaId);
-        fillTableId(tableSchemaId, dataset.getTableValues(), oldTableId);
-        LOG.info("RN3-Import - Filled tableId: datasetId={}, fileName={}", datasetId, fileName);
-
-        // Save empty table
-        if (null == oldTableId) {
-          LOG.info("RN3-Import - Saving table: datasetId={}, fileName={}", datasetId, fileName);
-          datasetService.saveTable(datasetId, dataset.getTableValues().get(0));
-          LOG.info("RN3-Import - Table saved: datasetId={}, fileName={}", datasetId, fileName);
-        }
-
-        if (schemaContainsFixedRecords(datasetId, datasetSchema, tableSchemaId)) {
-          if (replace) {
-            ObjectId tableSchemaIdTemp = new ObjectId(tableSchemaId);
-            TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
-                .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
-                .findFirst().orElse(null);
-            if (tableSchema != null) {
-              updateRecordsWithConditions(dataset.getTableValues().get(0).getRecords(), datasetId,
-                  tableSchema);
-            }
-          }
-        } else {
-          storeRecords(datasetId, dataset.getTableValues().get(0).getRecords());
-        }
+        processFile(datasetId, fileName, inputStream, tableSchemaId, replace, datasetSchema,
+            delimiter);
 
         LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
-      } catch (IOException | SQLException | EEAException e) {
+      } catch (IOException | EEAException e) {
         LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
             tableSchemaId, e);
         error = e.getMessage();
@@ -678,71 +608,6 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
-  /**
-   * Integration VO copy constructor.
-   *
-   * @param integrationVO the integration VO
-   *
-   * @return the integration VO
-   */
-  private IntegrationVO integrationVOCopyConstructor(IntegrationVO integrationVO) {
-
-    IntegrationVO rtn = null;
-
-    if (null != integrationVO) {
-      Map<String, String> oldInternalParameters = integrationVO.getInternalParameters();
-      Map<String, String> newInternalParameters = new HashMap<>();
-      for (Map.Entry<String, String> entry : oldInternalParameters.entrySet()) {
-        newInternalParameters.put(entry.getKey(), entry.getValue());
-      }
-
-      rtn = new IntegrationVO();
-      rtn.setId(integrationVO.getId());
-      rtn.setName(integrationVO.getName());
-      rtn.setDescription(integrationVO.getDescription());
-      rtn.setTool(integrationVO.getTool());
-      rtn.setOperation(integrationVO.getOperation());
-      rtn.setInternalParameters(newInternalParameters);
-    }
-
-    return rtn;
-  }
-
-  /**
-   * Gets the integration VO.
-   *
-   * @param datasetSchema the dataset schema
-   * @param mimeType the mime type
-   *
-   * @return the integration VO
-   */
-  private IntegrationVO getIntegrationVO(DataSetSchema datasetSchema, String mimeType) {
-
-    IntegrationVO rtn = null;
-
-    // Create the IntegrationVO used as criteria.
-    String datasetSchemaId = datasetSchema.getIdDataSetSchema().toString();
-    String dataflowId = datasetSchema.getIdDataFlow().toString();
-    Map<String, String> internalParameters = new HashMap<>();
-    internalParameters.put(IntegrationParams.DATASET_SCHEMA_ID, datasetSchemaId);
-    internalParameters.put(IntegrationParams.DATAFLOW_ID, dataflowId);
-    IntegrationVO criteria = new IntegrationVO();
-    criteria.setInternalParameters(internalParameters);
-
-    // Find all integrations matching the criteria.
-    for (IntegrationVO integrationVO : integrationController
-        .findAllIntegrationsByCriteria(criteria)) {
-      if (IntegrationOperationTypeEnum.IMPORT.equals(integrationVO.getOperation())
-          && mimeType.equalsIgnoreCase(
-              integrationVO.getInternalParameters().get(IntegrationParams.FILE_EXTENSION))) {
-        rtn = integrationVO;
-        break;
-      }
-    }
-
-    return rtn;
-  }
-
 
   /**
    * Gets the integration VO.
@@ -788,225 +653,70 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
-   * Schema contains fixed records.
+   * Process file.
    *
    * @param datasetId the dataset id
-   * @param schema the schema
-   * @param tableSchemaId the table schema id
-   * @return true, if successful
-   */
-  private boolean schemaContainsFixedRecords(Long datasetId, DataSetSchema schema,
-      String tableSchemaId) {
-
-    boolean rtn = false;
-
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
-      if (null == tableSchemaId) {
-        for (TableSchema tableSchema : schema.getTableSchemas()) {
-          if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
-            rtn = true;
-            break;
-          }
-        }
-      } else {
-        for (TableSchema tableSchema : schema.getTableSchemas()) {
-          if (tableSchemaId.equals(tableSchema.getIdTableSchema().toString())) {
-            rtn = Boolean.TRUE.equals(tableSchema.getFixedNumber());
-            break;
-          }
-        }
-      }
-    }
-
-    return rtn;
-  }
-
-  /**
-   * Parses the file.
-   *
-   * @param inputStream the input stream
-   * @param datasetId the dataset id
-   * @param tableSchemaId the table schema id
    * @param fileName the file name
-   * @return the dataset value
+   * @param is the is
+   * @param idTableSchema the id table schema
+   * @return the data set VO
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private DatasetValue parseFile(InputStream inputStream, Long datasetId, String tableSchemaId,
-      String fileName) throws EEAException, IOException {
-    DataSetVO datasetVO =
-        datasetService.processFile(datasetId, fileName, inputStream, tableSchemaId);
-    datasetVO.setId(datasetId);
-    DatasetValue dataset = dataSetMapper.classToEntity(datasetVO);
-    LOG.info("RN3-Import DataSetVO mapping completed: datasetId={}, tableSchemaId={}, fileName={}",
-        datasetId, tableSchemaId, fileName);
-    return dataset;
-  }
+  private void processFile(@DatasetId Long datasetId, String fileName, InputStream is,
+      String idTableSchema, boolean replace, DataSetSchema schema, String delimiter)
+      throws EEAException, IOException {
+    // obtains the file type from the extension
+    if (fileName == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NAME);
+    }
+    final String mimeType = datasetService.getMimetype(fileName);
+    // validates file types for the data load
+    validateFileType(mimeType);
 
-  /**
-   * Store records.
-   *
-   * @param datasetId the dataset id
-   * @param recordList the record list
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws SQLException the SQL exception
-   */
-  private void storeRecords(Long datasetId, List<RecordValue> recordList)
-      throws IOException, SQLException {
+    try {
+      // Get the partition for the partiton id
+      final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
 
-    String schema = LiteralConstants.DATASET_PREFIX + datasetId;
-    LOG.info("RN3-Import - Getting connections: datasetId={}", datasetId);
-    ConnectionDataVO connectionDataVO = recordStoreControllerZuul.getConnectionToDataset(schema);
+      // Get the dataFlowId from the metabase
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
 
-    LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
-    try (
-        PostgresBulkImporter recordsImporter = new PostgresBulkImporter(connectionDataVO, schema,
-            "record_value (ID, ID_RECORD_SCHEMA,ID_TABLE,DATASET_PARTITION_ID,DATA_PROVIDER_CODE) ",
-            importPath);
-        PostgresBulkImporter fieldsImporter = new PostgresBulkImporter(connectionDataVO, schema,
-            "field_value (ID, TYPE, VALUE, ID_FIELD_SCHEMA, ID_RECORD, GEOMETRY) ", importPath)) {
+      // create the right file parser for the file type
+      final IFileParseContext context =
+          fileParserFactory.createContext(mimeType, datasetId, delimiter);
 
-      LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
+      context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
+          schema);
 
-      for (RecordValue recordValue : recordList) {
-
-        String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
-        recordsImporter.addTuple(new Object[] {recordId, recordValue.getIdRecordSchema(),
-            recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
-            recordValue.getDataProviderCode()});
-
-        for (FieldValue fieldValue : recordValue.getFields()) {
-          String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
-          fieldsImporter.addTuple(new Object[] {fieldId, fieldValue.getType().getValue(),
-              fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
-        }
-      }
-
-      LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
-      recordsImporter.copy();
-      fieldsImporter.copy();
-      LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
+    } catch (Exception e) {
+      LOG.error("error processing file", e);
+      throw e;
+    } finally {
+      is.close();
     }
   }
 
   /**
-   * Update records with conditions.
+   * Validate file type.
    *
-   * @param recordList the record list
-   * @param datasetId the dataset id
-   * @param tableSchema the table schema
+   * @param mimeType the mime type
+   * @throws EEAException the EEA exception
    */
-  private void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
-      TableSchema tableSchema) {
-    LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
-    boolean readOnly =
-        tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
-    tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
-
-    // get list paginated of old records to modify
-    TableValue targetTable =
-        tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
-    List<RecordValue> oldRecords =
-        recordRepository.findOrderedNativeRecord(targetTable.getId(), datasetId, null);
-    // sublist records to insert
-    List<RecordValue> recordsToSave = new ArrayList<>();
-
-    if (!readOnly) {
-      Iterator<RecordValue> itr = recordList.iterator();
-      for (RecordValue oldRecord : oldRecords) {
-        if (itr.hasNext()) {
-          refillFields(oldRecord, itr.next().getFields());
-        } else {
-          refillFields(oldRecord, null);
-        }
-        oldRecord.setTableValue(targetTable);
-        recordsToSave.add(oldRecord);
-      }
-    } else {
-      List<ObjectId> readOnlyFields =
-          tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
-              .map(FieldSchema::getIdFieldSchema).collect(Collectors.toList());
-      if (!CollectionUtils.isEmpty(oldRecords)
-          && readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
-        for (RecordValue oldRecord : oldRecords) {
-          Map<Integer, Integer> mapPosition =
-              mapPositionReadOnlyFieldsForReference(readOnlyFields, oldRecord, recordList.get(0));
-          findByReadOnlyRecords(mapPosition, oldRecord, recordList);
-          oldRecord.setTableValue(targetTable);
-          recordsToSave.add(oldRecord);
-        }
-      }
-    }
-    LOG.info("Import dataset table {} with {} number of records", tableSchema.getNameTableSchema(),
-        recordsToSave.size());
-
-    // save
-    datasetService.saveAllRecords(datasetId, recordsToSave);
-  }
-
-  /**
-   * Refill fields.
-   *
-   * @param oldRecord the old record
-   * @param fieldValues the field values
-   */
-  private void refillFields(RecordValue oldRecord, List<FieldValue> fieldValues) {
-    if (fieldValues != null) {
-      oldRecord.getFields().stream().forEach(oldField -> {
-        oldField.setValue(fieldValues.stream()
-            .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
-            .map(FieldValue::getValue).findFirst().orElse(""));
-        oldField.setRecord(oldRecord);
-      });
-    } else {
-      oldRecord.getFields().forEach(field -> field.setValue(""));
+  private void validateFileType(final String mimeType) throws EEAException {
+    // files that will be accepted: csv, xml, xls, xlsx
+    switch (FileTypeEnum.getEnum(mimeType)) {
+      case CSV:
+        break;
+      case XML:
+        break;
+      case XLS:
+        break;
+      case XLSX:
+        break;
+      default:
+        throw new InvalidFileException(EEAErrorMessage.FILE_FORMAT);
     }
   }
-
-  /**
-   * Map position read only fields for reference.
-   *
-   * @param readOnlyFields the read only fields
-   * @param recordValue the record value
-   * @param newRecordValues the new record values
-   * @return the map
-   */
-  private Map<Integer, Integer> mapPositionReadOnlyFieldsForReference(List<ObjectId> readOnlyFields,
-      RecordValue recordValue, RecordValue newRecordValues) {
-    Map<Integer, Integer> mapPosition = new HashMap<>();
-    for (ObjectId id : readOnlyFields) {
-      mapPosition.put(
-          recordValue.getFields().stream().map(FieldValue::getIdFieldSchema)
-              .collect(Collectors.toList()).indexOf(id.toString()),
-          newRecordValues.getFields().stream().map(FieldValue::getIdFieldSchema)
-              .collect(Collectors.toList()).indexOf(id.toString()));
-    }
-    return mapPosition;
-  }
-
-  /**
-   * Find by read only records.
-   *
-   * @param readOnlyPositionFields the read only position fields
-   * @param oldRecord the old record
-   * @param recordList the record list
-   * @return the record value
-   */
-  private void findByReadOnlyRecords(Map<Integer, Integer> readOnlyPositionFields,
-      RecordValue oldRecord, List<RecordValue> recordList) {
-
-    RecordValue recordToUpdate = recordList.stream()
-        .filter(record -> readOnlyPositionFields.entrySet().stream()
-            .allMatch(entry -> record.getFields().get(entry.getValue()).getValue()
-                .equals(oldRecord.getFields().get(entry.getKey()).getValue())))
-        .findFirst().orElse(null);
-    if (recordToUpdate != null) {
-      refillFields(oldRecord, recordToUpdate.getFields());
-    }
-
-  }
-
 
   /**
    * Export dataset file.
@@ -1038,7 +748,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     try {
       Map<String, byte[]> contents = new HashMap<>();
-      if (extension.equalsIgnoreCase("csv")) {
+      if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
         List<TableSchema> tablesSchema = getTables(datasetId);
         List<byte[]> dataFile =
             context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
@@ -1048,14 +758,14 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       } else {
         byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
-            extension.equalsIgnoreCase("validations"));
+            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()));
         contents.put(null, dataFile);
       }
 
       Boolean includeZip = false;
       // If the length after splitting the file type arrives it's more than 1, then there's a
       // zip+xlsx type
-      if (type.length > 1 && !extension.equalsIgnoreCase("validations")) {
+      if (type.length > 1 && !extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue())) {
         includeZip = true;
       }
       generateFile(datasetId, extension, contents, includeZip, datasetType);
@@ -1159,8 +869,8 @@ public class FileTreatmentHelper implements DisposableBean {
             nameFileXlsxCsv =
                 entry.getKey().substring(entry.getKey().indexOf("_") + 1, entry.getKey().length());
           }
-          if ("validations".equals(mimeType)) {
-            mimeType = "xlsx";
+          if (FileTypeEnum.VALIDATIONS.getValue().equals(mimeType)) {
+            mimeType = FileTypeEnum.XLSX.getValue();
           }
           // Adding the xlsx/csv file to the zip
           ZipEntry e = new ZipEntry(nameFileXlsxCsv + "." + mimeType);
@@ -1173,8 +883,8 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     // only the xlsx file
     else {
-      if ("validations".equals(mimeType)) {
-        mimeType = "xlsx";
+      if (FileTypeEnum.VALIDATIONS.getValue().equals(mimeType)) {
+        mimeType = FileTypeEnum.XLSX.getValue();
       }
       nameFile = nameDataset + "." + mimeType;
       File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
@@ -1354,7 +1064,8 @@ public class FileTreatmentHelper implements DisposableBean {
             .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
             .findFirst().orElse(null);
         if (tableSchema != null) {
-          updateRecordsWithConditions(tableValue.getRecords(), datasetId, tableSchema);
+          datasetService.updateRecordsWithConditions(tableValue.getRecords(), datasetId,
+              tableSchema);
         }
       }
       if (null == oldTableId) {

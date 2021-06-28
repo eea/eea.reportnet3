@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Future;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,6 +25,7 @@ import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -121,7 +121,7 @@ public class ValidationServiceImpl implements ValidationService {
   /**
    * The delimiter.
    */
-  @Value("${loadDataDelimiter}")
+  @Value("${exportDataDelimiter}")
   private char delimiter;
 
   /** The path public file. */
@@ -405,17 +405,17 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable) {
 
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-    List<RecordValue> records = this.recordRepository.findAll(pageable).getContent();
+    List<RecordValue> records = recordRepository.findRecordsPageable(pageable);
     List<RecordValidation> recordValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
-      records.stream().filter(Objects::nonNull).forEach(row -> {
+      for (RecordValue row : records) {
         runRecordValidations(row, session);
         List<RecordValidation> validations = row.getRecordValidations();
-        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         recordValidations.addAll(validations);
-      });
+      }
       if (!recordValidations.isEmpty()) {
+        TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         recordValidationRepository.saveAll(recordValidations);
       }
     } finally {
@@ -429,12 +429,15 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param pageable the pageable
+   * @param onlyEmptyFields the only empty fields
    */
   @Override
   @Transactional
-  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable) {
-
-    Page<FieldValue> fields = fieldRepository.findAll(pageable);
+  public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable,
+      boolean onlyEmptyFields) {
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+    Page<FieldValue> fields = onlyEmptyFields ? fieldRepository.findEmptyFields(pageable)
+        : fieldRepository.findAll(pageable);
     List<FieldValidation> fieldValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
@@ -541,12 +544,15 @@ public class ValidationServiceImpl implements ValidationService {
     for (RecordValidation recordValidation : recordValidations) {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
-      error.setIdObject(recordValidation.getRecordValue().getId());
+      if (recordValidation.getRecordValue() != null) {
+        error.setIdObject(recordValidation.getRecordValue().getId());
+        error
+            .setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
+      }
       error.setIdValidation(recordValidation.getValidation().getId());
       error.setLevelError(recordValidation.getValidation().getLevelError().name());
       error.setMessage(recordValidation.getValidation().getMessage());
       error.setNameTableSchema(recordValidation.getValidation().getTableName());
-      error.setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
       error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
       error.setValidationDate(recordValidation.getValidation().getValidationDate());
       error.setShortCode(recordValidation.getValidation().getShortCode());
@@ -693,7 +699,18 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public Integer countFieldsDataset(Long datasetId) {
-    return recordRepository.countFieldsDataset();
+    return fieldRepository.countFieldsDataset();
+  }
+
+  /**
+   * Count empty fields dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the integer
+   */
+  @Override
+  public Integer countEmptyFieldsDataset(Long datasetId) {
+    return fieldRepository.countEmptyFieldsDataset();
   }
 
   /**
@@ -710,7 +727,7 @@ public class ValidationServiceImpl implements ValidationService {
 
     // Sets the validation file name and it's root directory
     String composedFileName = "dataset-" + datasetId + "-validations";
-    String fileNameWithExtension = composedFileName + "." + "csv";
+    String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
     String creatingFileError =
         String.format("Failed generating CSV file with name %s using datasetID %s",
             fileNameWithExtension, datasetId);
@@ -885,10 +902,8 @@ public class ValidationServiceImpl implements ValidationService {
 
 
       if (CollectionUtils.isEmpty(validations.getErrors())) {
-        for (int i = 0; i < nHeaders; i++)
-          fieldsToWrite[i] = "";
-
-        csvWriter.writeNext(fieldsToWrite);
+        LOG_ERROR.error(
+            "Tried to create validations export from an empty validations dataset so it delivered an empty file.");
       }
 
       else {
@@ -900,7 +915,7 @@ public class ValidationServiceImpl implements ValidationService {
 
           fieldsToWrite = fillValidationErrorData(castedError, dataset, nHeaders);
 
-          csvWriter.writeNext(fieldsToWrite);
+          csvWriter.writeNext(fieldsToWrite, false);
         }
       }
     }

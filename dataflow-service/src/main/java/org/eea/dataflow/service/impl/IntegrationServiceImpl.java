@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
-import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
@@ -27,7 +26,6 @@ import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -78,9 +76,6 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Autowired
   private DataSetControllerZuul datasetControllerZuul;
 
-  /** The kafka sender utils. */
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
 
 
   /**
@@ -401,15 +396,12 @@ public class IntegrationServiceImpl implements IntegrationService {
           datasetId);
       datasetControllerZuul.deleteDataBeforeReplacing(datasetId, integrationId, operation);
     } else {
-      IntegrationVO integrationVO = new IntegrationVO();
-      integrationVO.setId(integrationId);
-      List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationVO);
-      if (!CollectionUtils.isEmpty(integrations)
-          && (Integer) integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME)
-              .execute(operation, null, datasetId, integrations.get(0)).getExecutionResultParams()
-              .get("id") == 0) {
+      IntegrationVO integration = getIntegration(integrationId);
+      if (null != integration && (Integer) integrationExecutorFactory
+          .getExecutor(IntegrationToolTypeEnum.FME).execute(operation, null, datasetId, integration)
+          .getExecutionResultParams().get("id") == 0) {
         LOG_ERROR.error("Error executing external integration: datasetId={}, integration={}",
-            datasetId, integrations.get(0));
+            datasetId, integration);
         throw new EEAException("Error executing external integration");
       }
     }
@@ -510,10 +502,6 @@ public class IntegrationServiceImpl implements IntegrationService {
         LockSignature.DELETE_DATASET_VALUES.getValue());
     deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
 
-    Map<String, Object> importFileData = new HashMap<>();
-    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-    importFileData.put(LiteralConstants.DATASETID, datasetId);
-
     Map<String, Object> insertRecordsMultitable = new HashMap<>();
     insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
         LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
@@ -524,7 +512,6 @@ public class IntegrationServiceImpl implements IntegrationService {
     createLockWithSignature(updateField);
     createLockWithSignature(updateRecords);
     createLockWithSignature(deleteDatasetValues);
-    createLockWithSignature(importFileData);
     createLockWithSignature(insertRecordsMultitable);
   }
 

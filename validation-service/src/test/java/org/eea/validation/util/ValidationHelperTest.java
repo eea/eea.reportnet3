@@ -1,6 +1,7 @@
 package org.eea.validation.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -26,6 +28,9 @@ import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
+import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.model.ValidationProcessVO;
 import org.junit.After;
@@ -122,6 +127,9 @@ public class ValidationHelperTest {
   private SecurityContext securityContext;
   @Mock
   private Authentication authentication;
+
+  @Mock
+  private RulesRepository rulesRepository;
 
   /**
    * Inits the mocks.
@@ -264,9 +272,17 @@ public class ValidationHelperTest {
 
     Mockito.when(datasetMetabaseControllerZuul.getType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
-
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca190");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
+    RulesSchema rules = new RulesSchema();
+    Rule rule = new Rule();
+    rule.setType(EntityTypeEnum.RECORD);
+    rules.setRules(Arrays.asList(rule));
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rules);
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
-    Mockito.when(validationService.countFieldsDataset(Mockito.eq(1l))).thenReturn(1);
 
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));

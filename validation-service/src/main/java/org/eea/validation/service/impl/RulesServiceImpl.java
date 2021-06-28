@@ -388,7 +388,8 @@ public class RulesServiceImpl implements RulesService {
           notificationVO);
 
     } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType())
-        && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
+        && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)
+        && (StringUtils.isBlank(ruleVO.getSqlSentence()))) {
       rule.setAutomatic(true);
       rule.setVerified(true);
       rule.setEnabled(true);

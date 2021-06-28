@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -57,6 +59,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.RulesErrorUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -493,8 +496,7 @@ public class ValidationServiceTest {
     recordValue.setRecordValidations(recordValidations);
     records.add(recordValue);
 
-    Page<RecordValue> page = new PageImpl<>(records);
-    when(recordRepository.findAll(Mockito.any(Pageable.class))).thenReturn(page);
+    when(recordRepository.findRecordsPageable(Mockito.any(Pageable.class))).thenReturn(records);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
 
@@ -530,7 +532,7 @@ public class ValidationServiceTest {
     when(fieldRepository.findAll(Mockito.any(Pageable.class))).thenReturn(page);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
-    validationServiceImpl.validateFields(1L, kieBase, PageRequest.of(0, 5000));
+    validationServiceImpl.validateFields(1L, kieBase, PageRequest.of(0, 5000), false);
 
   }
 
@@ -922,7 +924,7 @@ public class ValidationServiceTest {
    */
   @Test
   public void countFieldsDatasetTest() {
-    when(recordRepository.countFieldsDataset()).thenReturn(1);
+    when(fieldRepository.countFieldsDataset()).thenReturn(1);
     assertEquals("not Equals", Integer.valueOf(1), validationServiceImpl.countFieldsDataset(1L));
   }
 
@@ -1045,6 +1047,22 @@ public class ValidationServiceTest {
       assertEquals(EEAErrorMessage.VALIDATION_SESSION_ERROR, e.getLocalizedMessage());
       throw e;
     }
+  }
+  
+  @After
+  public void afterTests() {
+    File file = new File("./dataset-1-validations");
+    try {
+      FileUtils.deleteDirectory(file);
+    } catch (IOException e) {
+
+    }
+  }
+
+  @Test
+  public void countEmptyFieldsDatasetTestSuccess() throws EEAException {
+    when(fieldRepository.countEmptyFieldsDataset()).thenReturn(1);
+    assertEquals((Integer) 1, validationServiceImpl.countEmptyFieldsDataset(1L));
   }
 
 }
