@@ -1,10 +1,11 @@
 .defaultExpandable {
+  cursor: pointer;
   color: var(--treeview-expandable-color);
   font-size: 12pt;
   font-weight: bold;
   margin-top: 0.5rem;
   display: flex;
-  align-content: center;
+  align-items: center;
 }
 
 .defaultExpandableButtonDisable {

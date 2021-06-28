@@ -1169,6 +1169,7 @@
     "downloadValidationsStart": "Generating validations file",
     "downloadValidationsError": "Failed downloading validations",
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
-    "downloadValidationsFileError": "Failed downloading validations file"
+    "downloadValidationsFileError": "Failed downloading validations file",
+    "collapseAll": "Collapse all"
   }
 }
