@@ -41,6 +41,7 @@ const TitleWithItem = memo(
                 <>
                   <FontAwesomeIcon
                     aria-hidden={false}
+                    aria-label="Info"
                     className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
                     data-for={tooltipId}
                     data-tip
