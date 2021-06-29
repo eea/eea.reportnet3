@@ -626,7 +626,12 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
                 </span>
               )}
               {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-                <ReactTooltip className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+                <ReactTooltip
+                  border={true}
+                  className={styles.tooltipClass}
+                  effect="solid"
+                  id="createTooltip"
+                  place="top">
                   <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
                 </ReactTooltip>
               )}
