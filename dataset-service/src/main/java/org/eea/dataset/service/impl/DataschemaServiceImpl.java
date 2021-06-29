@@ -74,6 +74,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -2185,6 +2186,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     Long shortcode = rulesControllerZuul
         .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId));
     ruleVO.setShortCode("TB" + shortcode);
+    ruleVO.setAutomaticType(AutomaticRuleTypeEnum.MANDATORY_TABLE);
 
     rulesControllerZuul.createNewRule(datasetId, ruleVO);
     LOG.info("Created notEmpty rule for TableSchema {}", tableSchemaId);

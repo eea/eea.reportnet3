@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -442,34 +443,39 @@ public class RulesServiceImpl implements RulesService {
     Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
 
     if (required && typeData.equals(DataType.POINT)) {
-      ruleList.add(AutomaticRules.createRequiredRulePoint(referenceId, typeEntityEnum,
-          "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
+      ruleList.add(
+          AutomaticRules.createRequiredRulePoint(referenceId, typeEntityEnum, "Field cardinality",
+              "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
     } else if (required) {
-      ruleList.add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum,
-          "Field cardinality", "FC" + shortcode, FC_DESCRIPTION));
+      ruleList
+          .add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
+              "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
     } else {
       switch (typeData) {
         case NUMBER_INTEGER:
           ruleList.add(AutomaticRules.createNumberIntegerAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + "NUMBER - INTEGER", "FT" + shortcode,
+              FIELD_TYPE + "NUMBER - INTEGER", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
               FT_DESCRIPTION + "NUMBER - INTEGER"));
           break;
         case NUMBER_DECIMAL:
           ruleList.add(AutomaticRules.createNumberDecimalAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + "NUMBER - DECIMAL", "FT" + shortcode,
+              FIELD_TYPE + "NUMBER - DECIMAL", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
               FT_DESCRIPTION + "NUMBER - DECIMAL"));
           break;
         case DATE:
           ruleList.add(AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+              FT_DESCRIPTION + typeData));
           break;
         case DATETIME:
           ruleList.add(AutomaticRules.createDateTimeAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+              FT_DESCRIPTION + typeData));
           break;
         case BOOLEAN:
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+              FT_DESCRIPTION + typeData));
           break;
         case EXTERNAL_LINK:
         case LINK:
@@ -482,8 +488,8 @@ public class RulesServiceImpl implements RulesService {
           FieldSchema fieldSchemaPK = getPKFieldSchemaFromSchema(datasetSchema, referenceId);
 
           ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
-              FIELD_TYPE + typeData, "TC" + shortcode, TC_DESCRIPTION + typeData, tableSchemaId,
-              false));
+              FIELD_TYPE + typeData, "TC" + shortcode, AutomaticRuleTypeEnum.FIELD_LINK,
+              TC_DESCRIPTION + typeData, tableSchemaId, false));
 
           if (null != fieldSchemaPK && Boolean.TRUE.equals(fieldSchemaPK.getPkMustBeUsed())) {
 
@@ -491,7 +497,8 @@ public class RulesServiceImpl implements RulesService {
                 rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
 
             ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
-                "Table Completeness", "TO" + shortcodeAux, TO_DESCRIPTION, tableSchemaId, true));
+                "Table Completeness", "TO" + shortcodeAux, AutomaticRuleTypeEnum.TABLE_COMPLETNESS,
+                TO_DESCRIPTION, tableSchemaId, true));
           }
 
           break;
@@ -502,7 +509,7 @@ public class RulesServiceImpl implements RulesService {
           List<String> singleCodeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
               FIELD_TYPE + typeData, singleCodeListItems, "FT" + shortcode,
-              FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
+              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
           break;
         case MULTISELECT_CODELIST:
           // we find values available to create this validation for a codelist, same value with
@@ -511,19 +518,22 @@ public class RulesServiceImpl implements RulesService {
           List<String> codeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createMultiSelectCodelistAutomaticRule(referenceId,
               typeEntityEnum, FIELD_TYPE + typeData, codeListItems, "FT" + shortcode,
-              FT_DESCRIPTION + typeData));
+              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
           break;
         case URL:
           ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+              FT_DESCRIPTION + typeData));
           break;
         case EMAIL:
           ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+              FT_DESCRIPTION + typeData));
           break;
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+              FT_DESCRIPTION + typeData));
           break;
         case MULTIPOLYGON:
         case POINT:
@@ -533,12 +543,13 @@ public class RulesServiceImpl implements RulesService {
         case POLYGON:
         case GEOMETRYCOLLECTION:
           ruleList.add(AutomaticRules.createGeometryAutomaticRule(typeData, referenceId,
-              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode, FT_DESCRIPTION + typeData));
+              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
+              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
           // add additional rule for the EPSG SRID check
           shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
           ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckEPSGSRID(typeData,
               referenceId, typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
-              FT_DESCRIPTION + typeData));
+              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
           break;
         default:
           LOG.info("This Data Type has not automatic rule {}", typeData.getValue());
@@ -859,9 +870,10 @@ public class RulesServiceImpl implements RulesService {
         message.append("The field ").append(fieldNames).append(" is unique within table");
       }
     }
-    Rule rule = AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId,
-        EntityTypeEnum.TABLE, "Table type uniqueConstraint", "TU" + shortcode,
-        description.toString(), message.toString(), uniqueId);
+    Rule rule =
+        AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId, EntityTypeEnum.TABLE,
+            "Table type uniqueConstraint", "TU" + shortcode, AutomaticRuleTypeEnum.TABLE_UNIQUENESS,
+            description.toString(), message.toString(), uniqueId);
     rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
