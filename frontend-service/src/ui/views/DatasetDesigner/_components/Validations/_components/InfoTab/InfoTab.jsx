@@ -143,6 +143,7 @@ export const InfoTab = ({
           </label>
           <InputText
             id={`${componentName}__shortCode`}
+            keyfilter="noDoubleQuote"
             maxLength={255}
             onChange={e => onInfoFieldChange('shortCode', e.target.value)}
             placeholder={resourcesContext.messages['ruleShortCode']}
@@ -215,6 +216,7 @@ export const InfoTab = ({
           </label>
           <InputText
             id={`${componentName}__errorMessage`}
+            keyfilter="noDoubleQuote"
             maxLength={255}
             onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
             placeholder={resourcesContext.messages['ruleErrorMessage']}
