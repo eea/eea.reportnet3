@@ -755,7 +755,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage(), e);
+      LOG_ERROR.error("The etlImportDataset failed because {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
