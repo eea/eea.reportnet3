@@ -254,6 +254,7 @@ const ValidationViewer = memo(
             />
           </span>
           <ReactTooltip
+            border={true}
             effect="solid"
             getContent={() =>
               ReactDOMServer.renderToStaticMarkup(
