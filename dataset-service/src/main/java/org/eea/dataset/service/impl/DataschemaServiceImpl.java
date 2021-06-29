@@ -2177,6 +2177,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleVO.setRuleName(LiteralConstants.RULE_TABLE_MANDATORY);
     ruleVO.setEnabled(true);
     ruleVO.setType(EntityTypeEnum.TABLE);
+    ruleVO.setAutomatic(true);
     ruleVO.setThenCondition(
         Arrays.asList("Mandatory table has no records", ErrorTypeEnum.BLOCKER.getValue()));
     ruleVO

@@ -24,7 +24,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.utils.LiteralConstants;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -326,8 +325,7 @@ public class RulesServiceImpl implements RulesService {
     }
 
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
-        && StringUtils.isBlank(ruleVO.getSqlSentence())
-        && !ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)) {
+        && StringUtils.isBlank(ruleVO.getSqlSentence()) && !ruleVO.isAutomatic()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
     if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
@@ -387,8 +385,7 @@ public class RulesServiceImpl implements RulesService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
           notificationVO);
 
-    } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType())
-        && ruleVO.getRuleName().equalsIgnoreCase(LiteralConstants.RULE_TABLE_MANDATORY)
+    } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.isAutomatic()
         && (StringUtils.isBlank(ruleVO.getSqlSentence()))) {
       rule.setAutomatic(true);
       rule.setVerified(true);
