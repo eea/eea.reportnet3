@@ -41,12 +41,13 @@ export const MultiSelectHeader = ({
   };
 
   const renderFilterElement = () => {
+    console.log(id);
     if (filter) {
       return (
         <div className="p-multiselect-filter-container">
           <InputText
             className="p-inputtext p-component"
-            id="multiselectFilter"
+            id={`${id}_multiselectFilter`}
             onChange={event => onFilterEvent(event)}
             placeholder={filterPlaceholder}
             ref={filterRef}
