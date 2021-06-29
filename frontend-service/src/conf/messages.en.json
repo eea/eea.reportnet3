@@ -1160,7 +1160,7 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "goToLink": "Go to link",
-    "snapshotsEmtpyDescription": "Empty description",
+    "snapshotsEmptyDescription": "Empty description",
     "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters",
     "pinDataflowMessage": "Check to mark as pinned your new dataflow",
     "notFieldToSelect": "No Field",
@@ -1170,6 +1170,7 @@
     "downloadValidationsError": "Failed downloading validations",
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
     "downloadValidationsFileError": "Failed downloading validations file",
-    "collapseAll": "Collapse all"
+    "collapseAll": "Collapse all",
+    "noQuotesQCTooltip": "Double quotes (&quot&quot) cannot be used"
   }
 }
