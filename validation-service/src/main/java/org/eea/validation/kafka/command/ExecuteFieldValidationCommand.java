@@ -38,7 +38,8 @@ public class ExecuteFieldValidationCommand extends ExecuteValidationCommand {
     return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
       final int numPag = (int) eeaEventVO.getData().get("numPag");
       Pageable pageable = PageRequest.of(numPag, fieldBatchSize);
-      validationService.validateFields(datasetId, kieBase, pageable);
+      boolean onlyEmptyFields = (boolean) eeaEventVO.getData().get("onlyEmptyFields");
+      validationService.validateFields(datasetId, kieBase, pageable, onlyEmptyFields);
     };
   }
 

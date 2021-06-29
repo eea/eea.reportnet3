@@ -462,9 +462,9 @@
     "externalExportEudatasetCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> exported correctly",
     "externalExportEudatasetFailedEvent": "Error exporting <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalImportDesignCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalImportDesignFromOtherSystemCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportDesignFromOtherSystemCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
@@ -1169,6 +1169,7 @@
     "downloadValidationsStart": "Generating validations file",
     "downloadValidationsError": "Failed downloading validations",
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
-    "downloadValidationsFileError": "Failed downloading validations file"
+    "downloadValidationsFileError": "Failed downloading validations file",
+    "collapseAll": "Collapse all"
   }
 }
