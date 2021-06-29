@@ -5,7 +5,6 @@ import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -65,15 +64,6 @@ public interface DataFlowController {
   List<DataFlowVO> findCompleted(
       @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize);
-
-  /**
-   * Find user dataflows by status.
-   *
-   * @param type the type
-   * @return the list
-   */
-  @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findUserDataflowsByStatus(@PathVariable("type") TypeRequestEnum type);
 
 
   /**
