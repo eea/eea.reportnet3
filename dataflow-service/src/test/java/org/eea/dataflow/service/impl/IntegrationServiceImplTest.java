@@ -360,8 +360,11 @@ public class IntegrationServiceImplTest {
     executionResultParams.put("id", 1);
     ExecutionResultVO executionResultVO = new ExecutionResultVO();
     executionResultVO.setExecutionResultParams(executionResultParams);
-    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
-    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
+
+    Mockito.when(integrationRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new Integration()));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
 
     Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
@@ -468,7 +471,7 @@ public class IntegrationServiceImplTest {
   @Test
   public void addLocksTest() throws EEAException {
     integrationService.addLocks(0L);
-    Mockito.verify(lockService, times(7)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
+    Mockito.verify(lockService, times(6)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any());
   }
 
