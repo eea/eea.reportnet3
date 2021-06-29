@@ -13,6 +13,7 @@ import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,7 +82,6 @@ public class CSVReaderStrategyTest {
     tables.add(table);
     dataSet.setTableSchemas(tables);
 
-
   }
 
 
@@ -91,13 +91,13 @@ public class CSVReaderStrategyTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void testParseFile() throws EEAException {
+  public void parseFileTest() throws EEAException {
     FieldSchema fschema = new FieldSchema();
     fschema.setHeaderName("campo_1");
     fschema.setIdFieldSchema(new ObjectId());
     fschema.setReadOnly(false);
+    fschema.setType(DataType.DATE);
     when(fileCommon.isDesignDataset(Mockito.any())).thenReturn(false);
-    // when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
@@ -108,21 +108,95 @@ public class CSVReaderStrategyTest {
 
 
   /**
+   * Parses the file point test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void parseFilePointTest() throws EEAException {
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    fschema.setType(DataType.POINT);
+    when(fileCommon.isDesignDataset(Mockito.any())).thenReturn(false);
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
+    csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
+        dataSet);
+    Mockito.verify(fileCommon, times(3)).findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class));
+  }
+
+  /**
+   * Parses the file no type test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void parseFileNoTypeTest() throws EEAException {
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    when(fileCommon.isDesignDataset(Mockito.any())).thenReturn(false);
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
+    csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
+        dataSet);
+    Mockito.verify(fileCommon, times(3)).findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class));
+  }
+
+  /**
    * Test parse exception.
    *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
   @Test(expected = InvalidFileException.class)
-  public void testParseException() throws IOException, EEAException {
+  public void parseExceptionTest() throws IOException, EEAException {
     String csv = "\n TABLA1,B,C,D\r\n" + "TABLA1,\"I,I\",I,I\r\n";
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    // when(fileCommon.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(dataSet);
     csvReaderStrategy.parseFile(input, 1L, null, null, null, csv, false, dataSet);
   }
 
+  /**
+   * Test parse file read only.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = InvalidFileException.class)
+  public void parseFileReadOnlyTest() throws EEAException {
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(true);
+    dataSet.getTableSchemas().get(0).getRecordSchema().getFieldSchema().remove(0);
+    dataSet.getTableSchemas().get(0).getRecordSchema().getFieldSchema().add(fschema);
+    when(fileCommon.isDesignDataset(Mockito.any())).thenReturn(false);
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(fschema);
+    csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
+        dataSet);
+  }
 
-
+  /**
+   * Parses the file no fields test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void parseFileNoFieldsTest() throws EEAException {
+    FieldSchema fschema = new FieldSchema();
+    fschema.setHeaderName("campo_1");
+    fschema.setIdFieldSchema(new ObjectId());
+    fschema.setReadOnly(false);
+    when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchema.class))).thenReturn(null);
+    csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
+        dataSet);
+  }
 }
