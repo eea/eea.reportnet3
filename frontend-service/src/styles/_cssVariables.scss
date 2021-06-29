@@ -262,6 +262,18 @@
   --dropdown-panel-items-group-not-highlight-color-hover: var(--gray-110);
   --dropdown-panel-items-group-not-highlight-bg-hover: var(--gray-25);
 
+  /* DropdownFilter */
+  --dropdownFilter-border: 1px solid var(--c-black-200);
+  --dropdownFilter-bg-color: var(--white);
+  --dropdownFilter-color: var(--c-black-400);
+  --dropdownFilter-box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
+  --dropdownFilter-border-color-hover: var(--gray-25);
+  --dropdownFilter-icon-color: var(--c-corporate-blue);
+
+  /* Dropdown menu */
+  --dropdown-menu-bg-color: var(--bg);
+  --dropdown-menu-items-bg-color-hover: var(--gray-15);
+
   /* Floating label */
   --floating-label-color: var(--gray-65);
 

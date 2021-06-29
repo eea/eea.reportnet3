@@ -3459,6 +3459,9 @@ public class DatasetServiceImpl implements DatasetService {
       recordsImporter.copy();
       fieldsImporter.copy();
       LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
+    } catch (SQLException e) {
+      LOG_ERROR.error("Cannot save the records for dataset {}", datasetId, e);
+      throw e;
     }
   }
 

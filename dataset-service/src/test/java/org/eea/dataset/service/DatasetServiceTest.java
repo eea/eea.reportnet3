@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,6 +48,8 @@ import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.data.repository.TableValidationRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
+import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
+import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -78,6 +81,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -100,10 +104,12 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -313,6 +319,18 @@ public class DatasetServiceTest {
   /** The output stream. */
   @Mock
   private OutputStream outputStream;
+
+  /** The record store controller zuul. */
+  @Mock
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
+  /** The record value id generator. */
+  @Mock
+  private RecordValueIdGenerator recordValueIdGenerator;
+
+  /** The field value id generator. */
+  @Mock
+  private FieldValueIdGenerator fieldValueIdGenerator;
 
   /** The field value. */
   private FieldValue fieldValue;
@@ -1206,6 +1224,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field type test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldTypeTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -2707,6 +2730,11 @@ public class DatasetServiceTest {
     Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
   }
 
+  /**
+   * Initialize dataset fixed records sucess test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void initializeDatasetFixedRecordsSucessTest() throws EEAException {
     DesignDataset desingDataset = new DesignDataset();
@@ -2764,7 +2792,7 @@ public class DatasetServiceTest {
    * Initialize dataset reference test.
    *
    * @throws EEAException the EEA exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test
   public void initializeDatasetReferenceTest() throws EEAException, IOException {
@@ -2989,6 +3017,127 @@ public class DatasetServiceTest {
   }
 
   /**
+   * Store records test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  @Test(expected = SQLException.class)
+  public void storeRecordsTest() throws EEAException, IOException, SQLException {
+
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setValue("value");
+    fieldValue.setType(DataType.TEXT);
+    List<FieldValue> fieldValues = new ArrayList<>();
+    fieldValues.add(fieldValue);
+
+    RecordValue recordValue = new RecordValue();
+    recordValue.setFields(fieldValues);
+    List<RecordValue> recordValues = new ArrayList<>();
+    recordValue.setIdRecordSchema("5cf0e9b3b793310e9ceca190");
+    recordValues.add(recordValue);
+    recordValues.add(recordValue);
+
+    TableValue tableValue = new TableValue();
+    recordValue.setTableValue(tableValue);
+    tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
+    tableValue.setRecords(recordValues);
+    List<TableValue> tableValues = new ArrayList<>();
+    tableValues.add(tableValue);
+
+    DatasetValue datasetValue = new DatasetValue();
+    datasetValue.setTableValues(tableValues);
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
+    datasetService.storeRecords(1L, recordValues);
+  }
+
+  /**
+   * Update records with conditions test.
+   */
+  @Test
+  public void updateRecordsWithConditionsTest() {
+    FieldSchema fieldSchema4 = new FieldSchema();
+    fieldSchema4.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca194"));
+    fieldSchema4.setType(DataType.LINK);
+    fieldSchema4.setPkHasMultipleValues(Boolean.TRUE);
+    fieldSchema4.setReadOnly(Boolean.FALSE);
+    List<FieldSchema> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema4);
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    recordSchema.setFieldSchema(fieldSchemas);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setRecordSchema(recordSchema);
+    tableSchema.setReadOnly(Boolean.FALSE);
+    tableSchema.setFixedNumber(Boolean.FALSE);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
+    when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(tableValue);
+    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
+    datasetService.updateRecordsWithConditions(recordValues, 1L, tableSchema);
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
+  }
+
+  /**
+   * Update records with conditions read only test.
+   */
+  @Test
+  public void updateRecordsWithConditionsReadOnlyTest() {
+    FieldSchema fieldSchema3 = new FieldSchema();
+    fieldSchema3.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca193"));
+    fieldSchema3.setType(DataType.MULTISELECT_CODELIST);
+    fieldSchema3.setPkHasMultipleValues(Boolean.TRUE);
+    fieldSchema3.setReadOnly(Boolean.FALSE);
+    FieldSchema fieldSchema4 = new FieldSchema();
+    fieldSchema4.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca194"));
+    fieldSchema4.setType(DataType.LINK);
+    fieldSchema4.setPkHasMultipleValues(Boolean.TRUE);
+    fieldSchema4.setReadOnly(Boolean.TRUE);
+    List<FieldSchema> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema4);
+    fieldSchemas.add(fieldSchema3);
+    RecordSchema recordSchema = new RecordSchema();
+    recordSchema.setIdRecordSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    recordSchema.setFieldSchema(fieldSchemas);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    tableSchema.setRecordSchema(recordSchema);
+    tableSchema.setReadOnly(Boolean.FALSE);
+    tableSchema.setFixedNumber(Boolean.FALSE);
+    when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
+    when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(tableValue);
+    ArrayList<FieldValue> fields = new ArrayList<>();
+    fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca193");
+    fieldValue.setValue("");
+    fieldValue.setId("1L");
+    fields.add(fieldValue);
+    FieldValue field = new FieldValue();
+    field.setId("1L");
+    field.setIdFieldSchema("5cf0e9b3b793310e9ceca194");
+    fields.add(field);
+    field.setValue("");
+    recordValues.get(0).setFields(fields);
+    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(recordValues);
+    datasetService.updateRecordsWithConditions(recordValues, 1L, tableSchema);
+    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
+  }
+
+  /**
    * After tests we remove the files.
    */
   @After
@@ -2998,6 +3147,12 @@ public class DatasetServiceTest {
       FileUtils.deleteDirectory(file);
     } catch (IOException e) {
 
+    }
+    final File downloadDirectory = new File("./");
+    for (File f : downloadDirectory.listFiles()) {
+      if (f.getName().endsWith(".bin")) {
+        f.delete();
+      }
     }
   }
 }

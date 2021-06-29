@@ -400,6 +400,7 @@ export const useSetColumns = (
                 />
               </span>
               <ReactTooltip
+                border={true}
                 effect="solid"
                 getContent={() =>
                   ReactDOMServer.renderToStaticMarkup(

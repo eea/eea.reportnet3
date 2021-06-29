@@ -184,7 +184,12 @@ const DatasetSchema = ({
               data-tip
               icon={AwesomeIcons('externalUrl')}
             />
-            <ReactTooltip className={styles.tooltipClass} effect="solid" id="geometricTypeTooltip" place="top">
+            <ReactTooltip
+              border={true}
+              className={styles.tooltipClass}
+              effect="solid"
+              id="geometricTypeTooltip"
+              place="top">
               <span>{resources.messages['geomTypeHelpTooltip']}</span>
             </ReactTooltip>
           </span>

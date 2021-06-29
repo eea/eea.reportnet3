@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
@@ -71,6 +72,10 @@ public class Rule {
   /** The short code. */
   @Field(value = "shortCode")
   private String shortCode;
+
+  /** The automatic type. */
+  @Field(value = "automaticType")
+  private AutomaticRuleTypeEnum automaticType;
 
   /** The unique constraint id. */
   @Field(value = "uniqueConstraintId")
