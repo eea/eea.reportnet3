@@ -1160,7 +1160,7 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "goToLink": "Go to link",
-    "snapshotsEmtpyDescription": "Empty description",
+    "snapshotsEmptyDescription": "Empty description",
     "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters",
     "pinDataflowMessage": "Check to mark as pinned your new dataflow",
     "notFieldToSelect": "No Field",
