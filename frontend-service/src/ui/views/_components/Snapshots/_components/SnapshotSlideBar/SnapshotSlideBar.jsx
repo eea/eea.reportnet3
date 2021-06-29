@@ -145,7 +145,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               </div>
               <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="saveCopy" place="left">
                 {inputValue.length === 0
-                  ? resources.messages['snapshotsEmtpyDescription']
+                  ? resources.messages['snapshotsEmptyDescription']
                   : inputValue.length > 255
                   ? resources.messages['snapshotsWrongLengthDescription']
                   : resources.messages.createSnapshotTooltip}
