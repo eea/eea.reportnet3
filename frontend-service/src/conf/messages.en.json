@@ -1170,6 +1170,7 @@
     "downloadValidationsError": "Failed downloading validations",
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
     "downloadValidationsFileError": "Failed downloading validations file",
-    "collapseAll": "Collapse all"
+    "collapseAll": "Collapse all",
+    "noQuotesQCTooltip": "Double quotes (&quot&quot) cannot be used"
   }
 }

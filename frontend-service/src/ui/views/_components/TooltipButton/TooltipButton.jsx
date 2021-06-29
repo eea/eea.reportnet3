@@ -12,6 +12,7 @@ export const TooltipButton = ({ message, uniqueIdentifier, getContent = null }) 
         />
       </span>
       <ReactTooltip
+        border={true}
         effect="solid"
         getContent={() => (getContent ? getContent() : message)}
         html={true}

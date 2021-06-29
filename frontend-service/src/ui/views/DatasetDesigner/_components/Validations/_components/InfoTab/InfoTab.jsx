@@ -9,6 +9,7 @@ import styles from './InfoTab.module.scss';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
@@ -136,7 +137,10 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}
           onBlur={() => onAddToClickedFields('shortCode')}
           onFocus={() => onDeleteFromClickedFields('shortCode')}>
-          <label htmlFor={`${componentName}__shortCode`}>{resourcesContext.messages['ruleShortCode']}</label>
+          <label htmlFor={`${componentName}__shortCode`}>
+            {resourcesContext.messages['ruleShortCode']}
+            <TooltipButton message={resourcesContext.messages['noQuotesQCTooltip']} uniqueIdentifier="shortCode" />
+          </label>
           <InputText
             id={`${componentName}__shortCode`}
             maxLength={255}
@@ -201,12 +205,14 @@ export const InfoTab = ({
             value={creationFormState.candidateRule.errorLevel}
           />
         </div>
-
         <div
           className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}
           onBlur={() => onAddToClickedFields('errorMessage')}
           onFocus={() => onDeleteFromClickedFields('errorMessage')}>
-          <label htmlFor={`${componentName}__errorMessage`}>{resourcesContext.messages['ruleErrorMessage']}</label>
+          <label htmlFor={`${componentName}__errorMessage`}>
+            {resourcesContext.messages['ruleErrorMessage']}
+            <TooltipButton message={resourcesContext.messages['noQuotesQCTooltip']} parentName="errorMessage" />
+          </label>
           <InputText
             id={`${componentName}__errorMessage`}
             maxLength={255}
