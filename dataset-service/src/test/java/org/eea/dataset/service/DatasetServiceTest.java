@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
@@ -102,6 +104,7 @@ import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1137,10 +1140,6 @@ public class DatasetServiceTest {
     byte[] expectedResult = "".getBytes();
     ReportingDataset dataset = new ReportingDataset();
     dataset.setDataflowId(1L);
-    // partition.setId(1L);
-    // when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
-    // Mockito.any())).thenReturn(Optional.of(partition));
-    // when(reportingDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
         Mockito.anyBoolean())).thenReturn(expectedResult);
@@ -1172,6 +1171,46 @@ public class DatasetServiceTest {
   public void updateFieldPKTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
     fieldVO.setId("5cf0e9b3b793310e9ceca190");
+    fieldVO.setValue("123");
+    FieldValue dataEnd = new FieldValue();
+    dataEnd.setValue("123");
+    dataEnd.setRecord(recordValue);
+
+    List<Document> fieldSchemas = new ArrayList<>();
+    Document fieldSchema = new Document();
+    List<ObjectId> referenced = new ArrayList<>();
+    PkCatalogueSchema pkCatalogueSchema = new PkCatalogueSchema();
+    fieldSchema.put(LiteralConstants.PK, true);
+    fieldSchema.put(LiteralConstants.ID, new ObjectId("5cf0e9b3b793310e9ceca190"));
+    fieldSchema.put("headerName", "ListOfSinglePams");
+    fieldSchemas.add(fieldSchema);
+    referenced.add(new ObjectId("5cf0e9b3b793310e9ceca190"));
+    pkCatalogueSchema.setReferenced(referenced);
+    Document recordSchemaDocument = new Document();
+    recordSchemaDocument.put(LiteralConstants.FIELD_SCHEMAS, fieldSchemas);
+    recordValue.setFields(fieldList);
+    fieldSchema.put(LiteralConstants.READ_ONLY, Boolean.FALSE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+
+    when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(recordSchemaDocument);
+    when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(pkCatalogueSchema);
+    when(fieldRepository.findByIdFieldSchemaIn(Mockito.any())).thenReturn(fieldList);
+
+    when(fieldRepository.findById("5cf0e9b3b793310e9ceca190")).thenReturn(dataEnd);
+
+    when(dataSetMetabaseRepository.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    datasetService.updateField(1L, fieldVO, true);
+    Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateFieldTypeTest() throws EEAException {
+    FieldVO fieldVO = new FieldVO();
+    fieldVO.setId("5cf0e9b3b793310e9ceca190");
+    fieldVO.setType(DataType.POINT);
     FieldValue dataEnd = new FieldValue();
     dataEnd.setValue("123");
     dataEnd.setRecord(recordValue);
@@ -1398,7 +1437,7 @@ public class DatasetServiceTest {
    * Testdelete all table values.
    */
   @Test
-  public void testdeleteAllTableValues() {
+  public void deleteAllTableValuesTest() {
     datasetService.deleteAllTableValues(1L);
     Mockito.verify(tableRepository, times(1)).removeTableData(Mockito.any());
   }
@@ -2565,8 +2604,10 @@ public class DatasetServiceTest {
         .thenReturn(true);
     DataSetSchema dataSetSchema = new DataSetSchema();
     dataSetSchema.setAvailableInPublic(true);
-    byte[] expectedResult = null;
+    dataSetSchema.setTableSchemas(new ArrayList<>());
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
+    byte[] expectedResult = "".getBytes();
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
         Mockito.anyBoolean())).thenReturn(expectedResult);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
@@ -2717,9 +2758,10 @@ public class DatasetServiceTest {
    * Initialize dataset reference test.
    *
    * @throws EEAException the EEA exception
+   * @throws IOException
    */
   @Test
-  public void initializeDatasetReferenceTest() throws EEAException {
+  public void initializeDatasetReferenceTest() throws EEAException, IOException {
     DesignDataset desingDataset = new DesignDataset();
     desingDataset.setId(2L);
     desingDataset.setDatasetSchema("5cf0e9b3b793310e9ceca190");
@@ -2736,6 +2778,7 @@ public class DatasetServiceTest {
     FieldSchema fieldSchema = new FieldSchema();
     fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca193"));
     fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
+    fieldSchema.setType(DataType.ATTACHMENT);
     fieldSchemas.add(fieldSchema);
     recordSchema.setFieldSchema(fieldSchemas);
     desingTableSchema.setRecordSchema(recordSchema);
@@ -2753,12 +2796,16 @@ public class DatasetServiceTest {
     DataSetMetabase dataset = new DataSetMetabase();
     dataset.setDataflowId(1L);
     dataset.setId(1L);
+    dataset.setDatasetSchema("5cf0e9b3b793310e9ceca193");
     when(tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(referenceDatasetRepository.existsById(Mockito.any())).thenReturn(true);
     when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(desingDataset));
+    when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<DesignDataset>());
+    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
     field.setType(DataType.ATTACHMENT);
@@ -2782,11 +2829,17 @@ public class DatasetServiceTest {
     AttachmentValue attachment = new AttachmentValue();
     attachment.setFieldValue(field);
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
-
+    "".getBytes();
+    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
+    byte[] expectedResult = "".getBytes();
+    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.anyBoolean())).thenReturn(expectedResult);
+    attachment.setContent(expectedResult);
+    when(attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(Mockito.anyString()))
+        .thenReturn(Arrays.asList(attachment));
     datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
-    Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
+    Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
-
 
 
   /**
@@ -2927,5 +2980,18 @@ public class DatasetServiceTest {
     Mockito.when(schemasRepository.findAvailableInPublicByIdDataSetSchema(Mockito.any()))
         .thenReturn(Boolean.TRUE);
     assertTrue(datasetService.checkAnySchemaAvailableInPublic(0L));
+  }
+
+  /**
+   * After tests we remove the files.
+   */
+  @After
+  public void afterTests() {
+    File file = new File("./dato");
+    try {
+      FileUtils.deleteDirectory(file);
+    } catch (IOException e) {
+
+    }
   }
 }

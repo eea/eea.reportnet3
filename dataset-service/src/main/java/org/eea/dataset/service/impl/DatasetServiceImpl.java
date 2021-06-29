@@ -933,9 +933,10 @@ public class DatasetServiceImpl implements DatasetService {
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    final IFileExportContext context = fileExportFactory.createContext(mimeType);
+    final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false);
+    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
+        false);
   }
 
 
@@ -1350,7 +1351,7 @@ public class DatasetServiceImpl implements DatasetService {
 
         LOG_ERROR.error(
             "Error with dataset id {}  field  with id {} because data has not correct format {}",
-            datasetIdOrigin, idPk, fvPk.getType().toString());
+            datasetIdOrigin, idPk, fvPk.getType());
         // we find table and field to send in notification
         Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
             fvPk.getRecord().getTableValue().getIdTableSchema());
@@ -1358,7 +1359,7 @@ public class DatasetServiceImpl implements DatasetService {
             schemasRepository.findFieldSchema(datasetSchemaId, fvPk.getIdFieldSchema());
         String tableSchemaName = (String) tableSchema.get("nameTableSchema");
         String tableSchemaId = tableSchema.get("_id").toString();
-        String fieldSchemaName = (String) fieldSchemaDocument.get("headerName");
+        String fieldSchemaName = (String) fieldSchemaDocument.get(HEADER_NAME);
 
         NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -1997,9 +1998,6 @@ public class DatasetServiceImpl implements DatasetService {
   private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
     if (pageable == null && totalRecords > 0) {
       pageable = PageRequest.of(0, totalRecords.intValue());
-    }
-    if (pageable == null && totalRecords == 0) {
-      pageable = PageRequest.of(0, 20);
     }
     return pageable;
   }
