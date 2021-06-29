@@ -747,6 +747,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     // check if dataset is reportable
     if (!datasetService.isDatasetReportable(datasetId)) {
+      LOG_ERROR.error("The dataset {} is not reportable", datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
@@ -754,7 +755,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

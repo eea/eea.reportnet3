@@ -1975,9 +1975,8 @@ public class DatasetServiceTest {
   public void isReportableDesignTest() {
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(designDatasetRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(new DesignDataset()));
-    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.DESIGN);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertTrue(datasetService.isDatasetReportable(1L));
   }
@@ -1989,10 +1988,11 @@ public class DatasetServiceTest {
   public void isNotReportableDesignTest() {
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(designDatasetRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(new DesignDataset()));
+
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.COLLECTION);
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
@@ -2001,6 +2001,12 @@ public class DatasetServiceTest {
    */
   @Test
   public void isReportableTest() {
+    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.COLLECTION);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertFalse(datasetService.isDatasetReportable(1L));
   }
 
@@ -2009,10 +2015,10 @@ public class DatasetServiceTest {
    */
   @Test
   public void isReportableReportingTest() {
+    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.REPORTING);
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(new ReportingDataset()));
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertTrue(datasetService.isDatasetReportable(1L));
@@ -2025,9 +2031,9 @@ public class DatasetServiceTest {
   public void isNotReportableReportingTest() {
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(reportingDatasetRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(new ReportingDataset()));
-    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+
+    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.COLLECTION);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     assertFalse(datasetService.isDatasetReportable(1L));
   }
