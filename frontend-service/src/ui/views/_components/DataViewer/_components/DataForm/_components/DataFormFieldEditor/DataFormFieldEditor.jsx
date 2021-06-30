@@ -460,6 +460,7 @@ const DataFormFieldEditor = ({
         onFocus={e => {
           calculateCalendarPanelPosition(e.currentTarget);
         }}
+        readOnlyInput={true}
         showSeconds={true}
         showTime={true}
         value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
