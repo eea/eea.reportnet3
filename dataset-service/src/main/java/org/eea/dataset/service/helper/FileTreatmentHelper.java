@@ -327,7 +327,7 @@ public class FileTreatmentHelper implements DisposableBean {
         if (!files.isEmpty()) {
           wipeData(datasetId, null, replace);
           queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
-                replace, delimiter,multipartFileMimeType);
+              replace, delimiter, multipartFileMimeType);
         } else {
           releaseLock(datasetId);
           throw new EEAException("Empty zip file");
@@ -419,7 +419,7 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
-      String delimiter,String mimeType) throws IOException, EEAException {
+      String delimiter, String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO, mimeType);
     } else {
@@ -995,7 +995,10 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
           datasetSchemaId, e.getMessage(), e);
     }
-    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
+    if (datasetSchema != null) {
+      tableSchemaList = datasetSchema.getTableSchemas();
+    }
 
     return tableSchemaList;
   }
