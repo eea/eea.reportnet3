@@ -282,6 +282,7 @@ class DropdownFilter extends Component {
                   this.updateChecked(field.key);
                 }}>
                 <FontAwesomeIcon
+                  ariaLabel={field.label.toLowerCase()}
                   className={styles.checkboxIcon}
                   icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')}
                 />
