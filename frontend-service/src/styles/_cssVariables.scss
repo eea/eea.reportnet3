@@ -152,6 +152,7 @@
   /* Title */
   --title-icon-color: var(--gray-110);
   --title-color: var(--gray-110);
+  --title-icon-opacity: 0.6;
   --subtitle-color: var(--c-corporate-blue);
 
   /* Tabview */
@@ -442,6 +443,7 @@
   --field-designer-separator-box-shadow: 1px 1px rgba(var(--c-corporate-blue-rgb), 0.2),
     2px 2px rgba(var(--c-corporate-blue-rgb), 0.2), 3px 3px rgba(var(--c-corporate-blue-rgb), 0.2);
   --field-designer-separator-bg: rgba(var(--c-corporate-blue-rgb), 0.2);
+  --field-designer-separator-border-color: var(--gray-75);
 
   /* SideBar */
   --sidebar-bg: var(--white);
