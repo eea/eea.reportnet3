@@ -27,7 +27,12 @@ const TitleWithItem = memo(
       <div className={styles.rowContainer}>
         <div className={styles.titleWrap}>
           <div className={styles.iconWrap}>
-            <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons(icon)} style={{ fontSize: iconSize }} />
+            <FontAwesomeIcon
+              className={styles.icon}
+              icon={AwesomeIcons(icon)}
+              role="presentation"
+              style={{ fontSize: iconSize }}
+            />
           </div>
           <div className={styles.textWrap}>
             <span className={styles.title}>
@@ -36,6 +41,7 @@ const TitleWithItem = memo(
                 <>
                   <FontAwesomeIcon
                     aria-hidden={false}
+                    aria-label="Info"
                     className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
                     data-for={tooltipId}
                     data-tip

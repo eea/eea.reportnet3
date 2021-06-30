@@ -6,21 +6,29 @@ import styles from './Footer.module.scss';
 import { routes } from 'ui/routes';
 
 import eeaLogo from 'assets/images/logos/reportnet-3.0-logo.png';
+import eeaLogoDark from 'assets/images/logos/reportnet-3.0-logo-white.png';
 import logo from 'assets/images/logos/logo.png';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const Footer = withRouter(({ history }) => {
   const resources = useContext(ResourcesContext);
+  const themeContext = useContext(ThemeContext);
 
   return (
     <div className={styles.Footer}>
       <div className={styles.footerContent}>
         <div className={styles.reportnetLogo}>
           <a className={styles.title} href="https://www.eea.europa.eu/" title={resources.messages['eea']}>
-            <img alt={resources.messages['eea']} className={styles.appLogo} height="50px" src={eeaLogo} />
+            <img
+              alt={resources.messages['eea']}
+              className={styles.appLogo}
+              height="50px"
+              src={themeContext.currentTheme !== 'dark' ? eeaLogo : eeaLogoDark}
+            />
           </a>
         </div>
         <div className={styles.reportnetLogo}>

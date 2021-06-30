@@ -285,6 +285,7 @@ class DropdownFilter extends Component {
                   ariaLabel={field.label.toLowerCase()}
                   className={styles.checkboxIcon}
                   icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')}
+                  role="presentation"
                 />
                 {this.props.showLevelErrorIcons ? (
                   !TextUtils.areEquals(field.label, 'SELECT ALL') && !TextUtils.areEquals(field.label, 'CORRECT') ? (

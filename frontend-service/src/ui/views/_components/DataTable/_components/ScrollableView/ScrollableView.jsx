@@ -245,7 +245,7 @@ export class ScrollableView extends Component {
             style={{
               overflow: this.props.totalRecords === 0 || isNull(this.props.totalRecords) ? 'auto' : 'hidden'
             }}>
-            <table className={tableHeaderClassName} style={this.props.tableStyle}>
+            <table className={tableHeaderClassName} style={this.props.tableStyle} summary={this.props.header}>
               {colGroup}
               {this.props.header}
               {this.props.frozenBody}
