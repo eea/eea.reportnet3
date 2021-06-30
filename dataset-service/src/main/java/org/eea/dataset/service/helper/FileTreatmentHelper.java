@@ -216,7 +216,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     if (delimiter != null && delimiter.length() > 1) {
       LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
-      throw new EEAException("the size of the delimiter cannot be greater than 1");
+      throw new EEAException("The size of the delimiter cannot be greater than 1");
     }
 
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
