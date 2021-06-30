@@ -677,4 +677,11 @@ public class DataFlowControllerImplTest {
     assertFalse("reference not allowed",
         dataFlowControllerImpl.accessReferenceEntity(EntityClassEnum.DATASET, 1L));
   }
+
+  @Test
+  public void findReferenceDataflowsTest() throws EEAException {
+    when(dataflowService.getReferenceDataflows(Mockito.any())).thenReturn(new ArrayList<>());
+    dataFlowControllerImpl.findReferenceDataflows();
+    assertEquals("fail", new ArrayList<>(), dataflowService.getReferenceDataflows(Mockito.any()));
+  }
 }
