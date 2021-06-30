@@ -1088,6 +1088,12 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayEquals("1", 1));
   }
 
+  @Test
+  public void recordDayEqualsCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    assertTrue(RuleOperators.recordDayEquals("1", 1));
+  }
+
   /**
    * Record day distinct test.
    */
@@ -1112,6 +1118,12 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayDistinctCatchTest() {
     fieldValue1.setValue(null);
+    assertTrue(RuleOperators.recordDayDistinct("1", 1));
+  }
+
+  @Test
+  public void recordDayDistinctCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     assertTrue(RuleOperators.recordDayDistinct("1", 1));
   }
 
@@ -1142,6 +1154,12 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayGreaterThan("1", 1));
   }
 
+  @Test
+  public void recordDayGreaterThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    assertTrue(RuleOperators.recordDayGreaterThan("1", 1));
+  }
+
   /**
    * Record day less than test.
    */
@@ -1166,6 +1184,12 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayLessThanCatchTest() {
     fieldValue1.setValue(null);
+    assertTrue(RuleOperators.recordDayLessThan("1", 1));
+  }
+
+  @Test
+  public void recordDayLessThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     assertTrue(RuleOperators.recordDayLessThan("1", 1));
   }
 
@@ -1196,6 +1220,12 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayGreaterThanOrEqualsThan("1", 1));
   }
 
+  @Test
+  public void recordDayGreaterThanOrEqualsThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    assertTrue(RuleOperators.recordDayGreaterThanOrEqualsThan("1", 1));
+  }
+
   /**
    * Record day less than or equals than test.
    */
@@ -1220,6 +1250,12 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayLessThanOrEqualsThanCatchTest() {
     fieldValue1.setValue(null);
+    assertTrue(RuleOperators.recordDayLessThanOrEqualsThan("1", 1));
+  }
+
+  @Test
+  public void recordDayLessThanOrEqualsThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     assertTrue(RuleOperators.recordDayLessThanOrEqualsThan("1", 1));
   }
 
@@ -1249,6 +1285,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayEqualsRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayEqualsRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDayEqualsRecordCatchTest2() {
+    fieldValue1.setValue("2020-12-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordDayEqualsRecord("1", "2"));
   }
@@ -1283,6 +1326,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayDistinctRecord("1", "2"));
   }
 
+  @Test
+  public void recordDayDistinctRecordCatchTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayDistinctRecord("1", "2"));
+  }
+
   /**
    * Record day greater than record test.
    */
@@ -1309,6 +1359,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayGreaterThanRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayGreaterThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDayGreaterThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-12-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordDayGreaterThanRecord("1", "2"));
   }
@@ -1343,6 +1400,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayLessThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordDayLessThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayLessThanRecord("1", "2"));
+  }
+
   /**
    * Record day greater than or equals than record test.
    */
@@ -1369,6 +1433,14 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayGreaterThanOrEqualsThanRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
+
+  @Test
+  public void recordDayGreaterThanOrEqualsThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-12-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordDayGreaterThanOrEqualsThanRecord("1", "2"));
   }
@@ -1403,6 +1475,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayLessThanOrEqualsThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordDayLessThanOrEqualsThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayLessThanOrEqualsThanRecord("1", "2"));
+  }
+
   /**
    * Record day equals record number test.
    */
@@ -1429,6 +1508,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayEqualsRecordNumberCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayEqualsRecordNumber("1", "2"));
+  }
+
+  @Test
+  public void recordDayEqualsRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-12-01 00:00:00");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordDayEqualsRecordNumber("1", "2"));
   }
@@ -1463,6 +1549,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayDistinctRecordNumber("1", "2"));
   }
 
+  @Test
+  public void recordDayDistinctRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-12-01 00:00:00");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayDistinctRecordNumber("1", "2"));
+  }
+
   /**
    * Record day greater than record number test.
    */
@@ -1489,6 +1582,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayGreaterThanRecordNumberCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayGreaterThanRecordNumber("1", "2"));
+  }
+
+  @Test
+  public void recordDayGreaterThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-12-01 00:00:00");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordDayGreaterThanRecordNumber("1", "2"));
   }
@@ -1523,6 +1623,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayLessThanRecordNumber("1", "2"));
   }
 
+  @Test
+  public void recordDayLessThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-12-01 00:00:00");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayLessThanRecordNumber("1", "2"));
+  }
+
   /**
    * Record day greater than or equals than record number test.
    */
@@ -1549,6 +1656,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordDayGreaterThanOrEqualsThanRecordNumberCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayGreaterThanOrEqualsThanRecordNumber("1", "2"));
+  }
+
+  @Test
+  public void recordDayGreaterThanOrEqualsThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-12-01 00:00:00");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordDayGreaterThanOrEqualsThanRecordNumber("1", "2"));
   }
@@ -1583,6 +1697,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDayLessThanOrEqualsThanRecordNumber("1", "2"));
   }
 
+  @Test
+  public void recordDayLessThanOrEqualsThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-12-01 00:00:00");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDayLessThanOrEqualsThanRecordNumber("1", "2"));
+  }
+
   /**
    * Record month equals test.
    */
@@ -1607,6 +1728,12 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthEqualsCatchTest() {
     fieldValue1.setValue(null);
+    assertTrue(RuleOperators.recordMonthEquals("1", 1));
+  }
+
+  @Test
+  public void recordMonthEqualsCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     assertTrue(RuleOperators.recordMonthEquals("1", 1));
   }
 
@@ -1637,6 +1764,12 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthDistinct("1", 1));
   }
 
+  @Test
+  public void recordMonthDistinctCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    assertTrue(RuleOperators.recordMonthDistinct("1", 1));
+  }
+
   /**
    * Record month greater than test.
    */
@@ -1661,6 +1794,12 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthGreaterThanCatchTest() {
     fieldValue1.setValue(null);
+    assertTrue(RuleOperators.recordMonthGreaterThan("1", 1));
+  }
+
+  @Test
+  public void recordMonthGreaterThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     assertTrue(RuleOperators.recordMonthGreaterThan("1", 1));
   }
 
@@ -1691,6 +1830,12 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthLessThan("1", 1));
   }
 
+  @Test
+  public void recordMonthLessThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    assertTrue(RuleOperators.recordMonthLessThan("1", 1));
+  }
+
   /**
    * Record month greater than or equals than test.
    */
@@ -1715,6 +1860,12 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthGreaterThanOrEqualsThanCatchTest() {
     fieldValue1.setValue(null);
+    assertTrue(RuleOperators.recordMonthGreaterThanOrEqualsThan("1", 1));
+  }
+
+  @Test
+  public void recordMonthGreaterThanOrEqualsThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     assertTrue(RuleOperators.recordMonthGreaterThanOrEqualsThan("1", 1));
   }
 
@@ -1745,6 +1896,12 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthLessThanOrEqualsThan("1", 1));
   }
 
+  @Test
+  public void recordMonthLessThanOrEqualsThanCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    assertTrue(RuleOperators.recordMonthLessThanOrEqualsThan("1", 1));
+  }
+
   /**
    * Record month equals record test.
    */
@@ -1771,6 +1928,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthEqualsRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthEqualsRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthEqualsRecordCatchTest2() {
+    fieldValue1.setValue("2020-12-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordMonthEqualsRecord("1", "2"));
   }
@@ -1805,6 +1969,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthDistinctRecord("1", "2"));
   }
 
+  @Test
+  public void recordMonthDistinctRecordCatchTest2() {
+    fieldValue1.setValue("2020-02-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthDistinctRecord("1", "2"));
+  }
+
   /**
    * Record month greater than record test.
    */
@@ -1831,6 +2002,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthGreaterThanRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthGreaterThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthGreaterThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-01-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordMonthGreaterThanRecord("1", "2"));
   }
@@ -1865,6 +2043,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthLessThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordMonthLessThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-02-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthLessThanRecord("1", "2"));
+  }
+
   /**
    * Record month greater than or equals than record test.
    */
@@ -1891,6 +2076,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthGreaterThanOrEqualsThanRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthGreaterThanOrEqualsThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-01-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordMonthGreaterThanOrEqualsThanRecord("1", "2"));
   }
@@ -1925,6 +2117,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthLessThanOrEqualsThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordMonthLessThanOrEqualsThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-02-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthLessThanOrEqualsThanRecord("1", "2"));
+  }
+
   /**
    * Record month equals record number test.
    */
@@ -1951,6 +2150,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthEqualsRecordNumberCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthEqualsRecordNumber("1", "2"));
+  }
+
+  @Test
+  public void recordMonthEqualsRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-13-12");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordMonthEqualsRecordNumber("1", "2"));
   }
@@ -1985,6 +2191,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthDistinctRecordNumber("1", "2"));
   }
 
+  @Test
+  public void recordMonthDistinctRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthDistinctRecordNumber("1", "2"));
+  }
+
   /**
    * Record month greater than record number test.
    */
@@ -2011,6 +2224,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthGreaterThanRecordNumberCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthGreaterThanRecordNumber("1", "2"));
+  }
+
+  @Test
+  public void recordMonthGreaterThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordMonthGreaterThanRecordNumber("1", "2"));
   }
@@ -2045,6 +2265,15 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthLessThanRecordNumber("1", "2"));
   }
 
+
+  @Test
+  public void recordMonthLessThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthLessThanRecordNumber("1", "2"));
+  }
+
+
   /**
    * Record month greater than or equals than record number test.
    */
@@ -2075,6 +2304,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthGreaterThanOrEqualsThanRecordNumber("1", "2"));
   }
 
+  @Test
+  public void recordMonthGreaterThanOrEqualsThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthGreaterThanOrEqualsThanRecordNumber("1", "2"));
+  }
+
   /**
    * Record month less than or equals than record number test.
    */
@@ -2101,6 +2337,14 @@ public class RuleOperatorsTest {
   @Test
   public void recordMonthLessThanOrEqualsThanRecordNumberCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthLessThanOrEqualsThanRecordNumber("1", "2"));
+  }
+
+
+  @Test
+  public void recordMonthLessThanOrEqualsThanRecordNumberCatchTest2() {
+    fieldValue1.setValue("2020-13-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordMonthLessThanOrEqualsThanRecordNumber("1", "2"));
   }
@@ -2297,6 +2541,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordYearEqualsRecord("1", "2"));
   }
 
+  @Test
+  public void recordYearEqualsRecordCatchTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYearEqualsRecord("1", "2"));
+  }
+
   /**
    * Record year distinct record test.
    */
@@ -2323,6 +2574,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordYearDistinctRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYearDistinctRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYearDistinctRecordCatchTest2() {
+    fieldValue1.setValue("2020-01-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordYearDistinctRecord("1", "2"));
   }
@@ -2357,6 +2615,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordYearGreaterThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordYearGreaterThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYearGreaterThanRecord("1", "2"));
+  }
+
   /**
    * Record year less than record test.
    */
@@ -2383,6 +2648,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordYearLessThanRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYearLessThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYearLessThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-01-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordYearLessThanRecord("1", "2"));
   }
@@ -2417,6 +2689,13 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordYearGreaterThanOrEqualsThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordYearGreaterThanOrEqualsThanRecordCatchTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYearGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
   /**
    * Record year less than or equals than record test.
    */
@@ -2443,6 +2722,13 @@ public class RuleOperatorsTest {
   @Test
   public void recordYearLessThanOrEqualsThanRecordCatchTest() {
     fieldValue1.setValue(null);
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYearLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYearLessThanOrEqualsThanRecordCatchTest2() {
+    fieldValue1.setValue("2021-01-01");
     fieldValue2.setValue(null);
     assertTrue(RuleOperators.recordYearLessThanOrEqualsThanRecord("1", "2"));
   }
@@ -6185,7 +6471,7 @@ public class RuleOperatorsTest {
 
   @Test
   public void fieldYeartimeGreaterThanFalseDatetimeTest() {
-    assertFalse(RuleOperators.fieldYearGreaterThan("2020-02-01", 2021));
+    assertFalse(RuleOperators.fieldYeartimeGreaterThan("2020-02-01 00:00:00", 2021));
   }
 
 
@@ -6527,6 +6813,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDaytimeEqualsRecord("1", "2"));
   }
 
+  @Test
+  public void recordDaytimeEqualsRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeEqualsRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeEqualsRecordCatchDatetimeTest3() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue("2020-12-01");
+    assertTrue(RuleOperators.recordDaytimeEqualsRecord("1", "2"));
+  }
+
 
   @Test
   public void recordDaytimeDistinctRecordDatetimeTest() {
@@ -6548,6 +6848,20 @@ public class RuleOperatorsTest {
   public void recordDaytimeDistinctRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeDistinctRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeDistinctRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeDistinctRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeDistinctRecordDatetimeTest3() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue("2020-12-02");
     assertTrue(RuleOperators.recordDaytimeDistinctRecord("1", "2"));
   }
 
@@ -6575,6 +6889,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDaytimeGreaterThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordDaytimeGreaterThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeGreaterThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeGreaterThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-12-02");
+    fieldValue2.setValue("2020-12-01");
+    assertTrue(RuleOperators.recordDaytimeGreaterThanRecord("1", "2"));
+  }
+
 
   @Test
   public void recordDaytimeLessThanRecordDatetimeTest() {
@@ -6596,6 +6924,20 @@ public class RuleOperatorsTest {
   public void recordDaytimeLessThanRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeLessThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeLessThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeLessThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeLessThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue("2020-12-02");
     assertTrue(RuleOperators.recordDaytimeLessThanRecord("1", "2"));
   }
 
@@ -6623,6 +6965,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordDaytimeGreaterThanOrEqualsThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordDaytimeGreaterThanOrEqualsThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeGreaterThanOrEqualsThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-12-02");
+    fieldValue2.setValue("2020-12-01");
+    assertTrue(RuleOperators.recordDaytimeGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
 
   @Test
   public void recordDaytimeLessThanOrEqualsThanRecordDatetimeTest() {
@@ -6644,6 +7000,20 @@ public class RuleOperatorsTest {
   public void recordDaytimeLessThanOrEqualsThanRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeLessThanOrEqualsThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordDaytimeLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordDaytimeLessThanOrEqualsThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-12-01");
+    fieldValue2.setValue("2020-12-02");
     assertTrue(RuleOperators.recordDaytimeLessThanOrEqualsThanRecord("1", "2"));
   }
 
@@ -6941,6 +7311,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthtimeEqualsRecord("1", "2"));
   }
 
+  @Test
+  public void recordMonthtimeEqualsRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeEqualsRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeEqualsRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-01-01");
+    assertTrue(RuleOperators.recordMonthtimeEqualsRecord("1", "2"));
+  }
+
 
   @Test
   public void recordMonthtimeDistinctRecordDatetimeTest() {
@@ -6965,6 +7349,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthtimeDistinctRecord("1", "2"));
   }
 
+  @Test
+  public void recordMonthtimeDistinctRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeDistinctRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeDistinctRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-02-01");
+    assertTrue(RuleOperators.recordMonthtimeDistinctRecord("1", "2"));
+  }
+
 
   @Test
   public void recordMonthtimeGreaterThanRecordDatetimeTest() {
@@ -6985,6 +7383,20 @@ public class RuleOperatorsTest {
   public void recordMonthtimeGreaterThanRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeGreaterThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeGreaterThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeGreaterThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeGreaterThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-02-01");
+    fieldValue2.setValue("2020-01-01");
     assertTrue(RuleOperators.recordMonthtimeGreaterThanRecord("1", "2"));
   }
 
@@ -7012,6 +7424,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthtimeLessThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordMonthtimeLessThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeLessThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeLessThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-02-01");
+    assertTrue(RuleOperators.recordMonthtimeLessThanRecord("1", "2"));
+  }
+
 
   @Test
   public void recordMonthtimeGreaterThanOrEqualsThanRecordDatetimeTest() {
@@ -7036,6 +7462,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordMonthtimeGreaterThanOrEqualsThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordMonthtimeGreaterThanOrEqualsThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeGreaterThanOrEqualsThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-02-01");
+    fieldValue2.setValue("2020-01-01");
+    assertTrue(RuleOperators.recordMonthtimeGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
 
   @Test
   public void recordMonthtimeLessThanOrEqualsThanRecordDatetimeTest() {
@@ -7057,6 +7497,20 @@ public class RuleOperatorsTest {
   public void recordMonthtimeLessThanOrEqualsThanRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeLessThanOrEqualsThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordMonthtimeLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordMonthtimeLessThanOrEqualsThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-02-01");
     assertTrue(RuleOperators.recordMonthtimeLessThanOrEqualsThanRecord("1", "2"));
   }
 
@@ -7352,6 +7806,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordYeartimeEqualsRecord("1", "2"));
   }
 
+  @Test
+  public void recordYeartimeEqualsRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeEqualsRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYeartimeEqualsRecordDatetimeTest2() {
+    fieldValue1.setValue("2020-01-01");
+    fieldValue2.setValue("2020-01-01");
+    assertTrue(RuleOperators.recordYeartimeEqualsRecord("1", "2"));
+  }
+
 
   @Test
   public void recordYeartimeDistinctRecordDatetimeTest() {
@@ -7373,6 +7841,20 @@ public class RuleOperatorsTest {
   public void recordYeartimeDistinctRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeDistinctRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYeartimeDistinctRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeDistinctRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYeartimeDistinctRecordDatetimeTest2() {
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertTrue(RuleOperators.recordYeartimeDistinctRecord("1", "2"));
   }
 
@@ -7400,6 +7882,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordYeartimeGreaterThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordYeartimeGreaterThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeGreaterThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYeartimeGreaterThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2021-01-01");
+    fieldValue2.setValue("2020-01-01");
+    assertTrue(RuleOperators.recordYeartimeGreaterThanRecord("1", "2"));
+  }
+
 
   @Test
   public void recordYeartimeLessThanRecordDatetimeTest() {
@@ -7421,6 +7917,21 @@ public class RuleOperatorsTest {
   public void recordYeartimeLessThanRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeLessThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYeartimeLessThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeLessThanRecord("1", "2"));
+  }
+
+
+  @Test
+  public void recordYeartimeLessThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertTrue(RuleOperators.recordYeartimeLessThanRecord("1", "2"));
   }
 
@@ -7447,6 +7958,20 @@ public class RuleOperatorsTest {
     assertTrue(RuleOperators.recordYeartimeGreaterThanOrEqualsThanRecord("1", "2"));
   }
 
+  @Test
+  public void recordYeartimeGreaterThanOrEqualsThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYeartimeGreaterThanOrEqualsThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2021-01-01");
+    fieldValue2.setValue("2020-01-01");
+    assertTrue(RuleOperators.recordYeartimeGreaterThanOrEqualsThanRecord("1", "2"));
+  }
+
 
   @Test
   public void recordYeartimeLessThanOrEqualsThanRecordDatetimeTest() {
@@ -7468,6 +7993,21 @@ public class RuleOperatorsTest {
   public void recordYeartimeLessThanOrEqualsThanRecordCatchDatetimeTest() {
     fieldValue1.setValue(null);
     fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+  @Test
+  public void recordYeartimeLessThanOrEqualsThanRecordCatchDatetimeTest2() {
+    fieldValue1.setValue("2020-12-12");
+    fieldValue2.setValue(null);
+    assertTrue(RuleOperators.recordYeartimeLessThanOrEqualsThanRecord("1", "2"));
+  }
+
+
+  @Test
+  public void recordYeartimeLessThanOrEqualsThanRecordDatetimeTest2() {
+    fieldValue1.setValue("2019-01-01");
+    fieldValue2.setValue("2020-01-01");
     assertTrue(RuleOperators.recordYeartimeLessThanOrEqualsThanRecord("1", "2"));
   }
 

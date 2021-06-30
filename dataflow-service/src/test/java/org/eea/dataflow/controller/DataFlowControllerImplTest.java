@@ -1,6 +1,7 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
@@ -714,6 +715,7 @@ public class DataFlowControllerImplTest {
 
   @Test
   public void accessReferenceEntityTest() {
-    dataFlowControllerImpl.accessReferenceEntity(EntityClassEnum.DATASET, 1L);
+    assertFalse("reference not allowed",
+        dataFlowControllerImpl.accessReferenceEntity(EntityClassEnum.DATASET, 1L));
   }
 }
