@@ -219,41 +219,43 @@ public class ExcelReaderStrategy implements ReaderStrategy {
         String value = dataFormatter.formatCellValue(recordRow.getCell(i));
         FieldSchema fieldSchema = headers.get(i);
         FieldValue field = new FieldValue();
-        field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
-        field.setType(fieldSchema.getType());
-        field.setRecord(record);
-        field.setValue(value);
-        if (null == field.getType() && value.length() >= fieldMaxLength) {
-          field.setValue(value.substring(0, fieldMaxLength));
-        } else {
-          switch (field.getType()) {
-            case ATTACHMENT:
-              field.setValue("");
-              break;
-            case POINT:
-              break;
-            case LINESTRING:
-              break;
-            case POLYGON:
-              break;
-            case MULTIPOINT:
-              break;
-            case MULTILINESTRING:
-              break;
-            case MULTIPOLYGON:
-              break;
-            case GEOMETRYCOLLECTION:
-              break;
-            default:
-              if (value.length() >= fieldMaxLength) {
-                field.setValue(value.substring(0, fieldMaxLength));
-              }
+        if (null != fieldSchema && null != fieldSchema.getIdFieldSchema()) {
+          field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
+          field.setType(fieldSchema.getType());
+          field.setRecord(record);
+          field.setValue(value);
+          if (null == field.getType() && value.length() >= fieldMaxLength) {
+            field.setValue(value.substring(0, fieldMaxLength));
+          } else {
+            switch (field.getType()) {
+              case ATTACHMENT:
+                field.setValue("");
+                break;
+              case POINT:
+                break;
+              case LINESTRING:
+                break;
+              case POLYGON:
+                break;
+              case MULTIPOINT:
+                break;
+              case MULTILINESTRING:
+                break;
+              case MULTIPOLYGON:
+                break;
+              case GEOMETRYCOLLECTION:
+                break;
+              default:
+                if (value.length() >= fieldMaxLength) {
+                  field.setValue(value.substring(0, fieldMaxLength));
+                }
+            }
           }
-        }
 
-        if (field.getIdFieldSchema() != null) {
-          fields.add(field);
-          idSchema.add(field.getIdFieldSchema());
+          if (field.getIdFieldSchema() != null) {
+            fields.add(field);
+            idSchema.add(field.getIdFieldSchema());
+          }
         }
       }
       setMissingField(fileCommon.findFieldSchemas(idTableSchema, dataSetSchema), fields, idSchema);
@@ -314,7 +316,6 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       if (dataSetSchema != null) {
         dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
       }
-
       fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace, schema,
           dataset);
     } catch (EEAException | IOException | SQLException e) {

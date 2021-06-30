@@ -2,6 +2,8 @@ import { Fragment, useContext } from 'react';
 
 import styles from './userConfiguration.module.scss';
 
+import uniqueId from 'lodash/uniqueId';
+
 import DarkGray from 'assets/images/layers/DarkGray.png';
 import Gray from 'assets/images/layers/Gray.png';
 import Imagery from 'assets/images/layers/Imagery.png';
@@ -70,11 +72,14 @@ const UserConfiguration = () => {
     }
   };
 
+  const id = uniqueId();
+
   const basemapLayerDropdown = (
     <Fragment>
       <Dropdown
+        ariaLabel="basemapLayer"
         className={styles.basemapLayer}
-        id={`basemapLayer`}
+        id={`basemapLayer_${id}`}
         itemTemplate={basemapTemplate}
         name="basemapLayer"
         onChange={async e => {
@@ -110,6 +115,7 @@ const UserConfiguration = () => {
     <Fragment>
       <span className={styles.switchTextInput}>{resources.messages['light']}</span>
       <InputSwitch
+        aria-label="theme"
         checked={userContext.userProps.visualTheme === 'dark'}
         onChange={async e => {
           themeContext.onToggleTheme(e.value ? 'dark' : 'light');
@@ -138,6 +144,7 @@ const UserConfiguration = () => {
     <Fragment>
       <span className={styles.switchTextInput}>AM/PM</span>
       <InputSwitch
+        aria-label="amPmFormat"
         checked={userContext.userProps.amPm24h}
         onChange={async e => {
           userContext.onToggleAmPm24hFormat(e.value);
@@ -160,6 +167,7 @@ const UserConfiguration = () => {
     <Fragment>
       <span className={styles.switchTextInput}>No popup</span>
       <InputSwitch
+        aria-label="configurationLogout"
         checked={userContext.userProps.showLogoutConfirmation}
         onChange={async e => {
           userContext.onToggleLogoutConfirm(e.value);
@@ -184,6 +192,7 @@ const UserConfiguration = () => {
     <Fragment>
       <span className={styles.switchTextInput}>{resources.messages['noSound']}</span>
       <InputSwitch
+        aria-label="notificationSound"
         checked={userContext.userProps.notificationSound}
         onChange={async e => {
           userContext.onToggleNotificationSound(e.value);
@@ -208,6 +217,7 @@ const UserConfiguration = () => {
     <Fragment>
       <span className={styles.switchTextInput}>{resources.messages['noPushNotifications']}</span>
       <InputSwitch
+        aria-label="pushNotifications"
         checked={userContext.userProps.pushNotifications}
         onChange={async e => {
           userContext.onTogglePushNotifications(e.value);
@@ -232,6 +242,7 @@ const UserConfiguration = () => {
     <Fragment>
       <span className={styles.switchTextInput}>{`${resources.messages['magazineView']}`}</span>
       <InputSwitch
+        aria-label="typeView"
         checked={userContext.userProps.listView}
         onChange={async e => {
           userContext.onToggleTypeView(e.value);
@@ -255,6 +266,7 @@ const UserConfiguration = () => {
   const rowsInPaginationDropdown = (
     <Fragment>
       <Dropdown
+        ariaLabel="rowPerPage"
         id={`rowsPage`}
         name="rowPerPage"
         onChange={async e => {
@@ -277,6 +289,7 @@ const UserConfiguration = () => {
 
   const dateFormatDropdown = (
     <Dropdown
+      ariaLabel="dateFormat"
       name="dateFormat"
       onChange={async e => {
         const inmUserProperties = { ...userContext.userProps };

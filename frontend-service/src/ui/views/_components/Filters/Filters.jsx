@@ -392,15 +392,13 @@ export const Filters = ({
       />
       <span className={styles.checkbox}>
         <Checkbox
+          ariaLabel={resources.messages['strictModeCheckboxFilter']}
           checked={filterState.matchMode}
           id="matchMode_checkbox"
           inputId="matchMode_checkbox"
           onChange={() => onToggleMatchMode()}
           role="checkbox"
         />
-        <label className="srOnly" htmlFor={`matchMode_checkbox`}>
-          {resources.messages['strictModeCheckboxFilter']}
-        </label>
       </span>
     </span>
   );
@@ -412,6 +410,7 @@ export const Filters = ({
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
             <Checkbox
+              ariaLabel={resources.messages[property]}
               checked={getCheckboxFilterState(property)}
               id={property}
               inputId={property}
