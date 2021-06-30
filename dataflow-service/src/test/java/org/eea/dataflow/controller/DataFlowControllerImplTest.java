@@ -679,6 +679,6 @@ public class DataFlowControllerImplTest {
 
   @Test
   public void findReferenceDataflowsTest() {
-    dataFlowControllerImpl.findReferenceDataflows();
+    assertNotNull("assertion error", dataFlowControllerImpl.findReferenceDataflows());
   }
 }
