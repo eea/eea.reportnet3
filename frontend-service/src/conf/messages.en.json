@@ -462,9 +462,9 @@
     "externalExportEudatasetCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> exported correctly",
     "externalExportEudatasetFailedEvent": "Error exporting <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalImportDesignCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "externalImportDesignFromOtherSystemCompletedEvent": "<strong title='{:datasetName}'>{:shortDatasetName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "externalImportDesignFromOtherSystemCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportReportingFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
@@ -1160,7 +1160,7 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "goToLink": "Go to link",
-    "snapshotsEmtpyDescription": "Empty description",
+    "snapshotsEmptyDescription": "Empty description",
     "snapshotsWrongLengthDescription": "Description must be smaller than 256 characters",
     "pinDataflowMessage": "Check to mark as pinned your new dataflow",
     "notFieldToSelect": "No Field",
@@ -1170,6 +1170,7 @@
     "downloadValidationsError": "Failed downloading validations",
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
     "downloadValidationsFileError": "Failed downloading validations file",
-    "collapseAll": "Collapse all"
+    "collapseAll": "Collapse all",
+    "noQuotesQCTooltip": "Double quotes (&quot&quot) cannot be used"
   }
 }

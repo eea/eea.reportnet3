@@ -180,11 +180,16 @@ const DatasetSchema = ({
               aria-hidden={false}
               aria-label={resources.messages['geomTypeHelpTooltip']}
               className="p-breadcrumb-home"
-              data-for="geometricTypeTooltip"
+              data-for={`${field.fieldId}_geometricTypeTooltip`}
               data-tip
               icon={AwesomeIcons('externalUrl')}
             />
-            <ReactTooltip className={styles.tooltipClass} effect="solid" id="geometricTypeTooltip" place="top">
+            <ReactTooltip
+              border={true}
+              className={styles.tooltipClass}
+              effect="solid"
+              id={`${field.fieldId}_geometricTypeTooltip`}
+              place="top">
               <span>{resources.messages['geomTypeHelpTooltip']}</span>
             </ReactTooltip>
           </span>
