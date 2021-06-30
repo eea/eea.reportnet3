@@ -41,13 +41,14 @@ const TitleWithItem = memo(
                 <>
                   <FontAwesomeIcon
                     aria-hidden={false}
+                    aria-label="Info"
                     className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
                     data-for={tooltipId}
                     data-tip
                     icon={AwesomeIcons('infoCircle')}
                   />
 
-                  <ReactTooltip className={styles.tooltip} effect="solid" id={tooltipId} place="right">
+                  <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="right">
                     {
                       <div className={styles.infoTooltipWrapper}>
                         <span>{tooltipInfo}</span>

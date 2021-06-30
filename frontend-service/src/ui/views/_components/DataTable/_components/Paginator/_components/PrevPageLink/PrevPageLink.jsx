@@ -1,4 +1,6 @@
 import { Component } from 'react';
+import uniqueId from 'lodash/uniqueId';
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -18,7 +20,7 @@ export class PrevPageLink extends Component {
 
     return (
       <button className={className} disabled={this.props.disabled} onClick={this.props.onClick} type="button">
-        <span className="p-paginator-icon pi pi-caret-left" id="prevPage"></span>
+        <span className="p-paginator-icon pi pi-caret-left" id={uniqueId('prevPage')}></span>
         <span className="srOnly" htmlFor="prevPage">
           Previous page
         </span>

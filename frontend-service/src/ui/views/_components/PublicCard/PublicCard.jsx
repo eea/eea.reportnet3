@@ -70,7 +70,7 @@ export const PublicCard = ({
           <h4 className={styles.subtitle} data-for={idTooltip} data-tip>
             {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
           </h4>
-          <ReactTooltip className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={idTooltip} place="top">
             {subtitle.text}
           </ReactTooltip>
         </div>

@@ -30,6 +30,7 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
@@ -152,6 +153,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The test dataset repository. */
   @Autowired
   private TestDatasetRepository testDatasetRepository;
+
+  /** The reference dataset repository. */
+  @Autowired
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
 
   /**
@@ -789,6 +794,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       type = DatasetTypeEnum.EUDATASET;
     } else if (testDatasetRepository.existsById(datasetId)) {
       type = DatasetTypeEnum.TEST;
+    } else if (referenceDatasetRepository.existsById(datasetId)) {
+      type = DatasetTypeEnum.REFERENCE;
     }
 
     return type;

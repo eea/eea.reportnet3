@@ -5,6 +5,7 @@ export class Validation {
     allExpressionsIf,
     allExpressionsThen,
     automatic,
+    automaticType,
     condition,
     date,
     description,
@@ -23,13 +24,13 @@ export class Validation {
     ruleId,
     shortCode,
     sqlSentence
-    
   } = {}) {
     this.activationGroup = activationGroup;
     this.allExpressions = allExpressions;
     this.allExpressionsIf = allExpressionsIf;
     this.allExpressionsThen = allExpressionsThen;
     this.automatic = automatic;
+    this.automaticType = automaticType;
     this.condition = condition;
     this.date = date;
     this.description = description;

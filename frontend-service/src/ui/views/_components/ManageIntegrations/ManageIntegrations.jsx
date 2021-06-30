@@ -401,7 +401,7 @@ export const ManageIntegrations = ({
       />
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
-        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
+        <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
           {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
       )}
@@ -593,7 +593,7 @@ export const ManageIntegrations = ({
             )}
 
             {isKeyDuplicated && (
-              <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
+              <ReactTooltip border={true} effect="solid" id="addParameterTooltip" place="top">
                 {resources.messages['parameterAlreadyExists']}
               </ReactTooltip>
             )}
