@@ -6,7 +6,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -79,18 +78,6 @@ public interface DataflowService {
    */
   List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException;
 
-
-  /**
-   * Gets the pending by user.
-   *
-   * @param userId the user id
-   * @param type the type
-   *
-   * @return the pending by user
-   *
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
 
   /**
    * Adds the contributor to dataflow.
