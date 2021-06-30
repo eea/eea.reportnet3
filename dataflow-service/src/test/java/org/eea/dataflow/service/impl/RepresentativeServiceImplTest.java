@@ -653,6 +653,8 @@ public class RepresentativeServiceImplTest {
 
 
     representativeServiceImpl.importFile(1L, 2L, file);
+    Mockito.verify(representativeRepository, times(1)).saveAll(Mockito.any());
+
   }
 
   @Test
@@ -667,8 +669,8 @@ public class RepresentativeServiceImplTest {
     dataProviderList.add(dataProvider);
 
     DataProviderVO dataProviderVO = new DataProviderVO();
-    dataProvider.setId(1L);
-    dataProvider.setCode("AL");
+    dataProviderVO.setId(1L);
+    dataProviderVO.setCode("AL");
     List<DataProviderVO> dataProviderListVO = new ArrayList<>();
     dataProviderListVO.add(dataProviderVO);
 
@@ -677,7 +679,7 @@ public class RepresentativeServiceImplTest {
     Mockito.when(dataProviderRepository.findByCode(Mockito.any())).thenReturn(dataProviderList);
     Mockito.when(dataProviderMapper.entityListToClass(Mockito.any()))
         .thenReturn(dataProviderListVO);
-    representativeServiceImpl.getProviderIds();
+    assertEquals(Arrays.asList(1L), representativeServiceImpl.getProviderIds());
   }
 
 }

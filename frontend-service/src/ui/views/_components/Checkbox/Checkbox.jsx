@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';
 
+import uniqueId from 'lodash/uniqueId';
+
 export class Checkbox extends Component {
   static defaultProps = {
     ariaLabel: null,
@@ -132,6 +134,8 @@ export class Checkbox extends Component {
     });
     let iconClass = classNames('p-checkbox-icon p-c', { 'pi pi-check': this.props.checked });
 
+    const id = uniqueId();
+
     return (
       <div
         className={containerClass}
@@ -147,7 +151,7 @@ export class Checkbox extends Component {
             aria-labelledby={this.props.ariaLabelledBy}
             defaultChecked={this.props.checked}
             disabled={this.props.disabled}
-            id={this.props.inputId}
+            id={`${this.props.inputId}_${id}`}
             name={this.props.name}
             onBlur={this.onBlur}
             onFocus={this.onFocus}

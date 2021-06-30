@@ -933,9 +933,10 @@ public class DatasetServiceImpl implements DatasetService {
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    final IFileExportContext context = fileExportFactory.createContext(mimeType);
+    final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false);
+    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
+        false);
   }
 
 
@@ -1350,7 +1351,7 @@ public class DatasetServiceImpl implements DatasetService {
 
         LOG_ERROR.error(
             "Error with dataset id {}  field  with id {} because data has not correct format {}",
-            datasetIdOrigin, idPk, fvPk.getType().toString());
+            datasetIdOrigin, idPk, fvPk.getType());
         // we find table and field to send in notification
         Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
             fvPk.getRecord().getTableValue().getIdTableSchema());
@@ -1358,7 +1359,7 @@ public class DatasetServiceImpl implements DatasetService {
             schemasRepository.findFieldSchema(datasetSchemaId, fvPk.getIdFieldSchema());
         String tableSchemaName = (String) tableSchema.get("nameTableSchema");
         String tableSchemaId = tableSchema.get("_id").toString();
-        String fieldSchemaName = (String) fieldSchemaDocument.get("headerName");
+        String fieldSchemaName = (String) fieldSchemaDocument.get(HEADER_NAME);
 
         NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -1468,30 +1469,18 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public boolean isDatasetReportable(Long idDataset) {
+
     boolean result = false;
-    // Check if dataset is a designDataset
-    final Optional<DesignDataset> designDataset = designDatasetRepository.findById(idDataset);
-    if (designDataset.isPresent()) {
-      DataFlowVO dataflow = getDataflow(idDataset);
-      if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
-        result = true;
-      } else {
-        LOG.info("DesignDataset {} is not reportable because are in dataflow {} with status {}",
-            idDataset, dataflow.getId(), dataflow);
-      }
-    }
-    // Check if dataset is a reportingDataset
-    if (!result) {
-      Optional<ReportingDataset> reportingDataset = reportingDatasetRepository.findById(idDataset);
-      if (reportingDataset.isPresent()) {
-        DataFlowVO dataflow = getDataflow(idDataset);
-        if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
-          result = true;
-        } else {
-          LOG.info("DesignDataset {} is not reportable because are in dataflow {} with status {}",
-              idDataset, dataflow.getId(), dataflow);
-        }
-      }
+    DatasetTypeEnum type = datasetMetabaseService.getDatasetType(idDataset);
+    DataFlowVO dataflow = getDataflow(idDataset);
+    if (DatasetTypeEnum.DESIGN.equals(type) && TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+      result = true;
+    } else if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.REFERENCE.equals(type)
+        || DatasetTypeEnum.TEST.equals(type)) {
+      result = true;
+    } else {
+      LOG.info("Dataset {} is not reportable because are in dataflow {} and the dataset type is {}",
+          idDataset, dataflow.getId(), type);
     }
     return result;
   }
@@ -1997,9 +1986,6 @@ public class DatasetServiceImpl implements DatasetService {
   private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
     if (pageable == null && totalRecords > 0) {
       pageable = PageRequest.of(0, totalRecords.intValue());
-    }
-    if (pageable == null && totalRecords == 0) {
-      pageable = PageRequest.of(0, 20);
     }
     return pageable;
   }
@@ -3473,10 +3459,21 @@ public class DatasetServiceImpl implements DatasetService {
       recordsImporter.copy();
       fieldsImporter.copy();
       LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
+    } catch (SQLException e) {
+      LOG_ERROR.error("Cannot save the records for dataset {}", datasetId, e);
+      throw e;
     }
   }
 
+  /**
+   * Update records with conditions.
+   *
+   * @param recordList the record list
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   */
   @Override
+  @Transactional
   public void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
       TableSchema tableSchema) {
     LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());

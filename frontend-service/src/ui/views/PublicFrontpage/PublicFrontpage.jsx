@@ -87,7 +87,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                   </div>
                 </div>
                 <div className={styles.illustration}>
-                  <img alt="Public illustration" src={Illustration} />
+                  <img alt="Public illustration" rel="preload" src={Illustration} />
                 </div>
                 <div className={styles.sideBar}>
                   <div className={`${styles.contactBox} ${styles.sideBarItem}`}>

@@ -44,7 +44,7 @@ export const MultiSelectItem = ({
     <li
       aria-selected={selected}
       className={className}
-      id={label}
+      // id={label}
       onClick={event => onClickEvent(event)}
       onKeyDown={event => onKeyDownEvent(event)}
       role="option"

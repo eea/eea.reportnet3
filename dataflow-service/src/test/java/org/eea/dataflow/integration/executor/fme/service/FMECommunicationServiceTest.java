@@ -293,6 +293,7 @@ public class FMECommunicationServiceTest {
         Mockito.any(), Mockito.any());
   }
 
+
   @Test
   public void releaseNotificationsImportDesignFailedTest() throws EEAException {
     File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
@@ -302,6 +303,76 @@ public class FMECommunicationServiceTest {
     fmeJob.setDatasetId(1L);
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
+    fmeJob.setFileName("Test.csv");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+
+  @Test
+  public void releaseNotificationsImportFromOtherSystemDesignTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    fmeJob.setFileName("Test.csv");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsImportFromOtherSystemDesignFailedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
+    fmeJob.setProviderId(null);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    fmeJob.setFileName("Test.csv");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void releaseNotificationsImportFromOtherSystemReportingTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
+    fmeJob.setProviderId(1L);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
+    fmeJob.setFileName("Test.csv");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+
+  @Test
+  public void releaseNotificationsImportFromOtherSystemReportingFailedTest() throws EEAException {
+    File file1 = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
+    File file2 = new File(file1, "Test.csv");
+    file2.mkdirs();
+    FMEJob fmeJob = new FMEJob();
+    fmeJob.setDatasetId(1L);
+    fmeJob.setProviderId(1L);
+    fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     fmeJob.setFileName("Test.csv");
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
@@ -383,4 +454,12 @@ public class FMECommunicationServiceTest {
     fmeCommunicationService.updateJobStatus(new FMEJob(), 1L);
     Mockito.verify(fmeJobRepository, times(1)).save(Mockito.any());
   }
+
+  @Test
+  public void updateJobStatusByIdTest() {
+    Mockito.when(fmeJobRepository.findById(Mockito.any())).thenReturn(Optional.of(new FMEJob()));
+    fmeCommunicationService.updateJobStatusById(0L, 0L);
+    Mockito.verify(fmeJobRepository, times(1)).findById(Mockito.any());
+  }
+
 }

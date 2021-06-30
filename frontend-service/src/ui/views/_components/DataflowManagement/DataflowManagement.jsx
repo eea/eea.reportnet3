@@ -170,7 +170,7 @@ export const DataflowManagement = ({
               data-tip
               icon={AwesomeIcons('infoCircle')}
             />
-            <ReactTooltip className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
+            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
               <span>{resources.messages['pinDataflowMessage']}</span>
             </ReactTooltip>
           </div>

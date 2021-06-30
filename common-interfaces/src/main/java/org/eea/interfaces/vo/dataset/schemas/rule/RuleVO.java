@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -54,6 +55,9 @@ public class RuleVO {
 
   /** The short code. */
   private String shortCode;
+
+  /** The automatic type. */
+  private AutomaticRuleTypeEnum automaticType;
 
   /** The integrity VO. */
   private IntegrityVO integrityVO;
