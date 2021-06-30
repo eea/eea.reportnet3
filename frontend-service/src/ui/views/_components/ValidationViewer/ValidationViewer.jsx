@@ -496,7 +496,7 @@ const ValidationViewer = memo(
           break;
         case 'TABLE':
           const ruleSchema = getRuleSchema(event.data);
-          if (TextUtils.areEquals(ruleSchema.automaticType, 'TableUniqueness')) {
+          if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
             onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
           }
           break;
