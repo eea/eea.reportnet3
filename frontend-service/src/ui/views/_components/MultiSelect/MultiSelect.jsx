@@ -605,7 +605,7 @@ export class MultiSelect extends Component {
         <div className={`p-hidden-accessible ${this.props.inputClassName}`}>
           <input
             aria-haspopup="listbox"
-            aria-labelledby={this.props.ariaLabelledBy}
+            ariaLabelledby={this.props.ariaLabelledBy}
             className={labelContent ? 'p-filled' : ''}
             id={this.props.inputId}
             onBlur={this.onBlur}

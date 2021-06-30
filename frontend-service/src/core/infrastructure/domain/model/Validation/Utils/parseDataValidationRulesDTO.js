@@ -58,6 +58,7 @@ export const parseDataValidationRulesDTO = validations => {
         allExpressionsIf: newAllExpressionsIf,
         allExpressionsThen: newAllExpressionsThen,
         automatic: validationDTO.automatic,
+        automaticType: validationDTO.automaticType,
         condition: validationDTO.whenCondition,
         date: validationDTO.activationGroup,
         description: validationDTO.description,

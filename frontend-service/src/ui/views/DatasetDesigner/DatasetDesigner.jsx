@@ -1216,9 +1216,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   }}>
                   {resources.messages['referenceDataset']}
                 </label>
-                <label className="srOnly" htmlFor="reference_dataset_checkbox">
-                  {resources.messages['referenceDataset']}
-                </label>
               </div>
               <div>
                 <Checkbox
@@ -1250,9 +1247,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     marginRight: '6px',
                     opacity: isDesignDatasetEditorRead ? 0.5 : 1
                   }}>
-                  {resources.messages['availableInPublicView']}
-                </label>
-                <label className="srOnly" htmlFor="available_in_public_view_checkbox">
                   {resources.messages['availableInPublicView']}
                 </label>
               </div>
@@ -1308,35 +1302,20 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className="p-toolbar-group-right">
               <Button
                 className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData &&
-                  designerState.viewType['tabularData'] &&
-                  !isDataflowOpen &&
-                  !isDesignDatasetEditorRead
-                    ? ' p-button-animated-blink'
-                    : null
+                  !isDataflowOpen && !isDesignDatasetEditorRead ? ' p-button-animated-blink' : null
                 }`}
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'validate'}
-                iconClasses={null}
+                icon="validate"
                 label={resources.messages['validate']}
                 onClick={() => manageDialogs('validateDialogVisible', true)}
-                ownButtonClasses={null}
               />
 
               <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetStatistics.datasetErrors &&
-                  designerState.viewType['tabularData'] &&
-                  !isDataflowOpen &&
-                  !isDesignDatasetEditorRead
-                    ? 'p-button-animated-blink'
-                    : null
-                }`}
-                icon={'warning'}
+                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+                icon="warning"
                 iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resources.messages['showValidations']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: true })}
-                ownButtonClasses={null}
               />
 
               <Button
@@ -1347,10 +1326,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 } datasetSchema-qcRules-help-step`}
                 disabled={isDesignDatasetEditorRead || (isDataflowOpen && designerState.referenceDataset)}
                 icon={'horizontalSliders'}
-                iconClasses={null}
                 label={resources.messages['qcRules']}
                 onClick={() => manageDialogs('validationListDialogVisible', true)}
-                ownButtonClasses={null}
               />
 
               <Button

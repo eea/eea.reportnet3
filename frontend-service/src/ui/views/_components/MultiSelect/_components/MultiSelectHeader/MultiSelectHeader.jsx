@@ -1,4 +1,5 @@
 import { useContext, useRef } from 'react';
+import uniqueId from 'lodash/uniqueId';
 
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { InputText } from 'ui/views/_components/InputText';
@@ -46,7 +47,7 @@ export const MultiSelectHeader = ({
         <div className="p-multiselect-filter-container">
           <InputText
             className="p-inputtext p-component"
-            id="multiselectFilter"
+            id={uniqueId('multiselectFilter_')}
             onChange={event => onFilterEvent(event)}
             placeholder={filterPlaceholder}
             ref={filterRef}

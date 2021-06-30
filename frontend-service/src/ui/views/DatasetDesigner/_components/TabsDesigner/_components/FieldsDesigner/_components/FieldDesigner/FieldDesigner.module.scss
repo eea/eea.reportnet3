@@ -81,11 +81,10 @@
   height: 1.95rem;
   border: 1px solid var(--c-custom-gray);
   color: var(--main-font-color);
-}
-
-.button:hover {
-  background-color: var(--c-custom-gray);
-  color: var(--main-font-color);
+  :hover {
+    background-color: var(--c-custom-gray);
+    color: var(--main-font-color);
+  }
 }
 
 .deleteButton {
@@ -127,8 +126,8 @@
   animation-name: fadeInBorder;
   animation-iteration-count: 1;
   animation-timing-function: ease-in;
-  animation-duration: 400ms;
-  border: 1px dashed var(--gray-75);
+  animation-duration: 100ms;
+  border: 2px dashed var(--field-designer-separator-border-color);
   opacity: 0.7;
   border-radius: 3px;
 }
