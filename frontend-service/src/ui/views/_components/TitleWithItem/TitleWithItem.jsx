@@ -48,7 +48,7 @@ const TitleWithItem = memo(
                     icon={AwesomeIcons('infoCircle')}
                   />
 
-                  <ReactTooltip className={styles.tooltip} effect="solid" id={tooltipId} place="right">
+                  <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="right">
                     {
                       <div className={styles.infoTooltipWrapper}>
                         <span>{tooltipInfo}</span>

@@ -88,6 +88,7 @@ const DataForm = ({
                         />
                       </span>
                       <ReactTooltip
+                        border={true}
                         effect="solid"
                         getContent={() =>
                           ReactDOMServer.renderToStaticMarkup(
@@ -203,6 +204,7 @@ const DataForm = ({
                         />
                       </span>
                       <ReactTooltip
+                        border={true}
                         effect="solid"
                         getContent={() =>
                           ReactDOMServer.renderToStaticMarkup(

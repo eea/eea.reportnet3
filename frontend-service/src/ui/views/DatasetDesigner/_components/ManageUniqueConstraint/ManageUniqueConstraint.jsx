@@ -239,7 +239,7 @@ export const ManageUniqueConstraint = ({
         }}
       />
       {isDuplicated && (
-        <ReactTooltip effect="solid" id="createTooltip" place="top">
+        <ReactTooltip border={true} effect="solid" id="createTooltip" place="top">
           {resources.messages['duplicatedUniqueConstraint']}
         </ReactTooltip>
       )}
