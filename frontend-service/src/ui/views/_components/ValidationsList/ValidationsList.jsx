@@ -147,6 +147,7 @@ const ValidationsList = withRouter(
         validationContext.onSetRulesDescription(
           validationsServiceList?.validations?.map(validation => {
             return {
+              automaticType: validation.automaticType,
               id: validation.id,
               description: validation.description,
               name: validation.name

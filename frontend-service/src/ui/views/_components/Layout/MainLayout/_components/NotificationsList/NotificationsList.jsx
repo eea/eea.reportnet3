@@ -142,6 +142,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             paginatorRight={<span>{`${resources.messages['totalRecords']}  ${notifications.length}`}</span>}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
+            summary="notificationsList"
             totalRecords={notifications.length}
             value={notifications}>
             {columns}

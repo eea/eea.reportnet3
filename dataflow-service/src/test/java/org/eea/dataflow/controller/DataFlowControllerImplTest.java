@@ -206,6 +206,7 @@ public class DataFlowControllerImplTest {
   }
 
 
+
   /**
    * Adds the contributor.
    *
@@ -673,12 +674,14 @@ public class DataFlowControllerImplTest {
 
   @Test
   public void accessReferenceEntityTest() {
-    assertFalse("assertion error",
+    assertFalse("reference not allowed",
         dataFlowControllerImpl.accessReferenceEntity(EntityClassEnum.DATASET, 1L));
   }
 
   @Test
-  public void findReferenceDataflowsTest() {
-    assertNotNull("assertion error", dataFlowControllerImpl.findReferenceDataflows());
+  public void findReferenceDataflowsTest() throws EEAException {
+    when(dataflowService.getReferenceDataflows(Mockito.any())).thenReturn(new ArrayList<>());
+    dataFlowControllerImpl.findReferenceDataflows();
+    assertEquals("fail", new ArrayList<>(), dataflowService.getReferenceDataflows(Mockito.any()));
   }
 }

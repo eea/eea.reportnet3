@@ -898,7 +898,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
                   disabled={!hasWritePermissions}
-                  icon={'import'}
+                  icon="import"
                   label={resources.messages['importDataset']}
                   onClick={event => importMenuRef.current.show(event)}
                 />
@@ -930,7 +930,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
                 !hasWritePermissions ? null : 'p-button-animated-blink dataset-deleteDataset-help-step'
               }`}
               disabled={!hasWritePermissions}
-              icon={'trash'}
+              icon="trash"
               label={resources.messages['deleteDatasetData']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
@@ -938,40 +938,34 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <div className="p-toolbar-group-right">
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-validate-help-step ${
-                !hasWritePermissions || !datasetHasData ? null : 'p-button-animated-blink'
+                hasWritePermissions && 'p-button-animated-blink'
               }`}
               disabled={!hasWritePermissions}
-              icon={'validate'}
-              iconClasses={null}
+              icon="validate"
               label={resources.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
-              ownButtonClasses={null}
             />
             <Button
-              className={`p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step ${
-                !datasetHasErrors ? null : 'p-button-animated-blink'
-              }`}
-              icon={'warning'}
+              className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
+              icon="warning"
               iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resources.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
-              ownButtonClasses={null}
             />
             <Button
               className={
                 'p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step'
               }
-              icon={'horizontalSliders'}
+              icon="horizontalSliders"
               label={resources.messages['qcRules']}
               onClick={() => onSetVisible(setValidationListDialogVisible, true)}
-              ownButtonClasses={null}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataset-dashboards-help-step ${
                 !datasetHasData ? null : 'p-button-animated-blink'
               }`}
               disabled={!datasetHasData}
-              icon={'dashboard'}
+              icon="dashboard"
               label={resources.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
             />
@@ -980,7 +974,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
                 !hasWritePermissions ? null : 'p-button-animated-blink'
               }`}
               disabled={!hasWritePermissions}
-              icon={'camera'}
+              icon="camera"
               label={resources.messages['snapshots']}
               onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
             />
@@ -988,7 +982,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
               className={`p-button-rounded p-button-${
                 isRefreshHighlighted ? 'primary' : 'secondary-transparent'
               } p-button-animated-blink dataset-refresh-help-step`}
-              icon={'refresh'}
+              icon="refresh"
               label={resources.messages['refresh']}
               onClick={() => onLoadDatasetSchema()}
             />
