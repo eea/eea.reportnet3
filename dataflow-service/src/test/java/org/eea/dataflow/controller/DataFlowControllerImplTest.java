@@ -19,7 +19,6 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -206,47 +205,7 @@ public class DataFlowControllerImplTest {
         dataflowService.getCompleted(Mockito.any(), Mockito.any()));
   }
 
-  /**
-   * Find user dataflows by status throws.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void findUserDataflowsByStatusThrows() throws EEAException {
-    Map<String, String> details = new HashMap<>();
-    details.put(AuthenticationDetails.USER_ID, "1");
-    Authentication authentication = Mockito.mock(Authentication.class);
-    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(details);
-    SecurityContextHolder.setContext(securityContext);
 
-    when(dataflowService.getPendingByUser(Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
-    dataFlowControllerImpl.findUserDataflowsByStatus(TypeRequestEnum.PENDING);
-    Mockito.verify(dataflowService, times(1)).getPendingByUser(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Find user dataflows by status.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void findUserDataflowsByStatus() throws EEAException {
-    Map<String, String> details = new HashMap<>();
-    details.put(AuthenticationDetails.USER_ID, "1");
-    Authentication authentication = Mockito.mock(Authentication.class);
-    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(details);
-    SecurityContextHolder.setContext(securityContext);
-
-    when(dataflowService.getPendingByUser(Mockito.any(), Mockito.any()))
-        .thenReturn(new ArrayList<>());
-    dataFlowControllerImpl.findUserDataflowsByStatus(TypeRequestEnum.PENDING);
-    assertEquals("fail", new ArrayList<>(), dataflowService.getDataflows(Mockito.any()));
-  }
 
   /**
    * Adds the contributor.
