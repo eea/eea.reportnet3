@@ -463,7 +463,7 @@ const DataFormFieldEditor = ({
         readOnlyInput={true}
         showSeconds={true}
         showTime={true}
-        value={fieldValue !== '' && new Date(fieldValue) !== 'Invalid Date' ? new Date(fieldValue) : Date.now()}
+        value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
         yearNavigator={true}
         yearRange="1900:2100"
       />
