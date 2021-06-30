@@ -745,6 +745,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @return true, if is reference dataflow draft
    */
   @Override
+  @Transactional
   public boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId) {
     boolean reference = false;
     DataFlowVO dataflow = new DataFlowVO();

@@ -799,10 +799,8 @@ public class FileTreatmentHelperTest {
     dataSetMetabase.setDataSetName("file");
 
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    // when(
-    // contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean()))
-    // .thenReturn(expectedResult);
-    when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+
+    when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("603362319d49f04fce13b68f");
     when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(new DataSetSchema()));
     fileTreatmentHelper.exportDatasetFile(1L, FileTypeEnum.CSV.getValue());
