@@ -372,6 +372,7 @@ export const Map = ({
               </label>
               {/* {(MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)) && (
                 <ReactTooltip
+                  border={true}
                   className={styles.tooltip}
                   effect="float"
                   id="coordinatesTooltip"

@@ -1024,4 +1024,24 @@ public class DataFlowServiceImplTest {
     assertTrue(dataflowServiceImpl.isReferenceDataflowDraft(EntityClassEnum.DATASET, 1L));
   }
 
+  @Test
+  public void getReferenceDataflowsTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(0L);
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+        Mockito.any(), Mockito.any())).thenReturn(dataflows);
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    Mockito
+        .when(dataflowRepository
+            .findReferenceByStatusInOrderByStatusDescCreationDateDesc(Mockito.any()))
+        .thenReturn(dataflows);
+    assertNotNull(dataflowServiceImpl.getReferenceDataflows(""));
+  }
+
 }

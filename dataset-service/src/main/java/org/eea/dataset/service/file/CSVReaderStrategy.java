@@ -410,44 +410,46 @@ public class CSVReaderStrategy implements ReaderStrategy {
       final FieldValue field = new FieldValue();
       if (contAux < headers.size()) {
         FieldSchema fieldSchema = headers.get(contAux);
-        field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
-        field.setType(fieldSchema.getType());
-        field.setValue(value);
-        field.setRecord(record);
-        if (null == field.getType()) {
-          if (null != value && value.length() >= fieldMaxLength) {
-            field.setValue(value.substring(0, fieldMaxLength));
+        if (null != fieldSchema && null != fieldSchema.getIdFieldSchema()) {
+          field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
+          field.setType(fieldSchema.getType());
+          field.setValue(value);
+          field.setRecord(record);
+          if (null == field.getType()) {
+            if (null != value && value.length() >= fieldMaxLength) {
+              field.setValue(value.substring(0, fieldMaxLength));
+            }
+          } else {
+            switch (field.getType()) {
+              case ATTACHMENT:
+                field.setValue("");
+                break;
+              case POINT:
+                break;
+              case LINESTRING:
+                break;
+              case POLYGON:
+                break;
+              case MULTIPOINT:
+                break;
+              case MULTILINESTRING:
+                break;
+              case MULTIPOLYGON:
+                break;
+              case GEOMETRYCOLLECTION:
+                break;
+              default:
+                if (value.length() >= fieldMaxLength) {
+                  field.setValue(value.substring(0, fieldMaxLength));
+                }
+            }
           }
-        } else {
-          switch (field.getType()) {
-            case ATTACHMENT:
-              field.setValue("");
-              break;
-            case POINT:
-              break;
-            case LINESTRING:
-              break;
-            case POLYGON:
-              break;
-            case MULTIPOINT:
-              break;
-            case MULTILINESTRING:
-              break;
-            case MULTIPOLYGON:
-              break;
-            case GEOMETRYCOLLECTION:
-              break;
-            default:
-              if (value.length() >= fieldMaxLength) {
-                field.setValue(value.substring(0, fieldMaxLength));
-              }
-          }
-        }
 
-        if (field.getIdFieldSchema() != null && ((!fieldSchema.getReadOnly() && !isDesignDataset)
-            || isDesignDataset || isFixedNumberOfRecords)) {
-          fields.add(field);
-          idSchema.add(field.getIdFieldSchema());
+          if (field.getIdFieldSchema() != null && ((!fieldSchema.getReadOnly() && !isDesignDataset)
+              || isDesignDataset || isFixedNumberOfRecords)) {
+            fields.add(field);
+            idSchema.add(field.getIdFieldSchema());
+          }
         }
       }
       contAux++;

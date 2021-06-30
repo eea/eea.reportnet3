@@ -10,6 +10,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +59,7 @@ public class CSVWriterStrategyTest {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testWriteFile() throws IOException, EEAException {
     List<RecordValue> records = new ArrayList<>();
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
@@ -68,11 +69,14 @@ public class CSVWriterStrategyTest {
     FieldSchemaVO fieldSchema = new FieldSchemaVO();
     fieldSchema.setId("");
     fieldValue.setIdFieldSchema("");
+    fieldValue.setValue("value");
     fields.add(fieldValue);
     record.setFields(fields);
     records.add(record);
     record.setDataProviderCode("ES");
     fieldSchemas.add(fieldSchema);
+    Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any()))
+        .thenReturn(new DataSetSchemaVO());
     Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any(DataSetSchemaVO.class)))
@@ -90,7 +94,7 @@ public class CSVWriterStrategyTest {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testWriteFileWrite() throws IOException, EEAException {
     List<RecordValue> records = new ArrayList<>();
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
@@ -106,11 +110,19 @@ public class CSVWriterStrategyTest {
     records.add(record);
     records.add(record2);
     fieldSchemas.add(fieldSchema);
+    DataSetSchemaVO dataSetSchemaVO = new DataSetSchemaVO();
+    List<TableSchemaVO> tableSchemas = new ArrayList<>();
+    TableSchemaVO tableSchemaVO = new TableSchemaVO();
+    tableSchemaVO.setIdTableSchema("AAAAAAAA");
+    tableSchemas.add(tableSchemaVO);
+    dataSetSchemaVO.setTableSchemas(tableSchemas);
+    Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any()))
+        .thenReturn(dataSetSchemaVO);
     Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any(DataSetSchemaVO.class)))
         .thenReturn(fieldSchemas);
-    csvWriterStrategy.writeFile(1L, 1L, "", false, false);
+    csvWriterStrategy.writeFileList(1L, 1L, false, false);
     Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(),
         Mockito.any(DataSetSchemaVO.class));
     Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),

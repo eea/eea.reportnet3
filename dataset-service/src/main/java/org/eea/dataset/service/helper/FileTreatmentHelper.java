@@ -327,9 +327,11 @@ public class FileTreatmentHelper implements DisposableBean {
         if (!files.isEmpty()) {
           wipeData(datasetId, null, replace);
           queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
-                replace, delimiter,multipartFileMimeType);
+              replace, delimiter, multipartFileMimeType);
         } else {
           releaseLock(datasetId);
+          LOG_ERROR.error("Error trying to import a zip file into dataset {}. Empty zip file",
+              datasetId);
           throw new EEAException("Empty zip file");
         }
       } else {
@@ -348,9 +350,10 @@ public class FileTreatmentHelper implements DisposableBean {
             replace, delimiter, multipartFileMimeType);
       }
 
-    } catch (FeignException | IOException e) {
-      LOG_ERROR.error("Unexpected exception importing file data: datasetId={}, file={}", datasetId,
-          multipartFile.getName(), e);
+    } catch (EEAException | FeignException | IOException e) {
+      LOG_ERROR.error(
+          "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
+          multipartFile.getName(), e.getMessage(), e);
       releaseLock(datasetId);
       throw new EEAException(e);
     }
@@ -419,7 +422,7 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
-      String delimiter,String mimeType) throws IOException, EEAException {
+      String delimiter, String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
       fmeFileProcess(datasetId, files.get(0), integrationVO, mimeType);
     } else {
