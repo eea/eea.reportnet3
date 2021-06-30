@@ -1,4 +1,6 @@
 import { Component } from 'react';
+import uniqueId from 'lodash/uniqueId';
+
 import PropTypes from 'prop-types';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 
@@ -25,7 +27,7 @@ export class RowsPerPageDropdown extends Component {
         <Dropdown
           appendTo={document.body}
           ariaLabel={'rowsPerPage'}
-          name={'rowsPerPage'}
+          name={uniqueId('rowsPerPage')}
           onChange={this.props.onChange}
           options={options}
           value={this.props.value}

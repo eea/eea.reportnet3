@@ -1,6 +1,6 @@
 .inputswitch_dark_theme_checked:before {
   background-color: var(--black) !important;
-  box-shadow: inset -4px -1px var(--white) !important;
+  box-shadow: inset -4px 0px 1px 0.5px var(--white) !important;
 }
 
 .inputswitch_dark_theme_unchecked,
