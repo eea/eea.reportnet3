@@ -3,7 +3,9 @@ package org.eea.dataflow.integration.manager;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.manager.FMEIntegrationManager;
@@ -135,9 +137,33 @@ public class FMEIntegrationManagerTest {
     IntegrationVO integrationVO = new IntegrationVO();
     integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
     integrationVO.getInternalParameters().put("dataflowId", "1");
-
     integrationManager.create(integrationVO);
     Mockito.verify(integrationRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void createIntegrationDuplicatedNameTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.getInternalParameters().put("datasetSchemaId", "test1");
+    integrationVO.getInternalParameters().put("dataflowId", "1");
+    Integration integration = new Integration();
+    integration.setName("");
+    List<InternalOperationParameters> internalParameters = new ArrayList<>();
+    InternalOperationParameters internalParameter = new InternalOperationParameters();
+    internalParameter.setParameter("datasetSchemaId");
+    internalParameter.setValue("test1");
+    internalParameter.setIntegration(integration);
+    internalParameters.add(internalParameter);
+    integration.setInternalParameters(internalParameters);
+    Mockito.when(integrationMapper.classToEntity(Mockito.any())).thenReturn(integration);
+    Mockito
+        .when(integrationRepository.findByInternalOperationParameter(Mockito.any(), Mockito.any()))
+        .thenReturn(Arrays.asList(integration));
+    try {
+      integrationManager.create(integrationVO);
+    } catch (EEAException e) {
+      throw e;
+    }
   }
 
   /**
