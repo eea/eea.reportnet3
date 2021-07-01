@@ -719,7 +719,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       selectedRuleId: ''
     });
 
-  const onSelectValidation = (tableSchemaId, selectedRuleId, selectedRuleMessage = '', selectedRuleLevelError = '') => {
+  const onSelectValidation = (
+    tableSchemaId,
+    selectedRuleId = '',
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
+  ) => {
     setDataViewerOptions({
       ...dataViewerOptions,
       isGroupedValidationDeleted: false,
