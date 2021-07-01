@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './Dialog.module.scss';
 
@@ -22,6 +23,7 @@ export const Dialog = ({
   visible,
   zIndex = 5000
 }) => {
+  const id = uniqueId();
   const dialogContext = useContext(DialogContext);
   const [dialogId, setDialogId] = useState('');
   const [maskStyle, setMaskStyle] = useState({
@@ -74,6 +76,7 @@ export const Dialog = ({
       });
     }
   }, [dialogContext.open]);
+
   return (
     <div className={dialogClass} style={maskStyle}>
       <PrimeDialog
@@ -84,12 +87,16 @@ export const Dialog = ({
         focusOnShow={focusOnShow}
         footer={footer}
         header={header}
+        id="dialogId"
         maximizable={false}
         onHide={onHide}
         style={style ? { ...style, ...dialogStyle } : { ...dialogStyle, width: '50vw' }}
         visible={visible}>
         {children}
       </PrimeDialog>
+      <label className="srOnly" id="dialogId_label">
+        {header}
+      </label>
     </div>
   );
 };

@@ -14,5 +14,5 @@ public interface IFileParserFactory {
    * @param datasetId the dataset id
    * @return the i file parse context
    */
-  IFileParseContext createContext(String mimeType, Long datasetId);
+  IFileParseContext createContext(String mimeType, Long datasetId, String delimiter);
 }

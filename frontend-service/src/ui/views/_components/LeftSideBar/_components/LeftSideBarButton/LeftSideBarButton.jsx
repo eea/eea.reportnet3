@@ -30,6 +30,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const defaultLayout = (
     <>
       <FontAwesomeIcon
+        aria-label={title}
         className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
         icon={AwesomeIcons(icon)}
       />
@@ -40,6 +41,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
     <>
       <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
         <FontAwesomeIcon
+          aria-label={resourcesContext.messages['notifications']}
           className={`${styles.leftSideBarUserIcon} ${animate ? styles.leftSideBarElementNotification : ''}`}
           icon={AwesomeIcons(icon)}
         />
@@ -60,7 +62,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
         <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
       </a>
       {!leftSideBarContext.isLeftSideBarOpened ? (
-        <ReactTooltip className={styles.tooltipClass} effect="solid" id={title} place="right">
+        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id={title} place="right">
           <span>{!leftSideBarContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}</span>
         </ReactTooltip>
       ) : null}

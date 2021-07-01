@@ -194,6 +194,8 @@ public class DataSetControllerImpl implements DatasetController {
    * @param tableSchemaId the table schema id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
    */
   @Override
   @HystrixCommand
@@ -206,12 +208,16 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId,
+      @RequestParam(value = "delimiter", required = false) String delimiter) {
     try {
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace);
+      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
+          delimiter);
     } catch (EEAException e) {
-      LOG_ERROR.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
-          tableSchemaId, file.getOriginalFilename());
+      LOG_ERROR.error(
+          "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
+          tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
@@ -229,6 +235,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param file the file
    * @param idTableSchema the id table schema
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -239,7 +246,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -247,7 +255,8 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace);
+      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace, integrationId,
+          null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
@@ -261,6 +270,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param providerId the provider id
    * @param file the file
    * @param replace the replace
+   * @param integrationId the integration id
    */
   @Override
   @HystrixCommand
@@ -271,7 +281,8 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace) {
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId) {
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -279,7 +290,7 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, null, file, replace);
+      importFileData(datasetId, dataflowId, providerId, null, file, replace, integrationId, null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
@@ -475,14 +486,28 @@ public class DataSetControllerImpl implements DatasetController {
    * Delete import data.
    *
    * @param datasetId the data set id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   public void deleteImportData(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId) {
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
+
+    // Rest API only: Check if the dataflow belongs to the dataset
+    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+
     // This method will release the lock
     deleteHelper.executeDeleteDatasetProcess(datasetId);
   }
@@ -492,15 +517,29 @@ public class DataSetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    */
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   public void deleteImportTable(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId) {
+      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId) {
+
+
+    // Rest API only: Check if the dataflow belongs to the dataset
+    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
     // This method will release the lock
     deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
   }
@@ -649,6 +688,11 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the ETL dataset VO
    */
   @Override
@@ -703,6 +747,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     // check if dataset is reportable
     if (!datasetService.isDatasetReportable(datasetId)) {
+      LOG_ERROR.error("The dataset {} is not reportable", datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
@@ -710,7 +755,8 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("The etlImportDataset failed on datasetId {} because {}", datasetId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

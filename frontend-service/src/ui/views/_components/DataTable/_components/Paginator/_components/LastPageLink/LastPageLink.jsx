@@ -1,4 +1,6 @@
 import { Component } from 'react';
+import uniqueId from 'lodash/uniqueId';
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -18,8 +20,10 @@ export class LastPageLink extends Component {
 
     return (
       <button className={className} disabled={this.props.disabled} onClick={this.props.onClick} type="button">
-        <span className="p-paginator-icon pi pi-step-forward"></span>
-        <span className="srOnly">Last page</span>
+        <span className="p-paginator-icon pi pi-step-forward" id={uniqueId('lastPage')}></span>
+        <span className="srOnly" htmlFor="lastPage">
+          Last page
+        </span>
       </button>
     );
   }

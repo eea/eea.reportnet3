@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -435,15 +436,15 @@ public class RepresentativeControllerImplTest {
 
   @Test
   public void importFileCountryTemplateTest() {
-    MockMultipartFile fileMock =
-        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    MockMultipartFile fileMock = new MockMultipartFile("file", "fileOriginal.csv",
+        FileTypeEnum.CSV.getValue(), "content".getBytes());
     assertNotNull(representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock));
   }
 
   @Test(expected = ResponseStatusException.class)
   public void importFileCountryTemplateFileExtensionTest() {
-    MockMultipartFile fileMock =
-        new MockMultipartFile("file", "fileOriginal", "csv", "content".getBytes());
+    MockMultipartFile fileMock = new MockMultipartFile("file", "fileOriginal",
+        FileTypeEnum.CSV.getValue(), "content".getBytes());
     try {
       representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
     } catch (ResponseStatusException e) {
@@ -455,8 +456,8 @@ public class RepresentativeControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void importFileCountryTemplateCSVExceptionTest() {
-    MockMultipartFile fileMock =
-        new MockMultipartFile("file", "fileOriginal.xlsx", "xlsx", "content".getBytes());
+    MockMultipartFile fileMock = new MockMultipartFile("file", "fileOriginal.xlsx",
+        FileTypeEnum.XLSX.getValue(), "content".getBytes());
     try {
       representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);
     } catch (ResponseStatusException e) {
@@ -468,8 +469,8 @@ public class RepresentativeControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void importFileCountryTemplateExceptionTest() throws EEAException, IOException {
-    MockMultipartFile fileMock =
-        new MockMultipartFile("file", "fileOriginal.csv", "csv", "content".getBytes());
+    MockMultipartFile fileMock = new MockMultipartFile("file", "fileOriginal.csv",
+        FileTypeEnum.CSV.getValue(), "content".getBytes());
     when(representativeService.importFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     try {

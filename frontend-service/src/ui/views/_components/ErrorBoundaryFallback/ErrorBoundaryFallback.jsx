@@ -41,7 +41,12 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
           <div className={styles.boundaryContainer}>
             <h2>{resources.messages['errorBoundaryTitle']}</h2>
             <h3 className={styles.errorMessage}>{error.message}</h3>
-            <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('meteor')} />
+            <FontAwesomeIcon
+              aria-hidden={false}
+              className="p-breadcrumb-home"
+              icon={AwesomeIcons('meteor')}
+              role="presentation"
+            />
             <div className={styles.errorTexts}>
               <p
                 dangerouslySetInnerHTML={{

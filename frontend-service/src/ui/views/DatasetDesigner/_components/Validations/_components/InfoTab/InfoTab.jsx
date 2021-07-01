@@ -6,9 +6,10 @@ import { config } from 'conf';
 
 import styles from './InfoTab.module.scss';
 
-import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
@@ -74,7 +75,6 @@ export const InfoTab = ({
 
       setFieldsDropdown(
         <Dropdown
-          id={`${componentName}__field`}
           appendTo={document.body}
           disabled={
             creationFormState.candidateRule.automatic || validationContext.ruleEdit
@@ -82,10 +82,11 @@ export const InfoTab = ({
               : fieldDropdownOptions.disabled
           }
           filterPlaceholder={fieldDropdownOptions.placeholder}
-          placeholder={fieldDropdownOptions.placeholder}
+          id={`${componentName}__field`}
+          onChange={fieldDropdownOptions.onChange}
           optionLabel="label"
           options={fieldDropdownOptions.options}
-          onChange={fieldDropdownOptions.onChange}
+          placeholder={fieldDropdownOptions.placeholder}
           value={fieldDropdownOptions.value}
         />
       );
@@ -101,9 +102,9 @@ export const InfoTab = ({
     <div className={styles.section}>
       <div className={styles.fieldsGroup}>
         <div
+          className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}
           onBlur={() => onAddToClickedFields('table')}
-          onFocus={() => onDeleteFromClickedFields('table')}
-          className={`${styles.field} ${styles.qcTable} formField ${printError('table')}`}>
+          onFocus={() => onDeleteFromClickedFields('table')}>
           <label htmlFor="table">{resourcesContext.messages['table']}</label>
           <Dropdown
             appendTo={document.body}
@@ -136,9 +137,13 @@ export const InfoTab = ({
           className={`${styles.field} ${styles.qcShortCode} formField ${printError('shortCode')}`}
           onBlur={() => onAddToClickedFields('shortCode')}
           onFocus={() => onDeleteFromClickedFields('shortCode')}>
-          <label htmlFor={`${componentName}__shortCode`}>{resourcesContext.messages['ruleShortCode']}</label>
+          <label htmlFor={`${componentName}__shortCode`}>
+            {resourcesContext.messages['ruleShortCode']}
+            <TooltipButton message={resourcesContext.messages['noQuotesQCTooltip']} uniqueIdentifier="shortCode" />
+          </label>
           <InputText
             id={`${componentName}__shortCode`}
+            keyfilter="noDoubleQuote"
             maxLength={255}
             onChange={e => onInfoFieldChange('shortCode', e.target.value)}
             placeholder={resourcesContext.messages['ruleShortCode']}
@@ -149,8 +154,8 @@ export const InfoTab = ({
         <div className={`${styles.field} ${styles.qcEnabled} formField `}>
           <label htmlFor="QcActive">{resourcesContext.messages['qcEnabled']}</label>
           <Checkbox
+            checked={creationFormState.candidateRule.active}
             id={`${componentName}__active`}
-            isChecked={creationFormState.candidateRule.active}
             onChange={e => onInfoFieldChange('active', e.checked)}
           />
         </div>
@@ -195,20 +200,23 @@ export const InfoTab = ({
             id={`${componentName}__errorType`}
             onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
             optionLabel="label"
-            options={config.validations.errorLevels}
             optionValue="value"
+            options={config.validations.errorLevels}
             placeholder={resourcesContext.messages['errorTypePlaceholder']}
             value={creationFormState.candidateRule.errorLevel}
           />
         </div>
-
         <div
           className={`${styles.field} ${styles.qcErrorMessage} formField ${printError('errorMessage')}`}
           onBlur={() => onAddToClickedFields('errorMessage')}
           onFocus={() => onDeleteFromClickedFields('errorMessage')}>
-          <label htmlFor={`${componentName}__errorMessage`}>{resourcesContext.messages['ruleErrorMessage']}</label>
+          <label htmlFor={`${componentName}__errorMessage`}>
+            {resourcesContext.messages['ruleErrorMessage']}
+            <TooltipButton message={resourcesContext.messages['noQuotesQCTooltip']} parentName="errorMessage" />
+          </label>
           <InputText
             id={`${componentName}__errorMessage`}
+            keyfilter="noDoubleQuote"
             maxLength={255}
             onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
             placeholder={resourcesContext.messages['ruleErrorMessage']}

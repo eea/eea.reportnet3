@@ -169,7 +169,7 @@ export const BigButton = ({
           !enabled && styles.bigButtonDisabled
         }`}>
         <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
         {model && !isEmpty(model) && (
           <DropdownButton
@@ -200,7 +200,9 @@ export const BigButton = ({
         <InputText
           autoFocus={true}
           className={`${styles.inputText}`}
+          id="editName"
           key={index}
+          name={resources.messages['editDatasetSchemaName']}
           onBlur={e => {
             onInputSave(e.target.value.trim(), index);
             setButtonsTitle(e.target.value.trim());
@@ -233,7 +235,7 @@ export const BigButton = ({
             {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
           </p>
           {!isUndefined(buttonsTitle) && buttonsTitle.length > 60 && (
-            <ReactTooltip className={styles.tooltip} effect="solid" id={tooltipId} place="top">
+            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="top">
               {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
             </ReactTooltip>
           )}
@@ -246,7 +248,7 @@ export const BigButton = ({
     <>
       <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <span onClick={event => menuBigButtonRef.current.show(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} />
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
         <DropDownMenu model={model} ref={menuBigButtonRef} />
       </div>
@@ -263,7 +265,7 @@ export const BigButton = ({
     <>
       <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
       {tooltip && (
-        <ReactTooltip effect="solid" id={caption} place="top">
+        <ReactTooltip border={true} effect="solid" id={caption} place="top">
           {tooltip}
         </ReactTooltip>
       )}

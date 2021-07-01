@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +30,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
@@ -52,6 +52,8 @@ import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
 import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
+import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -77,13 +79,13 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
-import org.eea.dataset.service.file.interfaces.IFileParseContext;
-import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -102,12 +104,14 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -222,9 +226,13 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordMapper recordMapper;
 
-  /** The file parser factory. */
+  /** The record value id generator. */
   @Autowired
-  private IFileParserFactory fileParserFactory;
+  private RecordValueIdGenerator recordValueIdGenerator;
+
+  /** The field value id generator. */
+  @Autowired
+  private FieldValueIdGenerator fieldValueIdGenerator;
 
   /** The file export factory. */
   @Autowired
@@ -291,52 +299,13 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-  /**
-   * Process file.
-   *
-   * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param is the is
-   * @param idTableSchema the id table schema
-   *
-   * @return the data set VO
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  public DataSetVO processFile(final Long datasetId, final String fileName, final InputStream is,
-      final String idTableSchema) throws EEAException, IOException {
-    // obtains the file type from the extension
-    if (fileName == null) {
-      throw new EEAException(EEAErrorMessage.FILE_NAME);
-    }
-    final String mimeType = getMimetype(fileName);
-    // validates file types for the data load
-    validateFileType(mimeType);
+  /** The record store controller. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
-    try {
-      // Get the partition for the partiton id
-      final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
-
-      // Get the dataFlowId from the metabase
-      final Long dataflowId = getDataFlowIdById(datasetId);
-
-      // create the right file parser for the file type
-      final IFileParseContext context = fileParserFactory.createContext(mimeType, datasetId);
-
-      final DataSetVO datasetVO = context.parse(is, dataflowId, partition.getId(), idTableSchema);
-
-      if (datasetVO == null) {
-        throw new IOException("Empty dataset");
-      }
-
-      return datasetVO;
-
-    } finally {
-      is.close();
-    }
-  }
+  /** The import path. */
+  @Value("${importPath}")
+  private String importPath;
 
   /**
    * Save all records.
@@ -964,9 +933,10 @@ public class DatasetServiceImpl implements DatasetService {
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
         || DatasetTypeEnum.COLLECTION.equals(datasetType);
 
-    final IFileExportContext context = fileExportFactory.createContext(mimeType);
+    final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
     LOG.info("End of exportFile");
-    return context.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false);
+    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
+        false);
   }
 
 
@@ -1381,7 +1351,7 @@ public class DatasetServiceImpl implements DatasetService {
 
         LOG_ERROR.error(
             "Error with dataset id {}  field  with id {} because data has not correct format {}",
-            datasetIdOrigin, idPk, fvPk.getType().toString());
+            datasetIdOrigin, idPk, fvPk.getType());
         // we find table and field to send in notification
         Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
             fvPk.getRecord().getTableValue().getIdTableSchema());
@@ -1389,7 +1359,7 @@ public class DatasetServiceImpl implements DatasetService {
             schemasRepository.findFieldSchema(datasetSchemaId, fvPk.getIdFieldSchema());
         String tableSchemaName = (String) tableSchema.get("nameTableSchema");
         String tableSchemaId = tableSchema.get("_id").toString();
-        String fieldSchemaName = (String) fieldSchemaDocument.get("headerName");
+        String fieldSchemaName = (String) fieldSchemaDocument.get(HEADER_NAME);
 
         NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -1499,30 +1469,18 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public boolean isDatasetReportable(Long idDataset) {
+
     boolean result = false;
-    // Check if dataset is a designDataset
-    final Optional<DesignDataset> designDataset = designDatasetRepository.findById(idDataset);
-    if (designDataset.isPresent()) {
-      DataFlowVO dataflow = getDataflow(idDataset);
-      if (TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
-        result = true;
-      } else {
-        LOG.info("DesignDataset {} is not reportable because are in dataflow {} with status {}",
-            idDataset, dataflow.getId(), dataflow);
-      }
-    }
-    // Check if dataset is a reportingDataset
-    if (!result) {
-      Optional<ReportingDataset> reportingDataset = reportingDatasetRepository.findById(idDataset);
-      if (reportingDataset.isPresent()) {
-        DataFlowVO dataflow = getDataflow(idDataset);
-        if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
-          result = true;
-        } else {
-          LOG.info("DesignDataset {} is not reportable because are in dataflow {} with status {}",
-              idDataset, dataflow.getId(), dataflow);
-        }
-      }
+    DatasetTypeEnum type = datasetMetabaseService.getDatasetType(idDataset);
+    DataFlowVO dataflow = getDataflow(idDataset);
+    if (DatasetTypeEnum.DESIGN.equals(type) && TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
+      result = true;
+    } else if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.REFERENCE.equals(type)
+        || DatasetTypeEnum.TEST.equals(type)) {
+      result = true;
+    } else {
+      LOG.info("Dataset {} is not reportable because are in dataflow {} and the dataset type is {}",
+          idDataset, dataflow.getId(), type);
     }
     return result;
   }
@@ -1982,51 +1940,6 @@ public class DatasetServiceImpl implements DatasetService {
     return dataflowControllerZuul.getMetabaseById(dataflowId);
   }
 
-
-  /**
-   * Obtain partition.
-   *
-   * @param datasetId the dataset id
-   * @param user the user
-   *
-   * @return the partition data set metabase
-   *
-   * @throws EEAException the EEA exception
-   */
-  private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
-      throws EEAException {
-    final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
-        .findFirstByIdDataSet_idAndUsername(datasetId, user).orElse(null);
-    if (partition == null) {
-      LOG_ERROR.error(EEAErrorMessage.PARTITION_ID_NOTFOUND);
-      throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
-    }
-    return partition;
-  }
-
-  /**
-   * Validate file type.
-   *
-   * @param mimeType the mime type
-   *
-   * @throws EEAException the EEA exception
-   */
-  private void validateFileType(final String mimeType) throws EEAException {
-    // files that will be accepted: csv, xml, xls, xlsx
-    switch (mimeType) {
-      case "csv":
-        break;
-      case "xml":
-        break;
-      case "xls":
-        break;
-      case "xlsx":
-        break;
-      default:
-        throw new InvalidFileException(EEAErrorMessage.FILE_FORMAT);
-    }
-  }
-
   /**
    * Retrieve validations.
    *
@@ -2073,9 +1986,6 @@ public class DatasetServiceImpl implements DatasetService {
   private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
     if (pageable == null && totalRecords > 0) {
       pageable = PageRequest.of(0, totalRecords.intValue());
-    }
-    if (pageable == null && totalRecords == 0) {
-      pageable = PageRequest.of(0, 20);
     }
     return pageable;
   }
@@ -3147,7 +3057,7 @@ public class DatasetServiceImpl implements DatasetService {
 
         try {
           // 1º we create
-          byte[] file = exportFile(datasetToFile.getId(), "xlsx", null);
+          byte[] file = exportFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null);
           // we save the file in its files
           if (null != file) {
             String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
@@ -3454,170 +3364,14 @@ public class DatasetServiceImpl implements DatasetService {
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName) throws EEAException {
     try {
-      String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-      DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
-          .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
-      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-      String tableName = "";
-      StringBuilder query = new StringBuilder();
-      if (null == tableSchemaId) {
-        query.append(" select cast(json_build_object('tables',json_agg(tables)) as TEXT) from ( ");
-      } else {
-        query.append(" select cast(tables as TEXT) from ( ");
-      }
-      String tableSchemaQueryPart = " when id_table_schema = '%s' then '%s' ";
-      StringBuilder caseTables = new StringBuilder();
-      if (null != tableSchemaId) {
-        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
-        if (tableSchema != null) {
-          tableName = (String) tableSchema.get("nameTableSchema");
-        }
-      }
-      if (null != tableSchemaList) {
-        if (null != tableSchemaId) {
-          caseTables.append((String.format(tableSchemaQueryPart, tableSchemaId, tableName)));
-        } else {
-          for (TableSchema table : tableSchemaList) {
-            caseTables.append((String.format(tableSchemaQueryPart,
-                table.getIdTableSchema().toString(), table.getNameTableSchema())));
-          }
-        }
-      }
-      query.append(
-          " select json_build_object('tableName',(case " + caseTables.toString() + " end), ");
-      String totalRecords = "";
-      if (null != tableSchemaId) {
-        totalRecords = String.format(
-            " 'totalRecords',(select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table), ",
-            datasetId, datasetId, tableSchemaId);
-      }
-      if (null != columnName || null != filterValue) {
-        totalRecords =
-            totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
-      }
-      query.append(totalRecords).append(" 'records', json_agg(records)) as tables ")
-          .append(" from ( ")
-          .append(
-              " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
-          .append(
-              " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
-          .append(" select case ");
-      String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-      for (TableSchema table : tableSchemaList) {
-        if (null != tableSchemaId) {
-          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
-            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-              query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                  field.getHeaderName()));
-            }
-          }
-        } else {
-          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-            query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                field.getHeaderName()));
-          }
-        }
-      }
-      query.append(String.format(
-          " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
-          datasetId, datasetId, datasetId));
-      if (null != tableSchemaId || null != filterValue || null != columnName) {
-        query.append(" where ")
-            .append(null != tableSchemaId
-                ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
-                : "")
-            .append(null != columnName ? String.format(" \"fieldName\" like '%s' and ", columnName)
-                : "")
-            .append(null != filterValue ? String.format(" value like '%s' and ", filterValue) : "");
-        query.delete(query.lastIndexOf("and "), query.length() - 1);
-      }
-      query.append(
-          ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ");
-      String paginationPart = " offset %s limit %s ";
-      if (null != offset && null != limit) {
-        Integer offsetAux = (limit * offset) - limit;
-        if (offsetAux < 0) {
-          offsetAux = 0;
-        }
-        query.append(String.format(paginationPart, offsetAux, limit));
-      }
-      query.append(" ) tablesAux group by id_table_schema ) as json ");
-
-      LOG.info("Query: {} ", query);
       // Delete the query log and the timestamp part later, once the tests are finished.
-      outputStream.write(recordRepository.findAndGenerateETLJson(query.toString()).getBytes());
+      outputStream.write(recordRepository.findAndGenerateETLJson(datasetId, outputStream,
+          tableSchemaId, limit, offset, filterValue, columnName).getBytes());
       LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
   }
-
-
-  /**
-   * Total records query.
-   *
-   * @param datasetId the dataset id
-   * @param tableSchemaList the table schema list
-   * @param tableSchemaId the table schema id
-   * @param filterValue the filter value
-   * @param columnName the column name
-   * @return the string
-   */
-  private String totalRecordsQuery(Long datasetId, List<TableSchema> tableSchemaList,
-      String tableSchemaId, String filterValue, String columnName) {
-    String queryPartOne =
-        " 'totalRecords',( select count(\"fieldName\") as \"totalRecords\" from ( select case ";
-    String queryPartTwo =
-        "end as \"fieldName\",  fv.value as \"value\" from dataset_%s.field_value fv inner join dataset_%s.record_value rv on rv.id = fv.id_record  inner join dataset_%s.table_value tv on rv.id_table = tv.id ";
-    String queryValueFilter = " and fv.value like '%s' ";
-    String queryColumnFilter = " where \"fieldName\" = '%s'";
-    String queryTablePart = " where tv.id_table_schema in( %s ) ";
-    String queryPartThree = " ) as countAux ";
-    String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-    StringBuilder query = new StringBuilder(queryPartOne);
-    for (TableSchema table : tableSchemaList) {
-      if (null != tableSchemaId) {
-        if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
-          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-            query.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                field.getHeaderName()));
-          }
-        }
-      } else {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          query.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
-        }
-      }
-    }
-    query.append(String.format(queryPartTwo, datasetId, datasetId, datasetId));
-    StringBuilder tableList = new StringBuilder();
-    Iterator<TableSchema> tableIterator = tableSchemaList.iterator();
-    while (tableIterator.hasNext()) {
-      if (null != tableSchemaId) {
-        String tableschema = tableIterator.next().getIdTableSchema().toString();
-        if (tableschema.equals(tableSchemaId)) {
-          tableList.append("'" + tableschema + "'");
-        }
-      } else {
-        tableList.append("'" + tableIterator.next().getIdTableSchema().toString() + "'");
-        if (tableIterator.hasNext()) {
-          tableList.append(",");
-        }
-      }
-    }
-    query.append(String.format(queryTablePart, tableList));
-    if (null != filterValue) {
-      query.append(String.format(queryValueFilter, filterValue));
-    }
-    query.append(queryPartThree);
-    if (null != columnName) {
-      query.append(String.format(queryColumnFilter, columnName));
-    }
-    query.append(" ) , ");
-    return query.toString();
-  }
-
 
   /**
    * Creates the reference dataset files.
@@ -3639,7 +3393,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     try {
       // create the excel file
-      byte[] file = exportFile(dataset.getId(), "xlsx", null);
+      byte[] file = exportFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null);
       // we save the file in its files
       if (null != file) {
         String nameFileUnique = String.format("%s", datasetDesingName);
@@ -3661,4 +3415,172 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * Store records.
+   *
+   * @param datasetId the dataset id
+   * @param recordList the record list
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  @Override
+  public void storeRecords(@DatasetId Long datasetId, List<RecordValue> recordList)
+      throws IOException, SQLException {
+
+    String schema = LiteralConstants.DATASET_PREFIX + datasetId;
+    LOG.info("RN3-Import - Getting connections: datasetId={}", datasetId);
+    ConnectionDataVO connectionDataVO = recordStoreControllerZuul.getConnectionToDataset(schema);
+
+    LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
+    try (
+        PostgresBulkImporter recordsImporter = new PostgresBulkImporter(connectionDataVO, schema,
+            "record_value (ID, ID_RECORD_SCHEMA,ID_TABLE,DATASET_PARTITION_ID,DATA_PROVIDER_CODE) ",
+            importPath);
+        PostgresBulkImporter fieldsImporter = new PostgresBulkImporter(connectionDataVO, schema,
+            "field_value (ID, TYPE, VALUE, ID_FIELD_SCHEMA, ID_RECORD, GEOMETRY) ", importPath)) {
+
+      LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
+
+      for (RecordValue recordValue : recordList) {
+
+        String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
+        recordsImporter.addTuple(new Object[] {recordId, recordValue.getIdRecordSchema(),
+            recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
+            recordValue.getDataProviderCode()});
+
+        for (FieldValue fieldValue : recordValue.getFields()) {
+          String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
+          fieldsImporter.addTuple(new Object[] {fieldId, fieldValue.getType().getValue(),
+              fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
+        }
+      }
+
+      LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
+      recordsImporter.copy();
+      fieldsImporter.copy();
+      LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
+    } catch (SQLException e) {
+      LOG_ERROR.error("Cannot save the records for dataset {}", datasetId, e);
+      throw e;
+    }
+  }
+
+  /**
+   * Update records with conditions.
+   *
+   * @param recordList the record list
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   */
+  @Override
+  @Transactional
+  public void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
+      TableSchema tableSchema) {
+    LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
+    boolean readOnly =
+        tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
+    tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
+
+    // get list paginated of old records to modify
+    TableValue targetTable =
+        tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
+    List<RecordValue> oldRecords =
+        recordRepository.findOrderedNativeRecord(targetTable.getId(), datasetId, null);
+    // sublist records to insert
+    List<RecordValue> recordsToSave = new ArrayList<>();
+
+    if (!readOnly) {
+      Iterator<RecordValue> itr = recordList.iterator();
+      for (RecordValue oldRecord : oldRecords) {
+        if (itr.hasNext()) {
+          refillFields(oldRecord, itr.next().getFields());
+        } else {
+          refillFields(oldRecord, null);
+        }
+        oldRecord.setTableValue(targetTable);
+        recordsToSave.add(oldRecord);
+      }
+    } else {
+      List<ObjectId> readOnlyFields =
+          tableSchema.getRecordSchema().getFieldSchema().stream().filter(FieldSchema::getReadOnly)
+              .map(FieldSchema::getIdFieldSchema).collect(Collectors.toList());
+      if (!CollectionUtils.isEmpty(oldRecords)
+          && readOnlyFields.size() != tableSchema.getRecordSchema().getFieldSchema().size()) {
+        for (RecordValue oldRecord : oldRecords) {
+          Map<Integer, Integer> mapPosition =
+              mapPositionReadOnlyFieldsForReference(readOnlyFields, oldRecord, recordList.get(0));
+          findByReadOnlyRecords(mapPosition, oldRecord, recordList);
+          oldRecord.setTableValue(targetTable);
+          recordsToSave.add(oldRecord);
+        }
+      }
+    }
+    LOG.info("Import dataset table {} with {} number of records", tableSchema.getNameTableSchema(),
+        recordsToSave.size());
+
+    saveAllRecords(datasetId, recordsToSave);
+  }
+
+
+  /**
+   * Refill fields.
+   *
+   * @param oldRecord the old record
+   * @param fieldValues the field values
+   */
+  private void refillFields(RecordValue oldRecord, List<FieldValue> fieldValues) {
+    if (fieldValues != null) {
+      oldRecord.getFields().stream().forEach(oldField -> {
+        oldField.setValue(fieldValues.stream()
+            .filter(field -> oldField.getIdFieldSchema().equals(field.getIdFieldSchema()))
+            .map(FieldValue::getValue).findFirst().orElse(""));
+        oldField.setRecord(oldRecord);
+      });
+    } else {
+      oldRecord.getFields().forEach(field -> field.setValue(""));
+    }
+  }
+
+  /**
+   * Map position read only fields for reference.
+   *
+   * @param readOnlyFields the read only fields
+   * @param recordValue the record value
+   * @param newRecordValues the new record values
+   * @return the map
+   */
+  private Map<Integer, Integer> mapPositionReadOnlyFieldsForReference(List<ObjectId> readOnlyFields,
+      RecordValue recordValue, RecordValue newRecordValues) {
+    Map<Integer, Integer> mapPosition = new HashMap<>();
+    for (ObjectId id : readOnlyFields) {
+      mapPosition.put(
+          recordValue.getFields().stream().map(FieldValue::getIdFieldSchema)
+              .collect(Collectors.toList()).indexOf(id.toString()),
+          newRecordValues.getFields().stream().map(FieldValue::getIdFieldSchema)
+              .collect(Collectors.toList()).indexOf(id.toString()));
+    }
+    return mapPosition;
+  }
+
+  /**
+   * Find by read only records.
+   *
+   * @param readOnlyPositionFields the read only position fields
+   * @param oldRecord the old record
+   * @param recordList the record list
+   * @return the record value
+   */
+  private void findByReadOnlyRecords(Map<Integer, Integer> readOnlyPositionFields,
+      RecordValue oldRecord, List<RecordValue> recordList) {
+
+    RecordValue recordToUpdate = recordList.stream()
+        .filter(record -> readOnlyPositionFields.entrySet().stream()
+            .allMatch(entry -> record.getFields().get(entry.getValue()).getValue()
+                .equals(oldRecord.getFields().get(entry.getKey()).getValue())))
+        .findFirst().orElse(null);
+    if (recordToUpdate != null) {
+      refillFields(oldRecord, recordToUpdate.getFields());
+    }
+
+  }
 }

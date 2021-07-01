@@ -50,7 +50,7 @@ public class ExternalIntegrationDesignCompletedEvent implements NotificableEvent
 
     Long dataflowId = notificationVO.getDataflowId();
     Long datasetId = notificationVO.getDatasetId();
-    String dataflowName = dataflowService.getById(dataflowId).getName();
+    String dataflowName = dataflowService.getMetabaseById(dataflowId).getName();
     String datasetName = "";
     if (datasetId != null) {
       datasetName =

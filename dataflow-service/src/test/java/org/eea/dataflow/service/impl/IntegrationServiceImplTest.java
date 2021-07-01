@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.eea.dataflow.integration.crud.factory.CrudManager;
 import org.eea.dataflow.integration.crud.factory.CrudManagerFactory;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
@@ -24,6 +25,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -41,6 +43,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
+
 
 /**
  * The Class IntegrationServiceImplTest.
@@ -305,7 +308,7 @@ public class IntegrationServiceImplTest {
     IntegrationVO integrationVO = new IntegrationVO();
     InternalOperationParameters parameter = new InternalOperationParameters();
     parameter.setParameter(IntegrationParams.FILE_EXTENSION);
-    parameter.setValue("csv");
+    parameter.setValue(FileTypeEnum.CSV.getValue());
     Integration integration = new Integration();
     integration.setId(1L);
     integration.setInternalParameters(Arrays.asList(parameter));
@@ -357,8 +360,11 @@ public class IntegrationServiceImplTest {
     executionResultParams.put("id", 1);
     ExecutionResultVO executionResultVO = new ExecutionResultVO();
     executionResultVO.setExecutionResultParams(executionResultParams);
-    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
-    Mockito.when(crudManager.get(Mockito.any())).thenReturn(Arrays.asList(integrationVO));
+
+    Mockito.when(integrationRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new Integration()));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
 
     Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
@@ -465,7 +471,25 @@ public class IntegrationServiceImplTest {
   @Test
   public void addLocksTest() throws EEAException {
     integrationService.addLocks(0L);
-    Mockito.verify(lockService, times(7)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
+    Mockito.verify(lockService, times(6)).createLock(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any());
+  }
+
+
+  @Test
+  public void getIntegrationById() {
+    IntegrationVO integrationVO = new IntegrationVO();
+    InternalOperationParameters parameter = new InternalOperationParameters();
+    parameter.setParameter(IntegrationParams.FILE_EXTENSION);
+    parameter.setValue(FileTypeEnum.CSV.getValue());
+    Integration integration = new Integration();
+    integration.setId(1L);
+    integration.setInternalParameters(Arrays.asList(parameter));
+
+
+    Mockito.when(integrationRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(integration));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+    Assert.assertEquals(integrationVO, integrationService.getIntegration(1L));
   }
 }

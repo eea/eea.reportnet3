@@ -83,8 +83,8 @@ public interface FieldRepository
    * @return the list
    */
   @Query(
-      value = "with records as(select rv.id  from record_value rv  where rv.id_record_schema=:recordIdSchema )"
-          + "select fv.* from field_value fv join records on records.id=fv.id_record ",
+      value = "with records as(select rv.id  from record_value rv  where rv.id_record_schema=:recordIdSchema order by rv.DATA_POSITION )"
+          + "select fv.* from field_value fv join records on records.id=fv.id_record order by fv.DATA_POSITION ",
       nativeQuery = true)
   List<FieldValue> findByRecord_IdRecordSchema(@Param("recordIdSchema") String recordIdSchema,
       Pageable pageable);

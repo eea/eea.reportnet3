@@ -6,6 +6,7 @@ export class MultiSelectPanel extends Component {
   static defaultProps = {
     appendTo: null,
     header: null,
+    label: null,
     onClick: null,
     scrollHeight: null
   };
@@ -13,6 +14,7 @@ export class MultiSelectPanel extends Component {
   static propTypes = {
     appendTo: PropTypes.object,
     header: PropTypes.any,
+    label: PropTypes.string,
     onClick: PropTypes.func,
     scrollHeight: PropTypes.string
   };
@@ -25,7 +27,11 @@ export class MultiSelectPanel extends Component {
         ref={el => (this.element = el)}>
         {this.props.header}
         <div className="p-multiselect-items-wrapper" style={{ maxHeight: this.props.scrollHeight }}>
-          <ul aria-multiselectable={true} className="p-multiselect-items p-multiselect-list p-component" role="listbox">
+          <ul
+            aria-label={this.props.label}
+            aria-multiselectable={true}
+            className="p-multiselect-items p-multiselect-list p-component"
+            role="listbox">
             {this.props.children}
           </ul>
         </div>

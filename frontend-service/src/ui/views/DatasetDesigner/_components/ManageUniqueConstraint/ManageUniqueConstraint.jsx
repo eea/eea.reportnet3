@@ -34,8 +34,6 @@ export const ManageUniqueConstraint = ({
     datasetSchemaId,
     isDuplicatedToManageUnique,
     isManageUniqueConstraintDialogVisible,
-    isUniqueConstraintCreating,
-    isUniqueConstraintUpdating,
     manageUniqueConstraintData,
     uniqueConstraintsList
   } = designerState;
@@ -222,7 +220,7 @@ export const ManageUniqueConstraint = ({
 
   const renderFooter = (
     <Fragment>
-      <span data-tip data-for="createTooltip">
+      <span data-for="createTooltip" data-tip>
         <Button
           className={`p-button-primary ${!isEmpty(selectedFields) && !isDuplicated ? 'p-button-animated-blink' : ''}`}
           disabled={isEmpty(selectedFields) || isDuplicated || isCreating || isUpdating}
@@ -241,7 +239,7 @@ export const ManageUniqueConstraint = ({
         }}
       />
       {isDuplicated && (
-        <ReactTooltip effect="solid" id="createTooltip" place="top">
+        <ReactTooltip border={true} effect="solid" id="createTooltip" place="top">
           {resources.messages['duplicatedUniqueConstraint']}
         </ReactTooltip>
       )}
@@ -256,8 +254,8 @@ export const ManageUniqueConstraint = ({
         setSelectedFields([]);
       }}
       optionLabel="name"
-      options={getTableOptions()}
       optionValue="value"
+      options={getTableOptions()}
       title={resources.messages['selectUniqueTableTitle']}
       value={selectedTable}
     />
@@ -271,8 +269,8 @@ export const ManageUniqueConstraint = ({
       multiple={true}
       onChange={event => !isNil(event.value) && setSelectedFields(event.value)}
       optionLabel="name"
-      options={getFieldOptions()}
       optionValue="value"
+      options={getFieldOptions()}
       title={resources.messages['selectUniqueFieldsTitle']}
       value={selectedFields}
     />

@@ -12,7 +12,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const TreeViewExpandableItem = ({
-  blockExpand = false,
   buttons,
   children,
   expanded = true,
@@ -38,7 +37,7 @@ const TreeViewExpandableItem = ({
   }, [isOpen]);
 
   useEffect(() => {
-    setIsOpen(expanded);
+    setIsOpen(!isUndefined(items) & (items.length > 0) ? expanded : true);
   }, [expanded]);
 
   const renderHeader = () => {
@@ -111,21 +110,12 @@ const TreeViewExpandableItem = ({
     <Fragment>
       <div
         className={!isUndefined(className) ? className : styles.defaultExpandable}
-        onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
-        style={{
-          cursor: 'pointer',
-          color: blockExpand ? 'var(--errors)' : 'inherit',
-          opacity: blockExpand ? '0.7' : '1'
-        }}>
+        onClick={() => setIsOpen(!isOpen)}>
         {!isUndefined(items) & (items.length > 0) ? (
           <FontAwesomeIcon
+            aria-label={resources.messages[isOpen ? 'collapse' : 'expand']}
             icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
-            onClick={!blockExpand ? () => setIsOpen(!isOpen) : null}
-            style={{
-              cursor: 'pointer',
-              color: blockExpand ? 'var(--errors)' : 'inherit',
-              opacity: blockExpand ? '0.7' : '1'
-            }}
+            onClick={() => setIsOpen(!isOpen)}
           />
         ) : (
           ''

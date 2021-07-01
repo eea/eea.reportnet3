@@ -64,7 +64,7 @@ public class CSVWriterStrategy implements WriterStrategy {
       boolean includeCountryCode, boolean includeValidations) throws EEAException {
     LOG.info("starting csv file writter");
 
-    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
 
     // Init the writer
     StringWriter writer = new StringWriter();
@@ -95,7 +95,7 @@ public class CSVWriterStrategy implements WriterStrategy {
       boolean includeCountryCode, boolean includeValidations) throws EEAException {
     LOG.info("starting csv file writter");
 
-    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchema(dataflowId, datasetId);
+    DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
 
     // Init the writer
     StringWriter writer = new StringWriter();

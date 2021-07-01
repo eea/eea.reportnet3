@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -30,22 +32,6 @@ import org.springframework.data.domain.Pageable;
  * The interface Dataset service.
  */
 public interface DatasetService {
-
-  /**
-   * Process the file: read, parse and save in the db.
-   *
-   * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param is the is
-   * @param idTableSchema the id table schema
-   *
-   * @return the data set VO
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  DataSetVO processFile(@DatasetId Long datasetId, String fileName, InputStream is,
-      String idTableSchema) throws EEAException, IOException;
 
   /**
    * Delete the dataSchema.
@@ -600,5 +586,25 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   File downloadExportedFile(Long datasetId, String fileName) throws IOException, EEAException;
+
+  /**
+   * Update records with conditions.
+   *
+   * @param recordList the record list
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   */
+  void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
+      TableSchema tableSchema);
+
+  /**
+   * Store records.
+   *
+   * @param datasetId the dataset id
+   * @param recordList the record list
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  void storeRecords(Long datasetId, List<RecordValue> recordList) throws IOException, SQLException;
 
 }

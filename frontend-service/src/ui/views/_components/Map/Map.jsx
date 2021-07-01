@@ -252,7 +252,7 @@ export const Map = ({
   const getGeoJson = () => {
     switch (geometryType.toUpperCase()) {
       case 'POINT':
-        if (MapUtils.checkValidJSONCoordinates(geoJson)) {
+        if (MapUtils.checkValidJSONCoordinates(mapGeoJson)) {
           return (
             <GeoJSON
               coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
@@ -267,7 +267,7 @@ export const Map = ({
       case 'MULTIPOINT':
       case 'POLYGON':
       case 'MULTIPOLYGON':
-        if (MapUtils.checkValidJSONMultipleCoordinates(geoJson)) {
+        if (MapUtils.checkValidJSONMultipleCoordinates(mapGeoJson)) {
           return (
             <GeoJSON
               coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
@@ -313,11 +313,13 @@ export const Map = ({
   const projectGeoJsonCoordinates = (geoJsonData, isCenter = false) => {
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
     const projectPoint = coordinate => {
-      return proj4(
-        proj4(!isNil(parsedGeoJsonData) ? getSRID(parsedGeoJsonData.properties.srid) : currentCRS.value),
-        proj4('EPSG:4326'),
-        coordinate
-      );
+      return MapUtils.checkValidCoordinates(coordinate)
+        ? proj4(
+            proj4(!isNil(parsedGeoJsonData) ? getSRID(parsedGeoJsonData.properties.srid) : currentCRS.value),
+            proj4('EPSG:4326'),
+            coordinate
+          )
+        : coordinate;
     };
     if (isCenter) {
       return projectPoint(parsedGeoJsonData.geometry.coordinates);
@@ -370,6 +372,7 @@ export const Map = ({
               </label>
               {/* {(MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)) && (
                 <ReactTooltip
+                  border={true}
                   className={styles.tooltip}
                   effect="float"
                   id="coordinatesTooltip"

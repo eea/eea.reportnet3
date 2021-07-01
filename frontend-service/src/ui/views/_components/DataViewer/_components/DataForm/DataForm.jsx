@@ -76,7 +76,7 @@ const DataForm = ({
                     column.type
                   ) && (
                     <div className="p-col-4" style={{ padding: '.75em' }}>
-                      <label htmlFor={column.field}>{`${column.header}${
+                      <label>{`${column.header}${
                         TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
                       }`}</label>
                       <span data-for={`infoCircleButton_${i}`} data-tip>
@@ -88,6 +88,7 @@ const DataForm = ({
                         />
                       </span>
                       <ReactTooltip
+                        border={true}
                         effect="solid"
                         getContent={() =>
                           ReactDOMServer.renderToStaticMarkup(
@@ -203,6 +204,7 @@ const DataForm = ({
                         />
                       </span>
                       <ReactTooltip
+                        border={true}
                         effect="solid"
                         getContent={() =>
                           ReactDOMServer.renderToStaticMarkup(

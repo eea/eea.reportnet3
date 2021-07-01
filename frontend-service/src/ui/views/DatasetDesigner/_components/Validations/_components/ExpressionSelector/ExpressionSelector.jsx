@@ -101,20 +101,18 @@ export const ExpressionSelector = ({
   const expressionsTypeView = () => {
     if (!isEmpty(expressionType) && expressionType === 'fieldComparison') {
       return (
-        <>
-          <FieldComparison
-            componentName={componentName}
-            creationFormState={creationFormState}
-            onAddNewExpression={onAddNewExpression}
-            onExpressionDelete={onExpressionDelete}
-            onExpressionFieldUpdate={onExpressionFieldUpdate}
-            onExpressionGroup={onExpressionGroup}
-            onExpressionMarkToGroup={onExpressionMarkToGroup}
-            onExpressionsErrors={onExpressionsErrors}
-            onGetFieldType={onGetFieldType}
-            tabsChanges={tabsChanges}
-          />
-        </>
+        <FieldComparison
+          componentName={componentName}
+          creationFormState={creationFormState}
+          onAddNewExpression={onAddNewExpression}
+          onExpressionDelete={onExpressionDelete}
+          onExpressionFieldUpdate={onExpressionFieldUpdate}
+          onExpressionGroup={onExpressionGroup}
+          onExpressionMarkToGroup={onExpressionMarkToGroup}
+          onExpressionsErrors={onExpressionsErrors}
+          onGetFieldType={onGetFieldType}
+          tabsChanges={tabsChanges}
+        />
       );
     }
 
@@ -162,16 +160,16 @@ export const ExpressionSelector = ({
           onAddNewExpressionIf={onAddNewExpressionIf}
           onAddNewExpressionThen={onAddNewExpressionThen}
           onExpressionIfDelete={onExpressionIfDelete}
-          onExpressionThenDelete={onExpressionThenDelete}
           onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
-          onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
           onExpressionIfGroup={onExpressionIfGroup}
-          onExpressionThenGroup={onExpressionThenGroup}
           onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
+          onExpressionThenDelete={onExpressionThenDelete}
+          onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
+          onExpressionThenGroup={onExpressionThenGroup}
           onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
           onExpressionsErrors={onExpressionsErrors}
-          tabsChanges={tabsChanges}
           onGetFieldType={onGetFieldType}
+          tabsChanges={tabsChanges}
         />
       );
     }
@@ -180,12 +178,12 @@ export const ExpressionSelector = ({
       return (
         <SQLsentence
           creationFormState={creationFormState}
-          onSetSQLsentence={onSetSQLsentence}
           level={validationContext.level}
+          onSetSQLsentence={onSetSQLsentence}
         />
       );
     }
-    return <></>;
+    return <div />;
   };
   return (
     <>

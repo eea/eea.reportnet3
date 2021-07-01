@@ -357,10 +357,10 @@ export const ManageIntegrations = ({
         </label>
         <div className={styles.checkboxWrapper}>
           <Checkbox
-            id={'notificationRequired'}
-            inputId={'notificationRequired'}
-            isChecked={manageIntegrationsState.notificationRequired}
-            label={'notificationRequired'}
+            checked={manageIntegrationsState.notificationRequired}
+            id="notificationRequired"
+            inputId="notificationRequired"
+            label="notificationRequired"
             onChange={event => {
               onChangeNotificationRequiredCheckboxEvent(event.checked, option);
             }}
@@ -401,7 +401,7 @@ export const ManageIntegrations = ({
       />
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
-        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
+        <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
           {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
       )}
@@ -470,6 +470,7 @@ export const ManageIntegrations = ({
   const renderEditorInput = (option, parameter, id) => {
     return (
       <InputText
+        id={`editor_${parameter}`}
         onBlur={event => onBlurParameter(id, option, event)}
         onChange={event => onChangeParameter(event.target.value, option, id)}
         onKeyPress={event => onEditKeyDown(event, id, option)}
@@ -592,7 +593,7 @@ export const ManageIntegrations = ({
             )}
 
             {isKeyDuplicated && (
-              <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
+              <ReactTooltip border={true} effect="solid" id="addParameterTooltip" place="top">
                 {resources.messages['parameterAlreadyExists']}
               </ReactTooltip>
             )}

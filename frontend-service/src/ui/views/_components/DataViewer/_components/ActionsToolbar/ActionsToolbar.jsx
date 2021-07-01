@@ -35,8 +35,8 @@ const ActionsToolbar = ({
   isExportable,
   isFilterable = true,
   isFilterValidationsActive,
-  isLoading,
   isGroupedValidationSelected,
+  isLoading,
   isValidationSelected,
   levelErrorTypesWithCorrects,
   onHideSelectGroupedValidation,
@@ -46,6 +46,7 @@ const ActionsToolbar = ({
   records,
   selectedRuleLevelError,
   selectedRuleMessage,
+  selectedTableSchemaId,
   setColumns,
   setDeleteDialogVisible,
   setImportTableDialogVisible,
@@ -246,9 +247,7 @@ const ActionsToolbar = ({
           className={`p-button-animated-blink`}
           filters={filter.visibilityDropdown}
           id="dropdownFilterMenu"
-          onShow={e => {
-            getExportButtonPosition(e);
-          }}
+          onShow={event => getExportButtonPosition(event)}
           popup={true}
           ref={dropdownFilterRef}
           showFilters={showFilters}
@@ -280,7 +279,7 @@ const ActionsToolbar = ({
               showFilters={showValidationFilter}
               showLevelErrorIcons={true}
             />
-            {filter.groupedFilter && selectedRuleMessage !== '' && (
+            {filter.groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId && (
               <ChipButton
                 hasLevelErrorIcon={true}
                 labelClassName={styles.groupFilter}

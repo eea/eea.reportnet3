@@ -133,24 +133,20 @@ export class HeaderCell extends Component {
     if (this.props.filter) {
       const id = uuid.v4();
       filterElement = this.props.filterElement || (
-        <>
-          <InputText
-            className="p-column-filter"
-            defaultValue={
-              this.props.filters && this.props.filters[this.props.field]
-                ? this.props.filters[this.props.field].value
-                : null
-            }
-            id={`${this.props.field}_${id}_filter`}
-            maxLength={this.props.filterMaxLength}
-            onInput={this.onFilterInput}
-            placeholder={this.props.filterPlaceholder}
-            type={this.props.filterType}
-          />
-          <label className="srOnly" htmlFor={`${this.props.field}_${id}_filter`}>
-            {`${this.props.field}_filter`}
-          </label>
-        </>
+        <InputText
+          className="p-column-filter"
+          defaultValue={
+            this.props.filters && this.props.filters[this.props.field]
+              ? this.props.filters[this.props.field].value
+              : null
+          }
+          id={`${this.props.field}_${id}_filter`}
+          maxLength={this.props.filterMaxLength}
+          name={`${this.props.field}_filter`}
+          onInput={this.onFilterInput}
+          placeholder={this.props.filterPlaceholder}
+          type={this.props.filterType}
+        />
       );
     }
 

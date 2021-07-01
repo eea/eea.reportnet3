@@ -20,7 +20,6 @@ import { DatasetService } from 'core/services/Dataset';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { DatasetDesignerUtils } from 'ui/views/DatasetDesigner/_functions/Utils/DatasetDesignerUtils';
 import { QuerystringUtils } from 'ui/views/_functions/Utils/QuerystringUtils';
@@ -51,13 +50,14 @@ export const TabsDesigner = withRouter(
     onHideSelectGroupedValidation,
     onLoadTableData,
     onTabChange,
-    onUpdateTable,
     onUpdateSchema,
+    onUpdateTable,
     recordPositionId,
     selectedRecordErrorId,
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
+    selectedTableSchemaId,
     setActiveTableSchemaId,
     tableSchemaId,
     viewType
@@ -66,7 +66,6 @@ export const TabsDesigner = withRouter(
       params: { dataflowId, datasetId }
     } = match;
     const notificationContext = useContext(NotificationContext);
-    const validationContext = useContext(ValidationContext);
 
     const [errorMessage, setErrorMessage] = useState();
     const [errorMessageTitle, setErrorMessageTitle] = useState();
@@ -335,18 +334,16 @@ export const TabsDesigner = withRouter(
 
     const renderErrors = (errorTitle, error) => {
       return (
-        <Fragment>
-          {isErrorDialogVisible && (
-            <Dialog
-              footer={errorDialogFooter}
-              header={errorTitle}
-              modal={true}
-              onHide={() => setIsErrorDialogVisible(false)}
-              visible={isErrorDialogVisible}>
-              <div className="p-grid p-fluid">{error}</div>
-            </Dialog>
-          )}
-        </Fragment>
+        isErrorDialogVisible && (
+          <Dialog
+            footer={errorDialogFooter}
+            header={errorTitle}
+            modal={true}
+            onHide={() => setIsErrorDialogVisible(false)}
+            visible={isErrorDialogVisible}>
+            <div className="p-grid p-fluid">{error}</div>
+          </Dialog>
+        )
       );
     };
 
@@ -424,6 +421,7 @@ export const TabsDesigner = withRouter(
                         selectedRuleId={selectedRuleId}
                         selectedRuleLevelError={selectedRuleLevelError}
                         selectedRuleMessage={selectedRuleMessage}
+                        selectedTableSchemaId={selectedTableSchemaId}
                         table={tabs[i]}
                         viewType={viewType}
                       />

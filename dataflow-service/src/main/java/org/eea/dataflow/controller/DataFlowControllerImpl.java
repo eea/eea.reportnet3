@@ -16,7 +16,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -215,32 +214,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
-  /**
-   * Find user dataflows by status.
-   *
-   * @param type the type
-   * @return the list
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/request/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find list of Dataflows based on the Status for the logged User",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
-  public List<DataFlowVO> findUserDataflowsByStatus(@ApiParam(type = "Object",
-      value = "Dataflow status") @PathVariable("type") TypeRequestEnum type) {
-    List<DataFlowVO> dataflows = new ArrayList<>();
-    String userId =
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID);
-    try {
-      dataflows = dataflowService.getPendingByUser(userId, type);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-    return dataflows;
-  }
 
   /**
    * Adds the contributor.
@@ -339,7 +312,8 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     if (status == HttpStatus.OK) {
       try {
-        dataflowService.createDataFlow(dataFlowVO);
+        Long dataflowId = dataflowService.createDataFlow(dataFlowVO);
+        message = dataflowId.toString();
       } catch (EEAException e) {
         LOG_ERROR.error("Create dataflow failed. ", e.getCause());
         message = e.getMessage();

@@ -68,6 +68,10 @@
     "value": "fA=="
   },
   {
+    "key": "config/application/exportDataDelimiter",
+    "value": "LA=="
+  },
+  {
     "key": "config/dataset/spring.jpa.hibernate.show-sql",
     "value": "JHtTSE9XX1NRTDpmYWxzZX0="
   },
@@ -1378,6 +1382,14 @@
     {
     "key": "config/dataset/pathPublicFile",
     "value": "JHtEQVRBU0VUX1BVQkxJQ19GSUxFX1BBVEg6QzpcaW1wb3J0RmlsZXNQdWJsaWNcfQ=="
+  },
+  {
+    "key": "config/validation/validationExportPathFile",
+    "value": "JHtWQUxJREFUSU9OX0VYUE9SVF9GSUxFU19QQVRIOkM6XHZhbGlkYXRpb25FeHBvcnRGaWxlc1x9"
+  },
+    {
+    "key": "config/validation/stream.download.timeout",
+    "value": "JHtTVFJFQU1fVElNRU9VVDozNjAwMDB9"
   },
   {
     "key": "config/apiGateway/zuul.routes.pam.path",

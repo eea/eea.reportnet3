@@ -8,14 +8,17 @@ import { Button } from 'ui/views/_components/Button';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { UserService } from 'core/services/User';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const DataflowManagementForm = forwardRef(
   ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, refresh }, ref) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
+    const userContext = useContext(UserContext);
 
     const [description, setDescription] = useState(data.description);
     const [errors, setErrors] = useState({
@@ -62,7 +65,7 @@ const DataflowManagementForm = forwardRef(
       return hasErrors;
     };
 
-    const onConfirm = async () => {
+    const onConfirm = async pinned => {
       checkIsCorrectInputValue(data.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
@@ -82,7 +85,16 @@ const DataflowManagementForm = forwardRef(
             );
             onEdit(name, description, data.obligation.id);
           } else {
-            await DataflowService.create(name, description, data.obligation.id);
+            const creationResponse = await DataflowService.create(name, description, data.obligation.id);
+            if (pinned) {
+              const inmUserProperties = { ...userContext.userProps };
+              inmUserProperties.pinnedDataflows.push(creationResponse.data.toString());
+
+              const response = await UserService.updateAttributes(inmUserProperties);
+              if (!isNil(response) && response.status >= 200 && response.status <= 299) {
+                userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
+              }
+            }
             onCreate();
             onResetData();
           }
@@ -168,7 +180,7 @@ const DataflowManagementForm = forwardRef(
           </div>
 
           <div className={`${styles.search}`}>
-            <Button icon="search" label={resources.messages['searchObligations']} onMouseDown={onSearch} />
+            <Button icon="search" label={resources.messages['searchObligations']} onClick={onSearch} />
             <input
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               id="searchObligation"
