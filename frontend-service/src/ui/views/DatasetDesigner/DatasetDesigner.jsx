@@ -714,7 +714,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       }
     });
 
-  const onSelectValidation = (tableSchemaId, selectedRuleId, selectedRuleMessage = '', selectedRuleLevelError = '') => {
+  const onSelectValidation = (
+    tableSchemaId,
+    selectedRuleId = '',
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
+  ) => {
     designerDispatch({
       type: 'SET_DATAVIEWER_GROUPED_OPTIONS',
       payload: {
