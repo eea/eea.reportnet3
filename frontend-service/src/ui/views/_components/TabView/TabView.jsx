@@ -166,7 +166,7 @@ const TabView = withRouter(
       return (
         <div
           aria-hidden={!selected}
-          aria-labelledby={ariaLabelledBy}
+          ariaLabelledby={ariaLabelledBy}
           className={className}
           id={id}
           key={id}

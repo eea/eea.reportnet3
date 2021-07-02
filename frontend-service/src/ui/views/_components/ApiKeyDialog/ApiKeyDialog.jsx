@@ -135,11 +135,11 @@ const ApiKeyDialog = ({
               </div>
               <p className={styles.ids_info}>
                 <span className={styles.ids_label}>
-                  {resources.messages['dataflow']}: <b>{dataflowId} </b>
+                  {resources.messages['dataflow']}: <strong>{dataflowId} </strong>
                 </span>
                 <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
                   {resources.messages['apiKeyDataProviderIdLabel']}:{' '}
-                  <b>{representativeId ? representativeId : dataProviderId} </b>
+                  <strong>{representativeId ? representativeId : dataProviderId} </strong>
                 </span>
               </p>
             </div>

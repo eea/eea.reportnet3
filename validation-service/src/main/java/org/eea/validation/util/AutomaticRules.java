@@ -72,7 +72,7 @@ public class AutomaticRules {
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode,
       AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
-        "The value is not a valid whole number ", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        "The value is not a valid whole number", ErrorTypeEnum.ERROR.getValue(), shortCode,
         automaticType, description);
   }
 
@@ -109,7 +109,7 @@ public class AutomaticRules {
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isDateYYYYMMDD(value)",
-        "The value is not a valid date (YYYY-MM-DD) ", ErrorTypeEnum.ERROR.getValue(), shortCode,
+        "The value is not a valid date (YYYY-MM-DD)", ErrorTypeEnum.ERROR.getValue(), shortCode,
         automaticType, description);
   }
 
@@ -126,7 +126,7 @@ public class AutomaticRules {
   public static Rule createDateTimeAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isDateTime(value)",
-        "The value is not a valid dateTime (YYYY-MM-DD HH:MM:SS) ", ErrorTypeEnum.ERROR.getValue(),
+        "The value is not a valid datetime (YYYY-MM-DD HH:MM:SS)", ErrorTypeEnum.ERROR.getValue(),
         shortCode, automaticType, description);
   }
 
@@ -145,7 +145,7 @@ public class AutomaticRules {
   public static Rule createBooleanAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isBoolean(value)",
-        "The field must be TRUE OR FALSE", ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType,
+        "The field must be TRUE or FALSE", ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType,
         description);
   }
 
@@ -163,7 +163,7 @@ public class AutomaticRules {
   public static Rule createLatAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isCordenateLat(value)",
-        "The field must be a valid Lat(beetween -90 and 90)", ErrorTypeEnum.ERROR.getValue(),
+        "The field must be a valid latitude (between -90 and 90)", ErrorTypeEnum.ERROR.getValue(),
         shortCode, automaticType, description);
   }
 
@@ -181,7 +181,7 @@ public class AutomaticRules {
   public static Rule createLongAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isCordenateLong(value)",
-        "The field must be a valid Longitude(beetween -180 and 180)",
+        "The field must be a valid longitude (between -180 and 180)",
         ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
   }
 
@@ -301,7 +301,7 @@ public class AutomaticRules {
   public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isURL(value)",
-        "The value does not follow the expected syntax for a valid URL ",
+        "The value does not follow the expected syntax for a valid URL",
         ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
   }
 
@@ -319,7 +319,7 @@ public class AutomaticRules {
   public static Rule createPhoneAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isPhone(value)",
-        "The value does not follow the expected syntax for a valid phone number ",
+        "The value does not follow the expected syntax for a valid phone number",
         ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
   }
 
@@ -337,7 +337,7 @@ public class AutomaticRules {
   public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isEmail(value)",
-        "The value does not follow the expected syntax for a valid email ",
+        "The value does not follow the expected syntax for a valid email",
         ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
   }
 

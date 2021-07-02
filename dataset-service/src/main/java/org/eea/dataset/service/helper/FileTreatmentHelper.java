@@ -25,7 +25,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -216,7 +215,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     if (delimiter != null && delimiter.length() > 1) {
       LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
-      throw new EEAException("the size of the delimiter cannot be greater than 1");
+      throw new EEAException("The size of the delimiter cannot be greater than 1");
     }
 
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
@@ -986,10 +985,9 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @return the tables
    */
-  @Transactional
   public List<TableSchema> getTables(Long datasetId) {
 
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
     DataSetSchema datasetSchema = null;
     try {
       datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
@@ -998,7 +996,10 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
           datasetSchemaId, e.getMessage(), e);
     }
-    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
+    if (datasetSchema != null) {
+      tableSchemaList = datasetSchema.getTableSchemas();
+    }
 
     return tableSchemaList;
   }

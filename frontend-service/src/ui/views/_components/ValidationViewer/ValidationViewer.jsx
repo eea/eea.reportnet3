@@ -29,6 +29,8 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 
 import { validationReducer } from './_functions/Reducers/validationReducer';
 
+import { TextUtils } from 'ui/views/_functions/Utils';
+
 const ValidationViewer = memo(
   ({
     buttonsList = undefined,
@@ -220,8 +222,11 @@ const ValidationViewer = memo(
       return style;
     };
 
+    const getRuleSchema = data =>
+      validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === data.ruleId);
+
     const getTooltipMessage = column => {
-      const ruleInfo = validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === column.ruleId);
+      const ruleInfo = getRuleSchema(column);
       return (
         <Fragment>
           <span className={styles.tooltipInfoLabel}>{resources.messages['ruleName']}: </span>{' '}
@@ -434,6 +439,7 @@ const ValidationViewer = memo(
       validationContext.onSetRulesDescription(
         validationsServiceList?.validations?.map(validation => {
           return {
+            automaticType: validation.automaticType,
             id: validation.id,
             description: validation.description,
             name: validation.name
@@ -489,8 +495,11 @@ const ValidationViewer = memo(
           onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
           break;
         case 'TABLE':
-          if (event.data.shortCode.substring(0, 2) === 'TU' && event.data.message.startsWith('Uniqueness')) {
+          const ruleSchema = getRuleSchema(event.data);
+          if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
             onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+          } else {
+            onSelectValidation(event.data.tableSchemaId);
           }
           break;
 

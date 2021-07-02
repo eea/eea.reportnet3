@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSchemaMapper;
@@ -34,9 +35,11 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.domain.webform.Webform;
+import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
@@ -259,6 +262,9 @@ public class DatasetSchemaServiceTest {
 
   @Mock
   private ZipUtils zipUtils;
+
+  @Mock
+  private DataflowReferencedRepository dataflowReferencedRepository;
 
   /** The security context. */
   private SecurityContext securityContext;
@@ -487,7 +493,7 @@ public class DatasetSchemaServiceTest {
     field.setReferencedField(referencedField);
     field.setCodelistItems(codelistItems);
     field.setType(DataType.CODELIST);
-
+    field.setValidExtensions(Arrays.asList("pdf ", "csv").toArray(new String[2]));
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(null);
     Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
@@ -510,7 +516,6 @@ public class DatasetSchemaServiceTest {
     field.setType(DataType.CODELIST);
     field.setId("1");
     field.setName("");
-
     Document document = new Document();
     Document documentField = new Document();
     List<Document> documentsField = new ArrayList<>();
@@ -1304,6 +1309,7 @@ public class DatasetSchemaServiceTest {
     ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
     referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
     referenced.setIdPk("5ce524fad31fc52540abae73");
+    referenced.setDataflowId(1L);
     fieldSchemaVO.setReferencedField(referenced);
     PkCatalogueSchema catalogue = new PkCatalogueSchema();
     catalogue.setIdPk(new ObjectId());
@@ -1312,6 +1318,32 @@ public class DatasetSchemaServiceTest {
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setDataflowId(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dataset);
+    Mockito.when(dataflowReferencedRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new DataflowReferencedSchema());
+    dataSchemaServiceImpl.addToPkCatalogue(fieldSchemaVO, 1L);
+    Mockito.verify(pkCatalogueRepository, times(1)).save(Mockito.any());
+  }
+
+  @Test
+  public void updatePkCatalogueExistingPKReferencedTest() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(true);
+    fieldSchemaVO.setType(DataType.LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    referenced.setDataflowId(1L);
+    fieldSchemaVO.setReferencedField(referenced);
+    PkCatalogueSchema catalogue = new PkCatalogueSchema();
+    catalogue.setIdPk(new ObjectId());
+    catalogue.setReferenced(new ArrayList<>());
+    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dataset);
+    Mockito.when(dataflowReferencedRepository.findByDataflowId(Mockito.anyLong())).thenReturn(null);
     dataSchemaServiceImpl.addToPkCatalogue(fieldSchemaVO, 1L);
     Mockito.verify(pkCatalogueRepository, times(1)).save(Mockito.any());
   }
@@ -1331,6 +1363,36 @@ public class DatasetSchemaServiceTest {
     ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
     referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
     referenced.setIdPk("5ce524fad31fc52540abae73");
+    referenced.setDataflowId(1L);
+    fieldSchemaVO.setReferencedField(referenced);
+    PkCatalogueSchema catalogue = new PkCatalogueSchema();
+    catalogue.setIdPk(new ObjectId());
+    catalogue.setReferenced(new ArrayList<>());
+    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
+
+    Document doc = new Document();
+    doc.put("typeData", DataType.LINK.getValue());
+    Document referencedDoc = new Document();
+    referencedDoc.put("idDatasetSchema", "5ce524fad31fc52540abae73");
+    referencedDoc.put("idPk", "5ce524fad31fc52540abae73");
+    doc.put("referencedField", referencedDoc);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any())).thenReturn(doc);
+
+    dataSchemaServiceImpl.deleteFromPkCatalogue(fieldSchemaVO, 1L);
+    Mockito.verify(pkCatalogueRepository, times(1)).findByIdPk(Mockito.any());
+  }
+
+  @Test
+  public void deleteFromPkCatalogueReferenced() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    referenced.setDataflowId(1L);
     fieldSchemaVO.setReferencedField(referenced);
     PkCatalogueSchema catalogue = new PkCatalogueSchema();
     catalogue.setIdPk(new ObjectId());
@@ -1495,8 +1557,10 @@ public class DatasetSchemaServiceTest {
     ReferencedFieldSchema referenced = new ReferencedFieldSchema();
     referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
     referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setDataflowId(1L);
     field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
     field.setReferencedField(referenced);
+    field.setType(DataType.EXTERNAL_LINK);
     record.setFieldSchema(Arrays.asList(field));
     table.setRecordSchema(record);
     schema.setTableSchemas(Arrays.asList(table));
@@ -1589,9 +1653,11 @@ public class DatasetSchemaServiceTest {
     ReferencedFieldSchema referenced = new ReferencedFieldSchema();
     referenced.setIdDatasetSchema(new ObjectId("5ce524fad31fc52540abae73"));
     referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced.setDataflowId(1L);
     field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
     field.setReferencedField(referenced);
     field.setPk(false);
+    field.setType(DataType.EXTERNAL_LINK);
     record.setFieldSchema(Arrays.asList(field));
     table.setRecordSchema(record);
     table.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
@@ -1935,9 +2001,74 @@ public class DatasetSchemaServiceTest {
     Mockito.when(referenced.getIdDatasetSchema()).thenReturn("5ce524fad31fc52540abae73");
     Mockito.when(referenced.getIdPk()).thenReturn("5ce524fad31fc52540abae73");
     Mockito.when(fieldSchemaVO.getName()).thenReturn("name");
-
     Assert.assertEquals(DataType.LINK, dataSchemaServiceImpl
         .updateFieldSchema("5ce524fad31fc52540abae73", fieldSchemaVO, 1L, true));
+  }
+
+  @Test
+  public void updateFieldSchemaLinkFullDataTest() throws EEAException {
+    FieldSchemaVO fieldSchemaVO = Mockito.mock(FieldSchemaVO.class);
+    Document document = Mockito.mock(Document.class);
+    PkCatalogueSchema catalogue = Mockito.mock(PkCatalogueSchema.class);
+    DataSetSchema datasetSchema = Mockito.mock(DataSetSchema.class);
+    String[] codelistItems = new String[] {"item1", "item2", "item3"};
+    ReferencedFieldSchemaVO referenced = Mockito.mock(ReferencedFieldSchemaVO.class);
+    Mockito.when(fieldSchemaVO.getId()).thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(fieldSchemaVO.getPk()).thenReturn(Boolean.TRUE);
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(document);
+    Mockito.when(document.get(LiteralConstants.TYPE_DATA)).thenReturn(DataType.LINK.getValue());
+    Mockito.when(document.get(LiteralConstants.REFERENCED_FIELD)).thenReturn(document);
+    Mockito.when(document.get("idPk")).thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(document.get("_id")).thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(document.get("dataflowId")).thenReturn(1L);
+    Mockito.when(document.get(LiteralConstants.ID_DATASET_SCHEMA))
+        .thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(pkCatalogueRepository.findByIdPk(Mockito.any())).thenReturn(catalogue);
+    Mockito.when(catalogue.getReferenced()).thenReturn(new ArrayList<>());
+    Mockito.when(catalogue.getIdPk()).thenReturn(null);
+    Mockito.doNothing().when(pkCatalogueRepository).deleteByIdPk(Mockito.any());
+    Mockito.when(pkCatalogueRepository.save(Mockito.any())).thenReturn(null);
+    Mockito.when(document.put("pkReferenced", Boolean.FALSE)).thenReturn(null);
+    Mockito.when(schemasRepository.updateFieldSchema(Mockito.anyString(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Mockito.when(document.get(LiteralConstants.PK)).thenReturn(Boolean.FALSE);
+    Mockito.when(document.get("idRecord")).thenReturn(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    Mockito.when(datasetSchema.getTableSchemas()).thenReturn(new ArrayList<>());
+    Mockito.when(fieldSchemaVO.getType()).thenReturn(DataType.LINK);
+    Mockito.when(document.put(LiteralConstants.TYPE_DATA, DataType.LINK.getValue()))
+        .thenReturn(DataType.TEXT.getValue());
+    Mockito.when(document.containsKey(LiteralConstants.CODELIST_ITEMS)).thenReturn(true);
+    Mockito.when(document.remove(Mockito.any())).thenReturn(null);
+    Mockito.when(fieldSchemaVO.getDescription()).thenReturn("");
+    Mockito.when(document.put("description", "")).thenReturn(null);
+    // Mockito.when(document.put("headerName", "")).thenReturn(null);
+    Mockito.when(fieldSchemaVO.getCodelistItems()).thenReturn(codelistItems);
+    Mockito.when(fieldSchemaVO.getReferencedField()).thenReturn(referenced);
+    Mockito.when(referenced.getIdDatasetSchema()).thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(referenced.getIdPk()).thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(referenced.getLabelId()).thenReturn("5eb4269d06390651aced7c93");
+    Mockito.when(referenced.getLinkedConditionalFieldId()).thenReturn("5eb4269d06390651aced7c93");
+    Mockito.when(referenced.getMasterConditionalFieldId()).thenReturn("5eb4269d06390651aced7c93");
+    Mockito.when(referenced.getTableSchemaName()).thenReturn("table");
+    Mockito.when(referenced.getFieldSchemaName()).thenReturn("field");
+    Mockito.when(referenced.getDataflowId()).thenReturn(1L);
+    Mockito.when(fieldSchemaVO.getName()).thenReturn("name");
+    Mockito.when(fieldSchemaVO.getValidExtensions())
+        .thenReturn(Arrays.asList("pdf ", "csv").toArray(new String[2]));
+    DataflowReferencedSchema dataflowReferenced = new DataflowReferencedSchema();
+    List<Long> referencedIds = new ArrayList<>();
+    referencedIds.add(1L);
+    referencedIds.add(2L);
+    dataflowReferenced.setReferencedByDataflow(referencedIds);
+    Mockito.when(dataflowReferencedRepository.findByDataflowId(Mockito.any()))
+        .thenReturn(dataflowReferenced);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(dataset);
+    Assert.assertEquals(DataType.LINK, dataSchemaServiceImpl
+        .updateFieldSchema("5ce524fad31fc52540abae73", fieldSchemaVO, 1L, false));
   }
 
   /**
@@ -2091,7 +2222,7 @@ public class DatasetSchemaServiceTest {
   }
 
 
-  // @Test
+  @Test
   public void testImportSchemas() throws EEAException, IOException {
 
     DesignDatasetVO dataset = new DesignDatasetVO();
@@ -2137,6 +2268,7 @@ public class DatasetSchemaServiceTest {
     referenced2.setLabelId(new ObjectId("5ce524fad31fc52540abae73"));
     referenced2.setLinkedConditionalFieldId(new ObjectId("5ce524fad31fc52540abae73"));
     referenced2.setMasterConditionalFieldId(new ObjectId("5ce524fad31fc52540abae73"));
+    referenced2.setDataflowId(1L);
     field.setIdFieldSchema(new ObjectId("5ce524fad31fc52540abae73"));
     field.setReferencedField(referenced2);
     field.setType(DataType.LINK);
@@ -2188,9 +2320,7 @@ public class DatasetSchemaServiceTest {
     uniqueVO.setUniqueId("5ce524fad31fc52540abae73");
     uniqueVO.setTableSchemaId("5ce524fad31fc52540abae73");
     uniqueVO.setFieldSchemaIds(Arrays.asList("5ce524fad31fc52540abae73"));
-    Mockito.when(uniqueConstraintMapper.entityListToClass(Mockito.any()))
-        .thenReturn(Arrays.asList(uniqueVO));
-
+    schemaNames.put("5ce524fad31fc52540abae73", " name ");
 
     ImportSchemas importSchema = new ImportSchemas();
     importSchema.setSchemas(Arrays.asList(schema));
@@ -2210,10 +2340,38 @@ public class DatasetSchemaServiceTest {
     Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any(FieldSchema.class)))
         .thenReturn(fieldSchemaVO);
 
+    Document document = new Document();
+    document.put(LiteralConstants.TYPE_DATA, DataType.LINK);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(null);
+        .thenReturn(document);
+    Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(new UpdateResult() {
 
+          @Override
+          public boolean wasAcknowledged() {
+            return false;
+          }
 
+          @Override
+          public boolean isModifiedCountAvailable() {
+            return false;
+          }
+
+          @Override
+          public BsonValue getUpsertedId() {
+            return null;
+          }
+
+          @Override
+          public long getModifiedCount() {
+            return 1;
+          }
+
+          @Override
+          public long getMatchedCount() {
+            return 1;
+          }
+        });
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ZipOutputStream zip = new ZipOutputStream(baos);
     ZipEntry entry1 = new ZipEntry("Table.schema");
@@ -2223,10 +2381,11 @@ public class DatasetSchemaServiceTest {
     zip.close();
     MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
         "application/x-zip-compressed", baos.toByteArray());
-
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
+        .thenReturn(new DataSetMetabaseVO());
     dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(), "file.zip");
-    Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    // Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
+    // Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 
@@ -2268,7 +2427,7 @@ public class DatasetSchemaServiceTest {
       Mockito.when(authentication.getName()).thenReturn("name");
       dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(),
           multipartFile.getOriginalFilename());
-    } catch (Exception e) {
+    } catch (EEAException e) {
       assertEquals("error", e.getMessage());
       throw e;
     }

@@ -113,14 +113,16 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
 
   const isEUReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.isEUReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      {rowData.isEUReleased ? (
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
+      ) : null}
     </div>
   );
 
   const isDataCollectionReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.isDataCollectionReleased ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
       ) : null}
     </div>
   );
@@ -251,6 +253,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
+          summary={resources.messages['historicReleases']}
           totalRecords={historicReleasesState.filteredData.length}
           value={historicReleasesState.filteredData}>
           {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
