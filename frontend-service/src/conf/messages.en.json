@@ -1171,6 +1171,7 @@
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
     "downloadValidationsFileError": "Failed downloading validations file",
     "collapseAll": "Collapse all",
-    "noQuotesQCTooltip": "Double quotes (&quot&quot) cannot be used"
+    "noQuotesQCTooltip": "Double quotes (&quot&quot) cannot be used",
+    "coords": "Coords:"
   }
 }
