@@ -322,6 +322,7 @@ export const Feedback = withRouter(({ match, history }) => {
         {isCustodian && (
           <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
             <ListBox
+              ariaLabel="dataProviders"
               className={styles.dataProvider}
               onChange={e => {
                 onChangeDataProvider(e.target.value);

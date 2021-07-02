@@ -88,6 +88,7 @@ const DataForm = ({
                         />
                       </span>
                       <ReactTooltip
+                        border={true}
                         effect="solid"
                         getContent={() =>
                           ReactDOMServer.renderToStaticMarkup(
@@ -203,6 +204,7 @@ const DataForm = ({
                         />
                       </span>
                       <ReactTooltip
+                        border={true}
                         effect="solid"
                         getContent={() =>
                           ReactDOMServer.renderToStaticMarkup(
@@ -237,7 +239,7 @@ const DataForm = ({
                       width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'EXTERNAL_LINK'].includes(
                         column.type
                       )
-                        ? '30%'
+                        ? '60%'
                         : ''
                     }}>
                     <DataFormFieldEditor

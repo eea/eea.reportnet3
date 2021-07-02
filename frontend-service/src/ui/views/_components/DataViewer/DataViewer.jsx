@@ -82,6 +82,7 @@ const DataViewer = withRouter(
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
+    selectedTableSchemaId,
     showWriteButtons,
     tableFixedNumber,
     tableHasErrors,
@@ -391,7 +392,7 @@ const DataViewer = withRouter(
           nRows,
           fields,
           levelErrorValidations,
-          groupedRules
+          tableId === selectedTableSchemaId ? groupedRules : undefined
         );
 
         if (!isEmpty(data.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
@@ -1133,6 +1134,7 @@ const DataViewer = withRouter(
           records={records}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
+          selectedTableSchemaId={selectedTableSchemaId}
           setColumns={setColumns}
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportTableDialogVisible={setImportTableDialogVisible}
@@ -1277,7 +1279,8 @@ const DataViewer = withRouter(
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
               datasetId: datasetId,
-              tableSchemaId: tableId
+              tableSchemaId: tableId,
+              delimiter: `${config.IMPORT_FILE_DELIMITER}`
             })}`}
           />
         )}

@@ -152,6 +152,7 @@
   /* Title */
   --title-icon-color: var(--gray-110);
   --title-color: var(--gray-110);
+  --title-icon-opacity: 0.6;
   --subtitle-color: var(--c-corporate-blue);
 
   /* Tabview */
@@ -261,6 +262,18 @@
   --dropdown-panel-items-group-highlight-bg: var(--c-corporate-blue);
   --dropdown-panel-items-group-not-highlight-color-hover: var(--gray-110);
   --dropdown-panel-items-group-not-highlight-bg-hover: var(--gray-25);
+
+  /* DropdownFilter */
+  --dropdownFilter-border: 1px solid var(--c-black-200);
+  --dropdownFilter-bg-color: var(--white);
+  --dropdownFilter-color: var(--c-black-400);
+  --dropdownFilter-box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
+  --dropdownFilter-border-color-hover: var(--gray-25);
+  --dropdownFilter-icon-color: var(--c-corporate-blue);
+
+  /* Dropdown menu */
+  --dropdown-menu-bg-color: var(--bg);
+  --dropdown-menu-items-bg-color-hover: var(--gray-15);
 
   /* Floating label */
   --floating-label-color: var(--gray-65);
@@ -430,6 +443,7 @@
   --field-designer-separator-box-shadow: 1px 1px rgba(var(--c-corporate-blue-rgb), 0.2),
     2px 2px rgba(var(--c-corporate-blue-rgb), 0.2), 3px 3px rgba(var(--c-corporate-blue-rgb), 0.2);
   --field-designer-separator-bg: rgba(var(--c-corporate-blue-rgb), 0.2);
+  --field-designer-separator-border-color: var(--gray-75);
 
   /* SideBar */
   --sidebar-bg: var(--white);

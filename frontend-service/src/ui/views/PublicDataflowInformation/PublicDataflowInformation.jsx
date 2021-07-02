@@ -77,7 +77,12 @@ export const PublicDataflowInformation = withRouter(
                 key={publicFileName}
                 onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
                 <FontAwesomeIcon data-for={publicFileName} data-tip icon={AwesomeIcons('7z')} />
-                <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
+                <ReactTooltip
+                  border={true}
+                  className={styles.tooltipClass}
+                  effect="solid"
+                  id={publicFileName}
+                  place="top">
                   <span>{getPublicFileName(publicFileName)}</span>
                 </ReactTooltip>
               </span>
@@ -93,7 +98,12 @@ export const PublicDataflowInformation = withRouter(
               data-tip
               icon={AwesomeIcons('lock')}
             />
-            <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
+            <ReactTooltip
+              border={true}
+              className={styles.tooltipClass}
+              effect="solid"
+              id={'restrictFromPublicField'}
+              place="top">
               <span>{resources.messages['restrictFromPublicField']}</span>
             </ReactTooltip>
           </div>
@@ -109,7 +119,12 @@ export const PublicDataflowInformation = withRouter(
             key={rowData.publicFileName}
             onClick={() => onFileDownload(null, rowData.publicFileName)}>
             <FontAwesomeIcon data-for={rowData.publicFileName} data-tip icon={AwesomeIcons('7z')} />
-            <ReactTooltip className={styles.tooltipClass} effect="solid" id={rowData.publicFileName} place="top">
+            <ReactTooltip
+              border={true}
+              className={styles.tooltipClass}
+              effect="solid"
+              id={rowData.publicFileName}
+              place="top">
               <span>{rowData.publicFileName}</span>
             </ReactTooltip>
           </span>
@@ -208,7 +223,7 @@ export const PublicDataflowInformation = withRouter(
               );
             }}
           />
-          <ReactTooltip className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
+          <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
             <span>{resources.messages['navigateToCountry']}</span>
           </ReactTooltip>
         </span>

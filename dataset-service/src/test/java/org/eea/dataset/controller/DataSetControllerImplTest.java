@@ -34,6 +34,7 @@ import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.lock.service.LockService;
 import org.junit.Assert;
@@ -868,7 +869,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
-    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
+    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn(FileTypeEnum.CSV.getValue());
     try {
       dataSetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
@@ -947,8 +948,8 @@ public class DataSetControllerImplTest {
         .thenReturn("tableName");
     Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
         .thenReturn(new byte[1]);
-    ResponseEntity<byte[]> result =
-        dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", "csv");
+    ResponseEntity<byte[]> result = dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190",
+        FileTypeEnum.CSV.getValue());
     Assert.assertEquals(1, result.getBody().length);
   }
 
@@ -963,7 +964,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn(null);
     try {
-      dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", "csv");
+      dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.IDTABLESCHEMA_INCORRECT, e.getReason());
       throw e;
@@ -983,7 +984,7 @@ public class DataSetControllerImplTest {
     Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     try {
-      dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", "csv");
+      dataSetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -1100,10 +1101,11 @@ public class DataSetControllerImplTest {
   @Test
   public void importFileDataTest() throws EEAException {
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any());
-    dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true, 1L);
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true, 1L,
+        null);
     Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any());
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1115,10 +1117,11 @@ public class DataSetControllerImplTest {
   public void importFileDataExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
     Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     try {
-      dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true, 1L);
+      dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true, 1L,
+          null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
       throw e;
@@ -1197,7 +1200,7 @@ public class DataSetControllerImplTest {
   @Test
   public void exportDatasetTest() throws IOException, EEAException {
 
-    dataSetControllerImpl.exportDatasetFile(1L, "xlsx");
+    dataSetControllerImpl.exportDatasetFile(1L, FileTypeEnum.XLSX.getValue());
     Mockito.verify(fileTreatmentHelper, times(1)).exportDatasetFile(Mockito.anyLong(),
         Mockito.any());
   }

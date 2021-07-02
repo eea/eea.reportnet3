@@ -235,7 +235,7 @@ export const BigButton = ({
             {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
           </p>
           {!isUndefined(buttonsTitle) && buttonsTitle.length > 60 && (
-            <ReactTooltip className={styles.tooltip} effect="solid" id={tooltipId} place="top">
+            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="top">
               {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
             </ReactTooltip>
           )}
@@ -265,7 +265,7 @@ export const BigButton = ({
     <>
       <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
       {tooltip && (
-        <ReactTooltip effect="solid" id={caption} place="top">
+        <ReactTooltip border={true} effect="solid" id={caption} place="top">
           {tooltip}
         </ReactTooltip>
       )}

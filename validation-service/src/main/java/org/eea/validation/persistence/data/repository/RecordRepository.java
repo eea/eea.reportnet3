@@ -82,13 +82,4 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   @Query(nativeQuery = true, value = "SELECT count(*) from record_value")
   Integer countRecordsDataset();
 
-  /**
-   * Count fields dataset.
-   *
-   * @return the integer
-   */
-  @Query(nativeQuery = true, value = "SELECT count(*) from field_value")
-  Integer countFieldsDataset();
-
-
 }

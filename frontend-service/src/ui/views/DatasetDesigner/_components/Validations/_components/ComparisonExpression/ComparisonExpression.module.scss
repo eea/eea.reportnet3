@@ -55,10 +55,27 @@
   .expressionValue {
     flex: 1 auto;
     width: 100%;
-    :global .p-input,
-    :global .p-dropdown,
-    :global .p-inputnumber {
+    :global .p-dropdown {
       width: 100%;
+      height: 35px !important;
+    }
+    button {
+      height: 35px !important;
+    }
+    input {
+      width: 100%;
+      height: 35px !important;
+    }
+    :global .p-calendar {
+      :global .p-inputtext {
+        height: 35px !important;
+      }
+    }
+    > span {
+      width: 100%;
+      input {
+        width: 100%;
+      }
     }
   }
   > span {
@@ -80,7 +97,7 @@
 .inputStringMatch {
   display: flex;
   align-items: flex-start;
-  width: 15rem;
+  flex: auto;
   .ccButton {
     margin: 0 !important;
     margin-left: 0.4rem !important;
