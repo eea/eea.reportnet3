@@ -996,7 +996,10 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
           datasetSchemaId, e.getMessage(), e);
     }
-    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
+    if (datasetSchema != null) {
+      tableSchemaList = datasetSchema.getTableSchemas();
+    }
 
     return tableSchemaList;
   }

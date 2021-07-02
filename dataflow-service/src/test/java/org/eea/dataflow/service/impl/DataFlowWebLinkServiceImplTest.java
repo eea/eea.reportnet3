@@ -152,7 +152,7 @@ public class DataFlowWebLinkServiceImplTest {
    * @return the web link empty
    * @throws EEAException
    */
-  @Test
+  @Test(expected = EntityNotFoundException.class)
   public void getWebLinkEmpty() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
@@ -162,6 +162,23 @@ public class DataFlowWebLinkServiceImplTest {
       dataflowServiceWebLinkImpl.getWebLink(Mockito.anyLong());
     } catch (EntityNotFoundException e) {
       assertEquals(EEAErrorMessage.ID_LINK_INCORRECT, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the web link df not found test.
+   *
+   * @return the web link df not found test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EntityNotFoundException.class)
+  public void getWebLinkDfNotFoundTest() throws EEAException {
+    try {
+      dataflowServiceWebLinkImpl.getWebLink(Mockito.anyLong());
+    } catch (EntityNotFoundException e) {
+      assertEquals("assertion error", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
     }
   }
 
@@ -170,7 +187,7 @@ public class DataFlowWebLinkServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = EntityNotFoundException.class)
   public void saveWebLinkException() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
@@ -178,6 +195,7 @@ public class DataFlowWebLinkServiceImplTest {
       dataflowServiceWebLinkImpl.saveWebLink(1L, weblinkVOBad);
     } catch (EntityNotFoundException e) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
     }
   }
 
@@ -199,7 +217,7 @@ public class DataFlowWebLinkServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = EntityNotFoundException.class)
   public void removeWebLinkException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
@@ -209,6 +227,22 @@ public class DataFlowWebLinkServiceImplTest {
       dataflowServiceWebLinkImpl.removeWebLink(1L);
     } catch (EntityNotFoundException e) {
       assertEquals(EEAErrorMessage.ID_LINK_INCORRECT, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Removes the web link exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EntityNotFoundException.class)
+  public void removeWebLinkDfNotFoundTest() throws EEAException {
+    try {
+      dataflowServiceWebLinkImpl.removeWebLink(1L);
+    } catch (EntityNotFoundException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
     }
   }
 
@@ -231,7 +265,7 @@ public class DataFlowWebLinkServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test
+  @Test(expected = EntityNotFoundException.class)
   public void updateWebLinkException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
@@ -243,8 +277,27 @@ public class DataFlowWebLinkServiceImplTest {
       dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
     } catch (EntityNotFoundException e) {
       assertEquals(EEAErrorMessage.ID_LINK_NOT_FOUND, e.getMessage());
+      throw e;
     }
   }
+
+  /**
+   * Update web link df not found test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EntityNotFoundException.class)
+  public void updateWebLinkDfNotFoundTest() throws EEAException {
+    when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
+    when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(null);
+    try {
+      dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
+    } catch (EntityNotFoundException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
+    }
+  }
+
 
   /**
    * Update web link.
