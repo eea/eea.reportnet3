@@ -10,12 +10,14 @@ import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
@@ -48,10 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-// AÑADIDO POR MI
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
+
 /**
  * The Class SqlRulesServiceImpl.
  */
@@ -105,7 +104,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   @Autowired
   private DataFlowControllerZuul dataFlowController;
-  
+
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
@@ -135,7 +134,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .error("The QC Rule is disabled").build();
 
     String query = proccessQuery(datasetId, rule.getSqlSentence());
-    
+
     if (validateRule(query, datasetId, rule, Boolean.TRUE)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
@@ -334,16 +333,17 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
-    	if(checkDatasetFromSameDataflow(datasetId, query) || checkDatasetFromReferenceDataflow(query)) {
-    		try {
-    			checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
-    		} catch (EEAInvalidSQLException e) {
-    			LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
-    	        isSQLCorrect = false;
-    	    }
-    	} else {
-    		isSQLCorrect = false;
-    	}
+        if (checkDatasetFromSameDataflow(datasetId, query)
+            || checkDatasetFromReferenceDataflow(query)) {
+          try {
+            checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
+          } catch (EEAInvalidSQLException e) {
+            LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
+            isSQLCorrect = false;
+          }
+        } else {
+          isSQLCorrect = false;
+        }
       } else {
         isSQLCorrect = false;
       }
@@ -795,66 +795,66 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     return datasetSchamasMap;
   }
+
   /**
    * Gets a list with the id of the query datasets
+   * 
    * @param query the query
    * @return Gets a list with the id of the query datasets
    */
-  private List<String> getListOfDatasetsOnQuery(String query){
-	  List<String> datasetsIdList = new ArrayList<>();
-	  String[] palabras = query.split("\\s+");
-	  for(String palabra : palabras) {
-		  if(palabra.contains(DATASET)) {
-			  String datasetId = palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
-			  datasetsIdList.add(datasetId);
-		  }
-	  }
-	  return datasetsIdList;
+  private List<String> getListOfDatasetsOnQuery(String query) {
+    List<String> datasetsIdList = new ArrayList<>();
+    String[] palabras = query.split("\\s+");
+    for (String palabra : palabras) {
+      if (palabra.contains(DATASET)) {
+        String datasetId = palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
+        datasetsIdList.add(datasetId);
+      }
+    }
+    return datasetsIdList;
   }
-  
+
   /**
    * Check datasets on the query belongs to the same dataflow
+   * 
    * @param datasetId
    * @param query
    * @return the boolean
    */
   private boolean checkDatasetFromSameDataflow(Long datasetId, String query) {
-	boolean isSQLCorrect = true;
-	List<String> listOfIds = new ArrayList<String>();
-	listOfIds = getListOfDatasetsOnQuery(query);
-  	Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
-  	Long idDataFlowFromDatasetOnQuery;
-  	for(String id : listOfIds) {
-  		idDataFlowFromDatasetOnQuery = datasetMetabaseController.findDatasetMetabaseById(Long.parseLong(id)).getDataflowId();
-  		if(dataflowId != idDataFlowFromDatasetOnQuery) {
-  			isSQLCorrect = false;
-  		}
-  	}
-  	return isSQLCorrect;
+    boolean isSQLCorrect = true;
+    List<String> listOfIds = getListOfDatasetsOnQuery(query);
+    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+    for (String id : listOfIds) {
+      Long idDataFlowFromDatasetOnQuery =
+          datasetMetabaseController.findDatasetMetabaseById(Long.parseLong(id)).getDataflowId();
+      if (!dataflowId.equals(idDataFlowFromDatasetOnQuery)) {
+        isSQLCorrect = false;
+      }
+    }
+    return isSQLCorrect;
   }
-  
+
   /**
    * Check if the query datasets belong to any reference dataflow
+   * 
    * @param query
    * @return the boolean
    */
   private boolean checkDatasetFromReferenceDataflow(String query) {
-	  boolean isSQLCorrect = true;
-	  
-	  List<String> listOfIds = new ArrayList<String>();
-	  listOfIds = getListOfDatasetsOnQuery(query);
-	  List<DataFlowVO> referencesDataflow = dataFlowController.findReferenceDataflows();
-	  for(DataFlowVO referenceDataflow : referencesDataflow) {
-		  List<ReferenceDatasetVO> referenceDatasets = referenceDataflow.getReferenceDatasets();
-		  for(ReferenceDatasetVO dataset : referenceDatasets) {
-			  for(String id : listOfIds) {
-				  if(Long.parseLong(id) != dataset.getId()) {
-					  isSQLCorrect = false;
-				  }
-			  }
-		  }
-	  } 
-	  return isSQLCorrect;
+    boolean isSQLCorrect = true;
+    List<String> listOfIds = getListOfDatasetsOnQuery(query);
+    List<DataFlowVO> referencesDataflow = dataFlowController.findReferenceDataflows();
+    for (DataFlowVO referenceDataflow : referencesDataflow) {
+      for (String id : listOfIds) {
+        Long idDataFlow =
+            datasetMetabaseController.findDatasetMetabaseById(Long.parseLong(id)).getDataflowId();
+        if (!idDataFlow.equals(referenceDataflow.getId())) {
+          isSQLCorrect = false;
+        }
+      }
+    }
+    return isSQLCorrect;
   }
-  
+
 }
