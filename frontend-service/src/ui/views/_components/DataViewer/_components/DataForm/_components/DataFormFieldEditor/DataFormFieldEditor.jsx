@@ -537,7 +537,7 @@ const DataFormFieldEditor = ({
   const renderMapType = (field, fieldValue) => (
     <div>
       <div className={styles.pointEpsgWrapper}>
-        <label className={styles.epsg}>{'Coords:'}</label>
+        <label className={styles.epsg}>{resources.messages['coords']}</label>
         <InputText
           className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
           disabled={(column.readOnly && reporting) || isSaving}
