@@ -2384,8 +2384,8 @@ public class DatasetSchemaServiceTest {
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(), "file.zip");
-    // Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
-    // Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
 
