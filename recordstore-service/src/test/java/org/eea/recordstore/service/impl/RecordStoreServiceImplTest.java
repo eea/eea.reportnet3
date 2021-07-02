@@ -35,7 +35,6 @@ import com.github.dockerjava.api.model.Container;
  * The Class RecordStoreServiceImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-// @Ignore
 public class RecordStoreServiceImplTest {
 
   /** The record store service impl. */
