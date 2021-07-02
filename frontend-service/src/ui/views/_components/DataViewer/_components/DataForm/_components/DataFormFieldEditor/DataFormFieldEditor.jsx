@@ -403,7 +403,7 @@ const DataFormFieldEditor = ({
         name={column.header}
         onChange={e => onChangeForm(field, e.target.value, isConditional)}
         ref={inputRef}
-        style={{ width: '35%' }}
+        style={{ width: '60%' }}
         type="text"
         value={fieldValue}
       />
@@ -425,7 +425,7 @@ const DataFormFieldEditor = ({
         onChange={e =>
           onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
         }
-        style={{ width: '60px' }}
+        style={{ width: '50%' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
         yearRange="1900:2100"
@@ -453,6 +453,7 @@ const DataFormFieldEditor = ({
       <Calendar
         appendTo={document.body}
         baseZIndex={9999}
+        dateFormat="yy-mm-dd"
         disabled={(column.readOnly && reporting) || isSaving}
         inputRef={refDatetimeCalendar}
         monthNavigator={true}
