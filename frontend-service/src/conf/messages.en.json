@@ -1172,6 +1172,8 @@
     "downloadValidationsFileError": "Failed downloading validations file",
     "collapseAll": "Collapse all",
     "noQuotesQCTooltip": "Double quotes (&quot&quot) cannot be used",
-    "coords": "Coords:"
+    "coords": "Coords:",
+    "importTableSchema": "Import definition",
+    "exportTableSchema": "Export definition"
   }
 }

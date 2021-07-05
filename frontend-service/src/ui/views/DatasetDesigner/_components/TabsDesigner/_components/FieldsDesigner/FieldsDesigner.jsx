@@ -7,6 +7,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './FieldsDesigner.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
@@ -14,6 +16,7 @@ import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -580,6 +583,53 @@ export const FieldsDesigner = ({
 
   return (
     <Fragment>
+      <Toolbar>
+        <div className="p-toolbar-group-left">
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent ${
+            !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+          }`}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead}
+          icon={AwesomeIcons('fileImport')}
+          label={resources.messages['importTableSchema']}
+          onClick={() => manageDialogs('importTableSchemaDialogVisible', true)}
+        />
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent ${
+            !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+          }`}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead}
+          icon={AwesomeIcons('fileExport')}
+          label={resources.messages['exportTableSchema']}
+          // onClick={() => manageDialogs('validateDialogVisible', true)}
+        />
+          <Button
+            className={`p-button-secondary-transparent ${
+              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
+            } datasetSchema-uniques-help-step`}
+            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
+            icon={'key'}
+            label={resources.messages['addUniqueConstraint']}
+            onClick={() => {
+              manageDialogs('isManageUniqueConstraintDialogVisible', true);
+              manageUniqueConstraint({
+                isTableCreationMode: true,
+                tableSchemaId: table.tableSchemaId,
+                tableSchemaName: table.tableSchemaName
+              });
+            }}
+          />
+          <Button
+            className={`p-button-secondary-transparent ${
+              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
+            } datasetSchema-rowConstraint-help-step`}
+            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
+            icon={'horizontalSliders'}
+            label={resources.messages['addRowConstraint']}
+            onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
+          />
+        </div>
+      </Toolbar>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.tableDescriptionRow}>
         <InputTextarea
@@ -598,34 +648,9 @@ export const FieldsDesigner = ({
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
-        <div className={styles.constraintsButtons}>
-          <Button
-            className={`p-button-secondary ${
-              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
-            } datasetSchema-uniques-help-step`}
-            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'key'}
-            label={resources.messages['addUniqueConstraint']}
-            onClick={() => {
-              manageDialogs('isManageUniqueConstraintDialogVisible', true);
-              manageUniqueConstraint({
-                isTableCreationMode: true,
-                tableSchemaId: table.tableSchemaId,
-                tableSchemaName: table.tableSchemaName
-              });
-            }}
-          />
-
-          <Button
-            className={`p-button-secondary ${
-              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
-            } datasetSchema-rowConstraint-help-step`}
-            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'horizontalSliders'}
-            label={resources.messages['addRowConstraint']}
-            onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
-          />
-        </div>
+        {/* <div className={styles.constraintsButtons}>
+          
+        </div> */}
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span

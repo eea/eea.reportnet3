@@ -96,7 +96,8 @@ import {
   faUpload,
   faFile,
   faClock,
-  faMeteor
+  faMeteor,
+  faFileImport
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -417,6 +418,8 @@ export const AwesomeIcons = icon => {
       return faStaylinked;
     case 'meteor':
       return faMeteor;
+    case 'importTableSchema':
+      return faFileImport;
     default:
       return faFileAlt;
   }
