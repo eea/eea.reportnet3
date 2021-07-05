@@ -87,14 +87,14 @@ export const Dialog = ({
         focusOnShow={focusOnShow}
         footer={footer}
         header={header}
-        id="dialogId"
+        id={id}
         maximizable={false}
         onHide={onHide}
         style={style ? { ...style, ...dialogStyle } : { ...dialogStyle, width: '50vw' }}
         visible={visible}>
         {children}
       </PrimeDialog>
-      <label className="srOnly" id="dialogId_label">
+      <label className="srOnly" id={id}>
         {header}
       </label>
     </div>
