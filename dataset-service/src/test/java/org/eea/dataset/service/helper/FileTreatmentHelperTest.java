@@ -710,7 +710,7 @@ public class FileTreatmentHelperTest {
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileListWriter(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
         Mockito.anyBoolean())).thenReturn(bytes);
-    when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+    when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("603362319d49f04fce13b68f");
     when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(dataSetMetabase);

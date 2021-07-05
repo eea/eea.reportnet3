@@ -239,7 +239,7 @@ const DataForm = ({
                       width: ['DATE', 'DATETIME', 'CODELIST', 'MULTISELECT_CODELIST', 'LINK', 'EXTERNAL_LINK'].includes(
                         column.type
                       )
-                        ? '30%'
+                        ? '60%'
                         : ''
                     }}>
                     <DataFormFieldEditor

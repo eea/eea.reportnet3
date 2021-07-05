@@ -3465,7 +3465,15 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
+  /**
+   * Update records with conditions.
+   *
+   * @param recordList the record list
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   */
   @Override
+  @Transactional
   public void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
       TableSchema tableSchema) {
     LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
