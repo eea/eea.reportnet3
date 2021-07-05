@@ -652,18 +652,20 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
         .append(" select case ");
     String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-    for (TableSchema table : tableSchemaList) {
-      if (null != tableSchemaId) {
-        if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+    if (null != tableSchemaList) {
+      for (TableSchema table : tableSchemaList) {
+        if (null != tableSchemaId) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+              stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                  field.getHeaderName()));
+            }
+          }
+        } else {
           for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
             stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
                 field.getHeaderName()));
           }
-        }
-      } else {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          stringQuery.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
         }
       }
     }
@@ -769,10 +771,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     stringQuery.append(" 'totalRecords', ");
     stringQuery.append(" (case  ");
     for (TableSchema tableSchemaIdAux : tableSchemaList) {
-      tableSchemaId = tableSchemaIdAux.getIdTableSchema().toString();
+      String tableSchemaIdString = tableSchemaIdAux.getIdTableSchema().toString();
       stringQuery.append(String.format(
           "when id_table_schema = '%s'  then ( select count(*)  as \"totalRecords\" from ( ",
-          tableSchemaId));
+          tableSchemaIdString));
       stringQuery.append(
           " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
           .append(
@@ -780,8 +782,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .append(" select case ");
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
       for (TableSchema table : tableSchemaList) {
-        if (null != tableSchemaId) {
-          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+        if (null != tableSchemaIdString) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaIdString)) {
             for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
               stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
                   field.getHeaderName()));
@@ -798,10 +800,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
           datasetId, datasetId, datasetId));
 
-      if (null != tableSchemaId) {
+      if (null != tableSchemaIdString) {
         stringQuery.append(" where ")
-            .append(null != tableSchemaId
-                ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
+            .append(null != tableSchemaIdString
+                ? String.format(" id_table_schema like '%s' and ", tableSchemaIdString)
                 : "");
         stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
       }
