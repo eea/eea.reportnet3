@@ -983,7 +983,7 @@ const Dataflow = withRouter(({ history, match }) => {
               }
               role="checkbox"
             />
-            <label className={styles.showPublicInfo} htmlFor="isReleasableCheckbox">
+            <label className={styles.showPublicInfo} htmlFor="showPublicInfoCheckbox">
               <a
                 onClick={() =>
                   dataflowDispatch({

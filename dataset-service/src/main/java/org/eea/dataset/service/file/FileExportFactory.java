@@ -2,6 +2,7 @@ package org.eea.dataset.service.file;
 
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -21,7 +22,7 @@ public class FileExportFactory implements IFileExportFactory {
   @Autowired
   private FileCommonUtils fileCommon;
 
-  @Value("${loadDataDelimiter}")
+  @Value("${exportDataDelimiter}")
   private char delimiter;
 
   /**
@@ -35,15 +36,15 @@ public class FileExportFactory implements IFileExportFactory {
   public IFileExportContext createContext(String mimeType) {
     FileExportContextImpl context = null;
 
-    switch (mimeType.toLowerCase()) {
-      case "csv":
+    switch (FileTypeEnum.getEnum(mimeType.toLowerCase())) {
+      case CSV:
         context = new FileExportContextImpl(new CSVWriterStrategy(delimiter, fileCommon));
         break;
-      case "xml":
+      case XML:
         // Fill it with the xml strategy
         break;
-      case "xlsx":
-      case "validations":
+      case XLSX:
+      case VALIDATIONS:
         context = new FileExportContextImpl(new ExcelWriterStrategy(fileCommon, mimeType));
         break;
       default:

@@ -216,6 +216,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
                 />
               </span>
               <ReactTooltip
+                border={true}
                 effect="solid"
                 getContent={() =>
                   ReactDOMServer.renderToStaticMarkup(

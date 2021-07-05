@@ -35,6 +35,8 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
+  /** The dataset repository. */
   @Autowired
   private DatasetRepository datasetRepository;
 
@@ -185,6 +188,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant FIELD_SCHEMA: {@value}. */
   private static final String FIELD_SCHEMA = "fieldSchema";
+
+  /** The Constant TABLE_NAME: {@value}. */
+  private static final String TABLE_NAME = "tableName";
+
+  /** The Constant TOTAL_RECORDS: {@value}. */
+  private static final String TOTAL_RECORDS = "totalRecords";
+
+  /** The Constant RECORDS: {@value}. */
+  private static final String RECORDS = "records";
+
+
 
   /**
    * Find by table value with order.
@@ -504,6 +518,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param conn the conn
    * @param tableId the table id
    * @param datasetId the dataset id
+   * @param pageable the pageable
    * @return the list
    * @throws SQLException the SQL exception
    */
@@ -557,6 +572,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    *
    * @param idTable the id table
    * @param datasetId the dataset id
+   * @param pageable the pageable
    * @return the list
    * @throws HibernateException the hibernate exception
    */
@@ -572,9 +588,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * Find and generate ETL json.
    *
-   * @param stringQuery the string query
+   * @param datasetId the dataset id
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the string
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
@@ -630,18 +652,20 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
         .append(" select case ");
     String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-    for (TableSchema table : tableSchemaList) {
-      if (null != tableSchemaId) {
-        if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+    if (null != tableSchemaList) {
+      for (TableSchema table : tableSchemaList) {
+        if (null != tableSchemaId) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+              stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                  field.getHeaderName()));
+            }
+          }
+        } else {
           for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
             stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
                 field.getHeaderName()));
           }
-        }
-      } else {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          stringQuery.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
         }
       }
     }
@@ -685,10 +709,50 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     } catch (NoResultException nre) {
       LOG.info("no result, ignore message");
     }
-    if (null == result) {
-      result = "";
+    if (null == result || result.toString().equals(("{\"tables\" : null}"))) {
+      result = returnigJsonWithNoData(datasetSchemaId, tableSchemaList, tableSchemaId);
     }
     return result.toString();
+  }
+
+
+  /**
+   * Returnig json with no data.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaList the table schema list
+   * @param tableSchemaId the table schema id
+   * @return the string
+   */
+  @SuppressWarnings("unchecked")
+  private String returnigJsonWithNoData(String datasetSchemaId, List<TableSchema> tableSchemaList,
+      String tableSchemaId) {
+    JSONObject tables = new JSONObject();
+    JSONArray jsonArray = new JSONArray();
+    String tableName = "";
+    if (null != tableSchemaList) {
+      if (null != tableSchemaId) {
+        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+        if (tableSchema != null) {
+          tableName = (String) tableSchema.get("nameTableSchema");
+          JSONObject jsonTable = new JSONObject();
+          jsonTable.put(TABLE_NAME, tableName);
+          jsonTable.put(TOTAL_RECORDS, 0);
+          jsonTable.put(RECORDS, new JSONArray());
+          jsonArray.add(jsonTable);
+        }
+      } else {
+        for (TableSchema tableAux : tableSchemaList) {
+          JSONObject jsonTable = new JSONObject();
+          jsonTable.put(TABLE_NAME, tableAux.getNameTableSchema());
+          jsonTable.put(TOTAL_RECORDS, 0);
+          jsonTable.put(RECORDS, new JSONArray());
+          jsonArray.add(jsonTable);
+        }
+      }
+    }
+    tables.put("tables", jsonArray);
+    return tables.toString();
   }
 
   /**
@@ -707,10 +771,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     stringQuery.append(" 'totalRecords', ");
     stringQuery.append(" (case  ");
     for (TableSchema tableSchemaIdAux : tableSchemaList) {
-      tableSchemaId = tableSchemaIdAux.getIdTableSchema().toString();
+      String tableSchemaIdString = tableSchemaIdAux.getIdTableSchema().toString();
       stringQuery.append(String.format(
           "when id_table_schema = '%s'  then ( select count(*)  as \"totalRecords\" from ( ",
-          tableSchemaId));
+          tableSchemaIdString));
       stringQuery.append(
           " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
           .append(
@@ -718,8 +782,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .append(" select case ");
       String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
       for (TableSchema table : tableSchemaList) {
-        if (null != tableSchemaId) {
-          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+        if (null != tableSchemaIdString) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaIdString)) {
             for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
               stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
                   field.getHeaderName()));
@@ -736,10 +800,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
           datasetId, datasetId, datasetId));
 
-      if (null != tableSchemaId) {
+      if (null != tableSchemaIdString) {
         stringQuery.append(" where ")
-            .append(null != tableSchemaId
-                ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
+            .append(null != tableSchemaIdString
+                ? String.format(" id_table_schema like '%s' and ", tableSchemaIdString)
                 : "");
         stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
       }

@@ -3,6 +3,7 @@ import { useContext, useEffect } from 'react';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 
 import { DatasetService } from 'core/services/Dataset';
+import { ValidationService } from 'core/services/Validation';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 
@@ -14,10 +15,18 @@ const GlobalNotifications = () => {
   const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
+    if (hasHiddenDownloadValidationsNotification()) {
+      downloadValidationsFile();
+    }
+
     if (findHiddenExportFMENotification()) downloadExportFMEFile();
 
     findHiddenExportDatasetNotification();
   }, [notificationContext.hidden]);
+
+  const hasHiddenDownloadValidationsNotification = () => {
+    return notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
+  };
 
   const findHiddenExportFMENotification = () => {
     return notificationContext.hidden.find(
@@ -103,6 +112,30 @@ const GlobalNotifications = () => {
     } catch (error) {
       console.error(error);
       notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const downloadValidationsFile = async () => {
+    const [notification] = notificationContext.hidden.filter(
+      notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT'
+    );
+
+    notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE' });
+
+    try {
+      const { data } = await ValidationService.downloadFile(
+        notification.content.datasetId,
+        notification.content.nameFile
+      );
+
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.nameFile);
+      }
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
     }

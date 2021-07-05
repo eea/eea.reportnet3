@@ -1,10 +1,11 @@
 /*
- * 
+ *
  */
 package org.eea.dataset.service.file;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,17 +36,17 @@ public class FileExportFactoryTest {
    */
   @Test
   public void testCreateContextCsv() {
-    assertNotNull("is null", fileExportFactory.createContext("csv"));
+    assertNotNull("is null", fileExportFactory.createContext(FileTypeEnum.CSV.getValue()));
   }
 
   @Test
   public void testCreateContextXml() {
-    assertNull("is null", fileExportFactory.createContext("xml"));
+    assertNull("is null", fileExportFactory.createContext(FileTypeEnum.XML.getValue()));
   }
 
   @Test
   public void testCreateContextXlsx() {
-    assertNotNull("is null", fileExportFactory.createContext("xlsx"));
+    assertNotNull("is null", fileExportFactory.createContext(FileTypeEnum.XLSX.getValue()));
   }
 
 }

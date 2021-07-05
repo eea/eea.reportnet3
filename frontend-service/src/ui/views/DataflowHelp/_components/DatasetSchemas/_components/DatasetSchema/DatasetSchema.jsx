@@ -9,18 +9,21 @@ import styles from './DatasetSchema.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { TreeView } from 'ui/views/_components/TreeView';
+
+import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 const DatasetSchema = ({
   designDataset,
   extensionsOperationsList = [],
+  expandAll,
   index,
   onGetReferencedFieldName,
   uniqueList = [],
   validationList
 }) => {
   const resources = useContext(ResourcesContext);
+
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
       const parsedDesignDataset = parseDesignDataset(
@@ -120,10 +123,11 @@ const DatasetSchema = ({
           <TreeView
             columnOptions={columnOptions}
             excludeBottomBorder={false}
+            expandAll={expandAll}
             key={index}
             property={parsedDesignDataset}
-            propertyName={''}
-            rootProperty={''}
+            propertyName=""
+            rootProperty=""
           />
         </div>
       );
@@ -176,11 +180,16 @@ const DatasetSchema = ({
               aria-hidden={false}
               aria-label={resources.messages['geomTypeHelpTooltip']}
               className="p-breadcrumb-home"
-              data-for="geometricTypeTooltip"
+              data-for={`${field.fieldId}_geometricTypeTooltip`}
               data-tip
               icon={AwesomeIcons('externalUrl')}
             />
-            <ReactTooltip className={styles.tooltipClass} effect="solid" id="geometricTypeTooltip" place="top">
+            <ReactTooltip
+              border={true}
+              className={styles.tooltipClass}
+              effect="solid"
+              id={`${field.fieldId}_geometricTypeTooltip`}
+              place="top">
               <span>{resources.messages['geomTypeHelpTooltip']}</span>
             </ReactTooltip>
           </span>

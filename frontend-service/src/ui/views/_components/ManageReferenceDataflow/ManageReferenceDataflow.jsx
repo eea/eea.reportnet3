@@ -1,26 +1,34 @@
 import React, { Fragment, useContext, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
 import styles from './ManageReferenceDataflow.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import ReactTooltip from 'react-tooltip';
 
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'ui/views/_functions/Hooks/useInputTextFocus';
+
+import { UserService } from 'core/services/User';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
@@ -42,6 +50,7 @@ export const ManageReferenceDataflow = ({
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [deleteInput, setDeleteInput] = useState('');
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
@@ -52,6 +61,7 @@ export const ManageReferenceDataflow = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState(isEditing ? metadata.name : '');
+  const [pinDataflow, setPinDataflow] = useState(false);
 
   const deleteInputRef = useRef(null);
   const inputRef = useRef(null);
@@ -111,9 +121,19 @@ export const ManageReferenceDataflow = ({
           onEditDataflow(name, description);
         }
       } else {
-        const { status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+        const { data, status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+        if (status >= 200 && status <= 299) {
+          if (pinDataflow) {
+            const inmUserProperties = { ...userContext.userProps };
+            inmUserProperties.pinnedDataflows.push(data.toString());
 
-        if (status >= 200 && status <= 299) onManage();
+            const response = await UserService.updateAttributes(inmUserProperties);
+            if (!isNil(response) && response.status >= 200 && response.status <= 299) {
+              userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
+            }
+          }
+          onManage();
+        }
       }
     } catch (error) {
       if (TextUtils.areEquals(error?.response?.data, 'Dataflow name already exists')) {
@@ -135,6 +155,31 @@ export const ManageReferenceDataflow = ({
     <Fragment>
       <div className="p-toolbar-group-left">
         {/* {isEditing && state.isCustodian && state.status === config.dataflowStatus.DESIGN && ( */}
+        {!isEditing && (
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              ariaLabel={resources.messages['pinDataflow']}
+              checked={pinDataflow}
+              id="replaceCheckbox"
+              inputId="replaceCheckbox"
+              onChange={() => setPinDataflow(!pinDataflow)}
+              role="checkbox"
+            />
+            <label>
+              <span onClick={() => setPinDataflow(!pinDataflow)}>{resources.messages['pinDataflow']}</span>
+            </label>
+            <FontAwesomeIcon
+              aria-hidden={false}
+              className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+              data-for="pinDataflow"
+              data-tip
+              icon={AwesomeIcons('infoCircle')}
+            />
+            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
+              <span>{resources.messages['pinDataflowMessage']}</span>
+            </ReactTooltip>
+          </div>
+        )}
         {isEditing && isDesign && (
           <Button
             className="p-button-danger p-button-animated-blink"

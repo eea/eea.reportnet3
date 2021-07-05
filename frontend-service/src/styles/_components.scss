@@ -24,12 +24,3 @@ body .p-dialog.edit-table.calendar-table .p-dialog-content {
 .p-toolbar.p-component {
   position: relative;
 }
-
-/*growl notifications*/
-.p-growl.p-component.p-growl-topright {
-  z-index: 5100 !important;
-}
-
-.p-growl.p-growl-topright {
-  top: 75px !important;
-}

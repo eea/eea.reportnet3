@@ -195,6 +195,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param file the file
    * @param replace the replace
    * @param integrationId the integration id
+   * @param delimiter the delimiter
    */
   @Override
   @HystrixCommand
@@ -208,12 +209,15 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace,
-      @RequestParam(value = "integrationId", required = false) Long integrationId) {
+      @RequestParam(value = "integrationId", required = false) Long integrationId,
+      @RequestParam(value = "delimiter", required = false) String delimiter) {
     try {
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId);
+      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
+          delimiter);
     } catch (EEAException e) {
-      LOG_ERROR.error("File import failed: datasetId={}, tableSchemaId={}, fileName={}", datasetId,
-          tableSchemaId, file.getOriginalFilename());
+      LOG_ERROR.error(
+          "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
+          tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
@@ -251,8 +255,8 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace,
-          integrationId);
+      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace, integrationId,
+          null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
@@ -286,7 +290,7 @@ public class DataSetControllerImpl implements DatasetController {
     lockCriteria.put("datasetId", datasetId);
     try {
       lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, null, file, replace, integrationId);
+      importFileData(datasetId, dataflowId, providerId, null, file, replace, integrationId, null);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
     }
@@ -684,6 +688,11 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
    * @return the ETL dataset VO
    */
   @Override
@@ -738,6 +747,7 @@ public class DataSetControllerImpl implements DatasetController {
     }
     // check if dataset is reportable
     if (!datasetService.isDatasetReportable(datasetId)) {
+      LOG_ERROR.error("The dataset {} is not reportable", datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
@@ -745,7 +755,8 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("The etlImportDataset failed on datasetId {} because {}", datasetId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

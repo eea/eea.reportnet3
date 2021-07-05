@@ -12,6 +12,7 @@ import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { LevelError } from 'ui/views/_components/LevelError';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -391,15 +392,13 @@ export const Filters = ({
       />
       <span className={styles.checkbox}>
         <Checkbox
+          ariaLabel={resources.messages['strictModeCheckboxFilter']}
           checked={filterState.matchMode}
           id="matchMode_checkbox"
           inputId="matchMode_checkbox"
           onChange={() => onToggleMatchMode()}
           role="checkbox"
         />
-        <label className="srOnly" htmlFor={`matchMode_checkbox`}>
-          {resources.messages['strictModeCheckboxFilter']}
-        </label>
       </span>
     </span>
   );
@@ -411,6 +410,7 @@ export const Filters = ({
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
             <Checkbox
+              ariaLabel={resources.messages[property]}
               checked={getCheckboxFilterState(property)}
               id={property}
               inputId={property}
@@ -578,11 +578,7 @@ export const Filters = ({
 
   const selectTemplate = option => {
     if (!isNil(option.type)) {
-      return (
-        <span className={`${styles[option.type.toString().toLowerCase()]} ${styles.statusBox}`}>
-          {option.type.toString().toUpperCase()}
-        </span>
-      );
+      return <LevelError type={option.type} />;
     }
   };
 

@@ -142,9 +142,9 @@ public class PaMServiceImplTest {
     fieldValue.setIdFieldSchema(idSchema);
     fieldValueList.add(fieldValue);
     record.setFields(fieldValueList);
-    when(fileCommonUtils.getDataSetSchema(Mockito.any(), Mockito.any())).thenReturn(schema);
-    when(fileCommonUtils.findIdFieldSchema(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(fieldSchema);
+    when(fileCommonUtils.getDataSetSchemaVO(Mockito.any(), Mockito.any())).thenReturn(schema);
+    when(fileCommonUtils.findIdFieldSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(DataSetSchemaVO.class))).thenReturn(fieldSchema);
     when(fieldRepository.findFirstByIdFieldSchemaAndValue(Mockito.any(), Mockito.any()))
         .thenReturn(fieldValue);
     when(fieldRepository.findByFieldSchemaAndValue(Mockito.any(), Mockito.any(), Mockito.any()))

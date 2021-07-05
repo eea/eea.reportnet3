@@ -6,8 +6,9 @@ import isUndefined from 'lodash/isUndefined';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
+import { LevelError } from 'ui/views/_components/LevelError';
 
-import styles from './DropdownFilter.module.css';
+import styles from './DropdownFilter.module.scss';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -280,7 +281,12 @@ class DropdownFilter extends Component {
                 onClick={e => {
                   this.updateChecked(field.key);
                 }}>
-                <FontAwesomeIcon icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')} />
+                <FontAwesomeIcon
+                  ariaLabel={field.label.toLowerCase()}
+                  className={styles.checkboxIcon}
+                  icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')}
+                  role="presentation"
+                />
                 {this.props.showLevelErrorIcons ? (
                   !TextUtils.areEquals(field.label, 'SELECT ALL') && !TextUtils.areEquals(field.label, 'CORRECT') ? (
                     <IconTooltip
@@ -302,7 +308,8 @@ class DropdownFilter extends Component {
                       }}></span>
                   )
                 ) : null}
-                {field.label}
+                <LevelError type={field.label.toLowerCase()} />
+                {/* {field.label} */}
               </div>
             </li>
           ))}

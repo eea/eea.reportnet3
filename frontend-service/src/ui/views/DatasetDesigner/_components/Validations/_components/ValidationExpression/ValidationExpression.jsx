@@ -33,6 +33,8 @@ const ValidationExpression = ({
     validations: { operatorTypes: operatorTypesConf, operatorByType }
   } = config;
   const inputStringMatchRef = useRef(null);
+  const refDatetimeCalendar = useRef(null);
+
   const resourcesContext = useContext(ResourcesContext);
 
   const [clickedFields, setClickedFields] = useState([]);
@@ -178,6 +180,21 @@ const ValidationExpression = ({
     }
   };
 
+  const calculateCalendarPanelPosition = element => {
+    const {
+      current: { panel }
+    } = refDatetimeCalendar;
+
+    panel.style.display = 'block';
+
+    const inputRect = element.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const top = `${inputRect.top - panelRect.height / 2}px`;
+
+    panel.style.top = top;
+    panel.style.position = 'fixed';
+  };
+
   const buildValueInput = () => {
     const { operatorType, operatorValue } = expressionValues;
 
@@ -193,8 +210,12 @@ const ValidationExpression = ({
           appendTo={document.body}
           baseZIndex={6000}
           dateFormat="yy-mm-dd"
+          inputRef={refDatetimeCalendar}
           monthNavigator={true}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
+          onFocus={e => {
+            calculateCalendarPanelPosition(e.currentTarget);
+          }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
           showSeconds={showSeconds}

@@ -9,7 +9,7 @@ import styles from './Notifications.module.scss';
 import logo from 'assets/images/logos/logo.png';
 import logoError from 'assets/images/logos/logo_error.png';
 import { Button } from 'ui/views/_components/Button';
-import { Growl } from 'primereact/growl';
+import { Growl } from 'ui/views/_components/Growl';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';

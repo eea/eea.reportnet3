@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
@@ -132,7 +133,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Find Representatives by Dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List")
@@ -309,7 +310,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_EXTENSION);
     }
     String mimeType = file.getOriginalFilename().substring(location + 1);
-    if (!"csv".equalsIgnoreCase(mimeType)) {
+    if (!FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CSV_FILE_ERROR);
     }
 

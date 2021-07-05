@@ -8,11 +8,15 @@ import styles from './DataflowManagement.module.scss';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { DataflowManagementForm } from './_components/DataflowManagementForm';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
+import ReactTooltip from 'react-tooltip';
 import { ReportingObligations } from './_components/ReportingObligations';
 
 import { DataflowService } from 'core/services/Dataflow';
@@ -55,6 +59,7 @@ export const DataflowManagement = ({
       isEditForm && state.obligations
         ? { id: state.obligations.obligationId, title: state.obligations.title }
         : { id: null, title: '' },
+    pinDataflow: false,
     isReleasable: state.isReleasable
   };
 
@@ -115,7 +120,7 @@ export const DataflowManagement = ({
     dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowManagementState.obligationPrevState });
 
   const onSave = () => {
-    if (formRef.current) formRef.current.handleSubmit();
+    if (formRef.current) formRef.current.handleSubmit(dataflowManagementState.pinDataflow);
   };
 
   const renderCancelButton = action => (
@@ -137,6 +142,38 @@ export const DataflowManagement = ({
             label={resources.messages['deleteDataflowButton']}
             onClick={() => manageDialogs('isDeleteDialogVisible', true)}
           />
+        )}
+        {!isEditForm && (
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              ariaLabel={resources.messages['pinDataflow']}
+              checked={dataflowManagementState.pinDataflow}
+              id="replaceCheckbox"
+              inputId="replaceCheckbox"
+              onChange={() =>
+                dataflowManagementDispatch({ type: 'TOGGLE_PIN', payload: !dataflowManagementState.pinDataflow })
+              }
+              role="checkbox"
+            />
+            <label>
+              <span
+                onClick={() =>
+                  dataflowManagementDispatch({ type: 'TOGGLE_PIN', payload: !dataflowManagementState.pinDataflow })
+                }>
+                {resources.messages['pinDataflow']}
+              </span>
+            </label>
+            <FontAwesomeIcon
+              aria-hidden={false}
+              className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+              data-for="pinDataflow"
+              data-tip
+              icon={AwesomeIcons('infoCircle')}
+            />
+            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
+              <span>{resources.messages['pinDataflowMessage']}</span>
+            </ReactTooltip>
+          </div>
         )}
       </div>
       <Button
