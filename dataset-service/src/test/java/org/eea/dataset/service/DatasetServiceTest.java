@@ -129,7 +129,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -335,6 +336,12 @@ public class DatasetServiceTest {
   @Mock
   private FieldValueIdGenerator fieldValueIdGenerator;
 
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
+
   /** The field value. */
   private FieldValue fieldValue;
 
@@ -416,6 +423,11 @@ public class DatasetServiceTest {
 
     sortedList.add(field);
     fieldList.add(field);
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
 
     MockitoAnnotations.initMocks(this);
   }
@@ -1353,6 +1365,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field line test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldLineTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -1392,6 +1409,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field polygon test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldPolygonTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -1431,6 +1453,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field multipoint type test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldMultipointTypeTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -1470,6 +1497,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field multiline test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldMultilineTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -1509,6 +1541,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field multipolygon test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldMultipolygonTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -1548,6 +1585,11 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(2)).saveValue(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Update field geometry test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateFieldGeometryTest() throws EEAException {
     FieldVO fieldVO = new FieldVO();
@@ -1910,10 +1952,17 @@ public class DatasetServiceTest {
         datasetService.getFieldValuesReferenced(1L, "", "", "", "", null));
   }
 
+  /**
+   * Gets the field values referenced catch test.
+   *
+   * @return the field values referenced catch test
+   * @throws PSQLException the PSQL exception
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getFieldValuesReferencedCatchTest() throws PSQLException, EEAException {
-    SecurityContextHolder.getContext()
-        .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
+    // SecurityContextHolder.getContext()
+    // .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     Document doc = new Document();
     doc.put("typeData", DataType.LINK.getValue());
     Document referencedDoc = new Document();
@@ -1936,8 +1985,9 @@ public class DatasetServiceTest {
         .thenThrow(DataIntegrityViolationException.class);
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(tableSchema);
-
-    datasetService.getFieldValuesReferenced(1L, "", "", "", "", null);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    datasetService.getFieldValuesReferenced(1L, "", "", "", "", 1);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -2509,6 +2559,12 @@ public class DatasetServiceTest {
     Mockito.verify(fieldRepository, times(1)).save(Mockito.any());
   }
 
+  /**
+   * Test update attachment null.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void testUpdateAttachmentNull() throws EEAException, IOException {
     final MockMultipartFile file = new MockMultipartFile("file", "fileOriginal.csv",
@@ -3337,6 +3393,12 @@ public class DatasetServiceTest {
     Mockito.verify(outputStream, times(1)).flush();
   }
 
+  /**
+   * Etl export dataset exception test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void etlExportDatasetExceptionTest() throws IOException, EEAException {
     ObjectId id = new ObjectId();
