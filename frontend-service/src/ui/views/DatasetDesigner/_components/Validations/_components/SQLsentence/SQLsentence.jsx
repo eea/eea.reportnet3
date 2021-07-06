@@ -81,6 +81,10 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
           <p
             className={styles.levelHelp}
             dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceSpatialTypesNote'] }}></p>
+          <p
+            className={styles.levelHelp}
+            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceCCNote'] }}></p>
+
         </Dialog>
       )}
     </div>

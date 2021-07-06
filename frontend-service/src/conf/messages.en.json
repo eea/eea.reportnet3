@@ -1172,6 +1172,7 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "sqlSentenceCCNote": "<i>Note: You can include the keyword {%R3_COUNTRY_CODE%} to use the country code in the SQL sentence."
   }
 }
