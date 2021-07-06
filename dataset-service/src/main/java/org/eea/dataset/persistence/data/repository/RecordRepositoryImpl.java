@@ -147,7 +147,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant LIKE_APPEND_QUERY: {@value}. */
   private static final String LIKE_APPEND_QUERY =
-      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE :fieldValue) ";
+      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE % :fieldValue %) ";
 
   /** The Constant MASTER_QUERY: {@value}. */
   private static final String MASTER_QUERY =
