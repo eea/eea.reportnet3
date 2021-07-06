@@ -147,7 +147,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant LIKE_APPEND_QUERY: {@value}. */
   private static final String LIKE_APPEND_QUERY =
-      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE % :fieldValue %) ";
+      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE :fieldValue) ";
 
   /** The Constant MASTER_QUERY: {@value}. */
   private static final String MASTER_QUERY =
@@ -185,9 +185,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant FIELD_VALUE: {@value}. */
   private static final String FIELD_VALUE = "fieldValue";
-
-  /** The Constant FIELD_SCHEMA: {@value}. */
-  private static final String FIELD_SCHEMA = "fieldSchema";
 
   /** The Constant TABLE_NAME: {@value}. */
   private static final String TABLE_NAME = "tableName";
@@ -303,7 +300,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(RULE_ID_LIST, idRules);
       }
       if (null != fieldValue) {
-        query2.setParameter(FIELD_VALUE, fieldValue);
+        query2.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
       }
       if (!errorList.isEmpty()) {
         query2.setParameter(ERROR_LIST, errorList);
@@ -350,7 +347,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(ERROR_LIST, errorList);
     }
     if (null != fieldValue) {
-      query.setParameter(FIELD_VALUE, fieldValue);
+      query.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
     query.setMaxResults(pageable.getPageSize());
