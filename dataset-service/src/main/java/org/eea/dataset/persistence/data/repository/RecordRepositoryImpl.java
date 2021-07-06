@@ -147,7 +147,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant LIKE_APPEND_QUERY: {@value}. */
   private static final String LIKE_APPEND_QUERY =
-      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.idFieldSchema = :fieldSchema and fieldV.value LIKE :fieldValue) ";
+      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE :fieldValue) ";
 
   /** The Constant MASTER_QUERY: {@value}. */
   private static final String MASTER_QUERY =
@@ -208,7 +208,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param levelErrorList the level error list
    * @param pageable the pageable
    * @param idRules the id rules
-   * @param fieldSchema the field schema
    * @param fieldValue the field value
    * @param sortFields the sort fields
    * @return the table VO
@@ -216,7 +215,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public TableVO findByTableValueWithOrder(Long datasetId, String idTableSchema,
       List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
-      String fieldSchema, String fieldValue, SortField... sortFields) {
+      String fieldValue, SortField... sortFields) {
 
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
@@ -231,16 +230,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     boolean idRulesListFilled = null != idRules && !idRules.isEmpty();
 
     // Compose the query filtering by level ERROR
-    filter = composeFilterByError(levelErrorList, fieldSchema, fieldValue, filter, errorList,
+    filter = composeFilterByError(levelErrorList, fieldValue, filter, errorList,
         levelErrorListFilled, idRulesListFilled);
     // We don't want to do any query if the filter is empty and then return a new
     // result object
     if (levelErrorListFilled || idRulesListFilled) {
       // Total records calculated.
-      recordsCalc(idTableSchema, result, filter, errorList, idRules, fieldSchema, fieldValue);
+      recordsCalc(idTableSchema, result, filter, errorList, idRules, fieldValue);
 
       queryOrder(idTableSchema, pageable, sortQueryBuilder, directionQueryBuilder, result, filter,
-          errorList, idRules, fieldSchema, fieldValue, sortFields);
+          errorList, idRules, fieldValue, sortFields);
     }
     return result;
   }
@@ -249,7 +248,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Compose filter by error.
    *
    * @param levelErrorList the level error list
-   * @param fieldSchema the field schema
    * @param fieldValue the field value
    * @param filter the filter
    * @param errorList the error list
@@ -257,8 +255,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param idRulesListFilled the id rules list filled
    * @return the filter
    */
-  private String composeFilterByError(List<ErrorTypeEnum> levelErrorList, String fieldSchema,
-      String fieldValue, String filter, List<ErrorTypeEnum> errorList, boolean levelErrorListFilled,
+  private String composeFilterByError(List<ErrorTypeEnum> levelErrorList, String fieldValue,
+      String filter, List<ErrorTypeEnum> errorList, boolean levelErrorListFilled,
       boolean idRulesListFilled) {
     if (levelErrorListFilled && levelErrorList.size() != MAX_FILTERS) {
       filter = WARNING_ERROR_INFO_BLOCKER_APPEND_QUERY;
@@ -278,7 +276,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (idRulesListFilled) {
       filter = filter + RULE_ID_APPEND_QUERY;
     }
-    if (fieldSchema != null && fieldValue != null) {
+    if (fieldValue != null) {
       filter = filter + LIKE_APPEND_QUERY;
     }
     return filter;
@@ -292,11 +290,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param filter the filter
    * @param errorList the error list
    * @param idRules the id rules
-   * @param fieldSchema the field schema
    * @param fieldValue the field value
    */
   private void recordsCalc(String idTableSchema, TableVO result, String filter,
-      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue) {
+      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldValue) {
     if (!filter.isEmpty()) {
       Query query2;
       query2 = entityManager.createQuery(MASTER_QUERY_COUNT + filter);
@@ -305,8 +302,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(RULE_ID_LIST, idRules);
         query2.setParameter(RULE_ID_LIST, idRules);
       }
-      if (null != fieldSchema && null != fieldValue) {
-        query2.setParameter(FIELD_SCHEMA, fieldSchema);
+      if (null != fieldValue) {
         query2.setParameter(FIELD_VALUE, fieldValue);
       }
       if (!errorList.isEmpty()) {
@@ -329,13 +325,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param filter the filter
    * @param errorList the error list
    * @param idRules the id rules
-   * @param fieldSchema the field schema
    * @param fieldValue the field value
    * @param sortFields the sort fields
    */
   private void queryOrder(String idTableSchema, Pageable pageable, StringBuilder sortQueryBuilder,
       StringBuilder directionQueryBuilder, TableVO result, String filter,
-      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
+      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldValue,
       SortField... sortFields) {
 
     // Query without order or with it
@@ -354,8 +349,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(ERROR_LIST, errorList);
       query.setParameter(ERROR_LIST, errorList);
     }
-    if (null != fieldSchema && null != fieldValue) {
-      query.setParameter(FIELD_SCHEMA, fieldSchema);
+    if (null != fieldValue) {
       query.setParameter(FIELD_VALUE, fieldValue);
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());

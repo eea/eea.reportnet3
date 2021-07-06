@@ -142,7 +142,7 @@ public class DataSetControllerImplTest {
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     dataSetControllerImpl.getDataTablesValues(null, "mongoId", 1, 1, fields, errorfilter, null,
-        null, null);
+        null);
   }
 
   /**
@@ -156,8 +156,7 @@ public class DataSetControllerImplTest {
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, errorfilter, null, null,
-        null);
+    dataSetControllerImpl.getDataTablesValues(1L, null, 1, 1, fields, errorfilter, null, null);
   }
 
   /**
@@ -169,8 +168,8 @@ public class DataSetControllerImplTest {
   public void testGetDataTablesValuesExceptionEntry3() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.DATASET_NOTFOUND)).when(datasetService)
         .getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null, null, null);
+            Mockito.any(), Mockito.any(), Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null, null);
   }
 
   /**
@@ -182,8 +181,8 @@ public class DataSetControllerImplTest {
   public void testGetDataTablesValuesExceptionEntry4() throws Exception {
     doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService).getTableValuesById(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null, null, null);
+        Mockito.any());
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, null, null, null, null);
   }
 
   /**
@@ -197,12 +196,11 @@ public class DataSetControllerImplTest {
     tablevo.setId(1L);
     tablevo.setLevelError(ErrorTypeEnum.ERROR);
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(tablevo);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tablevo);
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
     assertEquals(tablevo, dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields,
-        errorfilter, null, null, null));
+        errorfilter, null, null));
   }
 
   /**
@@ -213,17 +211,15 @@ public class DataSetControllerImplTest {
   @Test
   public void testGetDataTablesValuesSuccess() throws Exception {
     when(datasetService.getTableValuesById(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(new TableVO());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new TableVO());
     List<Boolean> order = new ArrayList<>(Arrays.asList(new Boolean[2]));
     Collections.fill(order, Boolean.TRUE);
     String fields = "field_1,fields_2,fields_3";
     ErrorTypeEnum[] errorfilter = new ErrorTypeEnum[] {ErrorTypeEnum.ERROR, ErrorTypeEnum.WARNING};
-    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null, null,
-        null);
+    dataSetControllerImpl.getDataTablesValues(1L, "mongoId", 1, 1, fields, errorfilter, null, null);
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**

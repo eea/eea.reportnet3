@@ -48,7 +48,6 @@ public interface DatasetController {
    * @param fields the fields
    * @param levelError the level error
    * @param idRules the id rules
-   * @param fieldSchemaId the field schema id
    * @param fieldValue the field value
    * @return the data tables values
    */
@@ -60,7 +59,6 @@ public interface DatasetController {
       @RequestParam(value = "fields", required = false) String fields,
       @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
       @RequestParam(value = "idRules", required = false) String[] idRules,
-      @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId,
       @RequestParam(value = "fieldValue", required = false) String fieldValue);
 
   /**

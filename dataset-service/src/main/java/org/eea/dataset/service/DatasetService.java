@@ -56,16 +56,13 @@ public interface DatasetService {
    * @param fields the fields
    * @param levelError the level error
    * @param idRules the id rules
-   * @param fieldSchema the field schema
    * @param fieldValue the field value
-   *
    * @return the table values by id
-   *
    * @throws EEAException the EEA exception
    */
   TableVO getTableValuesById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
-      String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
-      String fieldValue) throws EEAException;
+      String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldValue)
+      throws EEAException;
 
   /**
    * Gets the position from any object id.
