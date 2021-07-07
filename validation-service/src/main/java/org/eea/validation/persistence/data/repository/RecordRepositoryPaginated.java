@@ -24,5 +24,12 @@ public interface RecordRepositoryPaginated {
   // countQuery = "SELECT count(rv) from RecordValue rv WHERE rv.tableValue.id = :tableId")
   List<RecordValue> findAllRecordsByTableValueIdPaginated(Long tableId, Pageable pageable);
 
+  /**
+   * Find records pageable.
+   *
+   * @param pageable the pageable
+   * @return the list
+   */
+  List<RecordValue> findRecordsPageable(Pageable pageable);
 
 }

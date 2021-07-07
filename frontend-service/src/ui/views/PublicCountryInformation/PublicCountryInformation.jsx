@@ -283,7 +283,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                 data-tip
                 icon={AwesomeIcons('7z')}
               />
-              <ReactTooltip className={styles.tooltipClass} effect="solid" id={publicFileName.fileName} place="top">
+              <ReactTooltip
+                border={true}
+                className={styles.tooltipClass}
+                effect="solid"
+                id={publicFileName.fileName}
+                place="top">
                 <span>{getPublicFileName(publicFileName.fileName)}</span>
               </ReactTooltip>
             </span>
@@ -299,7 +304,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             data-tip
             icon={AwesomeIcons('lock')}
           />
-          <ReactTooltip className={styles.tooltipClass} effect="solid" id={'restrictFromPublicField'} place="top">
+          <ReactTooltip
+            border={true}
+            className={styles.tooltipClass}
+            effect="solid"
+            id={'restrictFromPublicField'}
+            place="top">
             <span>{resources.messages['restrictFromPublicField']}</span>
           </ReactTooltip>
         </div>
@@ -323,6 +333,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                 icon={AwesomeIcons('7z')}
               />
               <ReactTooltip
+                border={true}
                 className={styles.tooltipClass}
                 effect="solid"
                 id={referencePublicFilesName.fileName}
@@ -372,7 +383,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true));
           }}
         />
-        <ReactTooltip className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
+        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
           <span>{resources.messages['navigateToDataflow']}</span>
         </ReactTooltip>
       </span>

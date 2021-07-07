@@ -4,7 +4,7 @@
   margin-bottom: 0.5rem;
   padding: 0.25rem;
 
-  .exportSubmenu {
+  .menuWrapper {
     width: 16rem;
   }
 }
@@ -70,6 +70,10 @@
   @include shadow-0em;
 }
 
+.replaceDataLabel {
+  cursor: pointer;
+}
+
 .switch {
   align-items: center;
   display: flex;
@@ -106,4 +110,8 @@
     align-items: center;
     margin-left: auto;
   }
+}
+.validationsFooter {
+  display: flex;
+  justify-content: space-between;
 }

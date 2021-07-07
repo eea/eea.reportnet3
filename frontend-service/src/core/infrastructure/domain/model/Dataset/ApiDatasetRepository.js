@@ -105,70 +105,8 @@ const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
 const downloadReferenceDatasetFileData = async (dataflowId, fileName) =>
   await apiDataset.downloadReferenceDatasetFileData(dataflowId, fileName);
 
-const errorsById = async (
-  datasetId,
-  pageNum,
-  pageSize,
-  sortField,
-  asc,
-  fieldValueFilter,
-  levelErrorsFilter,
-  typeEntitiesFilter,
-  tablesFilter
-) => {
-  const datasetErrorsDTO = await apiDataset.errorsById(
-    datasetId,
-    pageNum,
-    pageSize,
-    sortField,
-    asc,
-    fieldValueFilter,
-    levelErrorsFilter,
-    typeEntitiesFilter,
-    tablesFilter
-  );
-  const dataset = new Dataset({
-    datasetId: datasetErrorsDTO.data.idDataset,
-    datasetSchemaId: datasetErrorsDTO.data.idDatasetSchema,
-    datasetSchemaName: datasetErrorsDTO.data.nameDataSetSchema,
-    totalRecords: datasetErrorsDTO.data.totalRecords,
-    totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
-  });
-  const errors = datasetErrorsDTO.data.errors.map(
-    datasetErrorDTO =>
-      datasetErrorDTO &&
-      new DatasetError({
-        entityType: datasetErrorDTO.typeEntity,
-        fieldSchemaName: datasetErrorDTO.nameFieldSchema,
-        levelError: datasetErrorDTO.levelError,
-        message: datasetErrorDTO.message,
-        objectId: datasetErrorDTO.idObject,
-        ruleId: datasetErrorDTO.idRule,
-        shortCode: datasetErrorDTO.shortCode,
-        tableSchemaId: datasetErrorDTO.idTableSchema,
-        tableSchemaName: datasetErrorDTO.nameTableSchema,
-        validationDate: datasetErrorDTO.validationDate,
-        validationId: datasetErrorDTO.idValidation
-      })
-  );
 
-  dataset.errors = errors;
-  datasetErrorsDTO.data = dataset;
-  return datasetErrorsDTO;
-};
 
-const errorPositionByObjectId = async (objectId, datasetId, entityType) => {
-  const datasetErrorDTO = await apiDataset.errorPositionByObjectId(objectId, datasetId, entityType);
-
-  datasetErrorDTO.data = new DatasetError({
-    position: datasetErrorDTO.data.position,
-    recordId: datasetErrorDTO.data.idRecord,
-    tableSchemaId: datasetErrorDTO.data.idTableSchema,
-    tableSchemaName: datasetErrorDTO.data.nameTableSchema
-  });
-
-  return datasetErrorDTO;
-};
 
 const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
@@ -727,8 +665,6 @@ export const ApiDatasetRepository = {
   downloadExportFile,
   downloadFileData,
   downloadReferenceDatasetFileData,
-  errorPositionByObjectId,
-  errorsById,
   errorStatisticsById,
   exportDataById,
   exportDatasetDataExternal,

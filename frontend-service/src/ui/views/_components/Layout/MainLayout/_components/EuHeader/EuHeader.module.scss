@@ -20,7 +20,8 @@
       margin: 5.5px 8px 0 0;
       border: 1px solid #7f99cc;
     }
-    > a {
+    > span {
+      cursor: pointer;
       font-weight: normal;
       text-decoration: none;
       color: var(--white);

@@ -525,6 +525,7 @@ export class MultiSelect extends Component {
         filterPlaceholder={this.props.filterPlaceholder}
         filterValue={this.state.filter}
         headerClassName={this.props.headerClassName}
+        id={this.props.id}
         isPanelVisible={this.state.isPanelVisible}
         notCheckAllHeader={this.props.notCheckAllHeader}
         onClose={this.onCloseClick}
@@ -604,7 +605,7 @@ export class MultiSelect extends Component {
         <div className={`p-hidden-accessible ${this.props.inputClassName}`}>
           <input
             aria-haspopup="listbox"
-            aria-labelledby={this.props.ariaLabelledBy}
+            ariaLabelledby={this.props.ariaLabelledBy}
             className={labelContent ? 'p-filled' : ''}
             id={this.props.inputId}
             onBlur={this.onBlur}
@@ -621,6 +622,7 @@ export class MultiSelect extends Component {
         <MultiSelectPanel
           appendTo={this.props.appendTo}
           header={header}
+          label={this.props.label}
           onClick={this.onPanelClick}
           ref={el => (this.panel = el)}
           scrollHeight={this.props.scrollHeight}>

@@ -195,7 +195,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    */
   @Override
   public ResourceInfoVO getResourceDetails(String groupName) {
-    GroupInfo[] groups = keycloakConnectorService.getGroups();
+    GroupInfo[] groups = keycloakConnectorService.getGroupsWithSearch(groupName);
     String groupId = "";
     ResourceInfoVO result = new ResourceInfoVO();
     if (null != groups && groups.length > 0) {
@@ -295,10 +295,15 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     if (null != resources && resources.size() > 0) {
       // Once recovered all the group names from input, get the group names from Keycloak to
       // determine which ones must be removed
-      GroupInfo[] groups = keycloakConnectorService.getGroups();
-      if (null != groups && groups.length > 0) {
-        Arrays.asList(groups).stream()
-            .filter(groupInfo -> resources.containsKey(groupInfo.getName()))
+      List<GroupInfo> groups = new ArrayList<>();
+      for (String resource : resourceName) {
+        GroupInfo[] groupCall = keycloakConnectorService.getGroupsWithSearch(resource);
+        if (null != groupCall && groupCall.length > 0) {
+          groups.addAll(Arrays.asList(groupCall));
+        }
+      }
+      if (!groups.isEmpty()) {
+        groups.stream().filter(groupInfo -> resources.containsKey(groupInfo.getName()))
             .forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
         // Removing groups one by one
         resources.values().stream()
@@ -322,11 +327,17 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public void deleteResourceInstancesByDatasetId(List<Long> datasetIds) {
     if (datasetIds != null && !datasetIds.isEmpty()) {
       Set<Long> set = new HashSet<>(datasetIds);
-      GroupInfo[] groups = keycloakConnectorService.getGroups();
-      for (int i = 0; i < groups.length; i++) {
-        if (set.contains(Long.parseLong(groups[i].getName().split("-")[1]))) {
-          keycloakConnectorService.deleteGroupDetail(groups[i].getId());
-          LOG.info("Group {} with id {} deleted", groups[i].getName(), groups[i].getId());
+      List<GroupInfo> groups = new ArrayList<>();
+      for (Long datasetId : datasetIds) {
+        GroupInfo[] groupCall = keycloakConnectorService.getGroupsWithSearch(datasetId.toString());
+        if (null != groupCall && groupCall.length > 0) {
+          groups.addAll(Arrays.asList(groupCall));
+        }
+      }
+      for (int i = 0; i < groups.size(); i++) {
+        if (set.contains(Long.parseLong(groups.get(i).getName().split("-")[1]))) {
+          keycloakConnectorService.deleteGroupDetail(groups.get(i).getId());
+          LOG.info("Group {} with id {} deleted", groups.get(i).getName(), groups.get(i).getId());
         }
       }
     }
@@ -343,7 +354,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public void addUserToUserGroup(String userId, String groupName) throws EEAException {
     // Retrieve the groups available in keycloak. Keycloak does not support queries on groups
-    GroupInfo[] groups = keycloakConnectorService.getGroups();
+    GroupInfo[] groups = keycloakConnectorService.getGroupsWithSearch(groupName);
     if (null != groups && groups.length > 0) {
       // Retrieve the group id of the group where the user will be added
       String groupId = Arrays.asList(groups).stream()
@@ -417,11 +428,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   @Override
   public List<ResourceInfoVO> getGroupsByIdResourceType(Long idResource,
       ResourceTypeEnum resourceType) {
-    // we get all groups
-    GroupInfo[] groups = keycloakConnectorService.getGroups();
+
+
     List<ResourceInfoVO> resourceReturn = new ArrayList<>();
     // ge create the resource that we are looking for it to filter
     String resourceToContain = resourceType + "-" + idResource.toString() + "-";
+    // we get the groups
+    GroupInfo[] groups = keycloakConnectorService.getGroupsWithSearch(resourceToContain);
 
     // we do a for and find the data that we need
     if (null != groups && groups.length > 0) {

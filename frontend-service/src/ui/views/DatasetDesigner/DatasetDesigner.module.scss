@@ -4,7 +4,7 @@
   margin-bottom: 0.5rem;
   padding: 0.25rem;
 
-  .exportSubmenu {
+  .menuWrapper {
     width: 16rem;
   }
 }
@@ -39,6 +39,10 @@
 .FileUpload .span {
   width: 100%;
   min-height: 120px;
+}
+
+.replaceDataLabel {
+  cursor: pointer;
 }
 
 .warning > span {
@@ -117,4 +121,9 @@
 .integrationsButton span:first-child:hover {
   transform: rotate(-90deg) scale(1.25) !important;
   transition: 0.08s auto;
+}
+
+.validationsFooter {
+  display: flex;
+  justify-content: space-between;
 }

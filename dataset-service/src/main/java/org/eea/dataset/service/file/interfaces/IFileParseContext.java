@@ -1,8 +1,8 @@
 package org.eea.dataset.service.file.interfaces;
 
 import java.io.InputStream;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 
 /**
  * The Interface IFileParseContext.
@@ -17,9 +17,10 @@ public interface IFileParseContext {
    * @param dataflowId the dataflow id
    * @param partitionId the partition id
    * @param idTableSchema the id table schema
+   * @param datasetId the dataset id
    * @return the data set VO
    * @throws EEAException the EEA exception
    */
-  DataSetVO parse(InputStream inputStream, Long dataflowId, Long partitionId, String idTableSchema)
-      throws EEAException;
+  void parse(InputStream inputStream, Long dataflowId, Long partitionId, String idTableSchema,
+      Long datasetId, String fileName, boolean replace, DataSetSchema schema) throws EEAException;
 }

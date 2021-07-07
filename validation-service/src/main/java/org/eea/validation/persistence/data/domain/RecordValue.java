@@ -69,6 +69,10 @@ public class RecordValue {
   @Transient
   private ErrorTypeEnum levelError;
 
+  /** The data position. */
+  @Column(name = "DATA_POSITION", insertable = false, updatable = false)
+  private Long dataPosition;
+
   /**
    * Hash code.
    *

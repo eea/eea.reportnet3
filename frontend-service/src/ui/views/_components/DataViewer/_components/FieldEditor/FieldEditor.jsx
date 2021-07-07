@@ -76,7 +76,8 @@ const FieldEditor = ({
       ? !MapUtils.checkValidCoordinates(
           RecordUtils.getCellValue(cells, cells.field) !== ''
             ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
-            : ''
+            : '',
+          true
         )
       : true
   );
@@ -203,7 +204,9 @@ const FieldEditor = ({
       const inputRect = element.getBoundingClientRect();
       const panelRect = panel.getBoundingClientRect();
       if (panelRect.right + panelRect.width > window.innerWidth) {
-        panel.style.offsetRight = `${window.innerWidth}px`;
+        panel.style.left = `${
+          inputRect.left - (Number(panelRect.width) - (Number(inputRect.right) - Number(inputRect.left)))
+        }px`;
       } else {
         panel.style.left = `${inputRect.left}px`;
       }
@@ -217,12 +220,12 @@ const FieldEditor = ({
         const projectedCoordinates = projectCoordinates(coordinates, crs.value);
         geoJson.geometry.coordinates = projectedCoordinates;
         geoJson.properties.srid = crs.value;
-        setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates));
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(projectedCoordinates, true));
         return JSON.stringify(geoJson);
       } else {
-        setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates));
+        setIsMapDisabled(!MapUtils.checkValidCoordinates(coordinates, true));
         if (checkCoordinates) {
-          geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates)
+          geoJson.geometry.coordinates = MapUtils.checkValidCoordinates(coordinates, true)
             ? MapUtils.parseCoordinates(coordinates.replace(', ', ',').split(','), parseToFloat)
             : [];
         } else {
@@ -330,6 +333,7 @@ const FieldEditor = ({
       case 'TEXT':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={textCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -347,6 +351,7 @@ const FieldEditor = ({
         return (
           <InputTextarea
             collapsedHeight={75}
+            id={cells.field}
             maxLength={textCharacters}
             moveCaretToEnd={true}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -362,6 +367,7 @@ const FieldEditor = ({
       case 'RICH_TEXT':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={richTextCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -378,6 +384,7 @@ const FieldEditor = ({
       case 'NUMBER_INTEGER':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={longCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -393,6 +400,7 @@ const FieldEditor = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={decimalCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -407,8 +415,10 @@ const FieldEditor = ({
         );
       case 'POINT':
         return (
-          <div className={styles.pointWrapper}>
+          <div className={styles.pointEpsgWrapper}>
+            <label className={styles.epsg}>{resources.messages['coords']}</label>
             <InputText
+              id={cells.field}
               keyfilter={RecordUtils.getFilter(type)}
               onBlur={e => {
                 onEditorSubmitValue(
@@ -528,18 +538,20 @@ const FieldEditor = ({
                   placeholder="Select a CRS"
                   value={!isNil(currentCRS) ? currentCRS : { label: 'WGS84 - 4326', value: 'EPSG:4326' }}
                 />
-                <Button
-                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                  icon="marker"
-                  onClick={e => {
-                    if (!isNil(onMapOpen)) {
-                      onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
-                    }
-                  }}
-                  style={{ width: '35%' }}
-                  tooltip={resources.messages['selectGeographicalDataOnMap']}
-                  tooltipOptions={{ position: 'bottom' }}
-                />
+                <div className={styles.mapButtonWrapper}>
+                  <Button
+                    className={`p-button-secondary-transparent button`}
+                    disabled={isMapDisabled}
+                    icon="marker"
+                    onClick={() => {
+                      if (!isNil(onMapOpen)) {
+                        onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
+                      }
+                    }}
+                    tooltip={resources.messages['selectGeographicalDataOnMap']}
+                    tooltipOptions={{ position: 'bottom' }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -665,6 +677,7 @@ const FieldEditor = ({
       case 'EMAIL':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={emailCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -680,6 +693,7 @@ const FieldEditor = ({
       case 'URL':
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             maxLength={urlCharacters}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
@@ -810,6 +824,7 @@ const FieldEditor = ({
       default:
         return (
           <InputText
+            id={cells.field}
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
             onChange={e => onEditorValueChange(cells, e.target.value)}

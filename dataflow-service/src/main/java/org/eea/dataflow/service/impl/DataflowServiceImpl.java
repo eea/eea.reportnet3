@@ -42,7 +42,6 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -392,22 +391,6 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Gets the pending by user.
-   *
-   * @param userId the user id
-   * @param type the type
-   * @return the pending by user
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type)
-      throws EEAException {
-    List<Dataflow> dataflows = new ArrayList();
-    LOG.info("Get the dataflows of the user id: {} with the status {}", userId, type);
-    return dataflowNoContentMapper.entityListToClass(dataflows);
-  }
-
-  /**
    * Adds the contributor to dataflow.
    *
    * @param idDataflow the id dataflow
@@ -442,11 +425,12 @@ public class DataflowServiceImpl implements DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @return the long
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void createDataFlow(DataFlowVO dataflowVO) throws EEAException {
+  public Long createDataFlow(DataFlowVO dataflowVO) throws EEAException {
     Dataflow dataFlowSaved;
     // we find if the name of this dataflow exist
     if (dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()).isPresent()) {
@@ -473,6 +457,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
         ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    return dataFlowSaved.getId();
   }
 
   /**
@@ -760,6 +745,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @return true, if is reference dataflow draft
    */
   @Override
+  @Transactional
   public boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId) {
     boolean reference = false;
     DataFlowVO dataflow = new DataFlowVO();

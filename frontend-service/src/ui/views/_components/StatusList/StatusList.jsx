@@ -3,6 +3,8 @@ import { useContext } from 'react';
 import styles from './StatusList.module.scss';
 import colors from 'conf/colors.json';
 
+import { LevelError } from 'ui/views/_components/LevelError';
+
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes }) => {
@@ -29,7 +31,7 @@ export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes })
         />
 
         <label className={styles.labelItem} htmlFor={`${labelLowerCase}_${i}`}>
-          {resources.messages[labelLowerCase]}
+          <LevelError type={labelLowerCase} />
         </label>
       </li>
     );

@@ -17,16 +17,18 @@ const SnapshotItem = ({ itemData }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const getFormatedDate = creationDate => {
+    return dayjs(creationDate).format(
+      `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+        userContext.userProps.amPm24h ? '' : ' A'
+      } CET`
+    );
+  };
+
   return (
     <li className={styles.listItem}>
       <div className={styles.listItemData}>
-        <h5>
-          {dayjs(itemData.creationDate).format(
-            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-              userContext.userProps.amPm24h ? '' : ' A'
-            }`
-          )}
-        </h5>
+        <h5>{getFormatedDate(itemData.creationDate)}</h5>
         {itemData.isReleased && (
           <h5 className={styles.is_released_snapshot}>
             {resources.messages['snapshotIsReleased'].toLowerCase()}

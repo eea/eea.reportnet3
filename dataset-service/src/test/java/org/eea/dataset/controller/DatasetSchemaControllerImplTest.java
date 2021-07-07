@@ -1311,7 +1311,7 @@ public class DatasetSchemaControllerImplTest {
     ds.setDatasetSchema(new ObjectId().toString());
     df.setDesignDatasets(new ArrayList<>());
     df.getDesignDatasets().add(ds);
-    when(dataflowControllerZuul.findById(Mockito.any())).thenReturn(df);
+    when(dataflowControllerZuul.findById(Mockito.any(), Mockito.any())).thenReturn(df);
     Assert.assertFalse(dataSchemaControllerImpl.validateSchemas(1L));
   }
 
