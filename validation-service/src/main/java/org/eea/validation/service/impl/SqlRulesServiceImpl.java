@@ -140,8 +140,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       rule.setEnabled(false);
       LOG.info("Rule validation not passed: {}", rule);
     }
-    rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
-        .append(rule.getRuleId().toString()).append("')").toString());
+    rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id, '")
+        .append(rule.getRuleId().toString())
+        .append(
+            "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+        .append(")").toString());
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     releaseNotification(notificationEventType, notificationVO);
@@ -168,8 +171,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       rule.setEnabled(verifAndEnabled);
     }
     rule.setVerified(verifAndEnabled);
-    rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
-        .append(rule.getRuleId().toString()).append("')").toString());
+    rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id,'")
+        .append(rule.getRuleId().toString()).append("', 'XX'").append(")").toString());
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
 
     return verifAndEnabled;
@@ -264,8 +267,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           rule.setVerified(false);
           rule.setEnabled(false);
         }
-        rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
-            .append(rule.getRuleId().toString()).append("')").toString());
+        rule.setWhenCondition(new StringBuilder()
+            .append("isSQLSentenceWithCode(this.datasetId.id, '")
+            .append(rule.getRuleId().toString())
+            .append(
+                "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+            .append(")").toString());
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
     }
