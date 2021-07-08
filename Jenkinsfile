@@ -49,7 +49,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('Altia SonarQube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                  	sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                  	sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=11 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
 
                     // sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
                 }
