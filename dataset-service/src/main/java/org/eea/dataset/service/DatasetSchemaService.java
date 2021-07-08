@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Interface DataschemaService.
@@ -548,5 +549,31 @@ public interface DatasetSchemaService {
    */
   void updateReferenceDataset(Long datasetId, String datasetSchemaId, boolean referenceDataset,
       boolean updateTables);
+
+
+  /**
+   * Export fields schema.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   */
+  byte[] exportFieldsSchema(final String datasetSchemaId, final String tableSchemaId)
+      throws EEAException;
+
+  /**
+   * Import fields schema.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param file the file
+   * @param replace the replace
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
+      MultipartFile file, boolean replace) throws EEAException, IOException;
 
 }

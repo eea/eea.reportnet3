@@ -9,6 +9,7 @@ export const TooltipButton = ({ message, uniqueIdentifier, getContent = null }) 
         <Button
           className={`${styles.tooltipButton} p-button-rounded p-button-secondary-transparent`}
           icon="infoCircle"
+          role="button"
         />
       </span>
       <ReactTooltip

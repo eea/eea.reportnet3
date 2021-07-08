@@ -115,10 +115,12 @@ public class SQLValidationUtils {
    *
    * @param datasetId the dataset id
    * @param ruleId the rule id
+   * @param dataProviderCode the data provider code
    */
-  public static void executeValidationSQLRule(Long datasetId, String ruleId) {
+  public static void executeValidationSQLRule(Long datasetId, String ruleId,
+      String dataProviderCode) {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
-    TableValue tableToEvaluate = getTableToEvaluate(datasetId, rule);
+    TableValue tableToEvaluate = getTableToEvaluate(datasetId, rule, dataProviderCode);
     if (null != tableToEvaluate && null != tableToEvaluate.getId()) {
       String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
       Optional<DataSetSchema> dataSetSchema = schemasRepository.findById(new ObjectId(schemaId));
@@ -149,13 +151,17 @@ public class SQLValidationUtils {
    *
    * @param datasetId the dataset id
    * @param rule the rule
+   * @param dataProviderCode the data provider code
    * @return the table to evaluate
    */
-  private static TableValue getTableToEvaluate(Long datasetId, Rule rule) {
+  private static TableValue getTableToEvaluate(Long datasetId, Rule rule, String dataProviderCode) {
     TableValue table = null;
     String query = rule.getSqlSentence();
     try {
       String preparedquery = query.contains(";") ? query.replace(";", "") : query;
+      if (dataProviderCode != null) {
+        preparedquery = preparedquery.replace("{%COUNTRY_CODE%}", dataProviderCode);
+      }
       table = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);

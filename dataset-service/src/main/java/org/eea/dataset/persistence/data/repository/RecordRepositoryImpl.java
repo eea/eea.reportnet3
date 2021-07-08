@@ -149,6 +149,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private static final String LIKE_APPEND_QUERY =
       "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.idFieldSchema = :fieldSchema and fieldV.value LIKE :fieldValue) ";
 
+  /** The Constant LIKE_APPEND_QUERY_NO_FIELD_SCHEMA: {@value}. */
+  private static final String LIKE_APPEND_QUERY_NO_FIELD_SCHEMA =
+      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE :fieldValue) ";
+
   /** The Constant MASTER_QUERY: {@value}. */
   private static final String MASTER_QUERY =
       "SELECT rv %s from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_ID_TABLE_SCHEMA;
@@ -280,6 +284,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     if (fieldSchema != null && fieldValue != null) {
       filter = filter + LIKE_APPEND_QUERY;
+    } else if (fieldSchema == null && fieldValue != null) {
+      filter = filter + LIKE_APPEND_QUERY_NO_FIELD_SCHEMA;
     }
     return filter;
   }
@@ -308,6 +314,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (null != fieldSchema && null != fieldValue) {
         query2.setParameter(FIELD_SCHEMA, fieldSchema);
         query2.setParameter(FIELD_VALUE, fieldValue);
+      } else if (null == fieldSchema && null != fieldValue) {
+        query2.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
       }
       if (!errorList.isEmpty()) {
         query2.setParameter(ERROR_LIST, errorList);
@@ -357,6 +365,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (null != fieldSchema && null != fieldValue) {
       query.setParameter(FIELD_SCHEMA, fieldSchema);
       query.setParameter(FIELD_VALUE, fieldValue);
+    } else if (null == fieldSchema && null != fieldValue) {
+      query.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
     query.setMaxResults(pageable.getPageSize());
