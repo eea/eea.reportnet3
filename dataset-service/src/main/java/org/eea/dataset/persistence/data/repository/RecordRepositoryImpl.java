@@ -316,13 +316,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(FIELD_VALUE, fieldValue);
       } else if (null == fieldSchema && null != fieldValue) {
         query2.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
-        LOG.info("Filtering the table by fieldValue as : " + "%" + fieldValue + "%");
       }
       if (!errorList.isEmpty()) {
         query2.setParameter(ERROR_LIST, errorList);
         query2.setParameter(ERROR_LIST, errorList);
       }
       Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
+
+      LOG.info(
+          "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}",
+          fieldValue, idTableSchema, idRules, errorList, fieldSchema);
       result.setTotalFilteredRecords(recordsCount);
     }
   }
@@ -368,7 +371,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(FIELD_VALUE, fieldValue);
     } else if (null == fieldSchema && null != fieldValue) {
       query.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
-      LOG.info("Filtering the table by fieldValue as : " + "%" + fieldValue + "%");
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
     query.setMaxResults(pageable.getPageSize());
@@ -384,6 +386,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<Object[]> a = query.getResultList();
       recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
     }
+    LOG.info(
+        "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {}",
+        fieldValue, idTableSchema, idRules, errorList, fieldSchema, pageable.getPageSize());
     result.setRecords(recordVOs);
   }
 
