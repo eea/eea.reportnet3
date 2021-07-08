@@ -99,7 +99,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -2513,18 +2512,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
    * Export fields schema.
    *
+   * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
   @Override
-  public byte[] exportFieldsSchema(final String datasetSchemaId, final String tableSchemaId)
-      throws EEAException {
-    LOG.info("starting csv file writter to field schemas");
+  public byte[] exportFieldsSchema(final Long datasetId, final String datasetSchemaId,
+      final String tableSchemaId) throws EEAException {
+    LOG.info("starting csv file writter to field schemas in datasetId {}", datasetId);
 
     DataSetSchemaVO datasetSchema = getDataSchemaById(datasetSchemaId);
 
@@ -2542,6 +2543,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
    * Import fields schema.
    *
@@ -2556,12 +2558,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Async
   @Override
   public void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
-      MultipartFile file, boolean replace) throws EEAException, IOException {
+      InputStream file, boolean replace) throws EEAException, IOException {
 
+    LOG.info("Init importing field schemas from file into dataset {}", datasetId);
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    readFieldLines(file.getInputStream(), tableSchemaId, datasetId, replace, datasetSchema);
-
+    // Method to process the file
+    readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
 
     // Success notification
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
@@ -2607,8 +2610,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
 
       if (!isDesignDataset) {
+        LOG_ERROR.error(
+            "Error importing field schemas on datasetId {} because this dataset is not a design dataset",
+            datasetId);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
+            null,
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId).error("Error importing fieldSchemas").build());
         throw new IOException(
             "This dataset is not a design dataset. It's not possible to perform the operation");
+
       }
 
       // If replace=true, delete all the fields of the table
@@ -2620,38 +2632,37 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
-        FieldSchemaVO fieldSchemaVO = sanitizeAndCreateFieldSchema(values, recordSchemaId);
+        FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
 
         if (null != fieldSchemaVO) {
           // SAVE
           if (fieldSchemas.stream()
               .noneMatch(f -> f.getHeaderName().equals(fieldSchemaVO.getName()))) {
-            LOG.info("SAVING fieldSchema {}", fieldSchemaVO);
             saveImportFieldSchema(fieldSchemaVO, datasetSchema, datasetId);
           } else {
             // UPDATE
-            LOG.info("UPDATING fieldSchema {}", fieldSchemaVO);
             updateImportFieldSchema(fieldSchemaVO, fieldSchemas, datasetSchema, datasetId);
           }
         }
       }
 
     } catch (IOException e) {
-      LOG_ERROR.error("Problem with the file trying to import field schemas", e);
+      LOG_ERROR.error("Problem with the file trying to import field schemas on datasetId {}",
+          datasetId, e);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
           null,
           NotificationVO.builder()
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .datasetId(datasetId).error(InvalidFileException.ERROR_MESSAGE).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error importing field schemas", e);
+      LOG_ERROR.error("Error importing field schemas on datasetId {}", datasetId, e);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
           null,
           NotificationVO.builder()
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .datasetId(datasetId).error("Error importing fieldSchemas").build());
     }
-    LOG.info("Reading Csv Fields File Completed");
+    LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {}", datasetId);
 
   }
 
@@ -2666,6 +2677,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void saveImportFieldSchema(FieldSchemaVO fieldSchemaVO, DataSetSchema datasetSchema,
       Long datasetId) throws EEAException {
 
+    LOG.info("Inserting new field schema into dataset {}", datasetId);
     createFieldSchema(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO);
     // propagate the new field to the existing records in the dataset value
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
@@ -2710,30 +2722,42 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void updateImportFieldSchema(FieldSchemaVO fieldSchemaVO, List<FieldSchema> fieldSchemas,
       DataSetSchema datasetSchema, Long datasetId) throws EEAException {
 
+    LOG.info("Updating field schema into dataset {}", datasetId);
     Optional<FieldSchema> field = fieldSchemas.stream()
         .filter(f -> f.getHeaderName().equals(fieldSchemaVO.getName())).findFirst();
     if (field.isPresent()) {
       fieldSchemaVO.setId(field.get().getIdFieldSchema().toString());
     }
-    // Modify the register into the metabase fieldRelations
-    updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema.getIdDataSetSchema().toString());
 
-    // Clear the attachments if necessary
-    if (Boolean.TRUE.equals(checkClearAttachments(datasetId,
-        datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO))) {
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-      datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
+    if (Boolean.TRUE
+        .equals(checkPkAllowUpdate(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO))) {
+
+      // Modify the register into the metabase fieldRelations
+      updateForeignRelation(datasetId, fieldSchemaVO,
+          datasetSchema.getIdDataSetSchema().toString());
+
+      // Clear the attachments if necessary
+      if (Boolean.TRUE.equals(checkClearAttachments(datasetId,
+          datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO))) {
+        TenantResolver
+            .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+        datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
+      }
+
+      DataType type = updateFieldSchema(datasetSchema.getIdDataSetSchema().toString(),
+          fieldSchemaVO, datasetId, false);
+
+      // Create query view
+      propagateRulesAfterUpdateSchema(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO,
+          type, datasetId);
+
+      // Add the Pk if needed to the catalogue
+      addToPkCatalogue(fieldSchemaVO, datasetId);
+    } else {
+      LOG.info(
+          "Updating a previous field schema during import field schema on datasetId {}: there's a field that cannot be updated because is a PK already in use",
+          datasetId);
     }
-
-    DataType type = updateFieldSchema(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO,
-        datasetId, false);
-
-    // Create query view
-    propagateRulesAfterUpdateSchema(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO,
-        type, datasetId);
-
-    // Add the Pk if needed to the catalogue
-    addToPkCatalogue(fieldSchemaVO, datasetId);
   }
 
   /**
@@ -2751,48 +2775,36 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+
   /**
-   * Sanitize and create field schema.
+   * Sanitize and fill field schema.
    *
    * @param values the values
    * @param recordSchemaId the record schema id
    * @return the field schema VO
    */
-  private FieldSchemaVO sanitizeAndCreateFieldSchema(final List<String> values,
+  private FieldSchemaVO sanitizeAndFillFieldSchema(final List<String> values,
       final String recordSchemaId) {
     FieldSchemaVO fieldSchema = null;
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
-      fieldSchema = fillFieldSchema(values, recordSchemaId);
+
+      // Order in the array
+      // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
+      fieldSchema = new FieldSchemaVO();
+      fieldSchema.setName(values.get(0));
+      fieldSchema.setPk(Boolean.valueOf(values.get(1)));
+      fieldSchema.setRequired(Boolean.valueOf(values.get(2)));
+      fieldSchema.setReadOnly(Boolean.valueOf(values.get(3)));
+      fieldSchema.setDescription(values.get(4));
+      fieldSchema.setType(DataType.valueOf(values.get(5)));
+      fieldSchema.setValidExtensions(new String[0]);
+
+      fieldSchema.setIdRecord(recordSchemaId);
     }
     return fieldSchema;
   }
 
-  /**
-   * Fill field schema.
-   *
-   * @param values the values
-   * @param recordSchemaId the record schema id
-   * @return the field schema VO
-   */
-  private FieldSchemaVO fillFieldSchema(final List<String> values, String recordSchemaId) {
-
-    FieldSchemaVO field = null;
-    // Order in the array
-    // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
-
-    field = new FieldSchemaVO();
-    field.setName(values.get(0));
-    field.setPk(Boolean.valueOf(values.get(1)));
-    field.setRequired(Boolean.valueOf(values.get(2)));
-    field.setReadOnly(Boolean.valueOf(values.get(3)));
-    field.setDescription(values.get(4));
-    field.setType(DataType.valueOf(values.get(5)));
-    field.setValidExtensions(new String[0]);
-
-    field.setIdRecord(recordSchemaId);
-    return field;
-  }
 
 
   /**
@@ -2910,9 +2922,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           deleteForeignRelation(datasetId, fieldVO);
 
         } catch (EEAException e) {
-          LOG_ERROR.error("Error deleting fieldSchemas during the import field schemas from file",
-              e);
+          LOG_ERROR.error(
+              "Error deleting fieldSchemas during the import field schemas from file. DatasetId {}",
+              datasetId, e);
         }
+      } else {
+        LOG.info(
+            "Deleting previous fields during import field schema on datasetId {}: there's a field that cannot be deleted because is a PK already in use",
+            datasetId);
       }
     });
     // Create query view
