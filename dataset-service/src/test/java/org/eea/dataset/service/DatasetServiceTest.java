@@ -1961,8 +1961,6 @@ public class DatasetServiceTest {
    */
   @Test
   public void getFieldValuesReferencedCatchTest() throws PSQLException, EEAException {
-    // SecurityContextHolder.getContext()
-    // .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     Document doc = new Document();
     doc.put("typeData", DataType.LINK.getValue());
     Document referencedDoc = new Document();
