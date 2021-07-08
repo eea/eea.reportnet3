@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
 RUN apk add --no-cache postgresql-client
 VOLUME /tmp
 ARG JAR_FILE
