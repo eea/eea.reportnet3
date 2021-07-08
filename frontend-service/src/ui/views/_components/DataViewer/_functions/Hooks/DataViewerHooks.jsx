@@ -132,7 +132,7 @@ export const useSetColumns = (
             onClick={() => onFileDownload(value, fieldId)}
           />
         )}
-        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && (
+        {hasWritePermissions && !isDataflowOpen && !isDesignDatasetEditorRead && (!colSchema.readOnly || !isReporting) && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="import"
@@ -147,13 +147,18 @@ export const useSetColumns = (
             }}
           />
         )}
-        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && !isNil(value) && value !== '' && (
-          <Button
-            className={`p-button-animated-blink p-button-secondary-transparent`}
-            icon="trash"
-            onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
-          />
-        )}
+        {hasWritePermissions &&
+          !isDataflowOpen &&
+          !isDesignDatasetEditorRead &&
+          (!colSchema.readOnly || !isReporting) &&
+          !isNil(value) &&
+          value !== '' && (
+            <Button
+              className={`p-button-animated-blink p-button-secondary-transparent`}
+              icon="trash"
+              onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
+            />
+          )}
       </div>
     );
   };

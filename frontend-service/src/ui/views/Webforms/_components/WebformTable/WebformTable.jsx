@@ -161,17 +161,15 @@ export const WebformTable = ({
     try {
       const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
 
-      const { data } = await DatasetService.tableDataById(
+      const { data } = await DatasetService.tableDataById({
         datasetId,
-        webform.tableSchemaId,
-        '',
-        300,
-        undefined,
-        ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-        undefined,
-        fieldSchema || fieldId,
-        selectedTable.pamsId
-      );
+        tableSchemaId: webform.tableSchemaId,
+        pageNum: '',
+        pageSize: 300,
+        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+        fieldSchemaId: fieldSchema || fieldId,
+        value: selectedTable.pamsId
+      });
       if (!isNil(data.records)) {
         const tables = getTableElements(webform);
         const tableSchemaIds = tables.map(table => table.tableSchemaId);

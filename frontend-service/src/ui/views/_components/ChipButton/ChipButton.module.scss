@@ -1,6 +1,6 @@
 .chipButton {
   align-items: baseline;
-  background: var(--button-secondary-transparent-bg);
+  background: var(--chipbutton-secondary-transparent-bg);
   border-radius: 25px;
   color: var(--main-font-color);
   display: inline-flex;
@@ -12,7 +12,7 @@
   transition: background-color 0.2s, box-shadow 0.2s;
   white-space: normal;
   &:hover {
-    background: var(--button-secondary-transparent-bg-hover);
+    background: var(--chipbutton-secondary-transparent-bg-hover);
   }
 }
 .chipButtonIcon {

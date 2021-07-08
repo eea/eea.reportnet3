@@ -144,6 +144,12 @@ const ActionsToolbar = ({
     }
   };
 
+  const onSearchKeyEvent = event => {
+    if (event.key === 'Enter') {
+      showValueFilter(encodeURIComponent(valueFilter));
+    }
+  };
+
   const createTableName = (tableName, fileType) => {
     return `${tableName}.${fileType}`;
   };
@@ -313,11 +319,11 @@ const ActionsToolbar = ({
                     labelClassName={styles.groupFilter}
                     levelError={selectedRuleLevelError}
                     onClick={() => showValueFilter('')}
-                    value={prevFilterValue}
+                    value={decodeURIComponent(prevFilterValue)}
                   />
                 </span>
                 <ReactTooltip border={true} effect="solid" id="valueFilterTooltip" place="top">
-                  {prevFilterValue}
+                  {decodeURIComponent(prevFilterValue)}
                 </ReactTooltip>
               </Fragment>
             )}
@@ -332,6 +338,7 @@ const ActionsToolbar = ({
               id="value_filter_input"
               name={resources.messages['valueFilter']}
               onChange={event => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: event.target.value })}
+              onKeyDown={onSearchKeyEvent}
               value={valueFilter}
             />
             {!isEmpty(valueFilter) && (
@@ -344,7 +351,7 @@ const ActionsToolbar = ({
             <Button
               className="p-button-secondary-transparent"
               icon="search"
-              onClick={() => showValueFilter(valueFilter)}
+              onClick={() => showValueFilter(encodeURIComponent(valueFilter))}
             />
             <label
               className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}

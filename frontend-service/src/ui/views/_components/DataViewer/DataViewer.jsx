@@ -125,7 +125,7 @@ const DataViewer = withRouter(
     ]);
     const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
-    const [valueFilter, setValueFilter] = useState('');
+    const [valueFilter, setValueFilter] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       crs: 'EPSG:4326',
@@ -418,7 +418,6 @@ const DataViewer = withRouter(
         if (data.totalRecords !== records.totalRecords) {
           dispatchRecords({ type: 'SET_TOTAL', payload: data.totalRecords });
         }
-        debugger;
         if (data.totalFilteredRecords !== records.totalFilteredRecords) {
           dispatchRecords({ type: 'SET_FILTERED', payload: data.totalFilteredRecords });
         }
@@ -477,17 +476,18 @@ const DataViewer = withRouter(
     }, [levelErrorValidations]);
 
     useEffect(() => {
-      console.log(valueFilter);
-      onFetchData(
-        sort.sortField,
-        sort.sortOrder,
-        0,
-        records.recordsPerPage,
-        levelErrorValidations,
-        selectedRuleId,
-        valueFilter
-      );
-      setPrevFilterValue(valueFilter);
+      if (!isNil(valueFilter)) {
+        onFetchData(
+          sort.sortField,
+          sort.sortOrder,
+          0,
+          records.recordsPerPage,
+          levelErrorValidations,
+          selectedRuleId,
+          valueFilter
+        );
+        setPrevFilterValue(valueFilter);
+      }
     }, [valueFilter]);
 
     useEffect(() => {
@@ -1123,14 +1123,14 @@ const DataViewer = withRouter(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {isFilterValidationsActive && records.totalRecords !== records.totalFilteredRecords
+        {(isFilterValidationsActive || valueFilter !== '') && records.totalRecords !== records.totalFilteredRecords
           ? `${resources.messages['filtered']}: ${records.totalFilteredRecords} | `
           : ''}
         {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
         {records.totalRecords === 1
           ? resources.messages['record'].toLowerCase()
           : resources.messages['records'].toLowerCase()}
-        {isFilterValidationsActive && records.totalRecords === records.totalFilteredRecords
+        {(isFilterValidationsActive || valueFilter !== '') && records.totalRecords === records.totalFilteredRecords
           ? `(${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
@@ -1261,9 +1261,7 @@ const DataViewer = withRouter(
             sortOrder={sort.sortOrder}
             sortable={true}
             totalRecords={
-              !isNull(records.totalFilteredRecords) &&
-              !isUndefined(records.totalFilteredRecords) &&
-              isFilterValidationsActive
+              !isNil(records.totalFilteredRecords) && (isFilterValidationsActive || valueFilter !== '')
                 ? records.totalFilteredRecords
                 : records.totalRecords
             }
