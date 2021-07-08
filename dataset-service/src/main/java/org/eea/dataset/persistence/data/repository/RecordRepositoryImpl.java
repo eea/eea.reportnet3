@@ -322,6 +322,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(ERROR_LIST, errorList);
       }
       Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
+
+      LOG.info(
+          "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}",
+          fieldValue, idTableSchema, idRules, errorList, fieldSchema);
       result.setTotalFilteredRecords(recordsCount);
     }
   }
@@ -382,6 +386,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<Object[]> a = query.getResultList();
       recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
     }
+    LOG.info(
+        "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {}",
+        fieldValue, idTableSchema, idRules, errorList, fieldSchema, pageable.getPageSize());
     result.setRecords(recordVOs);
   }
 
