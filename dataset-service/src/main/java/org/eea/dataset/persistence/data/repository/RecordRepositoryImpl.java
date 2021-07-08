@@ -314,7 +314,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (null != fieldSchema && null != fieldValue) {
         query2.setParameter(FIELD_SCHEMA, fieldSchema);
         query2.setParameter(FIELD_VALUE, fieldValue);
-      } else if (null == fieldSchema && null != fieldValue) {
+      }
+      // Searches in the table occurrences where any column value matches fieldValue
+      else if (null == fieldSchema && null != fieldValue) {
         query2.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
       }
       if (!errorList.isEmpty()) {
@@ -369,7 +371,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (null != fieldSchema && null != fieldValue) {
       query.setParameter(FIELD_SCHEMA, fieldSchema);
       query.setParameter(FIELD_VALUE, fieldValue);
-    } else if (null == fieldSchema && null != fieldValue) {
+    }
+    // Searches in the table occurrences where any column value matches fieldValue
+    else if (null == fieldSchema && null != fieldValue) {
       query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
@@ -779,6 +783,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the string
    */
   private String escapeSpecialCharacters(String fieldValue) {
+
+    /*
+     * We're replacing '\\' with '\' because a single '\' works as escape character, so we need '\\'
+     * to insert a single '\' that's why we're replacing '\\' with '\\\\' so it replaces '\' with
+     * '\\' in the fieldValue and the query works properly
+     */
 
     if (fieldValue.contains("\\"))
       fieldValue = fieldValue.replace("\\", "\\\\");
