@@ -315,7 +315,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(FIELD_SCHEMA, fieldSchema);
         query2.setParameter(FIELD_VALUE, fieldValue);
       } else if (null == fieldSchema && null != fieldValue) {
-        query2.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
+        query2.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
       }
       if (!errorList.isEmpty()) {
         query2.setParameter(ERROR_LIST, errorList);
@@ -370,7 +370,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(FIELD_SCHEMA, fieldSchema);
       query.setParameter(FIELD_VALUE, fieldValue);
     } else if (null == fieldSchema && null != fieldValue) {
-      query.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
+      query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
     query.setMaxResults(pageable.getPageSize());
@@ -770,6 +770,20 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     tables.put("tables", jsonArray);
     return tables.toString();
+  }
+
+  /**
+   * Escape special characters.
+   *
+   * @param fieldValue the field value
+   * @return the string
+   */
+  private String escapeSpecialCharacters(String fieldValue) {
+
+    if (fieldValue.contains("\\"))
+      fieldValue = fieldValue.replace("\\", "\\\\");
+
+    return fieldValue;
   }
 
   /**
