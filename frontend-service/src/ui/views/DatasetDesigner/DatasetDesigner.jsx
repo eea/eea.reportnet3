@@ -114,8 +114,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isDownloadingValidations: false,
+    isExportTableSchemaDialogVisible: false,
     isImportDatasetDialogVisible: false,
     isImportOtherSystemsDialogVisible: false,
+    isImportTableSchemaDialogVisible: false,
     isIntegrationListDialogVisible: false,
     isIntegrationManageDialogVisible: false,
     isLoading: true,
@@ -1408,6 +1410,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
+            designerState={designerState}
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
             getUpdatedTabs={onUpdateTabs}

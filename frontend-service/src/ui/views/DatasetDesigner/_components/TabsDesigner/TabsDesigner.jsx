@@ -32,6 +32,7 @@ export const TabsDesigner = withRouter(
     datasetSchema,
     datasetSchemas,
     datasetStatistics,
+    designerState,
     editable = false,
     getIsTableCreated,
     getUpdatedTabs,
@@ -401,6 +402,7 @@ export const TabsDesigner = withRouter(
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
+                        designerState={designerState}
                         isDataflowOpen={isDataflowOpen}
                         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}

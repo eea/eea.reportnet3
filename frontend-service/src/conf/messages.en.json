@@ -1174,7 +1174,8 @@
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
     "sqlSentenceCountryCodeNote": "<i>Note: You can include the keyword {%R3_COUNTRY_CODE%} to use the country code in the SQL sentence.",
-	"importTableSchema": "Import definition",
-    "exportTableSchema": "Export definition"
+	  "importTableSchema": "Import definition",
+    "exportTableSchema": "Export definition",
+    "importTableSchemaDialogHeader": "Import schema definition in table"
   }
 }
