@@ -105,9 +105,6 @@ const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
 const downloadReferenceDatasetFileData = async (dataflowId, fileName) =>
   await apiDataset.downloadReferenceDatasetFileData(dataflowId, fileName);
 
-
-
-
 const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
     await apiDataset.statisticsById(datasetId);

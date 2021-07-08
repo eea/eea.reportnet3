@@ -30,6 +30,7 @@ export const ChipButton = ({
   }, []);
 
   const renderTooltip = () => {
+    console.log(tooltip);
     new Tooltip({
       target: listElement.current,
       targetContainer: listElement.current,

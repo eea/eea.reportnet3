@@ -181,17 +181,13 @@ export const WebformTable = ({
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
           const { fieldSchema, fieldId } = getFieldSchemaId(tables, tableSchemaId);
-          const tableChildData = await DatasetService.tableDataById(
+          const tableChildData = await DatasetService.tableDataById({
             datasetId,
             tableSchemaId,
-            '',
-            '',
-            undefined,
-            ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-            undefined,
-            fieldSchema || fieldId,
-            selectedTable.pamsId
-          );
+            levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+            fieldSchemaId: fieldSchema || fieldId,
+            value: selectedTable.pamsId
+          });
           tableData[tableSchemaId] = tableChildData.data;
         }
         const records = onParseWebformRecords(data.records, webform, tableData, data.totalRecords);

@@ -109,6 +109,7 @@ const DataViewer = withRouter(
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isDataUpdated, setIsDataUpdated] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [prevFilterValue, setPrevFilterValue] = useState('');
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
@@ -124,6 +125,7 @@ const DataViewer = withRouter(
     ]);
     const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
+    const [valueFilter, setValueFilter] = useState('');
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       crs: 'EPSG:4326',
@@ -359,25 +361,25 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules) => {
-      const removeSelectAllFromList = levelErrorValidations => {
-        levelErrorValidations = levelErrorValidations
-          .map(error => error.toUpperCase())
-          .filter(error => error !== 'SELECTALL')
-          .join(',');
-        return levelErrorValidations;
-      };
+    const removeSelectAllFromList = levelErrorValidations => {
+      levelErrorValidations = levelErrorValidations
+        .map(error => error.toUpperCase())
+        .filter(error => error !== 'SELECTALL')
+        .join(',');
+      return levelErrorValidations;
+    };
 
-      const filterDataResponse = data => {
-        const dataFiltered = DataViewerUtils.parseData(data);
-        if (dataFiltered.length > 0) {
-          dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
-        } else {
-          setFetchedData([]);
-        }
-        setFetchedData(dataFiltered);
-      };
+    const filterDataResponse = data => {
+      const dataFiltered = DataViewerUtils.parseData(data);
+      if (dataFiltered.length > 0) {
+        dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
+      } else {
+        setFetchedData([]);
+      }
+      setFetchedData(dataFiltered);
+    };
 
+    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules, valueFilter = '') => {
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
       setIsLoading(true);
       try {
@@ -385,15 +387,16 @@ const DataViewer = withRouter(
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
-        const { data } = await DatasetService.tableDataById(
+        const { data } = await DatasetService.tableDataById({
           datasetId,
-          tableId,
-          Math.floor(fRow / nRows),
-          nRows,
+          tableSchemaId: tableId,
+          pageNum: Math.floor(fRow / nRows),
+          pageSize: nRows,
           fields,
-          levelErrorValidations,
-          tableId === selectedTableSchemaId ? groupedRules : undefined
-        );
+          levelError: levelErrorValidations,
+          ruleId: tableId === selectedTableSchemaId ? groupedRules : undefined,
+          value: valueFilter
+        });
 
         if (!isEmpty(data.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(data)) {
@@ -415,6 +418,7 @@ const DataViewer = withRouter(
         if (data.totalRecords !== records.totalRecords) {
           dispatchRecords({ type: 'SET_TOTAL', payload: data.totalRecords });
         }
+        debugger;
         if (data.totalFilteredRecords !== records.totalFilteredRecords) {
           dispatchRecords({ type: 'SET_FILTERED', payload: data.totalFilteredRecords });
         }
@@ -447,7 +451,15 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (recordErrorPositionId === -1) {
         if (!isValidationShown && levelErrorValidations.length > 0) {
-          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+          onFetchData(
+            sort.sortField,
+            sort.sortOrder,
+            0,
+            records.recordsPerPage,
+            levelErrorValidations,
+            selectedRuleId,
+            valueFilter
+          );
         } else {
           if (isValidationShown) {
             onFetchData(
@@ -456,7 +468,8 @@ const DataViewer = withRouter(
               0,
               records.recordsPerPage,
               levelErrorValidations,
-              selectedRuleId
+              selectedRuleId,
+              valueFilter
             );
           }
         }
@@ -464,9 +477,31 @@ const DataViewer = withRouter(
     }, [levelErrorValidations]);
 
     useEffect(() => {
+      console.log(valueFilter);
+      onFetchData(
+        sort.sortField,
+        sort.sortOrder,
+        0,
+        records.recordsPerPage,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
+      setPrevFilterValue(valueFilter);
+    }, [valueFilter]);
+
+    useEffect(() => {
       if (recordErrorPositionId === -1) {
         if (selectedRuleId !== '' || isGroupedValidationDeleted) {
-          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+          onFetchData(
+            sort.sortField,
+            sort.sortOrder,
+            0,
+            records.recordsPerPage,
+            levelErrorValidations,
+            selectedRuleId,
+            valueFilter
+          );
         }
       }
     }, [selectedRuleId, recordErrorPositionId]);
@@ -519,6 +554,11 @@ const DataViewer = withRouter(
       }
     };
 
+    const showValueFilter = value => {
+      setValueFilter(value);
+      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+    };
+
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
@@ -554,7 +594,15 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
-      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations, selectedRuleId);
+      onFetchData(
+        sort.sortField,
+        sort.sortOrder,
+        event.first,
+        event.rows,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
     };
 
     const onConditionalChange = field => {
@@ -786,7 +834,8 @@ const DataViewer = withRouter(
         records.firstPageRecord,
         records.recordsPerPage,
         levelErrorValidations,
-        selectedRuleId
+        selectedRuleId,
+        valueFilter
       );
     };
 
@@ -876,7 +925,15 @@ const DataViewer = withRouter(
     const onSort = event => {
       dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+      onFetchData(
+        event.sortField,
+        event.sortOrder,
+        0,
+        records.recordsPerPage,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
     };
 
     const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
@@ -1131,6 +1188,7 @@ const DataViewer = withRouter(
           onSetVisible={onSetVisible}
           onUpdateData={onUpdateData}
           originalColumns={originalColumns}
+          prevFilterValue={prevFilterValue}
           records={records}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
@@ -1141,6 +1199,7 @@ const DataViewer = withRouter(
           setRecordErrorPositionId={setRecordErrorPositionId}
           showGroupedValidationFilter={showGroupedValidationFilter}
           showValidationFilter={showValidationFilter}
+          showValueFilter={showValueFilter}
           showWriteButtons={showWriteButtons && !tableFixedNumber && !tableReadOnly}
           tableHasErrors={tableHasErrors}
           tableId={tableId}
