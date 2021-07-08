@@ -587,6 +587,7 @@ export class Dropdown extends Component {
       <div className="p-hidden-accessible p-dropdown-hidden-select">
         <select
           aria-hidden="true"
+          aria-label={this.props.name}
           id={this.props.name}
           name={this.props.name}
           ref={el => (this.nativeSelect = el)}
@@ -727,6 +728,8 @@ export class Dropdown extends Component {
       return (
         <div className="p-dropdown-filter-container">
           <input
+            aria-label={this.props.ariaLabel}
+            aria-labelledby={this.props.ariaLabelledBy}
             autoComplete="off"
             className="p-dropdown-filter p-inputtext p-component"
             onChange={this.onFilterInputChange}

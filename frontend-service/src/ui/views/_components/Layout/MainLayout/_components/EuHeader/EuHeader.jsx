@@ -29,15 +29,17 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
             {resources.messages['howDoYouKnow']}
             {openGloban ? (
               <FontAwesomeIcon
-                aria-label={resources.messages['howDoYouKnow']}
+                ariaLabel={resources.messages['howDoYouKnow']}
                 className="p-breadcrumb-home"
                 icon={AwesomeIcons('angleSingleUp')}
+                role="button"
               />
             ) : (
               <FontAwesomeIcon
-                aria-label={resources.messages['howDoYouKnow']}
+                ariaLabel={resources.messages['howDoYouKnow']}
                 className="p-breadcrumb-home"
                 icon={AwesomeIcons('angleDown')}
+                role="button"
               />
             )}
           </span>
