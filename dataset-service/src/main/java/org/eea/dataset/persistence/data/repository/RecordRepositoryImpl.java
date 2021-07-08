@@ -316,6 +316,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(FIELD_VALUE, fieldValue);
       } else if (null == fieldSchema && null != fieldValue) {
         query2.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
+        LOG.info("Filtering the table by fieldValue as : " + "%" + fieldValue + "%");
       }
       if (!errorList.isEmpty()) {
         query2.setParameter(ERROR_LIST, errorList);
@@ -367,6 +368,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(FIELD_VALUE, fieldValue);
     } else if (null == fieldSchema && null != fieldValue) {
       query.setParameter(FIELD_VALUE, "%" + fieldValue + "%");
+      LOG.info("Filtering the table by fieldValue as : " + "%" + fieldValue + "%");
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
     query.setMaxResults(pageable.getPageSize());
