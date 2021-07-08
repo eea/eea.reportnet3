@@ -372,7 +372,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(FIELD_SCHEMA, fieldSchema);
       query.setParameter(FIELD_VALUE, fieldValue);
     }
-    // fieldValue preceded by '%' and followed by '%' is required to use the LIKE clause in JPQL
+    // Searches in the table occurrences where any column value matches fieldValue
     else if (null == fieldSchema && null != fieldValue) {
       query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
     }
