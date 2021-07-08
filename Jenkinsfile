@@ -7,7 +7,7 @@ pipeline {
     }
 
     agent {
-        label 'java8'
+        label 'java11'
     }
     stages {
         stage('Preparation') {
