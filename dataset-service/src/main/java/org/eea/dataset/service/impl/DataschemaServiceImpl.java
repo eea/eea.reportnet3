@@ -2630,11 +2630,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         fieldSchemas.clear();
       }
 
+      // we have to check there's only one pk per table
+      Boolean pkAlreadyInTable =
+          fieldSchemas.stream().anyMatch(f -> f.getPk() != null && f.getPk());
+      FieldSchema existingFieldPk = fieldSchemas.stream()
+          .filter(f -> f.getPk() != null && f.getPk()).findFirst().orElse(null);
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
-
-        if (null != fieldSchemaVO) {
+        // if there's not a pk present, continue inserting/updating the field
+        if (null != fieldSchemaVO && (Boolean.FALSE.equals(pkAlreadyInTable)
+            || (Boolean.TRUE.equals(pkAlreadyInTable) && Boolean.FALSE.equals(fieldSchemaVO.getPk())
+                || (existingFieldPk != null
+                    && fieldSchemaVO.getName().equals(existingFieldPk.getHeaderName()))))) {
           // SAVE
           if (fieldSchemas.stream()
               .noneMatch(f -> f.getHeaderName().equals(fieldSchemaVO.getName()))) {
@@ -2643,9 +2651,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             // UPDATE
             updateImportFieldSchema(fieldSchemaVO, fieldSchemas, datasetSchema, datasetId);
           }
+          if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
+            pkAlreadyInTable = true;
+          }
+        } else {
+          LOG.info(
+              "Ommited one line of the file because the field schema to insert/update is a PK and there's already one in dataset {}",
+              datasetId);
         }
       }
-
     } catch (IOException e) {
       LOG_ERROR.error("Problem with the file trying to import field schemas on datasetId {}",
           datasetId, e);
@@ -2663,7 +2677,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               .datasetId(datasetId).error("Error importing fieldSchemas").build());
     }
     LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {}", datasetId);
-
   }
 
   /**
