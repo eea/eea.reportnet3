@@ -102,6 +102,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
 
+  /** The dataflow controller. */
   @Autowired
   private DataFlowControllerZuul dataFlowController;
 
@@ -776,12 +777,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private Map<String, Long> getMapOfDatasetsOnQuery(String query) {
     Map<String, Long> datasetSchamasMap = new HashMap<>();
-    String[] palabras = query.split("\\s+");
-    for (String palabra : palabras) {
-      if (palabra.contains(DATASET)) {
+    String[] words = query.split("\\s+");
+    for (String word : words) {
+      if (word.contains(DATASET)) {
         try {
           String datasetIdFromotherSchemas =
-              palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
+              word.substring(word.indexOf('_') + 1, word.indexOf('.'));
 
           datasetSchamasMap.put(
               datasetMetabaseController
@@ -804,10 +805,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private List<String> getListOfDatasetsOnQuery(String query) {
     List<String> datasetsIdList = new ArrayList<>();
-    String[] palabras = query.split("\\s+");
-    for (String palabra : palabras) {
-      if (palabra.contains(DATASET)) {
-        String datasetId = palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
+    String[] words = query.split("\\s+");
+    for (String word : words) {
+      if (word.contains(DATASET)) {
+        String datasetId = word.substring(word.indexOf('_') + 1, word.indexOf('.'));
         datasetsIdList.add(datasetId);
       }
     }
