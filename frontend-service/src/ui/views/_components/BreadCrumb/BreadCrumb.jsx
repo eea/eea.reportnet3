@@ -47,6 +47,7 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
               aria-label={item.label}
               className="p-breadcrumb-home"
               icon={AwesomeIcons(item.icon)}
+              role="button"
             />
           )}
           <span className="p-menuitem-text">{item.label ? item.label : <span className="srOnly">Home</span>}</span>

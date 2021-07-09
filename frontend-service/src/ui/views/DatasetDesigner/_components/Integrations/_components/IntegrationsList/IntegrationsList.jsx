@@ -196,6 +196,7 @@ export const IntegrationsList = ({
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
+          summary={resources.messages['externalIntegrations']}
           totalRecords={integrationListState.filteredData.length}
           value={integrationListState.filteredData}>
           {renderColumns(integrationListState.filteredData)}
