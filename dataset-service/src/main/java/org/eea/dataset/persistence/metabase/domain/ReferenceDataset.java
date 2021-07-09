@@ -26,6 +26,10 @@ public class ReferenceDataset extends DataSetMetabase {
   private Long id;
 
 
+  /** The updatable. */
+  @Column(name = "UPDATABLE")
+  private Boolean updatable;
+
   /**
    * Equals.
    *
@@ -40,8 +44,8 @@ public class ReferenceDataset extends DataSetMetabase {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final ReferenceDataset testDataset = (ReferenceDataset) o;
-    return id.equals(testDataset.id);
+    final ReferenceDataset referenceDataset = (ReferenceDataset) o;
+    return id.equals(referenceDataset.id) && updatable.equals(referenceDataset.updatable);
 
   }
 
@@ -52,7 +56,7 @@ public class ReferenceDataset extends DataSetMetabase {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hash(id, updatable);
   }
 
 }
