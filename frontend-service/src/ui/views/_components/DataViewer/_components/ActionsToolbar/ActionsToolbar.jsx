@@ -316,6 +316,7 @@ const ActionsToolbar = ({
               <Fragment>
                 <span data-for="valueFilterTooltip" data-tip>
                   <ChipButton
+                    icon="search"
                     labelClassName={styles.groupFilter}
                     levelError={selectedRuleLevelError}
                     onClick={() => showValueFilter('')}

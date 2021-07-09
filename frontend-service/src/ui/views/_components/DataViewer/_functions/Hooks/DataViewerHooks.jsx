@@ -9,15 +9,15 @@ import styles from '../../DataViewer.module.scss';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
-import { IconTooltip } from 'ui/views/_components/IconTooltip';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
+
+import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
-import ReactTooltip from 'react-tooltip';
 import { TextUtils, RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
@@ -395,18 +395,7 @@ export const useSetColumns = (
                 />
               )}
               {column.header}
-              <span data-for={`infoCircleButton_${i}`} data-tip>
-                <Button
-                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
-                  icon="infoCircle"
-                  onClick={() => {
-                    onShowFieldInfo(column.header, true);
-                  }}
-                />
-              </span>
-              <ReactTooltip
-                border={true}
-                effect="solid"
+              <TooltipButton
                 getContent={() =>
                   ReactDOMServer.renderToStaticMarkup(
                     <div
@@ -419,9 +408,11 @@ export const useSetColumns = (
                     </div>
                   )
                 }
-                html={true}
-                id={`infoCircleButton_${i}`}
-                place="top"></ReactTooltip>
+                onClick={() => {
+                  onShowFieldInfo(column.header, true);
+                }}
+                uniqueIdentifier={i}
+              />
             </Fragment>
           }
           key={column.field}

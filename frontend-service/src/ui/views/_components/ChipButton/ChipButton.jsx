@@ -4,6 +4,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './ChipButton.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'ui/views/_components/Icon';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import Tooltip from 'primereact/tooltip';
@@ -12,6 +14,7 @@ export const ChipButton = ({
   className = '',
   hasLevelErrorIcon = false,
   key,
+  icon = null,
   levelError,
   onClick,
   style,
@@ -48,6 +51,7 @@ export const ChipButton = ({
           message={''}
         />
       )}
+      {icon && <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons(icon)} />}
       <span className={`${styles.labelClassName} ${styles.chipButtonLabel}`} ref={inputElement}>
         {value}
       </span>

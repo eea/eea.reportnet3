@@ -1,11 +1,10 @@
 import { useContext } from 'react';
 import PropTypes from 'prop-types';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './Card.module.scss';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 

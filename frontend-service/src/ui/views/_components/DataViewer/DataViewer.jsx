@@ -980,7 +980,7 @@ const DataViewer = withRouter(
           onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
-          className="p-button-secondary button-right-aligned"
+          className="p-button-secondary button-right-aligned p-button-animated-blink"
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
