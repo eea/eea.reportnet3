@@ -5,6 +5,9 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+import { DatasetConfig } from 'conf/domain/model/Dataset';
+
 import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -13,6 +16,7 @@ import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { Toolbar } from 'ui/views/_components/Toolbar';
@@ -24,9 +28,11 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
-import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const FieldsDesigner = ({
+  dataflowId,
   datasetId,
   datasetSchemaId,
   datasetSchemas,
@@ -61,12 +67,15 @@ export const FieldsDesigner = ({
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState();
   const [fieldToDeleteType, setFieldToDeleteType] = useState();
+  const [exportTableSchema, setExportTableSchema] = useState(undefined);
+  const [exportTableSchemaName, setExportTableSchemaName] = useState('');
   const [indexToDelete, setIndexToDelete] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
   const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
@@ -96,6 +105,12 @@ export const FieldsDesigner = ({
       );
     }
   }, [fields]);
+
+  useEffect(() => {
+    if (!isUndefined(exportTableSchema)) {
+      DownloadFile(exportTableSchema, exportTableSchemaName);
+    }
+  }, [exportTableSchema]);
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
     setIsCodelistOrLink(
@@ -581,6 +596,61 @@ export const FieldsDesigner = ({
     }
   };
 
+  const onUpload = async () => {
+    manageDialogs('isImportTableSchemaDialogVisible', false);
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    notificationContext.add({
+      type: 'DATASET_DATA_LOADING_INIT',
+      content: {
+        datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+        title: TextUtils.ellipsis('tableName', config.notifications.STRING_LENGTH_MAX),
+        datasetLoading: resources.messages['datasetLoading'],
+        dataflowName,
+        datasetName
+      }
+    });
+  };
+
+  const createTableName = (tableName, fileType) => {
+    console.log('name', `${tableName}.${fileType}`);
+    return `${tableName}.${fileType}`;
+  };
+
+  const onExportTableSchema = async fileType => {
+    setIsLoadingFile(true);
+    try {
+      setExportTableSchemaName(createTableName(table.tableSchemaName, fileType));
+      const { data } = await DatasetService.exportTableSchemaById(
+        datasetId,
+        designerState.datasetSchemaId,
+        table.tableSchemaId,
+        fileType
+      );
+      setExportTableSchema(data);
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      console.log('falta notificacion de table schema');
+      notificationContext.add({
+        type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName,
+          tableName: designerState.tableName
+        }
+      });
+    } finally {
+      setIsLoadingFile(false);
+    }
+  };
+
   return (
     <Fragment>
       <Toolbar>
@@ -601,7 +671,7 @@ export const FieldsDesigner = ({
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={'export'}
             label={resources.messages['exportTableSchema']}
-            onClick={() => manageDialogs('isExportTableSchemaDialogVisible', true)}
+            onClick={() => onExportTableSchema('csv', true)}
           />
           <Button
             className={`p-button-secondary-transparent ${
@@ -774,13 +844,13 @@ export const FieldsDesigner = ({
           multiple={false}
           name="file"
           // onError={onImportTableError}
-          // onUpload={onUpload}
+          onUpload={onUpload}
           replaceCheck={true}
-          // url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
-          //   datasetId: datasetId,
-          //   tableSchemaId: tableId,
-          //   delimiter: `${config.IMPORT_FILE_DELIMITER}`
-          // })}`}
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
+            datasetSchemaId: designerState.datasetSchemaId,
+            datasetId: datasetId,
+            tableSchemaId: table.tableSchemaId
+          })}`}
         />
       )}
     </Fragment>
