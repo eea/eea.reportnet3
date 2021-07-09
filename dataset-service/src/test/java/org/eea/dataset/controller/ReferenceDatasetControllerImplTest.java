@@ -76,6 +76,11 @@ public class ReferenceDatasetControllerImplTest {
         Mockito.anyBoolean());
   }
 
+  /**
+   * Update reference dataset exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void updateReferenceDatasetExceptionTest() throws EEAException {
     doThrow(new EEAException("Fail")).when(referenceDatasetService)
