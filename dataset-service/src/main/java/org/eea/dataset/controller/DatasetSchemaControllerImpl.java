@@ -1127,7 +1127,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName());
       dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId,
           file.getInputStream(), replace);
-    } catch (EEAException | IOException e) {
+    } catch (IOException e) {
       LOG_ERROR.error("File importing field schemas into dataset {} failed. fileName={}", datasetId,
           file.getOriginalFilename(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);

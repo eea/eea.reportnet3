@@ -576,6 +576,6 @@ public interface DatasetSchemaService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
-      InputStream file, boolean replace) throws EEAException, IOException;
+      InputStream file, boolean replace);
 
 }

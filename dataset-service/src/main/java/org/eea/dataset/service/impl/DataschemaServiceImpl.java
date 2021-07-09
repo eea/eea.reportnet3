@@ -64,6 +64,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -293,6 +294,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The file common. */
   @Autowired
   private FileCommonUtils fileCommon;
+
 
 
   /**
@@ -2539,7 +2541,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     // Once read we convert it to string
     return writer.toString().getBytes();
-
   }
 
 
@@ -2558,21 +2559,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Async
   @Override
   public void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
-      InputStream file, boolean replace) throws EEAException, IOException {
+      InputStream file, boolean replace) {
 
     LOG.info("Init importing field schemas from file into dataset {}", datasetId);
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     // Method to process the file
-    readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
+    try {
+      readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
 
-    // Success notification
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
-        null,
-        NotificationVO.builder()
-            .user(SecurityContextHolder.getContext().getAuthentication().getName())
-            .datasetId(datasetId).build());
-
+      // Success notification
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
+          null,
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetId(datasetId).build());
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error importing field schemas on datasetId {}", datasetId, e);
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
+            null,
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId).error("Error importing fieldSchemas").build());
+      } catch (EEAException e1) {
+        LOG_ERROR.error(
+            "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
+            datasetId, e);
+      }
+    }
   }
 
 
@@ -2608,10 +2623,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       String recordSchemaId = fileCommon.findIdRecord(tableSchemaId, datasetSchema);
       List<FieldSchema> fieldSchemas = fileCommon.findFieldSchemas(tableSchemaId, datasetSchema);
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
-
-      if (!isDesignDataset) {
+      Boolean dataflowStatusOk = true;
+      if (!TypeStatusEnum.DESIGN.equals(dataFlowControllerZuul
+          .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+        dataflowStatusOk = false;
+      }
+      if (!isDesignDataset && Boolean.TRUE.equals(dataflowStatusOk)) {
         LOG_ERROR.error(
-            "Error importing field schemas on datasetId {} because this dataset is not a design dataset",
+            "Error importing field schemas on datasetId {} because this dataset is not a design dataset or the dataflow is not in the correct status",
             datasetId);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
             null,
@@ -2619,8 +2638,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).error("Error importing fieldSchemas").build());
         throw new IOException(
-            "This dataset is not a design dataset. It's not possible to perform the operation");
-
+            "This dataset is not a design dataset or the dataflow is not in the correct status. It's not possible to perform the operation");
       }
 
       // If replace=true, delete all the fields of the table
@@ -2804,16 +2822,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       // Order in the array
       // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
-      fieldSchema = new FieldSchemaVO();
-      fieldSchema.setName(values.get(0));
-      fieldSchema.setPk(Boolean.valueOf(values.get(1)));
-      fieldSchema.setRequired(Boolean.valueOf(values.get(2)));
-      fieldSchema.setReadOnly(Boolean.valueOf(values.get(3)));
-      fieldSchema.setDescription(values.get(4));
-      fieldSchema.setType(DataType.valueOf(values.get(5)));
-      fieldSchema.setValidExtensions(new String[0]);
+      String fieldName = values.get(0);
+      // If the field name is not correct, skip the line
+      if (Pattern.matches(REGEX_NAME, fieldName.trim())) {
+        fieldSchema = new FieldSchemaVO();
+        fieldSchema.setName(fieldName);
+        fieldSchema.setPk(Boolean.valueOf(values.get(1)));
+        fieldSchema.setRequired(Boolean.valueOf(values.get(2)));
+        fieldSchema.setReadOnly(Boolean.valueOf(values.get(3)));
+        fieldSchema.setDescription(values.get(4));
+        fieldSchema.setType(DataType.valueOf(values.get(5)));
+        fieldSchema.setValidExtensions(new String[0]);
 
-      fieldSchema.setIdRecord(recordSchemaId);
+        fieldSchema.setIdRecord(recordSchemaId);
+      }
     }
     return fieldSchema;
   }
