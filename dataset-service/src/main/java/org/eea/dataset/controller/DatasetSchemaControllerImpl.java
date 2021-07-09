@@ -1091,11 +1091,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     try {
       String fileName = "fieldschemas_export_dataset_" + datasetId + ".csv";
-      byte[] file = dataschemaService.exportFieldsSchema(datasetSchemaId, tableSchemaId);
+      byte[] file = dataschemaService.exportFieldsSchema(datasetId, datasetSchemaId, tableSchemaId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error exporting field schemas in dataset {}", datasetId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
@@ -1118,17 +1119,17 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @RequestParam(value = "datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replaceData", required = false) Boolean replace) {
+      @RequestParam(value = "replace", required = false) Boolean replace) {
 
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
-      dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId, file,
-          replace);
-    } catch (EEAException | IOException e) {
-      LOG_ERROR.error("File importing field schemas failed. fileName={}",
-          file.getOriginalFilename());
+      dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId,
+          file.getInputStream(), replace);
+    } catch (IOException e) {
+      LOG_ERROR.error("File importing field schemas into dataset {} failed. fileName={}", datasetId,
+          file.getOriginalFilename(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
     }
   }

@@ -357,6 +357,6 @@ public interface DatasetSchemaController {
       @RequestParam(value = "datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replaceData", required = false) Boolean replace);
+      @RequestParam(value = "replace", required = false) Boolean replace);
 
 }
