@@ -7,9 +7,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataForm.module.css';
 
-import { Button } from 'ui/views/_components/Button';
 import { DataFormFieldEditor } from './_components/DataFormFieldEditor';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -62,6 +61,25 @@ const DataForm = ({
     setFieldsWithError(inmFieldsWithError);
   };
 
+  const renderTooltipButton = (column, i) => (
+    <TooltipButton
+      getContent={() =>
+        ReactDOMServer.renderToStaticMarkup(
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }}>
+            {getTooltipMessage(column)}
+          </div>
+        )
+      }
+      onClick={() => onShowFieldInfo(column.header, true)}
+      uniqueIdentifier={i}
+    />
+  );
+
   const editRecordForm =
     nonAttachmentsOrComplexGeomTypes.length !== 0 ? (
       colsSchema.map((column, i) => {
@@ -79,32 +97,7 @@ const DataForm = ({
                       <label>{`${column.header}${
                         TextUtils.areEquals(column.type, 'DATE') ? ' (YYYY-MM-DD)' : ''
                       }`}</label>
-                      <span data-for={`infoCircleButton_${i}`} data-tip>
-                        <Button
-                          className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                          icon="infoCircle"
-                          onClick={() => onShowFieldInfo(column.header, true)}
-                          tabIndex="-1"
-                        />
-                      </span>
-                      <ReactTooltip
-                        border={true}
-                        effect="solid"
-                        getContent={() =>
-                          ReactDOMServer.renderToStaticMarkup(
-                            <div
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start'
-                              }}>
-                              {getTooltipMessage(column)}
-                            </div>
-                          )
-                        }
-                        html={true}
-                        id={`infoCircleButton_${i}`}
-                        place="top"></ReactTooltip>
+                      {renderTooltipButton(column, i)}
                     </div>
                   )}
                   <div
@@ -193,34 +186,7 @@ const DataForm = ({
                           ? ' (YYYY-MM-DD HH:mm:ss)'
                           : ''
                       }`}</label>
-                      <span data-for={`infoCircleButton_${i}`} data-tip>
-                        <Button
-                          className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-                          icon="infoCircle"
-                          onClick={() => {
-                            onShowFieldInfo(column.header, true);
-                          }}
-                          tabIndex="-1"
-                        />
-                      </span>
-                      <ReactTooltip
-                        border={true}
-                        effect="solid"
-                        getContent={() =>
-                          ReactDOMServer.renderToStaticMarkup(
-                            <div
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start'
-                              }}>
-                              {getTooltipMessage(column)}
-                            </div>
-                          )
-                        }
-                        html={true}
-                        id={`infoCircleButton_${i}`}
-                        place="top"></ReactTooltip>
+                      {renderTooltipButton(column, i)}
                     </div>
                   )}
                   <div

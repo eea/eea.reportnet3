@@ -55,14 +55,13 @@ export const NationalSystemsTable = ({
         ? getFieldSchemaColumnIdByHeader(schemaTables.records, tables.sortBy)
         : undefined;
 
-      const response = await DatasetService.tableDataById(
+      const response = await DatasetService.tableDataById({
         datasetId,
-        schemaTables?.tableSchemaId,
-        '',
-        100,
-        sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
-        ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-      );
+        tableSchemaId: schemaTables?.tableSchemaId,
+        pageSize: 100,
+        fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+      });
 
       setData(parseData(response.data.records, tables, schemaTables));
       setSchemaData(response.data);
