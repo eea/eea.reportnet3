@@ -15,6 +15,7 @@ export const ChipButton = ({
   hasLevelErrorIcon = false,
   key,
   icon = null,
+  labelClassName,
   levelError,
   onClick,
   style,
@@ -40,7 +41,6 @@ export const ChipButton = ({
       options: tooltipOptions
     });
   };
-
   return (
     <div className={`${className} ${styles.chipButton}`} key={key} ref={listElement} style={style}>
       {hasLevelErrorIcon && (
@@ -52,7 +52,7 @@ export const ChipButton = ({
         />
       )}
       {icon && <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons(icon)} />}
-      <span className={`${styles.labelClassName} ${styles.chipButtonLabel}`} ref={inputElement}>
+      <span className={`${labelClassName} ${styles.chipButtonLabel}`} ref={inputElement}>
         {value}
       </span>
       <div onMouseOut={() => setIconToShow('cancel')} onMouseOver={() => setIconToShow('errorCircle')}>

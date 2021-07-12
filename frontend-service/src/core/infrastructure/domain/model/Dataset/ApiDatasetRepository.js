@@ -478,8 +478,7 @@ const tableDataById = async (
   const table = new DatasetTable({});
 
   table.tableSchemaId = tableDataDTO.data.idTableSchema;
-  table.totalRecords =
-    isEmpty(ruleId) || isNil(ruleId) ? tableDataDTO.data.totalRecords : tableDataDTO.data.totalFilteredRecords;
+  table.totalRecords = tableDataDTO.data.totalRecords;
   table.totalFilteredRecords = tableDataDTO.data.totalFilteredRecords;
 
   let field;

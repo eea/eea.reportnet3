@@ -312,22 +312,22 @@ const ActionsToolbar = ({
                 value={selectedRuleMessage}
               />
             )}
-            {prevFilterValue !== '' && (
-              <Fragment>
-                <span data-for="valueFilterTooltip" data-tip>
-                  <ChipButton
-                    icon="search"
-                    labelClassName={styles.groupFilter}
-                    levelError={selectedRuleLevelError}
-                    onClick={() => showValueFilter('')}
-                    value={decodeURIComponent(prevFilterValue)}
-                  />
-                </span>
-                <ReactTooltip border={true} effect="solid" id="valueFilterTooltip" place="top">
-                  {decodeURIComponent(prevFilterValue)}
-                </ReactTooltip>
-              </Fragment>
-            )}
+          </Fragment>
+        )}
+        {prevFilterValue !== '' && (
+          <Fragment>
+            <span data-for="valueFilterTooltip" data-tip>
+              <ChipButton
+                icon="search"
+                labelClassName={styles.groupFilter}
+                levelError={selectedRuleLevelError}
+                onClick={() => showValueFilter('')}
+                value={decodeURIComponent(prevFilterValue)}
+              />
+            </span>
+            <ReactTooltip border={true} effect="solid" id="valueFilterTooltip" place="top">
+              {decodeURIComponent(prevFilterValue)}
+            </ReactTooltip>
           </Fragment>
         )}
       </div>

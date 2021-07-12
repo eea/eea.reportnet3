@@ -1123,15 +1123,17 @@ const DataViewer = withRouter(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {(isFilterValidationsActive || valueFilter !== '') && records.totalRecords !== records.totalFilteredRecords
+        {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords !== records.totalFilteredRecords
           ? `${resources.messages['filtered']}: ${records.totalFilteredRecords} | `
           : ''}
         {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
         {records.totalRecords === 1
           ? resources.messages['record'].toLowerCase()
           : resources.messages['records'].toLowerCase()}
-        {(isFilterValidationsActive || valueFilter !== '') && records.totalRecords === records.totalFilteredRecords
-          ? `(${resources.messages['filtered'].toLowerCase()})`
+        {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords === records.totalFilteredRecords
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
     );
