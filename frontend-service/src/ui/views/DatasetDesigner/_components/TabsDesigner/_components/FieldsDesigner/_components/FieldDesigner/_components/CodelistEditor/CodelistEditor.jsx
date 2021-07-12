@@ -42,8 +42,8 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
   const codelistDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
-        label={resources.messages['save']}
         icon="check"
+        label={resources.messages['save']}
         onClick={() => {
           setIsSaved(true);
         }}
@@ -77,6 +77,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
           errorMessage={resources.messages['duplicatedItem']}
           forbiddenChar={true}
           inputClassName={styles.codelistChips}
+          name={resources.messages['multipleSingleMessage']}
           onChange={e => setCodelistItems(e.value)}
           pasteSeparator=";"
           showErrorMessage={true}

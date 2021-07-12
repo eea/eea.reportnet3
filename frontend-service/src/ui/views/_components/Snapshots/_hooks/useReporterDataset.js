@@ -36,6 +36,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
   const onCreateSnapshot = async () => {
     try {
       await SnapshotService.createByIdReporter(datasetId, snapshotState.description);
+      snapshotDispatch({ type: 'ON_SNAPSHOT_RESET' });
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {

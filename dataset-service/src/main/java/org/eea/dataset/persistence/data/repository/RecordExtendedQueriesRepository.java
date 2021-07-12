@@ -1,8 +1,10 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.io.OutputStream;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.data.domain.Pageable;
@@ -63,11 +65,20 @@ public interface RecordExtendedQueriesRepository {
 
   /**
    * Find and generate ETL json.
+   * 
+   * @param outputStream
+   * @param datasetId
    *
    * @param stringQuery the string query
+   * @param columnName
+   * @param filterValue
+   * @param offset
+   * @param limit
    * @return the stream
+   * @throws EEAException
    */
-  String findAndGenerateETLJson(String stringQuery);
+  String findAndGenerateETLJson(Long datasetId, OutputStream outputStream, String tableSchemaId,
+      Integer limit, Integer offset, String filterValue, String columnName) throws EEAException;
 
   /**
    * Find ordered native record.

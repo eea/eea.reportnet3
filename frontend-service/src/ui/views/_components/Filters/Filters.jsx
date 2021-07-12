@@ -12,6 +12,7 @@ import { Calendar } from 'ui/views/_components/Calendar';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { InputText } from 'ui/views/_components/InputText';
+import { LevelError } from 'ui/views/_components/LevelError';
 import { MultiSelect } from 'ui/views/_components/MultiSelect';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -369,12 +370,13 @@ export const Filters = ({
               }}
             />
           )}
-          <label
-            className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label}
-            htmlFor={property}>
+          <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={inputId}>
             {resources.messages[property]}
           </label>
         </span>
+        <label className="srOnly" htmlFor={inputId}>
+          {resources.messages[property]}
+        </label>
       </span>
     );
   };
@@ -390,15 +392,13 @@ export const Filters = ({
       />
       <span className={styles.checkbox}>
         <Checkbox
-          id={`matchMode_checkbox`}
-          inputId={`matchMode_checkbox`}
-          isChecked={filterState.matchMode}
+          ariaLabel={resources.messages['strictModeCheckboxFilter']}
+          checked={filterState.matchMode}
+          id="matchMode_checkbox"
+          inputId="matchMode_checkbox"
           onChange={() => onToggleMatchMode()}
           role="checkbox"
         />
-        <label className="srOnly" htmlFor={`matchMode_checkbox`}>
-          {resources.messages['strictModeCheckboxFilter']}
-        </label>
       </span>
     </span>
   );
@@ -410,9 +410,10 @@ export const Filters = ({
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
             <Checkbox
+              ariaLabel={resources.messages[property]}
+              checked={getCheckboxFilterState(property)}
               id={property}
               inputId={property}
-              isChecked={getCheckboxFilterState(property)}
               label={property}
               onChange={() => onChangeCheckboxFilter(property)}
               style={{ marginRight: '50px' }}
@@ -434,7 +435,7 @@ export const Filters = ({
         className={styles.dropdownFilter}
         filter={FiltersUtils.getOptionsTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
-        id={property}
+        id={`${property}_dropdown`}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
         label={resources.messages[property]}
@@ -459,6 +460,7 @@ export const Filters = ({
         <InputText
           className={styles.inputFilter}
           id={`${property}_input`}
+          name={resources.messages[property]}
           onChange={event => onFilterData(property, event.target.value)}
           value={filterState.filterBy[property] ? filterState.filterBy[property] : ''}
         />
@@ -469,7 +471,7 @@ export const Filters = ({
             onClick={() => onFilterData(property, '')}
           />
         )}
-        <label className={styles.label} htmlFor={property}>
+        <label className={styles.label} htmlFor={`${property}_input`}>
           {resources.messages[property]}
         </label>
       </span>
@@ -495,14 +497,14 @@ export const Filters = ({
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <MultiSelect
-        ariaLabelledBy={property}
+        ariaLabelledBy={`${property}_input`}
         checkAllHeader={resources.messages['checkAllFilter']}
         className={styles.multiselectFilter}
         filter={showInput}
         headerClassName={styles.selectHeader}
         id={property}
         inputClassName={`p-float-label ${styles.label}`}
-        inputId={property}
+        inputId={`${property}_input`}
         isFilter
         itemTemplate={selectTemplate}
         label={isEmpty(label) ? resources.messages[property] : label}
@@ -576,11 +578,7 @@ export const Filters = ({
 
   const selectTemplate = option => {
     if (!isNil(option.type)) {
-      return (
-        <span className={`${styles[option.type.toString().toLowerCase()]} ${styles.statusBox}`}>
-          {option.type.toString().toUpperCase()}
-        </span>
-      );
+      return <LevelError type={option.type} />;
     }
   };
 

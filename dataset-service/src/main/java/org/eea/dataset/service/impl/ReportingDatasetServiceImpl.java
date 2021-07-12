@@ -131,7 +131,7 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
           .findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, providerIds);
       for (ReportingDatasetPublicVO reporting : reportings) {
         for (RepresentativeVO representativeVO : representatives) {
-          if (reporting.getDataProviderId() == representativeVO.getDataProviderId()) {
+          if (reporting.getDataProviderId().equals(representativeVO.getDataProviderId())) {
             reporting.setRestrictFromPublic(representativeVO.isRestrictFromPublic());
             break;
           }

@@ -9,15 +9,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import javax.sql.DataSource;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataCollectionMapper;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.EUDataset;
+import org.eea.dataset.persistence.metabase.domain.TestDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.model.FKDataCollection;
@@ -35,11 +43,14 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -142,6 +153,18 @@ public class DataCollectionServiceImplTest {
   /** The reference dataset repository. */
   @Mock
   private ReferenceDatasetRepository referenceDatasetRepository;
+
+  @Mock
+  private DatasetMetabaseService datasetMetabaseService;
+
+  @Mock
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Mock
+  private EUDatasetRepository euDatasetRepository;
+
+  @Mock
+  private TestDatasetRepository testDatasetRepository;
 
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;
@@ -329,6 +352,10 @@ public class DataCollectionServiceImplTest {
     RepresentativeVO representative = new RepresentativeVO();
     DataProviderVO dataProvider = new DataProviderVO();
     RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.TABLE);
+    IntegrityVO integrityVO = new IntegrityVO();
+    integrityVO.setReferencedDatasetSchemaId("id");
+    ruleVO.setIntegrityVO(integrityVO);
     UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
     userRepresentationVO.setEmail("email@reportnet.net");
     design.setDataSetName("datasetName_");
@@ -370,15 +397,27 @@ public class DataCollectionServiceImplTest {
     Mockito.when(designDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(designsValue);
     Mockito.when(resourceManagementControllerZuul.getResourceDetail(Mockito.any(), Mockito.any()))
         .thenReturn(new ResourceInfoVO());
+    RulesSchemaVO rulesSchemaVO = new RulesSchemaVO();
+    rulesSchemaVO.setRules(Arrays.asList(ruleVO));
     Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any()))
-        .thenReturn(new RulesSchemaVO());
+        .thenReturn(rulesSchemaVO);
     Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
         .thenReturn(new ArrayList<>());
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-
+    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+        .thenReturn(DatasetTypeEnum.REPORTING).thenReturn(DatasetTypeEnum.COLLECTION)
+        .thenReturn(DatasetTypeEnum.EUDATASET).thenReturn(DatasetTypeEnum.TEST);
+    DataSetMetabase datasetmetabase = new DataSetMetabase();
+    datasetmetabase.setId(1L);
+    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
+        Mockito.any())).thenReturn(Optional.of(datasetmetabase));
+    Mockito.when(euDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(new EUDataset()));
+    Mockito.when(testDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(new TestDataset()));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
@@ -469,8 +508,8 @@ public class DataCollectionServiceImplTest {
     tableSchema.setRecordSchema(recordSchema);
     schema.setTableSchemas(Arrays.asList(tableSchema));
     schema2.setTableSchemas(Arrays.asList(tableSchema));
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema);
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema2);
+    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema)
+        .thenReturn(schema2);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");

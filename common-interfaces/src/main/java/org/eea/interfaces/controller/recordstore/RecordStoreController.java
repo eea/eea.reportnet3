@@ -42,7 +42,7 @@ public interface RecordStoreController {
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
    */
-  @PostMapping(value = "/dataset/create/{datasetName}")
+  @PostMapping(value = "/private/dataset/create/{datasetName}")
   void createEmptyDataset(@PathVariable("datasetName") String datasetName,
       @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema);
 
@@ -61,7 +61,7 @@ public interface RecordStoreController {
    *
    * @return the connection to dataset
    */
-  @GetMapping(value = "/connections")
+  @GetMapping(value = "/private/connections")
   List<ConnectionDataVO> getDataSetConnections();
 
   /**

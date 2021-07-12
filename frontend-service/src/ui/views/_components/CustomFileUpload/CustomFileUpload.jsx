@@ -11,7 +11,6 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { userStorage } from 'core/domain/model/User/UserStorage';
-import ReactTooltip from 'react-tooltip';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
@@ -378,16 +377,16 @@ export const CustomFileUpload = ({
     return (
       <div className={styles.checkboxWrapper}>
         <Checkbox
+          checked={state.replace}
           id="replaceCheckbox"
           inputId="replaceCheckbox"
-          isChecked={state.replace}
           onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}
           role="checkbox"
         />
         <label htmlFor="replaceCheckbox">
-          <a onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}>
+          <span onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}>
             {replaceCheckLabel}
-          </a>
+          </span>
         </label>
       </div>
     );
@@ -395,28 +394,7 @@ export const CustomFileUpload = ({
 
   const renderAdvanced = () => {
     const cClassName = classNames('p-fileupload p-component', className);
-    let uploadButton, cancelButton, filesList, progressBar;
-
-    if (!auto) {
-      uploadButton = (
-        <Fragment>
-          <span data-for="inValidExtension" data-tip>
-            <Button
-              disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
-              icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
-              label={uploadLabel}
-              onClick={upload}
-            />
-          </span>
-
-          {accept && checkValidExtension() && (
-            <ReactTooltip effect="solid" id="inValidExtension" place="top">
-              {invalidExtensionMessage}
-            </ReactTooltip>
-          )}
-        </Fragment>
-      );
-    }
+    let filesList, progressBar;
 
     if (hasFiles()) {
       filesList = renderFiles();
@@ -448,24 +426,19 @@ export const CustomFileUpload = ({
   };
 
   const renderAdvancedFooter = () => {
-    const cClassName = classNames('p-fileupload p-component', className);
     let uploadButton;
     let cancelButton;
-    let filesList;
-    let progressBar;
 
     if (!auto) {
       uploadButton = (
-        <Fragment>
-          <span data-for="invalidExtension" data-tip>
-            <Button
-              disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
-              icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
-              label={uploadLabel}
-              onClick={upload}
-            />
-          </span>
-        </Fragment>
+        <span data-for="invalidExtension" data-tip>
+          <Button
+            disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
+            icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
+            label={uploadLabel}
+            onClick={upload}
+          />
+        </span>
       );
       cancelButton = (
         <Button
@@ -480,7 +453,6 @@ export const CustomFileUpload = ({
 
     if (hasFiles()) {
       FileList = renderFiles();
-      progressBar = <ProgressBar showValue={false} value={state.progress} />;
     }
 
     return (

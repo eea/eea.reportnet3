@@ -97,6 +97,7 @@ export class DataTable extends Component {
     stateKey: null,
     stateStorage: 'session',
     style: null,
+    summary: null,
     tabIndex: '0',
     tableClassName: null,
     tableStyle: null,
@@ -186,6 +187,7 @@ export class DataTable extends Component {
     stateKey: PropTypes.string,
     stateStorage: PropTypes.string,
     style: PropTypes.object,
+    summary: PropTypes.string,
     tabIndex: PropTypes.string,
     tableClassName: PropTypes.string,
     tableStyle: PropTypes.any,
@@ -1448,7 +1450,8 @@ export class DataTable extends Component {
               ref={el => {
                 this.table = el;
               }}
-              style={this.props.tableStyle}>
+              style={this.props.tableStyle}
+              summary={this.props.summary}>
               {tableHeader}
               {tableFooter}
               {tableBody}

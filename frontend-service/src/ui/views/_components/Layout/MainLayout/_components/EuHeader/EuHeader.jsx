@@ -21,21 +21,28 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
       <div className={styles.globan} id="globan" style={globanElementStyle}>
         <div className={styles.globanContent}>
           <span>{resources.messages['anOfficialWebsite']}</span>
-          <a
-            aria-controls="globan-dropdown-186d0fazrpn"
-            aria-expanded="false"
-            href="#globan-dropdown-186d0fazrpn"
+          <span
             onClick={e => {
               e.preventDefault();
               setOpenGloban(!openGloban);
             }}>
             {resources.messages['howDoYouKnow']}
             {openGloban ? (
-              <FontAwesomeIcon className="p-breadcrumb-home" icon={AwesomeIcons('angleSingleUp')} />
+              <FontAwesomeIcon
+                ariaLabel={resources.messages['howDoYouKnow']}
+                className="p-breadcrumb-home"
+                icon={AwesomeIcons('angleSingleUp')}
+                role="button"
+              />
             ) : (
-              <FontAwesomeIcon className="p-breadcrumb-home" icon={AwesomeIcons('angleDown')} />
+              <FontAwesomeIcon
+                ariaLabel={resources.messages['howDoYouKnow']}
+                className="p-breadcrumb-home"
+                icon={AwesomeIcons('angleDown')}
+                role="button"
+              />
             )}
-          </a>
+          </span>
           {openGloban && (
             <div class={styles.ban}>
               <p>{resources.messages['allOfficialEuropeanUnionWebsiteAddresses']}</p>

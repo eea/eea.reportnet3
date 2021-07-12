@@ -1,4 +1,6 @@
 import { Component } from 'react';
+import uniqueId from 'lodash/uniqueId';
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -18,8 +20,10 @@ export class NextPageLink extends Component {
 
     return (
       <button className={className} disabled={this.props.disabled} onClick={this.props.onClick} type="button">
-        <span className="p-paginator-icon pi pi-caret-right"></span>
-        <span className="srOnly">Next page</span>
+        <span className="p-paginator-icon pi pi-caret-right" id={uniqueId('nextPage')}></span>
+        <span className="srOnly" htmlFor="nextPage">
+          Next page
+        </span>
       </button>
     );
   }

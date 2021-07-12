@@ -6,7 +6,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeRequestEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -81,18 +80,6 @@ public interface DataflowService {
 
 
   /**
-   * Gets the pending by user.
-   *
-   * @param userId the user id
-   * @param type the type
-   *
-   * @return the pending by user
-   *
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getPendingByUser(String userId, TypeRequestEnum type) throws EEAException;
-
-  /**
    * Adds the contributor to dataflow.
    *
    * @param idDataflow the id dataflow
@@ -119,7 +106,7 @@ public interface DataflowService {
    * @param dataflowVO the dataflow VO
    * @throws EEAException the EEA exception
    */
-  void createDataFlow(DataFlowVO dataflowVO) throws EEAException;
+  Long createDataFlow(DataFlowVO dataflowVO) throws EEAException;
 
 
   /**

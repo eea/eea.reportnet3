@@ -92,16 +92,16 @@ class DropDownMenu extends Component {
             {model ? (
               model.map((item, i) =>
                 item.title ? (
-                  <li className={style.listItemTitle} key={i}>
-                    <a className={style.title}>
+                  <li className={style.listItemTitle} key={item.label}>
+                    <div className={style.title}>
                       <Icon icon={item.icon} style={item.iconStyle ?? item.style} />
                       {item.label}
-                    </a>
+                    </div>
                   </li>
                 ) : (
                   <li
                     className={item.disabled ? style.listItemDisabled : style.listItemEnabled}
-                    key={i}
+                    key={item.label}
                     onClick={e => {
                       e.preventDefault();
                       if (!item.disabled) item.command();
@@ -110,10 +110,10 @@ class DropDownMenu extends Component {
                           return { ...state, menuClick: true };
                         });
                     }}>
-                    <a className={item.disabled ? style.menuItemDisabled : null} disabled={item.disabled}>
+                    <div className={item.disabled ? style.menuItemDisabled : null} disabled={item.disabled}>
                       <Icon icon={item.icon} style={item.iconStyle ?? item.style} />
                       {item.label}
-                    </a>
+                    </div>
                   </li>
                 )
               )

@@ -82,6 +82,7 @@ const DataViewer = withRouter(
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
+    selectedTableSchemaId,
     showWriteButtons,
     tableFixedNumber,
     tableHasErrors,
@@ -391,7 +392,7 @@ const DataViewer = withRouter(
           nRows,
           fields,
           levelErrorValidations,
-          groupedRules
+          tableId === selectedTableSchemaId ? groupedRules : undefined
         );
 
         if (!isEmpty(data.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
@@ -903,8 +904,9 @@ const DataViewer = withRouter(
         {isNewRecord && (
           <div className={styles.addAnotherOneWrapper}>
             <Checkbox
-              id={`addAnother`}
-              isChecked={addAnotherOne}
+              checked={addAnotherOne}
+              id="addAnother"
+              inputId="addAnother"
               onChange={() => setAddAnotherOne(!addAnotherOne)}
               role="checkbox"
             />
@@ -1041,9 +1043,18 @@ const DataViewer = withRouter(
           {rowData.field === 'Required' || rowData.field === 'Read only' ? (
             <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
           ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
-            <Chips className={styles.chips} disabled={true} pasteSeparator=";" value={rowData.value.split(';')}></Chips>
+            <Chips
+              className={styles.chips}
+              disabled={true}
+              name={resources.messages['multipleSingleMessage']}
+              pasteSeparator=";"
+              value={rowData.value.split(';')}></Chips>
           ) : rowData.field === 'Valid extensions' ? (
-            <Chips className={styles.chips} disabled={true} value={rowData.value.split(',')}></Chips>
+            <Chips
+              className={styles.chips}
+              disabled={true}
+              name={resources.messages['validExtensionsShort']}
+              value={rowData.value.split(',')}></Chips>
           ) : rowData.field === 'Maximum file size' ? (
             `${rowData.value} ${resources.messages['MB']}`
           ) : (
@@ -1123,6 +1134,7 @@ const DataViewer = withRouter(
           records={records}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
+          selectedTableSchemaId={selectedTableSchemaId}
           setColumns={setColumns}
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportTableDialogVisible={setImportTableDialogVisible}
@@ -1270,7 +1282,8 @@ const DataViewer = withRouter(
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
               datasetId: datasetId,
-              tableSchemaId: tableId
+              tableSchemaId: tableId,
+              delimiter: `${config.IMPORT_FILE_DELIMITER}`
             })}`}
           />
         )}

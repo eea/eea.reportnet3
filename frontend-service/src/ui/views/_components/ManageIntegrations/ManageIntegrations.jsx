@@ -3,6 +3,7 @@ import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './ManageIntegrations.module.scss';
 
@@ -357,10 +358,11 @@ export const ManageIntegrations = ({
         </label>
         <div className={styles.checkboxWrapper}>
           <Checkbox
-            id={'notificationRequired'}
-            inputId={'notificationRequired'}
-            isChecked={manageIntegrationsState.notificationRequired}
-            label={'notificationRequired'}
+            ariaLabel={`${componentName}__${option}`}
+            checked={manageIntegrationsState.notificationRequired}
+            id={`${componentName}__${option}`}
+            inputId={`${componentName}__${option}`}
+            label="notificationRequired"
             onChange={event => {
               onChangeNotificationRequiredCheckboxEvent(event.checked, option);
             }}
@@ -401,7 +403,7 @@ export const ManageIntegrations = ({
       />
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
-        <ReactTooltip effect="solid" id="integrationTooltip" place="top">
+        <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
           {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
       )}
@@ -445,10 +447,11 @@ export const ManageIntegrations = ({
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <Dropdown
           appendTo={document.body}
-          ariaLabel={'integrations'}
+          ariaLabel={resources.messages[option]}
           disabled={isEmpty(optionList[option])}
           filter={optionList[option].length > 7}
           inputId={`${componentName}__${option}`}
+          name={uniqueId(resources.messages[option])}
           onChange={event => {
             if (option === 'repository') {
               onFillFieldRepository(event.value, option);
@@ -470,6 +473,7 @@ export const ManageIntegrations = ({
   const renderEditorInput = (option, parameter, id) => {
     return (
       <InputText
+        id={`editor_${parameter}`}
         onBlur={event => onBlurParameter(id, option, event)}
         onChange={event => onChangeParameter(event.target.value, option, id)}
         onKeyPress={event => onEditKeyDown(event, id, option)}
@@ -592,7 +596,7 @@ export const ManageIntegrations = ({
             )}
 
             {isKeyDuplicated && (
-              <ReactTooltip effect="solid" id="addParameterTooltip" place="top">
+              <ReactTooltip border={true} effect="solid" id="addParameterTooltip" place="top">
                 {resources.messages['parameterAlreadyExists']}
               </ReactTooltip>
             )}

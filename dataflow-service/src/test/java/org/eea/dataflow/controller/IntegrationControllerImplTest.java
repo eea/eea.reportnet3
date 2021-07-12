@@ -1,12 +1,15 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
+import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
@@ -42,6 +45,14 @@ public class IntegrationControllerImplTest {
   /** The Lock service. */
   @Mock
   private LockService LockService;
+
+  /** The integration executor factory. */
+  @Mock
+  private IntegrationExecutorFactory integrationExecutorFactory;
+
+  /** The integration executor service. */
+  @Mock
+  private IntegrationExecutorService integrationExecutorService;
 
 
 
@@ -258,6 +269,23 @@ public class IntegrationControllerImplTest {
   }
 
   /**
+   * Creates the default integration test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createDefaultIntegrationExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(integrationService)
+        .createDefaultIntegration(Mockito.any(), Mockito.any());
+    try {
+      integrationControllerImpl.createDefaultIntegration(1L, "5ce524fad31fc52540abae73");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
    * Find expor EU dataset integration by dataset id test.
    */
   @Test
@@ -384,6 +412,23 @@ public class IntegrationControllerImplTest {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
+  }
+
+
+  @Test
+  public void findIntegrationByIdTest() throws EEAException {
+    IntegrationVO integration = new IntegrationVO();
+    integration.setId(1L);
+    Mockito.when(integrationService.getIntegration(Mockito.anyLong())).thenReturn(integration);
+    assertEquals(integration, integrationControllerImpl.findIntegrationById(1L));
+  }
+
+  @Test
+  public void executeIntegrationProcessTest() {
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any()))
+        .thenReturn(integrationExecutorService);
+    assertNull("assertion error",
+        integrationControllerImpl.executeIntegrationProcess(null, null, null, null, null));
   }
 
 }

@@ -96,7 +96,8 @@ const DataFormFieldEditor = ({
         dispatchMap({
           type: 'TOGGLE_MAP_DISABLED',
           payload: !MapUtils.checkValidCoordinates(
-            fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''
+            fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : '',
+            true
           )
         });
       }
@@ -209,7 +210,7 @@ const DataFormFieldEditor = ({
           MapUtils.checkValidCoordinates(coords)
         );
       }
-      dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coords) });
+      dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coords, true) });
       dispatchMap({ type: 'DISPLAY_COORDINATE_ERROR', payload: !MapUtils.checkValidCoordinates(coords, true) });
       return JSON.stringify(geoJson);
     }
@@ -291,7 +292,9 @@ const DataFormFieldEditor = ({
   };
 
   const projectCoordinates = (coordinates, newCRS) => {
-    return proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates);
+    return MapUtils.checkValidCoordinates(coordinates)
+      ? proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates)
+      : coordinates;
   };
 
   const renderCodelistDropdown = (field, fieldValue) => {
@@ -397,9 +400,10 @@ const DataFormFieldEditor = ({
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         maxLength={getMaxCharactersByType(type)}
+        name={column.header}
         onChange={e => onChangeForm(field, e.target.value, isConditional)}
         ref={inputRef}
-        style={{ width: '35%' }}
+        style={{ width: '60%' }}
         type="text"
         value={fieldValue}
       />
@@ -421,7 +425,7 @@ const DataFormFieldEditor = ({
         onChange={e =>
           onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
         }
-        style={{ width: '60px' }}
+        style={{ width: '50%' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
         yearRange="1900:2100"
@@ -449,6 +453,7 @@ const DataFormFieldEditor = ({
       <Calendar
         appendTo={document.body}
         baseZIndex={9999}
+        dateFormat="yy-mm-dd"
         disabled={(column.readOnly && reporting) || isSaving}
         inputRef={refDatetimeCalendar}
         monthNavigator={true}
@@ -456,6 +461,7 @@ const DataFormFieldEditor = ({
         onFocus={e => {
           calculateCalendarPanelPosition(e.currentTarget);
         }}
+        readOnlyInput={true}
         showSeconds={true}
         showTime={true}
         value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
@@ -532,10 +538,11 @@ const DataFormFieldEditor = ({
   const renderMapType = (field, fieldValue) => (
     <div>
       <div className={styles.pointEpsgWrapper}>
-        <label className={styles.epsg}>{'Coords:'}</label>
+        <label className={styles.epsg}>{resources.messages['coords']}</label>
         <InputText
           className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
           disabled={(column.readOnly && reporting) || isSaving}
+          id="coordinates"
           keyfilter={RecordUtils.getFilter(type)}
           onBlur={e =>
             onChangeForm(
@@ -591,6 +598,7 @@ const DataFormFieldEditor = ({
         />
         <Button
           className={`p-button-secondary-transparent button ${styles.mapButton}`}
+          disabled={map.isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
           tooltip={resources.messages['selectGeographicalDataOnMap']}

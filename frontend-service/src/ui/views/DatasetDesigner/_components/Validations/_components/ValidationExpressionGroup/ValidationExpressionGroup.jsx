@@ -9,7 +9,7 @@ import isEmpty from 'lodash/isEmpty';
 import first from 'lodash/first';
 
 import { Button } from 'ui/views/_components/Button';
-import { Checkbox } from 'ui/views/_components/Checkbox/Checkbox';
+import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
@@ -90,8 +90,8 @@ const ValidationExpressionGroup = ({
           <div className={styles.groupRow}>
             <span className={styles.group}>
               <Checkbox
+                checked={expressionValues.group}
                 disabled={isDisabled}
-                isChecked={expressionValues.group}
                 onChange={e => onExpressionGroup(expressionId, { key: 'group', value: e.checked })}
               />
             </span>

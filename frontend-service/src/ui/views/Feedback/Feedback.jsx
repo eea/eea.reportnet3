@@ -125,13 +125,26 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
 
+  const markMessagesAsRead = async data => {
+    //mark unread messages as read
+    if (data.unreadMessages.length > 0) {
+      const unreadMessages = data.unreadMessages
+        .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
+        .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
+
+      if (!isEmpty(unreadMessages)) {
+        await FeedbackService.markAsRead(dataflowId, unreadMessages);
+      }
+    }
+  };
+
   const onFirstLoadMessages = loadState => {
     dispatchFeedback({ type: 'ON_UPDATE_MESSAGE_FIRST_LOAD', payload: loadState });
   };
 
   const onChangeDataProvider = value => {
     if (isNil(value)) {
-      dispatchFeedback({ type: 'RESET_MESSAGES', payload: {} });
+      dispatchFeedback({ type: 'RESET_MESSAGES', payload: [] });
     } else {
       onFirstLoadMessages(true);
     }
@@ -157,21 +170,16 @@ export const Feedback = withRouter(({ match, history }) => {
       isCustodian ? selectedDataProvider.dataProviderId : representativeId,
       currentPage
     );
+
+    await markMessagesAsRead(data);
+
     dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
   };
 
   const onGetInitialMessages = async dataProviderId => {
     dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
     const data = await onLoadMessages(dataProviderId, 0);
-    //mark unread messages as read
-    if (data.unreadMessages.length > 0) {
-      const unreadMessages = data.unreadMessages
-        .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
-        .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
-      if (!isEmpty(unreadMessages)) {
-        await FeedbackService.markAsRead(dataflowId, unreadMessages);
-      }
-    }
+    await markMessagesAsRead(data);
 
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
   };
@@ -255,6 +263,7 @@ export const Feedback = withRouter(({ match, history }) => {
         {isCustodian && (
           <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
             <ListBox
+              ariaLabel="dataProviders"
               className={styles.dataProvider}
               onChange={e => {
                 onChangeDataProvider(e.target.value);

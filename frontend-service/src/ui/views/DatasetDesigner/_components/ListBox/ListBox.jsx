@@ -13,6 +13,7 @@ import { Spinner } from 'ui/views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
 
 const ListBox = ({
+  ariaLabel = null,
   ariaLabelledBy = null,
   className = null,
   dataKey = null,
@@ -35,7 +36,6 @@ const ListBox = ({
   tooltipOptions = null,
   value = null
 }) => {
-  let myTooltip;
   const inputElement = useRef();
   const [filter, setFilter] = useState('');
   const [optionTouched, setOptionTouched] = useState(false);
@@ -47,7 +47,7 @@ const ListBox = ({
   }, []);
 
   const renderTooltip = () => {
-    myTooltip = new Tooltip({
+    return new Tooltip({
       target: inputElement.current.element,
       content: tooltip,
       options: tooltipOptions
@@ -241,11 +241,11 @@ const ListBox = ({
     }
 
     if (filterProp) {
-      header = <ListBoxHeader filter={filter} onFilter={onFilter} disabled={disabled} />;
+      header = <ListBoxHeader disabled={disabled} filter={filter} onFilter={onFilter} />;
     }
 
     return (
-      <div ref={inputElement} id={id} className={classes} style={style}>
+      <div className={classes} id={id} ref={inputElement} style={style}>
         {header}
         {title && (
           <div className="p-listbox-title-wrapper">
@@ -258,7 +258,12 @@ const ListBox = ({
               <Spinner style={{ top: 0, left: 0, maxWidth: '15%' }} />
             </div>
           ) : (
-            <ul className="p-listbox-list" style={listStyle} role="listbox" aria-multiselectable={multiple}>
+            <ul
+              aria-label={ariaLabel}
+              aria-multiselectable={multiple}
+              className="p-listbox-list"
+              role="listbox"
+              style={listStyle}>
               {items}
             </ul>
           )}
@@ -286,6 +291,7 @@ ListBox.propTypes = {
   tabIndex: PropTypes.string,
   tooltip: PropTypes.string,
   tooltipOptions: PropTypes.object,
+  ariaLabel: PropTypes.string,
   ariaLabelledBy: PropTypes.string,
   onChange: PropTypes.func
 };

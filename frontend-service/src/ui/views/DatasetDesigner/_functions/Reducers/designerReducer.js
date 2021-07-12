@@ -42,6 +42,9 @@ export const designerReducer = (state, { type, payload }) => {
         metaData: payload.metaData
       };
 
+    case 'GET_SELECTED_IMPORT_EXTENSION':
+      return { ...state, selectedImportExtension: payload.selectedImportExtension };
+
     case 'GET_UNIQUES':
       return { ...state, uniqueConstraintsList: payload.data };
 
@@ -151,7 +154,8 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
-          tableSchemaId: payload.tableSchemaId
+          tableSchemaId: payload.tableSchemaId,
+          selectedTableSchemaId: payload.selectedTableSchemaId
         },
         isValidationViewerVisible: false
       };
@@ -170,13 +174,17 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
-          tableSchemaId: payload.tableSchemaId
+          tableSchemaId: payload.tableSchemaId,
+          selectedTableSchemaId: payload.selectedTableSchemaId
         },
         isValidationViewerVisible: false
       };
 
     case 'SET_EXPORT_DATASET_FILE_TYPE':
       return { ...state, exportDatasetFileType: payload.fileType };
+
+    case 'SET_IS_VALIDATIONS_TABULAR_VIEW':
+      return { ...state, isValidationsTabularView: payload.isValidationsTabularView };
 
     case 'SET_IS_VALIDATION_SELECTED':
       return {
@@ -205,6 +213,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'ON_UPDATE_TABS':
       return { ...state, schemaTables: payload.data, tabs: payload.tabs };
+
+    case 'SET_IS_DOWNLOADING_VALIDATIONS':
+      return { ...state, isDownloadingValidations: payload.isDownloadingValidations };
 
     default:
       return state;

@@ -31,11 +31,12 @@
               line-height: 1.5rem;
               a {
                 color: var(--white) !important;
+                text-decoration: underline;
                 &:hover {
-                  color: var(--white) !important;
+                  color: var(--c-corporate-yellow) !important;
                 }
                 &:visited {
-                  color: var(--white) !important;
+                  color: var(--c-corporate-yellow) !important;
                 }
               }
             }
@@ -214,10 +215,6 @@
           .sideBar {
             flex-direction: row;
             justify-content: space-between;
-            .contactBox {
-            }
-            .linkBox {
-            }
           }
         }
         @media (max-width: 320px) {

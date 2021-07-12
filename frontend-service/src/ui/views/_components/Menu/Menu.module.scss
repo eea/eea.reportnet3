@@ -1,5 +1,5 @@
 .dropDownMenu {
-  background-color: var(--white);
+  background-color: var(--dropdown-menu-bg-color) !important;
   border-radius: 2%;
   border: 1px solid var(--c-custom-gray);
   bottom: 0px;
@@ -17,9 +17,17 @@
     list-style: none;
     padding: 0px;
 
-    li span {
-      color: var(--gray-110);
-      padding: 0.85em 0.45em !important;
+    li {
+      span {
+        color: var(--main-font-color);
+        padding: 0.85em 0.45em !important;
+      }
+      svg {
+        color: var(--main-font-color);
+      }
+      &:hover {
+        background-color: var(--dropdown-menu-items-bg-color-hover);
+      }
     }
   }
 

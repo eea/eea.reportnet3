@@ -67,10 +67,10 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
       </div>
       {isVisibleInfoDialog && (
         <Dialog
-          style={{ maxWidth: '41vw' }}
+          header={resources.messages['sqlSentenceHelpDialogTitle']}
           onHide={onHideInfoDiaog}
-          visible={isVisibleInfoDialog}
-          header={resources.messages['sqlSentenceHelpDialogTitle']}>
+          style={{ maxWidth: '41vw' }}
+          visible={isVisibleInfoDialog}>
           <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
           <p
             className={styles.note}
@@ -81,6 +81,9 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
           <p
             className={styles.levelHelp}
             dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceSpatialTypesNote'] }}></p>
+          <p
+            className={styles.levelHelp}
+            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceCountryCodeNote'] }}></p>
         </Dialog>
       )}
     </div>

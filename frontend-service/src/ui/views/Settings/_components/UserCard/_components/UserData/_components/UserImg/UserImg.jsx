@@ -143,6 +143,7 @@ const UserImg = () => {
         </Dialog>
       )}
       <ReactTooltip
+        border={true}
         className={styles.tooltipClass}
         clickable={true}
         effect="solid"

@@ -1,6 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 import { routes } from 'ui/routes';
@@ -12,6 +15,7 @@ import { PublicLayout } from 'ui/views/_components/Layout/PublicLayout';
 import Illustration from 'assets/images/logos/public_illustration.png';
 import logo from 'assets/images/logos/logo.png';
 
+import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ThemeContext } from 'ui/views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
@@ -20,19 +24,32 @@ import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { PublicCard } from '../_components/PublicCard/PublicCard';
 
-export const PublicFrontpage = ({ history }) => {
+import { ErrorUtils } from 'ui/views/_functions/Utils';
+
+export const PublicFrontpage = withRouter(({ history, match }) => {
+  const notificationContext = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
 
+  const {
+    params: { errorType: urlErrorType }
+  } = match;
+
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!themeContext.headerCollapse) {
       setContentStyles({ marginTop: `${config.theme.cookieConsentHeight + 6}px` });
     } else {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
+
+  useEffect(() => {
+    if (!isNil(urlErrorType)) {
+      notificationContext.add({ type: ErrorUtils.parseErrorType(urlErrorType) });
+    }
+  }, [urlErrorType]);
 
   const handleRedirect = target => history.push(target);
 
@@ -70,7 +87,7 @@ export const PublicFrontpage = ({ history }) => {
                   </div>
                 </div>
                 <div className={styles.illustration}>
-                  <img alt="Public illustration" src={Illustration} />
+                  <img alt="Public illustration" rel="preload" src={Illustration} />
                 </div>
                 <div className={styles.sideBar}>
                   <div className={`${styles.contactBox} ${styles.sideBarItem}`}>
@@ -79,6 +96,7 @@ export const PublicFrontpage = ({ history }) => {
                         aria-hidden={false}
                         className={styles.emailIcon}
                         icon={AwesomeIcons('envelope')}
+                        role="presentation"
                       />
                     </div>
                     <h4>Need any help?</h4>
@@ -94,6 +112,7 @@ export const PublicFrontpage = ({ history }) => {
                         aria-hidden={false}
                         className={styles.emailIcon}
                         icon={AwesomeIcons('lightPdf')}
+                        role="presentation"
                       />
                     </div>
                     <h4>Support documents:</h4>
@@ -144,20 +163,20 @@ export const PublicFrontpage = ({ history }) => {
                 <h3>Dataflow status</h3>
               </div>
               <div className={styles.showPublicData}>
-                <a
+                <div
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
                   <p>
                     <strong>View by obligation dataflow status and download reported data</strong>
                   </p>
-                </a>
-                <a
+                </div>
+                <div
                   className={styles.showPublicDataButton}
                   onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
                   <p>
                     <strong>View by country dataflow status and download reported data</strong>
                   </p>
-                </a>
+                </div>
               </div>
             </div>
             <div className={styles.currentDataflows}>
@@ -224,4 +243,4 @@ export const PublicFrontpage = ({ history }) => {
       </div>
     </PublicLayout>
   );
-};
+});

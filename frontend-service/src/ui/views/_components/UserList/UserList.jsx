@@ -140,6 +140,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
               paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
+              summary="usersList"
               totalRecords={userListData.length}
               value={filteredData}>
               {isNil(representativeId) && isNil(dataflowId) && (

@@ -270,9 +270,9 @@ const Dataflow = withRouter(({ history, match }) => {
   const checkRestrictFromPublic = (
     <div style={{ float: 'left' }}>
       <Checkbox
-        id={`restrict_from_public_checkbox`}
-        inputId={`restrict_from_public_checkbox`}
-        isChecked={dataflowState.restrictFromPublic}
+        checked={dataflowState.restrictFromPublic}
+        id="restrict_from_public_checkbox"
+        inputId="restrict_from_public_checkbox"
         onChange={e => dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: e.checked })}
         role="checkbox"
       />
@@ -945,9 +945,9 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => onCloseIsReleaseableDialog()}
             visible={dataflowState.isReleaseableDialogVisible}>
             <Checkbox
+              checked={dataflowState.isReleasable}
               id="isReleasableCheckbox"
               inputId="isReleasableCheckbox"
-              isChecked={dataflowState.isReleasable}
               onChange={() => setIsReleaseable(!dataflowState.isReleasable)}
               role="checkbox"
             />
@@ -972,9 +972,9 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => onCloseIsShowPublicInfoDialog()}
             visible={dataflowState.isShowPublicInfoDialogVisible}>
             <Checkbox
+              checked={dataflowState.showPublicInfo}
               id="showPublicInfoCheckbox"
               inputId="showPublicInfoCheckbox"
-              isChecked={dataflowState.showPublicInfo}
               onChange={() =>
                 dataflowDispatch({
                   type: 'SET_SHOW_PUBLIC_INFO',
@@ -983,7 +983,7 @@ const Dataflow = withRouter(({ history, match }) => {
               }
               role="checkbox"
             />
-            <label className={styles.showPublicInfo} htmlFor="isReleasableCheckbox">
+            <label className={styles.showPublicInfo} htmlFor="showPublicInfoCheckbox">
               <a
                 onClick={() =>
                   dataflowDispatch({
