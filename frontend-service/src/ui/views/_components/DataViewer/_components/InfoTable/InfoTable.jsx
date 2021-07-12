@@ -12,7 +12,7 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import { InfoTableMessages } from './_components/InfoTableMessages';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'ui/views/_components/TooltipButton/TooltipButton';
 
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'ui/views/_functions/Utils';
@@ -208,16 +208,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           header={
             <Fragment>
               {column.header}
-              <span data-for={`infoCircleButton_${i}`} data-tip>
-                <Button
-                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
-                  icon="infoCircle"
-                  onClick={() => {}}
-                />
-              </span>
-              <ReactTooltip
-                border={true}
-                effect="solid"
+              <TooltipButton
                 getContent={() =>
                   ReactDOMServer.renderToStaticMarkup(
                     <div
@@ -230,9 +221,8 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
                     </div>
                   )
                 }
-                html={true}
-                id={`infoCircleButton_${i}`}
-                place="top"></ReactTooltip>
+                uniqueIdentifier={i}
+              />
             </Fragment>
           }
           key={column.field}

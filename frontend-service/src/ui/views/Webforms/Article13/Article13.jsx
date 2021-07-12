@@ -106,13 +106,12 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
 
   const getPamsTableRecords = async tableSchemaId => {
     if (!isNil(tableSchemaId[0])) {
-      const { data } = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
-        'CORRECT',
-        'INFO',
-        'WARNING',
-        'ERROR',
-        'BLOCKER'
-      ]);
+      const { data } = await DatasetService.tableDataById({
+        datasetId,
+        tableSchemaId: tableSchemaId[0],
+        pageSize: 300,
+        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+      });
 
       return onParseWebformRecords(data.records, article13State.data[0], {}, data.totalRecords) || [];
     }
@@ -213,13 +212,12 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
       if (!isNil(tableSchemaId[0])) {
-        const { data } = await DatasetService.tableDataById(datasetId, tableSchemaId[0], '', 300, undefined, [
-          'CORRECT',
-          'INFO',
-          'WARNING',
-          'ERROR',
-          'BLOCKER'
-        ]);
+        const { data } = await DatasetService.tableDataById({
+          datasetId,
+          tableSchemaId: tableSchemaId[0],
+          pageSize: 300,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        });
 
         if (!isNil(data.records)) {
           const tableData = {};
