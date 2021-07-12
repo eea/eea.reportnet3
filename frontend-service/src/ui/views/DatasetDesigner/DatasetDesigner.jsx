@@ -1069,7 +1069,11 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const renderConfigureWebformFooter = (
     <Fragment>
       <Button
-        className={`p-button-animated-blink ${styles.saveButton}`}
+        className={`${
+          !isUndefined(designerState.selectedWebform) &&
+          designerState?.selectedWebform?.value !== designerState?.webform?.value &&
+          'p-button-animated-blink'
+        } ${styles.saveButton}`}
         disabled={
           isUndefined(designerState.selectedWebform) ||
           designerState?.selectedWebform?.value === designerState?.webform?.value
