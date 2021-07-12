@@ -1175,6 +1175,8 @@
     "yes": "Yes",
     "sqlSentenceCountryCodeNote": "<i>Note: You can include the keyword {%R3_COUNTRY_CODE%} to use the country code in the SQL sentence.",
     "valueFilter": "Filter by value",
-    "valueFilterTooltip": "You can search any value"
+    "valueFilterTooltip": "You can search any value",
+    "valueFilterTooltipGeometryNote": "Note: Geometry fields will not be shown by filtering data",
+    "valueFilterTooltipCaseSensitiveNote": "Note: Filtering is case sensitive"
   }
 }
