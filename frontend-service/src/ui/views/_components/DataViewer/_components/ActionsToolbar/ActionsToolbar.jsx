@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
@@ -178,6 +179,17 @@ const ActionsToolbar = ({
       });
     }
     return filters;
+  };
+
+  const getTooltipMessage = () => {
+    return (
+      <>
+        <span style={{ fontWeight: 'bold' }}>{resources.messages['valueFilterTooltip']}</span> <br />
+        <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipGeometryNote']}</span>
+        <br />
+        <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipCaseSensitiveNote']}</span>
+      </>
+    );
   };
 
   const showFilters = columnKeys => {
@@ -361,7 +373,21 @@ const ActionsToolbar = ({
             </label>
           </span>
         </span>
-        <TooltipButton message={resources.messages['valueFilterTooltip']} uniqueIdentifier="valueFilter" />
+        <TooltipButton
+          getContent={() =>
+            ReactDOMServer.renderToStaticMarkup(
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start'
+                }}>
+                {getTooltipMessage()}
+              </div>
+            )
+          }
+          uniqueIdentifier="valueFilter"
+        />
       </div>
     </Toolbar>
   );
