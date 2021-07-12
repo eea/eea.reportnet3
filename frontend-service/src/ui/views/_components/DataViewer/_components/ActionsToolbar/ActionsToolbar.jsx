@@ -1,6 +1,7 @@
-import { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
@@ -12,8 +13,11 @@ import { Button } from 'ui/views/_components/Button';
 import { ChipButton } from 'ui/views/_components/ChipButton';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { DropdownFilter } from 'ui/views/Dataset/_components/DropdownFilter';
+import { InputText } from 'ui/views/_components/InputText';
 import { Menu } from 'ui/views/_components/Menu';
+import ReactTooltip from 'react-tooltip';
 import { Toolbar } from 'ui/views/_components/Toolbar';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -43,6 +47,7 @@ const ActionsToolbar = ({
   onSetVisible,
   onUpdateData,
   originalColumns,
+  prevFilterValue,
   records,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -52,6 +57,7 @@ const ActionsToolbar = ({
   setImportTableDialogVisible,
   showGroupedValidationFilter,
   showValidationFilter,
+  showValueFilter,
   showWriteButtons,
   tableHasErrors,
   tableId,
@@ -63,9 +69,12 @@ const ActionsToolbar = ({
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
+    valueFilter: prevFilterValue,
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
   });
+
+  const { groupedFilter, validationDropdown, valueFilter, visibilityDropdown, visibilityColumnIcon } = filter;
 
   const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
@@ -132,6 +141,12 @@ const ActionsToolbar = ({
       });
     } finally {
       setIsLoadingFile(false);
+    }
+  };
+
+  const onSearchKeyEvent = event => {
+    if (event.key === 'Enter') {
+      showValueFilter(encodeURIComponent(valueFilter));
     }
   };
 
@@ -237,7 +252,7 @@ const ActionsToolbar = ({
           }`}
           disabled={isDataflowOpen || isDesignDatasetEditorRead}
           icon={'eye'}
-          iconClasses={filter.visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
+          iconClasses={visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
           label={resources.messages['showHideColumns']}
           onClick={event => {
             dropdownFilterRef.current.show(event);
@@ -245,7 +260,7 @@ const ActionsToolbar = ({
         />
         <DropdownFilter
           className={`p-button-animated-blink`}
-          filters={filter.visibilityDropdown}
+          filters={visibilityDropdown}
           id="dropdownFilterMenu"
           onShow={event => getExportButtonPosition(event)}
           popup={true}
@@ -254,7 +269,7 @@ const ActionsToolbar = ({
         />
 
         {isFilterable && (
-          <>
+          <Fragment>
             <Button
               className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
                 tableHasErrors ? 'p-button-animated-blink' : null
@@ -268,7 +283,7 @@ const ActionsToolbar = ({
             <DropdownFilter
               className={!isLoading ? 'p-button-animated-blink' : null}
               disabled={isLoading}
-              filters={filter.validationDropdown}
+              filters={validationDropdown}
               hide={hideValidationFilter}
               id="filterValidationDropdown"
               onShow={e => {
@@ -279,7 +294,7 @@ const ActionsToolbar = ({
               showFilters={showValidationFilter}
               showLevelErrorIcons={true}
             />
-            {filter.groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId && (
+            {groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId && (
               <ChipButton
                 hasLevelErrorIcon={true}
                 labelClassName={styles.groupFilter}
@@ -297,8 +312,56 @@ const ActionsToolbar = ({
                 value={selectedRuleMessage}
               />
             )}
-          </>
+          </Fragment>
         )}
+        {prevFilterValue !== '' && (
+          <Fragment>
+            <span data-for="valueFilterTooltip" data-tip>
+              <ChipButton
+                icon="search"
+                labelClassName={styles.groupFilter}
+                levelError={selectedRuleLevelError}
+                onClick={() => showValueFilter('')}
+                value={decodeURIComponent(prevFilterValue)}
+              />
+            </span>
+            <ReactTooltip border={true} effect="solid" id="valueFilterTooltip" place="top">
+              {decodeURIComponent(prevFilterValue)}
+            </ReactTooltip>
+          </Fragment>
+        )}
+      </div>
+      <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
+        <span className={styles.input}>
+          <span className={`p-float-label ${styles.label}`}>
+            <InputText
+              className={styles.inputFilter}
+              id="value_filter_input"
+              name={resources.messages['valueFilter']}
+              onChange={event => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: event.target.value })}
+              onKeyDown={onSearchKeyEvent}
+              value={valueFilter}
+            />
+            {!isEmpty(valueFilter) && (
+              <Button
+                className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+                icon="cancel"
+                onClick={() => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: '' })}
+              />
+            )}
+            <Button
+              className="p-button-secondary-transparent"
+              icon="search"
+              onClick={() => showValueFilter(encodeURIComponent(valueFilter))}
+            />
+            <label
+              className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}
+              htmlFor="value_filter_input">
+              {resources.messages['valueFilter']}
+            </label>
+          </span>
+        </span>
+        <TooltipButton message={resources.messages['valueFilterTooltip']} uniqueIdentifier="valueFilter" />
       </div>
     </Toolbar>
   );

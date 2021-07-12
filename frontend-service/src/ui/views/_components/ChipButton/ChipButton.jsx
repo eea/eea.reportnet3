@@ -4,6 +4,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './ChipButton.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'ui/views/_components/Icon';
 import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import Tooltip from 'primereact/tooltip';
@@ -12,6 +14,8 @@ export const ChipButton = ({
   className = '',
   hasLevelErrorIcon = false,
   key,
+  icon = null,
+  labelClassName,
   levelError,
   onClick,
   style,
@@ -37,7 +41,6 @@ export const ChipButton = ({
       options: tooltipOptions
     });
   };
-
   return (
     <div className={`${className} ${styles.chipButton}`} key={key} ref={listElement} style={style}>
       {hasLevelErrorIcon && (
@@ -48,7 +51,8 @@ export const ChipButton = ({
           message={''}
         />
       )}
-      <span className={`${styles.labelClassName} ${styles.chipButtonLabel}`} ref={inputElement}>
+      {icon && <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons(icon)} />}
+      <span className={`${labelClassName} ${styles.chipButtonLabel}`} ref={inputElement}>
         {value}
       </span>
       <div onMouseOut={() => setIconToShow('cancel')} onMouseOver={() => setIconToShow('errorCircle')}>

@@ -111,7 +111,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /**
    * The delimiter.
    */
-  @Value("${loadDataDelimiter}")
+  @Value("${exportDataDelimiter}")
   private char delimiter;
 
 
@@ -451,7 +451,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       List<Representative> representativeList = new ArrayList<>();
 
       for (String representativeData : everyLines) {
-        String[] dataLine = representativeData.split("[|]");
+        String[] dataLine = representativeData.split("[" + delimiter + "]");
         String contryCode = dataLine[0].replaceAll("\"", "");
         String email = "";
         UserRepresentationVO user = null;

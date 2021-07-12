@@ -549,4 +549,33 @@ public interface DatasetSchemaService {
   void updateReferenceDataset(Long datasetId, String datasetSchemaId, boolean referenceDataset,
       boolean updateTables);
 
+
+
+  /**
+   * Export fields schema.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaId the table schema id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   */
+  byte[] exportFieldsSchema(final Long datasetId, final String datasetSchemaId,
+      final String tableSchemaId) throws EEAException;
+
+
+  /**
+   * Import fields schema.
+   *
+   * @param tableSchemaId the table schema id
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param file the file
+   * @param replace the replace
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
+      InputStream file, boolean replace);
+
 }
