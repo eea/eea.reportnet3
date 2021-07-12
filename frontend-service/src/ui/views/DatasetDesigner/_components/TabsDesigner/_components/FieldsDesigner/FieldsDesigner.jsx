@@ -606,7 +606,7 @@ export const FieldsDesigner = ({
       type: 'DATASET_DATA_LOADING_INIT',
       content: {
         datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-        title: TextUtils.ellipsis('tableName', config.notifications.STRING_LENGTH_MAX),
+        title: TextUtils.ellipsis(table.tableSchemaName, config.notifications.STRING_LENGTH_MAX),
         datasetLoading: resources.messages['datasetLoading'],
         dataflowName,
         datasetName
@@ -648,6 +648,12 @@ export const FieldsDesigner = ({
       });
     } finally {
       setIsLoadingFile(false);
+    }
+  };
+
+  const onImportTableSchemaError = async ({ xhr }) => {
+    if (xhr.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
     }
   };
 
@@ -843,7 +849,7 @@ export const FieldsDesigner = ({
           mode="advanced"
           multiple={false}
           name="file"
-          // onError={onImportTableError}
+          onError={onImportTableSchemaError}
           onUpload={onUpload}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {

@@ -1177,7 +1177,8 @@
 	  "importTableSchema": "Import definition",
     "exportTableSchema": "Export definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",
-    "improtFieldSchemaCompletedEvent": "OK",
-    "importFieldSchemaFailedEvent": "Error"
+    "importFieldSchemaCompletedEvent": "Loaded schema definition completed in <string>tableName</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importFieldSchemaFailedEvent": "Error",
+    "importTableSchemaInit": "Importing table schema in <strong>{:title}</strong>"
   }
 }

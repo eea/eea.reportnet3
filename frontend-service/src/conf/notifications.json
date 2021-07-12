@@ -940,11 +940,7 @@
           "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
         },
         {
-          "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId", "datasetName"]
-          }
+          "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT"
         }
       ]
     },
@@ -1020,6 +1016,9 @@
         },
         {
           "key": "RELEASE_START_EVENT"
+        },
+        {
+          "key": "IMPORT_TABLE_SCHEMA_INIT"
         }
       ]
     }

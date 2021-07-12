@@ -30,6 +30,7 @@ const useSocket = () => {
         },
         onConnect: () => {
           stompClient.subscribe('/user/queue/notifications', notification => {
+            console.log('noti', notification);
             const { type, content } = JSON.parse(notification.body);
             config.notifications.hiddenNotifications.includes(type)
               ? notificationContext.hide({ type, content })
