@@ -151,7 +151,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant LIKE_APPEND_QUERY_NO_FIELD_SCHEMA: {@value}. */
   private static final String LIKE_APPEND_QUERY_NO_FIELD_SCHEMA =
-      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE :fieldValue and fieldV.type NOT IN ('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON', 'POLYGON')) ";
+      "AND rv.id IN (SELECT fieldV.record from FieldValue fieldV where fieldV.value LIKE :fieldValue and fieldV.type NOT IN ('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON')) ";
 
   /** The Constant MASTER_QUERY: {@value}. */
   private static final String MASTER_QUERY =
