@@ -92,7 +92,6 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   public void updateReferenceDataset(@PathVariable Long datasetId,
       @RequestParam("updatable") Boolean updatable) {
     try {
-
       referenceDatasetService.updateUpdatable(datasetId, updatable);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());

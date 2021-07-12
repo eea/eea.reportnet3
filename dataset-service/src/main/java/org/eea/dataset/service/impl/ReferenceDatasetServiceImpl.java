@@ -12,6 +12,7 @@ import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferenced
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -125,7 +126,7 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
 
     ReferenceDataset referenceDataset = referenceDatasetRepository.findById(datasetId).orElse(null);
     if (null == referenceDataset) {
-      throw new EEAException("Reference dataset " + datasetId + " not found");
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_NOTFOUND, datasetId));
     }
     referenceDataset.setUpdatable(updatable);
     referenceDatasetRepository.save(referenceDataset);
