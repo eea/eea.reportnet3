@@ -1263,7 +1263,8 @@ const DataViewer = withRouter(
             sortOrder={sort.sortOrder}
             sortable={true}
             totalRecords={
-              !isNil(records.totalFilteredRecords) && (isFilterValidationsActive || valueFilter !== '')
+              !isNil(records.totalFilteredRecords) &&
+              (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== ''))
                 ? records.totalFilteredRecords
                 : records.totalRecords
             }
