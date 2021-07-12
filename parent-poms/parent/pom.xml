@@ -19,7 +19,7 @@
     <dataflow.version>3.0-SNAPSHOT</dataflow.version>
     <dataset.version>3.0-SNAPSHOT</dataset.version>
     <document.version>3.0-SNAPSHOT</document.version>
-    <frontend.version>3.0</frontend.version>
+    <frontend.version>3.0-SNAPSHOT</frontend.version>
     <indexsearch.version>3.0-SNAPSHOT</indexsearch.version>
     <inspire.version>3.0-SNAPSHOT</inspire.version>
     <recordstore.version>3.0-SNAPSHOT</recordstore.version>
