@@ -940,7 +940,11 @@
           "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
         },
         {
-          "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT"
+          "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },

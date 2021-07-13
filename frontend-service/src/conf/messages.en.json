@@ -1180,8 +1180,8 @@
 	"importTableSchema": "Import definition",
     "exportTableSchema": "Export definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",
-    "importFieldSchemaCompletedEvent": "Loaded schema definition completed in <string>tableName</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importFieldSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importFieldSchemaFailedEvent": "Error",
-    "importTableSchemaInit": "Importing table schema in <strong>{:title}</strong>"
+    "importTableSchemaInit": "Importing table schema definition"
   }
 }

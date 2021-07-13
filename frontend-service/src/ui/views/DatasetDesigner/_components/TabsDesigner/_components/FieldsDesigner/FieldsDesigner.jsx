@@ -597,21 +597,10 @@ export const FieldsDesigner = ({
   };
 
   const onUpload = async () => {
-    manageDialogs('isImportTableSchemaDialogVisible', false);
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
     notificationContext.add({
-      type: 'DATASET_DATA_LOADING_INIT',
-      content: {
-        datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-        title: TextUtils.ellipsis(table.tableSchemaName, config.notifications.STRING_LENGTH_MAX),
-        datasetLoading: resources.messages['datasetLoading'],
-        dataflowName,
-        datasetName
-      }
+      type: 'IMPORT_TABLE_SCHEMA_INIT'
     });
+    manageDialogs('isImportTableSchemaDialogVisible', false);
   };
 
   const createTableName = (tableName, fileType) => {
