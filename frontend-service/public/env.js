@@ -12,13 +12,13 @@ window.env = {
   //REACT_APP_BACKEND: 'http://localhost:3000',
 
   /**
-   * Sandbox
+   * Beta/DEV
    */
-  REACT_APP_BACKEND: 'http://rn3sandbox-api.altia.es',
+  REACT_APP_BACKEND: 'https://dev-api.reportnet.europa.eu',
   REACT_APP_EULOGIN: false,
   EULOGIN_URL:
-    'http://rn3dev-api.altia.es/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=http%3A%2F%2Frn3dev.altia.es%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
-  WEBSOCKET_URL: 'ws://rn3sandbox.altia.es/communication/reportnet-websocket',
+    'https://dev-auth.reportnet.europa.eu/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=https%3A%2F%2Fdev.reportnet.europa.eu%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
+  WEBSOCKET_URL: 'wss://dev.reportnet.europa.eu/communication/reportnet-websocket',
 
   /**
    * Beta
