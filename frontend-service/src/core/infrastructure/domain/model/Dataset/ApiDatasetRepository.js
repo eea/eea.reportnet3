@@ -105,9 +105,6 @@ const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
 const downloadReferenceDatasetFileData = async (dataflowId, fileName) =>
   await apiDataset.downloadReferenceDatasetFileData(dataflowId, fileName);
 
-
-
-
 const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
     await apiDataset.statisticsById(datasetId);
@@ -486,8 +483,7 @@ const tableDataById = async (
   const table = new DatasetTable({});
 
   table.tableSchemaId = tableDataDTO.data.idTableSchema;
-  table.totalRecords =
-    isEmpty(ruleId) || isNil(ruleId) ? tableDataDTO.data.totalRecords : tableDataDTO.data.totalFilteredRecords;
+  table.totalRecords = tableDataDTO.data.totalRecords;
   table.totalFilteredRecords = tableDataDTO.data.totalFilteredRecords;
 
   let field;
