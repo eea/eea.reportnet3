@@ -210,7 +210,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: true,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
-      manageRequestersBtn: dataflowState.status === config.dataflowStatus.DESIGN,
+      manageRequestersBtn: true,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
     };
