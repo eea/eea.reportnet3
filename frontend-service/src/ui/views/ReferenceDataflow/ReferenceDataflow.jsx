@@ -201,7 +201,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     </div>
   );
 
-  const requesterRoleOptionsOpenStatus = [
+  const requesterRoleOptions = [
     { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key }
   ];
@@ -210,7 +210,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: true,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
-      manageRequestersBtn: dataflowState.status === config.dataflowStatus.DESIGN,
+      manageRequestersBtn: true,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
     };
@@ -316,7 +316,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
-            roleOptions={requesterRoleOptionsOpenStatus}
+            roleOptions={requesterRoleOptions}
             setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}
