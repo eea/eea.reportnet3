@@ -34,6 +34,7 @@ import { CurrentPage } from 'ui/views/_functions/Utils';
 import { Dialog } from 'ui/views/_components/Dialog/';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { ManageReferenceDataflow } from 'ui/views/_components/ManageReferenceDataflow';
+import { UnlockReferenceDataflow } from './_components/UnlockReferenceDataflow/UnlockReferenceDataflow';
 
 const ReferenceDataflow = withRouter(({ history, match }) => {
   const {
@@ -54,12 +55,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
     isReferencingDataflowsDialogVisible: false,
+    isReferenceStateDialogVisible: false,
     isUserRightManagementDialogVisible: false,
     name: '',
     refresh: false,
     requestStatus: 'idle',
     status: '',
-    updatedDatasetSchema: []
+    updatedDatasetSchema: [],
+    updateable: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -175,6 +178,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
     />
   );
+  const referenceStateDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => manageDialogs('isReferenceStateDialogVisible', false)}
+    />
+  );
   const propertiesDataflowsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -211,10 +222,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       apiKeyBtn: true,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
       manageRequestersBtn: dataflowState.status === config.dataflowStatus.DESIGN,
+      referenceStateBtn: true,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
     };
   }
+
+  const toggleUnlockedLocked = () => {};
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
@@ -294,6 +308,20 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
           <ReferencingDataflows referenceDataflowId={referenceDataflowId} />
+        </Dialog>
+      )}
+
+      {dataflowState.isReferenceStateDialogVisible && (
+        <Dialog
+          footer={referenceStateDialogFooter}
+          header={resources.messages['referenceStateDialogHeader']}
+          onHide={() => manageDialogs('isReferenceStateDialogVisible', false)}
+          visible={dataflowState.isReferenceStateDialogVisible}>
+          <UnlockReferenceDataflow
+            referenceDataflowId={referenceDataflowId}
+            toggleUpdateable={toggleUnlockedLocked}
+            updateable={dataflowState.updateable}
+          />
         </Dialog>
       )}
 

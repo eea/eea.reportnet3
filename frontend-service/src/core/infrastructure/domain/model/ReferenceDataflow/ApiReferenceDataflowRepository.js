@@ -105,6 +105,7 @@ const parseDataflowDTO = dataflowDTO =>
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
+    updateable: dataflowDTO.updateable | false,
     userRole: dataflowDTO.userRole
   });
 

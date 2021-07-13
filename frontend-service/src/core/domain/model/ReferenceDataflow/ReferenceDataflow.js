@@ -16,6 +16,8 @@ export class ReferenceDataflow {
     requestId,
     showPublicInfo,
     status,
+    testDatasets,
+    updateable,
     userRole
   } = {}) {
     this.creationDate = creationDate;
@@ -34,6 +36,8 @@ export class ReferenceDataflow {
     this.requestId = requestId;
     this.showPublicInfo = showPublicInfo;
     this.status = status;
+    this.testDatasets = testDatasets;
+    this.updateable = updateable;
     this.userRole = userRole;
   }
 }
