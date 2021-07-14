@@ -43,16 +43,16 @@ td > .tooltip > span.tooltiptext {
 }
 
 .buttonCustom.info {
-  color: var(--c-blue-300);
+  color: var(--c-growl-info-darker-blue);
 }
 .buttonCustom.info:hover {
-  color: var(--c-blue-300) !important;
+  color: var(--c-growl-info-darker-blue) !important;
 }
 .buttonCustom.warning {
-  color: var(--c-orange-300);
+  color: var(--c-growl-warning-darker-yellow);
 }
 .buttonCustom.warning:hover {
-  color: var(--c-orange-300) !important;
+  color: var(--c-growl-warning-darker-yellow) !important;
 }
 .buttonCustom.error {
   color: var(--errors);
