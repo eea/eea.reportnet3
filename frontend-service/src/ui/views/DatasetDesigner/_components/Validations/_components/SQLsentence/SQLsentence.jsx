@@ -4,6 +4,8 @@ import trim from 'lodash/trim';
 
 import styles from './SQLsentence.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { SqlHelp } from './_components/SqlHelp';
@@ -44,10 +46,10 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
   };
 
   const onCCButtonClick = () => {
-    onSetSQLsentence('sqlSentence', trim(`${creationFormState.candidateRule['sqlSentence']} ${ccButtonValue}`));
+    onSetSQLsentence('sqlSentence', trim(`${creationFormState.candidateRule['sqlSentence']} ${countryCodeKeyword}`));
   };
 
-  const ccButtonValue = `{%R3_COUNTRY_CODE%}`;
+  const countryCodeKeyword = `${config.COUNTRY_CODE_KEYWORD}`
 
   return (
     <div className={styles.section}>
@@ -61,7 +63,7 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
             <Button
               className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
-              id="infoSQLsentence"
+              id="infoSqlSentence"
               onClick={e => onClickInfoButton()}
             />
             <Button
@@ -73,7 +75,7 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
             />
           </h3>
           <textarea
-            id="SQLsentenceTextarea"
+            id="sqlSentenceText"
             name=""
             onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
             value={creationFormState.candidateRule['sqlSentence']}></textarea>
