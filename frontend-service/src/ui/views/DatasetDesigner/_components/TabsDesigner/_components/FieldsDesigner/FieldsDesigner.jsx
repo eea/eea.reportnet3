@@ -708,9 +708,7 @@ export const FieldsDesigner = ({
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
-        {/* <div className={styles.constraintsButtons}>
-          
-        </div> */}
+
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span
@@ -824,7 +822,7 @@ export const FieldsDesigner = ({
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
           dialogHeader={`${resources.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
-          dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)} //allowTypes="/(\.|\/)(csv)$/"
+          dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
           dialogVisible={designerState.isImportTableSchemaDialogVisible}
           fileLimit={1}
           infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
