@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
+import trim from 'lodash/trim';
+
 import styles from './SQLsentence.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
@@ -41,6 +43,12 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
     setIsVisibleInfoDialog(false);
   };
 
+  const onCCButtonClick = () => {
+    onSetSQLsentence('sqlSentence', trim(`${creationFormState.candidateRule['sqlSentence']} ${ccButtonValue}`));
+  };
+
+  const ccButtonValue = `{%R3_COUNTRY_CODE%}`;
+
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -56,13 +64,19 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
               id="infoSQLsentence"
               onClick={e => onClickInfoButton()}
             />
+            <Button
+              className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
+              label={resources.messages['countryCodeVariableLabel']}
+              onClick={onCCButtonClick}
+              tooltip={resources.messages['matchStringTooltip']}
+              tooltipOptions={{ position: 'top' }}
+            />
           </h3>
           <textarea
             id="SQLsentenceTextarea"
             name=""
             onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
-            value={creationFormState.candidateRule['sqlSentence']}
-          />
+            value={creationFormState.candidateRule['sqlSentence']}></textarea>
         </div>
       </div>
       {isVisibleInfoDialog && (
