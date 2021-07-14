@@ -245,7 +245,8 @@ const Dataflow = withRouter(({ history, match }) => {
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
-        ((dataflowState.isCustodian || dataflowState.isObserver) && dataflowState.status === 'DRAFT')
+        dataflowState.isCustodian ||
+        dataflowState.isObserver
     };
   };
 
