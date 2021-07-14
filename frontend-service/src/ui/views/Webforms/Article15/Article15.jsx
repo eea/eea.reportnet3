@@ -102,12 +102,12 @@ export const Article15 = ({ dataProviderId, dataflowId, datasetId, isReporting, 
       return (
         <Fragment key={i}>
           <Button
-            data-tip
-            data-for={!isCreated ? 'TableNotExists' : ''}
-            disabled={article15State.isLoading}
             className={`${styles.headerButton} ${
               article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
             }`}
+            data-for={!isCreated ? 'TableNotExists' : ''}
+            data-tip
+            disabled={article15State.isLoading}
             icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
             iconClasses={
               !article15State.isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''
