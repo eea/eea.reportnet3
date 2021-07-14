@@ -188,6 +188,10 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   return await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
 };
 
+const exportTableSchemaById = async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
+  return await apiDataset.exportTableSchemaById(datasetId, datasetSchemaId, tableSchemaId, fileType);
+};
+
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
   datasetTableDataDTO.data = new Dataset({
@@ -665,6 +669,7 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportDatasetDataExternal,
   exportTableDataById,
+  exportTableSchemaById,
   getMetaData,
   getReferencedFieldValues,
   groupedErrorsById,
