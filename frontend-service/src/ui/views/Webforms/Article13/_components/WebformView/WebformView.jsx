@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -185,12 +185,12 @@ export const WebformView = ({
     !isNil(fields[0]) &&
     Object.keys(fields[0]).map(field => (
       <Column
-        key={field}
         columnResizeMode="expand"
         field={field}
         filter={true}
         filterMatchMode="contains"
         header={resources.messages[field]}
+        key={field}
         sortable={true}
       />
     ));
@@ -287,13 +287,11 @@ export const WebformView = ({
   if (isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
 
   return (
-    <Fragment>
-      <div className={styles.webform}>
-        <Toolbar className={styles.toolbar}>
-          <div className="p-toolbar-group-left">{renderWebFormHeaders()}</div>
-        </Toolbar>
-        {renderWebFormContent()}
-      </div>
-    </Fragment>
+    <div className={styles.webform}>
+      <Toolbar className={styles.toolbar}>
+        <div className="p-toolbar-group-left">{renderWebFormHeaders()}</div>
+      </Toolbar>
+      {renderWebFormContent()}
+    </div>
   );
 };
