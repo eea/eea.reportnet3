@@ -1177,6 +1177,7 @@
     "valueFilter": "Filter by value",
     "valueFilterTooltipGeometryNote": "Geometry fields will be omitted",
     "valueFilterTooltipCaseSensitiveNote": "Filter is case sensitive",
-    "integrationId": "Integration id"
+    "integrationId": "Integration id",
+    "countryCodeAcronym": "CC"
   }
 }
