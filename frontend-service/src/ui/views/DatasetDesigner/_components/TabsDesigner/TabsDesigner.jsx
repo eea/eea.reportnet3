@@ -49,7 +49,6 @@ export const TabsDesigner = withRouter(
     onChangeIsValidationSelected,
     onChangeReference,
     onHideSelectGroupedValidation,
-    onImportTableSchema,
     onLoadTableData,
     onTabChange,
     onUpdateSchema,
@@ -86,8 +85,7 @@ export const TabsDesigner = withRouter(
       }
     }, [datasetStatistics]);
 
-    useEffect(() => {
-      console.log(schemaImported);
+    useEffect(() => {      
       if (schemaImported) {
         onLoadSchema();
       }
@@ -426,7 +424,6 @@ export const TabsDesigner = withRouter(
                         onChangeReference={onChangeReference}
                         onChangeTableProperties={onChangeTableProperties}
                         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
-                        onImportTableSchema={onImportTableSchema}
                         onLoadTableData={onLoadTableData}
                         recordPositionId={tab.tableSchemaId === tableSchemaId ? recordPositionId : -1}
                         selectedRecordErrorId={tab.tableSchemaId === tableSchemaId ? selectedRecordErrorId : -1}

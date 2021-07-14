@@ -74,6 +74,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
+  const [schemaImported, setSchemaImported] = useState(false);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -143,7 +144,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     refresh: false,
     replaceData: false,
     selectedImportExtension: null,
-    schemaImported: false,
     schemaTables: [],
     tabs: [],
     uniqueConstraintsList: [],
@@ -166,7 +166,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isDataflowOpen,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
-    schemaImported,
     validateDialogVisible
   } = designerState;
 
@@ -197,11 +196,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     callSetMetaData();
   }, []);
 
-  useEffect(() => {
-    console.log(schemaImported);
+  useEffect(() => {    
     if (schemaImported) {
       onLoadSchema();
-      designerDispatch({ type: 'SET_SCHEMA_IMPORTED', payload: false });
+      setSchemaImported(false);
     }
   }, [schemaImported]);
 
@@ -641,6 +639,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setSqlValidationRunning,
     false
   );
+
+  useCheckNotifications(['IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'], setSchemaImported, true);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -1405,7 +1405,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
                 icon="refresh"
                 label={resources.messages['refresh']}
-                onClick={() => designerDispatch({ type: 'SET_SCHEMA_IMPORTED', payload: true })}
+                onClick={() => setSchemaImported(true)}
               />
             </div>
           </Toolbar>
@@ -1440,7 +1440,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onChangeIsValidationSelected={onChangeIsValidationSelected}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
-            onImportTableSchema={() => onHighlightRefresh(true)}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
             onUpdateSchema={onUpdateSchema}

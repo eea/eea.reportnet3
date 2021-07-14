@@ -48,7 +48,6 @@ export const FieldsDesigner = ({
   onChangeIsValidationSelected,
   onChangeTableProperties,
   onHideSelectGroupedValidation,
-  onImportTableSchema,
   onLoadTableData,
   recordPositionId,
   selectedRecordErrorId,
@@ -94,7 +93,7 @@ export const FieldsDesigner = ({
       table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
       setFixedNumber(table.fixedNumber || false);
     }
-  }, []);
+  }, [table]);
 
   useEffect(() => {
     if (!isUndefined(fields)) {
@@ -600,14 +599,10 @@ export const FieldsDesigner = ({
     notificationContext.add({
       type: 'IMPORT_TABLE_SCHEMA_INIT'
     });
-    onImportTableSchema();
     manageDialogs('isImportTableSchemaDialogVisible', false);
   };
 
-  const createTableName = (tableName, fileType) => {
-    console.log('name', `${tableName}.${fileType}`);
-    return `${tableName}.${fileType}`;
-  };
+  const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const onExportTableSchema = async fileType => {
     setIsLoadingFile(true);
@@ -625,7 +620,6 @@ export const FieldsDesigner = ({
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      console.log('falta notificacion de table schema');
       notificationContext.add({
         type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
         content: {
