@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -270,6 +271,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @param resourceInfoVO the resource info VO
    */
   @Override
+  @Async
   public void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO) {
     // Recover the resource names so they can be removed in the generic way.
     List<String> resourceNames =

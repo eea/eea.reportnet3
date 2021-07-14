@@ -420,6 +420,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @DeleteMapping("/{dataflowId}")
   @ApiOperation(value = "Delete a Dataflow by its Id")
   @ApiResponse(code = 500, message = "Internal Server Error")
+  @HystrixCommand
   public void deleteDataFlow(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {

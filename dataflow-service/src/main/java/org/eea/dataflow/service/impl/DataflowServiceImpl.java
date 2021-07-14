@@ -1027,118 +1027,125 @@ public class DataflowServiceImpl implements DataflowService {
   private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
       throws EEAException {
 
+    DataFlowVO dataflowVO = new DataFlowVO();
+
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     Dataflow result = dataflowRepository.findById(id).orElse(null);
 
-    DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
+    if (result != null) {
+      dataflowVO = dataflowMapper.entityToClass(result);
 
 
-    // filter design datasets (schemas) showed to the user depending on permissions
-    List<ResourceAccessVO> datasets =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA);
+      // filter design datasets (schemas) showed to the user depending on permissions
+      List<ResourceAccessVO> datasets =
+          userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA);
 
-    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
-      // add to the filter the reporting datasets
-      datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET));
-      // also, add to the filter the data collection
-      datasets.addAll(
-          userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
-      // and the eu datasets
-      datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
-      // add the test datasets
-      datasets
-          .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
-      // add the reference datasets
-      datasets.addAll(
-          userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.REFERENCE_DATASET));
+      if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+        // add to the filter the reporting datasets
+        datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET));
+        // also, add to the filter the data collection
+        datasets.addAll(
+            userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
+        // and the eu datasets
+        datasets
+            .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
+        // add the test datasets
+        datasets
+            .addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
+        // add the reference datasets
+        datasets.addAll(
+            userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.REFERENCE_DATASET));
+      }
+
+      List<Long> datasetsIds =
+          datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+
+
+      // If the dataflow it's on design status, no need to call for DC, EU datasets, Tests, etc. and
+      // we can
+      // save some calls
+      if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
+        // Set the reporting datasets
+        dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
+            .findReportingDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+        // Add the data collections
+        dataflowVO.setDataCollections(dataCollectionControllerZuul
+            .findDataCollectionIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+        // Add the EU datasets
+        dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+        // Add the Test datasets
+        dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id)
+            .stream().filter(dataset -> datasetsIds.contains(dataset.getId()))
+            .collect(Collectors.toList()));
+
+        // Add the Reference datasets
+        dataflowVO.setReferenceDatasets(referenceDatasetControllerZuul
+            .findReferenceDatasetByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+
+      } else {
+        dataflowVO.setReportingDatasets(new ArrayList<>());
+        dataflowVO.setDataCollections(new ArrayList<>());
+        dataflowVO.setEuDatasets(new ArrayList<>());
+        dataflowVO.setTestDatasets(new ArrayList<>());
+        dataflowVO.setReferenceDatasets(new ArrayList<>());
+      }
+
+      // special logic to REFERENCE DATAFLOWS that are in DRAFT status
+      if (TypeDataflowEnum.REFERENCE.equals(dataflowVO.getType())
+          && TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())
+          && dataflowVO.getReferenceDatasets().isEmpty()) {
+        dataflowVO.setReferenceDatasets(
+            referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(id));
+      }
+
+
+      // Add the representatives and design datasets
+      if (includeAllRepresentatives) {
+        dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
+        dataflowVO
+            .setDesignDatasets(datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id));
+      } else {
+        dataflowVO.setDesignDatasets(datasetMetabaseControllerZuul
+            .findDesignDataSetIdByDataflowId(id).stream()
+            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+        String userId = ((Map<String, String>) SecurityContextHolder.getContext()
+            .getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+        UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
+        dataflowVO.setRepresentatives(
+            representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
+      }
+      try {
+        getObligation(dataflowVO);
+      } catch (FeignException e) {
+        LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}", id,
+            e.getMessage(), e);
+      }
+      // we sort the weblinks and documents
+      if (!CollectionUtils.isEmpty(dataflowVO.getWeblinks())) {
+        dataflowVO.getWeblinks()
+            .sort(Comparator.comparing(WeblinkVO::getDescription, String.CASE_INSENSITIVE_ORDER));
+      }
+      if (!CollectionUtils.isEmpty(dataflowVO.getDocuments())) {
+        dataflowVO.getDocuments()
+            .sort(Comparator.comparing(DocumentVO::getDescription, String.CASE_INSENSITIVE_ORDER));
+      }
+
+      // Calculate anySchemaAvailableInPublic
+      dataflowVO.setAnySchemaAvailableInPublic(
+          dataSetControllerZuul.checkAnySchemaAvailableInPublic(dataflowVO.getId()));
+
+      LOG.info("Get the dataflow information with id {}", id);
+
     }
-
-    List<Long> datasetsIds =
-        datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-
-
-    // If the dataflow it's on design status, no need to call for DC, EU datasets, Tests, etc. and
-    // we can
-    // save some calls
-    if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
-      // Set the reporting datasets
-      dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
-          .findReportingDataSetIdByDataflowId(id).stream()
-          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-      // Add the data collections
-      dataflowVO.setDataCollections(dataCollectionControllerZuul
-          .findDataCollectionIdByDataflowId(id).stream()
-          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-      // Add the EU datasets
-      dataflowVO.setEuDatasets(euDatasetControllerZuul.findEUDatasetByDataflowId(id).stream()
-          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-      // Add the Test datasets
-      dataflowVO.setTestDatasets(testDataSetControllerZuul.findTestDatasetByDataflowId(id).stream()
-          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-      // Add the Reference datasets
-      dataflowVO.setReferenceDatasets(referenceDatasetControllerZuul
-          .findReferenceDatasetByDataflowId(id).stream()
-          .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-
-    } else {
-      dataflowVO.setReportingDatasets(new ArrayList<>());
-      dataflowVO.setDataCollections(new ArrayList<>());
-      dataflowVO.setEuDatasets(new ArrayList<>());
-      dataflowVO.setTestDatasets(new ArrayList<>());
-      dataflowVO.setReferenceDatasets(new ArrayList<>());
-    }
-
-    // special logic to REFERENCE DATAFLOWS that are in DRAFT status
-    if (TypeDataflowEnum.REFERENCE.equals(dataflowVO.getType())
-        && TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())
-        && dataflowVO.getReferenceDatasets().isEmpty()) {
-      dataflowVO.setReferenceDatasets(
-          referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(id));
-    }
-
-
-    // Add the representatives and design datasets
-    if (includeAllRepresentatives) {
-      dataflowVO.setRepresentatives(representativeService.getRepresetativesByIdDataFlow(id));
-      dataflowVO
-          .setDesignDatasets(datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id));
-    } else {
-      dataflowVO.setDesignDatasets(datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(id)
-          .stream().filter(dataset -> datasetsIds.contains(dataset.getId()))
-          .collect(Collectors.toList()));
-      String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
-          .getDetails()).get(AuthenticationDetails.USER_ID);
-      UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
-      dataflowVO.setRepresentatives(
-          representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
-    }
-    try {
-      getObligation(dataflowVO);
-    } catch (FeignException e) {
-      LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}", id,
-          e.getMessage(), e);
-    }
-    // we sort the weblinks and documents
-    if (!CollectionUtils.isEmpty(dataflowVO.getWeblinks())) {
-      dataflowVO.getWeblinks()
-          .sort(Comparator.comparing(WeblinkVO::getDescription, String.CASE_INSENSITIVE_ORDER));
-    }
-    if (!CollectionUtils.isEmpty(dataflowVO.getDocuments())) {
-      dataflowVO.getDocuments()
-          .sort(Comparator.comparing(DocumentVO::getDescription, String.CASE_INSENSITIVE_ORDER));
-    }
-
-    // Calculate anySchemaAvailableInPublic
-    dataflowVO.setAnySchemaAvailableInPublic(
-        dataSetControllerZuul.checkAnySchemaAvailableInPublic(dataflowVO.getId()));
-
-    LOG.info("Get the dataflow information with id {}", id);
 
     return dataflowVO;
   }

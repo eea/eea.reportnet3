@@ -231,7 +231,7 @@ public class DataFlowServiceImplTest {
     List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
     DesignDatasetVO designDatasetVO = new DesignDatasetVO();
     designDatasetVOs.add(designDatasetVO);
-    List<WeblinkVO> weblinks = new ArrayList();
+    List<WeblinkVO> weblinks = new ArrayList<>();
     WeblinkVO weblinkVO = new WeblinkVO();
     weblinkVO.setDescription("bbbb");
     WeblinkVO weblinkVO2 = new WeblinkVO();
@@ -242,6 +242,7 @@ public class DataFlowServiceImplTest {
 
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
+    when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new Dataflow()));
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
         .thenReturn(reportingDatasetVOs);
@@ -778,7 +779,8 @@ public class DataFlowServiceImplTest {
     List<RepresentativeVO> representatives = new ArrayList<>();
     RepresentativeVO representative = new RepresentativeVO();
     representatives.add(representative);
-    Mockito.when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    Mockito.when(dataflowRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new Dataflow()));
     Mockito
         .when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<ResourceAccessVO>());
