@@ -1178,6 +1178,7 @@
     "valueFilterTooltipGeometryNote": "Geometry fields will be omitted",
     "valueFilterTooltipCaseSensitiveNote": "Filter is case sensitive",
     "integrationId": "Integration id",
+    "countryCodeAcronym": "CC",
 	"importTableSchema": "Import definition",
     "exportTableSchema": "Export definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",

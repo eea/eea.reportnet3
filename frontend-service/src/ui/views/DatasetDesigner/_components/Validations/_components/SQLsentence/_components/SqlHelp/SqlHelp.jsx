@@ -2,6 +2,7 @@ import { useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import toLower from 'lodash/toLower';
 import trim from 'lodash/trim';
 
 import styles from './SqlHelp.module.scss';
@@ -12,7 +13,6 @@ import { DataflowService } from 'core/services/Dataflow';
 
 import { parseDatasetSchemas } from './_functions/utils/parseDatasetSchemas';
 import { parseHelpItem } from './_functions/utils/parseHelpItem';
-import { toLower } from 'lodash';
 
 const sqlHelpReducer = (state, { type, payload }) => {
   switch (type) {
