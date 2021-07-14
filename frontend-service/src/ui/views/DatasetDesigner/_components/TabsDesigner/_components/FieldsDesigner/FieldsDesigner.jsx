@@ -5,7 +5,6 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
 
 import styles from './FieldsDesigner.module.scss';
@@ -49,6 +48,7 @@ export const FieldsDesigner = ({
   onChangeIsValidationSelected,
   onChangeTableProperties,
   onHideSelectGroupedValidation,
+  onImportTableSchema,
   onLoadTableData,
   recordPositionId,
   selectedRecordErrorId,
@@ -600,6 +600,7 @@ export const FieldsDesigner = ({
     notificationContext.add({
       type: 'IMPORT_TABLE_SCHEMA_INIT'
     });
+    onImportTableSchema();
     manageDialogs('isImportTableSchemaDialogVisible', false);
   };
 

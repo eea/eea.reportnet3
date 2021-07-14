@@ -134,6 +134,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_UPDATE_SCHEMA':
       return { ...state, datasetSchema: { ...state.datasetSchema, tables: payload.schema } };
 
+    case 'SET_SCHEMA_IMPORTED':
+      return { ...state, schemaImported: payload };
+
     case 'SET_AVAILABLE_PUBLIC_VIEW':
       return { ...state, availableInPublic: payload };
 

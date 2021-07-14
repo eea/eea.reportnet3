@@ -143,6 +143,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     refresh: false,
     replaceData: false,
     selectedImportExtension: null,
+    schemaImported: false,
     schemaTables: [],
     tabs: [],
     uniqueConstraintsList: [],
@@ -165,6 +166,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isDataflowOpen,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
+    schemaImported,
     validateDialogVisible
   } = designerState;
 
@@ -194,6 +196,14 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     onLoadSchema();
     callSetMetaData();
   }, []);
+
+  useEffect(() => {
+    console.log(schemaImported);
+    if (schemaImported) {
+      onLoadSchema();
+      designerDispatch({ type: 'SET_SCHEMA_IMPORTED', payload: false });
+    }
+  }, [schemaImported]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -1336,7 +1346,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     : null
                 } datasetSchema-qcRules-help-step`}
                 disabled={isDesignDatasetEditorRead || (isDataflowOpen && designerState.referenceDataset)}
-                icon={'horizontalSliders'}
+                icon="horizontalSliders"
                 label={resources.messages['qcRules']}
                 onClick={() => manageDialogs('validationListDialogVisible', true)}
               />
@@ -1348,7 +1358,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     : null
                 }`}
                 disabled={isDesignDatasetEditorRead || (isDataflowOpen && designerState.referenceDataset)}
-                icon={'key'}
+                icon="key"
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
               />
@@ -1358,7 +1368,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   !isDesignDatasetEditorRead && !designerState.referenceDataset ? styles.integrationsButton : null
                 }`}
                 disabled={isDesignDatasetEditorRead || designerState.referenceDataset}
-                icon={'export'}
+                icon="export"
                 iconClasses={styles.integrationsButtonIcon}
                 label={resources.messages['externalIntegrations']}
                 onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
@@ -1372,7 +1382,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   'p-button-animated-blink'
                 }`}
                 disabled={!designerState.datasetHasData || isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'dashboard'}
+                icon="dashboard"
                 label={resources.messages['dashboards']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
@@ -1383,7 +1393,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     : null
                 }`}
                 disabled={designerState.hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'camera'}
+                icon="camera"
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
@@ -1393,9 +1403,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
                 }  ${!isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null}`}
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'refresh'}
+                icon="refresh"
                 label={resources.messages['refresh']}
-                onClick={() => onLoadSchema()}
+                onClick={() => designerDispatch({ type: 'SET_SCHEMA_IMPORTED', payload: true })}
               />
             </div>
           </Toolbar>
@@ -1430,11 +1440,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onChangeIsValidationSelected={onChangeIsValidationSelected}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+            onImportTableSchema={() => onHighlightRefresh(true)}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
             onUpdateSchema={onUpdateSchema}
             onUpdateTable={onUpdateTable}
             recordPositionId={dataViewerOptions.recordPositionId}
+            schemaImported={schemaImported}
             selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
             selectedRuleId={dataViewerOptions.selectedRuleId}
             selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
