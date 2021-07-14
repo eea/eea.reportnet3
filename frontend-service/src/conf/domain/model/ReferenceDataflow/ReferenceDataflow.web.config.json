@@ -3,5 +3,6 @@
   "createDataflow": "/dataflow",
   "deleteReferenceDataflow": "/dataflow/{:referenceDataflowId}",
   "getReferencingDataflows": "/referenceDataset/referenced/dataflow/{:referenceDataflowId}",
-  "referenceDataflow": "/dataflow/{:referenceDataflowId}"
+  "referenceDataflow": "/dataflow/{:referenceDataflowId}",
+  "toggleUpdatable": "/referenceDataset/{:referenceDataflowId}?updatable={:updatable}"
 }

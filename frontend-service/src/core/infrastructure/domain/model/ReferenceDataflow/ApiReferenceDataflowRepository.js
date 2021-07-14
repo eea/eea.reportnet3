@@ -105,7 +105,7 @@ const parseDataflowDTO = dataflowDTO =>
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
-    updateable: dataflowDTO.updateable | false,
+    updatable: dataflowDTO.updatable | false,
     userRole: dataflowDTO.userRole
   });
 
@@ -173,11 +173,16 @@ const referenceDataflow = async referenceDataflowId => {
   return referenceDataflowDTO;
 };
 
+const toggleUpdatable = (referenceDataflowId, updatable) => {
+  apiReferenceDataflow.toggleUpdatable(referenceDataflowId, updatable);
+};
+
 export const ApiReferenceDataflowRepository = {
   all,
   create,
   deleteReferenceDataflow,
   edit,
   getReferencingDataflows,
-  referenceDataflow
+  referenceDataflow,
+  toggleUpdatable
 };

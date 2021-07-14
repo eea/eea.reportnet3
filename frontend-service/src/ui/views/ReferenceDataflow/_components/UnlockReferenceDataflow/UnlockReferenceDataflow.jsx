@@ -6,12 +6,12 @@ import { Checkbox } from 'ui/views/_components/Checkbox';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const UnlockReferenceDataflow = ({ updateable, toggleUnlockedLocked }) => {
+export const UnlockReferenceDataflow = ({ updatable, toggleUpdatable }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   return (
     <div className={styles.wrapper}>
-      <Checkbox checked={updateable} onClick={() => toggleUnlockedLocked()} role="checkbox" />
+      <Checkbox checked={updatable} onChange={() => toggleUpdatable()} role="checkbox" />
       <label htmlFor="">{resourcesContext.messages['unlockReferenceDataflowLabel']}</label>
     </div>
   );

@@ -62,7 +62,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     requestStatus: 'idle',
     status: '',
     updatedDatasetSchema: [],
-    updateable: false
+    updatable: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -228,7 +228,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     };
   }
 
-  const toggleUnlockedLocked = () => {};
+  const toggleUpdatable = () => {
+    console.log('kk');
+    try {
+      ReferenceDataflowService.toggleUpdatable(referenceDataflowId, !dataflowState.updatable);
+    } catch (error) {
+      console.log(`error`, error);
+    }
+  };
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
@@ -319,8 +326,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           visible={dataflowState.isReferenceStateDialogVisible}>
           <UnlockReferenceDataflow
             referenceDataflowId={referenceDataflowId}
-            toggleUpdateable={toggleUnlockedLocked}
-            updateable={dataflowState.updateable}
+            toggleUpdatable={toggleUpdatable}
+            updatable={dataflowState.updatable}
           />
         </Dialog>
       )}

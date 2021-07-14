@@ -27,5 +27,9 @@ export const apiReferenceDataflow = {
     await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getReferencingDataflows, { referenceDataflowId }) }),
 
   referenceDataflow: async referenceDataflowId =>
-    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow, { referenceDataflowId }) })
+    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow, { referenceDataflowId }) }),
+  toggleUpdatable: (referenceDataflowId, updatable) =>
+    HTTPRequester.update({
+      url: getUrl(ReferenceDataflowConfig.toggleUpdatable, { referenceDataflowId, updatable })
+    })
 };

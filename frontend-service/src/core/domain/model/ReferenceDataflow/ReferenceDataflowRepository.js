@@ -6,7 +6,8 @@ export const ReferenceDataflowRepository = {
   deleteReferenceDataflow: () => Promise.reject('[DataflowRepository#deleteReferenceDataflow] must be implemented'),
   edit: () => Promise.reject('[DataflowRepository#edit] must be implemented'),
   getReferencingDataflows: () => Promise.reject('[DataflowRepository#getReferencingDataflows] must be implemented'),
-  referenceDataflow: () => Promise.reject('[DataflowRepository#referenceDataflow] must be implemented')
+  referenceDataflow: () => Promise.reject('[DataflowRepository#referenceDataflow] must be implemented'),
+  toggleUpdatable: () => '[DataflowRepository#toggleUpdatable] must be implemented'
 };
 
 export const referenceDataflowRepository = Object.assign(
