@@ -68,7 +68,7 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={resources.messages['countryCodeVariableLabel']}
+              label={resources.messages['countryCodeAcronym']}
               onClick={onCCButtonClick}
               tooltip={resources.messages['matchStringTooltip']}
               tooltipOptions={{ position: 'top' }}
