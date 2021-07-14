@@ -189,7 +189,6 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
 };
 
 const exportTableSchemaById = async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
-  console.log(datasetId, datasetSchemaId, tableSchemaId, fileType);
   return await apiDataset.exportTableSchemaById(datasetId, datasetSchemaId, tableSchemaId, fileType);
 };
 
