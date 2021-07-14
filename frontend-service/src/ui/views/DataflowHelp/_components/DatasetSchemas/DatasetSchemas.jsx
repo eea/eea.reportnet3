@@ -150,7 +150,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         const parseExtensionsOperations = extensionsOperations => {
           const parsedExtensionsOperations = [];
           extensionsOperations.forEach(extensionOperation => {
-            console.log(extensionOperation);
             parsedExtensionsOperations.push(
               pick(extensionOperation, 'datasetSchemaId', 'operation', 'fileExtension', 'id')
             );
