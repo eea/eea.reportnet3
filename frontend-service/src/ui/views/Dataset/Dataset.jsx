@@ -1116,7 +1116,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             isNil(importSelectedIntegrationId)
               ? getUrl(DatasetConfig.importFileDataset, {
                   datasetId: datasetId,
-                  delimiter: `${config.IMPORT_FILE_DELIMITER}`
+                  delimiter: encodeURIComponent(',')
                 })
               : getUrl(DatasetConfig.importFileDatasetExternal, {
                   datasetId: datasetId,

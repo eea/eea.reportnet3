@@ -196,7 +196,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     callSetMetaData();
   }, []);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (schemaImported) {
       onLoadSchema();
       setSchemaImported(false);
@@ -1603,7 +1603,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               isNil(importSelectedIntegrationId)
                 ? getUrl(DatasetConfig.importFileDataset, {
                     datasetId: datasetId,
-                    delimiter: `${config.IMPORT_FILE_DELIMITER}`
+                    delimiter: encodeURIComponent(',')
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {
                     datasetId: datasetId,
