@@ -19,7 +19,7 @@ const sqlHelpReducer = (state, { type, payload }) => {
     case 'UPDATE_PROPERTY':
       return {
         ...state,
-        [payload.key]: payload.value
+        [payload.key]: payload.value || ''
       };
 
     default:
