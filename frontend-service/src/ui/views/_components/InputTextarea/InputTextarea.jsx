@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';
@@ -179,7 +179,7 @@ export class InputTextarea extends Component {
     let textareaProps = ObjectUtils.findDiffKeys(this.props, InputTextarea.defaultProps);
 
     return (
-      <>
+      <Fragment>
         <textarea
           {...textareaProps}
           autoFocus={this.props.autoFocus}
@@ -195,7 +195,7 @@ export class InputTextarea extends Component {
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.placeholder || this.props.id}
         </label>
-      </>
+      </Fragment>
     );
   }
 }

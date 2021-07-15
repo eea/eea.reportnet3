@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { Fragment, memo } from 'react';
 
 import uuid from 'uuid';
 
@@ -38,7 +38,7 @@ const TitleWithItem = memo(
             <span className={styles.title}>
               {title}
               {hasInfoTooltip && (
-                <>
+                <Fragment>
                   <FontAwesomeIcon
                     aria-hidden={false}
                     aria-label="Info"
@@ -56,7 +56,7 @@ const TitleWithItem = memo(
                       </div>
                     }
                   </ReactTooltip>
-                </>
+                </Fragment>
               )}
             </span>
             <span className={styles.subtitle}>{subtitle}</span>

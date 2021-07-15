@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { Fragment, useContext, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { SettingsHelpConfig } from 'conf/help/settings';
@@ -29,14 +29,14 @@ const Settings = withRouter(({ history }) => {
 
   const renderUserOptions = () => {
     return (
-      <>
+      <Fragment>
         <div className={`${styles.userConfiguration} settings-change-settings-help-step`}>
           <UserConfiguration />
         </div>
         <div className={`${styles.userCard} settings-change-avatar-help-step`}>
           <UserCard />
         </div>
-      </>
+      </Fragment>
     );
   };
 
