@@ -92,9 +92,11 @@ public class LockServiceImpl implements LockService {
   @Override
   public Boolean removeLock(Integer lockId) {
     Boolean isRemoved = lockRepository.deleteIfPresent(lockId);
-    ScheduledFuture<?> task = TASKS.remove(lockId);
-    if (task != null) {
-      task.cancel(false);
+    if (Boolean.TRUE.equals(isRemoved)) {
+      ScheduledFuture<?> task = TASKS.remove(lockId);
+      if (task != null) {
+        task.cancel(false);
+      }
     }
     LOG.info("Lock removed: {} - {}", lockId, isRemoved);
     return isRemoved;
@@ -187,9 +189,11 @@ public class LockServiceImpl implements LockService {
    */
   private void scheduledRemoveLock(Integer lockId) {
     Boolean isRemoved = lockRepository.deleteIfPresent(lockId);
-    ScheduledFuture<?> task = TASKS.remove(lockId);
-    if (task != null) {
-      task.cancel(false);
+    if (Boolean.TRUE.equals(isRemoved)) {
+      ScheduledFuture<?> task = TASKS.remove(lockId);
+      if (task != null) {
+        task.cancel(false);
+      }
     }
     LOG.warn("Lock removed by scheduler: {} - {}", lockId, isRemoved);
   }

@@ -105,9 +105,6 @@ const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
 const downloadReferenceDatasetFileData = async (dataflowId, fileName) =>
   await apiDataset.downloadReferenceDatasetFileData(dataflowId, fileName);
 
-
-
-
 const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
     await apiDataset.statisticsById(datasetId);
@@ -189,6 +186,10 @@ const exportDatasetDataExternal = async (datasetId, integrationId) => {
 
 const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   return await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
+};
+
+const exportTableSchemaById = async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
+  return await apiDataset.exportTableSchemaById(datasetId, datasetSchemaId, tableSchemaId, fileType);
 };
 
 const getMetaData = async datasetId => {
@@ -481,8 +482,7 @@ const tableDataById = async (
   const table = new DatasetTable({});
 
   table.tableSchemaId = tableDataDTO.data.idTableSchema;
-  table.totalRecords =
-    isEmpty(ruleId) || isNil(ruleId) ? tableDataDTO.data.totalRecords : tableDataDTO.data.totalFilteredRecords;
+  table.totalRecords = tableDataDTO.data.totalRecords;
   table.totalFilteredRecords = tableDataDTO.data.totalFilteredRecords;
 
   let field;
@@ -669,6 +669,7 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportDatasetDataExternal,
   exportTableDataById,
+  exportTableSchemaById,
   getMetaData,
   getReferencedFieldValues,
   groupedErrorsById,

@@ -24,4 +24,7 @@ public class ReferenceDatasetPublicVO implements Serializable {
   /** The public file name. */
   private String publicFileName;
 
+  /** The updatable. */
+  private Boolean updatable;
+
 }

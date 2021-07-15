@@ -3,6 +3,7 @@ import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './ManageIntegrations.module.scss';
 
@@ -357,9 +358,10 @@ export const ManageIntegrations = ({
         </label>
         <div className={styles.checkboxWrapper}>
           <Checkbox
+            ariaLabel={`${componentName}__${option}`}
             checked={manageIntegrationsState.notificationRequired}
-            id="notificationRequired"
-            inputId="notificationRequired"
+            id={`${componentName}__${option}`}
+            inputId={`${componentName}__${option}`}
             label="notificationRequired"
             onChange={event => {
               onChangeNotificationRequiredCheckboxEvent(event.checked, option);
@@ -445,10 +447,11 @@ export const ManageIntegrations = ({
         <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <Dropdown
           appendTo={document.body}
-          ariaLabel={'integrations'}
+          ariaLabel={resources.messages[option]}
           disabled={isEmpty(optionList[option])}
           filter={optionList[option].length > 7}
           inputId={`${componentName}__${option}`}
+          name={uniqueId(resources.messages[option])}
           onChange={event => {
             if (option === 'repository') {
               onFillFieldRepository(event.value, option);

@@ -21,6 +21,11 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         validationDropdown: payload.levelErrors
       };
+    case 'SET_VALUE_FILTER':
+      return {
+        ...state,
+        valueFilter: payload
+      };
     case 'SET_VISIBILITY_FILTER':
       return {
         ...state,

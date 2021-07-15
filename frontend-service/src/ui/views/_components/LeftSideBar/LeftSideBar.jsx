@@ -96,8 +96,8 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
     const userHelpProps = {
       className: 'dataflowList-left-side-bar-help-help-step',
       href: '#',
-      label: 'help',
       icon: 'questionCircle',
+      label: 'help',
       onClick: async e => {
         e.preventDefault();
         setRun(true);

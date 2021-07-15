@@ -68,7 +68,8 @@ const DatasetSchema = ({
           invisible: ['datasetSchemaId'],
           names: {
             operation: 'Operation',
-            fileExtension: 'Extension'
+            fileExtension: 'Extension',
+            id: 'Id'
           }
         },
         uniques: {
@@ -171,7 +172,7 @@ const DatasetSchema = ({
       case 'POLYGON':
       case 'MULTIPOLYGON':
         return (
-          <span
+          <a
             href="https://geojsonlint.com/"
             rel="noreferrer"
             target="_blank"
@@ -192,7 +193,7 @@ const DatasetSchema = ({
               place="top">
               <span>{resources.messages['geomTypeHelpTooltip']}</span>
             </ReactTooltip>
-          </span>
+          </a>
         );
       default:
         return '';
