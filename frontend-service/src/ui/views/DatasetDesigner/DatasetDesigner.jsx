@@ -1603,7 +1603,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               isNil(importSelectedIntegrationId)
                 ? getUrl(DatasetConfig.importFileDataset, {
                     datasetId: datasetId,
-                    delimiter: encodeURIComponent(',')
+                    delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {
                     datasetId: datasetId,
