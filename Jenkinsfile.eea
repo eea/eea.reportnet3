@@ -24,15 +24,16 @@ pipeline {
                     //    }
                     //}
                 }
-                /*stage('Build Frontend') {
+                stage('Build Frontend') {
                     agent { node { label 'eea'} }
                     steps {
                         sh 'rm -rf frontend-service/node_modules/'
+                        sh 'rm frontend-service/package-lock.json'
                         sh '''
                             npm install frontend-service/
                         '''
                     }
-                }*/
+                }
             }
 
         }
