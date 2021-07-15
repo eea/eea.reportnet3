@@ -20,6 +20,10 @@ export const dataflowReducer = (state, { type, payload }) => {
       return { ...state, requestStatus: 'rejected', error: payload.error };
     }
 
+    case 'LOAD_PERMISSIONS': {
+      return { ...state, isCustodian: payload.isCustodian };
+    }
+
     case 'ON_EDIT_DATAFLOW':
       return { ...state, name: payload.name, description: payload.description };
 
