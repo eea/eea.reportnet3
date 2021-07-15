@@ -2574,7 +2574,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         tableSchemaName = tableSchema.get().getNameTableSchema();
       }
 
-      readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema, tableSchemaName);
+      readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
 
       // Success notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
@@ -2623,11 +2623,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param replace the replace
    * @param datasetSchema the dataset schema
-   * @param tableSchemaName the table schema name
    * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   private void readFieldLines(final InputStream inputStream, final String tableSchemaId,
-      Long datasetId, boolean replace, DataSetSchema datasetSchema, String tableSchemaName)
+      Long datasetId, boolean replace, DataSetSchema datasetSchema)
       throws EEAException, IOException {
     LOG.info("Processing entries at method readFieldLines");
     // Init variables
@@ -2665,8 +2665,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // If replace=true, delete all the fields of the table
       if (Boolean.TRUE.equals(replace)) {
         // if there's a PK in use in the table we want to replace -> error
-        if (Boolean.FALSE
-            .equals(checkPkInUse(fieldSchemas, datasetSchema.getIdDataSetSchema().toString()))) {
+        if (Boolean.FALSE.equals(checkPkInUse(fieldSchemas))) {
           LOG_ERROR.error(
               "Error importing field schemas on datasetId {} because the fields to replace have a PK in use",
               datasetId);
@@ -2807,20 +2806,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
    * Check pk in use.
    *
    * @param fieldSchemas the field schemas
-   * @param datasetSchemaId the dataset schema id
    * @return the boolean
    */
-  private Boolean checkPkInUse(List<FieldSchema> fieldSchemas, String datasetSchemaId) {
+  private Boolean checkPkInUse(List<FieldSchema> fieldSchemas) {
     Boolean allow = true;
     for (FieldSchema f : fieldSchemas) {
-      FieldSchemaVO fieldSchemaVO = fieldSchemaNoRulesMapper.entityToClass(f);
-      if (Boolean.FALSE.equals(checkPkAllowUpdate(datasetSchemaId, fieldSchemaVO))) {
+      if (f.getPkReferenced() != null && f.getPkReferenced()) {
         allow = false;
-        break;
       }
     }
     return allow;
@@ -2834,8 +2831,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void checklineEmpty(List<String> firstLine) throws InvalidFileException {
     // if the array is size one and their content is empty means that the line is empty
-    if (null == firstLine || firstLine.isEmpty()
-        || (firstLine.size() == 1 && "".equals(firstLine.get(0)))) {
+    if (null == firstLine || firstLine.isEmpty() || (firstLine.size() != 7)) {
       // throw an error if firstLine is empty, we need a header.
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
     }
@@ -2853,7 +2849,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       final String recordSchemaId) {
     FieldSchemaVO fieldSchema = null;
     // if the line is white then skip it
-    if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
+    if (null != values && !values.isEmpty() && values.size() >= 6) {
 
       // Order in the array
       // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
@@ -2861,15 +2857,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // If the field name is not correct, skip the line
       if (Pattern.matches(REGEX_NAME, fieldName.trim())) {
         fieldSchema = new FieldSchemaVO();
-        fieldSchema.setName(fieldName);
-        fieldSchema.setPk(Boolean.valueOf(values.get(1)));
-        fieldSchema.setRequired(Boolean.valueOf(values.get(2)));
-        fieldSchema.setReadOnly(Boolean.valueOf(values.get(3)));
-        fieldSchema.setDescription(values.get(4));
-        fieldSchema.setType(DataType.valueOf(values.get(5)));
-        fieldSchema.setValidExtensions(new String[0]);
-
-        fieldSchema.setIdRecord(recordSchemaId);
+        try {
+          fieldSchema.setName(fieldName);
+          fieldSchema.setIdRecord(recordSchemaId);
+          fieldSchema.setValidExtensions(new String[0]);
+          fieldSchema.setPk(Boolean.valueOf(values.get(1)));
+          fieldSchema.setRequired(Boolean.valueOf(values.get(2)));
+          fieldSchema.setReadOnly(Boolean.valueOf(values.get(3)));
+          fieldSchema.setDescription(values.get(4));
+          fieldSchema.setType(DataType.valueOf(values.get(5)));
+          if (values.get(6) != null) {
+            String[] codelist = values.get(6).split(";");
+            fieldSchema.setCodelistItems(codelist);
+          }
+        } catch (Exception e) {
+          fieldSchema = null;
+        }
       }
     }
     return fieldSchema;
@@ -2915,7 +2918,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         columns.add(fieldSchema.getDescription());
         columns.add(fieldSchema.getType().toString());
         if (fieldSchema.getCodelistItems() != null && fieldSchema.getCodelistItems().length > 0) {
-          columns.add(Arrays.toString(fieldSchema.getCodelistItems()));
+          String codelists = "";
+          Integer counter = 0;
+          for (String item : fieldSchema.getCodelistItems()) {
+            codelists = codelists.concat(item);
+            counter++;
+            if (counter < fieldSchema.getCodelistItems().length) {
+              codelists = codelists.concat(";");
+            }
+          }
+          columns.add(codelists);
           lastPart = true;
         }
 
