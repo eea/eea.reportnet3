@@ -1188,7 +1188,7 @@
     "importFieldSchemaFailedEvent": "Error",
     "importTableSchemaInit": "Importing table schema definition",
     "replaceDataPKInUse": "It's not possible to replace a PK in use",
-    "disabledPKGeom": "This field type can't be PK",
+    "disabledPKGeom": "This field type can't be a PK",
     "disabledPKHas": "Table has already a PK",
     "disabledPKLink": "Field is referenced by a link",
     "disabledIsOpen": "Dataflow is in open state",
