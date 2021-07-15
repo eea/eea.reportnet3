@@ -2816,7 +2816,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private Boolean checkPkInUse(List<FieldSchema> fieldSchemas) {
     Boolean allow = true;
     for (FieldSchema f : fieldSchemas) {
-      if (f.getPkReferenced() != null && Boolean.TRUE.equals(f.getPkReferenced())) {
+      if (Boolean.TRUE.equals(f.getPkReferenced())) {
         allow = false;
       }
     }
