@@ -188,6 +188,10 @@
   display: flex;
   justify-content: space-between;
 }
+
+.replaceCheckboxSpanDisabled {
+  cursor: not-allowed !important;
+}
 .iconPreview {
   font-size: 20pt;
   color: var(--main-font-color);

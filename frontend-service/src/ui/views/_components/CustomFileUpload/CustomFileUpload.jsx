@@ -56,6 +56,8 @@ export const CustomFileUpload = ({
   previewWidth = 50,
   replaceCheck = false,
   replaceCheckLabel = 'Replace data',
+  replaceCheckLabelMessage = '',
+  replaceCheckDisabled = false,
   style = null,
   uploadLabel = 'Upload',
   url = null,
@@ -407,16 +409,29 @@ export const CustomFileUpload = ({
       <div className={styles.checkboxWrapper}>
         <Checkbox
           checked={state.replace}
+          disabled={replaceCheckDisabled}
           id="replaceCheckbox"
           inputId="replaceCheckbox"
           onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}
           role="checkbox"
         />
         <label htmlFor="replaceCheckbox">
-          <span onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })}>
+          <span
+            className={replaceCheckDisabled && styles.replaceCheckboxSpanDisabled}
+            onClick={() =>
+              !replaceCheckDisabled && dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })
+            }>
             {replaceCheckLabel}
           </span>
         </label>
+        {replaceCheckDisabled && (
+          <Button
+            className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+            icon="infoCircle"
+            tooltip={replaceCheckLabelMessage}
+            tooltipOptions={{ position: 'top' }}
+          />
+        )}
       </div>
     );
   };
