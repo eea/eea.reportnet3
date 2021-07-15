@@ -534,7 +534,8 @@ const parseDatasetDTO = datasetDTO =>
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
     restrictFromPublic: datasetDTO.restrictFromPublic,
     name: datasetDTO.nameDatasetSchema,
-    dataProviderId: datasetDTO.dataProviderId
+    dataProviderId: datasetDTO.dataProviderId,
+    updatable: datasetDTO.updatable
   });
 
 const parseDocumentListDTO = documentsDTO => {
