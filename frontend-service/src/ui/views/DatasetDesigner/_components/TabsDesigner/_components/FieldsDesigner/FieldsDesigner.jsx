@@ -36,6 +36,7 @@ export const FieldsDesigner = ({
   datasetSchemaId,
   datasetSchemas,
   designerState,
+  hasPKReferenced,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
@@ -834,6 +835,7 @@ export const FieldsDesigner = ({
           onError={onImportTableSchemaError}
           onUpload={onUpload}
           replaceCheck={true}
+          replaceCheckDisabled={hasPKReferenced}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
             datasetSchemaId: designerState.datasetSchemaId,
             datasetId: datasetId,
