@@ -52,6 +52,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class RepresentativeServiceImplTest {
 
@@ -634,8 +635,9 @@ public class RepresentativeServiceImplTest {
 
   @Test
   public void importFile() throws EEAException, IOException {
-    String csv = "Representing|Email\r\n" + "AL|provider1@reportnet.net\r\n"
-        + "AL|provider2@reportnet.net\r\n";
+    ReflectionTestUtils.setField(representativeServiceImpl, "delimiter", ',');
+    String csv = "Representing,Email\r\n" + "AL,provider1@reportnet.net\r\n"
+        + "AL,provider2@reportnet.net\r\n";
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     UserRepresentationVO user = new UserRepresentationVO();

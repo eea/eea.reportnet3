@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
@@ -17,7 +18,6 @@ import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -35,7 +35,6 @@ import com.github.dockerjava.api.model.Container;
  * The Class RecordStoreServiceImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class RecordStoreServiceImplTest {
 
   /** The record store service impl. */
@@ -269,6 +268,37 @@ public class RecordStoreServiceImplTest {
   @Test(expected = UnsupportedOperationException.class)
   public void deleteDatasetTest() throws RecordStoreAccessException, SQLException, IOException {
     recordStoreServiceImpl.deleteDataset(DATASET);
+  }
+
+  /**
+   * Creates the schemas test.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void createSchemasTest() {
+    recordStoreServiceImpl.createSchemas(null, 1L, true, true);
+  }
+
+  /**
+   * Execute query view commands test.
+   *
+   * @throws RecordStoreAccessException the record store access exception
+   * @throws InterruptedException the interrupted exception
+   */
+  @Test(expected = RecordStoreAccessException.class)
+  public void executeQueryViewCommandsTest()
+      throws RecordStoreAccessException, InterruptedException {
+    when(dockerInterfaceService.getContainer(Mockito.any())).thenReturn(new Container());
+    doThrow(new InterruptedException("Error executing docker command to create the dataset. %s"))
+        .when(dockerInterfaceService).executeCommandInsideContainer(Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    try {
+      recordStoreServiceImpl.executeQueryViewCommands("command");
+    } catch (RecordStoreAccessException e) {
+      assertEquals("Error executing docker command to create the dataset. %s",
+          e.getCause().getMessage());
+      throw e;
+    }
   }
 
 

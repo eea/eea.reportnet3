@@ -1,6 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 
+import trim from 'lodash/trim';
+
 import styles from './SQLsentence.module.scss';
+
+import { config } from 'conf';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -41,6 +45,12 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
     setIsVisibleInfoDialog(false);
   };
 
+  const onCCButtonClick = () => {
+    onSetSQLsentence('sqlSentence', trim(`${creationFormState.candidateRule['sqlSentence']} ${countryCodeKeyword}`));
+  };
+
+  const countryCodeKeyword = `${config.COUNTRY_CODE_KEYWORD}`
+
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -53,16 +63,22 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
             <Button
               className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
-              id="infoSQLsentence"
+              id="infoSqlSentence"
               onClick={e => onClickInfoButton()}
+            />
+            <Button
+              className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
+              label={resources.messages['countryCodeAcronym']}
+              onClick={onCCButtonClick}
+              tooltip={resources.messages['matchStringTooltip']}
+              tooltipOptions={{ position: 'top' }}
             />
           </h3>
           <textarea
-            id="SQLsentenceTextarea"
+            id="sqlSentenceText"
             name=""
             onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
-            value={creationFormState.candidateRule['sqlSentence']}
-          />
+            value={creationFormState.candidateRule['sqlSentence']}></textarea>
         </div>
       </div>
       {isVisibleInfoDialog && (
@@ -81,6 +97,9 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
           <p
             className={styles.levelHelp}
             dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceSpatialTypesNote'] }}></p>
+          <p
+            className={styles.levelHelp}
+            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceCountryCodeNote'] }}></p>
         </Dialog>
       )}
     </div>

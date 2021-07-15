@@ -17,6 +17,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
 
 export const IntegrationsList = ({
   dataflowId,
@@ -141,25 +142,6 @@ export const IntegrationsList = ({
     isDataUpdated(!integrationListState.isDataUpdated);
   };
 
-  const renderActionButtonsColumn = (
-    <Column
-      body={row => actionsTemplate(row)}
-      className={styles.validationCol}
-      header={resources.messages['actions']}
-      key="actions"
-      style={{ width: '100px' }}
-    />
-  );
-
-  const renderColumns = integrations => {
-    const fieldColumns = Object.keys(integrations[0])
-      .filter(key => key.includes('integrationName') || key.includes('operationName'))
-      .map(field => <Column field={field} header={resources.messages[field]} key={field} sortable={true} />);
-
-    fieldColumns.push(renderActionButtonsColumn);
-    return fieldColumns;
-  };
-
   const filterOptions = [
     { type: 'input', properties: [{ name: 'integrationName' }] },
     { type: 'multiselect', properties: [{ name: 'operationName' }] }
@@ -174,6 +156,13 @@ export const IntegrationsList = ({
       </div>
     );
   }
+
+  const integrationNameTemplate = row => (
+    <Fragment>
+      {row.integrationName}
+      <TooltipButton message={`${resources.messages['integrationId']}: ${row.integrationId}`}></TooltipButton>
+    </Fragment>
+  );
 
   return isEmpty(integrationListState.data) ? (
     <div className={styles.integrationsWithoutTable}>
@@ -196,9 +185,29 @@ export const IntegrationsList = ({
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
+          summary={resources.messages['externalIntegrations']}
           totalRecords={integrationListState.filteredData.length}
           value={integrationListState.filteredData}>
-          {renderColumns(integrationListState.filteredData)}
+          <Column
+            body={integrationNameTemplate}
+            field="integrationName"
+            header={resources.messages['integrationName']}
+            key="integrationName"
+            sortable={true}
+          />
+          <Column
+            field="operationName"
+            header={resources.messages['operationName']}
+            key="operationName"
+            sortable={true}
+          />
+          <Column
+            body={row => actionsTemplate(row)}
+            className={styles.validationCol}
+            header={resources.messages['actions']}
+            key="actions"
+            style={{ width: '100px' }}
+          />
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>{resources.messages['noIntegrationsWithSelectedParameters']}</div>

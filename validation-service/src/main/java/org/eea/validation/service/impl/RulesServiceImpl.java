@@ -396,8 +396,11 @@ public class RulesServiceImpl implements RulesService {
       if (rule.getSqlSentence().contains("!=")) {
         rule.setSqlSentence(rule.getSqlSentence().replace("!=", "<>"));
       }
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id, '")
-          .append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id, '")
+          .append(rule.getRuleId().toString())
+          .append(
+              "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+          .append(")").toString());
       recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
@@ -714,8 +717,11 @@ public class RulesServiceImpl implements RulesService {
       if (rule.getSqlSentence().contains("!=")) {
         rule.setSqlSentence(rule.getSqlSentence().replaceAll("!=", "<>"));
       }
-      rule.setWhenCondition(new StringBuilder().append("isSQLSentence(this.datasetId.id,'")
-          .append(rule.getRuleId().toString()).append("')").toString());
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id,'")
+          .append(rule.getRuleId().toString())
+          .append(
+              "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+          .append(")").toString());
       recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }

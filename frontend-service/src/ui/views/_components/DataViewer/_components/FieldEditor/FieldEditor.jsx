@@ -415,7 +415,8 @@ const FieldEditor = ({
         );
       case 'POINT':
         return (
-          <div className={styles.pointWrapper}>
+          <div className={styles.pointEpsgWrapper}>
+            <label className={styles.epsg}>{resources.messages['coords']}</label>
             <InputText
               id={cells.field}
               keyfilter={RecordUtils.getFilter(type)}
@@ -537,19 +538,20 @@ const FieldEditor = ({
                   placeholder="Select a CRS"
                   value={!isNil(currentCRS) ? currentCRS : { label: 'WGS84 - 4326', value: 'EPSG:4326' }}
                 />
-                <Button
-                  className={`p-button-secondary-transparent button ${styles.mapButton}`}
-                  disabled={isMapDisabled}
-                  icon="marker"
-                  onClick={() => {
-                    if (!isNil(onMapOpen)) {
-                      onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
-                    }
-                  }}
-                  style={{ width: '35%' }}
-                  tooltip={resources.messages['selectGeographicalDataOnMap']}
-                  tooltipOptions={{ position: 'bottom' }}
-                />
+                <div className={styles.mapButtonWrapper}>
+                  <Button
+                    className={`p-button-secondary-transparent button`}
+                    disabled={isMapDisabled}
+                    icon="marker"
+                    onClick={() => {
+                      if (!isNil(onMapOpen)) {
+                        onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
+                      }
+                    }}
+                    tooltip={resources.messages['selectGeographicalDataOnMap']}
+                    tooltipOptions={{ position: 'bottom' }}
+                  />
+                </div>
               </div>
             </div>
           </div>

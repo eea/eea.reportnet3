@@ -441,7 +441,7 @@ const ComparisonExpression = ({
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label="CC"
+              label={resourcesContext.messages['countryCodeAcronym']}
               onClick={() => onCCButtonClick(ccButtonValue)}
               tooltip={resourcesContext.messages['matchStringTooltip']}
               tooltipOptions={{ position: 'top' }}
