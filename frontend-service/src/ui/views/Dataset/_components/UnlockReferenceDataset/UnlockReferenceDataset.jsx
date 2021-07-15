@@ -11,8 +11,15 @@ export const UnlockReferenceDataset = ({ updatable, toggleUpdatable }) => {
 
   return (
     <div className={styles.wrapper}>
-      <Checkbox checked={updatable} onChange={() => toggleUpdatable()} role="checkbox" />
-      <label htmlFor="">{resourcesContext.messages['unlockReferenceDatasetLabel']}</label>
+      <Checkbox
+        checked={updatable}
+        id="referenceDatasetUpdatableCheckbox"
+        onChange={() => toggleUpdatable()}
+        role="checkbox"
+      />
+      <label htmlFor="referenceDatasetUpdatableCheckbox">
+        {resourcesContext.messages['unlockReferenceDatasetLabel']}
+      </label>
     </div>
   );
 };
