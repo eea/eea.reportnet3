@@ -1,12 +1,12 @@
 import { useContext } from 'react';
 
-import styles from './UnlockReferenceDataflow.module.scss';
+import styles from './UnlockReferenceDataset.module.scss';
 
 import { Checkbox } from 'ui/views/_components/Checkbox';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const UnlockReferenceDataflow = ({ updatable, toggleUpdatable }) => {
+export const UnlockReferenceDataset = ({ updatable, toggleUpdatable }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   return (

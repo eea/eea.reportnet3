@@ -212,6 +212,10 @@ export const apiDataset = {
       })
     });
   },
+  toggleUpdatable: (datasetId, updatable) =>
+    HTTPRequester.update({
+      url: getUrl(DatasetConfig.toggleUpdatable, { datasetId, updatable })
+    }),
 
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) => {
     return await HTTPRequester.update({

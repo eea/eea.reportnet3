@@ -173,16 +173,11 @@ const referenceDataflow = async referenceDataflowId => {
   return referenceDataflowDTO;
 };
 
-const toggleUpdatable = (referenceDataflowId, updatable) => {
-  apiReferenceDataflow.toggleUpdatable(referenceDataflowId, updatable);
-};
-
 export const ApiReferenceDataflowRepository = {
   all,
   create,
   deleteReferenceDataflow,
   edit,
   getReferencingDataflows,
-  referenceDataflow,
-  toggleUpdatable
+  referenceDataflow
 };

@@ -29,6 +29,7 @@ export const DatasetRepository = {
   orderTableSchema: () => Promise.reject('[DatasetRepository#orderTableSchema] must be implemented'),
   schemaById: () => Promise.reject('[DatasetRepository#schemaById] must be implemented'),
   tableDataById: () => Promise.reject('[DatasetRepository#tableDataById] must be implemented'),
+  toggleUpdatable: () => '[DatasetRepository#toggleUpdatable] must be implemented',
   updateDatasetFeedbackStatus: () =>
     Promise.reject('[DatasetRepository#updateDatasetFeedbackStatus] must be implemented'),
   updateDatasetSchemaDescriptionDesign: () =>

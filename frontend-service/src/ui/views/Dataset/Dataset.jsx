@@ -32,6 +32,7 @@ import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 import { Webforms } from 'ui/views/Webforms';
+import { UnlockReferenceDataset } from './_components/UnlockReferenceDataset';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
@@ -117,6 +118,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [webformData, setWebformData] = useState(null);
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
   const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
+  const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
+  const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -136,6 +139,21 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
   }, []);
+
+  useEffect(() => {
+    if (isCustodianOrSteward && isReferenceDataset) {
+      leftSideBarContext.addModels([
+        {
+          className: 'dataflow-showPublicInfo-help-step',
+          icon: 'lock',
+          isVisible: setIsCustodianOrSteward,
+          label: 'referenceStateBarButton',
+          onClick: () => setIsUpdatableDialogVisible(true),
+          title: 'publicStatusLeftSideBarButton'
+        }
+      ]);
+    }
+  }, [isCustodianOrSteward, isReferenceDataset]);
 
   useEffect(() => {
     if (!isNil(tableSchema) && tableSchema.length > 0) {
@@ -167,6 +185,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
             `${config.permissions.prefixes.TESTDATASET}${datasetId}`
           )
+        );
+        setIsCustodianOrSteward(
+          userContext.hasContextAccessPermission(config.permissions.prefixes.REFERENCEDATASET, datasetId, [
+            config.permissions.roles.CUSTODIAN.key,
+            config.permissions.roles.STEWARD.key
+          ])
         );
       }
     }
@@ -569,7 +593,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      } else if (isReferenceDataset) {
+        dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       } else {
+        dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+        if (!isEmpty(dataset)) {
+          setIsDatasetReleased(dataset[0]?.isReleased);
+        }
         dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
         if (!isEmpty(dataset)) {
           setIsDatasetReleased(dataset[0].isReleased);
@@ -841,6 +871,15 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       </div>
     );
 
+  const referenceStateDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => setIsUpdatableDialogVisible(false)}
+    />
+  );
+
   const switchToTabularData = () => {
     setIsTableView(true);
     setIsValidationsTabularView(true);
@@ -856,6 +895,15 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
 
       setIsDownloadingValidations(false);
+    }
+  };
+
+  const toggleUpdatable = () => {
+    try {
+      DatasetService.toggleUpdatable(datasetId, !dataset.updatable);
+      onLoadDataflow();
+    } catch (error) {
+      console.log(`error`, error);
     }
   };
 
@@ -1174,6 +1222,16 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           visible={validateDialogVisible}>
           {resources.messages['validateDatasetConfirm']}
         </ConfirmDialog>
+      )}
+
+      {isUpdatableDialogVisible && (
+        <Dialog
+          footer={referenceStateDialogFooter}
+          header={resources.messages['referenceStateDialogHeader']}
+          onHide={() => setIsUpdatableDialogVisible(false)}
+          visible={isUpdatableDialogVisible}>
+          <UnlockReferenceDataset toggleUpdatable={toggleUpdatable} updatable={dataset.updatable} />
+        </Dialog>
       )}
 
       <Snapshots

@@ -6,7 +6,6 @@ import { Edit } from './Edit';
 import { GetAll } from './GetAll';
 import { GetReferenceDataflow } from './GetReferenceDataflow';
 import { GetReferencingDataflows } from './GetReferencingDataflows';
-import { ToggleUpdatable } from './toggleUpdatable';
 
 export const ReferenceDataflowService = {
   all: GetAll({ referenceDataflowRepository }),
@@ -14,6 +13,5 @@ export const ReferenceDataflowService = {
   deleteReferenceDataflow: DeleteDataflow({ referenceDataflowRepository }),
   edit: Edit({ referenceDataflowRepository }),
   getReferencingDataflows: GetReferencingDataflows({ referenceDataflowRepository }),
-  referenceDataflow: GetReferenceDataflow({ referenceDataflowRepository }),
-  toggleUpdatable: ToggleUpdatable({ referenceDataflowRepository })
+  referenceDataflow: GetReferenceDataflow({ referenceDataflowRepository })
 };
