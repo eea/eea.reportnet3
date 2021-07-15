@@ -56,6 +56,8 @@ const useStatusFilter = dataArray => {
           filterStatus: payloadLabelsArr,
           dashboardData: filteredStatusData
         };
+      default:
+        return state;
     }
   };
 
