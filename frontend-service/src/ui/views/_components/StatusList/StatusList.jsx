@@ -1,15 +1,9 @@
-import { useContext } from 'react';
-
 import styles from './StatusList.module.scss';
 import colors from 'conf/colors.json';
 
 import { LevelError } from 'ui/views/_components/LevelError';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 export const StatusList = ({ filterDispatch, filteredStatusTypes, statusTypes }) => {
-  const resources = useContext(ResourcesContext);
-
   const statusTypesFilters = statusTypes.map((label, i) => {
     label = label.toString();
     const labelLowerCase = label.toLowerCase();

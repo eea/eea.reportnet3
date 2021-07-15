@@ -5,15 +5,20 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
+import { DatasetConfig } from 'conf/domain/model/Dataset';
+
 import styles from './FieldsDesigner.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { DataViewer } from 'ui/views/_components/DataViewer';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
+import { Toolbar } from 'ui/views/_components/Toolbar';
 
 import { DatasetService } from 'core/services/Dataset';
 
@@ -22,12 +27,15 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
-import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+import { MetadataUtils, TextUtils } from 'ui/views/_functions/Utils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const FieldsDesigner = ({
+  dataflowId,
   datasetId,
   datasetSchemaId,
   datasetSchemas,
+  designerState,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
@@ -58,12 +66,15 @@ export const FieldsDesigner = ({
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
   const [fields, setFields] = useState();
   const [fieldToDeleteType, setFieldToDeleteType] = useState();
+  const [exportTableSchema, setExportTableSchema] = useState(undefined);
+  const [exportTableSchemaName, setExportTableSchemaName] = useState('');
   const [indexToDelete, setIndexToDelete] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
   const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
@@ -82,7 +93,7 @@ export const FieldsDesigner = ({
       table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
       setFixedNumber(table.fixedNumber || false);
     }
-  }, []);
+  }, [table]);
 
   useEffect(() => {
     if (!isUndefined(fields)) {
@@ -93,6 +104,12 @@ export const FieldsDesigner = ({
       );
     }
   }, [fields]);
+
+  useEffect(() => {
+    if (!isUndefined(exportTableSchema)) {
+      DownloadFile(exportTableSchema, exportTableSchemaName);
+    }
+  }, [exportTableSchema]);
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
     setIsCodelistOrLink(
@@ -578,8 +595,101 @@ export const FieldsDesigner = ({
     }
   };
 
+  const onUpload = async () => {
+    notificationContext.add({
+      type: 'IMPORT_TABLE_SCHEMA_INIT'
+    });
+    manageDialogs('isImportTableSchemaDialogVisible', false);
+  };
+
+  const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
+
+  const onExportTableSchema = async fileType => {
+    setIsLoadingFile(true);
+    try {
+      setExportTableSchemaName(createTableName(table.tableSchemaName, fileType));
+      const { data } = await DatasetService.exportTableSchemaById(
+        datasetId,
+        designerState.datasetSchemaId,
+        table.tableSchemaId,
+        fileType
+      );
+      setExportTableSchema(data);
+    } catch (error) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      notificationContext.add({
+        type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
+        content: {
+          dataflowId,
+          datasetId,
+          dataflowName,
+          datasetName,
+          tableName: designerState.tableName
+        }
+      });
+    } finally {
+      setIsLoadingFile(false);
+    }
+  };
+
+  const onImportTableSchemaError = async ({ xhr }) => {
+    if (xhr.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+    }
+  };
+
   return (
     <Fragment>
+      <Toolbar>
+        <div className="p-toolbar-group-left">
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent ${
+              !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+            }`}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead}
+            icon={'import'}
+            label={resources.messages['importTableSchema']}
+            onClick={() => manageDialogs('isImportTableSchemaDialogVisible', true)}
+          />
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent ${
+              !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
+            }`}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead}
+            icon={'export'}
+            label={resources.messages['exportTableSchema']}
+            onClick={() => onExportTableSchema('csv', true)}
+          />
+          <Button
+            className={`p-button-secondary-transparent ${
+              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
+            } datasetSchema-uniques-help-step`}
+            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
+            icon={'key'}
+            label={resources.messages['addUniqueConstraint']}
+            onClick={() => {
+              manageDialogs('isManageUniqueConstraintDialogVisible', true);
+              manageUniqueConstraint({
+                isTableCreationMode: true,
+                tableSchemaId: table.tableSchemaId,
+                tableSchemaName: table.tableSchemaName
+              });
+            }}
+          />
+          <Button
+            className={`p-button-secondary-transparent ${
+              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
+            } datasetSchema-rowConstraint-help-step`}
+            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
+            icon={'horizontalSliders'}
+            label={resources.messages['addRowConstraint']}
+            onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
+          />
+        </div>
+      </Toolbar>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.tableDescriptionRow}>
         <InputTextarea
@@ -598,34 +708,7 @@ export const FieldsDesigner = ({
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
           value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
         />
-        <div className={styles.constraintsButtons}>
-          <Button
-            className={`p-button-secondary ${
-              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
-            } datasetSchema-uniques-help-step`}
-            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'key'}
-            label={resources.messages['addUniqueConstraint']}
-            onClick={() => {
-              manageDialogs('isManageUniqueConstraintDialogVisible', true);
-              manageUniqueConstraint({
-                isTableCreationMode: true,
-                tableSchemaId: table.tableSchemaId,
-                tableSchemaName: table.tableSchemaName
-              });
-            }}
-          />
 
-          <Button
-            className={`p-button-secondary ${
-              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
-            } datasetSchema-rowConstraint-help-step`}
-            disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'horizontalSliders'}
-            label={resources.messages['addRowConstraint']}
-            onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
-          />
-        </div>
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span
@@ -732,6 +815,32 @@ export const FieldsDesigner = ({
       {renderAllFields()}
       {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message, errorMessageAndTitle.focusElement)}
       {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
+      {designerState.isImportTableSchemaDialogVisible && (
+        <CustomFileUpload
+          accept=".csv"
+          chooseLabel={resources.messages['selectFile']}
+          className={styles.FileUpload}
+          dialogClassName={styles.Dialog}
+          dialogHeader={`${resources.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
+          dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
+          dialogVisible={designerState.isImportTableSchemaDialogVisible}
+          fileLimit={1}
+          infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          isDialog={true}
+          mode="advanced"
+          multiple={false}
+          name="file"
+          onError={onImportTableSchemaError}
+          onUpload={onUpload}
+          replaceCheck={true}
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
+            datasetSchemaId: designerState.datasetSchemaId,
+            datasetId: datasetId,
+            tableSchemaId: table.tableSchemaId
+          })}`}
+        />
+      )}
     </Fragment>
   );
 };

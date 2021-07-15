@@ -2,22 +2,18 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import dayjs from 'dayjs';
-import isNil from 'lodash/isNil';
 
 import styles from './ReferencedDataflowItem.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { routes } from 'ui/routes';
 
 export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }) => {
   const resources = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [isPinned, setIsPinned] = useState(dataflow.pinned === 'pinned');
   const [isPinning, setIsPinning] = useState(false);
@@ -57,17 +53,6 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
     <Fragment>
       <div className={`${styles.icon}`}>
         <FontAwesomeIcon icon={AwesomeIcons('clone')} />
-      </div>
-
-      <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
-        <p>
-          <span>{`${resources.messages['deliveryDate']}: `}</span>
-          <span className={`${styles.dateBlock}`}>
-            {dataflow.expirationDate == '-'
-              ? resources.messages['pending']
-              : dayjs(dataflow.expirationDate).format(userContext.userProps.dateFormat)}
-          </span>
-        </p>
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>

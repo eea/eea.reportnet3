@@ -68,7 +68,8 @@ const DatasetSchema = ({
           invisible: ['datasetSchemaId'],
           names: {
             operation: 'Operation',
-            fileExtension: 'Extension'
+            fileExtension: 'Extension',
+            id: 'Id'
           }
         },
         uniques: {
