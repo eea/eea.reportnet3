@@ -213,7 +213,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
             ? '55%'
             : TextUtils.areEquals(field, 'TYPE')
             ? '25%'
-            : TextUtils.areEquals(field, 'REFERENCEDFIELD')
+            : TextUtils.areEquals(field, 'REFERENCEDFIELD') || TextUtils.areEquals(field, 'OPERATION')
             ? '30%'
             : '20%',
           display:

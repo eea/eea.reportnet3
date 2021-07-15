@@ -1340,7 +1340,7 @@ const DataViewer = withRouter(
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
               datasetId: datasetId,
               tableSchemaId: tableId,
-              delimiter: `${config.IMPORT_FILE_DELIMITER}`
+              delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
             })}`}
           />
         )}

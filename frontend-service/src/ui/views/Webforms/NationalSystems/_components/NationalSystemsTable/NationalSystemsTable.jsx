@@ -97,8 +97,8 @@ export const NationalSystemsTable = ({
           dataProviderId={dataProviderId}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          record={record}
           getTableErrors={getTableErrors}
+          record={record}
         />
       </Fragment>
     ));

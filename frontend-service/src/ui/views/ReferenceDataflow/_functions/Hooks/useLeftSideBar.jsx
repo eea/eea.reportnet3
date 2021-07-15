@@ -1,7 +1,5 @@
 import { useContext, useLayoutEffect } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
-
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, manageDialogs) => {
