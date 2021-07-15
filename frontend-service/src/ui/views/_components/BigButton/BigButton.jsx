@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
@@ -163,7 +163,7 @@ export const BigButton = ({
   };
 
   const defaultBigButton = (
-    <>
+    <Fragment>
       <div
         className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
           !enabled && styles.bigButtonDisabled
@@ -224,7 +224,7 @@ export const BigButton = ({
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
       ) : (
-        <>
+        <Fragment>
           <p
             className={styles.caption}
             data-for={tooltipId}
@@ -239,13 +239,13 @@ export const BigButton = ({
               {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
             </ReactTooltip>
           )}
-        </>
+        </Fragment>
       )}
-    </>
+    </Fragment>
   );
 
   const menuBigButton = (
-    <>
+    <Fragment>
       <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
         <span onClick={event => menuBigButtonRef.current.show(event)}>
           <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
@@ -253,7 +253,7 @@ export const BigButton = ({
         <DropDownMenu model={model} ref={menuBigButtonRef} />
       </div>
       <p className={styles.caption}>{caption}</p>
-    </>
+    </Fragment>
   );
 
   const buttons = {
@@ -262,13 +262,13 @@ export const BigButton = ({
   };
 
   return (
-    <>
+    <Fragment>
       <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
       {tooltip && (
         <ReactTooltip border={true} effect="solid" id={caption} place="top">
           {tooltip}
         </ReactTooltip>
       )}
-    </>
+    </Fragment>
   );
 };
