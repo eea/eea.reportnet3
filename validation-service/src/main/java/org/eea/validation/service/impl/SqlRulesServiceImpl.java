@@ -143,7 +143,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id, '")
         .append(rule.getRuleId().toString())
         .append(
-            "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+            "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
         .append(")").toString());
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
@@ -271,7 +271,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             .append("isSQLSentenceWithCode(this.datasetId.id, '")
             .append(rule.getRuleId().toString())
             .append(
-                "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+                "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
             .append(")").toString());
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
