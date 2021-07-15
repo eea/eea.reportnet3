@@ -836,6 +836,7 @@ export const FieldsDesigner = ({
           onUpload={onUpload}
           replaceCheck={true}
           replaceCheckDisabled={hasPKReferenced}
+          replaceCheckLabelMessage={resources.messages['replaceDataPKInUse']}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
             datasetSchemaId: designerState.datasetSchemaId,
             datasetId: datasetId,

@@ -52,8 +52,8 @@ export const CustomFileUpload = ({
   previewWidth = 50,
   replaceCheck = false,
   replaceCheckLabel = 'Replace data',
+  replaceCheckLabelMessage = '',
   replaceCheckDisabled = false,
-  replaceCheckTooltipPKReferenced = "It's not possible to replace a PK in use'",
   style = null,
   uploadLabel = 'Upload',
   url = null,
@@ -388,6 +388,7 @@ export const CustomFileUpload = ({
         />
         <label htmlFor="replaceCheckbox">
           <span
+            className={replaceCheckDisabled && styles.replaceCheckboxSpanDisabled}
             onClick={() =>
               !replaceCheckDisabled && dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })
             }>
@@ -398,7 +399,7 @@ export const CustomFileUpload = ({
           <Button
             className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
             icon="infoCircle"
-            tooltip={replaceCheckTooltipPKReferenced}
+            tooltip={replaceCheckLabelMessage}
             tooltipOptions={{ position: 'top' }}
           />
         )}
