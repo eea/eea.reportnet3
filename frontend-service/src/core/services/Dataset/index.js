@@ -19,6 +19,7 @@ import { DownloadReferenceDatasetFileData } from './DownloadReferenceDatasetFile
 import { ExportData } from './ExportData';
 import { ExportDatasetDataExternal } from './ExportDatasetDataExternal';
 import { ExportTableData } from './ExportTableData';
+import { ExportTableSchema } from './ExportTableSchema';
 import { GetData } from './GetData';
 import { GetMetaData } from './GetMetaData';
 import { GetReferencedFieldValues } from './GetReferencedFieldValues';
@@ -60,6 +61,7 @@ export const DatasetService = {
   exportDataById: ExportData({ datasetRepository }),
   exportDatasetDataExternal: ExportDatasetDataExternal({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
+  exportTableSchemaById: ExportTableSchema({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
   getReferencedFieldValues: GetReferencedFieldValues({ datasetRepository }),
   groupedErrorsById: GroupedErrors({ datasetRepository }),
