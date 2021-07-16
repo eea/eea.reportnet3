@@ -315,6 +315,9 @@ public class FileTreatmentHelper implements DisposableBean {
         integrationVO = null;
       } else {
         integrationVO = getIntegrationVO(integrationId);
+        if (null == integrationVO) {
+          LOG_ERROR.error("Error. Integration {} not found", integrationId);
+        }
       }
       if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
 

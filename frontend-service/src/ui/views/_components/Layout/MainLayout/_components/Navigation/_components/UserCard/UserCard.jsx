@@ -17,14 +17,14 @@ const UserCard = memo(() => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   return (
-    <div id="userProfile" className={styles.userProfileCard}>
+    <div className={styles.userProfileCard} id="userProfile">
       <div className={styles.userProfile}>
         <a
           href={getUrl(routes.SETTINGS)}
-          title="User profile details"
           onClick={async e => {
             e.preventDefault();
-          }}>
+          }}
+          title="User profile details">
           <FontAwesomeIcon aria-hidden={false} className={styles.avatar} icon={AwesomeIcons('user-profile')} />
           <h5 className={styles.userProfile}>
             {!isUndefined(userContext.preferredUsername) ? userContext.preferredUsername : userContext.name}
@@ -32,7 +32,6 @@ const UserCard = memo(() => {
         </a>
         <a
           href="#userProfilePage"
-          title="logout"
           onClick={async e => {
             e.preventDefault();
             userContext.socket.deactivate();
@@ -45,7 +44,8 @@ const UserCard = memo(() => {
             } finally {
               userContext.onLogout();
             }
-          }}>
+          }}
+          title="logout">
           <Icon icon="logout" />
         </a>
       </div>

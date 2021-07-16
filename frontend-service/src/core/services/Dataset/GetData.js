@@ -1,14 +1,14 @@
-export const GetData = ({ datasetRepository }) => async (
+export const GetData = ({ datasetRepository }) => async ({
   datasetId,
-  tableSchemaId,
+  fields = undefined,
+  fieldSchemaId = undefined,
+  levelError = null,
   pageNum,
   pageSize,
-  fields = undefined,
-  levelError = null,
   ruleId = undefined,
-  fieldSchemaId = undefined,
-  value = undefined
-) =>
+  tableSchemaId,
+  value = ''
+}) =>
   datasetRepository.tableDataById(
     datasetId,
     tableSchemaId,

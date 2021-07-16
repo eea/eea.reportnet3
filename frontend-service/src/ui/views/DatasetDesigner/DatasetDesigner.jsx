@@ -74,6 +74,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
+  const [schemaImported, setSchemaImported] = useState(false);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
@@ -114,8 +115,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
     isDownloadingValidations: false,
+    isExportTableSchemaDialogVisible: false,
     isImportDatasetDialogVisible: false,
     isImportOtherSystemsDialogVisible: false,
+    isImportTableSchemaDialogVisible: false,
     isIntegrationListDialogVisible: false,
     isIntegrationManageDialogVisible: false,
     isLoading: true,
@@ -192,6 +195,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     onLoadSchema();
     callSetMetaData();
   }, []);
+
+  useEffect(() => {
+    if (schemaImported) {
+      onLoadSchema();
+      setSchemaImported(false);
+    }
+  }, [schemaImported]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -629,6 +639,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setSqlValidationRunning,
     false
   );
+
+  useCheckNotifications(['IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'], setSchemaImported, true);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -1069,7 +1081,11 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const renderConfigureWebformFooter = (
     <Fragment>
       <Button
-        className={`p-button-animated-blink ${styles.saveButton}`}
+        className={`${
+          !isUndefined(designerState.selectedWebform) &&
+          designerState?.selectedWebform?.value !== designerState?.webform?.value &&
+          'p-button-animated-blink'
+        } ${styles.saveButton}`}
         disabled={
           isUndefined(designerState.selectedWebform) ||
           designerState?.selectedWebform?.value === designerState?.webform?.value
@@ -1330,7 +1346,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     : null
                 } datasetSchema-qcRules-help-step`}
                 disabled={isDesignDatasetEditorRead || (isDataflowOpen && designerState.referenceDataset)}
-                icon={'horizontalSliders'}
+                icon="horizontalSliders"
                 label={resources.messages['qcRules']}
                 onClick={() => manageDialogs('validationListDialogVisible', true)}
               />
@@ -1342,7 +1358,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     : null
                 }`}
                 disabled={isDesignDatasetEditorRead || (isDataflowOpen && designerState.referenceDataset)}
-                icon={'key'}
+                icon="key"
                 label={resources.messages['uniqueConstraints']}
                 onClick={() => manageDialogs('isUniqueConstraintsListDialogVisible', true)}
               />
@@ -1352,7 +1368,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   !isDesignDatasetEditorRead && !designerState.referenceDataset ? styles.integrationsButton : null
                 }`}
                 disabled={isDesignDatasetEditorRead || designerState.referenceDataset}
-                icon={'export'}
+                icon="export"
                 iconClasses={styles.integrationsButtonIcon}
                 label={resources.messages['externalIntegrations']}
                 onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
@@ -1366,7 +1382,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   'p-button-animated-blink'
                 }`}
                 disabled={!designerState.datasetHasData || isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'dashboard'}
+                icon="dashboard"
                 label={resources.messages['dashboards']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
               />
@@ -1377,7 +1393,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     : null
                 }`}
                 disabled={designerState.hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'camera'}
+                icon="camera"
                 label={resources.messages['snapshots']}
                 onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
               />
@@ -1387,9 +1403,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
                 }  ${!isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null}`}
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'refresh'}
+                icon="refresh"
                 label={resources.messages['refresh']}
-                onClick={() => onLoadSchema()}
+                onClick={() => setSchemaImported(true)}
               />
             </div>
           </Toolbar>
@@ -1408,6 +1424,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
             datasetStatistics={designerState.datasetStatistics}
+            designerState={designerState}
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
             getUpdatedTabs={onUpdateTabs}
@@ -1428,6 +1445,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onUpdateSchema={onUpdateSchema}
             onUpdateTable={onUpdateTable}
             recordPositionId={dataViewerOptions.recordPositionId}
+            schemaImported={schemaImported}
             selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
             selectedRuleId={dataViewerOptions.selectedRuleId}
             selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
@@ -1585,7 +1603,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               isNil(importSelectedIntegrationId)
                 ? getUrl(DatasetConfig.importFileDataset, {
                     datasetId: datasetId,
-                    delimiter: `${config.IMPORT_FILE_DELIMITER}`
+                    delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {
                     datasetId: datasetId,
