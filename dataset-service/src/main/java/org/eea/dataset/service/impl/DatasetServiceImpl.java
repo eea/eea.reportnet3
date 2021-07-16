@@ -552,8 +552,10 @@ public class DatasetServiceImpl implements DatasetService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
+    // if (checkDatasetUpdatable(datasetId)) {
     DatasetValue datasetValue = dataSetMapper.classToEntity(dataset);
     datasetRepository.saveAndFlush(datasetValue);
+    // }
   }
 
   /**
@@ -704,8 +706,10 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_NOTFOUND);
 
     }
+    // if (checkDatasetUpdatable(datasetId)) {
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
+
 
     if (updateCascadePK) {
       // we update the ids in cascade for any pk value changed
@@ -719,6 +723,7 @@ public class DatasetServiceImpl implements DatasetService {
       fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue, datasetType);
     }
     fieldRepository.saveAll(fieldValues);
+    // }
   }
 
 
@@ -1169,7 +1174,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void updateFieldValueType(Long datasetId, String fieldSchemaId, DataType type) {
+    // if (checkDatasetUpdatable(datasetId)) {
     fieldRepository.updateFieldValueType(fieldSchemaId, type.getValue());
+    // }
   }
 
   /**
@@ -3583,4 +3590,16 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
   }
+
+  /**
+   * Check dataset updatable.
+   *
+   * @param datasetId the dataset id
+   * @return true, if successful
+   */
+  /*
+   * public boolean checkDatasetUpdatable(Long datasetId) { ReferenceDataset referenceDataset =
+   * referenceDatasetRepository.findById(datasetId).orElse(null); return (referenceDataset == null
+   * || (referenceDataset != null && referenceDataset.getUpdatable())); }
+   */
 }
