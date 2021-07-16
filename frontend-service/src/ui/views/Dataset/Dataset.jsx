@@ -32,7 +32,6 @@ import { Title } from 'ui/views/_components/Title';
 import { Toolbar } from 'ui/views/_components/Toolbar';
 import { ValidationViewer } from 'ui/views/_components/ValidationViewer';
 import { Webforms } from 'ui/views/Webforms';
-import { UnlockReferenceDataset } from './_components/UnlockReferenceDataset';
 
 import { DataflowService } from 'core/services/Dataflow';
 import { DatasetService } from 'core/services/Dataset';
