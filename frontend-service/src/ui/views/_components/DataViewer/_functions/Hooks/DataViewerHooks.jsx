@@ -476,7 +476,14 @@ export const useSetColumns = (
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue, hasWebformWritePermissions]);
+  }, [
+    colsSchema,
+    columnOptions,
+    records.selectedRecord.recordId,
+    initialCellValue,
+    hasWebformWritePermissions,
+    hasWritePermissions
+  ]);
 
   return {
     columns,

@@ -95,6 +95,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
+  const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
@@ -178,7 +179,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             userContext.hasPermission(
               [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
               `${config.permissions.prefixes.TESTDATASET}${datasetId}`
-            )
+            ) ||
+            (isCustodianOrSteward && isDatasetUpdatable)
         );
         setIsTestDataset(
           userContext.hasPermission(
@@ -595,14 +597,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       } else if (isReferenceDataset) {
         dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+        setIsDatasetUpdatable(dataset[0]?.updatable);
       } else {
         dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
         if (!isEmpty(dataset)) {
           setIsDatasetReleased(dataset[0]?.isReleased);
-        }
-        dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
-        if (!isEmpty(dataset)) {
-          setIsDatasetReleased(dataset[0].isReleased);
         } else {
           dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
           setIsDatasetReleased(dataset[0]?.isReleased);
@@ -1063,6 +1062,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+          isReferenceDataset={isReferenceDataset}
           isReportingWebform={isReportingWebform}
           isValidationSelected={dataViewerOptions.isValidationSelected}
           levelErrorTypes={levelErrorTypes}
