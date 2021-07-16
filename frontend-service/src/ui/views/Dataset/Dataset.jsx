@@ -90,22 +90,27 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     import: [],
     importOtherSystems: []
   });
+  const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
+  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
+  const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
-  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
-  const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
+  const [isTableView, setIsTableView] = useState(true);
   const [isTestDataset, setIsTestDataset] = useState(undefined);
+  const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
+  const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
   const [replaceData, setReplaceData] = useState(false);
@@ -115,12 +120,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
-  const [isTableView, setIsTableView] = useState(true);
   const [webformData, setWebformData] = useState(null);
-  const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
-  const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
-  const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
-  const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
