@@ -202,7 +202,7 @@ const FieldEditor = ({
       let panel = refDatetimeCalendar?.current?.panel;
 
       if (!panel) {
-        panel = refCalendar?.current?.panel;
+        panel = refCalendar.current.panel;
       }
 
       const inputRect = element.getBoundingClientRect();
@@ -262,7 +262,6 @@ const FieldEditor = ({
   };
 
   const onCalendarFocus = e => {
-    console.log(`onCalendarFocus`);
     calculateCalendarPanelPosition(e.currentTarget, cells.field);
     setIsCalendarVisible(true);
     onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
