@@ -2914,39 +2914,58 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId) {
 
-    DataSetMetabase dataset = null;
+    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).orElse(null);
     DataSetSchema schema = null;
+    if (dataset != null) {
+      DatasetTypeEnum datasetType = getDatasetType(datasetId);
+      TypeStatusEnum dataflowStatus =
+          dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus();
 
-    // Dataset: DESIGN
-    dataset = designDatasetRepository.findById(datasetId).orElse(null);
-    if (null != dataset) {
-      if (TypeStatusEnum.DESIGN
-          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
-        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-      }
-    } else {
-      // Dataset: TEST
-      dataset = testDatasetRepository.findById(datasetId).orElse(null);
-      if (null == dataset) {
-        // Dataset: REPORTING
-        dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
-        if (dataset != null && !Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
-            .orElse(new ReferenceDataset()).getUpdatable())) {
-          dataset = null;
-        }
-      }
-      if (null != dataset && TypeStatusEnum.DRAFT
-          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
-        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-        if (null != tableSchemaId) {
-          TableSchema tableSchema = schema.getTableSchemas().stream()
-              .filter(t -> tableSchemaId.equals(t.getIdTableSchema().toString())).findFirst()
-              .orElse(null);
-          if (null == tableSchema || Boolean.TRUE.equals(tableSchema.getReadOnly())
-              || Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
-            schema = null;
+      switch (datasetType) {
+        case DESIGN:
+          if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
+            schema =
+                schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
           }
-        }
+          break;
+        case TEST:
+        case REPORTING:
+          if (TypeStatusEnum.DRAFT.equals(dataflowStatus)) {
+            schema = filterSchemaByTable(tableSchemaId, dataset);
+          }
+          break;
+        case REFERENCE:
+          if (TypeStatusEnum.DESIGN.equals(dataflowStatus)
+              || !Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+                  .orElse(new ReferenceDataset()).getUpdatable())) {
+            schema =
+                schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    return schema;
+  }
+
+  /**
+   * Filter schema by table.
+   *
+   * @param tableSchemaId the table schema id
+   * @param dataset the dataset
+   * @return the data set schema
+   */
+  private DataSetSchema filterSchemaByTable(String tableSchemaId, DataSetMetabase dataset) {
+    DataSetSchema schema;
+    schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+    if (null != tableSchemaId) {
+      TableSchema tableSchema = schema.getTableSchemas().stream()
+          .filter(t -> tableSchemaId.equals(t.getIdTableSchema().toString())).findFirst()
+          .orElse(null);
+      if (null == tableSchema || Boolean.TRUE.equals(tableSchema.getReadOnly())
+          || Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        schema = null;
       }
     }
     return schema;
