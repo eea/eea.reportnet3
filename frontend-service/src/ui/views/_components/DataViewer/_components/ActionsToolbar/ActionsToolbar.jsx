@@ -183,10 +183,10 @@ const ActionsToolbar = ({
 
   const getTooltipMessage = () => {
     return (
-      <>
+      <Fragment>
         <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipGeometryNote']}</span>
         <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipCaseSensitiveNote']}</span>
-      </>
+      </Fragment>
     );
   };
 
@@ -305,22 +305,27 @@ const ActionsToolbar = ({
               showLevelErrorIcons={true}
             />
             {groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId && (
-              <ChipButton
-                hasLevelErrorIcon={true}
-                labelClassName={styles.groupFilter}
-                levelError={selectedRuleLevelError}
-                onClick={() => {
-                  onHideSelectGroupedValidation();
-                  showGroupedValidationFilter(false);
-                  dispatchFilter({
-                    type: 'SET_VALIDATION_GROUPED_FILTER',
-                    payload: { groupedFilter: false }
-                  });
-                }}
-                tooltip={selectedRuleMessage}
-                tooltipOptions={{ position: 'top' }}
-                value={selectedRuleMessage}
-              />
+              <Fragment>
+                <span data-for="groupedFilterTooltip" data-tip>
+                  <ChipButton
+                    hasLevelErrorIcon={true}
+                    labelClassName={styles.groupFilter}
+                    levelError={selectedRuleLevelError}
+                    onClick={() => {
+                      onHideSelectGroupedValidation();
+                      showGroupedValidationFilter(false);
+                      dispatchFilter({
+                        type: 'SET_VALIDATION_GROUPED_FILTER',
+                        payload: { groupedFilter: false }
+                      });
+                    }}
+                    value={selectedRuleMessage}
+                  />
+                </span>
+                <ReactTooltip border={true} effect="solid" id="groupedFilterTooltip" place="top">
+                  {selectedRuleMessage}
+                </ReactTooltip>
+              </Fragment>
             )}
           </Fragment>
         )}
@@ -352,15 +357,17 @@ const ActionsToolbar = ({
               onKeyDown={onSearchKeyEvent}
               value={valueFilter}
             />
-            {!isEmpty(valueFilter) && (
+            {!isEmpty(valueFilter) ? (
               <Button
                 className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
                 icon="cancel"
                 onClick={() => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: '' })}
               />
+            ) : (
+              <span style={{ width: '2.357em' }} />
             )}
             <Button
-              className="p-button-secondary-transparent"
+              className="p-button-secondary"
               icon="search"
               onClick={() => showValueFilter(encodeURIComponent(valueFilter))}
             />

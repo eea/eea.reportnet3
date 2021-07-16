@@ -178,6 +178,10 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
+const toggleUpdatable = (datasetId, updatable) => {
+  apiDataset.toggleUpdatable(datasetId, updatable);
+};
+
 const exportDataById = async (datasetId, fileType) => await apiDataset.exportDataById(datasetId, fileType);
 
 const exportDatasetDataExternal = async (datasetId, integrationId) => {
@@ -186,6 +190,10 @@ const exportDatasetDataExternal = async (datasetId, integrationId) => {
 
 const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   return await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
+};
+
+const exportTableSchemaById = async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
+  return await apiDataset.exportTableSchemaById(datasetId, datasetSchemaId, tableSchemaId, fileType);
 };
 
 const getMetaData = async datasetId => {
@@ -665,6 +673,7 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportDatasetDataExternal,
   exportTableDataById,
+  exportTableSchemaById,
   getMetaData,
   getReferencedFieldValues,
   groupedErrorsById,
@@ -672,6 +681,7 @@ export const ApiDatasetRepository = {
   orderTableSchema,
   schemaById,
   tableDataById,
+  toggleUpdatable,
   updateDatasetFeedbackStatus,
   updateDatasetSchemaDesign,
   updateFieldById,

@@ -32,6 +32,7 @@ export const TabsDesigner = withRouter(
     datasetSchema,
     datasetSchemas,
     datasetStatistics,
+    designerState,
     editable = false,
     getIsTableCreated,
     getUpdatedTabs,
@@ -53,6 +54,7 @@ export const TabsDesigner = withRouter(
     onUpdateSchema,
     onUpdateTable,
     recordPositionId,
+    schemaImported = false,
     selectedRecordErrorId,
     selectedRuleId,
     selectedRuleLevelError,
@@ -82,6 +84,12 @@ export const TabsDesigner = withRouter(
         onLoadSchema();
       }
     }, [datasetStatistics]);
+
+    useEffect(() => {
+      if (schemaImported) {
+        onLoadSchema();
+      }
+    }, [schemaImported]);
 
     useEffect(() => {
       if (!isUndefined(scrollFn) && !isNull(scrollFn) && !isEditing) {
@@ -401,6 +409,8 @@ export const TabsDesigner = withRouter(
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
+                        designerState={designerState}
+                        hasPKReferenced={tab.hasPKReferenced}
                         isDataflowOpen={isDataflowOpen}
                         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 import dayjs from 'dayjs';
 
 import { config } from 'conf';
@@ -54,9 +54,9 @@ export const Message = ({ hasSeparator, message }) => {
   };
 
   return hasSeparator ? (
-    <>
+    <Fragment>
       {renderSeparator()} {renderMessage()}
-    </>
+    </Fragment>
   ) : (
     renderMessage()
   );

@@ -19,6 +19,7 @@ import { DownloadReferenceDatasetFileData } from './DownloadReferenceDatasetFile
 import { ExportData } from './ExportData';
 import { ExportDatasetDataExternal } from './ExportDatasetDataExternal';
 import { ExportTableData } from './ExportTableData';
+import { ExportTableSchema } from './ExportTableSchema';
 import { GetData } from './GetData';
 import { GetMetaData } from './GetMetaData';
 import { GetReferencedFieldValues } from './GetReferencedFieldValues';
@@ -27,6 +28,7 @@ import { GetStatistics } from './GetStatistics';
 import { GroupedErrors } from './GroupedErrors';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
+import { ToggleUpdatable } from './toggleUpdatable';
 import { UpdateDatasetFeedbackStatus } from './UpdateDatasetFeedbackStatus';
 import { UpdateDatasetSchemaDesign } from './UpdateDatasetSchemaDesign';
 import { UpdateField } from './UpdateField';
@@ -59,6 +61,7 @@ export const DatasetService = {
   exportDataById: ExportData({ datasetRepository }),
   exportDatasetDataExternal: ExportDatasetDataExternal({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
+  exportTableSchemaById: ExportTableSchema({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
   getReferencedFieldValues: GetReferencedFieldValues({ datasetRepository }),
   groupedErrorsById: GroupedErrors({ datasetRepository }),
@@ -66,6 +69,7 @@ export const DatasetService = {
   orderTableDesign: OrderTableDesign({ datasetRepository }),
   schemaById: GetSchema({ datasetRepository }),
   tableDataById: GetData({ datasetRepository }),
+  toggleUpdatable: ToggleUpdatable({ datasetRepository }),
   updateDatasetFeedbackStatus: UpdateDatasetFeedbackStatus({ datasetRepository }),
   updateDatasetSchemaDesign: UpdateDatasetSchemaDesign({ datasetRepository }),
   updateFieldById: UpdateField({ datasetRepository }),

@@ -24,6 +24,7 @@ export class Dataset {
     totalErrors,
     totalFilteredErrors,
     totalRecords,
+    updatable,
     webform
   } = {}) {
     this.availableInPublic = availableInPublic;
@@ -50,6 +51,7 @@ export class Dataset {
     this.totalErrors = totalErrors;
     this.totalFilteredErrors = totalFilteredErrors;
     this.totalRecords = totalRecords;
+    this.updatable = updatable;
     this.webform = webform;
   }
 }

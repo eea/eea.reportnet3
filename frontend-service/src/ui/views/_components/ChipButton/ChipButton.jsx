@@ -7,7 +7,6 @@ import styles from './ChipButton.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'ui/views/_components/Icon';
-import { IconTooltip } from 'ui/views/_components/IconTooltip';
 import Tooltip from 'primereact/tooltip';
 
 export const ChipButton = ({
@@ -44,20 +43,22 @@ export const ChipButton = ({
   return (
     <div className={`${className} ${styles.chipButton}`} key={key} ref={listElement} style={style}>
       {hasLevelErrorIcon && (
-        <IconTooltip
-          className={styles.chipButtonErrorIcon}
-          key={'levelErrorIcon'}
-          levelError={levelError.toUpperCase()}
-          message={''}
+        <Icon
+          className={`${styles.chipButtonIcon} ${styles[levelError.toLowerCase()]}`}
+          icon={levelError.toUpperCase() === 'BLOCKER' ? 'blocker' : 'warning'}
         />
       )}
       {icon && <FontAwesomeIcon aria-hidden={false} icon={AwesomeIcons(icon)} />}
       <span className={`${labelClassName} ${styles.chipButtonLabel}`} ref={inputElement}>
         {value}
       </span>
-      <div onMouseOut={() => setIconToShow('cancel')} onMouseOver={() => setIconToShow('errorCircle')}>
-        <Icon className={styles.chipButtonIcon} icon={iconToShow} onClick={onClick} />
-      </div>
+      <Icon
+        className={styles.chipButtonIcon}
+        icon={iconToShow}
+        onClick={onClick}
+        onMouseOut={() => setIconToShow('cancel')}
+        onMouseOver={() => setIconToShow('errorCircle')}
+      />
     </div>
   );
 };
