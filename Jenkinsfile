@@ -35,7 +35,7 @@ pipeline {
                     }
                 }
                 
-                stage('Compile NPM') {
+                /*stage('Compile NPM') {
                     steps {
                     	sh 'rm -rf /node_modules/'
                         sh 'rm -f package-lock.json'
@@ -44,7 +44,7 @@ pipeline {
                         '''
                     }
 
-                }
+                }*/
             }
         }
        
