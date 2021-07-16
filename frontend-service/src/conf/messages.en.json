@@ -1187,6 +1187,7 @@
     "importFieldSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importFieldSchemaFailedEvent": "Error",
     "importTableSchemaInit": "Importing table schema definition",
-    "replaceDataPKInUse": "It's not possible to replace a PK in use"
+    "replaceDataPKInUse": "It's not possible to replace a PK in use",
+    "unlockDatasetError": "Error unlocking/locking dataset"
   }
 }

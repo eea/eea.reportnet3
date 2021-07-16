@@ -898,12 +898,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     }
   };
 
-  const toggleUpdatable = () => {
+  const toggleUpdatable = async () => {
     try {
-      DatasetService.toggleUpdatable(datasetId, !dataset.updatable);
+      await DatasetService.toggleUpdatable(datasetId, !dataset.updatable);
       onLoadDataflow();
     } catch (error) {
-      console.log(`error`, error);
+      notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' });
     }
   };
 

@@ -28,7 +28,7 @@ import { GetStatistics } from './GetStatistics';
 import { GroupedErrors } from './GroupedErrors';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
-import { ToggleUpdatable } from './toggleUpdatable';
+import { ToggleUpdatable } from './ToggleUpdatable';
 import { UpdateDatasetFeedbackStatus } from './UpdateDatasetFeedbackStatus';
 import { UpdateDatasetSchemaDesign } from './UpdateDatasetSchemaDesign';
 import { UpdateField } from './UpdateField';

@@ -178,9 +178,7 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
-const toggleUpdatable = (datasetId, updatable) => {
-  apiDataset.toggleUpdatable(datasetId, updatable);
-};
+const toggleUpdatable = async (datasetId, updatable) => await apiDataset.toggleUpdatable(datasetId, updatable);
 
 const exportDataById = async (datasetId, fileType) => await apiDataset.exportDataById(datasetId, fileType);
 
