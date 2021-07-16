@@ -147,9 +147,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           className: 'dataflow-showPublicInfo-help-step',
           icon: 'lock',
           isVisible: setIsCustodianOrSteward,
-          label: 'referenceStateBarButton',
+          label: 'referenceUpdateStatusLeftSideBarButton',
           onClick: () => setIsUpdatableDialogVisible(true),
-          title: 'publicStatusLeftSideBarButton'
+          title: 'referenceUpdateStatusLeftSideBarButton'
         }
       ]);
     }
@@ -896,7 +896,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     }
   };
 
-  const toggleUpdatable = async () => {
+  const onConfirmUpdateReferenceDataset = async () => {
+    setIsUpdatableDialogVisible(false);
     try {
       await DatasetService.toggleUpdatable(datasetId, !dataset.updatable);
       onLoadDataflow();
@@ -1224,13 +1225,27 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       )}
 
       {isUpdatableDialogVisible && (
-        <Dialog
-          footer={referenceStateDialogFooter}
+        <ConfirmDialog
+          disabledConfirm={isDatasetUpdatable === dataset.updatable}
           header={resources.messages['referenceStateDialogHeader']}
+          labelCancel={resources.messages['cancel']}
+          labelConfirm={resources.messages['save']}
+          onConfirm={onConfirmUpdateReferenceDataset}
           onHide={() => setIsUpdatableDialogVisible(false)}
           visible={isUpdatableDialogVisible}>
-          <UnlockReferenceDataset toggleUpdatable={toggleUpdatable} updatable={dataset.updatable} />
-        </Dialog>
+          <Checkbox
+            checked={isDatasetUpdatable}
+            id="referenceDatasetUpdatableCheckbox"
+            inputId="referenceDatasetUpdatableCheckbox"
+            onChange={() => setIsDatasetUpdatable(!isDatasetUpdatable)}
+            role="checkbox"
+          />
+          <label className={styles.checkboxLabel} htmlFor="referenceDatasetUpdatableCheckbox">
+            <a onClick={() => setIsDatasetUpdatable(!isDatasetUpdatable)}>
+              {resources.messages['unlockReferenceDatasetLabel']}
+            </a>
+          </label>
+        </ConfirmDialog>
       )}
 
       <Snapshots
