@@ -58,6 +58,7 @@ import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -1482,14 +1483,36 @@ public class DatasetServiceImpl implements DatasetService {
     DataFlowVO dataflow = getDataflow(idDataset);
     if (DatasetTypeEnum.DESIGN.equals(type) && TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       result = true;
-    } else if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.REFERENCE.equals(type)
-        || DatasetTypeEnum.TEST.equals(type)) {
+    } else if (DatasetTypeEnum.REPORTING.equals(type)
+        || (DatasetTypeEnum.REFERENCE.equals(type)
+            && !Boolean.TRUE.equals(referenceDatasetRepository.findById(idDataset)
+                .orElse(new ReferenceDataset()).getUpdatable())
+            || DatasetTypeEnum.TEST.equals(type))) {
       result = true;
     } else {
       LOG.info("Dataset {} is not reportable because are in dataflow {} and the dataset type is {}",
           idDataset, dataflow.getId(), type);
     }
     return result;
+  }
+
+  /**
+   * Checks if is dataset not updatable read only.
+   *
+   * @param datasetId the dataset id
+   * @param idRecordSchema the id record schema
+   * @param entityType the entity type
+   * @return true, if is dataset updatable read only
+   */
+  @Override
+  public boolean isDatasetNotUpdatableReadOnly(Long datasetId, String idRecordSchema,
+      EntityTypeEnum entityType) {
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
+    return (DatasetTypeEnum.REFERENCE.equals(datasetType)
+        && !Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+            .orElse(new ReferenceDataset()).getUpdatable()))
+        || !DatasetTypeEnum.DESIGN.equals(datasetType)
+            && Boolean.TRUE.equals(getTableReadOnly(datasetId, idRecordSchema, entityType));
   }
 
   /**
@@ -2914,6 +2937,10 @@ public class DatasetServiceImpl implements DatasetService {
       if (null == dataset) {
         // Dataset: REPORTING
         dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
+        if (dataset != null && !Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+            .orElse(new ReferenceDataset()).getUpdatable())) {
+          dataset = null;
+        }
       }
       if (null != dataset && TypeStatusEnum.DRAFT
           .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
