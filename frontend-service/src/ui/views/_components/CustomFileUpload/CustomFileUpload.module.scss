@@ -178,3 +178,7 @@
   display: flex;
   justify-content: space-between;
 }
+
+.replaceCheckboxSpanDisabled {
+  cursor: not-allowed !important;
+}

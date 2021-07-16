@@ -3,6 +3,7 @@ import { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ReferenceDataflow.module.scss';
 
@@ -23,6 +24,7 @@ import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowReducer } from './_functions/Reducers/dataflowReducer';
 
@@ -42,12 +44,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
     data: {},
     description: '',
     designDatasetSchemas: [],
     error: null,
+    isCustodian: false,
     isApiKeyDialogVisible: false,
     isCreatingReferenceDatasets: false,
     isEditDialogVisible: false,
@@ -70,6 +74,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   useEffect(() => {
     onLoadReferenceDataflow();
   }, [dataflowState.refresh]);
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) onLoadPermissions();
+  }, [userContext]);
 
   useBreadCrumbs({
     currentPage: CurrentPage.REFERENCE_DATAFLOW,
@@ -123,6 +131,16 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         });
       }
     }
+  };
+
+  const onLoadPermissions = () => {
+    const isCustodian = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      referenceDataflowId,
+      [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
+    );
+
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isCustodian } });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -210,7 +228,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: true,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
-      manageRequestersBtn: true,
+      manageRequestersBtn: dataflowState.isCustodian,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
     };

@@ -1179,11 +1179,12 @@
     "valueFilterTooltipCaseSensitiveNote": "Filter is case sensitive",
     "integrationId": "Integration id",
     "countryCodeAcronym": "CC",
-	"importTableSchema": "Import definition",
+    "importTableSchema": "Import definition",
     "exportTableSchema": "Export definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",
     "importFieldSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importFieldSchemaFailedEvent": "Error",
-    "importTableSchemaInit": "Importing table schema definition"
+    "importTableSchemaInit": "Importing table schema definition",
+    "replaceDataPKInUse": "It's not possible to replace a PK in use"
   }
 }
