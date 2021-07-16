@@ -1188,6 +1188,12 @@
     "importFieldSchemaFailedEvent": "Error",
     "importTableSchemaInit": "Importing table schema definition",
     "replaceDataPKInUse": "It's not possible to replace a PK in use",
-    "unlockDatasetError": "Error unlocking/locking dataset"
+    "unlockDatasetError": "Error unlocking/locking dataset",
+    "disabledPKGeom": "This field type can't be a PK",
+    "disabledPKHas": "Table has already a PK",
+    "disabledPKLink": "Field is referenced by a link",
+    "disabledIsOpen": "Dataflow is in open state",
+    "disabledEditorRead": "User is editor read",
+    "disabledRequiredPK": "Field is a PK"
   }
 }
