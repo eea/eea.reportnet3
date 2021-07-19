@@ -205,7 +205,7 @@ const ActionsToolbar = ({
 
   return (
     <Toolbar className={`${styles.actionsToolbar} datasetSchema-table-toolbar-help-step`}>
-      <div className="p-toolbar-group-left">
+      <div className={`${styles.toolbarLeftContent} p-toolbar-group-left`}>
         {(hasWritePermissions || showWriteButtons) && (
           <Button
             className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
@@ -308,6 +308,7 @@ const ActionsToolbar = ({
               <Fragment>
                 <span data-for="groupedFilterTooltip" data-tip>
                   <ChipButton
+                    className={styles.chipButton}
                     hasLevelErrorIcon={true}
                     labelClassName={styles.groupFilter}
                     levelError={selectedRuleLevelError}
@@ -333,6 +334,7 @@ const ActionsToolbar = ({
           <Fragment>
             <span data-for="valueFilterTooltip" data-tip>
               <ChipButton
+                className={styles.chipButton}
                 icon="search"
                 labelClassName={styles.groupFilter}
                 levelError={selectedRuleLevelError}

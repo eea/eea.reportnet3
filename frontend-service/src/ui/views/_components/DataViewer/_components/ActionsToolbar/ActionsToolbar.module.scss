@@ -7,6 +7,15 @@
   border-top-right-radius: 3px !important;
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
+  padding: 11px 14px !important;
+}
+.toolbarLeftContent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.chipButton {
+  margin-bottom: 0px !important;
 }
 .filterInactive {
   font-size: 1.5rem !important;
