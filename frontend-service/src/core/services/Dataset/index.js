@@ -28,12 +28,12 @@ import { GetStatistics } from './GetStatistics';
 import { GroupedErrors } from './GroupedErrors';
 import { OrderRecordFieldDesign } from './OrderRecordFieldDesign';
 import { OrderTableDesign } from './OrderTableDesign';
-import { ToggleUpdatable } from './ToggleUpdatable';
 import { UpdateDatasetFeedbackStatus } from './UpdateDatasetFeedbackStatus';
 import { UpdateDatasetSchemaDesign } from './UpdateDatasetSchemaDesign';
 import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { UpdateRecordFieldDesign } from './UpdateRecordFieldDesign';
+import { UpdateReferenceDatasetStatus } from './UpdateReferenceDatasetStatus';
 import { UpdateSchemaName } from './UpdateSchemaName';
 import { UpdateTableDescriptionDesign } from './UpdateTableDescriptionDesign';
 import { UpdateTableNameDesign } from './UpdateTableNameDesign';
@@ -69,12 +69,12 @@ export const DatasetService = {
   orderTableDesign: OrderTableDesign({ datasetRepository }),
   schemaById: GetSchema({ datasetRepository }),
   tableDataById: GetData({ datasetRepository }),
-  toggleUpdatable: ToggleUpdatable({ datasetRepository }),
   updateDatasetFeedbackStatus: UpdateDatasetFeedbackStatus({ datasetRepository }),
   updateDatasetSchemaDesign: UpdateDatasetSchemaDesign({ datasetRepository }),
   updateFieldById: UpdateField({ datasetRepository }),
   updateRecordFieldDesign: UpdateRecordFieldDesign({ datasetRepository }),
   updateRecordsById: UpdateRecord({ datasetRepository }),
+  updateReferenceDatasetStatus: UpdateReferenceDatasetStatus({ datasetRepository }),
   updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
   updateTableDescriptionDesign: UpdateTableDescriptionDesign({ datasetRepository }),
   updateTableNameDesign: UpdateTableNameDesign({ datasetRepository }),

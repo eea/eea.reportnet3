@@ -178,8 +178,6 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
-const toggleUpdatable = async (datasetId, updatable) => await apiDataset.toggleUpdatable(datasetId, updatable);
-
 const exportDataById = async (datasetId, fileType) => await apiDataset.exportDataById(datasetId, fileType);
 
 const exportDatasetDataExternal = async (datasetId, integrationId) => {
@@ -595,6 +593,9 @@ const updateRecordsById = async (datasetId, record, updateInCascade) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord], updateInCascade);
 };
 
+const updateReferenceDatasetStatus = async (datasetId, updatable) =>
+  await apiDataset.updateReferenceDatasetStatus(datasetId, updatable);
+
 const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedbackStatus) => {
   return await apiDataset.updateDatasetFeedbackStatus(
     dataflowId,
@@ -679,12 +680,12 @@ export const ApiDatasetRepository = {
   orderTableSchema,
   schemaById,
   tableDataById,
-  toggleUpdatable,
   updateDatasetFeedbackStatus,
   updateDatasetSchemaDesign,
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
+  updateReferenceDatasetStatus,
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,

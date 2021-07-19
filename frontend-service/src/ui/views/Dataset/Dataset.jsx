@@ -901,7 +901,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onConfirmUpdateReferenceDataset = async () => {
     setIsUpdatableDialogVisible(false);
     try {
-      await DatasetService.toggleUpdatable(datasetId, !dataset.updatable);
+      await DatasetService.updateReferenceDatasetStatus(datasetId, !dataset.updatable);
       onLoadDataflow();
     } catch (error) {
       notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' });

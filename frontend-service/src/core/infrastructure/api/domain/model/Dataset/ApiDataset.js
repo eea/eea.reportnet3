@@ -219,11 +219,6 @@ export const apiDataset = {
       })
     });
   },
-  toggleUpdatable: async (datasetId, updatable) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.toggleUpdatable, { datasetId, updatable })
-    });
-  },
 
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) => {
     return await HTTPRequester.update({
@@ -257,6 +252,12 @@ export const apiDataset = {
     return await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableDataRecord, { datasetId, updateInCascade }),
       data: datasetTableRecords
+    });
+  },
+
+  updateReferenceDatasetStatus: async (datasetId, updatable) => {
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateReferenceDatasetStatus, { datasetId, updatable })
     });
   },
 
