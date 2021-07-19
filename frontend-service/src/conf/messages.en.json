@@ -1185,7 +1185,7 @@
     "exportTableSchema": "Export definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",
     "importFieldSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "importFieldSchemaFailedEvent": "Error",
+    "importFieldSchemaFailedEvent": "Error importing table schema definition",
     "importTableSchemaInit": "Importing table schema definition",
     "replaceDataPKInUse": "It's not possible to replace a PK in use",
     "disabledPKGeom": "This field type can't be a PK",
