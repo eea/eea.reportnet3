@@ -68,6 +68,7 @@ const DataViewer = withRouter(
     isFilterable,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
+    isReferenceDataset,
     isReportingWebform,
     isValidationSelected,
     match: {
@@ -262,7 +263,7 @@ const DataViewer = withRouter(
       columnOptions,
       hasCountryCode,
       hasWebformWritePermissions,
-      hasWritePermissions && !tableReadOnly,
+      (hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset),
       initialCellValue,
       isDataflowOpen,
       isDesignDatasetEditorRead,
@@ -1174,7 +1175,9 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           fileExtensions={extensionsOperationsList.export}
           hasCountryCode={hasCountryCode}
-          hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
+          hasWritePermissions={
+            (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
+          }
           hideValidationFilter={hideValidationFilter}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
@@ -1211,12 +1214,15 @@ const DataViewer = withRouter(
         <div className={styles.Table}>
           <DataTable
             contextMenuSelection={records.selectedRecord}
-            editable={hasWritePermissions && !tableReadOnly}
+            editable={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
             first={records.firstPageRecord}
             footer={
-              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
+              (hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber) ||
+              (hasWritePermissions && isReferenceDataset) ? (
                 <Footer
-                  hasWritePermissions={hasWritePermissions && !tableReadOnly}
+                  hasWritePermissions={
+                    (hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
+                  }
                   isDataflowOpen={isDataflowOpen}
                   isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                   onAddClick={() => {
@@ -1231,12 +1237,13 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWebformWritePermissions &&
-              hasWritePermissions &&
-              !tableReadOnly &&
-              !isEditing &&
-              !isDataflowOpen &&
-              !isDesignDatasetEditorRead
+              (hasWebformWritePermissions &&
+                hasWritePermissions &&
+                !tableReadOnly &&
+                !isEditing &&
+                !isDataflowOpen &&
+                !isDesignDatasetEditorRead) ||
+              (hasWritePermissions && isReferenceDataset)
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);

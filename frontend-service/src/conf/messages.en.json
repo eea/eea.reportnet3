@@ -575,7 +575,7 @@
     "isCorrect": "Validity",
     "isDataCollectionReleased": "Data collection",
     "isEUReleased": "EU Dataset",
-    "isReleasableDataflowCheckboxLabel": "Dataflow is opened for releases",
+    "isReleasableDataflowCheckboxLabel": "Dataflow is open for releases",
     "isReleasableDataflowDialogHeader": "Open/close release period",
     "isReleased": "Released",
     "isReleasing": "Is releasing",
@@ -1173,8 +1173,8 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
-    "referenceStateDialogHeader": "Reference dataset status",
-    "unlockReferenceDatasetLabel": "Unlock reference dataset",
+    "referenceStateDialogHeader": "Lock/Unlock reference dataset",
+    "unlockReferenceDatasetLabel": "Dataset is open for changes",
     "sqlSentenceCountryCodeNote": "<i>Note: You can include the keyword {%R3_COUNTRY_CODE%} to use the country code in the SQL sentence.",
     "valueFilter": "Filter by value",
     "valueFilterTooltipGeometryNote": "Geometry fields will be omitted",
@@ -1193,6 +1193,8 @@
     "disabledPKLink": "Field is referenced by a link",
     "disabledIsOpen": "Dataflow is in open state",
     "disabledEditorRead": "User is editor read",
-    "disabledRequiredPK": "Field is a PK"
+    "disabledRequiredPK": "Field is a PK",
+    "unlockDatasetError": "Error unlocking/locking dataset",
+    "referenceUpdateStatusLeftSideBarButton": "Update status"
   }
 }
