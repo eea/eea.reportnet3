@@ -24,7 +24,7 @@
     "addNewRelation": "Add new relation",
     "addNewRule": "Add new rule",
     "addRecord": "Add record",
-    "addRecordsByIdError": "There has been an error pasting your data <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "addRecordsByIdError": "There has been an error adding your data <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "addRecordsByIdSuccess": "The records have been added",
     "addRecordsError": "There has been an error adding a record",
     "addReporterConfirmHeader": "Add reporter",
@@ -1195,6 +1195,7 @@
     "disabledEditorRead": "User is editor read",
     "disabledRequiredPK": "Field is a PK",
     "unlockDatasetError": "Error unlocking/locking dataset",
-    "referenceUpdateStatusLeftSideBarButton": "Update status"
+    "referenceUpdateStatusLeftSideBarButton": "Update status",
+    "addRecordsPastingError": "There has been an error pasting your data <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }

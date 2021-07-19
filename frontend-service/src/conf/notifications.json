@@ -66,6 +66,13 @@
           }
         },
         {
+          "key": "ADD_RECORDS_PASTING_ERROR",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "ADD_RECORDS_ERROR"
         },
         {

@@ -798,7 +798,7 @@ const DataViewer = withRouter(
           MapUtils.parseGeometryData(records.pastedRecords)
         );
         if (!recordsAdded) {
-          throw new Error('ADD_RECORDS_BY_ID_ERROR');
+          throw new Error('ADD_RECORDS_PASTING_ERROR');
         } else {
           onRefresh();
           setIsPasting(false);
@@ -812,7 +812,7 @@ const DataViewer = withRouter(
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
-            type: 'ADD_RECORDS_BY_ID_ERROR',
+            type: 'ADD_RECORDS_PASTING_ERROR',
             content: {
               dataflowId,
               datasetId,
