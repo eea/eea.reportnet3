@@ -172,7 +172,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN')")
   @PutMapping("/update")
   public void updateDataset(@RequestBody DataSetVO dataset) {
     if (dataset == null) {
@@ -381,7 +381,7 @@ public class DataSetControllerImpl implements DatasetController {
           "Error updating records. The datasetId or the records to update are emtpy or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
-    if (datasetService.isDatasetNotUpdatableReadOnly(datasetId, records.get(0).getIdRecordSchema(),
+    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
         EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error updating records in the datasetId {}. The table is read only",
           datasetId);
@@ -411,7 +411,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void deleteRecord(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @PathVariable("recordId") String recordId,
       @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK) {
-    if (datasetService.isDatasetNotUpdatableReadOnly(datasetId,
+    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
         datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
           datasetId);
@@ -451,7 +451,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void insertRecords(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records) {
-    if (datasetService.isDatasetNotUpdatableReadOnly(datasetId,
+    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
         datasetService.findRecordSchemaIdById(datasetId, records.get(0).getIdRecordSchema()),
         EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
@@ -653,7 +653,7 @@ public class DataSetControllerImpl implements DatasetController {
   public void updateField(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @RequestBody FieldVO field,
       @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK) {
-    if (datasetService.isDatasetNotUpdatableReadOnly(datasetId, field.getIdFieldSchema(),
+    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, field.getIdFieldSchema(),
         EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
           datasetId);
@@ -827,7 +827,7 @@ public class DataSetControllerImpl implements DatasetController {
     try {
       // Not allow insert attachment if the table is marked as read only. This not applies to design
       // datasets
-      if (datasetService.isDatasetNotUpdatableReadOnly(datasetId,
+      if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
           datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
         LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
             datasetId);
@@ -859,7 +859,7 @@ public class DataSetControllerImpl implements DatasetController {
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
   public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String idField) {
-    if (datasetService.isDatasetNotUpdatableReadOnly(datasetId,
+    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
         datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
           datasetId);

@@ -414,7 +414,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testUpdateRecordsReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.isDatasetNotUpdatableReadOnly(Mockito.anyLong(), Mockito.any(),
+      Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
       dataSetControllerImpl.updateRecords(1L, records, false);
     } catch (ResponseStatusException e) {
@@ -458,7 +458,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.isDatasetNotUpdatableReadOnly(Mockito.anyLong(), Mockito.any(),
+      Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
       dataSetControllerImpl.deleteRecord(1L, recordId, false);
@@ -536,7 +536,7 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testUpdateFieldReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.isDatasetNotUpdatableReadOnly(Mockito.anyLong(), Mockito.any(),
+      Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
       dataSetControllerImpl.updateField(1L, new FieldVO(), false);
