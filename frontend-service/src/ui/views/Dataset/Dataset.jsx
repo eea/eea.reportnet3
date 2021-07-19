@@ -104,6 +104,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [isReferenceDatasetRegularDataflow, setIsReferenceDatasetRegularDataflow] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [isTableView, setIsTableView] = useState(true);
@@ -141,19 +142,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   }, []);
 
   useEffect(() => {
-    if (isCustodianOrSteward && isReferenceDataset) {
+    if (isCustodianOrSteward) {
       leftSideBarContext.addModels([
         {
           className: 'dataflow-showPublicInfo-help-step',
           icon: 'lock',
-          isVisible: setIsCustodianOrSteward,
+          isVisible: isReferenceDatasetRegularDataflow || isReferenceDataset,
           label: 'referenceUpdateStatusLeftSideBarButton',
           onClick: () => setIsUpdatableDialogVisible(true),
           title: 'referenceUpdateStatusLeftSideBarButton'
         }
       ]);
     }
-  }, [isCustodianOrSteward, isReferenceDataset]);
+  }, [isCustodianOrSteward, isReferenceDataset, isReferenceDatasetRegularDataflow]);
 
   useEffect(() => {
     if (!isNil(tableSchema) && tableSchema.length > 0) {
@@ -603,6 +604,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           setIsDatasetReleased(dataset[0]?.isReleased);
         } else {
           dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+          setIsReferenceDatasetRegularDataflow(true);
           setIsDatasetReleased(dataset[0]?.isReleased);
         }
       }
@@ -1062,7 +1064,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
-          isReferenceDataset={isReferenceDataset}
+          isReferenceDataset={isReferenceDataset || isReferenceDatasetRegularDataflow}
           isReportingWebform={isReportingWebform}
           isValidationSelected={dataViewerOptions.isValidationSelected}
           levelErrorTypes={levelErrorTypes}
