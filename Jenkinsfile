@@ -34,9 +34,11 @@ pipeline {
                         }
                     }
                 }
-                /*
-                stage('Compile NPM') {
+                
+                /*stage('Compile NPM') {
                     steps {
+                    	sh 'rm -rf /node_modules/'
+                        sh 'rm -f package-lock.json'
                         sh '''
                             npm install --no-cache frontend-service/
                         '''
@@ -111,7 +113,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" 
+                   return BRANCH_NAME == "sandbox" 
                 }
             }
             parallel {

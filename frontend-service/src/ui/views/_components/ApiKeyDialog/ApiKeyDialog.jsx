@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import styles from './ApiKeyDialog.module.scss';
 
@@ -69,7 +69,7 @@ const ApiKeyDialog = ({
   };
 
   const footer = (
-    <>
+    <Fragment>
       <Button
         className="p-button-primary"
         disabled={isKeyLoading}
@@ -83,7 +83,7 @@ const ApiKeyDialog = ({
         label={resources.messages['close']}
         onClick={() => onCloseDialog()}
       />
-    </>
+    </Fragment>
   );
 
   return (
