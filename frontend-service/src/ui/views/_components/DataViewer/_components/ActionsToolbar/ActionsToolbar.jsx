@@ -183,10 +183,10 @@ const ActionsToolbar = ({
 
   const getTooltipMessage = () => {
     return (
-      <>
+      <Fragment>
         <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipGeometryNote']}</span>
         <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipCaseSensitiveNote']}</span>
-      </>
+      </Fragment>
     );
   };
 

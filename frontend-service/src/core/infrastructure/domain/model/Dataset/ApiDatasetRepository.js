@@ -178,6 +178,10 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
+const toggleUpdatable = (datasetId, updatable) => {
+  apiDataset.toggleUpdatable(datasetId, updatable);
+};
+
 const exportDataById = async (datasetId, fileType) => await apiDataset.exportDataById(datasetId, fileType);
 
 const exportDatasetDataExternal = async (datasetId, integrationId) => {
@@ -677,6 +681,7 @@ export const ApiDatasetRepository = {
   orderTableSchema,
   schemaById,
   tableDataById,
+  toggleUpdatable,
   updateDatasetFeedbackStatus,
   updateDatasetSchemaDesign,
   updateFieldById,

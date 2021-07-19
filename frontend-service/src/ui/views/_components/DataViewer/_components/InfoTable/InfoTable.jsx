@@ -129,7 +129,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
   const getTooltipMessage = column => {
     if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
       return (
-        <>
+        <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
@@ -154,11 +154,11 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
               )
               .join('; ')}
           </span>
-        </>
+        </Fragment>
       );
     } else {
       return (
-        <>
+        <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
@@ -173,7 +173,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
               : column.description}
           </span>
           {column.type === 'ATTACHMENT' ? (
-            <>
+            <Fragment>
               <br />
               <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
               <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
@@ -188,11 +188,11 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
                   ? ` ${column.maxSize} ${resources.messages['MB']}`
                   : resources.messages['maxSizeNotDefined']}
               </span>
-            </>
+            </Fragment>
           ) : (
             ''
           )}
-        </>
+        </Fragment>
       );
     }
   };

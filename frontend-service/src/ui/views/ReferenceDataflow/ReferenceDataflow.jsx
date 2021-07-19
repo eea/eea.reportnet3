@@ -58,12 +58,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
     isReferencingDataflowsDialogVisible: false,
+    isReferenceStateDialogVisible: false,
     isUserRightManagementDialogVisible: false,
     name: '',
     refresh: false,
     requestStatus: 'idle',
     status: '',
-    updatedDatasetSchema: []
+    updatedDatasetSchema: [],
+    updatable: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -193,6 +195,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
     />
   );
+
   const propertiesDataflowsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"

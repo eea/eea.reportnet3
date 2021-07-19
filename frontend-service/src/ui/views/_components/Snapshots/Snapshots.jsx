@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import dayjs from 'dayjs';
 
@@ -42,7 +42,7 @@ const Snapshots = ({
   };
 
   return (
-    <>
+    <Fragment>
       <SnapshotSlideBar
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}
@@ -80,7 +80,7 @@ const Snapshots = ({
           </ul>
         </ConfirmDialog>
       )}
-    </>
+    </Fragment>
   );
 };
 

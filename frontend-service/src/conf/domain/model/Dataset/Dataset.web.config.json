@@ -33,6 +33,7 @@
   "orderFieldSchemaDesign": "/dataschema/{:datasetId}/fieldSchema/order",
   "orderTableSchemaDesign": "/dataschema/{:datasetId}/tableSchema/order",
   "referencedFieldValues": "/dataset/{:datasetId}/datasetSchemaId/{:datasetSchemaId}/fieldSchemaId/{:fieldSchemaId}/getFieldsValuesReferenced?searchValue={:searchToken}&conditionalValue={:conditionalValue}&resultsNumber={:resultsNumber}",
+  "toggleUpdatable": "/referenceDataset/{:datasetId}?updatable={:updatable}",
   "updateDataSchemaName": "/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}",
   "updateDatasetFeedbackStatus": "/datasetmetabase/updateDatasetStatus",
   "updateDatasetSchemaDesign": "/dataschema/{:datasetId}/datasetSchema",

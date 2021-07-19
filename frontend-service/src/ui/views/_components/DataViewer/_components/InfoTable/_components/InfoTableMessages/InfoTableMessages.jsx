@@ -31,14 +31,14 @@ export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns
                 </p>
               ) : null}
               {!checkValidCoordinates() && (
-                <>
+                <Fragment>
                   <p style={{ fontWeight: 'bold', color: colors.errors }}>
                     {resources.messages['pasteRecordsWarningCoordinatesMessage']}
                   </p>
                   <p style={{ fontStyle: 'italic', fontSize: '0.9em', fontWeight: 'bold' }}>
                     {`${resources.messages['pasteRecordsCoordinatesMessage']}(${resources.messages['pasteRecordsCoordinatesStructureMessage']})`}
                   </p>
-                </>
+                </Fragment>
               )}
               <p>{resources.messages['pasteColumnWarningConfirmMessage']}</p>
             </div>
