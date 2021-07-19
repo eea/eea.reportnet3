@@ -2494,6 +2494,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
       boolean referenceDataset, boolean updateTables) {
+
     schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
     if (referenceDataset && updateTables) {
       DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
