@@ -20,9 +20,23 @@
     label {
       margin-left: 0.5rem !important;
       a {
-        cursor: pointer;
         color: var(--main-font-color);
+        &:hover {
+          color: var(--main-font-color);
+          cursor: pointer;
+        }
       }
+    }
+  }
+}
+
+.checkboxLabel {
+  padding-left: 0.5rem;
+  a {
+    color: var(--main-font-color);
+    &:hover {
+      color: var(--main-font-color);
+      cursor: pointer;
     }
   }
 }
@@ -111,6 +125,7 @@
     margin-left: auto;
   }
 }
+
 .validationsFooter {
   display: flex;
   justify-content: space-between;

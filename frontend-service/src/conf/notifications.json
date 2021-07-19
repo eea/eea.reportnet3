@@ -710,6 +710,9 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId", "datasetName"]
           }
+        },
+        {
+          "key": "UNLOCK_DATASET_ERROR"
         }
       ]
     },

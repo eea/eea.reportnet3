@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 import styles from './TooltipButton.module.scss';
 import ReactTooltip from 'react-tooltip';
 import { Button } from 'ui/views/_components/Button';
@@ -10,7 +12,7 @@ export const TooltipButton = ({
   uniqueIdentifier = 1
 }) => {
   return (
-    <>
+    <Fragment>
       <span data-for={`infoCircleButton_${uniqueIdentifier}`} data-tip>
         <Button
           className={`${styles.tooltipButton} p-button-rounded p-button-secondary-transparent`}
@@ -28,6 +30,6 @@ export const TooltipButton = ({
         id={`infoCircleButton_${uniqueIdentifier}`}
         place="top"
       />
-    </>
+    </Fragment>
   );
 };
