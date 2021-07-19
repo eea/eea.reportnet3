@@ -255,6 +255,12 @@ export const apiDataset = {
     });
   },
 
+  updateReferenceDatasetStatus: async (datasetId, updatable) => {
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateReferenceDatasetStatus, { datasetId, updatable })
+    });
+  },
+
   updateSchemaNameById: async (datasetId, datasetSchemaName) => {
     return await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDataSchemaName, { datasetId, datasetSchemaName })

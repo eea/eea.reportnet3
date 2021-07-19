@@ -2872,6 +2872,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             fieldSchema.setCodelistItems(codelist);
           }
         } catch (Exception e) {
+          LOG.info("Importing field schema from field. Line ommited due to error: {}",
+              e.getMessage());
           fieldSchema = null;
         }
       }

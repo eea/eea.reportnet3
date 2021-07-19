@@ -33,6 +33,7 @@ import { UpdateDatasetSchemaDesign } from './UpdateDatasetSchemaDesign';
 import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { UpdateRecordFieldDesign } from './UpdateRecordFieldDesign';
+import { UpdateReferenceDatasetStatus } from './UpdateReferenceDatasetStatus';
 import { UpdateSchemaName } from './UpdateSchemaName';
 import { UpdateTableDescriptionDesign } from './UpdateTableDescriptionDesign';
 import { UpdateTableNameDesign } from './UpdateTableNameDesign';
@@ -73,6 +74,7 @@ export const DatasetService = {
   updateFieldById: UpdateField({ datasetRepository }),
   updateRecordFieldDesign: UpdateRecordFieldDesign({ datasetRepository }),
   updateRecordsById: UpdateRecord({ datasetRepository }),
+  updateReferenceDatasetStatus: UpdateReferenceDatasetStatus({ datasetRepository }),
   updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
   updateTableDescriptionDesign: UpdateTableDescriptionDesign({ datasetRepository }),
   updateTableNameDesign: UpdateTableNameDesign({ datasetRepository }),
