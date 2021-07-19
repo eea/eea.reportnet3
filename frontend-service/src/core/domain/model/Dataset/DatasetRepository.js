@@ -30,7 +30,6 @@ export const DatasetRepository = {
   orderTableSchema: () => Promise.reject('[DatasetRepository#orderTableSchema] must be implemented'),
   schemaById: () => Promise.reject('[DatasetRepository#schemaById] must be implemented'),
   tableDataById: () => Promise.reject('[DatasetRepository#tableDataById] must be implemented'),
-  toggleUpdatable: () => '[DatasetRepository#toggleUpdatable] must be implemented',
   updateDatasetFeedbackStatus: () =>
     Promise.reject('[DatasetRepository#updateDatasetFeedbackStatus] must be implemented'),
   updateDatasetSchemaDescriptionDesign: () =>
@@ -38,6 +37,7 @@ export const DatasetRepository = {
   updateFieldById: () => Promise.reject('[DatasetRepository#updateFieldById] must be implemented'),
   updateRecordFieldDesign: () => Promise.reject('[DatasetRepository#updateRecordFieldDesign ] must be implemented'),
   updateRecordsById: () => Promise.reject('[DatasetRepository#updateRecordsById] must be implemented'),
+  updateReferenceDatasetStatus: () => '[DatasetRepository#updateReferenceDatasetStatus] must be implemented',
   updateSchemaNameById: () => Promise.reject('[DatasetRepository#updateSchemaNameById] must be implemented'),
   updateTableDescriptionDesign: () =>
     Promise.reject('[DatasetRepository#updateTableDescriptionDesign] must be implemented'),
