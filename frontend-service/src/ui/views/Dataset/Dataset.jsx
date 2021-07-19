@@ -606,6 +606,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
           setIsReferenceDatasetRegularDataflow(true);
           setIsDatasetReleased(dataset[0]?.isReleased);
+          setIsDatasetUpdatable(dataset[0]?.updatable);
         }
       }
 
