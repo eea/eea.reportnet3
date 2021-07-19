@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -119,6 +120,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   /** The integration controller zuul. */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
+
 
   /**
    * Creates the empty dataset schema.
@@ -1065,6 +1067,70 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+  }
+
+
+  /**
+   * Export field schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @GetMapping(value = "/{datasetSchemaId}/exportFieldSchemas",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportFieldSchemas(
+      @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "datasetId") final Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) final String tableSchemaId) {
+
+    try {
+      String fileName = "fieldschemas_export_dataset_" + datasetId + ".csv";
+      byte[] file = dataschemaService.exportFieldsSchema(datasetId, datasetSchemaId, tableSchemaId);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error exporting field schemas in dataset {}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Import field schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/{datasetSchemaId}/importFieldSchemas")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  public void importFieldSchemas(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "datasetId") Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) Boolean replace) {
+
+    try {
+      // Set the user name on the thread
+      ThreadPropertiesManager.setVariable("user",
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId,
+          file.getInputStream(), replace);
+    } catch (IOException e) {
+      LOG_ERROR.error("File importing field schemas into dataset {} failed. fileName={}", datasetId,
+          file.getOriginalFilename(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
     }
   }
 
