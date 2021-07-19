@@ -205,7 +205,6 @@ const ActionsToolbar = ({
 
   return (
     <Toolbar className={`${styles.actionsToolbar} datasetSchema-table-toolbar-help-step`}>
-      <div className="p-toolbar-group-left">
       <div className={`${styles.toolbarLeftContent} p-toolbar-group-left`}>
         {(hasWritePermissions || showWriteButtons) && (
           <Button
