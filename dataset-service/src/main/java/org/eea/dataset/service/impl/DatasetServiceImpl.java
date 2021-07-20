@@ -393,6 +393,9 @@ public class DatasetServiceImpl implements DatasetService {
     TypeStatusEnum dataflowStatus = dataflowControllerZuul.getMetabaseById(dataflowId).getStatus();
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
         new ObjectId(datasetMetabaseService.findDatasetSchemaIdById(datasetId)));
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
+    Boolean referenceUpdateable = Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+        .orElse(new ReferenceDataset()).getUpdatable());
 
     for (TableSchema tableSchema : schema.getTableSchemas()) {
 
@@ -404,7 +407,9 @@ public class DatasetServiceImpl implements DatasetService {
 
       if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
         deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
-      } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
+      } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())
+          && !(DatasetTypeEnum.REFERENCE.equals(datasetType)
+              && Boolean.TRUE.equals(referenceUpdateable))) {
         LOG.info("Skipped deleteRecords: datasetId={}, tableSchemaId={}, tableSchema.readOnly={}",
             datasetId, loopTableSchemaId, tableSchema.getReadOnly());
       } else if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
@@ -808,7 +813,8 @@ public class DatasetServiceImpl implements DatasetService {
             .getCode()
         : null;
 
-    if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType)
+        && !DatasetTypeEnum.REFERENCE.equals(datasetType)) {
 
       // Deny insert if the table is marked as read only. Not applies for DESIGN.
       if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
@@ -1505,11 +1511,12 @@ public class DatasetServiceImpl implements DatasetService {
   public boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
       EntityTypeEnum entityType) {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
-    return (DatasetTypeEnum.REFERENCE.equals(datasetType)
-        && !Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
-            .orElse(new ReferenceDataset()).getUpdatable()))
-        || !DatasetTypeEnum.DESIGN.equals(datasetType)
-            && Boolean.TRUE.equals(getTableReadOnly(datasetId, idRecordSchema, entityType));
+    Boolean updatable = Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+        .orElse(new ReferenceDataset()).getUpdatable());
+    return (DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.FALSE.equals(updatable))
+        || (!DatasetTypeEnum.DESIGN.equals(datasetType)
+            && !(DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.TRUE.equals(updatable))
+            && Boolean.TRUE.equals(getTableReadOnly(datasetId, idRecordSchema, entityType)));
   }
 
   /**
@@ -2939,9 +2946,8 @@ public class DatasetServiceImpl implements DatasetService {
           }
           break;
         case REFERENCE:
-          if (TypeStatusEnum.DESIGN.equals(dataflowStatus)
-              || !Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
-                  .orElse(new ReferenceDataset()).getUpdatable())) {
+          if (Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+              .orElse(new ReferenceDataset()).getUpdatable())) {
             schema =
                 schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
           }
