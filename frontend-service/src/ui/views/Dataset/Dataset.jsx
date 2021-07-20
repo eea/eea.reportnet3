@@ -872,15 +872,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       </div>
     );
 
-  const referenceStateDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsUpdatableDialogVisible(false)}
-    />
-  );
-
   const switchToTabularData = () => {
     setIsTableView(true);
     setIsValidationsTabularView(true);
