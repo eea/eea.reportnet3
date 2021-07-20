@@ -895,6 +895,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       await DatasetService.updateReferenceDatasetStatus(datasetId, !dataset.updatable);
       onLoadDataflow();
+      onLoadDatasetSchema();
     } catch (error) {
       notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' });
     }
