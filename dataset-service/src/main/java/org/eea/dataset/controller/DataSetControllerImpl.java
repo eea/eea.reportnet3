@@ -451,23 +451,20 @@ public class DataSetControllerImpl implements DatasetController {
   public void insertRecords(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records) {
-    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-        datasetService.findRecordSchemaIdById(datasetId, records.get(0).getIdRecordSchema()),
+    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
         EntityTypeEnum.RECORD)) {
-      LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
+      LOG_ERROR.error("Error inserting record in the datasetId {}. The table is read only",
           datasetId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
-            datasetService.findRecordSchemaIdById(datasetId, records.get(0).getIdRecordSchema()),
-            EntityTypeEnum.RECORD))) {
+            records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD))) {
       LOG_ERROR.error(
-          "Error deleting record in the datasetId {}. The table has a fixed number of records",
+          "Error inserting record in the datasetId {}. The table has a fixed number of records",
           datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(
-          EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-          datasetService.findRecordSchemaIdById(datasetId, records.get(0).getIdRecordSchema())));
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String
+          .format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, records.get(0).getIdRecordSchema()));
     }
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
