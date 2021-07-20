@@ -22,6 +22,7 @@ export const TabsSchema = ({
   isFilterable,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
+  isReferenceDataset,
   isReportingWebform,
   isValidationSelected,
   levelErrorTypes,
@@ -56,6 +57,7 @@ export const TabsSchema = ({
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
                   isGroupedValidationSelected={isGroupedValidationSelected}
+                  isReferenceDataset={isReferenceDataset}
                   isReportingWebform={isReportingWebform}
                   isValidationSelected={isValidationSelected}
                   key={table.id}

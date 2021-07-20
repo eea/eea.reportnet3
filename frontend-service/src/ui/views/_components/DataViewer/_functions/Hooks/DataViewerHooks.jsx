@@ -9,15 +9,15 @@ import styles from '../../DataViewer.module.scss';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
-import { IconTooltip } from 'ui/views/_components/IconTooltip';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconTooltip } from 'ui/views/_components/IconTooltip';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
+
+import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { MapUtils } from 'ui/views/_functions/Utils/MapUtils';
-import ReactTooltip from 'react-tooltip';
 import { TextUtils, RecordUtils } from 'ui/views/_functions/Utils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
@@ -132,7 +132,7 @@ export const useSetColumns = (
             onClick={() => onFileDownload(value, fieldId)}
           />
         )}
-        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && (
+        {hasWritePermissions && !isDataflowOpen && !isDesignDatasetEditorRead && (!colSchema.readOnly || !isReporting) && (
           <Button
             className={`p-button-animated-blink p-button-secondary-transparent`}
             icon="import"
@@ -147,13 +147,18 @@ export const useSetColumns = (
             }}
           />
         )}
-        {hasWritePermissions && (!colSchema.readOnly || !isReporting) && !isNil(value) && value !== '' && (
-          <Button
-            className={`p-button-animated-blink p-button-secondary-transparent`}
-            icon="trash"
-            onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
-          />
-        )}
+        {hasWritePermissions &&
+          !isDataflowOpen &&
+          !isDesignDatasetEditorRead &&
+          (!colSchema.readOnly || !isReporting) &&
+          !isNil(value) &&
+          value !== '' && (
+            <Button
+              className={`p-button-animated-blink p-button-secondary-transparent`}
+              icon="trash"
+              onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
+            />
+          )}
       </div>
     );
   };
@@ -197,7 +202,7 @@ export const useSetColumns = (
   const getTooltipMessage = column => {
     if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
       return (
-        <>
+        <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
@@ -222,11 +227,11 @@ export const useSetColumns = (
               )
               .join('; ')}
           </span>
-        </>
+        </Fragment>
       );
     } else {
       return (
-        <>
+        <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
@@ -241,7 +246,7 @@ export const useSetColumns = (
               : column.description}
           </span>
           {column.type === 'ATTACHMENT' ? (
-            <>
+            <Fragment>
               <br />
               <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
               <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
@@ -256,11 +261,11 @@ export const useSetColumns = (
                   ? ` ${column.maxSize} ${resources.messages['MB']}`
                   : resources.messages['maxSizeNotDefined']}
               </span>
-            </>
+            </Fragment>
           ) : (
             ''
           )}
-        </>
+        </Fragment>
       );
     }
   };
@@ -390,18 +395,7 @@ export const useSetColumns = (
                 />
               )}
               {column.header}
-              <span data-for={`infoCircleButton_${i}`} data-tip>
-                <Button
-                  className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent datasetSchema-columnHeaderInfo-help-step`}
-                  icon="infoCircle"
-                  onClick={() => {
-                    onShowFieldInfo(column.header, true);
-                  }}
-                />
-              </span>
-              <ReactTooltip
-                border={true}
-                effect="solid"
+              <TooltipButton
                 getContent={() =>
                   ReactDOMServer.renderToStaticMarkup(
                     <div
@@ -414,9 +408,11 @@ export const useSetColumns = (
                     </div>
                   )
                 }
-                html={true}
-                id={`infoCircleButton_${i}`}
-                place="top"></ReactTooltip>
+                onClick={() => {
+                  onShowFieldInfo(column.header, true);
+                }}
+                uniqueIdentifier={i}
+              />
             </Fragment>
           }
           key={column.field}
@@ -480,7 +476,14 @@ export const useSetColumns = (
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue, hasWebformWritePermissions]);
+  }, [
+    colsSchema,
+    columnOptions,
+    records.selectedRecord.recordId,
+    initialCellValue,
+    hasWebformWritePermissions,
+    hasWritePermissions
+  ]);
 
   return {
     columns,

@@ -22,6 +22,7 @@ export const DatasetRepository = {
   exportDataById: () => Promise.reject('[DatasetRepository#exportDataById] must be implemented'),
   exportDatasetDataExternal: () => Promise.reject('[DatasetRepository#exportDatasetDataExternal] must be implemented'),
   exportTableDataById: () => Promise.reject('[DatasetRepository#exportTableDataById] must be implemented'),
+  exportTableSchemaById: () => Promise.reject('[DatasetRepository#exportTableSchemaById] must be implemented'),
   getMetaData: () => Promise.reject('[DatasetRepository#getMetaData] must be implemented'),
   getReferencedFieldValues: () => Promise.reject('[DatasetRepository#getReferencedFieldValues] must be implemented'),
   groupedErrorsById: () => Promise.reject('[DatasetRepository#groupedErrorsById] must be implemented'),
@@ -36,6 +37,7 @@ export const DatasetRepository = {
   updateFieldById: () => Promise.reject('[DatasetRepository#updateFieldById] must be implemented'),
   updateRecordFieldDesign: () => Promise.reject('[DatasetRepository#updateRecordFieldDesign ] must be implemented'),
   updateRecordsById: () => Promise.reject('[DatasetRepository#updateRecordsById] must be implemented'),
+  updateReferenceDatasetStatus: () => '[DatasetRepository#updateReferenceDatasetStatus] must be implemented',
   updateSchemaNameById: () => Promise.reject('[DatasetRepository#updateSchemaNameById] must be implemented'),
   updateTableDescriptionDesign: () =>
     Promise.reject('[DatasetRepository#updateTableDescriptionDesign] must be implemented'),

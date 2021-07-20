@@ -1,4 +1,4 @@
-import { useContext, forwardRef } from 'react';
+import { Fragment, useContext, forwardRef } from 'react';
 
 import ReactTooltip from 'react-tooltip';
 
@@ -91,7 +91,7 @@ const ConfirmDialog = forwardRef((props, _) => {
           onClick={onConfirm}
         />
       ) : (
-        <>
+        <Fragment>
           {footerAddon}
           <span data-for="confirmTooltipId" data-tip>
             <Button
@@ -111,7 +111,7 @@ const ConfirmDialog = forwardRef((props, _) => {
               {confirmTooltip}
             </ReactTooltip>
           )}
-        </>
+        </Fragment>
       )}
       <Button
         className={`${!isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary p-button-animated-blink'}`}

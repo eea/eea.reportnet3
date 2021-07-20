@@ -89,21 +89,28 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     import: [],
     importOtherSystems: []
   });
+  const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
+  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
+  const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
+  const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
-  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
-  const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [isReferenceDatasetRegularDataflow, setIsReferenceDatasetRegularDataflow] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
+  const [isTableView, setIsTableView] = useState(true);
   const [isTestDataset, setIsTestDataset] = useState(undefined);
+  const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
+  const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metaData, setMetaData] = useState({});
   const [replaceData, setReplaceData] = useState(false);
@@ -113,10 +120,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
-  const [isTableView, setIsTableView] = useState(true);
   const [webformData, setWebformData] = useState(null);
-  const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
-  const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -136,6 +140,21 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
   }, []);
+
+  useEffect(() => {
+    if (isCustodianOrSteward) {
+      leftSideBarContext.addModels([
+        {
+          className: 'dataflow-showPublicInfo-help-step',
+          icon: 'lock',
+          isVisible: isReferenceDatasetRegularDataflow || isReferenceDataset,
+          label: 'referenceUpdateStatusLeftSideBarButton',
+          onClick: () => setIsUpdatableDialogVisible(true),
+          title: 'referenceUpdateStatusLeftSideBarButton'
+        }
+      ]);
+    }
+  }, [isCustodianOrSteward, isReferenceDataset, isReferenceDatasetRegularDataflow]);
 
   useEffect(() => {
     if (!isNil(tableSchema) && tableSchema.length > 0) {
@@ -160,13 +179,20 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             userContext.hasPermission(
               [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
               `${config.permissions.prefixes.TESTDATASET}${datasetId}`
-            )
+            ) ||
+            (isCustodianOrSteward && isDatasetUpdatable)
         );
         setIsTestDataset(
           userContext.hasPermission(
             [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
             `${config.permissions.prefixes.TESTDATASET}${datasetId}`
           )
+        );
+        setIsCustodianOrSteward(
+          userContext.hasContextAccessPermission(config.permissions.prefixes.REFERENCEDATASET, datasetId, [
+            config.permissions.roles.CUSTODIAN.key,
+            config.permissions.roles.STEWARD.key
+          ])
         );
       }
     }
@@ -569,13 +595,18 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+      } else if (isReferenceDataset) {
+        dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+        setIsDatasetUpdatable(dataset[0]?.updatable);
       } else {
         dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
         if (!isEmpty(dataset)) {
-          setIsDatasetReleased(dataset[0].isReleased);
+          setIsDatasetReleased(dataset[0]?.isReleased);
         } else {
           dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+          setIsReferenceDatasetRegularDataflow(true);
           setIsDatasetReleased(dataset[0]?.isReleased);
+          setIsDatasetUpdatable(dataset[0]?.updatable);
         }
       }
 
@@ -841,6 +872,15 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       </div>
     );
 
+  const referenceStateDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon={'cancel'}
+      label={resources.messages['close']}
+      onClick={() => setIsUpdatableDialogVisible(false)}
+    />
+  );
+
   const switchToTabularData = () => {
     setIsTableView(true);
     setIsValidationsTabularView(true);
@@ -856,6 +896,16 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
 
       setIsDownloadingValidations(false);
+    }
+  };
+
+  const onConfirmUpdateReferenceDataset = async () => {
+    setIsUpdatableDialogVisible(false);
+    try {
+      await DatasetService.updateReferenceDatasetStatus(datasetId, !dataset.updatable);
+      onLoadDataflow();
+    } catch (error) {
+      notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' });
     }
   };
 
@@ -1015,6 +1065,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+          isReferenceDataset={isReferenceDataset || isReferenceDatasetRegularDataflow}
           isReportingWebform={isReportingWebform}
           isValidationSelected={dataViewerOptions.isValidationSelected}
           levelErrorTypes={levelErrorTypes}
@@ -1116,7 +1167,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             isNil(importSelectedIntegrationId)
               ? getUrl(DatasetConfig.importFileDataset, {
                   datasetId: datasetId,
-                  delimiter: `${config.IMPORT_FILE_DELIMITER}`
+                  delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                 })
               : getUrl(DatasetConfig.importFileDatasetExternal, {
                   datasetId: datasetId,
@@ -1173,6 +1224,30 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           onHide={() => onSetVisible(setValidateDialogVisible, false)}
           visible={validateDialogVisible}>
           {resources.messages['validateDatasetConfirm']}
+        </ConfirmDialog>
+      )}
+
+      {isUpdatableDialogVisible && (
+        <ConfirmDialog
+          disabledConfirm={isDatasetUpdatable === dataset.updatable}
+          header={resources.messages['referenceStateDialogHeader']}
+          labelCancel={resources.messages['cancel']}
+          labelConfirm={resources.messages['save']}
+          onConfirm={onConfirmUpdateReferenceDataset}
+          onHide={() => setIsUpdatableDialogVisible(false)}
+          visible={isUpdatableDialogVisible}>
+          <Checkbox
+            checked={isDatasetUpdatable}
+            id="referenceDatasetUpdatableCheckbox"
+            inputId="referenceDatasetUpdatableCheckbox"
+            onChange={() => setIsDatasetUpdatable(!isDatasetUpdatable)}
+            role="checkbox"
+          />
+          <label className={styles.checkboxLabel} htmlFor="referenceDatasetUpdatableCheckbox">
+            <a onClick={() => setIsDatasetUpdatable(!isDatasetUpdatable)}>
+              {resources.messages['unlockReferenceDatasetLabel']}
+            </a>
+          </label>
         </ConfirmDialog>
       )}
 

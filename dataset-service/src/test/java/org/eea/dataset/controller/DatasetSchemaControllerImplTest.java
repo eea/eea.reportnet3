@@ -1779,4 +1779,58 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+
+  @Test
+  public void testExportFieldSchemas() throws EEAException, IOException {
+
+    dataSchemaControllerImpl.exportFieldSchemas(new ObjectId().toString(), 1L,
+        new ObjectId().toString());
+    Mockito.verify(dataschemaService, times(1)).exportFieldsSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testExportFieldSchemasException() throws EEAException, IOException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).exportFieldsSchema(Mockito.any(),
+          Mockito.any(), Mockito.any());
+
+      dataSchemaControllerImpl.exportFieldSchemas(new ObjectId().toString(), 1L,
+          new ObjectId().toString());
+
+    } catch (EEAException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw e;
+    }
+  }
+
+
+  @Test
+  public void testImportFieldSchemas() throws EEAException, IOException {
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+    dataSchemaControllerImpl.importFieldSchemas(new ObjectId().toString(), 1L,
+        new ObjectId().toString(), multipartFile, true);
+    Mockito.verify(dataschemaService, times(1)).importFieldsSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+  }
+
+
+
 }

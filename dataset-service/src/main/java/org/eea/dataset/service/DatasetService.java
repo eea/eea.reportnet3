@@ -375,15 +375,17 @@ public interface DatasetService {
    */
   boolean isDatasetReportable(Long idDataset);
 
+
+
   /**
-   * Checks if is dataset not updatable read only.
+   * Check if dataset locked or read only.
    *
    * @param datasetId the dataset id
    * @param idRecordSchema the id record schema
    * @param entityType the entity type
-   * @return true, if is dataset updatable read only
+   * @return true, if successful
    */
-  boolean isDatasetNotUpdatableReadOnly(Long datasetId, String idRecordSchema,
+  boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
       EntityTypeEnum entityType);
 
   /**

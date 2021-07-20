@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -150,7 +150,9 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         const parseExtensionsOperations = extensionsOperations => {
           const parsedExtensionsOperations = [];
           extensionsOperations.forEach(extensionOperation => {
-            parsedExtensionsOperations.push(pick(extensionOperation, 'datasetSchemaId', 'operation', 'fileExtension'));
+            parsedExtensionsOperations.push(
+              pick(extensionOperation, 'datasetSchemaId', 'operation', 'fileExtension', 'id')
+            );
           });
           return parsedExtensionsOperations;
         };
@@ -366,10 +368,10 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   };
 
   return (
-    <>
+    <Fragment>
       {renderToolbar()}
       {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
-    </>
+    </Fragment>
   );
 };
 

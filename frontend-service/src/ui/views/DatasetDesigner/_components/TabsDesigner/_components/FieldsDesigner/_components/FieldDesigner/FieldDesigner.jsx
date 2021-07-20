@@ -912,6 +912,22 @@ export const FieldDesigner = ({
           }
         }}
         style={{ width: '35px' }}
+        tooltip={
+          !isNil(fieldDesignerState.fieldTypeValue) &&
+          !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
+          geometricTypes.includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())
+            ? resources.messages['disabledPKGeom']
+            : hasPK && !fieldDesignerState.fieldPKValue
+            ? resources.messages['disabledPKHas']
+            : hasPK && fieldDesignerState.fieldPKReferencedValue
+            ? resources.messages['disabledPKLink']
+            : isDataflowOpen
+            ? resources.messages['disabledIsOpen']
+            : isDesignDatasetEditorRead
+            ? resources.messages['disabledEditorRead']
+            : null
+        }
+        tooltipOptions={{ position: 'top' }}
       />
       <Checkbox
         ariaLabel={resources.messages['required']}
@@ -927,6 +943,16 @@ export const FieldDesigner = ({
           onRequiredChange(e.checked);
         }}
         style={{ width: '70px' }}
+        tooltip={
+          Boolean(fieldDesignerState.fieldPKValue)
+            ? resources.messages['disabledRequiredPK']
+            : isDataflowOpen
+            ? resources.messages['disabledIsOpen']
+            : isDesignDatasetEditorRead
+            ? resources.messages['disabledEditorRead']
+            : null
+        }
+        tooltipOptions={{ position: 'top' }}
       />
       <Checkbox
         ariaLabel={resources.messages['readOnly']}

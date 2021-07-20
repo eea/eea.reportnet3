@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import isNil from 'lodash/isNil';
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -353,7 +353,7 @@ export const Map = ({
   };
 
   return (
-    <>
+    <Fragment>
       {hasLegend && (
         <div className={styles.pointLegendWrapper}>
           <div className={styles.pointLegendItem}>
@@ -384,7 +384,7 @@ export const Map = ({
             </div>
           </div>
           {TextUtils.areEquals(geometryType, 'POINT') && (
-            <>
+            <Fragment>
               <div className={styles.pointLegendItem}>
                 <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
                 <div className={styles.pointLegendItemLabel}>
@@ -397,7 +397,7 @@ export const Map = ({
                   <label>{resources.messages['mapSelectPointMessage']}</label>
                 </div>
               </div>
-            </>
+            </Fragment>
           )}
         </div>
       )}
@@ -472,6 +472,6 @@ export const Map = ({
           )}
         </MapComponent>
       </div>
-    </>
+    </Fragment>
   );
 };

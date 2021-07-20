@@ -708,6 +708,7 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
 
+
     if (updateCascadePK) {
       // we update the ids in cascade for any pk value changed
       for (RecordValue recordValue : recordValues) {
@@ -720,6 +721,7 @@ public class DatasetServiceImpl implements DatasetService {
       fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue, datasetType);
     }
     fieldRepository.saveAll(fieldValues);
+
   }
 
 
@@ -1489,16 +1491,18 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
+
+
   /**
-   * Checks if is dataset not updatable read only.
+   * Check if dataset locked or read only.
    *
    * @param datasetId the dataset id
    * @param idRecordSchema the id record schema
    * @param entityType the entity type
-   * @return true, if is dataset updatable read only
+   * @return true, if successful
    */
   @Override
-  public boolean isDatasetNotUpdatableReadOnly(Long datasetId, String idRecordSchema,
+  public boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
       EntityTypeEnum entityType) {
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     return (DatasetTypeEnum.REFERENCE.equals(datasetType)
@@ -3629,4 +3633,5 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
   }
+
 }

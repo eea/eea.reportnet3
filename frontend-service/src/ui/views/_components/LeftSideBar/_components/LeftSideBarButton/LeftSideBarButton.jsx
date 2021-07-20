@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import styles from './LeftSideBarButton.module.scss';
 
@@ -28,7 +28,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   }, [notificationContext.newNotification]);
 
   const defaultLayout = (
-    <>
+    <Fragment>
       <FontAwesomeIcon
         aria-label={title}
         className={`${styles.leftSideBarUserIcon} ${styles.leftSideBarElementAnimation}`}
@@ -36,10 +36,10 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
         role="button"
       />
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
-    </>
+    </Fragment>
   );
   const notificationsLayout = (
-    <>
+    <Fragment>
       <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
         <FontAwesomeIcon
           aria-label={resourcesContext.messages['notifications']}
@@ -53,13 +53,13 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
         )}
       </div>
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
-    </>
+    </Fragment>
   );
 
   const buttonsLayouts = { defaultLayout, notificationsLayout };
 
   return (
-    <>
+    <Fragment>
       <a className={className} data-for={title} data-tip href={href} onClick={onClick} style={style}>
         <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
       </a>
@@ -68,7 +68,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
           <span>{!leftSideBarContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}</span>
         </ReactTooltip>
       ) : null}
-    </>
+    </Fragment>
   );
 };
 

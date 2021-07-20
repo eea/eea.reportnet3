@@ -2494,6 +2494,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
       boolean referenceDataset, boolean updateTables) {
+
     schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
     if (referenceDataset && updateTables) {
       DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
@@ -2565,7 +2566,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     DataSetSchema datasetSchema =
         schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     // Method to process the file
+    String tableSchemaName = "";
     try {
+      Optional<TableSchema> tableSchema = datasetSchema.getTableSchemas().stream()
+          .filter(t -> t.getIdTableSchema().equals(new ObjectId(tableSchemaId))).findFirst();
+
+      if (tableSchema.isPresent()) {
+        tableSchemaName = tableSchema.get().getNameTableSchema();
+      }
+
       readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
 
       // Success notification
@@ -2573,7 +2582,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           null,
           NotificationVO.builder()
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetId(datasetId).build());
+              .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
+    } catch (IOException e) {
+      LOG_ERROR.error("Problem with the file trying to import field schemas on datasetId {}",
+          datasetId, e);
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
+            null,
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId).tableSchemaName(tableSchemaName)
+                .error(InvalidFileException.ERROR_MESSAGE).build());
+      } catch (EEAException e1) {
+        LOG_ERROR.error(
+            "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
+            datasetId, e);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("Error importing field schemas on datasetId {}", datasetId, e);
       try {
@@ -2591,6 +2615,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
    * Read field lines.
    *
@@ -2600,9 +2625,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param replace the replace
    * @param datasetSchema the dataset schema
    * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   private void readFieldLines(final InputStream inputStream, final String tableSchemaId,
-      Long datasetId, boolean replace, DataSetSchema datasetSchema) throws EEAException {
+      Long datasetId, boolean replace, DataSetSchema datasetSchema)
+      throws EEAException, IOException {
     LOG.info("Processing entries at method readFieldLines");
     // Init variables
     String[] line;
@@ -2610,7 +2637,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     try (Reader buf =
         new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-      // Init de library of reader file
+      // Init the library of reader file
       final CSVParser csvParser = new CSVParserBuilder().withSeparator(delimiter).build();
       final CSVReader reader = new CSVReaderBuilder(buf).withCSVParser(csvParser).build();
 
@@ -2628,24 +2655,28 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
         dataflowStatusOk = false;
       }
-      if (!isDesignDataset && Boolean.TRUE.equals(dataflowStatusOk)) {
+      if (!isDesignDataset || Boolean.FALSE.equals(dataflowStatusOk)) {
         LOG_ERROR.error(
             "Error importing field schemas on datasetId {} because this dataset is not a design dataset or the dataflow is not in the correct status",
             datasetId);
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
-            null,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).error("Error importing fieldSchemas").build());
         throw new IOException(
             "This dataset is not a design dataset or the dataflow is not in the correct status. It's not possible to perform the operation");
       }
 
       // If replace=true, delete all the fields of the table
       if (Boolean.TRUE.equals(replace)) {
-        deleteFieldsFromTable(fieldSchemas, datasetId,
-            datasetSchema.getIdDataSetSchema().toString());
-        fieldSchemas.clear();
+        // if there's a PK in use in the table we want to replace -> error
+        if (Boolean.FALSE.equals(checkPkInUse(fieldSchemas))) {
+          LOG_ERROR.error(
+              "Error importing field schemas on datasetId {} because the fields to replace have a PK in use",
+              datasetId);
+          throw new IOException(
+              "This table has fields that have a PK already in use. It's not possible to perform the operation");
+        }
+        List<FieldSchema> fieldsToRemove = new ArrayList<>();
+        fieldsToRemove.addAll(deleteFieldsFromTable(fieldSchemas, datasetId,
+            datasetSchema.getIdDataSetSchema().toString()));
+        fieldSchemas.removeAll(fieldsToRemove);
       }
 
       // we have to check there's only one pk per table
@@ -2678,23 +2709,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               datasetId);
         }
       }
-    } catch (IOException e) {
-      LOG_ERROR.error("Problem with the file trying to import field schemas on datasetId {}",
-          datasetId, e);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
-          null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetId(datasetId).error(InvalidFileException.ERROR_MESSAGE).build());
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error importing field schemas on datasetId {}", datasetId, e);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
-          null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetId(datasetId).error("Error importing fieldSchemas").build());
+      LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {}", datasetId);
     }
-    LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {}", datasetId);
   }
 
   /**
@@ -2716,7 +2732,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // with that we create the rule automatic required
 
     if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
-
       rulesControllerZuul.createAutomaticRule(datasetSchema.getIdDataSetSchema().toString(),
           fieldSchemaVO.getId(), fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId,
           Boolean.TRUE);
@@ -2791,6 +2806,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+
+
+  /**
+   * Check pk in use.
+   *
+   * @param fieldSchemas the field schemas
+   * @return the boolean
+   */
+  private Boolean checkPkInUse(List<FieldSchema> fieldSchemas) {
+    Boolean allow = true;
+    for (FieldSchema f : fieldSchemas) {
+      if (Boolean.TRUE.equals(f.getPkReferenced())) {
+        allow = false;
+      }
+    }
+    return allow;
+  }
+
   /**
    * Checkline empty.
    *
@@ -2799,8 +2832,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void checklineEmpty(List<String> firstLine) throws InvalidFileException {
     // if the array is size one and their content is empty means that the line is empty
-    if (null == firstLine || firstLine.isEmpty()
-        || (firstLine.size() == 1 && "".equals(firstLine.get(0)))) {
+    if (null == firstLine || firstLine.isEmpty() || (firstLine.size() != 7)) {
       // throw an error if firstLine is empty, we need a header.
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
     }
@@ -2818,7 +2850,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       final String recordSchemaId) {
     FieldSchemaVO fieldSchema = null;
     // if the line is white then skip it
-    if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
+    if (null != values && !values.isEmpty() && values.size() >= 6) {
 
       // Order in the array
       // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
@@ -2826,15 +2858,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // If the field name is not correct, skip the line
       if (Pattern.matches(REGEX_NAME, fieldName.trim())) {
         fieldSchema = new FieldSchemaVO();
-        fieldSchema.setName(fieldName);
-        fieldSchema.setPk(Boolean.valueOf(values.get(1)));
-        fieldSchema.setRequired(Boolean.valueOf(values.get(2)));
-        fieldSchema.setReadOnly(Boolean.valueOf(values.get(3)));
-        fieldSchema.setDescription(values.get(4));
-        fieldSchema.setType(DataType.valueOf(values.get(5)));
-        fieldSchema.setValidExtensions(new String[0]);
-
-        fieldSchema.setIdRecord(recordSchemaId);
+        try {
+          fieldSchema.setName(fieldName);
+          fieldSchema.setIdRecord(recordSchemaId);
+          fieldSchema.setValidExtensions(new String[0]);
+          fieldSchema.setPk(Boolean.valueOf(values.get(1)));
+          fieldSchema.setRequired(Boolean.valueOf(values.get(2)));
+          fieldSchema.setReadOnly(Boolean.valueOf(values.get(3)));
+          fieldSchema.setDescription(values.get(4));
+          fieldSchema.setType(DataType.valueOf(values.get(5)));
+          if (values.get(6) != null) {
+            String[] codelist = values.get(6).split(";");
+            fieldSchema.setCodelistItems(codelist);
+          }
+        } catch (Exception e) {
+          LOG.info("Importing field schema from field. Line ommited due to error: {}",
+              e.getMessage());
+          fieldSchema = null;
+        }
       }
     }
     return fieldSchema;
@@ -2880,7 +2921,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         columns.add(fieldSchema.getDescription());
         columns.add(fieldSchema.getType().toString());
         if (fieldSchema.getCodelistItems() != null && fieldSchema.getCodelistItems().length > 0) {
-          columns.add(Arrays.toString(fieldSchema.getCodelistItems()));
+          String codelists = "";
+          Integer counter = 0;
+          for (String item : fieldSchema.getCodelistItems()) {
+            codelists = codelists.concat(item);
+            counter++;
+            if (counter < fieldSchema.getCodelistItems().length) {
+              codelists = codelists.concat(";");
+            }
+          }
+          columns.add(codelists);
           lastPart = true;
         }
 
@@ -2914,15 +2964,18 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
    * Delete fields from table.
    *
    * @param fieldSchemas the field schemas
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
+   * @return the list
    */
-  private void deleteFieldsFromTable(List<FieldSchema> fieldSchemas, Long datasetId,
+  private List<FieldSchema> deleteFieldsFromTable(List<FieldSchema> fieldSchemas, Long datasetId,
       String datasetSchemaId) {
+    List<FieldSchema> fieldSchemasRemoved = new ArrayList<>();
     fieldSchemas.stream().forEach(f -> {
 
       FieldSchemaVO fieldVO = fieldSchemaNoRulesMapper.entityToClass(f);
@@ -2956,6 +3009,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           // Delete the foreign relation between idDatasets in metabase, if needed
           deleteForeignRelation(datasetId, fieldVO);
 
+          fieldSchemasRemoved.add(f);
+
         } catch (EEAException e) {
           LOG_ERROR.error(
               "Error deleting fieldSchemas during the import field schemas from file. DatasetId {}",
@@ -2970,6 +3025,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // Create query view
     releaseCreateUpdateView(datasetId,
         SecurityContextHolder.getContext().getAuthentication().getName(), false);
+
+    return fieldSchemasRemoved;
   }
 
 

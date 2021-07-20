@@ -13,7 +13,6 @@ import { Checkbox } from 'ui/views/_components/Checkbox';
 import { Dialog } from 'ui/views/_components/Dialog';
 import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
-import ReactTooltip from 'react-tooltip';
 import { Spinner } from 'ui/views/_components/Spinner';
 
 import { DataflowService } from 'core/services/Dataflow';
