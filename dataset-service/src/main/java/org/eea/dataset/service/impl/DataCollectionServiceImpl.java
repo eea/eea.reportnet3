@@ -152,7 +152,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant INSERT_REFERENCE_INTO_REFERENCE_DATASET: {@value}. */
   private static final String INSERT_REFERENCE_INTO_REFERENCE_DATASET =
-      "insert into reference_dataset (id) values (%d)";
+      "insert into reference_dataset (id, updatable) values (%d, false)";
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
