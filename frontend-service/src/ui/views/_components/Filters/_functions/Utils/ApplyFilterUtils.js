@@ -4,10 +4,13 @@ import dayjs from 'dayjs';
 
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
+const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
+const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
+
 const checkDates = (betweenDates, data) => {
   if (!isEmpty(betweenDates)) {
     const btwDates = [getStartOfDay(betweenDates[0]), getEndOfDay(betweenDates[1])];
-    return new Date(data).getTime() / 1000 >= btwDates[0] && new Date(data).getTime() / 1000 <= btwDates[1];
+    return new Date(data).getTime() >= btwDates[0] && new Date(data).getTime() <= btwDates[1];
   }
   return true;
 };
@@ -56,16 +59,12 @@ const checkSelected = (state, data, selectedKeys = [], actualFilterBy) => {
   return true;
 };
 
-const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime() / 1000;
-
 const getSearchKeys = data => {
   if (!isNil(data))
     return Object.keys(Array.isArray(data) && !isEmpty(data) ? data[0] : data).filter(
       item => item !== 'id' && item !== 'key'
     );
 };
-
-const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime() / 1000;
 
 const onApplyFilters = ({
   actualFilterBy,
@@ -106,8 +105,8 @@ const onApplyFilters = ({
       isEmpty(value) ? (dates = []) : (dates = [getStartOfDay(value[0]), getEndOfDay(value[1])]);
 
       return !dates.includes(NaN) && !isEmpty(dates)
-        ? new Date(dataItem[filter]).getTime() / 1000 >= dates[0] &&
-            new Date(dataItem[filter]).getTime() / 1000 <= dates[1] &&
+        ? new Date(dataItem[filter]).getTime() >= dates[0] &&
+            new Date(dataItem[filter]).getTime() <= dates[1] &&
             checkFilters(filteredKeys, dataItem, state) &&
             checkSearched(state, dataItem, searchedKeys) &&
             checkSelected(state, dataItem, selectedKeys, actualFilterBy) &&
