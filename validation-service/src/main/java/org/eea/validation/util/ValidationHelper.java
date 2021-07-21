@@ -224,7 +224,7 @@ public class ValidationHelper implements DisposableBean {
 
     DatasetTypeEnum type = datasetMetabaseControllerZuul.getType(datasetId);
 
-    if (type.equals(DatasetTypeEnum.DESIGN)) {
+    if (DatasetTypeEnum.DESIGN.equals(type)) {
       executeValidationProcess(datasetId, processId, released);
     } else if (Boolean.FALSE.equals(updateViews)) {
       executeValidationProcess(datasetId, processId, released);

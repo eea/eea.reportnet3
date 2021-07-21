@@ -9,7 +9,8 @@ export const TooltipButton = ({
   message,
   onClick = () => {},
   tabIndex = '-1',
-  uniqueIdentifier = 1
+  uniqueIdentifier = 1,
+  maxWidth = false
 }) => {
   return (
     <Fragment>
@@ -24,6 +25,7 @@ export const TooltipButton = ({
       </span>
       <ReactTooltip
         border={true}
+        className={maxWidth ? styles.maxWidth : null}
         effect="solid"
         getContent={() => (getContent ? getContent() : message)}
         html={true}
