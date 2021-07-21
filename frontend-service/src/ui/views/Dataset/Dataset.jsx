@@ -905,6 +905,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     <div className={styles.validationsFooter}>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        disabled={isDownloadingValidations}
         icon={isDownloadingValidations ? 'spinnerAnimate' : 'export'}
         label={resources.messages['downloadValidationsButtonLabel']}
         onClick={onDownloadValidations}
