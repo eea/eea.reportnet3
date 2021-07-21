@@ -1,3 +1,4 @@
+@import 'styles/mixins';
 .tooltipButton {
   border-radius: 50%;
   width: 0.6em !important;
@@ -17,5 +18,44 @@
   span:nth-of-type(2) {
     font-size: x-small;
     padding: 0.25em !important;
+  }
+}
+
+.maxWidth {
+  max-width: 100vw;
+
+  @include for-phone-landscape-up {
+    max-width: calc(100vw - 100px);
+  }
+
+  @media (min-width: 500px) {
+    max-width: calc(100vw - 150px);
+  }
+
+  @media (min-width: 700px) {
+    max-width: calc(100vw - 200px);
+  }
+
+  @media (min-width: 800px) {
+    max-width: calc(100vw - 250px);
+  }
+  @media (min-width: 850px) {
+    max-width: calc(100vw - 300px);
+  }
+
+  @include for-tablet-landscape-up {
+    max-width: calc(100vw - 350px);
+  }
+
+  @media (min-width: 950px) {
+    max-width: calc(100vw - 400px);
+  }
+
+  @include for-desktop-up {
+    max-width: calc(100vw - 450px);
+  }
+
+  @include for-big-desktop-up {
+    max-width: calc(100vw - 500px);
   }
 }

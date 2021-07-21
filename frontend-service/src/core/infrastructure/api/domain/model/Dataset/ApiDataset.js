@@ -114,6 +114,13 @@ export const apiDataset = {
     });
   },
 
+  exportTableSchemaById: async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
+    return await HTTPRequester.download({
+      url: getUrl(DatasetConfig.exportTableSchema, { datasetId, datasetSchemaId, fileType, tableSchemaId }),
+      headers: { 'Content-Type': 'application/octet-stream' }
+    });
+  },
+
   getMetaData: async datasetId => {
     return await HTTPRequester.get({ url: getUrl(DatasetConfig.datasetMetaData, { datasetId }) });
   },
@@ -245,6 +252,12 @@ export const apiDataset = {
     return await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableDataRecord, { datasetId, updateInCascade }),
       data: datasetTableRecords
+    });
+  },
+
+  updateReferenceDatasetStatus: async (datasetId, updatable) => {
+    return await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateReferenceDatasetStatus, { datasetId, updatable })
     });
   },
 

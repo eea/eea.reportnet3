@@ -41,6 +41,13 @@
             box-shadow: none !important;
           }
         }
+        .ccButton {
+          margin: 0 !important;
+          margin-left: 0.4rem !important;
+          border: 1px solid var(--c-custom-gray) !important;
+          padding: 0.37rem 0.45rem;
+          float: right;
+        }
       }
       textarea {
         flex: auto;

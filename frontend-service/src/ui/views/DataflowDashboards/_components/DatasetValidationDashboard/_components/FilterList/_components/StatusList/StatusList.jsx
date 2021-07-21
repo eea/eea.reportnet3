@@ -1,15 +1,10 @@
-import { useContext } from 'react';
-
 import colors from 'conf/colors.json';
 
 import styles from './StatusList.module.scss';
 
 import { LevelError } from 'ui/views/_components/LevelError';
 
-import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
-
 const StatusList = ({ datasetSchemaId, filterDispatch, levelErrors, statusFilters }) => {
-  const resources = useContext(ResourcesContext);
   const errorListFilters = levelErrors.map(errorLevel => {
     const errorLevelStr = errorLevel.toString();
     const errorLevelLower = errorLevelStr.toLowerCase();

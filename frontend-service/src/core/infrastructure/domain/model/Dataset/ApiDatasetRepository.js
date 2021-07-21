@@ -188,6 +188,10 @@ const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
   return await apiDataset.exportTableDataById(datasetId, tableSchemaId, fileType);
 };
 
+const exportTableSchemaById = async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
+  return await apiDataset.exportTableSchemaById(datasetId, datasetSchemaId, tableSchemaId, fileType);
+};
+
 const getMetaData = async datasetId => {
   const datasetTableDataDTO = await apiDataset.getMetaData(datasetId);
   datasetTableDataDTO.data = new Dataset({
@@ -589,6 +593,9 @@ const updateRecordsById = async (datasetId, record, updateInCascade) => {
   return await apiDataset.updateRecordsById(datasetId, [datasetTableRecord], updateInCascade);
 };
 
+const updateReferenceDatasetStatus = async (datasetId, updatable) =>
+  await apiDataset.updateReferenceDatasetStatus(datasetId, updatable);
+
 const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedbackStatus) => {
   return await apiDataset.updateDatasetFeedbackStatus(
     dataflowId,
@@ -665,6 +672,7 @@ export const ApiDatasetRepository = {
   exportDataById,
   exportDatasetDataExternal,
   exportTableDataById,
+  exportTableSchemaById,
   getMetaData,
   getReferencedFieldValues,
   groupedErrorsById,
@@ -677,6 +685,7 @@ export const ApiDatasetRepository = {
   updateFieldById,
   updateRecordFieldDesign,
   updateRecordsById,
+  updateReferenceDatasetStatus,
   updateSchemaNameById,
   updateTableDescriptionDesign,
   updateTableNameDesign,
