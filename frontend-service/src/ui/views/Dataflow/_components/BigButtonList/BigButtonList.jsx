@@ -438,7 +438,7 @@ export const BigButtonList = ({
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
   const getDate = () => {
-    return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime() / 1000;
+    return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime();
   };
 
   const onCreateDataCollectionWithNotValids = async () => {
