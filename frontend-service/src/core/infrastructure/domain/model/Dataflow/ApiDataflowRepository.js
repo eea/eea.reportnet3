@@ -447,7 +447,7 @@ const parseDataflowDTO = dataflowDTO =>
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
     euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
-    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
+    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
@@ -678,8 +678,7 @@ const publicData = async () => {
     publicDataflow =>
       new Dataflow({
         description: publicDataflow.description,
-        expirationDate:
-          publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate * 1000).format('YYYY-MM-DD') : '-',
+        expirationDate: publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate).format('YYYY-MM-DD') : '-',
         id: publicDataflow.id,
         isReleasable: publicDataflow.releasable,
         name: publicDataflow.name,

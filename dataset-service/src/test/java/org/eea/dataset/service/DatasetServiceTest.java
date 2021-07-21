@@ -53,6 +53,7 @@ import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -3491,7 +3492,8 @@ public class DatasetServiceTest {
   @Test
   public void getSchemaIfReferenceDraftTest() {
     ObjectId id = new ObjectId();
-    ReportingDataset dataset = new ReportingDataset();
+    ReferenceDataset dataset = new ReferenceDataset();
+    dataset.setUpdatable(true);
     DataFlowVO dataflowVO = new DataFlowVO();
     DataSetSchema schema = new DataSetSchema();
     TableSchema tableSchema = new TableSchema();
@@ -3501,6 +3503,8 @@ public class DatasetServiceTest {
     dataset.setDatasetSchema(id.toString());
     Mockito.when(referenceDatasetRepository.existsById(Mockito.any())).thenReturn(true);
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(dataset));
+    Mockito.when(referenceDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(dataset));
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
@@ -3515,7 +3519,8 @@ public class DatasetServiceTest {
   @Test
   public void getSchemaIfReferenceDesignTest() {
     ObjectId id = new ObjectId();
-    ReportingDataset dataset = new ReportingDataset();
+    ReferenceDataset dataset = new ReferenceDataset();
+    dataset.setUpdatable(true);
     DataFlowVO dataflowVO = new DataFlowVO();
     DataSetSchema schema = new DataSetSchema();
     TableSchema tableSchema = new TableSchema();
@@ -3525,6 +3530,8 @@ public class DatasetServiceTest {
     dataset.setDatasetSchema(id.toString());
     Mockito.when(referenceDatasetRepository.existsById(Mockito.any())).thenReturn(true);
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(dataset));
+    Mockito.when(referenceDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(dataset));
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);

@@ -51,12 +51,12 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       className: 'dataflowList-left-side-bar-home-help-step',
       href: getUrl(routes['DATAFLOWS']),
       icon: 'home',
-      label: 'myDataflows',
+      label: 'dataflows',
       onClick: e => {
         e.preventDefault();
         history.push(getUrl(routes['DATAFLOWS']));
       },
-      title: 'myDataflows'
+      title: 'dataflows'
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };

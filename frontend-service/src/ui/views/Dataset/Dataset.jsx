@@ -872,15 +872,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       </div>
     );
 
-  const referenceStateDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => setIsUpdatableDialogVisible(false)}
-    />
-  );
-
   const switchToTabularData = () => {
     setIsTableView(true);
     setIsValidationsTabularView(true);
@@ -904,6 +895,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       await DatasetService.updateReferenceDatasetStatus(datasetId, !dataset.updatable);
       onLoadDataflow();
+      onLoadDatasetSchema();
     } catch (error) {
       notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' });
     }
@@ -913,6 +905,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     <div className={styles.validationsFooter}>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        disabled={isDownloadingValidations}
         icon={isDownloadingValidations ? 'spinnerAnimate' : 'export'}
         label={resources.messages['downloadValidationsButtonLabel']}
         onClick={onDownloadValidations}
