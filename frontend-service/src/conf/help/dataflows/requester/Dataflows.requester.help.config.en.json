@@ -1,7 +1,7 @@
 {
   "steps": [
     {
-      "content": "The main part of the page comprises the list of dataflows which you have access to – ‘My dataflows’",
+      "content": "The main part of the page comprises the list of dataflows which you have access to",
       "target": ".dataflowList-help-step"
     },
     {
@@ -21,7 +21,7 @@
       "target": ".dataflowList-left-side-bar-top-section-help-step"
     },
     {
-      "content": "1. My dataflows – will return you to this page",
+      "content": "1. Dataflows – will return you to this page",
       "target": ".dataflowList-left-side-bar-home-help-step"
     },
     {
