@@ -769,8 +769,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         for (TableSchema tableAux : tableSchemaList) {
           JSONObject jsonTable = new JSONObject();
           jsonTable.put(TABLE_NAME, tableAux.getNameTableSchema());
-          jsonTable.put(TOTAL_RECORDS, getTotalRecordsWithNoData(datasetId, tableSchemaId,
-              tableSchemaList, filterValue, columnName));
+          jsonTable.put(TOTAL_RECORDS, getTotalRecordsWithNoData(datasetId,
+              tableAux.getIdTableSchema().toString(), tableSchemaList, filterValue, columnName));
           jsonTable.put(RECORDS, new JSONArray());
           jsonArray.add(jsonTable);
         }
@@ -838,6 +838,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
     for (TableSchema table : tableSchemaList) {
       if (null != tableSchemaId && table.getIdTableSchema().toString().equals(tableSchemaId)) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          stringQuery.append(
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+        }
+      } else {
         for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
           stringQuery.append(
               String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
