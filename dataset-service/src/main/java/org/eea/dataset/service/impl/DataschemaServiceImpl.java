@@ -1176,16 +1176,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Validate schema.
    *
    * @param datasetSchemaId the dataset schema id
-   *
+   * @param dataflowType the dataflow type
    * @return the boolean
    */
   @Override
-  public Boolean validateSchema(String datasetSchemaId) {
+  public Boolean validateSchema(String datasetSchemaId, TypeDataflowEnum dataflowType) {
 
     Boolean isValid = true;
     DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
     for (ValidationSchemaCommand command : validationCommands) {
-      if (Boolean.FALSE.equals(command.execute(schema))) {
+      if (Boolean.FALSE.equals(command.execute(schema, dataflowType))) {
         isValid = false;
       }
     }
