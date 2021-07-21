@@ -322,7 +322,7 @@
     "details": "Details",
     "disabledCreateDataCollectionNoProviders": "You haven't assigned reporter/s to the dataflow yet",
     "disabledCreateDataCollectionSchemas": "There is already a data collection created",
-    "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all the schemas have tables and (at least) one field per table",
+    "disabledCreateDataCollectionSchemasWithError": "Incomplete schemas. Check that all the schemas have tables and (at least) one field per table and that there is at least one reporting dataset",
     "disableNamesTypesRulesErrorEvent": "Some QCs are now <strong>invalid</strong> due to the field type changed",
     "disclaimerMessage": "The data and illustrated errors are for testing purposes only and do not reflect the actual data delivered by any countries featured",
     "disclaimerTitle": "SPRINT 9 REVIEW DEMO",
