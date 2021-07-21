@@ -1,6 +1,7 @@
 package org.eea.ums.controller;
 
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -15,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class ResourceManagementControllerImplTest.
@@ -74,6 +78,14 @@ public class ResourceManagementControllerImplTest {
    */
   @Test
   public void deleteResource() {
+
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Authentication authentication = Mockito.mock(Authentication.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
     resourceManagementControllerImpl.deleteResource(new ArrayList<>());
     Mockito.verify(securityProviderInterfaceService, times(1))
         .deleteResourceInstances(Mockito.any());

@@ -7,12 +7,14 @@ import org.eea.interfaces.controller.ums.ResourceManagementController;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -84,6 +86,8 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @ApiOperation(value = "Delete a list of Resources")
   public void deleteResource(@ApiParam(type = "List<Object>",
       value = "ResourceInfoVO Object List") @RequestBody List<ResourceInfoVO> resourceInfoVO) {
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
     securityProviderInterfaceService.deleteResourceInstances(resourceInfoVO);
   }
 

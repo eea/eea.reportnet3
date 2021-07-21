@@ -58,7 +58,11 @@ import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +70,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import feign.FeignException;
@@ -155,6 +160,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The reference dataset controller zuul. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -544,48 +553,71 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public void deleteDataFlow(Long idDataflow) throws Exception {
+  @Async
+  public void deleteDataFlow(Long idDataflow) {
     // take the jpa entity
-    DataFlowVO dataflowVO = getById(idDataflow);
-    // use it to take all datasets Desing
 
-    LOG.info("Get the dataflow metabase with id {}", idDataflow);
-
-    // // PART DELETE DOCUMENTS
-    if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
-      deleteDocuments(idDataflow, dataflowVO);
-    }
-
-    // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
-    if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
-      deleteDatasetSchemas(idDataflow, dataflowVO);
-    }
-
-    // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
-    if (null != dataflowVO.getRepresentatives() && !dataflowVO.getRepresentatives().isEmpty()) {
-      deleteRepresentatives(dataflowVO);
-    }
     try {
-      // Delete the dataflow metabase info. Also by the foreign keys of the database, entities like
-      // weblinks are also deleted
-      dataflowRepository.deleteNativeDataflow(idDataflow);
-      LOG.info("Delete full dataflow with id: {}", idDataflow);
+      DataFlowVO dataflowVO = getById(idDataflow);
+
+      // use it to take all datasets Desing
+
+
+      LOG.info("Get the dataflow metabase with id {}", idDataflow);
+
+      // // PART DELETE DOCUMENTS
+      if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
+        deleteDocuments(idDataflow, dataflowVO);
+      }
+
+      // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
+      if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
+        long startTimeSchemas = System.currentTimeMillis();
+        LOG.info("Deleting dataflow schemas with DataflowId: {}", idDataflow);
+        deleteDatasetSchemas(idDataflow, dataflowVO);
+        long endTimeSchemas = System.currentTimeMillis() - startTimeSchemas;
+        LOG.info("Completion of delete dataflow schemas with DataflowId: {} in {} seconds",
+            idDataflow, endTimeSchemas / 1000);
+      }
+
+      // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
+      if (null != dataflowVO.getRepresentatives() && !dataflowVO.getRepresentatives().isEmpty()) {
+        deleteRepresentatives(dataflowVO);
+      }
+      try {
+        // Delete the dataflow metabase info. Also by the foreign keys of the database, entities
+        // like
+        // weblinks are also deleted
+        dataflowRepository.deleteNativeDataflow(idDataflow);
+        LOG.info("Delete full dataflow with id: {}", idDataflow);
+      } catch (Exception e) {
+        LOG_ERROR.error("Error deleting native dataflow with id: {}", idDataflow, e);
+        throw new EEAException(
+            String.format("Error deleting native dataflow with id: {} ", idDataflow), e);
+      }
+
+      // add resource to delete(DATAFLOW PART)
+      try {
+        List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+            .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
+        resourceManagementControllerZull.deleteResource(resourceCustodian);
+
+        LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
+      } catch (Exception e) {
+        LOG.error("Error deleting resources in keycloack, group with the id: {}", idDataflow, e);
+        throw new EEAException("Error deleting resource in keycloack ", e);
+      }
     } catch (Exception e) {
-      LOG_ERROR.error("Error deleting dataflow: {}", idDataflow, e);
-      throw new EEAException("Error Deleting dataflow ", e);
+      NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
+          .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_FAILED_EVENT, null,
+            notificationVO);
+      } catch (EEAException e1) {
+        LOG.error("Failed sending kafka delete dataflow failed event notification");
+      }
     }
 
-    // add resource to delete(DATAFLOW PART)
-    try {
-      List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-          .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
-      resourceManagementControllerZull.deleteResource(resourceCustodian);
-
-      LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
-    } catch (Exception e) {
-      LOG.error("Error deleting resources in keycloack, group with the id: {}", idDataflow, e);
-      throw new EEAException("Error deleting resource in keycloack ", e);
-    }
   }
 
   /**
@@ -1028,6 +1060,8 @@ public class DataflowServiceImpl implements DataflowService {
       throws EEAException {
 
     DataFlowVO dataflowVO = new DataFlowVO();
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (id == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);

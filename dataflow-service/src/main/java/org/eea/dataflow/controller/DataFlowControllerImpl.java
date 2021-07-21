@@ -23,9 +23,11 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -64,6 +66,7 @@ public class DataFlowControllerImpl implements DataFlowController {
 
   /** The dataflow service. */
   @Autowired
+  @Lazy
   private DataflowService dataflowService;
 
   /** The representative service. */
@@ -423,13 +426,10 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   public void deleteDataFlow(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-    try {
-      dataflowService.deleteDataFlow(dataflowId);
-    } catch (Exception e) {
-      LOG_ERROR.error("Error deleting the dataflow {}. Error message: {}", dataflowId,
-          e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    dataflowService.deleteDataFlow(dataflowId);
   }
 
   /**

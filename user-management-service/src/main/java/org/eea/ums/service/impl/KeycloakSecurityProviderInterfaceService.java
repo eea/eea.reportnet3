@@ -308,8 +308,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         groups.stream().filter(groupInfo -> resources.containsKey(groupInfo.getName()))
             .forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
         // Removing groups one by one
-        resources.values().stream()
-            .forEach(groupId -> keycloakConnectorService.deleteGroupDetail(groupId));
+        for (String resource : resources.values()) {
+          keycloakConnectorService.deleteGroupDetail(resource);
+        }
         LOG.info("Resources {} removed succesfully", resources);
       }
 
