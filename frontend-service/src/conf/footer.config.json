@@ -136,6 +136,14 @@
     {
       "title": "Web accessibility",
       "url": "https://europa.eu/european-union/abouteuropa/accessibility_en"
+    },
+    {
+      "title": "Versions",
+      "url": "https://www.eionet.europa.eu/reportnet/platform/footer/versions"
+    },
+    {
+      "title": "Privacy policy",
+      "url": "https://www.eionet.europa.eu/reportnet/platform/footer/privacypolicy"
     }
   ]
 }
