@@ -345,6 +345,7 @@ export const Filters = ({
         {renderOrderFilter(property)}
         <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
           <Calendar
+            baseZIndex={9999}
             className={styles.calendarFilter}
             dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
             inputClassName={styles.inputFilter}
