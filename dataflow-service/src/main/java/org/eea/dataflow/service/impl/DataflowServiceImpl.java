@@ -572,12 +572,8 @@ public class DataflowServiceImpl implements DataflowService {
 
       // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
       if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
-        long startTimeSchemas = System.currentTimeMillis();
         LOG.info("Deleting dataflow schemas with DataflowId: {}", idDataflow);
         deleteDatasetSchemas(idDataflow, dataflowVO);
-        long endTimeSchemas = System.currentTimeMillis() - startTimeSchemas;
-        LOG.info("Completion of delete dataflow schemas with DataflowId: {} in {} seconds",
-            idDataflow, endTimeSchemas / 1000);
       }
 
       // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
@@ -593,7 +589,7 @@ public class DataflowServiceImpl implements DataflowService {
       } catch (Exception e) {
         LOG_ERROR.error("Error deleting native dataflow with id: {}", idDataflow, e);
         throw new EEAException(
-            String.format("Error deleting native dataflow with id: {} ", idDataflow), e);
+            String.format("Error deleting native dataflow with id: %s", idDataflow), e);
       }
 
       // add resource to delete(DATAFLOW PART)
