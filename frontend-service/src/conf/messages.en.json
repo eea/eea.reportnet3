@@ -964,7 +964,7 @@
     "snapshotDescriptionValidationMax": "Description is too long",
     "snapshotDescriptionValidationMin": "Description is too short",
     "snapshotDescriptionValidationRequired": "Description is required",
-    "snapshotIsReleased": "RELEASED",
+    "snapshotIsReleased": "Released",
     "snapshotItemRestoreProcessDetail": "Restoring...",
     "snapshotItemRestoreProcessSummary": "Restoring copy",
     "snapshotRestoringError": "Copy restoring error at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
