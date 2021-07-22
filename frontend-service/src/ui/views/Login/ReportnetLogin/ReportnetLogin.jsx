@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 
-import { isEmpty, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './ReportnetLogin.module.scss';
 

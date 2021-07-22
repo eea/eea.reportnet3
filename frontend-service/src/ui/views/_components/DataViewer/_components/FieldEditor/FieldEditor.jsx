@@ -616,6 +616,7 @@ const FieldEditor = ({
         return (
           <Calendar
             appendTo={document.body}
+            baseZIndex={9999}
             dateFormat="yy-mm-dd"
             inputId={calendarId}
             inputRef={refCalendar}
@@ -632,6 +633,7 @@ const FieldEditor = ({
         return (
           <Calendar
             appendTo={document.body}
+            baseZIndex={9999}
             inputId={calendarWithDatetimeId}
             inputRef={refDatetimeCalendar}
             locale={{

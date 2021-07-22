@@ -61,6 +61,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -1112,7 +1113,8 @@ public class DatasetSchemaServiceTest {
   @Test
   public void validateSchemaTest() {
 
-    Assert.assertFalse(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73"));
+    Assert.assertFalse(
+        dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73", TypeDataflowEnum.REGULAR));
   }
 
 
