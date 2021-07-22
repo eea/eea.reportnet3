@@ -600,8 +600,8 @@ public class DataflowServiceImpl implements DataflowService {
 
         LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
       } catch (Exception e) {
-        LOG.error("Error deleting resources in keycloack, group with the id: {}", idDataflow, e);
-        throw new EEAException("Error deleting resource in keycloack ", e);
+        LOG.error("Error deleting resources in keycloak, group with the id: {}", idDataflow, e);
+        throw new EEAException("Error deleting resource in keycloak ", e);
       }
     } catch (Exception e) {
       NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
@@ -609,9 +609,20 @@ public class DataflowServiceImpl implements DataflowService {
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_FAILED_EVENT, null,
             notificationVO);
+        throw new EEAException("Error deleting dataflow ", e);
       } catch (EEAException e1) {
         LOG.error("Failed sending kafka delete dataflow failed event notification");
       }
+    }
+
+    NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT, null,
+          notificationVO);
+    } catch (EEAException e) {
+      LOG.error("Failed sending kafka delete dataflow completed event notification");
     }
 
   }
