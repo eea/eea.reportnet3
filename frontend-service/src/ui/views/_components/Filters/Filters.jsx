@@ -1,5 +1,6 @@
 import { useContext, useEffect, useReducer, useRef } from 'react';
 
+import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -432,7 +433,7 @@ export const Filters = ({
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <Dropdown
-        ariaLabel={property}
+        ariaLabel={capitalize(property)}
         className={styles.dropdownFilter}
         filter={FiltersUtils.getOptionsTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
