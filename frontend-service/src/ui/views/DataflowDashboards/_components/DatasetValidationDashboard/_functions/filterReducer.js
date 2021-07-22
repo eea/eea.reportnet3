@@ -1,4 +1,5 @@
-import { isEmpty, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isUndefined from 'lodash/isUndefined';
 
 const cleanOutFilteredTableData = (tablesData, labelsPositionsInFilteredLabels) => {
   return tablesData.map(table => ({

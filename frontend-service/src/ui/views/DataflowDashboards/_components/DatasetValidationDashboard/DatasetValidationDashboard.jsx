@@ -1,6 +1,8 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isNull from 'lodash/isNull';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DatasetValidationDashboard.module.css';
 

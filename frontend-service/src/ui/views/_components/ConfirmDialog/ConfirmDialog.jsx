@@ -2,7 +2,7 @@ import { Fragment, useContext, forwardRef } from 'react';
 
 import ReactTooltip from 'react-tooltip';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
