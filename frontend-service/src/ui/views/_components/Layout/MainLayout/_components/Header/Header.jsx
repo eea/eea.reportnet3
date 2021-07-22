@@ -156,7 +156,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
 
   const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>
-      <FontAwesomeIcon icon={AwesomeIcons('localhostAlert')} title={resources.messages['localhostAlert']} />
+      <FontAwesomeIcon
+        aria-labelledby={resources.messages['localhostAlert']}
+        icon={AwesomeIcons('localhostAlert')}
+        role="button"
+        title={resources.messages['localhostAlert']}
+      />
     </div>
   );
 
@@ -244,15 +249,16 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       }}>
       <FontAwesomeIcon
         aria-hidden={false}
-        aria-label="Logout"
+        ariaLabel="Logout"
         className={styles.logoutButton}
         icon={AwesomeIcons('logout')}
+        role="presentation"
       />
     </div>
   );
 
   const loadUser = () => (
-    <>
+    <Fragment>
       <div className={styles.userWrapper}>
         {themeSwitcher}
         {localhostEnvironmentAlert}
@@ -260,7 +266,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       </div>
 
       <div className={styles.logoutBtnContainer}>{logout}</div>
-    </>
+    </Fragment>
   );
 
   const loadLogin = () => (

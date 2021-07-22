@@ -3,6 +3,7 @@ import { useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ReferenceDataflow.module.scss';
 
@@ -20,9 +21,11 @@ import { ShareRights } from 'ui/views/_components/ShareRights';
 
 import { DatasetService } from 'core/services/Dataset';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
+import { UserService } from 'core/services/User';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { dataflowReducer } from './_functions/Reducers/dataflowReducer';
 
@@ -42,24 +45,28 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
     data: {},
     description: '',
     designDatasetSchemas: [],
     error: null,
+    isCustodian: false,
     isApiKeyDialogVisible: false,
     isCreatingReferenceDatasets: false,
     isEditDialogVisible: false,
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
     isReferencingDataflowsDialogVisible: false,
+    isReferenceStateDialogVisible: false,
     isUserRightManagementDialogVisible: false,
     name: '',
     refresh: false,
     requestStatus: 'idle',
     status: '',
-    updatedDatasetSchema: []
+    updatedDatasetSchema: [],
+    updatable: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -70,6 +77,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   useEffect(() => {
     onLoadReferenceDataflow();
   }, [dataflowState.refresh]);
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) onLoadPermissions();
+  }, [userContext]);
 
   useBreadCrumbs({
     currentPage: CurrentPage.REFERENCE_DATAFLOW,
@@ -96,7 +107,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   function refreshPage() {
     dataflowDispatch({ type: 'REFRESH_PAGE' });
+    onRefreshToken();
   }
+
+  const onRefreshToken = async () => {
+    try {
+      const userObject = await UserService.refreshToken();
+      userContext.onTokenRefresh(userObject);
+    } catch (error) {
+      notificationContext.add({
+        key: 'TOKEN_REFRESH_ERROR',
+        content: {}
+      });
+      await UserService.logout();
+      userContext.onLogout();
+    }
+  };
 
   function setIsCreatingReferenceDatasets(isCreatingReferenceDatasets) {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
@@ -123,6 +149,16 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         });
       }
     }
+  };
+
+  const onLoadPermissions = () => {
+    const isCustodian = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      referenceDataflowId,
+      [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
+    );
+
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isCustodian } });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -175,6 +211,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
     />
   );
+
   const propertiesDataflowsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -201,7 +238,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     </div>
   );
 
-  const requesterRoleOptionsOpenStatus = [
+  const requesterRoleOptions = [
     { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key }
   ];
@@ -210,7 +247,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: true,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
-      manageRequestersBtn: dataflowState.status === config.dataflowStatus.DESIGN,
+      manageRequestersBtn: dataflowState.isCustodian,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
     };
@@ -316,7 +353,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
-            roleOptions={requesterRoleOptionsOpenStatus}
+            roleOptions={requesterRoleOptions}
             setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}

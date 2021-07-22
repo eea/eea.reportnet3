@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react';
 
-import { isEmpty, capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import isEmpty from 'lodash/isEmpty';
 
 const useStatusFilter = dataArray => {
   const initialState = {
@@ -56,6 +57,8 @@ const useStatusFilter = dataArray => {
           filterStatus: payloadLabelsArr,
           dashboardData: filteredStatusData
         };
+      default:
+        return state;
     }
   };
 

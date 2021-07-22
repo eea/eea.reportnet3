@@ -2,7 +2,7 @@ import { Children, Fragment, useContext, useEffect, useState } from 'react';
 
 import uuid from 'uuid';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './TreeViewExpandableItem.module.css';
 

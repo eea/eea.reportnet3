@@ -31,7 +31,7 @@ const SnapshotItem = ({ itemData }) => {
         <h5>{getFormatedDate(itemData.creationDate)}</h5>
         {itemData.isReleased && (
           <h5 className={styles.is_released_snapshot}>
-            {resources.messages['snapshotIsReleased'].toLowerCase()}
+            {resources.messages['snapshotIsReleased']}
             <FontAwesomeIcon icon={AwesomeIcons('released')} />
           </h5>
         )}

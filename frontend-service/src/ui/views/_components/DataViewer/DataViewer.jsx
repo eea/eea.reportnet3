@@ -68,6 +68,7 @@ const DataViewer = withRouter(
     isFilterable,
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
+    isReferenceDataset,
     isReportingWebform,
     isValidationSelected,
     match: {
@@ -109,6 +110,7 @@ const DataViewer = withRouter(
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isDataUpdated, setIsDataUpdated] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [prevFilterValue, setPrevFilterValue] = useState('');
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
@@ -124,6 +126,7 @@ const DataViewer = withRouter(
     ]);
     const [levelErrorValidations, setLevelErrorValidations] = useState([]);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
+    const [valueFilter, setValueFilter] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       crs: 'EPSG:4326',
@@ -260,7 +263,7 @@ const DataViewer = withRouter(
       columnOptions,
       hasCountryCode,
       hasWebformWritePermissions,
-      hasWritePermissions && !tableReadOnly,
+      (hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset),
       initialCellValue,
       isDataflowOpen,
       isDesignDatasetEditorRead,
@@ -359,25 +362,25 @@ const DataViewer = withRouter(
       }
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules) => {
-      const removeSelectAllFromList = levelErrorValidations => {
-        levelErrorValidations = levelErrorValidations
-          .map(error => error.toUpperCase())
-          .filter(error => error !== 'SELECTALL')
-          .join(',');
-        return levelErrorValidations;
-      };
+    const removeSelectAllFromList = levelErrorValidations => {
+      levelErrorValidations = levelErrorValidations
+        .map(error => error.toUpperCase())
+        .filter(error => error !== 'SELECTALL')
+        .join(',');
+      return levelErrorValidations;
+    };
 
-      const filterDataResponse = data => {
-        const dataFiltered = DataViewerUtils.parseData(data);
-        if (dataFiltered.length > 0) {
-          dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
-        } else {
-          setFetchedData([]);
-        }
-        setFetchedData(dataFiltered);
-      };
+    const filterDataResponse = data => {
+      const dataFiltered = DataViewerUtils.parseData(data);
+      if (dataFiltered.length > 0) {
+        dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
+      } else {
+        setFetchedData([]);
+      }
+      setFetchedData(dataFiltered);
+    };
 
+    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules, valueFilter = '') => {
       levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
       setIsLoading(true);
       try {
@@ -385,15 +388,16 @@ const DataViewer = withRouter(
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
-        const { data } = await DatasetService.tableDataById(
+        const { data } = await DatasetService.tableDataById({
           datasetId,
-          tableId,
-          Math.floor(fRow / nRows),
-          nRows,
+          tableSchemaId: tableId,
+          pageNum: Math.floor(fRow / nRows),
+          pageSize: nRows,
           fields,
-          levelErrorValidations,
-          tableId === selectedTableSchemaId ? groupedRules : undefined
-        );
+          levelError: levelErrorValidations,
+          ruleId: tableId === selectedTableSchemaId ? groupedRules : undefined,
+          value: valueFilter
+        });
 
         if (!isEmpty(data.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
         if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(data)) {
@@ -447,7 +451,15 @@ const DataViewer = withRouter(
     useEffect(() => {
       if (recordErrorPositionId === -1) {
         if (!isValidationShown && levelErrorValidations.length > 0) {
-          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+          onFetchData(
+            sort.sortField,
+            sort.sortOrder,
+            0,
+            records.recordsPerPage,
+            levelErrorValidations,
+            selectedRuleId,
+            valueFilter
+          );
         } else {
           if (isValidationShown) {
             onFetchData(
@@ -456,7 +468,8 @@ const DataViewer = withRouter(
               0,
               records.recordsPerPage,
               levelErrorValidations,
-              selectedRuleId
+              selectedRuleId,
+              valueFilter
             );
           }
         }
@@ -464,9 +477,32 @@ const DataViewer = withRouter(
     }, [levelErrorValidations]);
 
     useEffect(() => {
+      if (!isNil(valueFilter)) {
+        onFetchData(
+          sort.sortField,
+          sort.sortOrder,
+          0,
+          records.recordsPerPage,
+          levelErrorValidations,
+          selectedRuleId,
+          valueFilter
+        );
+        setPrevFilterValue(valueFilter);
+      }
+    }, [valueFilter]);
+
+    useEffect(() => {
       if (recordErrorPositionId === -1) {
         if (selectedRuleId !== '' || isGroupedValidationDeleted) {
-          onFetchData(sort.sortField, sort.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+          onFetchData(
+            sort.sortField,
+            sort.sortOrder,
+            0,
+            records.recordsPerPage,
+            levelErrorValidations,
+            selectedRuleId,
+            valueFilter
+          );
         }
       }
     }, [selectedRuleId, recordErrorPositionId]);
@@ -519,6 +555,11 @@ const DataViewer = withRouter(
       }
     };
 
+    const showValueFilter = value => {
+      setValueFilter(value);
+      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+    };
+
     const showValidationFilter = filteredKeys => {
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
@@ -554,7 +595,15 @@ const DataViewer = withRouter(
     const onChangePage = event => {
       dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
-      onFetchData(sort.sortField, sort.sortOrder, event.first, event.rows, levelErrorValidations, selectedRuleId);
+      onFetchData(
+        sort.sortField,
+        sort.sortOrder,
+        event.first,
+        event.rows,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
     };
 
     const onConditionalChange = field => {
@@ -749,7 +798,7 @@ const DataViewer = withRouter(
           MapUtils.parseGeometryData(records.pastedRecords)
         );
         if (!recordsAdded) {
-          throw new Error('ADD_RECORDS_BY_ID_ERROR');
+          throw new Error('ADD_RECORDS_PASTING_ERROR');
         } else {
           onRefresh();
           setIsPasting(false);
@@ -763,7 +812,7 @@ const DataViewer = withRouter(
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
           notificationContext.add({
-            type: 'ADD_RECORDS_BY_ID_ERROR',
+            type: 'ADD_RECORDS_PASTING_ERROR',
             content: {
               dataflowId,
               datasetId,
@@ -786,7 +835,8 @@ const DataViewer = withRouter(
         records.firstPageRecord,
         records.recordsPerPage,
         levelErrorValidations,
-        selectedRuleId
+        selectedRuleId,
+        valueFilter
       );
     };
 
@@ -876,7 +926,15 @@ const DataViewer = withRouter(
     const onSort = event => {
       dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-      onFetchData(event.sortField, event.sortOrder, 0, records.recordsPerPage, levelErrorValidations, selectedRuleId);
+      onFetchData(
+        event.sortField,
+        event.sortOrder,
+        0,
+        records.recordsPerPage,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
     };
 
     const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
@@ -923,7 +981,7 @@ const DataViewer = withRouter(
           onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
-          className="p-button-secondary button-right-aligned"
+          className="p-button-secondary button-right-aligned p-button-animated-blink"
           icon="cancel"
           label={resources.messages['cancel']}
           onClick={() => {
@@ -1066,15 +1124,17 @@ const DataViewer = withRouter(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {isFilterValidationsActive && records.totalRecords !== records.totalFilteredRecords
+        {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords !== records.totalFilteredRecords
           ? `${resources.messages['filtered']}: ${records.totalFilteredRecords} | `
           : ''}
         {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
         {records.totalRecords === 1
           ? resources.messages['record'].toLowerCase()
           : resources.messages['records'].toLowerCase()}
-        {isFilterValidationsActive && records.totalRecords === records.totalFilteredRecords
-          ? `(${resources.messages['filtered'].toLowerCase()})`
+        {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords === records.totalFilteredRecords
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
     );
@@ -1115,7 +1175,9 @@ const DataViewer = withRouter(
           datasetId={datasetId}
           fileExtensions={extensionsOperationsList.export}
           hasCountryCode={hasCountryCode}
-          hasWritePermissions={hasWritePermissions && !tableFixedNumber && !tableReadOnly}
+          hasWritePermissions={
+            (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
+          }
           hideValidationFilter={hideValidationFilter}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
@@ -1131,6 +1193,7 @@ const DataViewer = withRouter(
           onSetVisible={onSetVisible}
           onUpdateData={onUpdateData}
           originalColumns={originalColumns}
+          prevFilterValue={prevFilterValue}
           records={records}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
@@ -1141,6 +1204,7 @@ const DataViewer = withRouter(
           setRecordErrorPositionId={setRecordErrorPositionId}
           showGroupedValidationFilter={showGroupedValidationFilter}
           showValidationFilter={showValidationFilter}
+          showValueFilter={showValueFilter}
           showWriteButtons={showWriteButtons && !tableFixedNumber && !tableReadOnly}
           tableHasErrors={tableHasErrors}
           tableId={tableId}
@@ -1150,12 +1214,15 @@ const DataViewer = withRouter(
         <div className={styles.Table}>
           <DataTable
             contextMenuSelection={records.selectedRecord}
-            editable={hasWritePermissions && !tableReadOnly}
+            editable={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
             first={records.firstPageRecord}
             footer={
-              hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber ? (
+              (hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber) ||
+              (hasWritePermissions && isReferenceDataset) ? (
                 <Footer
-                  hasWritePermissions={hasWritePermissions && !tableReadOnly}
+                  hasWritePermissions={
+                    (hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
+                  }
                   isDataflowOpen={isDataflowOpen}
                   isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                   onAddClick={() => {
@@ -1170,12 +1237,13 @@ const DataViewer = withRouter(
             lazy={true}
             loading={isLoading}
             onContextMenu={
-              hasWebformWritePermissions &&
-              hasWritePermissions &&
-              !tableReadOnly &&
-              !isEditing &&
-              !isDataflowOpen &&
-              !isDesignDatasetEditorRead
+              (hasWebformWritePermissions &&
+                hasWritePermissions &&
+                !tableReadOnly &&
+                !isEditing &&
+                !isDataflowOpen &&
+                !isDesignDatasetEditorRead) ||
+              (hasWritePermissions && isReferenceDataset)
                 ? e => {
                     datatableRef.current.closeEditingCell();
                     contextMenuRef.current.show(e.originalEvent);
@@ -1202,9 +1270,8 @@ const DataViewer = withRouter(
             sortOrder={sort.sortOrder}
             sortable={true}
             totalRecords={
-              !isNull(records.totalFilteredRecords) &&
-              !isUndefined(records.totalFilteredRecords) &&
-              isFilterValidationsActive
+              !isNil(records.totalFilteredRecords) &&
+              (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== ''))
                 ? records.totalFilteredRecords
                 : records.totalRecords
             }
@@ -1283,7 +1350,7 @@ const DataViewer = withRouter(
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
               datasetId: datasetId,
               tableSchemaId: tableId,
-              delimiter: `${config.IMPORT_FILE_DELIMITER}`
+              delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
             })}`}
           />
         )}

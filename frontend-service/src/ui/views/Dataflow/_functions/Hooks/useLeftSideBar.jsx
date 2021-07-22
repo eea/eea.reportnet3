@@ -93,14 +93,14 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       };
 
       const allButtons = [
-        propertiesBtn,
-        editBtn,
-        releaseableBtn,
-        showPublicInfoBtn,
-        exportSchemaBtn,
         apiKeyBtn,
+        editBtn,
+        exportSchemaBtn,
         manageReportersBtn,
         manageRequestersBtn,
+        propertiesBtn,
+        releaseableBtn,
+        showPublicInfoBtn,
         userListBtn
       ];
 

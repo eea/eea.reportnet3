@@ -45,6 +45,7 @@ const FieldEditor = ({
   reporting
 }) => {
   const refDatetimeCalendar = useRef(null);
+  const refCalendar = useRef(null);
   const crs = [
     { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
@@ -198,9 +199,12 @@ const FieldEditor = ({
   const calculateCalendarPanelPosition = (element, fieldId) => {
     const idx = colsSchema.map(e => e.field).indexOf(fieldId);
     if (idx === record.dataRow?.length - 3 && !isCalendarVisible) {
-      const {
-        current: { panel }
-      } = refDatetimeCalendar;
+      let panel = refDatetimeCalendar?.current?.panel;
+
+      if (!panel) {
+        panel = refCalendar.current.panel;
+      }
+
       const inputRect = element.getBoundingClientRect();
       const panelRect = panel.getBoundingClientRect();
       if (panelRect.right + panelRect.width > window.innerWidth) {
@@ -258,6 +262,7 @@ const FieldEditor = ({
   };
 
   const onCalendarFocus = e => {
+    calculateCalendarPanelPosition(e.currentTarget, cells.field);
     setIsCalendarVisible(true);
     onEditorValueFocus(cells, RecordUtils.formatDate(e.target.value, isNil(e.target.value)));
   };
@@ -611,8 +616,10 @@ const FieldEditor = ({
         return (
           <Calendar
             appendTo={document.body}
+            baseZIndex={9999}
             dateFormat="yy-mm-dd"
             inputId={calendarId}
+            inputRef={refCalendar}
             monthNavigator={true}
             onBlur={onCalendarBlur}
             onFocus={onCalendarFocus}
@@ -626,6 +633,7 @@ const FieldEditor = ({
         return (
           <Calendar
             appendTo={document.body}
+            baseZIndex={9999}
             inputId={calendarWithDatetimeId}
             inputRef={refDatetimeCalendar}
             locale={{

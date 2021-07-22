@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -370,7 +370,7 @@ const RepresentativesList = ({
     const labelId = `${representative.representativeId}-${representative.dataProviderId}`;
 
     return (
-      <>
+      <Fragment>
         <label className="srOnly" htmlFor={labelId}>
           {resources.messages['manageRolesDialogInputPlaceholder']}
         </label>
@@ -402,7 +402,7 @@ const RepresentativesList = ({
             );
           })}
         </select>
-      </>
+      </Fragment>
     );
   };
 

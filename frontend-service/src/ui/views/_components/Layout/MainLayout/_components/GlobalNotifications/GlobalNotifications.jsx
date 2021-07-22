@@ -122,13 +122,12 @@ const GlobalNotifications = () => {
       notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT'
     );
 
-    notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE' });
-
     try {
       const { data } = await ValidationService.downloadFile(
         notification.content.datasetId,
         notification.content.nameFile
       );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE' });
 
       if (data.size !== 0) {
         DownloadFile(data, notification.content.nameFile);

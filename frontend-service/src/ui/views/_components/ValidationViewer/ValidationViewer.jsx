@@ -12,14 +12,13 @@ import uniq from 'lodash/uniq';
 
 import styles from './ValidationViewer.module.scss';
 
-import { Button } from 'ui/views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'ui/views/_components/DataTable';
 import { Filters } from 'ui/views/_components/Filters';
 import { LevelError } from 'ui/views/_components/LevelError';
 import { Spinner } from 'ui/views/_components/Spinner';
 import { Toolbar } from 'ui/views/_components/Toolbar';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'ui/views/_components/TooltipButton';
 
 import { DatasetService } from 'core/services/Dataset';
 import { ValidationService } from 'core/services/Validation';
@@ -252,15 +251,7 @@ const ValidationViewer = memo(
       return (
         <div className={styles.ruleCodeTemplateWrapper}>
           <span>{recordData.shortCode}</span>
-          <span data-for={`infoCircleButton_${recordData.shortCode}`} data-tip>
-            <Button
-              className={`${styles.columnInfoButton} p-button-rounded p-button-secondary-transparent`}
-              icon="infoCircle"
-            />
-          </span>
-          <ReactTooltip
-            border={true}
-            effect="solid"
+          <TooltipButton
             getContent={() =>
               ReactDOMServer.renderToStaticMarkup(
                 <div
@@ -273,9 +264,9 @@ const ValidationViewer = memo(
                 </div>
               )
             }
-            html={true}
-            id={`infoCircleButton_${recordData.shortCode}`}
-            place="top"></ReactTooltip>
+            maxWidth
+            uniqueIdentifier={recordData.shortCode}
+          />
         </div>
       );
     };

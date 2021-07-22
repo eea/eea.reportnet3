@@ -19,6 +19,7 @@ import { DownloadReferenceDatasetFileData } from './DownloadReferenceDatasetFile
 import { ExportData } from './ExportData';
 import { ExportDatasetDataExternal } from './ExportDatasetDataExternal';
 import { ExportTableData } from './ExportTableData';
+import { ExportTableSchema } from './ExportTableSchema';
 import { GetData } from './GetData';
 import { GetMetaData } from './GetMetaData';
 import { GetReferencedFieldValues } from './GetReferencedFieldValues';
@@ -32,6 +33,7 @@ import { UpdateDatasetSchemaDesign } from './UpdateDatasetSchemaDesign';
 import { UpdateField } from './UpdateField';
 import { UpdateRecord } from './UpdateRecord';
 import { UpdateRecordFieldDesign } from './UpdateRecordFieldDesign';
+import { UpdateReferenceDatasetStatus } from './UpdateReferenceDatasetStatus';
 import { UpdateSchemaName } from './UpdateSchemaName';
 import { UpdateTableDescriptionDesign } from './UpdateTableDescriptionDesign';
 import { UpdateTableNameDesign } from './UpdateTableNameDesign';
@@ -59,6 +61,7 @@ export const DatasetService = {
   exportDataById: ExportData({ datasetRepository }),
   exportDatasetDataExternal: ExportDatasetDataExternal({ datasetRepository }),
   exportTableDataById: ExportTableData({ datasetRepository }),
+  exportTableSchemaById: ExportTableSchema({ datasetRepository }),
   getMetaData: GetMetaData({ datasetRepository }),
   getReferencedFieldValues: GetReferencedFieldValues({ datasetRepository }),
   groupedErrorsById: GroupedErrors({ datasetRepository }),
@@ -71,6 +74,7 @@ export const DatasetService = {
   updateFieldById: UpdateField({ datasetRepository }),
   updateRecordFieldDesign: UpdateRecordFieldDesign({ datasetRepository }),
   updateRecordsById: UpdateRecord({ datasetRepository }),
+  updateReferenceDatasetStatus: UpdateReferenceDatasetStatus({ datasetRepository }),
   updateSchemaNameById: UpdateSchemaName({ datasetRepository }),
   updateTableDescriptionDesign: UpdateTableDescriptionDesign({ datasetRepository }),
   updateTableNameDesign: UpdateTableNameDesign({ datasetRepository }),

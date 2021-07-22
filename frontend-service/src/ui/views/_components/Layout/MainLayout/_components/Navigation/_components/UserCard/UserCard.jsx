@@ -1,30 +1,32 @@
 import { memo, useContext } from 'react';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { routes } from 'ui/routes';
-import { isUndefined } from 'lodash';
-import { getUrl } from 'core/infrastructure/CoreUtils';
+import isUndefined from 'lodash/isUndefined';
+
 import styles from './UserCard.module.css';
 
+import { routes } from 'ui/routes';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { Icon } from 'ui/views/_components/Icon';
-
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 const UserCard = memo(() => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   return (
-    <div id="userProfile" className={styles.userProfileCard}>
+    <div className={styles.userProfileCard} id="userProfile">
       <div className={styles.userProfile}>
         <a
           href={getUrl(routes.SETTINGS)}
-          title="User profile details"
           onClick={async e => {
             e.preventDefault();
-          }}>
+          }}
+          title="User profile details">
           <FontAwesomeIcon aria-hidden={false} className={styles.avatar} icon={AwesomeIcons('user-profile')} />
           <h5 className={styles.userProfile}>
             {!isUndefined(userContext.preferredUsername) ? userContext.preferredUsername : userContext.name}
@@ -32,7 +34,6 @@ const UserCard = memo(() => {
         </a>
         <a
           href="#userProfilePage"
-          title="logout"
           onClick={async e => {
             e.preventDefault();
             userContext.socket.deactivate();
@@ -45,7 +46,8 @@ const UserCard = memo(() => {
             } finally {
               userContext.onLogout();
             }
-          }}>
+          }}
+          title="logout">
           <Icon icon="logout" />
         </a>
       </div>

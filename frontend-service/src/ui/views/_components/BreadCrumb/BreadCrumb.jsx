@@ -2,13 +2,14 @@ import { Fragment, useContext } from 'react';
 
 import styles from './BreadCrumb.module.scss';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { BreadCrumbContext } from 'ui/views/_functions/Contexts/BreadCrumbContext';
-import { isUndefined, isEmpty } from 'lodash';
 
 export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -47,6 +48,7 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
               aria-label={item.label}
               className="p-breadcrumb-home"
               icon={AwesomeIcons(item.icon)}
+              role="button"
             />
           )}
           <span className="p-menuitem-text">{item.label ? item.label : <span className="srOnly">Home</span>}</span>
