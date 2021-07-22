@@ -436,9 +436,10 @@ const Dataflow = withRouter(({ history, match }) => {
       [config.permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
-    const entity = isNil(representativeId)
-      ? `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
-      : `${config.permissions.prefixes.DATASET}${currentDatasetId}`;
+    const entity =
+      isNil(representativeId) || representativeId !== 0
+        ? `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+        : `${config.permissions.prefixes.DATASET}${currentDatasetId}`;
 
     const userRoles = userContext.getUserRole(entity);
 
