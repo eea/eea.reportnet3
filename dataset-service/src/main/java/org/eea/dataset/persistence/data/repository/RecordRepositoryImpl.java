@@ -714,10 +714,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     String paginationPart = " offset %s limit %s ";
     if (null != offset && null != limit) {
-      Integer offsetAux = (limit * offset) - limit;
-      if (offsetAux < 0) {
-        offsetAux = 0;
-      }
+      Integer offsetAux = limit * offset;
       stringQuery.append(String.format(paginationPart, offsetAux, limit));
     }
     stringQuery.append(" ) tablesAux ");
