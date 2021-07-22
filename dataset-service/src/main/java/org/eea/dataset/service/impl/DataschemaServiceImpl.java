@@ -1185,9 +1185,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     Boolean isValid = true;
     DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
     for (ValidationSchemaCommand command : validationCommands) {
-      if (Boolean.FALSE.equals(command.execute(schema, dataflowType))) {
-        isValid = false;
-      }
+      isValid = Boolean.TRUE.equals(isValid) ? command.execute(schema, dataflowType) : isValid;
     }
 
     return isValid;
@@ -3365,4 +3363,5 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
   }
+
 }
