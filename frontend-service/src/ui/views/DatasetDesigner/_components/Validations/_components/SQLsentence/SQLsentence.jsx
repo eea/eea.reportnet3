@@ -1,7 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 
-import trim from 'lodash/trim';
-
 import styles from './SQLsentence.module.scss';
 
 import { config } from 'conf';
@@ -46,10 +44,10 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
   };
 
   const onCCButtonClick = () => {
-    onSetSQLsentence('sqlSentence', trim(`${creationFormState.candidateRule['sqlSentence']} ${countryCodeKeyword}`));
+    onSetSQLsentence('sqlSentence', `${creationFormState.candidateRule['sqlSentence']} ${countryCodeKeyword}`);
   };
 
-  const countryCodeKeyword = `${config.COUNTRY_CODE_KEYWORD}`
+  const countryCodeKeyword = `${config.COUNTRY_CODE_KEYWORD}`;
 
   return (
     <div className={styles.section}>
