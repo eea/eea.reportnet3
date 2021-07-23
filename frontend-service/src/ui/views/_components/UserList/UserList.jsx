@@ -75,7 +75,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'multiselect',
-      properties: [{ name: 'datasetName', showInput: true, label: resources.messages['countries'] }, { name: 'role' }]
+      properties: [{ name: 'country', showInput: true, label: resources.messages['countries'] }, { name: 'role' }]
     },
     { type: 'input', properties: [{ name: 'email' }] }
   ];
@@ -90,9 +90,6 @@ export const UserList = ({ dataflowId, representativeId }) => {
     { type: 'multiselect', properties: [{ name: 'role' }] },
     { type: 'input', properties: [{ name: 'email' }] }
   ];
-
-  console.log('representativeId', representativeId);
-  console.log('dataflowId', dataflowId);
 
   const renderFilters = () => {
     if (isNil(representativeId) && isNil(dataflowId)) {
@@ -149,7 +146,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
               <Column field="role" header={resources.messages['role']} sortable={true} />
               <Column field="email" header={resources.messages['user']} sortable={true} />
               {isNil(representativeId) && !isNil(dataflowId) && (
-                <Column field="datasetName" header={resources.messages['countries']} sortable={true} />
+                <Column field="country" header={resources.messages['countries']} sortable={true} />
               )}
             </DataTable>
           ) : (

@@ -409,38 +409,40 @@ const getRepresentativesUsersList = async dataflowId => {
   const response = {
     data: [
       {
-        dataProviderId: 44,
-        datasetName: 'Austria',
-        users: [
-          {
-            email: 'miriam.provider@reportnet.net',
-            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-          },
-          {
-            email: 'mikel.provider@reportnet.net',
-            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-          }
-        ]
+        email: 'beaprovider@reportnet.net',
+        roles: ['LEAD_REPORTER'],
+        country: 'ES'
       },
       {
-        dataProviderId: 34,
-        datasetName: 'France',
-        users: [
-          {
-            email: 'miriam.provider@reportnet.net',
-            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-          },
-          {
-            email: 'mikel.provider@reportnet.net',
-            roles: ['DATA_CUSTODIAN', 'LEAD_REPORTER']
-          }
-        ]
+        email: 'beaprovider2@reportnet.net',
+        roles: ['REPORTER_READ', 'REPORTER_READ'],
+        country: 'ES'
+      },
+      {
+        email: 'nationalspain@reportnet.net',
+        roles: ['NATIONAL_COORDINATOR'],
+        country: 'ES'
+      },
+      {
+        email: 'bse.ies.so@gmail.com',
+        roles: ['DATA_CUSTODIAN'],
+        country: null
+      },
+      {
+        email: 'beaprovider2@reportnet.net',
+        roles: ['DATA_CUSTODIAN'],
+        country: null
+      },
+      {
+        email: 'beaprovider3@reportnet.net',
+        roles: ['DATA_STEWARD'],
+        country: null
       }
     ]
   };
   // const response = await apiDataflow.getRepresentativesUsersList(dataflowId);
   const usersList = parseCountriesUserList(response.data);
-  response.data = sortBy(usersList, 'datasetName');
+  response.data = sortBy(usersList, 'country');
   return response;
 };
 
@@ -680,22 +682,17 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   return usersList;
 };
 
-const parseCountriesUserList = countriesUserListDTO => {
-  countriesUserListDTO.forEach((country, countryIndex) => {
-    country.users.forEach((user, usersIndex) => {
-      user.roles.forEach((role, roleIndex) => {
-        countriesUserListDTO[countryIndex].users[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
-      });
+const parseCountriesUserList = usersListDTO => {
+  usersListDTO.forEach((user, usersIndex) => {
+    user.roles.forEach((role, roleIndex) => {
+      usersListDTO[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
     });
   });
   const usersList = [];
-  countriesUserListDTO.forEach(country => {
-    const { dataProviderId, datasetName } = country;
-    country.users.forEach(parsedUser => {
-      const { email, roles } = parsedUser;
-      roles.forEach(role => {
-        usersList.push({ dataProviderId, datasetName, email, role });
-      });
+  usersListDTO.forEach(parsedUser => {
+    const { country, email, roles } = parsedUser;
+    roles.forEach(role => {
+      usersList.push({ country, email, role });
     });
   });
   return usersList;
