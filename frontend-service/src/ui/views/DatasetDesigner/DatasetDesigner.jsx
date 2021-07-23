@@ -196,7 +196,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     callSetMetaData();
   }, []);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (schemaImported) {
       onLoadSchema();
       setSchemaImported(false);
@@ -975,6 +975,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     <div className={styles.validationsFooter}>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        disabled={designerState.isDownloadingValidations}
         icon={designerState.isDownloadingValidations ? 'spinnerAnimate' : 'export'}
         label={resources.messages['downloadValidationsButtonLabel']}
         onClick={onDownloadValidations}
@@ -1603,7 +1604,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               isNil(importSelectedIntegrationId)
                 ? getUrl(DatasetConfig.importFileDataset, {
                     datasetId: datasetId,
-                    delimiter: `${config.IMPORT_FILE_DELIMITER}`
+                    delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {
                     datasetId: datasetId,

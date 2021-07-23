@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './HistoricReleases.module.scss';
 
@@ -23,7 +24,6 @@ import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { HistoricReleaseService } from 'core/services/HistoricRelease';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
-import { uniqBy } from 'lodash';
 
 export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);

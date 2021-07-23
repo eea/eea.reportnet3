@@ -1,17 +1,19 @@
 import { memo, useContext } from 'react';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { routes } from 'ui/routes';
-import { isUndefined } from 'lodash';
-import { getUrl } from 'core/infrastructure/CoreUtils';
+import isUndefined from 'lodash/isUndefined';
+
 import styles from './UserCard.module.css';
 
+import { routes } from 'ui/routes';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 import { Icon } from 'ui/views/_components/Icon';
-
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 import { UserService } from 'core/services/User';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 const UserCard = memo(() => {
   const notificationContext = useContext(NotificationContext);

@@ -85,7 +85,7 @@ export const TabsDesigner = withRouter(
       }
     }, [datasetStatistics]);
 
-    useEffect(() => {      
+    useEffect(() => {
       if (schemaImported) {
         onLoadSchema();
       }
@@ -410,6 +410,7 @@ export const TabsDesigner = withRouter(
                         datasetSchemaId={datasetSchema.datasetSchemaId}
                         datasetSchemas={datasetSchemas}
                         designerState={designerState}
+                        hasPKReferenced={tab.hasPKReferenced}
                         isDataflowOpen={isDataflowOpen}
                         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                         isGroupedValidationDeleted={isGroupedValidationDeleted}

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -186,7 +186,7 @@ export const ExpressionSelector = ({
     return <div />;
   };
   return (
-    <>
+    <Fragment>
       {!validationContext.ruleEdit && (
         <div className={styles.section}>
           <Dropdown
@@ -202,6 +202,6 @@ export const ExpressionSelector = ({
       )}
 
       <div className={styles.section}>{expressionsTypeView()} </div>
-    </>
+    </Fragment>
   );
 };

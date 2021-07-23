@@ -23,7 +23,7 @@ config.MAX_INTEGRATION_NAME_LENGTH = 50;
 
 config.MAX_ATTACHMENT_SIZE = 20 * 1000 * 1024;
 
-config.IMPORT_FILE_DELIMITER = '%2C';
+config.IMPORT_FILE_DELIMITER = ',';
 
 config.avatars = avatarImages;
 config.countriesByGroup = countryByGroup;

@@ -258,7 +258,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   );
 
   const loadUser = () => (
-    <>
+    <Fragment>
       <div className={styles.userWrapper}>
         {themeSwitcher}
         {localhostEnvironmentAlert}
@@ -266,7 +266,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       </div>
 
       <div className={styles.logoutBtnContainer}>{logout}</div>
-    </>
+    </Fragment>
   );
 
   const loadLogin = () => (

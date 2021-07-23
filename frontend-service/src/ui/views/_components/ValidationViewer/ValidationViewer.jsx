@@ -264,6 +264,7 @@ const ValidationViewer = memo(
                 </div>
               )
             }
+            maxWidth
             uniqueIdentifier={recordData.shortCode}
           />
         </div>

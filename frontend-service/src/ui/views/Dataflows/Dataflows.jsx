@@ -65,10 +65,10 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const tabMenuItems = isCustodian
     ? [
-        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['dataflowsListTab'] },
+        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
       ]
-    : [{ className: styles.flow_tab, id: 'dataflows', label: resources.messages['dataflowsListTab'] }];
+    : [{ className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] }];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 

@@ -37,6 +37,7 @@ export const DatasetRepository = {
   updateFieldById: () => Promise.reject('[DatasetRepository#updateFieldById] must be implemented'),
   updateRecordFieldDesign: () => Promise.reject('[DatasetRepository#updateRecordFieldDesign ] must be implemented'),
   updateRecordsById: () => Promise.reject('[DatasetRepository#updateRecordsById] must be implemented'),
+  updateReferenceDatasetStatus: () => '[DatasetRepository#updateReferenceDatasetStatus] must be implemented',
   updateSchemaNameById: () => Promise.reject('[DatasetRepository#updateSchemaNameById] must be implemented'),
   updateTableDescriptionDesign: () =>
     Promise.reject('[DatasetRepository#updateTableDescriptionDesign] must be implemented'),

@@ -49,14 +49,11 @@ const expressions3 = {
     ]
   }
 };
-const expressions3 = {
+const expressions4 = {
   expressionType: [expression1, group2, expression3, expression4],
-  expressionFormula: "(field1 > 10) AND ((field1 < 1000) OR (field1 != 100)) AND (field1 != 500) AND (field1 == 1000)"
-
-  
-
+  expressionFormula: '(field1 > 10) AND ((field1 < 1000) OR (field1 != 100)) AND (field1 != 500) AND (field1 == 1000)',
   jsonTranslation: {
-    operator: "AND",
+    operator: 'AND',
     params: [
       {
         operator: 'FIELD_GT',
@@ -74,7 +71,7 @@ const expressions3 = {
               },
               {
                 operator: 'FIELD_NOT_EQ',
-                params: ['VALUE',100]
+                params: ['VALUE', 100]
               }
             ]
           },
@@ -88,7 +85,7 @@ const expressions3 = {
               },
               {
                 operator: 'EQ',
-                params: ['VALUE',1000]
+                params: ['VALUE', 1000]
               }
             ]
           }
