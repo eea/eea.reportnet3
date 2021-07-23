@@ -113,7 +113,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "sandbox" 
+                   return BRANCH_NAME == "develop" 
                 }
             }
             parallel {
