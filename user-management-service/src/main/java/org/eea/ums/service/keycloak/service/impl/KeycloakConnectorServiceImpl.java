@@ -74,7 +74,8 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   /**
    * The Constant LIST_USERS_URL: {@value}.
    */
-  private static final String LIST_USERS_URL = "/auth/admin/realms/{realm}/users?max=500";
+  @Value("${eea.keycloak.listUsersUrl}")
+  private String listUsersUrl;
 
   /**
    * The Constant GET_USER_BY_EMAIL_URL: {@value}.
@@ -753,7 +754,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     this.restTemplate.exchange(uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
-        .path(LIST_USERS_URL).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
+        .path(listUsersUrl).buildAndExpand(uriParams).toString(), HttpMethod.POST, request,
         Void.class);
   }
 
@@ -770,7 +771,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
     ResponseEntity<UserRepresentation[]> responseEntity = this.restTemplate.exchange(
-        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(LIST_USERS_URL)
+        uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost).path(listUsersUrl)
             .buildAndExpand(uriParams).toString(),
         HttpMethod.GET, request, UserRepresentation[].class);
 
