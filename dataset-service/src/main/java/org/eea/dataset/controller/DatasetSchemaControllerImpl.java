@@ -3,9 +3,11 @@ package org.eea.dataset.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -754,7 +756,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
   public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId) {
-    return dataschemaService.validateSchema(datasetSchemaId);
+    return dataschemaService.validateSchema(datasetSchemaId, null);
   }
 
   /**
@@ -775,8 +777,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
     Boolean isValid = false;
     if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
-      isValid = dataflow.getDesignDatasets().parallelStream().noneMatch(
-          ds -> Boolean.FALSE.equals(dataschemaService.validateSchema(ds.getDatasetSchema())));
+      Set<Boolean> results = dataflow.getDesignDatasets().parallelStream()
+          .map(ds -> dataschemaService.validateSchema(ds.getDatasetSchema(), dataflow.getType()))
+          .collect(Collectors.toSet());
+      isValid = results.contains(true) && !results.contains(false);
     }
     return isValid;
   }

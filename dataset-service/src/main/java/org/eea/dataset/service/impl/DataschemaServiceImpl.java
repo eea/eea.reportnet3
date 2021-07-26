@@ -32,8 +32,10 @@ import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -289,6 +291,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The dataflow referenced repository. */
   @Autowired
   private DataflowReferencedRepository dataflowReferencedRepository;
+
+  /** The reference dataset repository. */
+  @Autowired
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
 
   /** The file common. */
@@ -1176,18 +1182,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Validate schema.
    *
    * @param datasetSchemaId the dataset schema id
-   *
+   * @param dataflowType the dataflow type
    * @return the boolean
    */
   @Override
-  public Boolean validateSchema(String datasetSchemaId) {
+  public Boolean validateSchema(String datasetSchemaId, TypeDataflowEnum dataflowType) {
 
     Boolean isValid = true;
     DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
     for (ValidationSchemaCommand command : validationCommands) {
-      if (Boolean.FALSE.equals(command.execute(schema))) {
-        isValid = false;
-      }
+      isValid = Boolean.TRUE.equals(isValid) ? command.execute(schema, dataflowType) : isValid;
     }
 
     return isValid;
@@ -1524,10 +1528,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void addForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO) {
     if (fieldSchemaVO.getReferencedField() != null) {
-      datasetMetabaseService.addForeignRelation(idDatasetOrigin,
-          this.getDesignDatasetIdDestinationFromFk(
-              fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+      if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+        datasetMetabaseService.addForeignRelation(idDatasetOrigin,
+            this.getDesignDatasetIdDestinationFromFk(
+                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+      } else if (DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
+        datasetMetabaseService.addForeignRelation(idDatasetOrigin,
+            this.getReferenceDatasetIdDestinationFromFk(
+                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+      }
     }
   }
 
@@ -1540,10 +1551,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void deleteForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO) {
     if (fieldSchemaVO.getReferencedField() != null) {
-      datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-          this.getDesignDatasetIdDestinationFromFk(
-              fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-          fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+      if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+        datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+            this.getDesignDatasetIdDestinationFromFk(
+                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+      } else if (DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
+        datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+            this.getReferenceDatasetIdDestinationFromFk(
+                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+      }
     }
   }
 
@@ -1568,9 +1586,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         String previousIdPk = previousReferenced.get("idPk").toString();
         String previousIdDatasetReferenced =
             previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
-        datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-            this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
-            fieldSchemaVO.getId());
+        if (DataType.LINK.equals(fieldSchemaVO.getType())) {
+          datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+              this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
+              fieldSchemaVO.getId());
+        } else if (DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
+          datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
+              this.getReferenceDatasetIdDestinationFromFk(previousIdDatasetReferenced),
+              previousIdPk, fieldSchemaVO.getId());
+        }
       }
     }
     // If the type is Link, then we add the relation on the Metabase
@@ -1628,6 +1652,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema);
     if (designDataset.isPresent()) {
       datasetIdDestination = designDataset.get().getId();
+    }
+
+    return datasetIdDestination;
+  }
+
+  /**
+   * Gets the reference dataset id destination from fk.
+   *
+   * @param idDatasetSchema the id dataset schema
+   * @return the reference dataset id destination from fk
+   */
+  private Long getReferenceDatasetIdDestinationFromFk(String idDatasetSchema) {
+    Long datasetIdDestination = null;
+
+    Optional<ReferenceDataset> referenceDataset =
+        referenceDatasetRepository.findFirstByDatasetSchema(idDatasetSchema);
+    if (referenceDataset.isPresent()) {
+      datasetIdDestination = referenceDataset.get().getId();
     }
 
     return datasetIdDestination;
@@ -2494,6 +2536,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
       boolean referenceDataset, boolean updateTables) {
+
     schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
     if (referenceDataset && updateTables) {
       DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
@@ -2871,6 +2914,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             fieldSchema.setCodelistItems(codelist);
           }
         } catch (Exception e) {
+          LOG.info("Importing field schema from field. Line ommited due to error: {}",
+              e.getMessage());
           fieldSchema = null;
         }
       }
@@ -3362,4 +3407,5 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
   }
+
 }
