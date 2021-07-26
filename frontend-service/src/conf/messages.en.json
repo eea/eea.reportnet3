@@ -1196,6 +1196,7 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
+    "businessDataflowsListTab": "Business dataflows",
     "dataflowUsersByCountryList": "Dataflow users list by country"
   }
 }
