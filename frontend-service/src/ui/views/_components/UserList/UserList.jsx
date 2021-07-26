@@ -75,9 +75,13 @@ export const UserList = ({ dataflowId, representativeId }) => {
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'multiselect',
-      properties: [{ name: 'country', showInput: true, label: resources.messages['countries'] }, { name: 'role' }]
+      properties: [{ name: 'role' }]
     },
-    { type: 'input', properties: [{ name: 'email' }] }
+    { type: 'input', properties: [{ name: 'email' }] },
+    {
+      type: 'multiselect',
+      properties: [{ name: 'country', showInput: true, label: resources.messages['countries'] }]
+    }
   ];
 
   const filterOptionsNoRepresentative = [
