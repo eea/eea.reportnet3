@@ -696,6 +696,11 @@ const parseCountriesUserList = usersListDTO => {
       usersList.push({ country, email, role });
     });
   });
+  usersList.forEach(user => {
+    if (isNil(user.country)) {
+      user.country = '';
+    }
+  });
   return usersList;
 };
 
