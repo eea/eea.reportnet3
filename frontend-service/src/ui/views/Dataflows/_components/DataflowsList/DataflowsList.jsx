@@ -28,6 +28,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
 
   const [dataToFilter, setDataToFilter] = useState({
     dataflows: content['dataflows'],
+    business: content['business'],
     reference: content['reference']
   });
   const [filteredData, setFilteredData] = useState(dataToFilter[visibleTab]);
@@ -143,6 +144,20 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
       { type: 'date', properties: [{ name: 'expirationDate' }] }
     ],
+    business: [
+      {
+        type: 'input',
+        properties: [
+          { name: 'name' },
+          { name: 'description' },
+          { name: 'legalInstrument' },
+          { name: 'obligationTitle' },
+          { name: 'obligationId' }
+        ]
+      },
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
+      { type: 'date', properties: [{ name: 'expirationDate' }] }
+    ],
     reference: [
       { type: 'input', properties: [{ name: 'name' }, { name: 'description' }] },
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'pinned' }] }
@@ -152,6 +167,9 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   const renderDataflowItem = dataflow => {
     switch (visibleTab) {
       case 'dataflows':
+        return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
+
+      case 'business':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
       case 'reference':
@@ -164,7 +182,11 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
 
   const renderContent = () => {
     if (isEmpty(content[visibleTab])) {
-      const emptyDataflowsMessage = { reference: 'thereAreNoReferenceDataflows', dataflows: 'thereAreNoDataflows' };
+      const emptyDataflowsMessage = {
+        business: 'thereAreNoBusinessDataflows',
+        reference: 'thereAreNoReferenceDataflows',
+        dataflows: 'thereAreNoDataflows'
+      };
 
       return <div className={styles.noDataflows}>{resources.messages[emptyDataflowsMessage[visibleTab]]}</div>;
     }
@@ -196,6 +218,18 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
             sortable={true}
           />
         )}
+
+        {visibleTab === 'business' && (
+          <Filters
+            className={'dataflowsListFilters'}
+            data={dataToFilter['business']}
+            getFilteredData={onLoadFilteredData}
+            options={filterOptions['business']}
+            sortCategory={'pinned'}
+            sortable={true}
+          />
+        )}
+
         {visibleTab === 'reference' && (
           <Filters
             className={'referenceDataflowsListFilters'}

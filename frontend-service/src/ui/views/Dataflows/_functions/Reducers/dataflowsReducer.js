@@ -1,6 +1,6 @@
 export const dataflowsReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'GET_DATAFLOWS':
+    case 'SET_DATAFLOWS':
       return { ...state, [payload.type]: payload.data };
 
     case 'HAS_PERMISSION':

@@ -51,6 +51,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     activeIndex: 0,
     dataflows: [],
+    business: [],
     isAddDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
@@ -66,9 +67,13 @@ const Dataflows = withRouter(({ history, match }) => {
   const tabMenuItems = isCustodian
     ? [
         { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
         { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
       ]
-    : [{ className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] }];
+    : [
+        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
+      ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
@@ -128,13 +133,25 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const getDataflows = async () => {
     setLoading(true);
+
     try {
       if (TextUtils.areEquals(tabId, 'dataflows')) {
         const { data } = await DataflowService.all(userContext.contextRoles);
-        dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'dataflows' } });
-      } else {
+
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'dataflows' } });
+      }
+
+      if (TextUtils.areEquals(tabId, 'reference')) {
         const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
-        dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'reference' } });
+        console.log(`data reference`, data);
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
+      }
+
+      if (TextUtils.areEquals(tabId, 'business')) {
+        const { data } = await DataflowService.all(userContext.contextRoles);
+
+        console.log(`data business`, data);
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } }); //TODO
       }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -202,7 +219,11 @@ const Dataflows = withRouter(({ history, match }) => {
         <TabMenu activeIndex={activeIndex} model={tabMenuItems} onTabChange={event => onChangeTab(event.index)} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          content={{ dataflows: dataflowsState['dataflows'], reference: dataflowsState['reference'] }}
+          content={{
+            dataflows: dataflowsState['dataflows'],
+            business: dataflowsState['business'], // TODO
+            reference: dataflowsState['reference']
+          }}
           isLoading={loadingStatus[tabId]}
           visibleTab={tabId}
         />

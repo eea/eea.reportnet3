@@ -1195,6 +1195,8 @@
     "disabledRequiredPK": "Field is a PK",
     "unlockDatasetError": "Error unlocking/locking dataset",
     "referenceUpdateStatusLeftSideBarButton": "Update status",
-    "addRecordsPastingError": "There has been an error pasting records in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
+    "addRecordsPastingError": "There has been an error pasting records in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "businessDataflowsListTab": "Business dataflows",
+    "thereAreNoBusinessDataflows": "There are no business dataflows"
   }
 }
