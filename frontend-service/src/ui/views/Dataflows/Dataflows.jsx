@@ -68,7 +68,10 @@ const Dataflows = withRouter(({ history, match }) => {
         { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
       ]
-    : [{ className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] }];
+    : [
+        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
+      ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
