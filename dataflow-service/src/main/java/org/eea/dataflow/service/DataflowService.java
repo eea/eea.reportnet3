@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
+import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -216,4 +217,12 @@ public interface DataflowService {
    * @return true, if is reference dataflow draft
    */
   boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
+
+  /**
+   * Gets the user roles by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user roles by dataflow
+   */
+  List<UserRoleVO> getUserRolesByDataflow(Long dataflowId);
 }

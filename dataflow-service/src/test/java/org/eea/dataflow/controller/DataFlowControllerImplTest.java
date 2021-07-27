@@ -684,4 +684,10 @@ public class DataFlowControllerImplTest {
     dataFlowControllerImpl.findReferenceDataflows();
     assertEquals("fail", new ArrayList<>(), dataflowService.getReferenceDataflows(Mockito.any()));
   }
+
+  @Test
+  public void getUserRolesByDataflowTest() {
+    assertNotNull(dataFlowControllerImpl.getUserRolesByDataflow(0L));
+  }
+
 }

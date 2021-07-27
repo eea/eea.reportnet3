@@ -67,17 +67,12 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
 
 
   /**
-   * Find provider id by email and dataflow id.
+   * Update representative visibility restrictions.
    *
    * @param dataflowId the dataflow id
-   * @param email the email
-   * @return the representative
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
    */
-  @Query("SELECT  r from Representative r JOIN FETCH r.leadReporters rep WHERE rep.email= :email AND  r.dataflow.id= :dataflowId")
-  Representative findProviderIdByEmailAndDataflowId(@Param("dataflowId") Long dataflowId,
-      @Param("email") String email);
-
-
   @Modifying
   @Transactional
   @Query(nativeQuery = true,
@@ -96,4 +91,5 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    */
   List<Representative> findByDataflowIdAndDataProviderIdIn(Long dataflowId,
       List<Long> dataProviderIdList);
+
 }

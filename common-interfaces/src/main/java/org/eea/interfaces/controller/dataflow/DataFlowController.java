@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
+import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -215,4 +216,13 @@ public interface DataFlowController {
   @GetMapping("/private/isReferenceDataflowDraft/entity/{entity}/{entityId}")
   boolean accessReferenceEntity(@PathVariable("entity") EntityClassEnum entity,
       @PathVariable("entityId") Long entityId);
+
+  /**
+   * Gets the user roles by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user roles by dataflow
+   */
+  @GetMapping("/{dataflowId}/userRoles")
+  List<UserRoleVO> getUserRolesByDataflow(@PathVariable("dataflowId") Long dataflowId);
 }
