@@ -71,7 +71,7 @@ pipeline {
             }
         }
 
-        /*stage('Push to EEA GitHub') {
+        stage('Push to EEA GitHub') {
             when {
                 branch 'sandbox'
             }
@@ -83,7 +83,7 @@ pipeline {
                     sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:sandbox')
                 }
             }
-        }*/
+        }
         stage('Setup sandbox docker images build'){
             steps{
                 script {
