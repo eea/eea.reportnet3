@@ -1,2 +1,2 @@
-import BusinessDataflowConfig from './BusinessDataflowConfig.web.config';
+import BusinessDataflowConfig from './BusinessDataflow.web.config';
 export { BusinessDataflowConfig };
