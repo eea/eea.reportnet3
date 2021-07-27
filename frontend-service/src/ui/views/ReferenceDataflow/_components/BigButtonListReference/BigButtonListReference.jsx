@@ -95,12 +95,7 @@ const BigButtonListReference = withRouter(
     useEffect(() => {
       const response = notificationContext.hidden.find(notification => notification.key === 'NO_PK_ERROR_EVENT');
       if (response) {
-        const {
-          content: { schemas, tables }
-        } = response;
-        // setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: true });
-        // setIsActiveButton(true);
       }
     }, [notificationContext]);
 
