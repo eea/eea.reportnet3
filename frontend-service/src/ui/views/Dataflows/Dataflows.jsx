@@ -141,21 +141,17 @@ const Dataflows = withRouter(({ history, match }) => {
     try {
       if (TextUtils.areEquals(tabId, 'dataflows')) {
         const { data } = await DataflowService.all(userContext.contextRoles);
-
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'dataflows' } });
       }
 
       if (TextUtils.areEquals(tabId, 'reference')) {
         const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
-
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
 
       if (TextUtils.areEquals(tabId, 'business')) {
-        const { data } = await DataflowService.all(userContext.contextRoles);
-
-        console.log(`data business`, data);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } }); //TODO
+        const { data } = await DataflowService.all(userContext.contextRoles); //TODO
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
