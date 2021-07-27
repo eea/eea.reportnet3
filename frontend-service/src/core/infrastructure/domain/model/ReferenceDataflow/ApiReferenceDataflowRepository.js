@@ -68,7 +68,7 @@ const sortDataflows = dataflowDTOs => {
 };
 
 const all = async (userData = []) => {
-  const dataflowsDTO = await apiReferenceDataflow.all(userData);
+  const dataflowsDTO = await apiReferenceDataflow.all();
   const userRoles = [];
   const dataflows = [];
 
