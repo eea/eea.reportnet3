@@ -19,6 +19,7 @@ import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'ui/views/_components/UserList';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { BusinessDataflowService } from 'core/services/BusinessDataflow';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 import { UserService } from 'core/services/User';
 
@@ -150,7 +151,7 @@ const Dataflows = withRouter(({ history, match }) => {
       }
 
       if (TextUtils.areEquals(tabId, 'business')) {
-        const { data } = await DataflowService.all(userContext.contextRoles);
+        const { data } = await BusinessDataflowService.all(userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {
