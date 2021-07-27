@@ -1196,6 +1196,8 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
-    "businessDataflowsListTab": "Business dataflows"
+    "businessDataflowsListTab": "Business dataflows",
+    "tableWithNoPKWarningTitle": "There are tables with no primary keys (PK)",
+    "tableWithNoPKWarningBody": "There is at least one table in a schema with no PK assigned. This table will not be possible to be referenced after the reference datasets creation process. You can also press No and go to the schema to set a field PK."
   }
 }
