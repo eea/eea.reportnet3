@@ -731,7 +731,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.info("no result, ignore message");
     }
     if (null == result || result.toString().equals(("{\"tables\" : null}"))) {
-      result = returnigJsonWithNoData(datasetSchemaId, tableSchemaList, tableSchemaId);
+      result = returnigJsonWithNoData(datasetId, datasetSchemaId, tableSchemaList, tableSchemaId,
+          filterValue, columnName);
     }
     return result.toString();
   }
@@ -746,8 +747,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the string
    */
   @SuppressWarnings("unchecked")
-  private String returnigJsonWithNoData(String datasetSchemaId, List<TableSchema> tableSchemaList,
-      String tableSchemaId) {
+  private String returnigJsonWithNoData(Long datasetId, String datasetSchemaId,
+      List<TableSchema> tableSchemaList, String tableSchemaId, String filterValue,
+      String columnName) {
     JSONObject tables = new JSONObject();
     JSONArray jsonArray = new JSONArray();
     String tableName = "";
@@ -758,7 +760,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           tableName = (String) tableSchema.get("nameTableSchema");
           JSONObject jsonTable = new JSONObject();
           jsonTable.put(TABLE_NAME, tableName);
-          jsonTable.put(TOTAL_RECORDS, 0);
+          jsonTable.put(TOTAL_RECORDS, getTotalRecordsWithNoData(datasetId, tableSchemaId,
+              tableSchemaList, filterValue, columnName));
           jsonTable.put(RECORDS, new JSONArray());
           jsonArray.add(jsonTable);
         }
@@ -766,7 +769,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         for (TableSchema tableAux : tableSchemaList) {
           JSONObject jsonTable = new JSONObject();
           jsonTable.put(TABLE_NAME, tableAux.getNameTableSchema());
-          jsonTable.put(TOTAL_RECORDS, 0);
+          jsonTable.put(TOTAL_RECORDS, getTotalRecordsWithNoData(datasetId,
+              tableAux.getIdTableSchema().toString(), tableSchemaList, filterValue, columnName));
           jsonTable.put(RECORDS, new JSONArray());
           jsonArray.add(jsonTable);
         }
@@ -774,6 +778,101 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     tables.put("tables", jsonArray);
     return tables.toString();
+  }
+
+  /**
+   * Gets the total records with no data.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param tableSchemaList the table schema list
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the total records with no data
+   */
+  private int getTotalRecordsWithNoData(Long datasetId, String tableSchemaId,
+      List<TableSchema> tableSchemaList, String filterValue, String columnName) {
+
+    String totalRecords = "";
+
+    if (null != tableSchemaId) {
+      totalRecords = String.format(
+          "select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
+          datasetId, datasetId, tableSchemaId);
+    }
+
+    if (null != columnName || null != filterValue) {
+      totalRecords = resultTotalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue,
+          columnName);
+    }
+
+    LOG.info("Query Count: {} ", totalRecords);
+    Query query = entityManager.createNativeQuery(totalRecords);
+    Object result = null;
+    try {
+      result = query.getSingleResult();
+    } catch (NoResultException nre) {
+      LOG.info("no result, ignore message");
+    }
+    return Integer.parseInt(result.toString());
+  }
+
+  /**
+   * Result total records query.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaList the table schema list
+   * @param tableSchemaId the table schema id
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the string
+   */
+  private String resultTotalRecordsQuery(Long datasetId, List<TableSchema> tableSchemaList,
+      String tableSchemaId, String filterValue, String columnName) {
+    StringBuilder stringQuery = new StringBuilder();
+    stringQuery.append(
+        " select count(*)  as \"totalRecords\" from ( select id_table_schema, id_record, json_build_object('countryCode', data_provider_code, 'fields', json_agg(fields)) as records from ( ")
+        .append(
+            " select data_provider_code, id_table_schema, id_record ,json_build_object('fieldName', \"fieldName\", 'value', value, 'field_value_id', field_value_id) as fields from ( ")
+        .append(" select case ");
+    String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+    for (TableSchema table : tableSchemaList) {
+      if (null != tableSchemaId && table.getIdTableSchema().toString().equals(tableSchemaId)) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          stringQuery.append(
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+        }
+      } else {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          stringQuery.append(
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+        }
+      }
+    }
+    stringQuery.append(String.format(
+        " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table) fieldsAux",
+        datasetId, datasetId, datasetId));
+
+    if (null != tableSchemaId) {
+      stringQuery.append(" where ")
+          .append(null != tableSchemaId
+              ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
+              : "");
+      stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+    }
+    stringQuery.append(") records group by id_table_schema,id_record,data_provider_code ");
+    stringQuery.append(" ) tablesAux ");
+    if (null != filterValue || null != columnName) {
+      stringQuery.append(
+          " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
+          .append(null != columnName ? String.format(" x.o ->> 'fieldName' = '%s' and ", columnName)
+              : "")
+          .append(null != filterValue ? String.format(" x.o ->> 'value' = '%s' and ", filterValue)
+              : "");
+      stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+      stringQuery.append(" ) ");
+    }
+    return stringQuery.toString();
   }
 
   /**
@@ -862,9 +961,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
         stringQuery.append(" )) ");
       }
-
     }
-    stringQuery.append(" end) , ");
+    stringQuery.append(" end ) , ");
     return stringQuery.toString();
   }
 }
