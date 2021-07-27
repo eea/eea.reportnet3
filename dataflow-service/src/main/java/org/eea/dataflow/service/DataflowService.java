@@ -65,6 +65,8 @@ public interface DataflowService {
    */
   List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
 
+  List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException;
+
 
   /**
    * Gets the completed.

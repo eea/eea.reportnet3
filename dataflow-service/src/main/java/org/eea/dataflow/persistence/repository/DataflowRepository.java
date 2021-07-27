@@ -103,6 +103,18 @@ public interface DataflowRepository
   List<Dataflow> findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
       @Param("status") TypeStatusEnum status, @Param("ids") List<Long> ids);
 
+
+  @Modifying
+  @Query("select df from Dataflow df where df.type='BUSINESS' order by status, creationDate desc")
+  List<Dataflow> findBusinessInOrderByStatusDescCreationDateDesc();
+
+
+  @Modifying
+  @Query("select df from Dataflow df where df.type='BUSINESS' and df.id IN :ids order by status, creationDate desc")
+  List<Dataflow> findBusinessAndIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
+
+
+
   /**
    * Gets the datasets status.
    *
