@@ -3,6 +3,8 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'GET_USER_RIGHT_LIST':
       return { ...state, userRightList: payload.userRightList, clonedUserRightList: payload.clonedUserRightList };
 
+    case 'ON_ADMIN_CHANGE':
+      return { ...state, isAdmin: payload };
     case 'ON_CLOSE_MANAGEMENT_DIALOG':
       return { ...state, userRight: { account: '', isNew: true, role: '' }, isEditingModal: false };
 
@@ -75,6 +77,7 @@ export const shareRightsReducer = (state, { type, payload }) => {
         ...state,
         accountHasError: false,
         actionsButtons: { id: null, isEditing: false, isDeleting: false },
+        isAdmin: false,
         loadingStatus: { isActionButtonsLoading: false, isInitialLoading: false },
         userRight: { account: '', isNew: true, role: '' },
         userRightToDelete: {}

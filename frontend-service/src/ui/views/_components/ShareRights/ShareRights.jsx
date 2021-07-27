@@ -21,6 +21,7 @@ import { UserRightService } from 'core/services/UserRight';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
@@ -61,6 +62,7 @@ export const ShareRights = ({
 
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
     accountHasError: false,
@@ -69,6 +71,7 @@ export const ShareRights = ({
     clonedUserRightList: [],
     dataUpdatedCount: 0,
     filteredData: [],
+    isAdmin: false,
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
     isEditingModal: false,
@@ -94,6 +97,13 @@ export const ShareRights = ({
       dropdownRef.current.focusInput.focus();
     }
   }, [dropdownRef.current, isUserRightManagementDialogVisible]);
+
+  useEffect(() => {
+    if (!isNil(userContext.contextRoles)) {
+      const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+      shareRightsDispatch({ type: 'ON_ADMIN_CHANGE', payload: { isAdmin } });
+    }
+  }, [userContext]);
 
   useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
 
@@ -302,7 +312,7 @@ export const ShareRights = ({
   };
 
   const renderButtonsColumnTemplate = userRight => {
-    return notDeletableRoles.includes(userRight?.role) ? null : (
+    return notDeletableRoles.includes(userRight?.role) && !shareRightsState.isAdmin ? null : (
       <ActionsColumn
         disabledButtons={isNil(actionsButtons.id) && loadingStatus.isActionButtonsLoading}
         isDeletingDocument={actionsButtons.isDeleting}
