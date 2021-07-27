@@ -150,7 +150,7 @@ const Dataflows = withRouter(({ history, match }) => {
       }
 
       if (TextUtils.areEquals(tabId, 'business')) {
-        const { data } = await DataflowService.all(userContext.contextRoles); //TODO
+        const { data } = await DataflowService.all(userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {
@@ -222,7 +222,7 @@ const Dataflows = withRouter(({ history, match }) => {
           className="dataflowList-accepted-help-step"
           content={{
             dataflows: dataflowsState['dataflows'],
-            business: dataflowsState['business'], // TODO
+            business: dataflowsState['business'],
             reference: dataflowsState['reference']
           }}
           isLoading={loadingStatus[tabId]}
