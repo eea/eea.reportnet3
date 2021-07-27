@@ -23,57 +23,7 @@ import { Obligation } from 'core/domain/model/Obligation/Obligation';
 import { Representative } from 'core/domain/model/Representative/Representative';
 import { WebLink } from 'core/domain/model/WebLink/WebLink';
 
-import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
-
-const getUserRoleLabel = role => {
-  const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
-  return userRole?.label;
-};
-
-const getUserRoles = userRoles => {
-  const userRoleToDataflow = [];
-  userRoles.filter(userRol => !userRol.duplicatedRoles && userRoleToDataflow.push(userRol));
-
-  const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
-  const dataflowDuplicatedRoles = [];
-  for (const duplicatedRol of duplicatedRoles) {
-    if (dataflowDuplicatedRoles[duplicatedRol.id]) {
-      dataflowDuplicatedRoles[duplicatedRol.id].push(duplicatedRol);
-    } else {
-      dataflowDuplicatedRoles[duplicatedRol.id] = [duplicatedRol];
-    }
-  }
-
-  const dataflowPermissionsOrderConfig = {
-    1: config.permissions.roles.CUSTODIAN,
-    2: config.permissions.roles.STEWARD,
-    3: config.permissions.roles.OBSERVER,
-    4: config.permissions.roles.EDITOR_WRITE,
-    5: config.permissions.roles.EDITOR_READ,
-    6: config.permissions.roles.LEAD_REPORTER,
-    7: config.permissions.roles.NATIONAL_COORDINATOR,
-    8: config.permissions.roles.REPORTER_WRITE,
-    9: config.permissions.roles.REPORTER_READ
-  };
-
-  const dataflowPermissions = Object.values(dataflowPermissionsOrderConfig);
-
-  dataflowDuplicatedRoles.forEach(dataflowRoles => {
-    let rol = null;
-
-    dataflowPermissions.forEach(permission => {
-      dataflowRoles.forEach(dataflowRol => {
-        if (isNil(rol) && dataflowRol.userRole === permission.label) {
-          rol = dataflowRol;
-        }
-      });
-    });
-
-    userRoleToDataflow.push(rol);
-  });
-
-  return userRoleToDataflow;
-};
+import { CoreUtils, TextUtils, UserRoleUtils } from 'core/infrastructure/CoreUtils';
 
 const all = async userData => {
   const dataflowsDTO = await apiDataflow.all(userData);
@@ -85,7 +35,7 @@ const all = async userData => {
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
 
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: getUserRoleLabel(role) });
+      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: UserRoleUtils.getUserRoleLabel(role) });
     });
 
     for (let index = 0; index < dataflowsDTO.data.length; index++) {
@@ -99,7 +49,7 @@ const all = async userData => {
 
       dataflows.push({
         ...dataflow,
-        ...(isDuplicated ? getUserRoles(userRoles) : userRoles).find(item => item.id === dataflow.id)
+        ...(isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles).find(item => item.id === dataflow.id)
       });
     }
   }
@@ -625,7 +575,9 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(
+          role
+        );
       });
     });
   });
@@ -645,7 +597,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
 const parseUsersList = usersListDTO => {
   usersListDTO.forEach((user, usersIndex) => {
     user.roles.forEach((role, roleIndex) => {
-      usersListDTO[usersIndex].roles[roleIndex] = getUserRoleLabel(role);
+      usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
     });
   });
   const usersList = [];
