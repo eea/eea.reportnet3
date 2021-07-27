@@ -50,9 +50,10 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     activeIndex: 0,
-    dataflows: [],
     business: [],
+    dataflows: [],
     isAddDialogVisible: false,
+    isAdmin: null,
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
@@ -91,10 +92,13 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: dataflowsState.isCustodian,
+      isVisible: tabId === 'business' ? dataflowsState.isAdmin : dataflowsState.isCustodian,
       label: 'createNewDataflow',
       onClick: () =>
-        manageDialogs(tabId === 'dataflows' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible', true),
+        manageDialogs(
+          tabId === 'dataflows' || tabId === 'business' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible',
+          true
+        ),
       title: 'createNewDataflow'
     };
 
@@ -143,7 +147,7 @@ const Dataflows = withRouter(({ history, match }) => {
 
       if (TextUtils.areEquals(tabId, 'reference')) {
         const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
-        console.log(`data reference`, data);
+
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
 
@@ -175,6 +179,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
 
   const onLoadPermissions = () => {
+    const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
     const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
@@ -183,7 +188,7 @@ const Dataflows = withRouter(({ history, match }) => {
       [permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
-    dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian, isNationalCoordinator } });
+    dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isAdmin, isCustodian, isNationalCoordinator } });
   };
 
   const onRefreshToken = async () => {
