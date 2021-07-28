@@ -18,10 +18,8 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
-import org.eea.dataflow.persistence.domain.DataProvider;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
-import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
@@ -60,7 +58,6 @@ import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
-import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.junit.Assert;
@@ -1047,19 +1044,6 @@ public class DataFlowServiceImplTest {
     assertNotNull(dataflowServiceImpl.getReferenceDataflows(""));
   }
 
-  @Test
-  public void getUserRolesByDataflowTest() {
-    Representative rep = new Representative();
-    LeadReporter lRep = new LeadReporter();
-    rep.setDataProvider(new DataProvider());
-    rep.setLeadReporters(Arrays.asList(lRep));
-    Mockito.when(representativeRepository.findAllByDataflow_Id(Mockito.any()))
-        .thenReturn(Arrays.asList(rep));
-    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.any()))
-        .thenReturn(Arrays.asList(new ReportingDatasetVO()));
-    Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.any()))
-        .thenReturn(Arrays.asList(new UserRepresentationVO()));
-    dataflowServiceImpl.getUserRolesByDataflow(0L);
-  }
+
 
 }

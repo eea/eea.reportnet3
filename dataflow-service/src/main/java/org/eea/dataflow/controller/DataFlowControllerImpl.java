@@ -19,7 +19,6 @@ import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
-import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
@@ -526,21 +525,6 @@ public class DataFlowControllerImpl implements DataFlowController {
 
 
   /**
-   * Gets the user roles by dataflow.
-   *
-   * @param dataflowId the dataflow id
-   * @return the user roles by dataflow
-   */
-  @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
-  @GetMapping("/{dataflowId}/userRoles")
-  public List<UserRoleVO> getUserRolesByDataflow(@PathVariable("dataflowId") Long dataflowId) {
-
-    return dataflowService.getUserRolesByDataflow(dataflowId);
-  }
-
-
-  /**
    * Gets the user roles all dataflows.
    *
    * @return the user roles all dataflows
@@ -581,6 +565,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       @PathVariable("entityId") Long entityId) {
     return dataflowService.isReferenceDataflowDraft(entity, entityId);
   }
+
 
 
   /**

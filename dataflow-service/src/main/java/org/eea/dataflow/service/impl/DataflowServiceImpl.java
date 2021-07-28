@@ -1,7 +1,6 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -18,8 +17,6 @@ import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
-import org.eea.dataflow.persistence.domain.LeadReporter;
-import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
@@ -49,7 +46,6 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -58,7 +54,6 @@ import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
-import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -782,122 +777,6 @@ public class DataflowServiceImpl implements DataflowService {
           entityId, e.getMessage(), e);
     }
     return reference;
-  }
-
-  /**
-   * Gets the user roles by dataflow.
-   *
-   * @param dataflowId the dataflow id
-   * @return the user roles by dataflow
-   */
-  @Override
-  public List<UserRoleVO> getUserRolesByDataflow(Long dataflowId) {
-    List<UserRoleVO> userRoleList = new ArrayList<>();
-    HashMap<Long, String> providerIds = new HashMap<>();
-
-    getLeadReportersWithCountry(dataflowId, userRoleList, providerIds);
-    getUsersWithCountry(dataflowId, userRoleList, providerIds);
-    getUserRole(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId),
-        SecurityRoleEnum.DATA_CUSTODIAN.toString(), userRoleList, null);
-    getUserRole(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowId),
-        SecurityRoleEnum.DATA_STEWARD.toString(), userRoleList, null);
-    getUserRole(ResourceGroupEnum.DATAFLOW_OBSERVER.getGroupName(dataflowId),
-        SecurityRoleEnum.DATA_OBSERVER.toString(), userRoleList, null);
-    getUserRole(ResourceGroupEnum.DATAFLOW_EDITOR_READ.getGroupName(dataflowId),
-        SecurityRoleEnum.EDITOR_READ.toString(), userRoleList, null);
-    getUserRole(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId),
-        SecurityRoleEnum.EDITOR_WRITE.toString(), userRoleList, null);
-    return userRoleList;
-  }
-
-  /**
-   * Gets the lead reporters with country.
-   *
-   * @param dataflowId the dataflow id
-   * @param userRoleList the user role list
-   * @param providerIds the provider ids
-   * @return the lead reporters with country
-   */
-  private void getLeadReportersWithCountry(Long dataflowId, List<UserRoleVO> userRoleList,
-      HashMap<Long, String> providerIds) {
-    List<Representative> representatives =
-        representativeRepository.findAllByDataflow_Id(dataflowId);
-    if (null != representatives) {
-      for (Representative representative : representatives) {
-        if (null != representative.getLeadReporters()) {
-          for (LeadReporter leadReporter : representative.getLeadReporters()) {
-            UserRoleVO userRoleVO = new UserRoleVO();
-            userRoleVO.setEmail(leadReporter.getEmail());
-            userRoleVO.setRoles(Arrays.asList(SecurityRoleEnum.LEAD_REPORTER.toString()));
-            userRoleVO.setCountry(representative.getDataProvider().getCode());
-            userRoleList.add(userRoleVO);
-            providerIds.put(representative.getDataProvider().getId(),
-                representative.getDataProvider().getCode());
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Gets the users with country.
-   *
-   * @param dataflowId the dataflow id
-   * @param userRoleList the user role list
-   * @param providerIds the provider ids
-   * @return the users with country
-   */
-  private void getUsersWithCountry(Long dataflowId, List<UserRoleVO> userRoleList,
-      HashMap<Long, String> providerIds) {
-    List<ReportingDatasetVO> datasets =
-        datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
-    if (null != datasets) {
-      for (ReportingDatasetVO reportingDatasetVO : datasets) {
-        if (providerIds.containsKey(reportingDatasetVO.getDataProviderId())) {
-          getUserRole(
-              ResourceGroupEnum.DATASET_REPORTER_READ.getGroupName(reportingDatasetVO.getId()),
-              SecurityRoleEnum.REPORTER_READ.toString(), userRoleList,
-              providerIds.get(reportingDatasetVO.getDataProviderId()));
-          getUserRole(
-              ResourceGroupEnum.DATASET_REPORTER_WRITE.getGroupName(reportingDatasetVO.getId()),
-              SecurityRoleEnum.REPORTER_WRITE.toString(), userRoleList,
-              providerIds.get(reportingDatasetVO.getDataProviderId()));
-          getUserRole(
-              ResourceGroupEnum.DATASET_NATIONAL_COORDINATOR.getGroupName(
-                  reportingDatasetVO.getId()),
-              SecurityRoleEnum.NATIONAL_COORDINATOR.toString(), userRoleList,
-              providerIds.get(reportingDatasetVO.getDataProviderId()));
-          providerIds.remove(reportingDatasetVO.getDataProviderId());
-        }
-      }
-    }
-  }
-
-
-
-  /**
-   * Gets the user role.
-   *
-   * @param group the group
-   * @param role the role
-   * @param userRoleList the user role list
-   * @param country the country
-   * @return the user role
-   */
-  private void getUserRole(String group, String role, List<UserRoleVO> userRoleList,
-      String country) {
-    List<UserRepresentationVO> listUserWrite = userManagementControllerZull.getUsersByGroup(group);
-    if (!CollectionUtils.isEmpty(listUserWrite)) {
-      listUserWrite.stream().forEach(userWrite -> {
-        UserRoleVO userRoleVO = new UserRoleVO();
-        userRoleVO.setEmail(userWrite.getEmail());
-        userRoleVO.setRoles(Arrays.asList(role));
-        if (null != country) {
-          userRoleVO.setCountry(country);
-        }
-        userRoleList.add(userRoleVO);
-      });
-    }
   }
 
   /**
