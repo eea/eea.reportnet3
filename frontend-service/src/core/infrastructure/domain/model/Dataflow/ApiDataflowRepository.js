@@ -26,11 +26,11 @@ import { WebLink } from 'core/domain/model/WebLink/WebLink';
 import { CoreUtils, TextUtils, UserRoleUtils } from 'core/infrastructure/CoreUtils';
 
 const all = async userData => {
-  const dataflowsDTO = await apiDataflow.all(userData);
+  const dataflowsDTO = await apiDataflow.all();
   const dataflows = !userData ? dataflowsDTO.data : [];
-  const userRoles = [];
 
   if (userData) {
+    const userRoles = [];
     const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
     dataflowsRoles.map((item, i) => {
       const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
