@@ -16,6 +16,7 @@ export const useBreadCrumbs = ({
   dataflowId,
   dataflowStateData,
   history,
+  isBusinessDataflow = false,
   matchParams,
   metaData,
   representativeId,
@@ -33,7 +34,7 @@ export const useBreadCrumbs = ({
       command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
       icon: 'clone',
-      label: resources.messages['dataflow']
+      label: isBusinessDataflow ? resources.messages['businessDataflowCrumbLabel'] : resources.messages['dataflow']
     };
   };
 

@@ -193,6 +193,7 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowId,
     dataflowStateData: dataflowState.data,
     history,
+    isBusinessDataflow: dataflowState.isBusinessDataflow,
     matchParams: match.params,
     representativeId
   });
