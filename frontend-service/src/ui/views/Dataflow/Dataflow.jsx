@@ -80,6 +80,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
+    isBusinessDataflow: false,
     isCopyDataCollectionToEuDatasetLoading: false,
     isCustodian: false,
     isDataSchemaCorrect: [],
@@ -240,7 +241,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageRequestersBtn: dataflowState.isCustodian,
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      showPublicInfoBtn: !isDesign && isLeadDesigner,
+      showPublicInfoBtn: !isDesign && isLeadDesigner && !dataflowState.isBusinessDataflow,
       usersListBtn:
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
