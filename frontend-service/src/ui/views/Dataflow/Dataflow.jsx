@@ -1027,7 +1027,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={
               ((isNil(dataProviderId) && dataflowState.isCustodian) ||
                 (isNil(representativeId) && dataflowState.isObserver)) &&
-              dataflowState.status === 'DRAFT'
+              dataflowState.status === config.dataflowStatus.OPEN
                 ? resources.messages['dataflowUsersByCountryList']
                 : resources.messages['dataflowUsersList']
             }

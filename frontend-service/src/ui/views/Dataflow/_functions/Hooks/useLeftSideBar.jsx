@@ -3,6 +3,8 @@ import { useContext, useLayoutEffect } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
 export const useLeftSideBar = (
@@ -97,14 +99,14 @@ export const useLeftSideBar = (
         label:
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
-          dataflowState.status === 'DRAFT'
+          dataflowState.status === config.dataflowStatus.OPEN
             ? 'dataflowUsersByCountryList'
             : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title:
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
-          dataflowState.status === 'DRAFT'
+          dataflowState.status === config.dataflowStatus.OPEN
             ? 'dataflowUsersByCountryList'
             : 'dataflowUsersList'
       };
