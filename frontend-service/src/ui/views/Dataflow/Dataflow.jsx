@@ -827,7 +827,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
-            footerAddon={dataflowState.anySchemaAvailableInPublic && checkRestrictFromPublic}
+            footerAddon={
+              dataflowState.anySchemaAvailableInPublic && !dataflowState.isBusinessDataflow && checkRestrictFromPublic
+            }
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
