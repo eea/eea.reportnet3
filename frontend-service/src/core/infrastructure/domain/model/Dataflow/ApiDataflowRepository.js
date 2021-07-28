@@ -356,40 +356,6 @@ const getAllDataflowsUserList = async () => {
 };
 
 const getRepresentativesUsersList = async dataflowId => {
-  // const response = {
-  //   data: [
-  //     {
-  //       email: 'beaprovider@reportnet.net',
-  //       roles: ['LEAD_REPORTER'],
-  //       country: 'ES'
-  //     },
-  //     {
-  //       email: 'beaprovider2@reportnet.net',
-  //       roles: ['REPORTER_READ', 'REPORTER_READ'],
-  //       country: 'ES'
-  //     },
-  //     {
-  //       email: 'nationalspain@reportnet.net',
-  //       roles: ['NATIONAL_COORDINATOR'],
-  //       country: 'ES'
-  //     },
-  //     {
-  //       email: 'bse.ies.so@gmail.com',
-  //       roles: ['DATA_CUSTODIAN'],
-  //       country: null
-  //     },
-  //     {
-  //       email: 'beaprovider2@reportnet.net',
-  //       roles: ['DATA_CUSTODIAN'],
-  //       country: null
-  //     },
-  //     {
-  //       email: 'beaprovider3@reportnet.net',
-  //       roles: ['DATA_STEWARD'],
-  //       country: null
-  //     }
-  //   ]
-  // };
   const response = await apiDataflow.getRepresentativesUsersList(dataflowId);
   const usersList = parseCountriesUserList(response.data);
   response.data = sortBy(usersList, 'country');
