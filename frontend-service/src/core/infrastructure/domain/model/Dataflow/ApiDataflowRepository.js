@@ -355,6 +355,13 @@ const getAllDataflowsUserList = async () => {
   return usersListDTO;
 };
 
+const getRepresentativesUsersList = async dataflowId => {
+  const response = await apiDataflow.getRepresentativesUsersList(dataflowId);
+  const usersList = parseCountriesUserList(response.data);
+  response.data = sortBy(usersList, 'country');
+  return response;
+};
+
 const getUserList = async (dataflowId, representativeId) => {
   const response = await apiDataflow.getUserList(dataflowId, representativeId);
   const usersList = parseUsersList(response.data);
@@ -594,6 +601,27 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   return usersList;
 };
 
+const parseCountriesUserList = usersListDTO => {
+  usersListDTO.forEach((user, usersIndex) => {
+    user.roles.forEach((role, roleIndex) => {
+      usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
+    });
+  });
+  const usersList = [];
+  usersListDTO.forEach(parsedUser => {
+    const { country, email, roles } = parsedUser;
+    roles.forEach(role => {
+      usersList.push({ country, email, role });
+    });
+  });
+  usersList.forEach(user => {
+    if (isNil(user.country)) {
+      user.country = '';
+    }
+  });
+  return usersList;
+};
+
 const parseUsersList = usersListDTO => {
   usersListDTO.forEach((user, usersIndex) => {
     user.roles.forEach((role, roleIndex) => {
@@ -680,6 +708,7 @@ export const ApiDataflowRepository = {
   getAllSchemas,
   getApiKey,
   getAllDataflowsUserList,
+  getRepresentativesUsersList,
   getPublicDataflowData,
   getPublicDataflowsByCountryCode,
   getUserList,
