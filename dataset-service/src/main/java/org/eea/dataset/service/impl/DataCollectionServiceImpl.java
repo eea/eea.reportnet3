@@ -366,7 +366,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
-    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow);
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false);
   }
 
   /**
@@ -378,15 +378,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param manualCheck the manual check
    * @param showPublicInfo the show public info
    * @param referenceDataflow the reference dataflow
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
-      boolean referenceDataflow) {
+      boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
-        referenceDataflow);
+        referenceDataflow, stopAndNotifyPKError);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
@@ -414,18 +415,41 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
    * @param referenceDataflow the reference dataflow
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
+      boolean stopAndNotifyPKError) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
+    boolean havePK = true;
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
+      if (referenceDataflow) {
+        if (stopAndNotifyPKError) {
+          for (DesignDatasetVO dataset : designs) {
+            for (TableSchemaVO tableSchemaVO : datasetSchemaService
+                .getDataSchemaById(dataset.getDatasetSchema()).getTableSchemas()) {
+              for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
+                if (fieldSchemaVO.getPk() == null) {
+                  havePK = false;
+                }
+              }
+            }
+          }
+          if (!havePK) {
+            NotificationVO notificationVO = NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .dataflowId(dataflowId).build();
+            releaseNotification(EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT, notificationVO);
+          }
+        }
+      }
       LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
