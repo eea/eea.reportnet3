@@ -3,11 +3,11 @@ package org.eea.interfaces.vo.dataflow.enums;
 /** The Enum TypeDataProviderEnum. */
 public enum TypeDataProviderEnum {
 
-  /** The design. */
-  DESIGN("COUNTRY"),
+  /** The country. */
+  COUNTRY("COUNTRY"),
 
   /** The draft. */
-  DRAFT("COMPANY");
+  COMPANY("COMPANY");
 
   /** The value. */
   private final String value;
