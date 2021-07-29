@@ -2,12 +2,13 @@ package org.eea.dataflow.persistence.domain;
 
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -46,9 +47,9 @@ public class DataProvider {
   private String code;
 
   /** The group id. */
-  @Column(name = "group_id")
-  @OneToMany(mappedBy = "dataProvider", cascade = CascadeType.ALL, orphanRemoval = false)
-  private Long groupId;
+  @ManyToOne
+  @JoinColumn(name = "id")
+  private DataProviderGroup dataProviderGroup;
 
   /** The representatives. */
   @OneToMany(mappedBy = "dataProvider")

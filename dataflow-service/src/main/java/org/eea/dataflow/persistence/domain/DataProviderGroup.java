@@ -1,6 +1,8 @@
 package org.eea.dataflow.persistence.domain;
 
+import java.util.List;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
@@ -30,7 +33,7 @@ public class DataProviderGroup {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "data_provider_group_id_seq")
   @SequenceGenerator(name = "data_provider_group_id_seq", sequenceName = "data_provider_id_seq",
       allocationSize = 1)
-  @Column(name = "ID", columnDefinition = "serial")
+  @Column(name = "id", columnDefinition = "serial")
   private Long id;
 
   /** The name. */
@@ -41,6 +44,10 @@ public class DataProviderGroup {
   @Column(name = "type")
   @Enumerated(EnumType.STRING)
   private TypeDataProviderEnum type;
+
+  /** The dataproviders. */
+  @OneToMany(mappedBy = "dataProviderGroup", cascade = CascadeType.ALL, orphanRemoval = false)
+  private List<DataProvider> dataProviders;
 
   /**
    * Equals.

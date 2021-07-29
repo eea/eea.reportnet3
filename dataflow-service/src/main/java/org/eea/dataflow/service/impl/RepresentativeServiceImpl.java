@@ -19,6 +19,7 @@ import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
+import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.LeadReporterRepository;
@@ -69,6 +70,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The data provider repository. */
   @Autowired
   private DataProviderRepository dataProviderRepository;
+
+  /** The data provider repository. */
+  @Autowired
+  private DataProviderGroupRepository dataProviderGroupRepository;
 
   /** The dataflow repository. */
   @Autowired
@@ -216,12 +221,12 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<DataProviderCodeVO> getAllDataProviderTypes() {
     LOG.info("obtaining the distinct representative types");
-    List<DataProviderCode> dataProviderCodes = dataProviderRepository.findDistinctCode();
+    List<DataProviderCode> dataProviderGroupCodes = dataProviderGroupRepository.findDistinctCode();
     List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
-    for (DataProviderCode dataProviderCode : dataProviderCodes) {
+    for (DataProviderCode dataProviderGroupCode : dataProviderGroupCodes) {
       DataProviderCodeVO item = new DataProviderCodeVO();
-      item.setDataProviderGroupId(dataProviderCode.getDataProviderGroupId());
-      item.setLabel(dataProviderCode.getLabel());
+      item.setDataProviderGroupId(dataProviderGroupCode.getDataProviderGroupId());
+      item.setLabel(dataProviderGroupCode.getLabel());
       dataProviderCodeVOs.add(item);
     }
     return dataProviderCodeVOs;
@@ -252,7 +257,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    */
   @Override
   public List<DataProviderVO> getAllDataProviderByGroupId(Long groupId) {
-    return dataProviderMapper.entityListToClass(dataProviderRepository.findAllByGroupId(groupId));
+    return dataProviderMapper
+        .entityListToClass(dataProviderRepository.findAllByDataProviderGroup_id(groupId));
   }
 
   /**
@@ -395,7 +401,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       String[] fieldsToWrite = new String[nHeaders];
 
       // we find all dataprovider for group id
-      List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
+      List<DataProvider> dataProviderList =
+          dataProviderRepository.findAllByDataProviderGroup_id(groupId);
       for (DataProvider dataProvider : dataProviderList) {
         fieldsToWrite[0] = dataProvider.getCode();
         csvWriter.writeNext(fieldsToWrite);
@@ -438,7 +445,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       String[] fieldsToWrite = new String[nHeaders];
 
 
-      List<DataProvider> dataProviderList = dataProviderRepository.findAllByGroupId(groupId);
+      List<DataProvider> dataProviderList =
+          dataProviderRepository.findAllByDataProviderGroup_id(groupId);
       List<String> countryCodeList =
           dataProviderList.stream().map(DataProvider::getCode).collect(Collectors.toList());
 

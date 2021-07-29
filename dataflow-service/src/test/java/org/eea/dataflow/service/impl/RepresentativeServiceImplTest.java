@@ -20,6 +20,7 @@ import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
+import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.LeadReporterRepository;
@@ -76,6 +77,9 @@ public class RepresentativeServiceImplTest {
 
   @Mock
   private DataProviderRepository dataProviderRepository;
+
+  @Mock
+  private DataProviderGroupRepository dataProviderGroupRepository;
 
   @Mock
   private LeadReporterRepository leadReporterRepository;
@@ -236,7 +240,7 @@ public class RepresentativeServiceImplTest {
     dataProviderCodeVO.setDataProviderGroupId(1L);
     dataProviderCodeVO.setLabel("Country");
     dataProviderCodeVOs.add(dataProviderCodeVO);
-    when(dataProviderRepository.findDistinctCode()).thenReturn(dataProviderCodes);
+    when(dataProviderGroupRepository.findDistinctCode()).thenReturn(dataProviderCodes);
     assertEquals("error in the message", dataProviderCodeVOs,
         representativeServiceImpl.getAllDataProviderTypes());
   }
@@ -280,7 +284,7 @@ public class RepresentativeServiceImplTest {
   @Test
   public void getAllDataProviderByGroupIdSuccessTest() throws EEAException {
     when(dataProviderMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
-    when(dataProviderRepository.findAllByGroupId(1L)).thenReturn(new ArrayList<>());
+    when(dataProviderRepository.findAllByDataProviderGroup_id(1L)).thenReturn(new ArrayList<>());
     assertEquals("error in the message", new ArrayList<>(),
         representativeServiceImpl.getAllDataProviderByGroupId(1L));
   }
@@ -412,7 +416,8 @@ public class RepresentativeServiceImplTest {
     List<DataProvider> dataProviderList = new ArrayList<>();
     DataProvider dataProvider = new DataProvider();
     dataProviderList.add(dataProvider);
-    Mockito.when(dataProviderRepository.findAllByGroupId(1L)).thenReturn(dataProviderList);
+    Mockito.when(dataProviderRepository.findAllByDataProviderGroup_id(1L))
+        .thenReturn(dataProviderList);
     byte[] expectedResult = "".getBytes();
     Assert.assertNotEquals(expectedResult,
         representativeServiceImpl.exportTemplateReportersFile(1L));
@@ -649,7 +654,7 @@ public class RepresentativeServiceImplTest {
     List<DataProvider> dataProviderList = new ArrayList<>();
     dataProviderList.add(dataProvider);
 
-    Mockito.when(dataProviderRepository.findAllByGroupId(Mockito.any()))
+    Mockito.when(dataProviderRepository.findAllByDataProviderGroup_id(Mockito.any()))
         .thenReturn(dataProviderList);
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(user);
 
