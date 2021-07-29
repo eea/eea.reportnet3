@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * The Class UserRoleServiceImpl.
@@ -220,13 +221,15 @@ public class UserRoleServiceImpl implements UserRoleService {
       HashMap<Long, String> providerIds) {
     List<RepresentativeVO> representatives =
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
-    if (null != representatives) {
+    if (!CollectionUtils.isEmpty(representatives)) {
       List<Long> dataproviderIds = representatives.stream()
           .map(representative -> representative.getDataProviderId()).collect(Collectors.toList());
-      List<DataProviderVO> dataproviders =
-          representativeControllerZuul.findDataProvidersByIds(dataproviderIds);
-      for (DataProviderVO dataProviderVO : dataproviders) {
-        providerIds.put(dataProviderVO.getId(), dataProviderVO.getLabel());
+      if (!CollectionUtils.isEmpty(dataproviderIds)) {
+        List<DataProviderVO> dataproviders =
+            representativeControllerZuul.findDataProvidersByIds(dataproviderIds);
+        for (DataProviderVO dataProviderVO : dataproviders) {
+          providerIds.put(dataProviderVO.getId(), dataProviderVO.getLabel());
+        }
       }
 
       for (RepresentativeVO representative : representatives) {
