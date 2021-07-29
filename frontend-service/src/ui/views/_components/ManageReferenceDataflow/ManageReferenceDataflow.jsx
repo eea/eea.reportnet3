@@ -41,7 +41,7 @@ export const ManageReferenceDataflow = ({
   manageDialogs,
   metadata,
   onEditDataflow,
-  onManage
+  onCreateDataflow
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
   const INPUT_MAX_LENGTH = 255;
@@ -132,7 +132,7 @@ export const ManageReferenceDataflow = ({
               userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
             }
           }
-          onManage();
+          onCreateDataflow('isReferencedDataflowDialogVisible');
         }
       }
     } catch (error) {

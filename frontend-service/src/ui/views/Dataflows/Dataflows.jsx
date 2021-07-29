@@ -180,20 +180,23 @@ const Dataflows = withRouter(({ history, match }) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
   };
 
-  const onCreateDataflow = () => {
-    manageDialogs('isAddDialogVisible', false);
+  const onCreateDataflow = dialog => {
+    manageDialogs(dialog, false);
     onRefreshToken();
   };
 
-  const onCreateReferenceDataflow = () => {
-    manageDialogs('isReferencedDataflowDialogVisible', false);
-    onRefreshToken();
-  };
+  // const onCreateReferenceDataflow = dialog => {
+  //   manageDialogs('isReferencedDataflowDialogVisible', false);
+  //   onRefreshToken();
+  // };
 
-  const onCreateBusinessDataflow = () => {
-    manageDialogs('isBusinessDataflowDialogVisible', false);
-    onRefreshToken();
-  };
+  // const onCreateBusinessDataflow = () => {
+  //   manageDialogs('isBusinessDataflowDialogVisible', false);
+  //   onRefreshToken();
+  // };
+
+  const getPrevState = data =>
+    dataflowsDispatch({ type: 'OBLIGATION_PREVIOUS_STATE', payload: { id: data.id, title: data.title } });
 
   const onLoadObligation = ({ id, title }) => dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
 
@@ -251,7 +254,7 @@ const Dataflows = withRouter(({ history, match }) => {
         label={resources.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationDialogVisible', false);
-          // getPrevState(dataflowManagementState.obligation);
+          getPrevState(dataflowsState.obligation);
         }}
       />
       <Button
@@ -296,7 +299,7 @@ const Dataflows = withRouter(({ history, match }) => {
         <ManageReferenceDataflow
           isVisible={dataflowsState.isReferencedDataflowDialogVisible}
           manageDialogs={manageDialogs}
-          onManage={onCreateReferenceDataflow}
+          onCreateDataflow={onCreateDataflow}
         />
       )}
 
@@ -304,9 +307,16 @@ const Dataflows = withRouter(({ history, match }) => {
         <ManageBusinessDataflow
           isVisible={dataflowsState.isBusinessDataflowDialogVisible}
           manageDialogs={manageDialogs}
-          onManage={onCreateBusinessDataflow}
+          onCreateDataflow={onCreateDataflow}
         />
       )}
+
+      <DataflowManagement
+        isEditForm={false}
+        manageDialogs={manageDialogs}
+        onCreateDataflow={onCreateDataflow}
+        state={dataflowsState}
+      />
 
       {dataflowsState.isReportingObligationsDialogVisible && (
         <Dialog
@@ -318,13 +328,6 @@ const Dataflows = withRouter(({ history, match }) => {
           <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowsState.obligation} />
         </Dialog>
       )}
-
-      <DataflowManagement
-        isEditForm={false}
-        manageDialogs={manageDialogs}
-        onCreateDataflow={onCreateDataflow}
-        state={dataflowsState}
-      />
     </div>
   );
 });

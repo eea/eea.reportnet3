@@ -43,7 +43,7 @@ export const ManageBusinessDataflow = ({
   manageDialogs,
   metadata,
   onEditDataflow,
-  onManage
+  onCreateDataflow
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
   const INPUT_MAX_LENGTH = 255;
@@ -57,18 +57,9 @@ export const ManageBusinessDataflow = ({
   const [deleteInput, setDeleteInput] = useState('');
   const [selectedGroup, setSelectedGroup] = useState({});
 
-  console.log(`selectedGroup`, selectedGroup);
-
-  const [obligation, setObligation] = useState();
-  // isEditing && state.obligations
-  //   ? { id: state.obligations.obligationId, title: state.obligations.title }
-  //   : { id: null, title: '' }
-
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
 
   const [gropupOfCompanies, setGropupOfCompanies] = useState([]);
-
-  // console.log(`gropupOfCompanies`, gropupOfCompanies);
 
   const [errors, setErrors] = useState({
     description: { hasErrors: false, message: '' },
@@ -167,7 +158,7 @@ export const ManageBusinessDataflow = ({
               userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
             }
           }
-          onManage();
+          onCreateDataflow('isBusinessDataflowDialogVisible');
         }
       }
     } catch (error) {
