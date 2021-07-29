@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -6,20 +6,22 @@ import isNil from 'lodash/isNil';
 import { config } from 'conf';
 import { routes } from 'ui/routes';
 
-import styles from './ManageReferenceDataflow.module.scss';
+import styles from './ManageBusinessDataflow.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
 import { Checkbox } from 'ui/views/_components/Checkbox';
 import { ConfirmDialog } from 'ui/views/_components/ConfirmDialog';
 import { Dialog } from 'ui/views/_components/Dialog';
+import { Dropdown } from 'ui/views/_components/Dropdown';
 import { ErrorMessage } from 'ui/views/_components/ErrorMessage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
-import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
+import { BusinessDataflowService } from 'core/services/BusinessDataflow';
+import { RepresentativeService } from 'core/services/Representative';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -33,7 +35,7 @@ import { UserService } from 'core/services/User';
 import { getUrl } from 'core/infrastructure/CoreUtils';
 import { TextUtils } from 'ui/views/_functions/Utils';
 
-export const ManageReferenceDataflow = ({
+export const ManageBusinessDataflow = ({
   dataflowId,
   history,
   isEditing = false,
@@ -43,7 +45,7 @@ export const ManageReferenceDataflow = ({
   onEditDataflow,
   onManage
 }) => {
-  const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
+  const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
   const INPUT_MAX_LENGTH = 255;
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
@@ -53,10 +55,25 @@ export const ManageReferenceDataflow = ({
   const userContext = useContext(UserContext);
 
   const [deleteInput, setDeleteInput] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState({});
+
+  console.log(`selectedGroup`, selectedGroup);
+
+  const [obligation, setObligation] = useState();
+  // isEditing && state.obligations
+  //   ? { id: state.obligations.obligationId, title: state.obligations.title }
+  //   : { id: null, title: '' }
+
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
+
+  const [gropupOfCompanies, setGropupOfCompanies] = useState([]);
+
+  // console.log(`gropupOfCompanies`, gropupOfCompanies);
+
   const [errors, setErrors] = useState({
     description: { hasErrors: false, message: '' },
-    name: { hasErrors: false, message: '' }
+    name: { hasErrors: false, message: '' },
+    obligation: { message: '', hasErrors: false }
   });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -68,6 +85,19 @@ export const ManageReferenceDataflow = ({
 
   useInputTextFocus(isVisible, inputRef);
   useInputTextFocus(isDeleteDialogVisible, deleteInputRef);
+
+  const getGroupOfCompaniesList = async () => {
+    try {
+      const providerTypes = await RepresentativeService.getProviderTypes();
+      setGropupOfCompanies(providerTypes.data);
+    } catch (error) {
+      console.error('error on  RepresentativeService.getProviderTypes', error);
+    }
+  };
+
+  useEffect(() => {
+    getGroupOfCompaniesList();
+  }, []);
 
   const checkErrors = () => {
     let hasErrors = false;
@@ -92,11 +122,16 @@ export const ManageReferenceDataflow = ({
     setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
   };
 
+  const onSelectGroup = group => {
+    console.log(`group`, group);
+    setSelectedGroup(group);
+  };
+
   const onDeleteDataflow = async () => {
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await ReferenceDataflowService.deleteReferenceDataflow(dataflowId);
+      const response = await BusinessDataflowService.deleteReferenceDataflow(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
@@ -108,20 +143,20 @@ export const ManageReferenceDataflow = ({
     }
   };
 
-  const onManageReferenceDataflow = async () => {
+  const onManageBusinessDataflow = async () => {
     if (checkErrors()) return;
 
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await ReferenceDataflowService.edit(dataflowId, description, name, 'REFERENCE');
+        const { status } = await BusinessDataflowService.edit(dataflowId, description, name, 'BUSINESS');
 
         if (status >= 200 && status <= 299) {
           manageDialogs(dialogName, false);
           onEditDataflow(name, description);
         }
       } else {
-        const { data, status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+        const { data, status } = await BusinessDataflowService.create(name, description, 'BUSINESS');
         if (status >= 200 && status <= 299) {
           if (pinDataflow) {
             const inmUserProperties = { ...userContext.userProps };
@@ -141,8 +176,8 @@ export const ManageReferenceDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
         const notification = isEditing
-          ? { type: 'REFERENCE_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
-          : { type: 'REFERENCE_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
+          ? { type: 'BUSINESS_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
+          : { type: 'BUSINESS_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
         notificationContext.add(notification);
       }
@@ -195,7 +230,7 @@ export const ManageReferenceDataflow = ({
         disabled={isEmpty(name) || isEmpty(description) || isSending}
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
         label={isEditing ? resources.messages['save'] : resources.messages['create']}
-        onClick={() => onManageReferenceDataflow()}
+        onClick={() => onManageBusinessDataflow()}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -212,8 +247,8 @@ export const ManageReferenceDataflow = ({
         footer={renderDialogFooter()}
         header={
           isEditing
-            ? resources.messages['editReferenceDataflowDialogHeader']
-            : resources.messages['createReferenceDataflowDialogHeader']
+            ? resources.messages['editBusinessDataflowDialogHeader']
+            : resources.messages['createBusinessDataflowDialogHeader']
         }
         onHide={() => manageDialogs(dialogName, false)}
         visible={isVisible}>
@@ -228,6 +263,21 @@ export const ManageReferenceDataflow = ({
           />
           {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
         </div>
+        <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
+          <Dropdown
+            appendTo={document.body}
+            ariaLabel="groupOfCompanies"
+            name="groupOfCompanies"
+            onChange={event => {
+              onSelectGroup(event.target.value);
+            }}
+            optionLabel="label"
+            options={gropupOfCompanies}
+            placeholder={resources.messages[`selectGroupOfCompanies`]}
+            value={selectedGroup}
+          />
+          {!isEmpty(errors.name.message) && <ErrorMessage message={errors.groupOfCompanies.message} />}
+        </div>
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
@@ -240,13 +290,36 @@ export const ManageReferenceDataflow = ({
           />
           {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
         </div>
+        <div className={`${styles.search}`}>
+          <Button
+            icon="search"
+            label={resources.messages['searchObligations']}
+            onClick={() => manageDialogs('isReportingObligationsDialogVisible', true)}
+          />
+          <InputText
+            className={`${styles.searchInput} ${errors?.obligation?.hasErrors ? styles.searchErrors : ''}`}
+            id="searchObligation"
+            name="obligation.title"
+            // onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
+            // onKeyPress={e => {
+            //   if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
+            // }}
+            placeholder={resources.messages['associatedObligation']}
+            readOnly={true}
+            type="text"
+            // value={data.obligation.title}
+          />
+          <label className="srOnly" htmlFor="searchObligation">
+            {resources.messages['searchObligations']}
+          </label>
+        </div>
       </Dialog>
 
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name)}
-          header={resources.messages['deleteReferenceDataflowDialogHeader']}
+          header={resources.messages['deleteBusinessDataflowDialogHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onDeleteDataflow}

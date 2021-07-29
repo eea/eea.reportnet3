@@ -36,6 +36,8 @@ import { CurrentPage, TextUtils } from 'ui/views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
 import { ManageReferenceDataflow } from 'ui/views/_components/ManageReferenceDataflow';
+import { ManageBusinessDataflow } from 'ui/views/_components/ManageBusinessDataflow';
+import { ReportingObligations } from 'ui/views/_components/ReportingObligations';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {
@@ -58,24 +60,29 @@ const Dataflows = withRouter(({ history, match }) => {
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
+    isBusinessDataflowDialogVisible: false,
+    isReportingObligationsDialogVisible: false,
     isRepObDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { dataflows: true, reference: true },
     reference: []
   });
 
-  const { activeIndex, isCustodian, loadingStatus } = dataflowsState;
+  console.log(`isReportingObligationsDialogVisible`, dataflowsState.isReportingObligationsDialogVisible);
 
-  const tabMenuItems = isCustodian
-    ? [
-        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
-      ]
-    : [
-        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
-      ];
+  const { activeIndex, isCustodian, isAdmin, loadingStatus } = dataflowsState;
+
+  const tabMenuItems =
+    isCustodian || isAdmin
+      ? [
+          { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+          { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
+          { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
+        ]
+      : [
+          { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+          { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
+        ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
@@ -93,13 +100,19 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'business' ? dataflowsState.isAdmin : dataflowsState.isCustodian,
+      isVisible: dataflowsState.isCustodian,
       label: 'createNewDataflow',
       onClick: () =>
-        manageDialogs(
-          tabId === 'dataflows' || tabId === 'business' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible',
-          true
-        ),
+        manageDialogs(tabId === 'dataflows' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible', true),
+      title: 'createNewDataflow'
+    };
+
+    const createBusinessBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'plus',
+      isVisible: tabId === 'business' && dataflowsState.isAdmin,
+      label: 'createNewDataflow',
+      onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
       title: 'createNewDataflow'
     };
 
@@ -112,8 +125,8 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
-    leftSideBarContext.addModels([createBtn, userListBtn].filter(button => button.isVisible));
-  }, [dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
+    leftSideBarContext.addModels([createBusinessBtn, createBtn, userListBtn].filter(button => button.isVisible));
+  }, [dataflowsState.isAdmin, dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
 
   useEffect(() => {
     const messageStep0 = dataflowsState.isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
@@ -161,7 +174,9 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   };
 
-  const manageDialogs = (dialog, value) => dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+  const manageDialogs = (dialog, value) => {
+    dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+  };
 
   const onCreateDataflow = () => {
     manageDialogs('isAddDialogVisible', false);
@@ -172,6 +187,16 @@ const Dataflows = withRouter(({ history, match }) => {
     manageDialogs('isReferencedDataflowDialogVisible', false);
     onRefreshToken();
   };
+
+  const onCreateBusinessDataflow = () => {
+    manageDialogs('isBusinessDataflowDialogVisible', false);
+    onRefreshToken();
+  };
+
+  const onLoadObligation = ({ id, title }) => dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
+
+  const onResetObl = () =>
+    dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowsState.obligationPrevState });
 
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
 
@@ -215,6 +240,30 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
+  console.log(`dataflowsState`, dataflowsState.obligations);
+
+  const renderOblFooter = () => (
+    <>
+      <Button
+        icon="check"
+        label={resources.messages['ok']}
+        onClick={() => {
+          manageDialogs('isReportingObligationDialogVisible', false);
+          // getPrevState(dataflowManagementState.obligation);
+        }}
+      />
+      <Button
+        className="p-button-secondary button-right-aligned p-button-animated-blink"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => {
+          manageDialogs('isReportingObligationDialogVisible', false);
+          onResetObl();
+        }}
+      />
+    </>
+  );
+
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
@@ -247,6 +296,25 @@ const Dataflows = withRouter(({ history, match }) => {
           manageDialogs={manageDialogs}
           onManage={onCreateReferenceDataflow}
         />
+      )}
+
+      {dataflowsState.isBusinessDataflowDialogVisible && (
+        <ManageBusinessDataflow
+          isVisible={dataflowsState.isBusinessDataflowDialogVisible}
+          manageDialogs={manageDialogs}
+          onManage={onCreateBusinessDataflow}
+        />
+      )}
+
+      {dataflowsState.isReportingObligationsDialogVisible && (
+        <Dialog
+          footer={renderOblFooter()}
+          header={resources.messages['reportingObligations']}
+          onHide={() => manageDialogs('isReportingObligationsDialogVisible', false)}
+          style={{ width: '95%' }}
+          visible={dataflowsState.isReportingObligationsDialogVisible}>
+          <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowsState.obligation} />
+        </Dialog>
       )}
 
       <DataflowManagement

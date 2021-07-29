@@ -17,7 +17,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
 import ReactTooltip from 'react-tooltip';
-import { ReportingObligations } from './_components/ReportingObligations';
+import { ReportingObligations } from 'ui/views/_components/ReportingObligations';
 
 import { DataflowService } from 'core/services/Dataflow';
 
