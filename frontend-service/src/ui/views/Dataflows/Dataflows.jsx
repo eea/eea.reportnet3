@@ -57,14 +57,16 @@ const Dataflows = withRouter(({ history, match }) => {
     dataflows: [],
     isAddDialogVisible: false,
     isAdmin: null,
+    isBusinessDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
-    isBusinessDataflowDialogVisible: false,
-    isReportingObligationsDialogVisible: false,
     isRepObDialogVisible: false,
+    isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { dataflows: true, reference: true },
+    obligation: { id: null, title: '' },
+    obligationPrevState: { id: null, title: '' },
     reference: []
   });
 
