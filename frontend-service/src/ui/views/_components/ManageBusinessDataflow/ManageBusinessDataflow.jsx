@@ -43,7 +43,8 @@ export const ManageBusinessDataflow = ({
   manageDialogs,
   metadata,
   onEditDataflow,
-  onCreateDataflow
+  onCreateDataflow,
+  obligation
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
   const INPUT_MAX_LENGTH = 255;
@@ -290,7 +291,6 @@ export const ManageBusinessDataflow = ({
           <InputText
             className={`${styles.searchInput} ${errors?.obligation?.hasErrors ? styles.searchErrors : ''}`}
             id="searchObligation"
-            name="obligation.title"
             // onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
             // onKeyPress={e => {
             //   if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
@@ -298,7 +298,7 @@ export const ManageBusinessDataflow = ({
             placeholder={resources.messages['associatedObligation']}
             readOnly={true}
             type="text"
-            // value={data.obligation.title}
+            value={obligation.title}
           />
           <label className="srOnly" htmlFor="searchObligation">
             {resources.messages['searchObligations']}

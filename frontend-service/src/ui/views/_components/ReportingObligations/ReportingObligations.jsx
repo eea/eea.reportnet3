@@ -22,7 +22,7 @@ import { reportingObligationReducer } from './_functions/Reducers/reportingOblig
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 import { RodUrl } from 'core/infrastructure/RodUrl';
 
-export const ReportingObligations = ({ getObligation, oblChecked }) => {
+export const ReportingObligations = ({ getObligation, oblChecked, setObligation }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -161,6 +161,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
 
   const onSelectObl = rowData => {
     const selectedObligation = { id: rowData.id, title: rowData.title };
+    setObligation(selectedObligation);
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { selectedObligation } });
   };
 

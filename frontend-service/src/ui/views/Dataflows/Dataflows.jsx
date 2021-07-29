@@ -24,6 +24,7 @@ import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 import { UserService } from 'core/services/User';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+import { useReportingObligations } from 'ui/views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -38,6 +39,7 @@ import { ErrorUtils } from 'ui/views/_functions/Utils';
 import { ManageReferenceDataflow } from 'ui/views/_components/ManageReferenceDataflow';
 import { ManageBusinessDataflow } from 'ui/views/_components/ManageBusinessDataflow';
 import { ReportingObligations } from 'ui/views/_components/ReportingObligations';
+import { Fragment } from 'react';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {
@@ -65,10 +67,17 @@ const Dataflows = withRouter(({ history, match }) => {
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { dataflows: true, reference: true },
-    obligation: { id: null, title: '' },
-    obligationPrevState: { id: null, title: '' },
     reference: []
   });
+
+  const [
+    obligation,
+    setObligationToPrevious,
+    resetObligation,
+    resetPreviousObligation,
+    setObligation,
+    setPreviousObligation
+  ] = useReportingObligations();
 
   console.log(`isReportingObligationsDialogVisible`, dataflowsState.isReportingObligationsDialogVisible);
 
@@ -185,23 +194,13 @@ const Dataflows = withRouter(({ history, match }) => {
     onRefreshToken();
   };
 
-  // const onCreateReferenceDataflow = dialog => {
-  //   manageDialogs('isReferencedDataflowDialogVisible', false);
-  //   onRefreshToken();
-  // };
-
-  // const onCreateBusinessDataflow = () => {
-  //   manageDialogs('isBusinessDataflowDialogVisible', false);
-  //   onRefreshToken();
-  // };
-
-  const getPrevState = data =>
-    dataflowsDispatch({ type: 'OBLIGATION_PREVIOUS_STATE', payload: { id: data.id, title: data.title } });
+  const onHideObligationDialog = () => {
+    manageDialogs('isReportingObligationsDialogVisible', false);
+    resetObligation();
+    resetPreviousObligation();
+  };
 
   const onLoadObligation = ({ id, title }) => dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
-
-  const onResetObl = () =>
-    dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowsState.obligationPrevState });
 
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
 
@@ -245,16 +244,14 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
-  console.log(`dataflowsState`, dataflowsState.obligations);
-
-  const renderOblFooter = () => (
-    <>
+  const renderObligationFooter = () => (
+    <Fragment>
       <Button
         icon="check"
         label={resources.messages['ok']}
         onClick={() => {
-          manageDialogs('isReportingObligationDialogVisible', false);
-          getPrevState(dataflowsState.obligation);
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          setPreviousObligation(obligation);
         }}
       />
       <Button
@@ -262,11 +259,12 @@ const Dataflows = withRouter(({ history, match }) => {
         icon="cancel"
         label={resources.messages['cancel']}
         onClick={() => {
-          manageDialogs('isReportingObligationDialogVisible', false);
-          onResetObl();
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          resetPreviousObligation();
+          resetObligation();
         }}
       />
-    </>
+    </Fragment>
   );
 
   return renderLayout(
@@ -307,6 +305,7 @@ const Dataflows = withRouter(({ history, match }) => {
         <ManageBusinessDataflow
           isVisible={dataflowsState.isBusinessDataflowDialogVisible}
           manageDialogs={manageDialogs}
+          obligation={obligation}
           onCreateDataflow={onCreateDataflow}
         />
       )}
@@ -314,18 +313,23 @@ const Dataflows = withRouter(({ history, match }) => {
       <DataflowManagement
         isEditForm={false}
         manageDialogs={manageDialogs}
+        obligation={obligation}
         onCreateDataflow={onCreateDataflow}
         state={dataflowsState}
       />
 
       {dataflowsState.isReportingObligationsDialogVisible && (
         <Dialog
-          footer={renderOblFooter()}
+          footer={renderObligationFooter()}
           header={resources.messages['reportingObligations']}
-          onHide={() => manageDialogs('isReportingObligationsDialogVisible', false)}
+          onHide={onHideObligationDialog}
           style={{ width: '95%' }}
           visible={dataflowsState.isReportingObligationsDialogVisible}>
-          <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowsState.obligation} />
+          <ReportingObligations
+            getObligation={onLoadObligation}
+            oblChecked={obligation}
+            setObligation={setObligation}
+          />
         </Dialog>
       )}
     </div>

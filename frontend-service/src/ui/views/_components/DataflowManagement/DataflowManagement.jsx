@@ -38,6 +38,7 @@ export const DataflowManagement = ({
   onEditDataflow,
   onConfirmDeleteDataflow,
   manageDialogs,
+  obligation,
   state
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -51,14 +52,7 @@ export const DataflowManagement = ({
     description: isEditForm ? state.description : '',
     isSubmitting: false,
     name: isEditForm ? state.name : '',
-    obligation:
-      isEditForm && state.obligations
-        ? { id: state.obligations.obligationId, title: state.obligations.title }
-        : { id: null, title: '' },
-    obligationPrevState:
-      isEditForm && state.obligations
-        ? { id: state.obligations.obligationId, title: state.obligations.title }
-        : { id: null, title: '' },
+    obligation,
     pinDataflow: false,
     isReleasable: state.isReleasable
   };
