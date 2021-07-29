@@ -1205,6 +1205,7 @@
     "deleteBusinessDataflowDialogHeader": "Delete business dataflow",
     "businessDataflowUpdatingError": "Failed updating business dataflow",
     "businessDataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> business dataflow",
-    "selectGroupOfCompanies": "Select group of companies"
+    "selectGroupOfCompanies": "Select group of companies",
+    "dataflowUsersByCountryList": "Dataflow users list by country"
   }
 }
