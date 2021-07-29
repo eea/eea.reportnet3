@@ -1401,9 +1401,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (Map.Entry<Long, List<String>> entry : referenceDatasetIdsEmails.entrySet()) {
         if (null != entry.getValue()) {
           for (String email : entry.getValue()) {
-            LOG.info("Se asigna al usuario {} el reference {}", email, referenceDatasetId);
+            LOG.info("Assign to the user {} reference dataset {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
-                ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+                ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
 
             // Assign Dataflow-%s-LEAD_REPORTER
             assignments.add(

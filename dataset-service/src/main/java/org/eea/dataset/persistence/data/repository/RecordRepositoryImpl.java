@@ -16,6 +16,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -282,11 +283,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (idRulesListFilled) {
       filter = filter + RULE_ID_APPEND_QUERY;
     }
-    if (fieldSchema != null && fieldValue != null) {
+    if (fieldSchema != null && StringUtils.isNotBlank(fieldValue)) {
       filter = filter + LIKE_APPEND_QUERY;
-    } else if (fieldSchema == null && fieldValue != null) {
+    } else if (fieldSchema == null && StringUtils.isNotBlank(fieldValue)) {
       filter = filter + LIKE_APPEND_QUERY_NO_FIELD_SCHEMA;
     }
+
     return filter;
   }
 
@@ -311,7 +313,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(RULE_ID_LIST, idRules);
         query2.setParameter(RULE_ID_LIST, idRules);
       }
-      if (null != fieldSchema && null != fieldValue) {
+      if (null != fieldSchema && StringUtils.isNotBlank(fieldValue)) {
         query2.setParameter(FIELD_SCHEMA, fieldSchema);
         query2.setParameter(FIELD_VALUE, fieldValue);
       }
@@ -368,12 +370,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(ERROR_LIST, errorList);
       query.setParameter(ERROR_LIST, errorList);
     }
-    if (null != fieldSchema && null != fieldValue) {
+    if (null != fieldSchema && StringUtils.isNotBlank(fieldValue)) {
       query.setParameter(FIELD_SCHEMA, fieldSchema);
       query.setParameter(FIELD_VALUE, fieldValue);
     }
     // Searches in the table occurrences where any column value matches fieldValue
-    else if (null == fieldSchema && null != fieldValue) {
+    else if (null == fieldSchema && StringUtils.isNotBlank(fieldValue)) {
       query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
     }
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
@@ -813,6 +815,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       result = query.getSingleResult();
     } catch (NoResultException nre) {
       LOG.info("no result, ignore message");
+      result = "0";
     }
     return Integer.parseInt(result.toString());
   }
@@ -837,16 +840,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         .append(" select case ");
     String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
     for (TableSchema table : tableSchemaList) {
-      if (null != tableSchemaId && table.getIdTableSchema().toString().equals(tableSchemaId)) {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          stringQuery.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
-        }
-      } else {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          stringQuery.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
-        }
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        stringQuery.append(
+            String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
       }
     }
     stringQuery.append(String.format(
