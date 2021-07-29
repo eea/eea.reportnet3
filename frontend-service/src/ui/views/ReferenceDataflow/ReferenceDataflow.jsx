@@ -21,6 +21,7 @@ import { ShareRights } from 'ui/views/_components/ShareRights';
 
 import { DatasetService } from 'core/services/Dataset';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
+import { UserService } from 'core/services/User';
 
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
@@ -58,12 +59,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
     isReferencingDataflowsDialogVisible: false,
+    isReferenceStateDialogVisible: false,
     isUserRightManagementDialogVisible: false,
     name: '',
     refresh: false,
     requestStatus: 'idle',
     status: '',
-    updatedDatasetSchema: []
+    updatedDatasetSchema: [],
+    updatable: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
@@ -104,7 +107,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   function refreshPage() {
     dataflowDispatch({ type: 'REFRESH_PAGE' });
+    onRefreshToken();
   }
+
+  const onRefreshToken = async () => {
+    try {
+      const userObject = await UserService.refreshToken();
+      userContext.onTokenRefresh(userObject);
+    } catch (error) {
+      notificationContext.add({
+        key: 'TOKEN_REFRESH_ERROR',
+        content: {}
+      });
+      await UserService.logout();
+      userContext.onLogout();
+    }
+  };
 
   function setIsCreatingReferenceDatasets(isCreatingReferenceDatasets) {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
@@ -193,6 +211,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
     />
   );
+
   const propertiesDataflowsDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"

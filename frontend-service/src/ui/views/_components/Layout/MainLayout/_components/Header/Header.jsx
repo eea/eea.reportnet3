@@ -249,7 +249,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       }}>
       <FontAwesomeIcon
         aria-hidden={false}
-        ariaLabel="Logout"
+        aria-label="Logout"
         className={styles.logoutButton}
         icon={AwesomeIcons('logout')}
         role="presentation"
@@ -258,7 +258,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   );
 
   const loadUser = () => (
-    <>
+    <Fragment>
       <div className={styles.userWrapper}>
         {themeSwitcher}
         {localhostEnvironmentAlert}
@@ -266,7 +266,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       </div>
 
       <div className={styles.logoutBtnContainer}>{logout}</div>
-    </>
+    </Fragment>
   );
 
   const loadLogin = () => (

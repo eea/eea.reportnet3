@@ -152,7 +152,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant INSERT_REFERENCE_INTO_REFERENCE_DATASET: {@value}. */
   private static final String INSERT_REFERENCE_INTO_REFERENCE_DATASET =
-      "insert into reference_dataset (id) values (%d)";
+      "insert into reference_dataset (id, updatable) values (%d, false)";
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
@@ -1377,9 +1377,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (Map.Entry<Long, List<String>> entry : referenceDatasetIdsEmails.entrySet()) {
         if (null != entry.getValue()) {
           for (String email : entry.getValue()) {
-            LOG.info("Se asigna al usuario {} el reference {}", email, referenceDatasetId);
+            LOG.info("Assign to the user {} reference dataset {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
-                ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+                ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
 
             // Assign Dataflow-%s-LEAD_REPORTER
             assignments.add(

@@ -2,7 +2,7 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
-import { isNull } from 'lodash';
+import isNull from 'lodash/isNull';
 
 import './Dropdown.scss';
 

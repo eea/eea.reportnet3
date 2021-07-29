@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
@@ -245,11 +245,12 @@ const Dataflow = withRouter(({ history, match }) => {
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
-        ((dataflowState.isCustodian || dataflowState.isObserver) && !isNil(representativeId))
+        dataflowState.isCustodian ||
+        dataflowState.isObserver
     };
   };
 
-  useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs, representativeId);
+  useLeftSideBar(dataflowState, dataProviderId, getLeftSidebarButtonsVisibility, manageDialogs, representativeId);
 
   useEffect(() => {
     if (!isEmpty(dataflowState.data.representatives)) {
@@ -277,7 +278,7 @@ const Dataflow = withRouter(({ history, match }) => {
         role="checkbox"
       />
       <label
-        onClick={e =>
+        onClick={() =>
           dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
         }
         style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
@@ -376,7 +377,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const manageRoleDialogFooter = (
-    <>
+    <Fragment>
       <Button
         className={`${styles.manageLeadReportersButton} p-button-secondary ${
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
@@ -398,10 +399,10 @@ const Dataflow = withRouter(({ history, match }) => {
         label={resources.messages['close']}
         onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
       />
-    </>
+    </Fragment>
   );
 
-  const dataflowUsersListFooter = (
+  const renderDataflowUsersListFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
@@ -436,9 +437,10 @@ const Dataflow = withRouter(({ history, match }) => {
       [config.permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
-    const entity = isNil(representativeId)
-      ? `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
-      : `${config.permissions.prefixes.DATASET}${currentDatasetId}`;
+    const entity =
+      isNil(representativeId) || representativeId !== 0
+        ? `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
+        : `${config.permissions.prefixes.DATASET}${currentDatasetId}`;
 
     const userRoles = userContext.getUserRole(entity);
 
@@ -1021,11 +1023,20 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={dataflowUsersListFooter}
-            header={resources.messages['dataflowUsersList']}
+            footer={renderDataflowUsersListFooter}
+            header={
+              ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+                (isNil(representativeId) && dataflowState.isObserver)) &&
+              dataflowState.status === config.dataflowStatus.OPEN
+                ? resources.messages['dataflowUsersByCountryList']
+                : resources.messages['dataflowUsersList']
+            }
             onHide={() => manageDialogs('isUserListVisible', false)}
             visible={dataflowState.isUserListVisible}>
-            <UserList dataflowId={dataflowId} representativeId={dataProviderId} />
+            <UserList
+              dataflowId={dataflowId}
+              representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
+            />
           </Dialog>
         )}
 

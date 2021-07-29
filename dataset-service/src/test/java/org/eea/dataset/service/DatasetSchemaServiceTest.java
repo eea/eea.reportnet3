@@ -28,8 +28,10 @@ import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -61,6 +63,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -267,6 +270,9 @@ public class DatasetSchemaServiceTest {
 
   @Mock
   private DataflowReferencedRepository dataflowReferencedRepository;
+
+  @Mock
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
   @Mock
   private FileCommonUtils fileCommon;
@@ -1112,7 +1118,8 @@ public class DatasetSchemaServiceTest {
   @Test
   public void validateSchemaTest() {
 
-    Assert.assertFalse(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73"));
+    Assert.assertFalse(
+        dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73", TypeDataflowEnum.REGULAR));
   }
 
 
@@ -1425,6 +1432,7 @@ public class DatasetSchemaServiceTest {
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("5ce524fad31fc52540abae73");
     fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.LINK);
     ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
     referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
     referenced.setIdPk("5ce524fad31fc52540abae73");
@@ -1434,6 +1442,29 @@ public class DatasetSchemaServiceTest {
 
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
+    Mockito.doNothing().when(datasetMetabaseService).addForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    dataSchemaServiceImpl.addForeignRelation(1L, fieldSchemaVO);
+    Mockito.verify(datasetMetabaseService, times(1)).addForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testAddForeignRelationExtLink() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.EXTERNAL_LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    ReferenceDataset reference = new ReferenceDataset();
+    reference.setId(1L);
+
+    Mockito.when(referenceDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(reference));
     Mockito.doNothing().when(datasetMetabaseService).addForeignRelation(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.addForeignRelation(1L, fieldSchemaVO);
@@ -1451,6 +1482,7 @@ public class DatasetSchemaServiceTest {
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("5ce524fad31fc52540abae73");
     fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.LINK);
     ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
     referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
     referenced.setIdPk("5ce524fad31fc52540abae73");
@@ -1460,6 +1492,29 @@ public class DatasetSchemaServiceTest {
 
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
+    Mockito.doNothing().when(datasetMetabaseService).deleteForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    dataSchemaServiceImpl.deleteForeignRelation(1L, fieldSchemaVO);
+    Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testDeleteForeignRelationExtLink() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.EXTERNAL_LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    ReferenceDataset reference = new ReferenceDataset();
+    reference.setId(1L);
+
+    Mockito.when(referenceDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(reference));
     Mockito.doNothing().when(datasetMetabaseService).deleteForeignRelation(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.deleteForeignRelation(1L, fieldSchemaVO);

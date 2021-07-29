@@ -1,7 +1,7 @@
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { isUndefined } from 'lodash';
+import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataflowDashboards.module.css';
 

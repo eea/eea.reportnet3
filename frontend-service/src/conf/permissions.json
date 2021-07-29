@@ -5,9 +5,14 @@
     "DATACOLLECTION": "DATACOLLECTION-",
     "DATASCHEMA": "DATASCHEMA-",
     "TESTDATASET": "TESTDATASET-",
-    "NATIONAL_COORDINATOR": "PROVIDER"
+    "NATIONAL_COORDINATOR": "PROVIDER",
+    "REFERENCEDATASET": "REFERENCEDATASET-"
   },
   "roles": {
+    "ADMIN": {
+      "key": "ADMIN",
+      "label": "ADMIN"
+    },
     "CUSTODIAN": {
       "key": "DATA_CUSTODIAN",
       "label": "CUSTODIAN"

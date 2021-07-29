@@ -202,7 +202,7 @@ export const useSetColumns = (
   const getTooltipMessage = column => {
     if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
       return (
-        <>
+        <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
@@ -227,11 +227,11 @@ export const useSetColumns = (
               )
               .join('; ')}
           </span>
-        </>
+        </Fragment>
       );
     } else {
       return (
-        <>
+        <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
@@ -246,7 +246,7 @@ export const useSetColumns = (
               : column.description}
           </span>
           {column.type === 'ATTACHMENT' ? (
-            <>
+            <Fragment>
               <br />
               <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
               <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
@@ -261,11 +261,11 @@ export const useSetColumns = (
                   ? ` ${column.maxSize} ${resources.messages['MB']}`
                   : resources.messages['maxSizeNotDefined']}
               </span>
-            </>
+            </Fragment>
           ) : (
             ''
           )}
-        </>
+        </Fragment>
       );
     }
   };
@@ -476,7 +476,14 @@ export const useSetColumns = (
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
     // }
-  }, [colsSchema, columnOptions, records.selectedRecord.recordId, initialCellValue, hasWebformWritePermissions]);
+  }, [
+    colsSchema,
+    columnOptions,
+    records.selectedRecord.recordId,
+    initialCellValue,
+    hasWebformWritePermissions,
+    hasWritePermissions
+  ]);
 
   return {
     columns,

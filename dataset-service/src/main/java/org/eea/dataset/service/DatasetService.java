@@ -375,6 +375,19 @@ public interface DatasetService {
    */
   boolean isDatasetReportable(Long idDataset);
 
+
+
+  /**
+   * Check if dataset locked or read only.
+   *
+   * @param datasetId the dataset id
+   * @param idRecordSchema the id record schema
+   * @param entityType the entity type
+   * @return true, if successful
+   */
+  boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
+      EntityTypeEnum entityType);
+
   /**
    * Gets the mimetype.
    *

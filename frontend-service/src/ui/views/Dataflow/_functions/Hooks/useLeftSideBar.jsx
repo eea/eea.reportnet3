@@ -1,10 +1,19 @@
 import { useContext, useLayoutEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
+import { config } from 'conf';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 
-export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, manageDialogs, representativeId) => {
+export const useLeftSideBar = (
+  dataflowState,
+  dataProviderId,
+  getLeftSidebarButtonsVisibility,
+  manageDialogs,
+  representativeId
+) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
 
   useLayoutEffect(() => {
@@ -87,20 +96,30 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
         className: 'dataflow-properties-help-step',
         icon: 'users',
         isVisible: buttonsVisibility.usersListBtn,
-        label: 'dataflowUsersList',
+        label:
+          ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+            (isNil(representativeId) && dataflowState.isObserver)) &&
+          dataflowState.status === config.dataflowStatus.OPEN
+            ? 'dataflowUsersByCountryList'
+            : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
-        title: 'dataflowUsersList'
+        title:
+          ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+            (isNil(representativeId) && dataflowState.isObserver)) &&
+          dataflowState.status === config.dataflowStatus.OPEN
+            ? 'dataflowUsersByCountryList'
+            : 'dataflowUsersList'
       };
 
       const allButtons = [
-        propertiesBtn,
-        editBtn,
-        releaseableBtn,
-        showPublicInfoBtn,
-        exportSchemaBtn,
         apiKeyBtn,
+        editBtn,
+        exportSchemaBtn,
         manageReportersBtn,
         manageRequestersBtn,
+        propertiesBtn,
+        releaseableBtn,
+        showPublicInfoBtn,
         userListBtn
       ];
 

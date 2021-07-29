@@ -37,6 +37,7 @@
   "updateDatasetFeedbackStatus": "/datasetmetabase/updateDatasetStatus",
   "updateDatasetSchemaDesign": "/dataschema/{:datasetId}/datasetSchema",
   "updateRecordFieldDesign": "/dataschema/{:datasetId}/fieldSchema",
+  "updateReferenceDatasetStatus": "/referenceDataset/{:datasetId}?updatable={:updatable}",
   "updateTableDataField": "/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}",
   "updateTableDataRecord": "/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}",
   "updateTableDesign": "/dataschema/{:datasetId}/tableSchema",

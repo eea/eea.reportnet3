@@ -14,6 +14,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -58,6 +59,10 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The reference dataset repository. */
+  @Autowired
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
   /**
    * The Constant LOG_ERROR.

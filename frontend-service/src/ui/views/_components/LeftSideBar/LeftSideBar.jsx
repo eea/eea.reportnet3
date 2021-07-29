@@ -51,12 +51,12 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       className: 'dataflowList-left-side-bar-home-help-step',
       href: getUrl(routes['DATAFLOWS']),
       icon: 'home',
-      label: 'myDataflows',
+      label: 'dataflows',
       onClick: e => {
         e.preventDefault();
         history.push(getUrl(routes['DATAFLOWS']));
       },
-      title: 'myDataflows'
+      title: 'dataflows'
     };
     return <LeftSideBarButton {...userButtonProps} />;
   };
@@ -171,7 +171,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       />
       <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
         {
-          <>
+          <Fragment>
             <div className={`${styles.barSection} dataflowList-left-side-bar-top-section-help-step`}>
               {renderHome()}
               {renderUserProfile()}
@@ -203,7 +203,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
                 {resources.messages['userLogout']}
               </ConfirmDialog>
             )}
-          </>
+          </Fragment>
         }
       </div>
     </Fragment>

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -368,10 +368,10 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   };
 
   return (
-    <>
+    <Fragment>
       {renderToolbar()}
       {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
-    </>
+    </Fragment>
   );
 };
 
