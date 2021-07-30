@@ -117,6 +117,7 @@ export const DataflowManagement = ({
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(dataflowManagementState.pinDataflow);
+    onHideDataflowDialog();
   };
 
   const renderCancelButton = action => (
