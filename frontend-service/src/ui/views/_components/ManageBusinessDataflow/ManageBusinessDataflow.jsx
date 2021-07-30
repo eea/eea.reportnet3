@@ -42,9 +42,10 @@ export const ManageBusinessDataflow = ({
   isVisible,
   manageDialogs,
   metadata,
-  onEditDataflow,
+  obligation,
   onCreateDataflow,
-  obligation
+  onEditDataflow,
+  resetObligations
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
   const INPUT_MAX_LENGTH = 255;
@@ -228,7 +229,10 @@ export const ManageBusinessDataflow = ({
         className="p-button-secondary p-button-animated-blink"
         icon={'cancel'}
         label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
-        onClick={() => manageDialogs(dialogName, false)}
+        onClick={() => {
+          resetObligations();
+          manageDialogs(dialogName, false);
+        }}
       />
     </Fragment>
   );
@@ -242,7 +246,10 @@ export const ManageBusinessDataflow = ({
             ? resources.messages['editBusinessDataflowDialogHeader']
             : resources.messages['createBusinessDataflowDialogHeader']
         }
-        onHide={() => manageDialogs(dialogName, false)}
+        onHide={() => {
+          resetObligations();
+          manageDialogs(dialogName, false);
+        }}
         visible={isVisible}>
         <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
           <InputText

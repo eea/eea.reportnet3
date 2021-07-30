@@ -29,6 +29,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
+import { ReportingObligations } from 'ui/views/_components/ReportingObligations';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from 'ui/views/_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -51,6 +52,7 @@ import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
+import { useReportingObligations } from 'ui/views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -118,6 +120,14 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+
+  const {
+    obligation,
+    resetObligations,
+    setObligationToPrevious,
+    setCheckedObligation,
+    setToCheckedObligation
+  } = useReportingObligations();
 
   const uniqDataProviders = uniq(map(dataflowState.data.datasets, 'dataProviderId'));
 
@@ -680,6 +690,33 @@ const Dataflow = withRouter(({ history, match }) => {
     getImportExtensions.split(', ')
   ).join(', ')}`;
 
+  const onHideObligationDialog = () => {
+    manageDialogs('isReportingObligationsDialogVisible', false);
+    setObligationToPrevious();
+  };
+
+  const renderObligationFooter = () => (
+    <Fragment>
+      <Button
+        icon="check"
+        label={resources.messages['ok']}
+        onClick={() => {
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          setToCheckedObligation(); // sets previous and current obligation to selected
+        }}
+      />
+      <Button
+        className="p-button-secondary button-right-aligned p-button-animated-blink"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => {
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          setObligationToPrevious();
+        }}
+      />
+    </Fragment>
+  );
+
   const onConfirmUpdateIsReleaseable = async () => {
     manageDialogs('isReleaseableDialogVisible', false);
     try {
@@ -1047,10 +1084,24 @@ const Dataflow = withRouter(({ history, match }) => {
           history={history}
           isEditForm={true}
           manageDialogs={manageDialogs}
+          obligation={obligation}
           onConfirmDeleteDataflow={onConfirmDeleteDataflow}
           onEditDataflow={onEditDataflow}
+          resetObligations={resetObligations}
+          setCheckedObligation={setCheckedObligation}
           state={dataflowState}
         />
+
+        {dataflowState.isReportingObligationsDialogVisible && (
+          <Dialog
+            footer={renderObligationFooter()}
+            header={resources.messages['reportingObligations']}
+            onHide={onHideObligationDialog}
+            style={{ width: '95%' }}
+            visible={dataflowState.isReportingObligationsDialogVisible}>
+            <ReportingObligations oblChecked={obligation} setCheckedObligation={setCheckedObligation} />
+          </Dialog>
+        )}
 
         {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog

@@ -34,11 +34,13 @@ export const DataflowManagement = ({
   dataflowId,
   history,
   isEditForm,
-  onCreateDataflow,
-  onEditDataflow,
-  onConfirmDeleteDataflow,
   manageDialogs,
   obligation,
+  onConfirmDeleteDataflow,
+  onCreateDataflow,
+  onEditDataflow,
+  resetObligations,
+  setCheckedObligation,
   state
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -61,6 +63,21 @@ export const DataflowManagement = ({
     dataflowManagementReducer,
     dataflowManagementInitialState
   );
+
+  console.log(` DataflowManagement: obligation`, obligation);
+  console.log(`dataflowManagementState.obligation`, dataflowManagementState.obligation);
+
+  useEffect(() => {
+    console.log(`state`, state);
+    if (isEditForm) {
+      onLoadObligation({ id: state.obligations.obligationId, title: state.obligations.title });
+      setCheckedObligation({ id: state.obligations.obligationId, title: state.obligations.title });
+    }
+  }, [state]);
+
+  useEffect(() => {
+    onLoadObligation(obligation);
+  }, [obligation]);
 
   useEffect(() => {
     if (!isNil(deleteInputRef.current) && state.isDeleteDialogVisible) deleteInputRef.current.element.focus();
@@ -92,8 +109,9 @@ export const DataflowManagement = ({
   };
 
   const onHideDataflowDialog = () => {
-    manageDialogs(secondaryDialog, false);
     onResetData();
+    resetObligations();
+    manageDialogs(secondaryDialog, false);
   };
 
   // const onHideObligationDialog = () => {
@@ -107,8 +125,8 @@ export const DataflowManagement = ({
   const onLoadData = ({ name, description }) =>
     dataflowManagementDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
 
-  // const onLoadObligation = ({ id, title }) =>
-  //   dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
+  const onLoadObligation = ({ id, title }) =>
+    dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
 
   const onResetData = () =>
     dataflowManagementDispatch({ type: 'RESET_STATE', payload: { resetData: dataflowManagementInitialState } });
@@ -232,6 +250,7 @@ export const DataflowManagement = ({
             dataflowId={dataflowId}
             getData={onLoadData}
             isEditForm={isEditForm}
+            obligation={dataflowManagementState.obligation}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onResetData={onResetData}

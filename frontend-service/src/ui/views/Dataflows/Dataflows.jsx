@@ -70,16 +70,13 @@ const Dataflows = withRouter(({ history, match }) => {
     reference: []
   });
 
-  const [
+  const {
     obligation,
+    resetObligations,
     setObligationToPrevious,
-    resetObligation,
-    resetPreviousObligation,
-    setObligation,
-    setPreviousObligation
-  ] = useReportingObligations();
-
-  console.log(`isReportingObligationsDialogVisible`, dataflowsState.isReportingObligationsDialogVisible);
+    setCheckedObligation,
+    setToCheckedObligation
+  } = useReportingObligations();
 
   const { activeIndex, isCustodian, isAdmin, loadingStatus } = dataflowsState;
 
@@ -196,11 +193,10 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
-    resetObligation();
-    resetPreviousObligation();
+    setObligationToPrevious();
   };
 
-  const onLoadObligation = ({ id, title }) => dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
+  // const onLoadObligation = ({ id, title }) => dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
 
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
 
@@ -251,7 +247,7 @@ const Dataflows = withRouter(({ history, match }) => {
         label={resources.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
-          setPreviousObligation(obligation);
+          setToCheckedObligation(); // sets previous and current obligation to selected
         }}
       />
       <Button
@@ -260,8 +256,7 @@ const Dataflows = withRouter(({ history, match }) => {
         label={resources.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
-          resetPreviousObligation();
-          resetObligation();
+          setObligationToPrevious();
         }}
       />
     </Fragment>
@@ -307,6 +302,7 @@ const Dataflows = withRouter(({ history, match }) => {
           manageDialogs={manageDialogs}
           obligation={obligation}
           onCreateDataflow={onCreateDataflow}
+          resetObligations={resetObligations}
         />
       )}
 
@@ -315,6 +311,7 @@ const Dataflows = withRouter(({ history, match }) => {
         manageDialogs={manageDialogs}
         obligation={obligation}
         onCreateDataflow={onCreateDataflow}
+        resetObligations={resetObligations}
         state={dataflowsState}
       />
 
@@ -325,11 +322,7 @@ const Dataflows = withRouter(({ history, match }) => {
           onHide={onHideObligationDialog}
           style={{ width: '95%' }}
           visible={dataflowsState.isReportingObligationsDialogVisible}>
-          <ReportingObligations
-            getObligation={onLoadObligation}
-            oblChecked={obligation}
-            setObligation={setObligation}
-          />
+          <ReportingObligations oblChecked={obligation} setCheckedObligation={setCheckedObligation} />
         </Dialog>
       )}
     </div>

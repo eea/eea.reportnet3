@@ -23,8 +23,8 @@ export const dataflowsReducer = (state, { type, payload }) => {
     case 'ON_LOAD_OBLIGATION':
       return { ...state, obligation: { id: payload.id, title: payload.title } };
 
-    case 'OBLIGATION_PREVIOUS_STATE':
-      return { ...state, obligationPrevState: { id: payload.id, title: payload.title } };
+    // case 'OBLIGATION_PREVIOUS_STATE':
+    //   return { ...state, obligationPrevState: { id: payload.id, title: payload.title } };
 
     default:
       return state;
