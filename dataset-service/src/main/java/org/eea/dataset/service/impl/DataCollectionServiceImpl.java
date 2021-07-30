@@ -423,31 +423,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
-    boolean havePK = true;
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
-      if (referenceDataflow) {
-        if (stopAndNotifyPKError) {
-          for (DesignDatasetVO dataset : designs) {
-            for (TableSchemaVO tableSchemaVO : datasetSchemaService
-                .getDataSchemaById(dataset.getDatasetSchema()).getTableSchemas()) {
-              for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
-                if (fieldSchemaVO.getPk() == null) {
-                  havePK = false;
-                }
-              }
-            }
-          }
-          if (!havePK) {
-            NotificationVO notificationVO = NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .dataflowId(dataflowId).build();
-            releaseNotification(EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT, notificationVO);
-          }
+      if (referenceDataflow && stopAndNotifyPKError) {
+        if (!checkIfSchemasHavePk(designs)) {
+          NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .dataflowId(dataflowId).build();
+          releaseNotification(EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT, notificationVO);
         }
       }
       LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
@@ -1619,6 +1606,25 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     } catch (EEAException e) {
       LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
     }
+  }
+
+  /**
+   * Check if schemas have pk.
+   *
+   * @param designs the designs
+   * @return true, if successful
+   */
+  public boolean checkIfSchemasHavePk(List<DesignDatasetVO> designs) {
+    boolean hasPK = true;
+    for (DesignDatasetVO dataset : designs) {
+      for (TableSchemaVO tableSchemaVO : datasetSchemaService
+          .getDataSchemaById(dataset.getDatasetSchema()).getTableSchemas()) {
+        for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
+          hasPK = !Boolean.TRUE.equals(fieldSchemaVO.getPk()) ? false : hasPK;
+        }
+      }
+    }
+    return hasPK;
   }
 
 }
