@@ -15,7 +15,7 @@ import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
-import org.eea.dataflow.persistence.domain.DataProviderCode;
+import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
@@ -34,6 +34,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -221,14 +222,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<DataProviderCodeVO> getAllDataProviderTypes() {
     LOG.info("obtaining the distinct representative types");
-    List<DataProviderCode> dataProviderGroupCodes = dataProviderGroupRepository.findDistinctCode();
+    List<DataProviderGroup> dataProviderGroupCodes = dataProviderGroupRepository.findDistinctCode(
+        /* isAdmin() ? TypeDataProviderEnum.COMPANY : */ TypeDataProviderEnum.COUNTRY);
     List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
-    for (DataProviderCode dataProviderGroupCode : dataProviderGroupCodes) {
+
+    for (DataProviderGroup dataProviderGroupCode : dataProviderGroupCodes) {
       DataProviderCodeVO item = new DataProviderCodeVO();
-      item.setDataProviderGroupId(dataProviderGroupCode.getDataProviderGroupId());
-      item.setLabel(dataProviderGroupCode.getLabel());
+      item.setDataProviderGroupId(dataProviderGroupCode.getId());
+      item.setLabel(dataProviderGroupCode.getName());
       dataProviderCodeVOs.add(item);
     }
+
     return dataProviderCodeVOs;
   }
 
