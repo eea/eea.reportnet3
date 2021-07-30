@@ -490,9 +490,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
-
-    userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
-        ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    if (dataflowVO.getType() != TypeDataflowEnum.BUSINESS) {
+      userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
+          ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    }
     return dataFlowSaved.getId();
   }
 
@@ -814,6 +815,16 @@ public class DataflowServiceImpl implements DataflowService {
     return reference;
   }
 
+  /**
+   * Checks if is admin.
+   *
+   * @return true, if is admin
+   */
+  public boolean isAdmin() {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
+  }
 
   /**
    * Sets the reportings.

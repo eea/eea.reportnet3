@@ -77,7 +77,6 @@ public class DataFlowVO implements Serializable {
   /** The type. */
   private TypeDataflowEnum type;
 
-
   /** The request id. */
   private Long requestId;
 

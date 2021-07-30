@@ -218,4 +218,11 @@ public interface DataflowService {
    * @return true, if is reference dataflow draft
    */
   boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
+
+  /**
+   * Checks if user is admin.
+   *
+   * @return true, if is admin
+   */
+  boolean isAdmin();
 }

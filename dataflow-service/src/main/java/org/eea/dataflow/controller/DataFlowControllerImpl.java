@@ -293,7 +293,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @LockMethod
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','DATA_REQUESTER')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','DATA_REQUESTER','ADMIN')")
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Create one Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
@@ -307,9 +307,12 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     String message = "";
     HttpStatus status = HttpStatus.OK;
-
+    if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && !dataflowService.isAdmin()) {
+      message = EEAErrorMessage.UNAUTHORIZED;
+      status = HttpStatus.UNAUTHORIZED;
+    }
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
-    if (!TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+    if (status == HttpStatus.OK && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
         && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
             || dataFlowVO.getDeadlineDate().equals(dateToday))) {
 
@@ -610,4 +613,5 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return false;
   }
+
 }
