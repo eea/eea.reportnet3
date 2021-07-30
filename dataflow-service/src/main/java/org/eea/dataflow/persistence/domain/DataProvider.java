@@ -48,7 +48,7 @@ public class DataProvider {
 
   /** The group id. */
   @ManyToOne
-  @JoinColumn(name = "id")
+  @JoinColumn(name = "group_id")
   private DataProviderGroup dataProviderGroup;
 
   /** The representatives. */

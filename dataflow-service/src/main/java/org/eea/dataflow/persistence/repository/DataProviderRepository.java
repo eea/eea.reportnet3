@@ -3,6 +3,7 @@ package org.eea.dataflow.persistence.repository;
 import java.util.List;
 import org.eea.dataflow.persistence.domain.DataProvider;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface DataProviderRepository.
@@ -16,7 +17,7 @@ public interface DataProviderRepository extends CrudRepository<DataProvider, Lon
    * @param groupId the group id
    * @return the list
    */
-  List<DataProvider> findAllByDataProviderGroup_id(Long groupId);
+  List<DataProvider> findAllByDataProviderGroup_id(@Param("id") Long id);
 
   /**
    * Find by code.

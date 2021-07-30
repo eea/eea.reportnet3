@@ -2,7 +2,6 @@ package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
 import org.eea.dataflow.persistence.domain.DataProvider;
-import org.eea.dataflow.persistence.domain.DataProviderCode;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.springframework.data.jpa.repository.Query;
@@ -18,8 +17,8 @@ public interface DataProviderGroupRepository extends CrudRepository<DataProvider
    *
    * @return the list
    */
-  @Query("SELECT DISTINCT r FROM DataProviderGroup r")
-  List<DataProviderCode> findDistinctCode();
+  @Query("SELECT DISTINCT r FROM DataProviderGroup r WHERE r.type = :type")
+  List<DataProviderGroup> findDistinctCode(TypeDataProviderEnum type);
 
   /**
    * Find by code.
