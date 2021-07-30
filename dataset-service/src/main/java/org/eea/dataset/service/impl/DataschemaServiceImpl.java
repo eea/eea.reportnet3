@@ -2614,22 +2614,29 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // Method to process the file
     String tableSchemaName = "";
     try {
-      Optional<TableSchema> tableSchema = datasetSchema.getTableSchemas().stream()
-          .filter(t -> t.getIdTableSchema().equals(new ObjectId(tableSchemaId))).findFirst();
+      if (datasetSchema != null) {
+        Optional<TableSchema> tableSchema = datasetSchema.getTableSchemas().stream()
+            .filter(t -> t.getIdTableSchema().equals(new ObjectId(tableSchemaId))).findFirst();
 
-      if (tableSchema.isPresent()) {
-        tableSchemaName = tableSchema.get().getNameTableSchema();
+        if (tableSchema.isPresent()) {
+          tableSchemaName = tableSchema.get().getNameTableSchema();
+        }
+
+        readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
+
+        // Success notification
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
+            null,
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
+      } else {
+        LOG_ERROR.error("datasetSchema is null");
+        throw new EEAException("datasetSchema is null");
       }
+    } catch (
 
-      readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
-
-      // Success notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
-          null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
-    } catch (IOException e) {
+    IOException e) {
       LOG_ERROR.error("Problem with the file trying to import field schemas on datasetId {}",
           datasetId, e);
       try {

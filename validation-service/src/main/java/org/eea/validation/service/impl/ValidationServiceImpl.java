@@ -764,10 +764,9 @@ public class ValidationServiceImpl implements ValidationService {
       // only writes at most the number of columns as variables per row
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 9;
-      String[] fieldsToWrite = new String[nHeaders];
 
       if (getDatasetValuebyId(datasetId) != null)
-        fillValidationDataCSV(datasetId, nHeaders, fieldsToWrite, csvWriter, notificationVO);
+        fillValidationDataCSV(datasetId, nHeaders, csvWriter, notificationVO);
       else
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, creatingFileError);
 
@@ -894,8 +893,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @param notificationVO the notification VO
    * @throws EEAException the EEA exception
    */
-  private void fillValidationDataCSV(Long datasetId, int nHeaders, String[] fieldsToWrite,
-      CSVWriter csvWriter, NotificationVO notificationVO) throws EEAException {
+  private void fillValidationDataCSV(Long datasetId, int nHeaders, CSVWriter csvWriter,
+      NotificationVO notificationVO) throws EEAException {
     try {
       DatasetValue dataset = getDatasetValuebyId(datasetId);
       FailedValidationsDatasetVO validations = getValidationsByDatasetValue(dataset, datasetId);
@@ -913,9 +912,7 @@ public class ValidationServiceImpl implements ValidationService {
 
           GroupValidationVO castedError = (GroupValidationVO) error;
 
-          fieldsToWrite = fillValidationErrorData(castedError, dataset, nHeaders);
-
-          csvWriter.writeNext(fieldsToWrite, false);
+          csvWriter.writeNext(fillValidationErrorData(castedError, dataset, nHeaders), false);
         }
       }
     }
