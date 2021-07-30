@@ -815,6 +815,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       result = query.getSingleResult();
     } catch (NoResultException nre) {
       LOG.info("no result, ignore message");
+      result = "0";
     }
     return Integer.parseInt(result.toString());
   }
@@ -839,16 +840,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         .append(" select case ");
     String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
     for (TableSchema table : tableSchemaList) {
-      if (null != tableSchemaId && table.getIdTableSchema().toString().equals(tableSchemaId)) {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          stringQuery.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
-        }
-      } else {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          stringQuery.append(
-              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
-        }
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        stringQuery.append(
+            String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
       }
     }
     stringQuery.append(String.format(

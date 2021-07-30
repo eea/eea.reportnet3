@@ -256,7 +256,7 @@ export const BigButtonList = ({
 
   const onCreateDatasetSchema = () => setNewDatasetDialog(false);
 
-  const onCreateDataCollection = async () => {
+  const onCreateDataCollections = async () => {
     setIsConfirmCollectionDialog(false);
 
     notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
@@ -441,7 +441,7 @@ export const BigButtonList = ({
     return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime();
   };
 
-  const onCreateDataCollectionWithNotValids = async () => {
+  const onCreateDataCollectionsWithNotValids = async () => {
     setIsActiveButton(false);
     try {
       await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
@@ -757,7 +757,7 @@ export const BigButtonList = ({
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onCreateDataCollection()}
+          onConfirm={() => onCreateDataCollections()}
           onHide={() => {
             setIsConfirmCollectionDialog(false);
             onResetRadioButtonOptions();
@@ -777,7 +777,7 @@ export const BigButtonList = ({
           header={resources.messages['notValidQCWarningTitle']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onCreateDataCollectionWithNotValids()}
+          onConfirm={() => onCreateDataCollectionsWithNotValids()}
           onHide={() => setIsQCsNotValidWarningVisible(false)}
           visible={isQCsNotValidWarningVisible}>
           {TextUtils.parseText(resources.messages['notValidQCWarningBody'], {
