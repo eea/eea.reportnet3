@@ -16,7 +16,7 @@ import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
-import org.eea.dataflow.persistence.domain.DataProviderCode;
+import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
@@ -34,6 +34,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
@@ -222,25 +223,23 @@ public class RepresentativeServiceImplTest {
    */
   @Test
   public void getAllDataProviderTypesSuccessTest() throws EEAException {
-    List<DataProviderCode> dataProviderCodes = new ArrayList<>();
-    dataProviderCodes.add(new DataProviderCode() {
 
-      @Override
-      public String getLabel() {
-        return "Country";
-      }
-
-      @Override
-      public Long getDataProviderGroupId() {
-        return 1L;
-      }
-    });
     List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
-    DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
-    dataProviderCodeVO.setDataProviderGroupId(1L);
-    dataProviderCodeVO.setLabel("Country");
-    dataProviderCodeVOs.add(dataProviderCodeVO);
-    when(dataProviderGroupRepository.findDistinctCode()).thenReturn(dataProviderCodes);
+    DataProviderGroup dataProviderGroup = new DataProviderGroup();
+    dataProviderGroup.setId(1L);
+    dataProviderGroup.setType(TypeDataProviderEnum.COUNTRY);
+    List<DataProviderGroup> dataProviderGroups = new ArrayList<>();
+    dataProviderGroups.add(dataProviderGroup);
+    when(dataProviderGroupRepository.findDistinctCode(TypeDataProviderEnum.COUNTRY))
+        .thenReturn(dataProviderGroups);
+
+    for (int i = 0; i < dataProviderGroups.size(); i++) {
+      DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
+      dataProviderCodeVO.setLabel(dataProviderGroups.get(i).getType().toString());
+      dataProviderCodeVO.setDataProviderGroupId(dataProviderGroups.get(i).getId());
+      dataProviderCodeVOs.add(dataProviderCodeVO);
+    }
+
     assertEquals("error in the message", dataProviderCodeVOs,
         representativeServiceImpl.getAllDataProviderTypes());
   }
