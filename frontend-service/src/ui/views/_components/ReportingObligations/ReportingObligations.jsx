@@ -22,7 +22,8 @@ import { reportingObligationReducer } from './_functions/Reducers/reportingOblig
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 import { RodUrl } from 'core/infrastructure/RodUrl';
 
-export const ReportingObligations = ({ oblChecked, setCheckedObligation }) => {
+export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
+  console.log(`new obligationChecked`, obligationChecked);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -140,10 +141,10 @@ export const ReportingObligations = ({ oblChecked, setCheckedObligation }) => {
           data: ReportingObligationUtils.initialValues(response, userContext.userProps.dateFormat),
           filteredData: ReportingObligationUtils.filteredInitialValues(
             response,
-            oblChecked.id,
+            obligationChecked.id,
             userContext.userProps.dateFormat
           ),
-          selectedObligation: oblChecked,
+          selectedObligation: obligationChecked,
           filterBy: filterData,
           pagination: { first: 0, rows: 10, page: 0 }
         }

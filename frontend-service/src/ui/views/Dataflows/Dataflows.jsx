@@ -322,7 +322,7 @@ const Dataflows = withRouter(({ history, match }) => {
           onHide={onHideObligationDialog}
           style={{ width: '95%' }}
           visible={dataflowsState.isReportingObligationsDialogVisible}>
-          <ReportingObligations oblChecked={obligation} setCheckedObligation={setCheckedObligation} />
+          <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
         </Dialog>
       )}
     </div>

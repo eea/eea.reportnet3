@@ -124,10 +124,14 @@ const Dataflow = withRouter(({ history, match }) => {
   const {
     obligation,
     resetObligations,
-    setObligationToPrevious,
     setCheckedObligation,
+    setObligation,
+    setObligationToPrevious,
+    setPreviousObligation,
     setToCheckedObligation
   } = useReportingObligations();
+
+  console.log(`new dataflow obligation`, obligation);
 
   const uniqDataProviders = uniq(map(dataflowState.data.datasets, 'dataProviderId'));
 
@@ -465,13 +469,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
-      payload: {
-        hasWritePermissions,
-        isCustodian,
-        isObserver,
-        userRoles,
-        isNationalCoordinator
-      }
+      payload: { hasWritePermissions, isCustodian, isNationalCoordinator, isObserver, userRoles }
     });
   };
 
@@ -497,6 +495,12 @@ const Dataflow = withRouter(({ history, match }) => {
           status: dataflow.status
         }
       });
+
+      console.log(`new call dataflow.obligation`, dataflow.obligation);
+
+      setCheckedObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });
+      setObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });
+      setPreviousObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });
 
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
@@ -609,10 +613,7 @@ const Dataflow = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('error', error);
       if (error?.response?.status === 400) {
-        notificationContext.add({
-          type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
-          content: { schemaName: value }
-        });
+        notificationContext.add({ type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME', content: { schemaName: value } });
       }
     }
   };
@@ -661,10 +662,7 @@ const Dataflow = withRouter(({ history, match }) => {
       const userObject = await UserService.refreshToken();
       userContext.onTokenRefresh(userObject);
     } catch (error) {
-      notificationContext.add({
-        key: 'TOKEN_REFRESH_ERROR',
-        content: {}
-      });
+      notificationContext.add({ key: 'TOKEN_REFRESH_ERROR', content: {} });
       await UserService.logout();
       userContext.onLogout();
     }
@@ -1099,7 +1097,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={onHideObligationDialog}
             style={{ width: '95%' }}
             visible={dataflowState.isReportingObligationsDialogVisible}>
-            <ReportingObligations oblChecked={obligation} setCheckedObligation={setCheckedObligation} />
+            <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
           </Dialog>
         )}
 

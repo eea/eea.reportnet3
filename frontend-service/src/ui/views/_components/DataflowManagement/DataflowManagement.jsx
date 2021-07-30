@@ -234,7 +234,7 @@ export const DataflowManagement = ({
           onHide={() => onHideObligationDialog()}
           style={{ width: '95%' }}
           visible={state.isRepObDialogVisible}>
-          <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowManagementState.obligation} />
+          <ReportingObligations getObligation={onLoadObligation} obligationChecked={dataflowManagementState.obligation} />
         </Dialog>
       )} */}
 
