@@ -23,7 +23,6 @@ import { ReportingObligationUtils } from './_functions/Utils/ReportingObligation
 import { RodUrl } from 'core/infrastructure/RodUrl';
 
 export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
-  console.log(`new obligationChecked`, obligationChecked);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);

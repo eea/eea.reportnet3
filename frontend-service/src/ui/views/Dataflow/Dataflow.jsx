@@ -131,8 +131,6 @@ const Dataflow = withRouter(({ history, match }) => {
     setToCheckedObligation
   } = useReportingObligations();
 
-  console.log(`new dataflow obligation`, obligation);
-
   const uniqDataProviders = uniq(map(dataflowState.data.datasets, 'dataProviderId'));
 
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
@@ -495,8 +493,6 @@ const Dataflow = withRouter(({ history, match }) => {
           status: dataflow.status
         }
       });
-
-      console.log(`new call dataflow.obligation`, dataflow.obligation);
 
       setCheckedObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });
       setObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });

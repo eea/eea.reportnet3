@@ -196,8 +196,6 @@ const Dataflows = withRouter(({ history, match }) => {
     setObligationToPrevious();
   };
 
-  // const onLoadObligation = ({ id, title }) => dataflowsDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
-
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
 
   const onLoadPermissions = () => {

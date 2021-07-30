@@ -115,10 +115,7 @@ export const ManageBusinessDataflow = ({
     setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
   };
 
-  const onSelectGroup = group => {
-    console.log(`group`, group);
-    setSelectedGroup(group);
-  };
+  const onSelectGroup = group => setSelectedGroup(group);
 
   const onDeleteDataflow = async () => {
     setIsDeleteDialogVisible(false);

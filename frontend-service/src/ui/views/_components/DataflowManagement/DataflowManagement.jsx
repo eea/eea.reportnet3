@@ -17,7 +17,6 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
 import ReactTooltip from 'react-tooltip';
-// import { ReportingObligations } from 'ui/views/_components/ReportingObligations';
 
 import { DataflowService } from 'core/services/Dataflow';
 
@@ -64,11 +63,7 @@ export const DataflowManagement = ({
     dataflowManagementInitialState
   );
 
-  console.log(` DataflowManagement: obligation`, obligation);
-  console.log(`dataflowManagementState.obligation`, dataflowManagementState.obligation);
-
   useEffect(() => {
-    console.log(`state`, state);
     if (isEditForm) {
       onLoadObligation({ id: state.obligations.obligationId, title: state.obligations.title });
       setCheckedObligation({ id: state.obligations.obligationId, title: state.obligations.title });
@@ -84,9 +79,6 @@ export const DataflowManagement = ({
   }, [state.isDeleteDialogVisible]);
 
   const secondaryDialog = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
-
-  // const getPrevState = data =>
-  //   dataflowManagementDispatch({ type: 'PREV_STATE', payload: { id: data.id, title: data.title } });
 
   const onSubmit = value => dataflowManagementDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
@@ -113,14 +105,6 @@ export const DataflowManagement = ({
     resetObligations();
     manageDialogs(secondaryDialog, false);
   };
-
-  // const onHideObligationDialog = () => {
-  //   manageDialogs('isRepObDialogVisible', false);
-  //   onResetObl();
-  // };
-
-  // const onResetObl = () =>
-  //   dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowManagementState.obligationPrevState });
 
   const onLoadData = ({ name, description }) =>
     dataflowManagementDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
@@ -211,33 +195,8 @@ export const DataflowManagement = ({
     </Fragment>
   );
 
-  // const renderOblFooter = () => (
-  //   <Fragment>
-  //     <Button
-  //       icon="check"
-  //       label={resources.messages['ok']}
-  //       onClick={() => {
-  //         manageDialogs('isRepObDialogVisible', false);
-  //         getPrevState(dataflowManagementState.obligation);
-  //       }}
-  //     />
-  //     {renderCancelButton(onHideObligationDialog)}
-  //   </Fragment>
-  // );
-
   return (
     <Fragment>
-      {/* {state.isRepObDialogVisible && (
-        <Dialog
-          footer={renderOblFooter()}
-          header={resources.messages['reportingObligations']}
-          onHide={() => onHideObligationDialog()}
-          style={{ width: '95%' }}
-          visible={state.isRepObDialogVisible}>
-          <ReportingObligations getObligation={onLoadObligation} obligationChecked={dataflowManagementState.obligation} />
-        </Dialog>
-      )} */}
-
       {(state.isAddDialogVisible || state.isEditDialogVisible) && (
         <Dialog
           className={styles.dialog}
