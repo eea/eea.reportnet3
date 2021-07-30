@@ -233,10 +233,10 @@ public class RepresentativeServiceImplTest {
     when(dataProviderGroupRepository.findDistinctCode(TypeDataProviderEnum.COUNTRY))
         .thenReturn(dataProviderGroups);
 
-    for (int i = 0; i < dataProviderGroups.size(); i++) {
+    for (DataProviderGroup providerGroup : dataProviderGroups) {
       DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
-      dataProviderCodeVO.setLabel(dataProviderGroups.get(i).getType().toString());
-      dataProviderCodeVO.setDataProviderGroupId(dataProviderGroups.get(i).getId());
+      dataProviderCodeVO.setLabel(providerGroup.getType().toString());
+      dataProviderCodeVO.setDataProviderGroupId(providerGroup.getId());
       dataProviderCodeVOs.add(dataProviderCodeVO);
     }
 
