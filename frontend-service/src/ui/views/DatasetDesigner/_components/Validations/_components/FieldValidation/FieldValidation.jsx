@@ -25,23 +25,23 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 import {
   createValidationReducerInitState,
   createValidationReducer
-} from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
+} from 'ui/views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
-import { checkExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkExpressions';
-import { checkFieldValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkFieldValidation';
-import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpression';
-import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteExpressionRecursively';
-import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
-import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyExpression';
-import { getFieldExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getFieldExpressionString';
-import { getFieldType } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getFieldType';
-import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedFieldById';
-import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTablebyFieldId';
-import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
-import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/groupExpressions';
-import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleCreation';
-import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
-import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationExpression';
+import { checkExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkExpressions';
+import { checkFieldValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkFieldValidation';
+import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/deleteExpression';
+import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/deleteExpressionRecursively';
+import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getDatasetSchemaTableFields';
+import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getEmptyExpression';
+import { getFieldExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getFieldExpressionString';
+import { getFieldType } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getFieldType';
+import { getSelectedFieldById } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getSelectedFieldById';
+import { getSelectedTableByFieldId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getSelectedTablebyFieldId';
+import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getSelectedTableByTableSchemaId';
+import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/groupExpressions';
+import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/initValidationRuleCreation';
+import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/resetValidationRuleCreation';
+import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationExpression';
 
 const FieldValidation = ({ datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);

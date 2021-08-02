@@ -38,9 +38,15 @@
     &:nth-child(4) {
       width: 20%;
       margin-right: 0.4rem;
+      &.withCodelistOrLink {
+        width: 15%;
+      }
     }
     &:nth-child(5) {
-      width: 25%;
+      width: 15%;
+      @include for-big-desktop-up {
+        width: 25%;
+      }
       margin-right: 0.4rem;
     }
     &:nth-child(6) {
