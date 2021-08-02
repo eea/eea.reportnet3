@@ -31,7 +31,7 @@ import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
 
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 
-import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getExpressionString';
+import { getExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
 import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
 
 const ValidationsList = withRouter(
