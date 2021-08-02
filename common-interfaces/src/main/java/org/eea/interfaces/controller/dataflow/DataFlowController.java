@@ -82,6 +82,10 @@ public interface DataFlowController {
   @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findReferenceDataflows();
 
+
+  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataFlowVO> findBusinessDataflows();
+
   /**
    * Adds the contributor.
    *

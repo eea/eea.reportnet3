@@ -65,6 +65,8 @@ public interface DataflowService {
    */
   List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
 
+  List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException;
+
 
   /**
    * Gets the completed.
@@ -217,4 +219,10 @@ public interface DataflowService {
    */
   boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
 
+  /**
+   * Checks if user is admin.
+   *
+   * @return true, if is admin
+   */
+  boolean isAdmin();
 }
