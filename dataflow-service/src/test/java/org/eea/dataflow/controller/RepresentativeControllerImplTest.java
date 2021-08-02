@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.junit.Assert;
@@ -115,7 +116,7 @@ public class RepresentativeControllerImplTest {
    */
   @Test
   public void findAllDataProviderTypesSuccessTest() {
-    when(representativeService.getAllDataProviderTypes())
+    when(representativeService.getAllDataProviderTypes(TypeDataProviderEnum.COUNTRY))
         .thenReturn(new ArrayList<DataProviderCodeVO>());
     assertEquals(0, representativeControllerImpl.findAllDataProviderTypes().size());
   }

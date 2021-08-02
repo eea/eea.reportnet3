@@ -241,7 +241,7 @@ public class RepresentativeServiceImplTest {
     }
 
     assertEquals("error in the message", dataProviderCodeVOs,
-        representativeServiceImpl.getAllDataProviderTypes());
+        representativeServiceImpl.getAllDataProviderTypes(TypeDataProviderEnum.COUNTRY));
   }
 
   /**
