@@ -40,11 +40,12 @@ public interface RepresentativeService {
   Long updateDataflowRepresentative(RepresentativeVO representativeVO);
 
   /**
-   * Gets the all data provider types.
+   * Gets DataProviderGroup names based on TypeDataProviderEnum
    *
-   * @return the all data provider types
+   * @param providerType Country or Company
+   * @return all dataProviders matching the TypeDataProviderEnum provided
    */
-  List<DataProviderCodeVO> getAllDataProviderTypes(TypeDataProviderEnum providerType);
+  List<DataProviderCodeVO> getDataProviderGroupByType(TypeDataProviderEnum providerType);
 
   /**
    * Gets the all data provider by group id.

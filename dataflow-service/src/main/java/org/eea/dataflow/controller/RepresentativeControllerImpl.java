@@ -121,8 +121,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
-  public List<DataProviderCodeVO> findAllDataProviderTypes() {
-    return representativeService.getAllDataProviderTypes(TypeDataProviderEnum.COUNTRY);
+  public List<DataProviderCodeVO> findAllDataProviderCountryType() {
+    return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COUNTRY);
   }
 
   /**
@@ -137,8 +137,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Find all DataProvider business types",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
       responseContainer = "List")
-  public List<DataProviderCodeVO> findAllDataProviderBusinessTypes() {
-    return representativeService.getAllDataProviderTypes(TypeDataProviderEnum.COMPANY);
+  public List<DataProviderCodeVO> findAllDataProviderCompanyType() {
+    return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COMPANY);
   }
 
   /**

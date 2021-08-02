@@ -115,10 +115,10 @@ public class RepresentativeControllerImplTest {
    * Find all data provider types success test.
    */
   @Test
-  public void findAllDataProviderTypesSuccessTest() {
-    when(representativeService.getAllDataProviderTypes(TypeDataProviderEnum.COUNTRY))
+  public void getDataProviderGroupByCountryTypeSuccessTest() {
+    when(representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COUNTRY))
         .thenReturn(new ArrayList<DataProviderCodeVO>());
-    assertEquals(0, representativeControllerImpl.findAllDataProviderTypes().size());
+    assertEquals(0, representativeControllerImpl.findAllDataProviderCountryType().size());
   }
 
   /**

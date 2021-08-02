@@ -52,7 +52,7 @@ public interface RepresentativeController {
    * @return the list
    */
   @GetMapping(value = "/dataProvider/countryGroups", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataProviderCodeVO> findAllDataProviderTypes();
+  List<DataProviderCodeVO> findAllDataProviderCountryType();
 
   /**
    * Find all data provider business types.
@@ -60,7 +60,7 @@ public interface RepresentativeController {
    * @return the list
    */
   @GetMapping(value = "/dataProvider/companyGroups", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataProviderCodeVO> findAllDataProviderBusinessTypes();
+  List<DataProviderCodeVO> findAllDataProviderCompanyType();
 
 
 

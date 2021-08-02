@@ -216,13 +216,13 @@ public class RepresentativeServiceImplTest {
   }
 
   /**
-   * Gets the all data provider types success test.
+   * Gets the data provider group by country type success test.
    *
-   * @return the all data provider types success test
+   * @return the data provider group by country type success test
    * @throws EEAException the EEA exception
    */
   @Test
-  public void getAllDataProviderTypesSuccessTest() throws EEAException {
+  public void getDataProviderGroupByCountryTypeSuccessTest() throws EEAException {
 
     List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
     DataProviderGroup dataProviderGroup = new DataProviderGroup();
@@ -241,7 +241,7 @@ public class RepresentativeServiceImplTest {
     }
 
     assertEquals("error in the message", dataProviderCodeVOs,
-        representativeServiceImpl.getAllDataProviderTypes(TypeDataProviderEnum.COUNTRY));
+        representativeServiceImpl.getDataProviderGroupByType(TypeDataProviderEnum.COUNTRY));
   }
 
   /**
