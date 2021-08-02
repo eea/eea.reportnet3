@@ -26,22 +26,22 @@ import {
   createValidationReducer
 } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
-import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/checkComparisonExpressions';
-import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/checkComparisonSQLsentence';
-import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/checkComparisonValidation';
-import { checkComparisonValidationIfThen } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/checkComparisonValidationIfThen';
-import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/deleteExpression';
-import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/deleteExpressionRecursively';
-import { getComparisonExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/getComparisonExpressionString';
-import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/getDatasetSchemaTableFields';
-import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/getEmptyExpression';
-import { getFieldType } from '../../_functions/UtilsAux/getFieldType';
-import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/getSelectedTableByRecordId';
-import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/groupExpressions';
-import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/initValidationRuleCreation';
-import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/resetValidationRuleCreation';
-import { setExpressionsFieldsTypes } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/setExpressionsFieldsTypes';
-import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/UtilsAux/setValidationExpression';
+import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonExpressions';
+import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSQLsentence';
+import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidation';
+import { checkComparisonValidationIfThen } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidationIfThen';
+import { deleteExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/deleteExpression';
+import { deleteExpressionRecursively } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/deleteExpressionRecursively';
+import { getComparisonExpressionString } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getComparisonExpressionString';
+import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getDatasetSchemaTableFields';
+import { getEmptyExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getEmptyExpression';
+import { getFieldType } from '../../_functions/Utils/getFieldType';
+import { getSelectedTableByRecordId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getSelectedTableByRecordId';
+import { groupExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/groupExpressions';
+import { initValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/initValidationRuleCreation';
+import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/resetValidationRuleCreation';
+import { setExpressionsFieldsTypes } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/setExpressionsFieldsTypes';
+import { setValidationExpression } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationExpression';
 
 export const RowValidation = ({ datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);
