@@ -93,7 +93,9 @@ const BigButtonListReference = withRouter(
     } = referenceBigButtonsState;
 
     useEffect(() => {
-      const response = notificationContext.hidden.find(notification => notification.key === 'NO_PK_ERROR_EVENT');
+      const response = notificationContext.hidden.find(
+        notification => notification.key === 'NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT'
+      );
       if (response) {
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: true });
       }
