@@ -1,7 +1,5 @@
 {
   "all": "/dataflow/businessDataflows",
   "createDataflow": "/dataflow",
-  "deleteReferenceDataflow": "/dataflow/{:businessDataflowId}",
-  "getBusinessTypes": "/representative/dataProvider/types",
-  "getFmeUsers": "/representative/dataProvider/types"
+  "deleteReferenceDataflow": "/dataflow/{:businessDataflowId}"
 }

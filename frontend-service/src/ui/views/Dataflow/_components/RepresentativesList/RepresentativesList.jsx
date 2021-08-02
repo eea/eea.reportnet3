@@ -127,7 +127,7 @@ const RepresentativesList = ({
   };
 
   const getInitialData = async () => {
-    await getProviderTypes();
+    await getGroupProviders();
     await getAllRepresentatives();
 
     if (!isEmpty(formState.representatives)) {
@@ -152,12 +152,12 @@ const RepresentativesList = ({
     }
   };
 
-  const getProviderTypes = async () => {
+  const getGroupProviders = async () => {
     try {
-      const providerTypes = await RepresentativeService.getProviderTypes();
+      const providerTypes = await RepresentativeService.getGroupProviders();
       formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: providerTypes.data } });
     } catch (error) {
-      console.error('error on  RepresentativeService.getProviderTypes', error);
+      console.error('error on  RepresentativeService.getGroupProviders', error);
     }
   };
 

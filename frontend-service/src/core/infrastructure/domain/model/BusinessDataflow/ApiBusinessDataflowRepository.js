@@ -46,10 +46,6 @@ const create = async (name, description, obligationId, type, groupCompaniesId, f
 const edit = async (dataflowId, description, name, type, groupCompaniesId, fmeUserId) =>
   apiBusinessDataflow.edit(dataflowId, description, name, type, groupCompaniesId, fmeUserId);
 
-const getBusinessTypes = async () => await apiBusinessDataflow.getBusinessTypes();
-
-const getFmeUsers = async () => await apiBusinessDataflow.getFmeUsers();
-
 const parseDataflowDTO = dataflowDTO =>
   new BusinessDataflow({
     creationDate: dataflowDTO.creationDate,
@@ -76,7 +72,5 @@ const parseDataflowDTOs = dataflowDTOs => {
 export const ApiBusinessDataflowRepository = {
   all,
   create,
-  edit,
-  getBusinessTypes,
-  getFmeUsers
+  edit
 };
