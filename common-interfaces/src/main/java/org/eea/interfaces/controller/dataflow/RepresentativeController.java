@@ -51,7 +51,7 @@ public interface RepresentativeController {
    *
    * @return the list
    */
-  @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataProvider/countryGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderCodeVO> findAllDataProviderTypes();
 
   /**
@@ -59,7 +59,7 @@ public interface RepresentativeController {
    *
    * @return the list
    */
-  @GetMapping(value = "/dataProvider/businessTypes", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataProvider/companyGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderCodeVO> findAllDataProviderBusinessTypes();
 
 
