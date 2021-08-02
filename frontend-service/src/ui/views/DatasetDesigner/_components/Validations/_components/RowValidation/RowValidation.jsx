@@ -24,7 +24,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 import {
   createValidationReducerInitState,
   createValidationReducer
-} from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
+} from 'ui/views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkComparisonExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonExpressions';
 import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonSQLsentence';

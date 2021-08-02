@@ -23,7 +23,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 import {
   createValidationReducerInitState,
   createValidationReducer
-} from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
+} from 'ui/views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkComparisonRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonRelation';
 import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonSQLsentence';

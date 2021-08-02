@@ -25,7 +25,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 import {
   createValidationReducerInitState,
   createValidationReducer
-} from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
+} from 'ui/views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkExpressions } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkExpressions';
 import { checkFieldValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkFieldValidation';
