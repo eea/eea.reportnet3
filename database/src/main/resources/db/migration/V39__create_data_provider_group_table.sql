@@ -4,3 +4,5 @@ CREATE TABLE public.data_provider_group (
 	"type" varchar(255) NULL,
 	CONSTRAINT data_provider_gp_pk PRIMARY KEY (id)
 );
+
+GRANT ALL ON TABLE public.data_provider_group TO testuser, dataflow, dataset, validation, recordstore;
