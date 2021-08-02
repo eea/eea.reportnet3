@@ -7,13 +7,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class DataProviderVO.
+ * The Class DataProviderGroupVO.
  */
 @Getter
 @Setter
 @ToString
 public class DataProviderGroupVO implements Serializable {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 1L;
 
   /** The id. */
