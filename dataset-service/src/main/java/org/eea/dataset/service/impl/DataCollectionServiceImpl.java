@@ -435,6 +435,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).build();
           releaseNotification(EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT, notificationVO);
+          LOG_ERROR.error(
+              "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
+              dataflowId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
         }
       }
       LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
