@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 /**
  * The Interface RepresentativeMapper.
  */
-@Mapper(componentModel = "spring", uses = {LeadReporterMapper.class, DataProviderMapper.class})
+@Mapper(componentModel = "spring", uses = LeadReporterMapper.class)
 public interface RepresentativeMapper extends IMapper<Representative, RepresentativeVO> {
 
   /**
