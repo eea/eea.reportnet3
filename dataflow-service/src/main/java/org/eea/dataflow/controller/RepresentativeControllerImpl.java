@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -121,7 +122,23 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
   public List<DataProviderCodeVO> findAllDataProviderTypes() {
-    return representativeService.getAllDataProviderTypes();
+    return representativeService.getAllDataProviderTypes(TypeDataProviderEnum.COUNTRY);
+  }
+
+  /**
+   * Find all data provider business types.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataProvider/businessTypes", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Find all DataProvider business types",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
+      responseContainer = "List")
+  public List<DataProviderCodeVO> findAllDataProviderBusinessTypes() {
+    return representativeService.getAllDataProviderTypes(TypeDataProviderEnum.COMPANY);
   }
 
   /**

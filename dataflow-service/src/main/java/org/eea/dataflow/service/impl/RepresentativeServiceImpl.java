@@ -220,10 +220,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @return the all data provider types
    */
   @Override
-  public List<DataProviderCodeVO> getAllDataProviderTypes() {
+  public List<DataProviderCodeVO> getAllDataProviderTypes(TypeDataProviderEnum providerType) {
     LOG.info("obtaining the distinct representative types");
-    List<DataProviderGroup> dataProviderGroupCodes = dataProviderGroupRepository.findDistinctCode(
-        /* isAdmin() ? TypeDataProviderEnum.COMPANY : */ TypeDataProviderEnum.COUNTRY);
+    List<DataProviderGroup> dataProviderGroupCodes =
+        dataProviderGroupRepository.findDistinctCode(providerType);
     List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
 
     for (DataProviderGroup dataProviderGroupCode : dataProviderGroupCodes) {
