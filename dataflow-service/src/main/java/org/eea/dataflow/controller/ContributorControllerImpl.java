@@ -152,7 +152,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @return the list
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @GetMapping(value = "/requester/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find all Requesters in a Dataflow",
@@ -176,7 +176,7 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @GetMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataproviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER') || hasRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Find all Reporters in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
       responseContainer = "List")
