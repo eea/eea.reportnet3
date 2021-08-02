@@ -789,19 +789,15 @@ export const BigButtonList = ({
 
       {isImportSchemaVisible && (
         <CustomFileUpload
-          // dialogClassName={styles.Dialog}
           accept=".zip"
           chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
           dialogHeader={`${resources.messages['importSchema']}`}
           dialogOnHide={() => setIsImportSchemaVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
           dialogVisible={isImportSchemaVisible}
-          fileLimit={1}
           infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .zip`}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
-          mode="advanced"
-          multiple={false}
           name="file"
           onError={onImportSchemaError}
           onUpload={onUpload}
