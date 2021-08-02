@@ -11,8 +11,8 @@ import { SqlHelpListBox } from './_components/SqlHelpListBox';
 
 import { DataflowService } from 'core/services/Dataflow';
 
-import { parseDatasetSchemas } from './_functions/UtilsAux/parseDatasetSchemas';
-import { parseHelpItem } from './_functions/UtilsAux/parseHelpItem';
+import { parseDatasetSchemas } from './_functions/Utils/parseDatasetSchemas';
+import { parseHelpItem } from './_functions/Utils/parseHelpItem';
 
 const sqlHelpReducer = (state, { type, payload }) => {
   switch (type) {
