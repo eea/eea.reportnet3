@@ -16,7 +16,12 @@ import { DataflowService } from 'core/services/Dataflow';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const UserList = ({ dataflowId, representativeId }) => {
+export const UserList = ({
+  dataflowId,
+  areBusinessDataflows = false,
+  isBusinessDataflow = false,
+  representativeId
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -150,7 +155,11 @@ export const UserList = ({ dataflowId, representativeId }) => {
               <Column field="role" header={resources.messages['role']} sortable={true} />
               <Column field="email" header={resources.messages['user']} sortable={true} />
               {isNil(representativeId) && !isNil(dataflowId) && (
-                <Column field="country" header={resources.messages['countries']} sortable={true} />
+                <Column
+                  field="country"
+                  header={isBusinessDataflow ? resources.messages['company'] : resources.messages['countries']}
+                  sortable={true}
+                />
               )}
             </DataTable>
           ) : (

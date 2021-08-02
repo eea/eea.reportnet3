@@ -46,6 +46,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataflowName, setDataflowName] = useState('');
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
+  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -147,6 +148,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       if (!isEmpty(firstDataCollection)) {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
+      setIsBusinessDataflow(true); // TODO WITH REAL DATA
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
@@ -231,6 +233,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     <TabsSchema
       hasCountryCode={true}
       hasWritePermissions={false}
+      isBusinessDataflow={isBusinessDataflow}
       isExportable={false}
       isFilterable={false}
       levelErrorTypes={levelErrorTypes}

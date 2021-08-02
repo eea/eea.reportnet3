@@ -25,7 +25,15 @@ import { HistoricReleaseService } from 'core/services/HistoricRelease';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
-export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, historicReleasesView }) => {
+import { TextUtils } from 'ui/views/_functions/Utils/TextUtils';
+
+export const HistoricReleases = ({
+  dataflowId,
+  dataProviderId,
+  datasetId,
+  historicReleasesView,
+  isBusinessDataflow
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -147,7 +155,11 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
             body={template}
             columnResizeMode="expand"
             field={field}
-            header={resources.messages[field]}
+            header={
+              isBusinessDataflow && TextUtils.areEquals(field, 'countryCode')
+                ? resources.messages['companyCode']
+                : resources.messages[field]
+            }
             key={field}
             sortable={true}
           />

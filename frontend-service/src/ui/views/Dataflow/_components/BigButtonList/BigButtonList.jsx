@@ -48,6 +48,7 @@ export const BigButtonList = ({
   dataflowState,
   dataProviderId,
   handleRedirect,
+  isBusinessDataflow,
   isLeadReporterOfCountry,
   onCleanUpReceipt,
   onSaveName,
@@ -642,6 +643,7 @@ export const BigButtonList = ({
             dataflowId={dataflowId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
+            isBusinessDataflow={isBusinessDataflow}
           />
         </Dialog>
       )}

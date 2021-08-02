@@ -486,6 +486,7 @@ const Dataflow = withRouter(({ history, match }) => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
+          isBusinessDataflow: true, // TODO WITH REAL DATA
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -803,6 +804,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
+          isBusinessDataflow={dataflowState.isBusinessDataflow}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
@@ -1066,6 +1068,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
+              isBusinessDataflow={dataflowState.isBusinessDataflow}
               representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
             />
           </Dialog>
