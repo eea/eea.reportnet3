@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderMapper;
+import org.eea.dataflow.mapper.FMEUserMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
@@ -22,6 +23,7 @@ import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
@@ -32,6 +34,7 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
@@ -112,7 +115,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private EntityAccessService entityAccessService;
 
+  /** The FME user repository. */
+  private FMEUserRepository fmeUserRepository;
 
+  /** The FME user mapper. */
+  private FMEUserMapper fmeUserMapper;
 
   /**
    * The delimiter.
@@ -715,7 +722,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     } else {
       throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
     }
-    return dataProviders.stream().map(provider -> provider.getId()).collect(Collectors.toList());
+    return dataProviders.stream().map(DataProviderVO::getId).collect(Collectors.toList());
+  }
+
+
+  /**
+   * Find fme users.
+   *
+   * @return the list
+   */
+  @Override
+  public List<FMEUserVO> findFmeUsers() {
+    return fmeUserMapper.entityListToClass(fmeUserRepository.findAll());
   }
 
   /**
@@ -795,4 +813,5 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     }
     return countryCode;
   }
+
 }

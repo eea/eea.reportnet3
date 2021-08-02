@@ -11,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
@@ -456,6 +457,15 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     }
   }
 
+  @Override
+  @GetMapping(value = "/fmeUsers", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Find all the fme users for business dataflow",
+      response = RepresentativeControllerZuul.class, responseContainer = "List", hidden = true)
+  public List<FMEUserVO> findFmeUsers() {
+    return representativeService.findFmeUsers();
+  }
+
   /**
    * Update internal representative.
    *
@@ -502,4 +512,5 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeService.findRepresentativesByDataflowIdAndDataproviderList(dataflowId,
         providerIdList);
   }
+
 }
