@@ -12,6 +12,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -105,6 +107,14 @@ public class Dataflow {
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private Set<Integration> integrations;
 
+  /** The data provider group id. */
+  @Column(name = "DATAPROVIDER_GROUP_ID")
+  private Long dataProviderGroupId;
+
+  /** The fme user. */
+  @ManyToOne
+  @JoinColumn(name = "FME_USER_ID")
+  private FMEUser fmeUser;
 
   /**
    * Equals.
