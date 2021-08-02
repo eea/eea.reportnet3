@@ -1,2 +1,2 @@
-export const CreateReference = ({ dataCollectionRepository }) => async dataflowId =>
-  dataCollectionRepository.createReference(dataflowId);
+export const CreateReference = ({ dataCollectionRepository }) => async (dataflowId, stopAndNotifyPKError) =>
+  dataCollectionRepository.createReference(dataflowId, stopAndNotifyPKError);

@@ -64,6 +64,10 @@ export const apiDataflow = {
     return await HTTPRequester.get({ url });
   },
 
+  getRepresentativesUsersList: async dataflowId => {
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) });
+  },
+
   getPublicDataflowData: async dataflowId => {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) });
   },

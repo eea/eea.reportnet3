@@ -1,66 +1,15 @@
 import dayjs from 'dayjs';
-import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
-
-import { config } from 'conf';
 
 import { apiReferenceDataflow } from 'core/infrastructure/api/domain/model/ReferenceDataflow';
 
 import { Dataset } from 'core/domain/model/Dataset/Dataset';
 import { ReferenceDataflow } from 'core/domain/model/ReferenceDataflow/ReferenceDataflow';
 
-import { CoreUtils, TextUtils } from 'core/infrastructure/CoreUtils';
+import { config } from 'conf';
 
-const getUserRoleLabel = role => {
-  const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
-  return userRole?.label;
-};
-
-const getUserRoles = (userRoles = []) => {
-  const userRoleToDataflow = [];
-  userRoles.filter(userRol => !userRol.duplicatedRoles && userRoleToDataflow.push(userRol));
-
-  const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
-  const dataflowDuplicatedRoles = [];
-  for (const duplicatedRol of duplicatedRoles) {
-    if (dataflowDuplicatedRoles[duplicatedRol.id]) {
-      dataflowDuplicatedRoles[duplicatedRol.id].push(duplicatedRol);
-    } else {
-      dataflowDuplicatedRoles[duplicatedRol.id] = [duplicatedRol];
-    }
-  }
-
-  const dataflowPermissionsOrderConfig = {
-    1: config.permissions.roles.CUSTODIAN,
-    2: config.permissions.roles.STEWARD,
-    3: config.permissions.roles.OBSERVER,
-    4: config.permissions.roles.EDITOR_WRITE,
-    5: config.permissions.roles.EDITOR_READ,
-    6: config.permissions.roles.LEAD_REPORTER,
-    7: config.permissions.roles.NATIONAL_COORDINATOR,
-    8: config.permissions.roles.REPORTER_WRITE,
-    9: config.permissions.roles.REPORTER_READ
-  };
-
-  const dataflowPermissions = Object.values(dataflowPermissionsOrderConfig);
-
-  dataflowDuplicatedRoles.forEach(dataflowRoles => {
-    let rol = null;
-
-    dataflowPermissions.forEach(permission => {
-      dataflowRoles.forEach(dataflowRol => {
-        if (isNil(rol) && dataflowRol.userRole === permission.label) {
-          rol = dataflowRol;
-        }
-      });
-    });
-
-    userRoleToDataflow.push(rol);
-  });
-
-  return userRoleToDataflow;
-};
+import { CoreUtils, TextUtils, UserRoleUtils } from 'core/infrastructure/CoreUtils';
 
 const parseDatasetListDTO = datasetsDTO => {
   if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
@@ -119,7 +68,7 @@ const sortDataflows = dataflowDTOs => {
 };
 
 const all = async (userData = []) => {
-  const dataflowsDTO = await apiReferenceDataflow.all(userData);
+  const dataflowsDTO = await apiReferenceDataflow.all();
   const userRoles = [];
   const dataflows = [];
 
@@ -127,12 +76,15 @@ const all = async (userData = []) => {
 
   dataflowsRoles.map((item, index) => {
     const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-    return (userRoles[index] = { id: parseInt(item.replace(/\D/g, '')), userRole: getUserRoleLabel(role) });
+    return (userRoles[index] = {
+      id: parseInt(item.replace(/\D/g, '')),
+      userRole: UserRoleUtils.getUserRoleLabel(role)
+    });
   });
 
   dataflowsDTO.data.forEach(dataflow => {
     const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-    const role = isDuplicated ? getUserRoles(userRoles) : userRoles;
+    const role = isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles;
 
     dataflows.push({ ...dataflow, ...role.find(item => item.id === dataflow.id) });
   });

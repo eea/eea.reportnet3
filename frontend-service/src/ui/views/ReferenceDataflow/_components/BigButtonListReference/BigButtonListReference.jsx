@@ -42,11 +42,15 @@ const BigButtonListReference = withRouter(
     setUpdatedDatasetSchema
   }) => {
     const { showLoading, hideLoading } = useContext(LoadingContext);
-
     const [referenceBigButtonsState, referenceBigButtonsDispatch] = useReducer(referenceBigButtonsReducer, {
       cloneDataflow: { id: null, name: '' },
       deleteIndex: null,
-      dialogVisibility: { isCreateReference: false, isDeleteDataset: false, isNewDataset: false },
+      dialogVisibility: {
+        isCreateReference: false,
+        isDeleteDataset: false,
+        isNewDataset: false,
+        isTableWithNoPK: false
+      },
       hasDatasets: false,
       isCloningStatus: false,
       isCreateReferenceEnabled: false,
@@ -87,6 +91,15 @@ const BigButtonListReference = withRouter(
       isDesignStatus,
       hasDatasets
     } = referenceBigButtonsState;
+
+    useEffect(() => {
+      const response = notificationContext.hidden.find(
+        notification => notification.key === 'NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT'
+      );
+      if (response) {
+        handleDialogs({ dialog: 'isTableWithNoPK', isVisible: true });
+      }
+    }, [notificationContext]);
 
     function setIsDesignStatus(isDesignStatus) {
       referenceBigButtonsDispatch({ type: 'SET_IS_DESIGN_STATUS', payload: { isDesignStatus } });
@@ -165,7 +178,7 @@ const BigButtonListReference = withRouter(
       }
     };
 
-    const onAddReferenceDataset = async () => {
+    const onCreateReferenceDatasets = async () => {
       handleDialogs({ dialog: 'isCreateReference', isVisible: false });
 
       notificationContext.add({ type: 'CREATE_REFERENCE_DATASETS_INIT', content: {} });
@@ -173,7 +186,7 @@ const BigButtonListReference = withRouter(
       setIsCreatingReferenceDatasets(true);
 
       try {
-        return await DataCollectionService.createReference(dataflowId);
+        return await DataCollectionService.createReference(dataflowId, true);
       } catch (error) {
         console.error(error);
         const {
@@ -185,6 +198,33 @@ const BigButtonListReference = withRouter(
           content: { referenceDataflowId: dataflowId, dataflowName }
         });
         setIsCreatingReferenceDatasets(false);
+      } finally {
+        handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
+      }
+    };
+
+    const onCreateReferenceDatasetsWithNoPKs = async () => {
+      handleDialogs({ dialog: 'isCreateReference', isVisible: false });
+
+      notificationContext.add({ type: 'CREATE_REFERENCE_DATASETS_INIT', content: {} });
+
+      setIsCreatingReferenceDatasets(true);
+
+      try {
+        return await DataCollectionService.createReference(dataflowId, false);
+      } catch (error) {
+        console.error(error);
+        const {
+          dataflow: { name: dataflowName }
+        } = await getMetadata({ dataflowId });
+
+        notificationContext.add({
+          type: 'CREATE_REFERENCE_DATASETS_ERROR',
+          content: { referenceDataflowId: dataflowId, dataflowName }
+        });
+        setIsCreatingReferenceDatasets(false);
+      } finally {
+        handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
       }
     };
 
@@ -377,10 +417,22 @@ const BigButtonListReference = withRouter(
             header={resources.messages['createReferenceDatasetsDialogHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
-            onConfirm={onAddReferenceDataset}
+            onConfirm={onCreateReferenceDatasets}
             onHide={() => handleDialogs({ dialog: 'isCreateReference', isVisible: false })}
             visible={dialogVisibility.isCreateReference}>
             {resources.messages['createReferenceDatasetsDialogMessage']}
+          </ConfirmDialog>
+        )}
+
+        {dialogVisibility.isTableWithNoPK && (
+          <ConfirmDialog
+            header={resources.messages['tableWithNoPKWarningTitle']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
+            onConfirm={() => onCreateReferenceDatasetsWithNoPKs()}
+            onHide={() => handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false })}
+            visible={dialogVisibility.isTableWithNoPK}>
+            {resources.messages['tableWithNoPKWarningBody']}
           </ConfirmDialog>
         )}
 

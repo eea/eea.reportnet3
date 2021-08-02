@@ -575,7 +575,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     return result;
   }
 
-
   /**
    * Access reference entity.
    *
@@ -591,6 +590,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       @PathVariable("entityId") Long entityId) {
     return dataflowService.isReferenceDataflowDraft(entity, entityId);
   }
+
 
 
   /**
