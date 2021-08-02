@@ -30,12 +30,6 @@
   }
 }
 
-.buttonWrap {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-
-  .cancelButton {
-    margin-left: 0.5rem !important;
-  }
+.fieldset {
+  padding: 0;
 }

@@ -118,12 +118,11 @@ export const DataflowManagement = ({
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(dataflowManagementState.pinDataflow);
     manageDialogs(secondaryDialog, false);
-    // onHideDataflowDialog();
   };
 
   const renderCancelButton = action => (
     <Button
-      className="p-button-secondary button-right-aligned p-button-animated-blink"
+      className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
       icon="cancel"
       label={isEditForm ? resources.messages['cancel'] : resources.messages['close']}
       onClick={() => action()}

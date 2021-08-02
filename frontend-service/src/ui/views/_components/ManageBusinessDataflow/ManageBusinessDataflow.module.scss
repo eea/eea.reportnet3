@@ -36,6 +36,7 @@
   .searchInput {
     background-color: var(--form-field-bg);
     border-radius: 0 !important;
+    box-shadow: none !important;
     border: none;
     color: var(--main-font-color);
     cursor: default !important;
@@ -46,7 +47,7 @@
 
     &:focus {
       border: none;
-      box-shadow: none;
+      box-shadow: none !important;
     }
   }
 
@@ -56,4 +57,18 @@
       opacity: 1;
     }
   }
+}
+.cancelButton {
+  margin-right: 0px !important;
+}
+.dropdownsWrapper {
+  display: flex;
+  margin: 1rem 0;
+}
+.groupOfCompaniesWrapper,
+.fmeUsersWrapper {
+  width: 50%;
+}
+.fmeUsersWrapper {
+  margin-left: 1rem;
 }

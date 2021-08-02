@@ -126,7 +126,7 @@ const DataflowManagementForm = forwardRef(
 
     return (
       <form ref={form}>
-        <fieldset>
+        <fieldset className={styles.fieldset}>
           <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
             <input
               autoComplete="off"

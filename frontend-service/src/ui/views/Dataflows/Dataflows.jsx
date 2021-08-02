@@ -108,7 +108,8 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: dataflowsState.isCustodian,
+      isVisible:
+        (tabId !== 'business' && dataflowsState.isCustodian) || (tabId !== 'business' && dataflowsState.isAdmin),
       label: 'createNewDataflow',
       onClick: () =>
         manageDialogs(tabId === 'dataflows' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible', true),

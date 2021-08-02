@@ -21,7 +21,6 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
 import { BusinessDataflowService } from 'core/services/BusinessDataflow';
-import { RepresentativeService } from 'core/services/Representative';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -58,15 +57,14 @@ export const ManageBusinessDataflow = ({
 
   const [deleteInput, setDeleteInput] = useState('');
   const [selectedGroup, setSelectedGroup] = useState({});
-
+  const [selectedFmeUser, setSelectedFmeUser] = useState({});
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
-
-  const [gropupOfCompanies, setGropupOfCompanies] = useState([]);
+  const [groupOfCompanies, setGroupOfCompanies] = useState([]);
+  const [fmeUsers, setFmeUsers] = useState([]);
 
   const [errors, setErrors] = useState({
     description: { hasErrors: false, message: '' },
-    name: { hasErrors: false, message: '' },
-    obligation: { message: '', hasErrors: false }
+    name: { hasErrors: false, message: '' }
   });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -81,15 +79,25 @@ export const ManageBusinessDataflow = ({
 
   const getGroupOfCompaniesList = async () => {
     try {
-      const providerTypes = await RepresentativeService.getProviderTypes();
-      setGropupOfCompanies(providerTypes.data);
+      const providerTypes = await BusinessDataflowService.getBusinessTypes();
+      setGroupOfCompanies(providerTypes.data);
     } catch (error) {
-      console.error('error on  RepresentativeService.getProviderTypes', error);
+      console.error('error on  BusinessDataflowService.getBusinessTypes', error);
+    }
+  };
+
+  const getFmeUsersList = async () => {
+    try {
+      const fmeUsersList = await BusinessDataflowService.getFmeUsers();
+      setFmeUsers(fmeUsersList.data);
+    } catch (error) {
+      console.error('error on  BusinessDataflowService.getFmeUsers', error);
     }
   };
 
   useEffect(() => {
     getGroupOfCompaniesList();
+    getFmeUsersList();
   }, []);
 
   const checkErrors = () => {
@@ -116,6 +124,7 @@ export const ManageBusinessDataflow = ({
   };
 
   const onSelectGroup = group => setSelectedGroup(group);
+  const onSelectFmeUser = fmeUser => setSelectedFmeUser(fmeUser);
 
   const onDeleteDataflow = async () => {
     setIsDeleteDialogVisible(false);
@@ -146,7 +155,14 @@ export const ManageBusinessDataflow = ({
           onEditDataflow(name, description);
         }
       } else {
-        const { data, status } = await BusinessDataflowService.create(name, description, 'BUSINESS');
+        const { data, status } = await BusinessDataflowService.create(
+          name,
+          description,
+          obligation.id,
+          'BUSINESS',
+          selectedGroup.dataProviderGroupId, // groupCompaniesId,
+          selectedFmeUser.dataProviderGroupId // Todo change to userId
+        );
         if (status >= 200 && status <= 299) {
           if (pinDataflow) {
             const inmUserProperties = { ...userContext.userProps };
@@ -215,15 +231,28 @@ export const ManageBusinessDataflow = ({
       </div>
       <Button
         className={`p-button-primary ${
-          !isEmpty(name) && !isEmpty(description) && !isSending && 'p-button-animated-blink'
+          !isEmpty(name) &&
+          !isEmpty(description) &&
+          !isNil(obligation.id) &&
+          !isNil(selectedFmeUser.id) &&
+          !isNil(selectedGroup.dataProviderGroupId) &&
+          !isSending &&
+          'p-button-animated-blink'
         }`}
-        disabled={isEmpty(name) || isEmpty(description) || isSending}
+        disabled={
+          isEmpty(name) ||
+          isEmpty(description) ||
+          isNil(obligation.id) ||
+          isNil(selectedFmeUser.dataProviderGroupId) || // Todo change to userId
+          isNil(selectedGroup.dataProviderGroupId) ||
+          isSending
+        }
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
         label={isEditing ? resources.messages['save'] : resources.messages['create']}
         onClick={() => onManageBusinessDataflow()}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
         icon={'cancel'}
         label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
         onClick={() => {
@@ -259,21 +288,7 @@ export const ManageBusinessDataflow = ({
           />
           {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
         </div>
-        <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
-          <Dropdown
-            appendTo={document.body}
-            ariaLabel="groupOfCompanies"
-            name="groupOfCompanies"
-            onChange={event => {
-              onSelectGroup(event.target.value);
-            }}
-            optionLabel="label"
-            options={gropupOfCompanies}
-            placeholder={resources.messages[`selectGroupOfCompanies`]}
-            value={selectedGroup}
-          />
-          {!isEmpty(errors.name.message) && <ErrorMessage message={errors.groupOfCompanies.message} />}
-        </div>
+
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
@@ -286,6 +301,33 @@ export const ManageBusinessDataflow = ({
           />
           {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
         </div>
+        <div className={styles.dropdownsWrapper}>
+          <Dropdown
+            appendTo={document.body}
+            ariaLabel="groupOfCompanies"
+            className={styles.groupOfCompaniesWrapper}
+            name="groupOfCompanies"
+            onChange={event => onSelectGroup(event.target.value)}
+            onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
+            optionLabel="label"
+            options={groupOfCompanies}
+            placeholder={resources.messages[`selectGroupOfCompanies`]}
+            value={selectedGroup}
+          />
+
+          <Dropdown
+            appendTo={document.body}
+            ariaLabel="fmeUsers"
+            className={styles.fmeUsersWrapper}
+            name="fmeUsers"
+            onChange={event => onSelectFmeUser(event.target.value)}
+            onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
+            optionLabel="label" // Todo change to userName
+            options={fmeUsers}
+            placeholder={resources.messages[`selectFmeUser`]}
+            value={selectedFmeUser}
+          />
+        </div>
         <div className={`${styles.search}`}>
           <Button
             icon="search"
@@ -294,17 +336,13 @@ export const ManageBusinessDataflow = ({
           />
           <InputText
             className={`${styles.searchInput} ${errors?.obligation?.hasErrors ? styles.searchErrors : ''}`}
-            id="searchObligation"
-            // onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
-            // onKeyPress={e => {
-            //   if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
-            // }}
+            id="obligation"
             placeholder={resources.messages['associatedObligation']}
             readOnly={true}
             type="text"
             value={obligation.title}
           />
-          <label className="srOnly" htmlFor="searchObligation">
+          <label className="srOnly" htmlFor="obligation">
             {resources.messages['searchObligations']}
           </label>
         </div>

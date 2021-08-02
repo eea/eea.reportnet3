@@ -1206,6 +1206,7 @@
     "businessDataflowUpdatingError": "Failed updating business dataflow",
     "businessDataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> business dataflow",
     "selectGroupOfCompanies": "Select group of companies",
-    "dataflowUsersByCountryList": "Dataflow users list by country"
+    "dataflowUsersByCountryList": "Dataflow users list by country",
+    "selectFmeUser": "Select FME user"
   }
 }
