@@ -339,6 +339,10 @@ public final class EEAErrorMessage {
   public static final String NOT_REFERENCE_TO_PROCESS =
       "There aren't reference datasets to process";
 
+  /** The Constant NO_PK_REFERENCE_DATAFLOW: {@value}. */
+  public static final String NO_PK_REFERENCE_DATAFLOW =
+      "There aren't primary keys in the reference dataflow";
+
   /**
    * Instantiates a new EEA error message.
    */
