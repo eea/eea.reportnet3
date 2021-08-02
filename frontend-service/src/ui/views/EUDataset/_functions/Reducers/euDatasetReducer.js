@@ -9,8 +9,8 @@ export const euDatasetReducer = (state, { type, payload }) => {
         levelErrorTypes: payload.errorTypes
       };
 
-    case 'GET_DATAFLOW_NAME':
-      return { ...state, dataflowName: payload.name };
+    case 'GET_DATAFLOW_DETAILS':
+      return { ...state, dataflowName: payload.name, isBusinessDataflow: payload.isBusinessDataflow };
 
     case 'GET_EXPORT_EXTENSIONS_LIST':
       return { ...state, exportExtensionsList: payload.internalExtensionList };

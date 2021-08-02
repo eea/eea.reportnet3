@@ -46,6 +46,8 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataflowName, setDataflowName] = useState('');
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
+  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   let exportMenuRef = useRef();
   let growlRef = useRef();
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history });
+  useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history, isBusinessDataflow, isLoading });
 
   useCheckNotifications(
     ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD'],
@@ -147,6 +149,8 @@ export const DataCollection = withRouter(({ match, history }) => {
       if (!isEmpty(firstDataCollection)) {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
+      setIsBusinessDataflow(true); // TODO WITH REAL DATA
+      setIsLoading(false);
     } catch (error) {
       const {
         dataflow: { name: dataflowName },

@@ -1,8 +1,8 @@
 import { DataflowService } from 'core/services/Dataflow';
 
-const getDataflowName = async dataflowId => {
-  const { data } = await DataflowService.dataflowDetails(dataflowId);
-  return data.name;
+const getDataflowDetails = async dataflowId => {
+  const data = await DataflowService.dataflowDetails(dataflowId);
+  return data;
 };
 
-export const DataflowUtils = { getDataflowName };
+export const DataflowUtils = { getDataflowDetails };

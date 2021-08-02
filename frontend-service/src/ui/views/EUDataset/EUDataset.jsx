@@ -51,6 +51,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
     exportExtensionsList: [],
+    isBusinessDataflow: false,
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
@@ -68,6 +69,8 @@ export const EUDataset = withRouter(({ history, match }) => {
     dataflowName,
     datasetName,
     dataViewerOptions,
+    isBusinessDataflow,
+    isLoading,
     isGroupedValidationSelected,
     isValidationSelected,
     levelErrorTypes,
@@ -81,7 +84,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
     callSetMetaData();
-    getDataflowName();
+    getDataflowDetails();
   }, []);
 
   useEffect(() => {
@@ -98,16 +101,16 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   }, [notificationContext.hidden]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, metaData });
+  useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, isBusinessDataflow, isLoading, metaData });
 
   const callSetMetaData = async () => {
     euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata: await getMetadata({ dataflowId, datasetId }) } });
   };
 
-  const getDataflowName = async () => {
+  const getDataflowDetails = async () => {
     try {
       const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
-      euDatasetDispatch({ type: 'GET_DATAFLOW_NAME', payload: { name: data.name } });
+      euDatasetDispatch({ type: 'GET_DATAFLOW_DETAILS', payload: { name: data.name, isBusinessDataflow: true } }); // TODO WITH REAL DATA
     } catch (error) {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
@@ -168,7 +171,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   };
 
-  const isLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
+  const setIsLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
@@ -194,7 +197,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   useCheckNotifications(['VALIDATION_FINISHED_EVENT'], onHighlightRefresh, true);
 
   const onLoadDatasetSchema = async () => {
-    isLoading(true);
+    setIsLoading(true);
     onHighlightRefresh(false);
 
     try {
@@ -252,7 +255,7 @@ export const EUDataset = withRouter(({ history, match }) => {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     } finally {
-      isLoading(false);
+      setIsLoading(false);
     }
   };
 

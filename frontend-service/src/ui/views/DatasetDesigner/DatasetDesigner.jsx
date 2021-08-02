@@ -188,6 +188,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
     dataflowId,
     history,
+    isBusinessDataflow: designerState.isBusinessDataflow,
+    isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
   });
 

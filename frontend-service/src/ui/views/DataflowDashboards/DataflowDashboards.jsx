@@ -36,22 +36,32 @@ export const DataflowDashboards = withRouter(
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
     const [dataflowName, setDataflowName] = useState('');
     const [dataSchema, setDataSchema] = useState();
+    const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_DASHBOARDS, dataflowId, history });
+    useBreadCrumbs({
+      currentPage: CurrentPage.DATAFLOW_DASHBOARDS,
+      dataflowId,
+      history,
+      isBusinessDataflow,
+      isLoading
+    });
 
     useEffect(() => {
       leftSideBarContext.removeModels();
       try {
-        getDataflowName();
+        getDataflowDetails();
         onLoadDataSchemas();
       } catch (error) {
         console.error(error.response);
       }
     }, []);
 
-    const getDataflowName = async () => {
+    const getDataflowDetails = async () => {
       const { data } = await DataflowService.dataflowDetails(dataflowId);
+      setIsBusinessDataflow(true); //TODO WITH REAL DATA
       setDataflowName(data.name);
+      setIsLoading(false);
     };
 
     const onLoadDataSchemas = async () => {
