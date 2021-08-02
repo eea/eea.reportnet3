@@ -20,9 +20,9 @@ public class DataProviderGroupVO implements Serializable {
   /** The id. */
   private Long id;
 
-  /** The group. */
+  /** The name. */
   private String name;
 
-  /** The label. */
+  /** The type. */
   private TypeDataProviderEnum type;
 }
