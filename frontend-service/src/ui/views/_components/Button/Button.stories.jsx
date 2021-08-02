@@ -4,22 +4,22 @@ import { Button } from './Button';
 
 storiesOf('Button', module)
   .add('Default', () => <Button label="Default" />)
-  .add('Default rounded', () => <Button label="Default rounded" className={`p-button-rounded`} />)
-  .add('Disabled', () => <Button label="Disabled" disabled={true} />)
+  .add('Default rounded', () => <Button className={`p-button-rounded`} label="Default rounded" />)
+  .add('Disabled', () => <Button disabled={true} label="Disabled" />)
   .add('Clickable', () => <Button label="Click me!" onClick={action('clicked')} />)
-  .add('Secondary', () => <Button label="Secondary" className={`p-button-rounded p-button-secondary`} />)
+  .add('Secondary', () => <Button className={`p-button-rounded p-button-secondary`} label="Secondary" />)
   .add('Secondary transparent', () => (
-    <Button label="Secondary transparent" className={`p-button-rounded p-button-secondary-transparent`} />
+    <Button className={`p-button-rounded p-button-secondary-transparent`} label="Secondary transparent" />
   ))
-  .add('Icon Right', () => <Button label="Icon Right" icon="eye" iconPos="right" className={`p-button-rounded`} />)
+  .add('Icon Right', () => <Button className={`p-button-rounded`} icon="eye" iconPos="right" label="Icon Right" />)
   .add('Icon Left Secondary', () => (
-    <Button label="Icon Left & secondary" icon="eye" iconPos="left" className={`p-button-rounded p-button-secondary`} />
+    <Button className={`p-button-rounded p-button-secondary`} icon="eye" iconPos="left" label="Icon Left & secondary" />
   ))
   .add('Animated', () => (
     <Button
-      label="Animated button"
+      className={`p-button-rounded p-button-secondary p-button-animated-blink`}
       icon="eye"
       iconPos="left"
-      className={`p-button-rounded p-button-secondary p-button-animated-blink`}
+      label="Animated button"
     />
   ));
