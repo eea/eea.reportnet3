@@ -29,6 +29,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
       dataflowId,
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
+      isBusinessDataflow: true, // TODO WITH REAL DATA
       status: dataflowMetadata.status || ''
     };
   }

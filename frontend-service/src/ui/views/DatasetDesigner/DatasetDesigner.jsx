@@ -110,6 +110,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
+    isBusinessDataflow: false,
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
@@ -288,6 +289,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
+        isBusinessDataflow: metaData.dataflow.isBusinessDataflow,
         schemaName: metaData.dataset.name
       }
     });
@@ -1467,6 +1469,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
+            isBusinessDataflow={designerState.isBusinessDataflow}
             tabs={DatasetDesignerUtils.getTabs({
               datasetSchema: designerState.datasetSchema,
               datasetSchemas: designerState.datasetSchemas,
