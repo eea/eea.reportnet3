@@ -43,8 +43,8 @@ const all = async userData => {
 const create = async (name, description, obligationId, groupCompaniesId, fmeUserId) =>
   apiBusinessDataflow.create(name, description, obligationId, groupCompaniesId, fmeUserId);
 
-const edit = async (dataflowId, description, name, groupCompaniesId, fmeUserId) =>
-  apiBusinessDataflow.edit(dataflowId, description, name, groupCompaniesId, fmeUserId);
+const edit = async (dataflowId, description, obligationId, name, groupCompaniesId, fmeUserId) =>
+  apiBusinessDataflow.edit(dataflowId, description, obligationId, name, groupCompaniesId, fmeUserId);
 
 const parseDataflowDTO = dataflowDTO =>
   new BusinessDataflow({

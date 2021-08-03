@@ -152,6 +152,7 @@ export const ManageBusinessDataflow = ({
         const { status } = await BusinessDataflowService.edit(
           dataflowId,
           description,
+          obligation.id,
           name,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id
