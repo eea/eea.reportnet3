@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -45,8 +47,9 @@ public class DataProvider {
   private String code;
 
   /** The group id. */
-  @Column(name = "group_id")
-  private Long groupId;
+  @ManyToOne
+  @JoinColumn(name = "group_id")
+  private DataProviderGroup dataProviderGroup;
 
   /** The representatives. */
   @OneToMany(mappedBy = "dataProvider")

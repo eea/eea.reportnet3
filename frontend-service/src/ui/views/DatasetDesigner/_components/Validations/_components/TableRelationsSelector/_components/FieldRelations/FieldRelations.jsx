@@ -7,7 +7,7 @@ import { ValidationExpressionSelector } from 'ui/views/DatasetDesigner/_componen
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-import { checkComparisonRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonRelation';
+import { checkComparisonRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonRelation';
 
 export const FieldRelations = ({
   componentName,

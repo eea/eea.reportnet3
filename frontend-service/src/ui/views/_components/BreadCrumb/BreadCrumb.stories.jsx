@@ -11,6 +11,7 @@ const home = {
 
 storiesOf('BreadCrumb', module).add('Default', () => (
   <BreadCrumb
+    home={home}
     model={[
       {
         label: 'Home',
@@ -25,6 +26,5 @@ storiesOf('BreadCrumb', module).add('Default', () => (
         command: action('Go to designer!')
       }
     ]}
-    home={home}
   />
 ));

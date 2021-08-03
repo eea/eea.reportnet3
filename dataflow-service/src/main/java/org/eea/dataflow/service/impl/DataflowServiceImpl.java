@@ -826,7 +826,6 @@ public class DataflowServiceImpl implements DataflowService {
     return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
         .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
   }
-
   /**
    * Sets the reportings.
    *
