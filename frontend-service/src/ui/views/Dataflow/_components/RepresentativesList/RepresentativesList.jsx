@@ -157,7 +157,7 @@ const RepresentativesList = ({
       const providerTypes = await RepresentativeService.getGroupProviders();
       formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: providerTypes.data } });
     } catch (error) {
-      console.error('error on  RepresentativeService.getGroupProviders', error);
+      console.error(error);
     }
   };
 

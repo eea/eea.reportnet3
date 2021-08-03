@@ -149,7 +149,13 @@ export const ManageBusinessDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await BusinessDataflowService.edit(dataflowId, description, name, 'BUSINESS');
+        const { status } = await BusinessDataflowService.edit(
+          dataflowId,
+          description,
+          name,
+          selectedGroup.dataProviderGroupId,
+          selectedFmeUser.id
+        );
 
         if (status >= 200 && status <= 299) {
           manageDialogs(dialogName, false);
@@ -160,9 +166,8 @@ export const ManageBusinessDataflow = ({
           name,
           description,
           obligation.id,
-          'BUSINESS',
           selectedGroup.dataProviderGroupId,
-          selectedFmeUser.dataProviderGroupId
+          selectedFmeUser.id
         );
         if (status >= 200 && status <= 299) {
           if (pinDataflow) {
