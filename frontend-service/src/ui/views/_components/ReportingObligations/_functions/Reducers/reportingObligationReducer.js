@@ -28,7 +28,7 @@ export const reportingObligationReducer = (state, { type, payload }) => {
       return { ...state, pagination: payload.pagination };
 
     case 'ON_SELECT_OBL':
-      return { ...state, oblChoosed: payload.oblChoosed };
+      return { ...state, selectedObligation: payload.selectedObligation };
 
     case 'SEARCHED_DATA':
       return { ...state, searchedData: payload.data };

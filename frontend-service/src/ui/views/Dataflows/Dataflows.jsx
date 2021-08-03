@@ -24,6 +24,7 @@ import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 import { UserService } from 'core/services/User';
 
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
+import { useReportingObligations } from 'ui/views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { LeftSideBarContext } from 'ui/views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -36,6 +37,9 @@ import { CurrentPage, TextUtils } from 'ui/views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'ui/views/_functions/Utils';
 import { ManageReferenceDataflow } from 'ui/views/_components/ManageReferenceDataflow';
+import { ManageBusinessDataflow } from 'ui/views/_components/ManageBusinessDataflow';
+import { ReportingObligations } from 'ui/views/_components/ReportingObligations';
+import { Fragment } from 'react';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {
@@ -55,25 +59,35 @@ const Dataflows = withRouter(({ history, match }) => {
     dataflows: [],
     isAddDialogVisible: false,
     isAdmin: null,
+    isBusinessDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
     isRepObDialogVisible: false,
+    isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { dataflows: true, reference: true },
     reference: []
   });
 
-  const { activeIndex, isCustodian, loadingStatus } = dataflowsState;
+  const {
+    obligation,
+    resetObligations,
+    setObligationToPrevious,
+    setCheckedObligation,
+    setToCheckedObligation
+  } = useReportingObligations();
 
-  const tabMenuItems = isCustodian
+  const { activeIndex, loadingStatus } = dataflowsState;
+
+  const tabMenuItems = dataflowsState.isCustodian
     ? [
-        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
         { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
       ]
     : [
-        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
       ];
 
@@ -90,16 +104,30 @@ const Dataflows = withRouter(({ history, match }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
 
-    const createBtn = {
+    const createReportingDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'business' ? dataflowsState.isAdmin : dataflowsState.isCustodian,
+      isVisible: tabId === 'reporting' && dataflowsState.isCustodian,
       label: 'createNewDataflow',
-      onClick: () =>
-        manageDialogs(
-          tabId === 'dataflows' || tabId === 'business' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible',
-          true
-        ),
+      onClick: () => manageDialogs('isAddDialogVisible', true),
+      title: 'createNewDataflow'
+    };
+
+    const createReferenceDataflowBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'plus',
+      isVisible: tabId === 'reference' && dataflowsState.isCustodian,
+      label: 'createNewDataflow',
+      onClick: () => manageDialogs('isReferencedDataflowDialogVisible', true),
+      title: 'createNewDataflow'
+    };
+
+    const createBusinessDataflowBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'plus',
+      isVisible: tabId === 'business' && dataflowsState.isAdmin,
+      label: 'createNewDataflow',
+      onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
       title: 'createNewDataflow'
     };
 
@@ -112,8 +140,12 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
-    leftSideBarContext.addModels([createBtn, userListBtn].filter(button => button.isVisible));
-  }, [dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
+    leftSideBarContext.addModels(
+      [createBusinessDataflowBtn, createReferenceDataflowBtn, createReportingDataflowBtn, userListBtn].filter(
+        button => button.isVisible
+      )
+    );
+  }, [dataflowsState.isAdmin, dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
 
   useEffect(() => {
     const messageStep0 = dataflowsState.isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
@@ -140,9 +172,9 @@ const Dataflows = withRouter(({ history, match }) => {
     setLoading(true);
 
     try {
-      if (TextUtils.areEquals(tabId, 'dataflows')) {
+      if (TextUtils.areEquals(tabId, 'reporting')) {
         const { data } = await DataflowService.all(userContext.contextRoles);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'dataflows' } });
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
       }
 
       if (TextUtils.areEquals(tabId, 'reference')) {
@@ -161,16 +193,18 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   };
 
-  const manageDialogs = (dialog, value) => dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+  const manageDialogs = (dialog, value) => {
+    dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+  };
 
-  const onCreateDataflow = () => {
-    manageDialogs('isAddDialogVisible', false);
+  const onCreateDataflow = dialog => {
+    manageDialogs(dialog, false);
     onRefreshToken();
   };
 
-  const onCreateReferenceDataflow = () => {
-    manageDialogs('isReferencedDataflowDialogVisible', false);
-    onRefreshToken();
+  const onHideObligationDialog = () => {
+    manageDialogs('isReportingObligationsDialogVisible', false);
+    setObligationToPrevious();
   };
 
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
@@ -215,6 +249,28 @@ const Dataflows = withRouter(({ history, match }) => {
     />
   );
 
+  const renderObligationFooter = () => (
+    <Fragment>
+      <Button
+        icon="check"
+        label={resources.messages['ok']}
+        onClick={() => {
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          setToCheckedObligation();
+        }}
+      />
+      <Button
+        className="p-button-secondary button-right-aligned p-button-animated-blink"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => {
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          setObligationToPrevious();
+        }}
+      />
+    </Fragment>
+  );
+
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
@@ -222,7 +278,7 @@ const Dataflows = withRouter(({ history, match }) => {
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
-            dataflows: dataflowsState['dataflows'],
+            reporting: dataflowsState['reporting'],
             business: dataflowsState['business'],
             reference: dataflowsState['reference']
           }}
@@ -245,16 +301,39 @@ const Dataflows = withRouter(({ history, match }) => {
         <ManageReferenceDataflow
           isVisible={dataflowsState.isReferencedDataflowDialogVisible}
           manageDialogs={manageDialogs}
-          onManage={onCreateReferenceDataflow}
+          onCreateDataflow={onCreateDataflow}
+        />
+      )}
+
+      {dataflowsState.isBusinessDataflowDialogVisible && (
+        <ManageBusinessDataflow
+          isVisible={dataflowsState.isBusinessDataflowDialogVisible}
+          manageDialogs={manageDialogs}
+          obligation={obligation}
+          onCreateDataflow={onCreateDataflow}
+          resetObligations={resetObligations}
         />
       )}
 
       <DataflowManagement
         isEditForm={false}
         manageDialogs={manageDialogs}
+        obligation={obligation}
         onCreateDataflow={onCreateDataflow}
+        resetObligations={resetObligations}
         state={dataflowsState}
       />
+
+      {dataflowsState.isReportingObligationsDialogVisible && (
+        <Dialog
+          footer={renderObligationFooter()}
+          header={resources.messages['reportingObligations']}
+          onHide={onHideObligationDialog}
+          style={{ width: '95%' }}
+          visible={dataflowsState.isReportingObligationsDialogVisible}>
+          <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
+        </Dialog>
+      )}
     </div>
   );
 });

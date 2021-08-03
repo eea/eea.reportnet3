@@ -7,7 +7,6 @@ import isNull from 'lodash/isNull';
 
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import UniqueComponentId from 'ui/views/_functions/PrimeReact/UniqueComponentId';
 
 import './TabView.scss';
 import styles from './TabView.module.css';
@@ -28,7 +27,7 @@ const TabView = withRouter(
     designMode = false,
     hasQueryString = true,
     history,
-    id = null,
+    name,
     initialTabIndexDrag,
     isErrorDialogVisible,
     isDataflowOpen,
@@ -51,7 +50,7 @@ const TabView = withRouter(
     viewType
   }) => {
     const [activeIdx, setActiveIdx] = useState(activeIndex);
-    const [idx] = useState(id || UniqueComponentId());
+    const [idx] = useState(name);
     const [tableSchemaIdToDeleteToDelete, setTableSchemaIdToDelete] = useState(null);
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [isNavigationHidden, setIsNavigationHidden] = useState(true);
@@ -344,7 +343,7 @@ const TabView = withRouter(
     };
 
     return (
-      <div className={classNamed} id={id} style={style}>
+      <div className={classNamed} id={name} style={style}>
         {renderNavigator()}
         {renderContent()}
         {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
@@ -356,7 +355,7 @@ TabView.propTypes = {
   activeIndex: PropTypes.number,
   checkEditingTabs: PropTypes.func,
   className: PropTypes.string,
-  id: PropTypes.string,
+  name: PropTypes.string,
   onTabAdd: PropTypes.func,
   onTabAddCancel: PropTypes.func,
   onTabChange: PropTypes.func,

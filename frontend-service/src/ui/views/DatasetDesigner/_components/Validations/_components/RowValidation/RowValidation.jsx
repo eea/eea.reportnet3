@@ -734,6 +734,7 @@ export const RowValidation = ({ datasetId, tabs }) => {
           <TabView
             activeIndex={tabMenuActiveItem}
             className={styles.tabView}
+            name="RowValidation"
             onTabChange={e => onTabChange(e.index)}
             renderActiveOnly={false}>
             {tabContents}

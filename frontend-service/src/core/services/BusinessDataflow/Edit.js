@@ -1,2 +1,7 @@
-export const Edit = ({ businessDataflowRepository }) => async (dataflowId, description, name, type) =>
-  businessDataflowRepository.edit(dataflowId, description, name, type);
+export const Edit = ({ businessDataflowRepository }) => async (
+  dataflowId,
+  description,
+  name,
+  groupCompaniesId,
+  fmeUserId
+) => businessDataflowRepository.edit(dataflowId, description, name, groupCompaniesId, fmeUserId);
