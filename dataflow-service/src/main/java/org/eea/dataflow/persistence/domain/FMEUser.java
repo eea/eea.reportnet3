@@ -30,7 +30,7 @@ public class FMEUser {
 
   /** The user name. */
   @Column(name = "USER_NAME")
-  private String userName;
+  private String username;
 
   /** The password. */
   @Column(name = "PASSWORD")
