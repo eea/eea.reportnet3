@@ -44,7 +44,7 @@ export const ManageReferenceDataflow = ({
   onCreateDataflow
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
-  const INPUT_MAX_LENGTH = 255;
+
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -71,7 +71,7 @@ export const ManageReferenceDataflow = ({
 
   const checkErrors = () => {
     let hasErrors = false;
-    if (description.length > INPUT_MAX_LENGTH) {
+    if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',
         hasErrors: true,
@@ -80,7 +80,7 @@ export const ManageReferenceDataflow = ({
       hasErrors = true;
     }
 
-    if (name.length > INPUT_MAX_LENGTH) {
+    if (name.length > config.INPUT_MAX_LENGTH) {
       handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameValidationMax'] });
       hasErrors = true;
     }

@@ -48,7 +48,6 @@ export const ManageBusinessDataflow = ({
   resetObligations
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
-  const INPUT_MAX_LENGTH = 255;
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -103,7 +102,7 @@ export const ManageBusinessDataflow = ({
 
   const checkErrors = () => {
     let hasErrors = false;
-    if (description.length > INPUT_MAX_LENGTH) {
+    if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',
         hasErrors: true,
@@ -112,7 +111,7 @@ export const ManageBusinessDataflow = ({
       hasErrors = true;
     }
 
-    if (name.length > INPUT_MAX_LENGTH) {
+    if (name.length > config.INPUT_MAX_LENGTH) {
       handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameValidationMax'] });
       hasErrors = true;
     }
@@ -251,7 +250,7 @@ export const ManageBusinessDataflow = ({
           isEmpty(name) ||
           isEmpty(description) ||
           isNil(obligation.id) ||
-          isNil(selectedFmeUser.dataProviderGroupId) || // Todo change to userId
+          isNil(selectedFmeUser.id) ||
           isNil(selectedGroup.dataProviderGroupId) ||
           isSending
         }
