@@ -71,7 +71,11 @@ const downloadById = async dataflowId => {
 const downloadTemplateById = async dataProviderGroupId =>
   await apiRepresentative.downloadTemplateById(dataProviderGroupId);
 
-const getProviderTypes = async () => await apiRepresentative.getProviderTypes();
+const getFmeUsers = async () => await apiRepresentative.getFmeUsers();
+
+const getGroupCompanies = async () => await apiRepresentative.getGroupCompanies();
+
+const getGroupProviders = async () => await apiRepresentative.getGroupProviders();
 
 const updateDataProviderId = async (representativeId, dataProviderId) =>
   await apiRepresentative.updateDataProviderId(representativeId, dataProviderId);
@@ -88,7 +92,9 @@ export const ApiRepresentativeRepository = {
   deleteLeadReporter,
   downloadById,
   downloadTemplateById,
-  getProviderTypes,
+  getFmeUsers,
+  getGroupCompanies,
+  getGroupProviders,
   updateDataProviderId,
   updateLeadReporter
 };

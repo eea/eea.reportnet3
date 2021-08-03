@@ -27,7 +27,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   const userContext = useContext(UserContext);
 
   const [dataToFilter, setDataToFilter] = useState({
-    dataflows: content['dataflows'],
+    reporting: content['reporting'],
     business: content['business'],
     reference: content['reference']
   });
@@ -130,7 +130,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   };
 
   const filterOptions = {
-    dataflows: [
+    reporting: [
       {
         type: 'input',
         properties: [
@@ -166,7 +166,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
 
   const renderDataflowItem = dataflow => {
     switch (visibleTab) {
-      case 'dataflows':
+      case 'reporting':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
       case 'business':
@@ -208,12 +208,12 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   return (
     <div className={`${styles.wrap} ${className}`}>
       <div className="dataflowList-filters-help-step">
-        {visibleTab === 'dataflows' && (
+        {visibleTab === 'reporting' && (
           <Filters
             className={'dataflowsListFilters'}
-            data={dataToFilter['dataflows']}
+            data={dataToFilter['reporting']}
             getFilteredData={onLoadFilteredData}
-            options={filterOptions['dataflows']}
+            options={filterOptions['reporting']}
             sortCategory={'pinned'}
             sortable={true}
           />
