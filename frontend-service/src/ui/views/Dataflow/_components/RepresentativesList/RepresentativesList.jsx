@@ -122,7 +122,7 @@ const RepresentativesList = ({
         payload: { responseAllDataProviders, providersNoSelect }
       });
     } catch (error) {
-      console.error('error on RepresentativeService.allDataProviders', error);
+      console.error(error);
     }
   };
 
@@ -147,7 +147,7 @@ const RepresentativesList = ({
         payload: { response: responseAllRepresentatives, parsedLeadReporters }
       });
     } catch (error) {
-      console.error('error on RepresentativeService.allRepresentatives', error);
+      console.error(error);
       notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' });
     }
   };
@@ -180,7 +180,7 @@ const RepresentativesList = ({
 
         formDispatcher({ type: 'REFRESH' });
       } catch (error) {
-        console.error('error on RepresentativeService.add', error);
+        console.error(error);
         notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' });
       } finally {
         formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
@@ -211,7 +211,7 @@ const RepresentativesList = ({
         );
         formDispatcher({ type: 'REFRESH' });
       } catch (error) {
-        console.error('error on RepresentativeService.updateDataProviderId', error);
+        console.error(error);
         notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' });
       } finally {
         formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
@@ -239,7 +239,7 @@ const RepresentativesList = ({
 
       formDispatcher({ type: 'DELETE_REPRESENTATIVE', payload: { updatedList } });
     } catch (error) {
-      console.error('error on RepresentativeService.deleteById: ', error);
+      console.error(error);
       notificationContext.add({ type: 'DELETE_REPRESENTATIVE_ERROR' });
     } finally {
       formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' });
@@ -256,7 +256,7 @@ const RepresentativesList = ({
         formDispatcher({ type: 'REFRESH' });
       }
     } catch (error) {
-      console.error('error on RepresentativeService.deleteLeadReporter', error);
+      console.error(error);
       notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
     } finally {
       handleDialogs('deleteLeadReporter', false);
@@ -301,7 +301,7 @@ const RepresentativesList = ({
             formDispatcher({ type: 'REFRESH' });
           }
         } catch (error) {
-          console.error('error on RepresentativeService.addLeadReporter', error);
+          console.error(error);
 
           onCreateError(dataProviderId, hasErrors, leadReporter.id);
         }
