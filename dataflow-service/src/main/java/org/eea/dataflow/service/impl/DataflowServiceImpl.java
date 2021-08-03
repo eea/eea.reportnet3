@@ -289,6 +289,42 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
 
+  @Override
+  public List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+
+    // Get user's dataflows sorted by status and creation date
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (null != idsResources && !idsResources.isEmpty()) {
+      dataflowRepository.findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources)
+          .forEach(dataflow -> {
+            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+            if (!map.isEmpty() && null != datasetsStatusList) {
+              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+            }
+            dataflowVOs.add(dataflowVO);
+          });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
+    }
+
+    return dataflowVOs;
+  }
+
+
+
   /**
    * Sets the reporting dataset status.
    *
@@ -454,9 +490,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
-
-    userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
-        ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    if (dataflowVO.getType() != TypeDataflowEnum.BUSINESS) {
+      userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
+          ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    }
     return dataFlowSaved.getId();
   }
 
@@ -779,6 +816,16 @@ public class DataflowServiceImpl implements DataflowService {
     return reference;
   }
 
+  /**
+   * Checks if is admin.
+   *
+   * @return true, if is admin
+   */
+  public boolean isAdmin() {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
+  }
   /**
    * Sets the reportings.
    *
