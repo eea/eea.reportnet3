@@ -78,16 +78,16 @@ const Dataflows = withRouter(({ history, match }) => {
     setToCheckedObligation
   } = useReportingObligations();
 
-  const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+  const { activeIndex, loadingStatus } = dataflowsState;
 
-  const tabMenuItems = isCustodian
+  const tabMenuItems = dataflowsState.isCustodian
     ? [
-        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
         { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
       ]
     : [
-        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
       ];
 
@@ -104,20 +104,28 @@ const Dataflows = withRouter(({ history, match }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
 
-    const createBtn = {
+    const createReportingDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: (tabId !== 'business' && isCustodian) || (tabId !== 'business' && isAdmin),
+      isVisible: tabId === 'reporting' && dataflowsState.isCustodian,
       label: 'createNewDataflow',
-      onClick: () =>
-        manageDialogs(tabId === 'dataflows' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible', true),
+      onClick: () => manageDialogs('isAddDialogVisible', true),
       title: 'createNewDataflow'
     };
 
-    const createBusinessBtn = {
+    const createReferenceDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'business' && isAdmin,
+      isVisible: tabId === 'reference' && dataflowsState.isCustodian,
+      label: 'createNewDataflow',
+      onClick: () => manageDialogs('isReferencedDataflowDialogVisible', true),
+      title: 'createNewDataflow'
+    };
+
+    const createBusinessDataflowBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'plus',
+      isVisible: tabId === 'business' && dataflowsState.isAdmin,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
       title: 'createNewDataflow'
@@ -126,13 +134,17 @@ const Dataflows = withRouter(({ history, match }) => {
     const userListBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'users',
-      isVisible: isNationalCoordinator,
+      isVisible: dataflowsState.isNationalCoordinator,
       label: 'allDataflowsUserList',
       onClick: () => manageDialogs('isUserListVisible', true),
       title: 'allDataflowsUserList'
     };
 
-    leftSideBarContext.addModels([createBusinessBtn, createBtn, userListBtn].filter(button => button.isVisible));
+    leftSideBarContext.addModels(
+      [createBusinessDataflowBtn, createReferenceDataflowBtn, createReportingDataflowBtn, userListBtn].filter(
+        button => button.isVisible
+      )
+    );
   }, [dataflowsState.isAdmin, dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
 
   useEffect(() => {
@@ -160,9 +172,9 @@ const Dataflows = withRouter(({ history, match }) => {
     setLoading(true);
 
     try {
-      if (TextUtils.areEquals(tabId, 'dataflows')) {
+      if (TextUtils.areEquals(tabId, 'reporting')) {
         const { data } = await DataflowService.all(userContext.contextRoles);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'dataflows' } });
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
       }
 
       if (TextUtils.areEquals(tabId, 'reference')) {
@@ -266,7 +278,7 @@ const Dataflows = withRouter(({ history, match }) => {
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
-            dataflows: dataflowsState['dataflows'],
+            reporting: dataflowsState['reporting'],
             business: dataflowsState['business'],
             reference: dataflowsState['reference']
           }}
