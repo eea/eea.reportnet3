@@ -161,8 +161,8 @@ export const ManageBusinessDataflow = ({
           description,
           obligation.id,
           'BUSINESS',
-          selectedGroup.dataProviderGroupId, // groupCompaniesId,
-          selectedFmeUser.dataProviderGroupId // Todo change to userId
+          selectedGroup.dataProviderGroupId,
+          selectedFmeUser.dataProviderGroupId
         );
         if (status >= 200 && status <= 299) {
           if (pinDataflow) {
