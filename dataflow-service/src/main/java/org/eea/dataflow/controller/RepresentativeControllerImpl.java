@@ -118,7 +118,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataProvider/countryGroup", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataProvider/countryGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
@@ -133,7 +133,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataProvider/companyGroup", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataProvider/companyGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('ADMIN')")
   @ApiOperation(value = "Find all DataProvider business types",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
