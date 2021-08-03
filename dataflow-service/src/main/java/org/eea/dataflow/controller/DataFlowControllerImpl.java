@@ -181,6 +181,31 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+  /**
+   * Find business dataflows.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('ADMIN')")
+  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Business Dataflows for the logged User",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findBusinessDataflows() {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      dataflows = dataflowService.getBusinessDataflows(userId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+  }
+
 
   /**
    * Find completed.
@@ -273,7 +298,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @LockMethod
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','DATA_REQUESTER')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','DATA_REQUESTER','ADMIN')")
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Create one Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
@@ -287,9 +312,12 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     String message = "";
     HttpStatus status = HttpStatus.OK;
-
+    if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && !dataflowService.isAdmin()) {
+      message = EEAErrorMessage.UNAUTHORIZED;
+      status = HttpStatus.UNAUTHORIZED;
+    }
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
-    if (!TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+    if (status == HttpStatus.OK && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
         && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
             || dataFlowVO.getDeadlineDate().equals(dateToday))) {
 
@@ -323,6 +351,8 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     return new ResponseEntity<>(message, status);
   }
+
+
 
   /**
    * Update data flow.
@@ -588,4 +618,5 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return false;
   }
+
 }
