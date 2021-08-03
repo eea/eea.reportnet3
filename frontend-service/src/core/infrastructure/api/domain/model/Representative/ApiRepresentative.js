@@ -49,9 +49,17 @@ const apiRepresentative = {
     await HTTPRequester.download({
       url: getUrl(RepresentativeConfig.exportRepresentativesTemplate, { dataProviderGroupId })
     }),
-  getProviderTypes: async () =>
+  getFmeUsers: async () =>
     await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.getProviderTypes, {})
+      url: getUrl(RepresentativeConfig.getFmeUsers, {})
+    }),
+  getGroupCompanies: async () =>
+    await HTTPRequester.get({
+      url: getUrl(RepresentativeConfig.getGroupCompanies, {})
+    }),
+  getGroupProviders: async () =>
+    await HTTPRequester.get({
+      url: getUrl(RepresentativeConfig.getGroupProviders, {})
     }),
   updateDataProviderId: async (representativeId, dataProviderId) =>
     await HTTPRequester.update({

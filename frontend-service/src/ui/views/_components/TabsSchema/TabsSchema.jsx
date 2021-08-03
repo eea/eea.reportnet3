@@ -107,6 +107,7 @@ export const TabsSchema = ({
             )
           : 0
       }
+      name="TabsSchema"
       onTabChange={onTabChange}
       renderActiveOnly={false}
       tableSchemaId={tableSchemaId}>

@@ -6,7 +6,9 @@ import { Delete } from './Delete';
 import { DeleteLeadReporter } from './DeleteLeadReporter';
 import { Download } from './Download';
 import { DownloadTemplate } from './DownloadTemplate';
-import { GetProviderTypes } from './GetProviderTypes';
+import { GetFmeUsers } from './GetFmeUsers';
+import { GetGroupCompanies } from './GetGroupCompanies';
+import { GetGroupProviders } from './GetGroupProviders';
 import { Update } from './Update';
 import { UpdateDataProviderId } from './UpdateDataProviderId';
 import { UpdateLeadReporter } from './UpdateLeadReporter';
@@ -22,7 +24,9 @@ export const RepresentativeService = {
   deleteLeadReporter: DeleteLeadReporter({ representativeRepository }),
   downloadById: Download({ representativeRepository }),
   downloadTemplateById: DownloadTemplate({ representativeRepository }),
-  getProviderTypes: GetProviderTypes({ representativeRepository }),
+  getFmeUsers: GetFmeUsers({ representativeRepository }),
+  getGroupCompanies: GetGroupCompanies({ representativeRepository }),
+  getGroupProviders: GetGroupProviders({ representativeRepository }),
   update: Update({ representativeRepository }),
   updateDataProviderId: UpdateDataProviderId({ representativeRepository }),
   updateLeadReporter: UpdateLeadReporter({ representativeRepository })
