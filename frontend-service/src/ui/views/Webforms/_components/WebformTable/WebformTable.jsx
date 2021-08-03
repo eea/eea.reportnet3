@@ -133,7 +133,7 @@ export const WebformTable = ({
           onUpdateData();
         }
       } catch (error) {
-        console.error('error', error);
+        console.error('WebformTable - onAddMultipleWebform', error);
         if (error.response.status === 423) {
           notificationContext.add({
             type: 'GENERIC_BLOCKED_ERROR'
@@ -193,8 +193,7 @@ export const WebformTable = ({
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
     } catch (error) {
-      console.error('ERROR', error);
-
+      console.error('WebformTable - onLoadTableData', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

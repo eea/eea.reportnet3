@@ -59,7 +59,7 @@ const ReportnetLogin = ({ history }) => {
         userContext.onLogin(userObject);
         history.push(getUrl(routes.DATAFLOWS));
       } catch (error) {
-        console.error(error);
+        console.error('ReportnetLogin - onLogin', error);
         notificationContext.add({
           type: 'USER_SERVICE_OLD_LOGIN_ERROR',
           content: {}
@@ -68,7 +68,6 @@ const ReportnetLogin = ({ history }) => {
         const errorResponse = error.response;
         if (!isUndefined(errorResponse) && errorResponse.status === 500) {
           setLoginError(resources.messages['loginFormError']);
-          console.error(errorResponse.data.message);
         }
       }
       setIsSubmitting(false);

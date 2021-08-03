@@ -34,7 +34,7 @@ const EULogin = ({ location, history }) => {
         history.push(getUrl(routes.ACCESS_POINT));
       }
     } catch (error) {
-      console.error('error: ', error);
+      console.error('EULogin - onLogin', error);
       history.push(getUrl(routes.ACCESS_POINT));
     }
   };

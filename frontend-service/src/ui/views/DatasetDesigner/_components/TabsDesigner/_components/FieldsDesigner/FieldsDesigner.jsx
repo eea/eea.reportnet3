@@ -280,7 +280,7 @@ export const FieldsDesigner = ({
         setFields(inmFields);
       }
     } catch (error) {
-      console.error('Error during field delete');
+      console.error('FieldsDesigner - deleteField', error);
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       }
@@ -567,7 +567,7 @@ export const FieldsDesigner = ({
         onChangeFields(inmFields, false, table.tableSchemaId);
       }
     } catch (error) {
-      console.error(`There has been an error during the field reorder: ${error}`);
+      console.error('FieldsDesigner - reorderField', error);
     }
   };
 
@@ -592,7 +592,7 @@ export const FieldsDesigner = ({
         onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
       }
     } catch (error) {
-      console.error(`Error during table description update: ${error}`);
+      console.error('FieldsDesigner - updateTableDesign', error);
     }
   };
 
@@ -617,6 +617,7 @@ export const FieldsDesigner = ({
       );
       setExportTableSchema(data);
     } catch (error) {
+      console.error('FieldsDesigner - onExportTableSchema', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

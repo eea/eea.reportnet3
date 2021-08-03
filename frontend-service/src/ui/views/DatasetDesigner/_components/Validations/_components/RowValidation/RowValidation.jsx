@@ -304,10 +304,10 @@ export const RowValidation = ({ datasetId, tabs }) => {
       await ValidationService.createRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
+      console.error('RowValidation - onCreateValidationRule', error);
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
-      console.error('onCreateValidationRule error', error);
     } finally {
       setIsSubmitDisabled(false);
     }
@@ -331,10 +331,10 @@ export const RowValidation = ({ datasetId, tabs }) => {
       await ValidationService.updateRowRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
+      console.error('RowValidation - onUpdateValidationRule', error);
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });
-      console.error('onUpdateValidationRule error', error);
     } finally {
       setIsSubmitDisabled(false);
     }

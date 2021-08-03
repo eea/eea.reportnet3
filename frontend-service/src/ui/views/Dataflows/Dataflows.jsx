@@ -187,6 +187,7 @@ const Dataflows = withRouter(({ history, match }) => {
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {
+      console.error('Dataflows - getDataflows', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
     } finally {
       setLoading(false);
@@ -227,6 +228,7 @@ const Dataflows = withRouter(({ history, match }) => {
       const userObject = await UserService.refreshToken();
       userContext.onTokenRefresh(userObject);
     } catch (error) {
+      console.error('Dataflows - onRefreshToken', error);
       await UserService.logout();
       userContext.onLogout();
     }

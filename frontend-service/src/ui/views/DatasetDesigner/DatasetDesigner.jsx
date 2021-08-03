@@ -424,6 +424,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         }
       });
     } catch (error) {
+      console.error('DatasetDesigner - getFileExtensions', error);
       notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
     }
   };
@@ -432,6 +433,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
+      console.error('DatasetDesigner - getMetadata', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     } finally {
       setIsLoading(false);
@@ -443,7 +445,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
       return statistics.data;
     } catch (error) {
-      console.error(error);
+      console.error('DatasetDesigner - getStatisticsById', error);
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
   };
@@ -475,7 +477,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       designerDispatch({ type: 'SET_AVAILABLE_PUBLIC_VIEW', payload: checked });
       await DatasetService.updateDatasetSchemaDesign(datasetId, { availableInPublic: checked });
     } catch (error) {
-      console.error('Error during datasetSchema Available in public view update: ', error);
+      console.error('DatasetDesigner - onChangeAvailableInPublicView', error);
     }
   };
 
@@ -484,7 +486,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       designerDispatch({ type: 'SET_REFERENCE_DATASET', payload: checked });
       await DatasetService.updateDatasetSchemaDesign(datasetId, { referenceDataset: checked });
     } catch (error) {
-      console.error('Error during datasetSchema reference dataset update: ', error);
+      console.error('DatasetDesigner - onChangeReferenceDataset', error);
     }
   };
 
@@ -556,6 +558,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
+        console.error('DatasetDesigner - onConfirmValidate', error);
         notificationContext.add({
           type: 'VALIDATE_DATA_BY_ID_ERROR',
           content: {
@@ -589,6 +592,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
+      console.error('DatasetDesigner - onExportDataExternalIntegration', error);
       onExportError('EXTERNAL_EXPORT_DESIGN_FAILED_EVENT');
     }
   };
@@ -600,6 +604,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
+      console.error('DatasetDesigner - onExportDataInternalExtension', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
     }
   };
@@ -707,7 +712,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       getDatasetSchemaId();
       getDatasetSchemas();
     } catch (error) {
-      console.error(`Error while loading schema: ${error}`);
+      console.error('DatasetDesigner - onLoadSchema', error);
     }
   };
 
@@ -766,19 +771,17 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       const descriptionObject = { description: description };
       await DatasetService.updateDatasetSchemaDesign(datasetId, descriptionObject);
     } catch (error) {
-      console.error('Error during datasetSchema Description update: ', error);
+      console.error('DatasetDesigner - onUpdateDescription', error);
     }
   };
 
   const onUpdateWebform = async () => {
     try {
       const webformObject = { webform: { name: designerState.selectedWebform.value } };
-      const response = await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
-      if (response.status >= 200 && response.status <= 299) {
-        onLoadSchema();
-      }
+      await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
+      onLoadSchema();
     } catch (error) {
-      console.error('Error during datasetSchema Webform update: ', error);
+      console.error('DatasetDesigner - onUpdateWebform', error);
     } finally {
       onCloseConfigureWebformModal();
     }
@@ -808,7 +811,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         }
       });
     } catch (error) {
-      console.error('error', error);
+      console.error('DatasetDesigner - onUpload', error);
       notificationContext.add({
         type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
         content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
@@ -866,6 +869,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
+        console.error('DatasetDesigner - onImportOtherSystems', error);
         notificationContext.add({
           type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
           content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
@@ -879,7 +883,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
     } catch (error) {
-      console.error('error', error);
+      console.error('DatasetDesigner - validateQcRules', error);
     }
   };
 
@@ -965,6 +969,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       await ValidationService.generateFile(datasetId);
     } catch (error) {
+      console.error('DatasetDesigner - onDownloadValidations', error);
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
 
       setIsDownloadingValidations(false);

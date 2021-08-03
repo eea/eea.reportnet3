@@ -247,6 +247,7 @@ export const PublicDataflowInformation = withRouter(
         }
         DownloadFile(fileContent.data, fileName);
       } catch (error) {
+        console.error('PublicDataflowInformation - onFileDownload', error);
         if (error.response.status === 404) {
           notificationContext.add({
             type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
@@ -266,7 +267,7 @@ export const PublicDataflowInformation = withRouter(
         parseDataflowData(data.datasets);
         setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
-        console.error('error', error);
+        console.error('PublicDataflowInformation - onLoadDataflowData', error);
         if (error.response.status === 404 || error.response.status === 400) {
           setIsWrongUrlDataflowId(true);
         } else {

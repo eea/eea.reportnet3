@@ -41,17 +41,17 @@ export const DataflowDashboards = withRouter(
 
     useEffect(() => {
       leftSideBarContext.removeModels();
-      try {
-        getDataflowName();
-        onLoadDataSchemas();
-      } catch (error) {
-        console.error(error.response);
-      }
+      getDataflowName();
+      onLoadDataSchemas();
     }, []);
 
     const getDataflowName = async () => {
-      const { data } = await DataflowService.dataflowDetails(dataflowId);
-      setDataflowName(data.name);
+      try {
+        const { data } = await DataflowService.dataflowDetails(dataflowId);
+        setDataflowName(data.name);
+      } catch (error) {
+        console.error('DataflowDashboards - getDataflowName', error);
+      }
     };
 
     const onLoadDataSchemas = async () => {
@@ -62,6 +62,7 @@ export const DataflowDashboards = withRouter(
           data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))
         );
       } catch (error) {
+        console.error('DataflowDashboards - onLoadDataSchemas', error);
         if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
           history.push(getUrl(routes.DATAFLOWS));
         }

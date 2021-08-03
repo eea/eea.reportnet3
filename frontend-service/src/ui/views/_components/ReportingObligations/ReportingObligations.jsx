@@ -108,6 +108,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       const countries = await ObligationService.getCountries();
       reportingObligationDispatch({ type: 'ON_LOAD_COUNTRIES', payload: { countries } });
     } catch (error) {
+      console.error('ReportingObligations - onLoadCountries', error);
       notificationContext.add({ type: 'LOAD_COUNTRIES_ERROR' });
     }
   };
@@ -117,6 +118,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       const issues = await ObligationService.getIssues();
       reportingObligationDispatch({ type: 'ON_LOAD_ISSUES', payload: { issues } });
     } catch (error) {
+      console.error('ReportingObligations - onLoadIssues', error);
       notificationContext.add({ type: 'LOAD_ISSUES_ERROR' });
     }
   };
@@ -126,6 +128,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       const organizations = await ObligationService.getOrganizations();
       reportingObligationDispatch({ type: 'ON_LOAD_ORGANIZATIONS', payload: { organizations } });
     } catch (error) {
+      console.error('ReportingObligations - onLoadOrganizations', error);
       notificationContext.add({ type: 'LOAD_ORGANIZATIONS_ERROR' });
     }
   };
@@ -149,6 +152,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         }
       });
     } catch (error) {
+      console.error('ReportingObligations - onLoadReportingObligations', error);
       notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' });
     } finally {
       isLoading(false);

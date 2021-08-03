@@ -101,7 +101,7 @@ export const WebformField = ({
         onToggleDeleteAttachmentDialogVisible(false);
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('WebformField - onConfirmDeleteAttachment', error);
     }
   };
 
@@ -111,7 +111,7 @@ export const WebformField = ({
 
       DownloadFile(data, fileName);
     } catch (error) {
-      console.error('error', error);
+      console.error('WebformField - onFileDownload', error);
     }
   };
 
@@ -176,7 +176,7 @@ export const WebformField = ({
 
       webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
     } catch (error) {
-      console.error(`Error getting referenced link values: ${error}`);
+      console.error('WebformField - onFilter', error);
       notificationContext.add({
         type: 'GET_REFERENCED_LINK_VALUES_ERROR'
       });
@@ -228,6 +228,7 @@ export const WebformField = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
+        console.error('WebformField - onEditorSubmitValue', error);
         if (updateInCascade) {
           notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' });
         } else {

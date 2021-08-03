@@ -34,16 +34,10 @@ export const ReleasedDatasetsDashboard = dataflowId => {
       const { data } = await DataflowService.datasetsReleasedStatus(dataflowId.dataflowId);
       setReleasedDashboardData(buildReleasedDashboardObject(data));
     } catch (error) {
-      onErrorLoadingDashboard(error);
+      console.error('ReleasedDatasetsDashboard - onLoadDashboard', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const onErrorLoadingDashboard = error => {
-    console.error('Released dashboard error: ', error);
-    const errorResponse = error.response;
-    console.error('Released dashboard errorResponse: ', errorResponse);
   };
 
   const getMaxOfArrays = (releasedNumArr, unReleasedNumArr) => {
@@ -67,13 +61,6 @@ export const ReleasedDatasetsDashboard = dataflowId => {
     tooltips: {
       mode: 'point',
       intersect: true
-      // callbacks: {
-      //   label: (tooltipItems, data) =>
-      //     `${tooltipItems.yLabel} ${data.datasets[tooltipItems.datasetIndex].label}: ${
-      //       data.datasets[tooltipItems.datasetIndex]
-      //     }
-      //     `
-      // }
     },
     legend: {
       display: false
@@ -85,10 +72,6 @@ export const ReleasedDatasetsDashboard = dataflowId => {
         {
           stacked: true,
           gridLines: { display: false }
-          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' },
-          // ticks: {
-          //   fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
-          // }
         }
       ],
       yAxes: [
@@ -103,10 +86,8 @@ export const ReleasedDatasetsDashboard = dataflowId => {
               }
             },
             stepSize: 10
-            // fontColor: themeContext.currentTheme === 'light' ? '#707070' : '#fff'
           },
           gridLines: { display: false }
-          // gridLines: { color: themeContext.currentTheme === 'light' ? '#cfcfcf' : '#fff' }
         }
       ]
     }

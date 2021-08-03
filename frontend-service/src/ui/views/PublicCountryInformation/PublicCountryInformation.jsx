@@ -142,9 +142,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       } else {
         fileContent = await DatasetService.downloadReferenceDatasetFileData(dataflowId, fileName);
       }
-
       DownloadFile(fileContent.data, fileName);
     } catch (error) {
+      console.error('PublicCountryInformation - onFileDownload', error);
       if (error.response.status === 404) {
         notificationContext.add({
           type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
@@ -174,6 +174,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       setTotalRecords(data.totalRecords);
       parseDataflows(data.publicDataflows);
     } catch (error) {
+      console.error('PublicCountryInformation - onLoadPublicCountryInformation', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
     } finally {
       setIsLoading(false);

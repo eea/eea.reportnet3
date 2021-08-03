@@ -98,13 +98,7 @@ export const TableManagement = ({
         disabled={isSaving}
         icon={isSaving === true ? 'spinnerAnimate' : 'check'}
         label={resources.messages['save']}
-        onClick={() => {
-          try {
-            onSaveRecord(selectedRecord);
-          } catch (error) {
-            console.error(error);
-          }
-        }}
+        onClick={() => onSaveRecord(selectedRecord)}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -202,12 +196,12 @@ export const TableManagement = ({
         onRefresh();
       }
     } catch (error) {
-      console.error('error', error);
       if (error.response.status === 423) {
         notificationContext.add({
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
+        console.error('TableManagement - onDeleteRow', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -278,6 +272,7 @@ export const TableManagement = ({
       tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
       await DatasetService.updateRecordsById(datasetId, record, updateInCascade);
     } catch (error) {
+      console.error('TableManagement - onSaveRecord', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

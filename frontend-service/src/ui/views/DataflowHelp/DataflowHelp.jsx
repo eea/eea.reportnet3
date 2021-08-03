@@ -122,6 +122,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       const { data } = await DataflowService.dataflowDetails(dataflowId);
       setDataflowName(data.name);
     } catch (error) {
+      console.error('DataflowHelp - getDataflowName', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
   };
@@ -138,6 +139,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
         return datasetSchema.data;
       }
     } catch (error) {
+      console.error('DataflowHelp - onLoadDatasetSchema', error);
       notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' });
     }
   };
@@ -173,6 +175,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
         }
       }
     } catch (error) {
+      console.error('DataflowHelp - onLoadDatasetsSchemas', error);
       notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} });
     }
   };
@@ -186,6 +189,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       const loadedDocuments = data.documents.sort(sortByProperty('description'));
       setDocuments(loadedDocuments);
     } catch (error) {
+      console.error('DataflowHelp - onLoadDocuments', error);
       notificationContext.add({ type: 'LOAD_DOCUMENTS_ERROR', content: {} });
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
@@ -202,10 +206,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       const loadedWebLinks = data.weblinks.sort(sortByProperty('description'));
       setWebLinks(loadedWebLinks);
     } catch (error) {
+      console.error('DataflowHelp - onLoadWebLinks', error);
       notificationContext.add({ type: 'LOAD_WEB_LINKS_ERROR', content: {} });
-      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        console.error('error', error.response);
-      }
     } finally {
       setIsLoadingWeblinks(false);
     }

@@ -98,14 +98,12 @@ export const NationalSystemsField = ({
         handleDialogs('deleteAttachment', false);
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('NationalSystemsField - onConfirmDeleteAttachment', error);
     }
   };
 
   const onEditorKeyChange = (event, field, option) => {
-    if (event.key === 'Enter') onEditorSubmitValue(field, option, event.target.value);
-
-    if (event.key === 'Tab') onEditorSubmitValue(field, option, event.target.value);
+    if (event.key === 'Enter' || event.key === 'Tab') onEditorSubmitValue(field, option, event.target.value);
   };
 
   const onEditorSubmitValue = async (field, option, value) => {
@@ -121,6 +119,7 @@ export const NationalSystemsField = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
+        console.error('NationalSystemsField - onEditorSubmitValue', error);
         notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' });
       }
     }
@@ -132,7 +131,7 @@ export const NationalSystemsField = ({
 
       DownloadFile(data, fileName);
     } catch (error) {
-      console.error('error', error);
+      console.error('NationalSystemsField - onFileDownload', error);
     }
   };
 

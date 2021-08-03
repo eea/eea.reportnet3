@@ -126,6 +126,7 @@ const ActionsToolbar = ({
       const { data } = await DatasetService.exportTableDataById(datasetId, tableId, fileType);
       setExportTableData(data);
     } catch (error) {
+      console.error('ActionsToolbar - onExportTableData', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

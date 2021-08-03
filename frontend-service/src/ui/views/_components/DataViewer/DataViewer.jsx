@@ -240,7 +240,7 @@ const DataViewer = withRouter(
 
         DownloadFile(data, fileName);
       } catch (error) {
-        console.error('error', error);
+        console.error('DataViewer - onFileDownload', error);
       }
     };
 
@@ -349,6 +349,7 @@ const DataViewer = withRouter(
         const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
         setDatasetSchemaId(metadata.datasetSchemaId);
       } catch (error) {
+        console.error('DataViewer - getMetadata', error);
         notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
       }
     };
@@ -358,6 +359,7 @@ const DataViewer = withRouter(
         const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
         setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
       } catch (error) {
+        console.error('DataViewer - getFileExtensions', error);
         notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
     };
@@ -425,7 +427,7 @@ const DataViewer = withRouter(
 
         setIsLoading(false);
       } catch (error) {
-        console.error({ error });
+        console.error('DataViewer - onFetchData');
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -627,6 +629,7 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
       } catch (error) {
+        console.error('DataViewer - onConfirmDeleteTable', error);
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
@@ -653,7 +656,7 @@ const DataViewer = withRouter(
           setIsDeleteAttachmentVisible(false);
         }
       } catch (error) {
-        console.error('error', error);
+        console.error('DataViewer - onConfirmDeleteAttachment');
       }
     };
 
@@ -669,6 +672,7 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
+        console.error('DataViewer - onConfirmDeleteRow', error);
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
@@ -741,6 +745,7 @@ const DataViewer = withRouter(
               throw new Error('UPDATE_FIELD_BY_ID_ERROR');
             }
           } catch (error) {
+            console.error('DataViewer - onEditorSubmitValue', error);
             if (error.response.status === 423) {
               notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
             } else {
@@ -804,6 +809,7 @@ const DataViewer = withRouter(
           setIsPasting(false);
         }
       } catch (error) {
+        console.error('DataViewer - onPasteAccept', error);
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
@@ -863,6 +869,7 @@ const DataViewer = withRouter(
           await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
           onRefresh();
         } catch (error) {
+          console.error('DataViewer - onSaveRecord - add', error);
           if (error.response.status === 423) {
             notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
           } else {
@@ -888,6 +895,7 @@ const DataViewer = withRouter(
           await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
           onRefresh();
         } catch (error) {
+          console.error('DataViewer - onSaveRecord - update', error);
           if (error.response.status === 423) {
             notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
           } else {
@@ -1009,7 +1017,7 @@ const DataViewer = withRouter(
             try {
               onSaveRecord(records.editedRecord);
             } catch (error) {
-              console.error(error);
+              console.error('DataViewer - editRowDialogFooter');
             }
           }}
         />

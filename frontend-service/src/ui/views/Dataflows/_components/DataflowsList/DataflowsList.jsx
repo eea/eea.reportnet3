@@ -62,6 +62,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     try {
       return await UserService.updateAttributes(userProperties);
     } catch (error) {
+      console.error('DataflowsList - changeUserProperties', error);
       notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });
     }
   };
