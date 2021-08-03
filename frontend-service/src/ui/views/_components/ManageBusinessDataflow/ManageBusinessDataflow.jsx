@@ -21,6 +21,7 @@ import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
 import { BusinessDataflowService } from 'core/services/BusinessDataflow';
+import { RepresentativeService } from 'core/services/Representative';
 
 import { LoadingContext } from 'ui/views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationContext';
@@ -79,19 +80,19 @@ export const ManageBusinessDataflow = ({
 
   const getGroupOfCompaniesList = async () => {
     try {
-      const providerTypes = await BusinessDataflowService.getBusinessTypes();
+      const providerTypes = await RepresentativeService.getGroupCompanies();
       setGroupOfCompanies(providerTypes.data);
     } catch (error) {
-      console.error('error on  BusinessDataflowService.getBusinessTypes', error);
+      console.error(error);
     }
   };
 
   const getFmeUsersList = async () => {
     try {
-      const fmeUsersList = await BusinessDataflowService.getFmeUsers();
+      const fmeUsersList = await RepresentativeService.getFmeUsers();
       setFmeUsers(fmeUsersList.data);
     } catch (error) {
-      console.error('error on  BusinessDataflowService.getFmeUsers', error);
+      console.error(error);
     }
   };
 
@@ -160,8 +161,8 @@ export const ManageBusinessDataflow = ({
           description,
           obligation.id,
           'BUSINESS',
-          selectedGroup.dataProviderGroupId, // groupCompaniesId,
-          selectedFmeUser.dataProviderGroupId // Todo change to userId
+          selectedGroup.dataProviderGroupId,
+          selectedFmeUser.dataProviderGroupId
         );
         if (status >= 200 && status <= 299) {
           if (pinDataflow) {

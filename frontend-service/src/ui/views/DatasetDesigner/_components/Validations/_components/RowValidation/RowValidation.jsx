@@ -735,6 +735,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
           <TabView
             activeIndex={tabMenuActiveItem}
             className={styles.tabView}
+            name="RowValidation"
             onTabChange={e => onTabChange(e.index)}
             renderActiveOnly={false}>
             {tabContents}

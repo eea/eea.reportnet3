@@ -697,7 +697,7 @@ const Dataflow = withRouter(({ history, match }) => {
         label={resources.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
-          setToCheckedObligation(); // sets previous and current obligation to selected
+          setToCheckedObligation();
         }}
       />
       <Button

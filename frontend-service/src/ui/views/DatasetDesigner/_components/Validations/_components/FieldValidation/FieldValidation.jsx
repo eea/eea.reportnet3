@@ -542,6 +542,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
           <TabView
             activeIndex={tabMenuActiveItem}
             className={styles.tabView}
+            name="FieldValidation"
             onTabChange={e => onTabChange(e.index)}
             renderActiveOnly={false}>
             {tabContents}

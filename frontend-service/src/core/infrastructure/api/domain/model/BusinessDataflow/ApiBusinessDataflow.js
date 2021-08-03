@@ -12,16 +12,6 @@ export const apiBusinessDataflow = {
     });
   },
 
-  getBusinessTypes: async () =>
-    await HTTPRequester.get({
-      url: getUrl(BusinessDataflowConfig.getBusinessTypes, {})
-    }),
-
-  getFmeUsers: async () =>
-    await HTTPRequester.get({
-      url: getUrl(BusinessDataflowConfig.getFmeUsers, {})
-    }),
-
   edit: async (dataflowId, description, name, type, groupCompaniesId, fmeUserId) =>
     await HTTPRequester.update({
       url: getUrl(BusinessDataflowConfig.createDataflow),
