@@ -83,7 +83,7 @@ export const ManageBusinessDataflow = ({
       const providerTypes = await RepresentativeService.getGroupCompanies();
       setGroupOfCompanies(providerTypes.data);
     } catch (error) {
-      console.error('ManageBusinessDataflow - getGroupOfCompaniesList', error);
+      console.error('ManageBusinessDataflow - getGroupOfCompaniesList.', error);
     }
   };
 
@@ -92,7 +92,7 @@ export const ManageBusinessDataflow = ({
       const fmeUsersList = await RepresentativeService.getFmeUsers();
       setFmeUsers(fmeUsersList.data);
     } catch (error) {
-      console.error('ManageBusinessDataflow - getFmeUsersList', error);
+      console.error('ManageBusinessDataflow - getFmeUsersList.', error);
     }
   };
 
@@ -137,7 +137,7 @@ export const ManageBusinessDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       }
     } catch (error) {
-      console.error('ManageBusinessDataflow - onDeleteDataflow', error);
+      console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();
@@ -188,7 +188,7 @@ export const ManageBusinessDataflow = ({
         handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameExists'] });
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
-        console.error('ManageBusinessDataflow - onManageBusinessDataflow', error);
+        console.error('ManageBusinessDataflow - onManageBusinessDataflow.', error);
         const notification = isEditing
           ? { type: 'BUSINESS_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
           : { type: 'BUSINESS_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };

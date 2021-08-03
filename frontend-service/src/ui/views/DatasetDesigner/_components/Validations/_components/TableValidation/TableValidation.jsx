@@ -379,7 +379,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
       await ValidationService.createTableRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
-      console.error('TableValidation - onCreateValidationRule', error);
+      console.error('TableValidation - onCreateValidationRule.', error);
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
@@ -406,7 +406,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs
       }
       onHide();
     } catch (error) {
-      console.error('TableValidation - onUpdateValidationRule', error);
+      console.error('TableValidation - onUpdateValidationRule.', error);
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });

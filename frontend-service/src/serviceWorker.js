@@ -80,7 +80,7 @@ function registerValidSW(swUrl, config) {
       };
     })
     .catch(error => {
-      console.error('ServiceWorker - registerValidSW', error);
+      console.error('ServiceWorker - registerValidSW.', error);
     });
 }
 

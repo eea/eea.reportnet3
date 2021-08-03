@@ -102,7 +102,7 @@ const DataflowManagementForm = forwardRef(
             onResetData();
           }
         } catch (error) {
-          console.error('DataflowManagementForm - onConfirm', error);
+          console.error('DataflowManagementForm - onConfirm.', error);
           if (error?.response?.data === 'Dataflow name already exists') {
             setErrors(previousErrors => {
               return {

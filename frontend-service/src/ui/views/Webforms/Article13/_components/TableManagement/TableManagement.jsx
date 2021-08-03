@@ -201,7 +201,7 @@ export const TableManagement = ({
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
-        console.error('TableManagement - onDeleteRow', error);
+        console.error('TableManagement - onDeleteRow.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -272,7 +272,7 @@ export const TableManagement = ({
       tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
       await DatasetService.updateRecordsById(datasetId, record, updateInCascade);
     } catch (error) {
-      console.error('TableManagement - onSaveRecord', error);
+      console.error('TableManagement - onSaveRecord.', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

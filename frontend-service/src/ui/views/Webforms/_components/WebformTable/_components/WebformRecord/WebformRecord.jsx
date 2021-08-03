@@ -89,7 +89,7 @@ export const WebformRecord = ({
         handleDialogs('deleteRow', false);
       }
     } catch (error) {
-      console.error('WebformRecord - onDeleteMultipleWebform', error);
+      console.error('WebformRecord - onDeleteMultipleWebform.', error);
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
@@ -113,7 +113,7 @@ export const WebformRecord = ({
     try {
       await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
     } catch (error) {
-      console.error('WebformRecord - onSaveField', error);
+      console.error('WebformRecord - onSaveField.', error);
     }
   };
 

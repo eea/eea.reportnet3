@@ -102,7 +102,7 @@ export const ManageReferenceDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       }
     } catch (error) {
-      console.error('ManageReferenceDataflows - onDeleteDataflow', error);
+      console.error('ManageReferenceDataflows - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();
@@ -141,7 +141,7 @@ export const ManageReferenceDataflow = ({
         handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameExists'] });
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
-        console.error('ManageReferenceDataflows - onManageReferenceDataflow', error);
+        console.error('ManageReferenceDataflows - onManageReferenceDataflow.', error);
         const notification = isEditing
           ? { type: 'REFERENCE_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
           : { type: 'REFERENCE_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };

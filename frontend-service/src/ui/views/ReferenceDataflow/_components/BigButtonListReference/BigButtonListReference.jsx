@@ -133,7 +133,7 @@ const BigButtonListReference = withRouter(
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
-          console.error('BigButtonListReference - cloneDatasetSchemas', error);
+          console.error('BigButtonListReference - cloneDatasetSchemas.', error);
           notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
         }
       }
@@ -150,7 +150,7 @@ const BigButtonListReference = withRouter(
       try {
         return await MetadataUtils.getMetadata(ids);
       } catch (error) {
-        console.error('BigButtonListReference - getMetadata', error);
+        console.error('BigButtonListReference - getMetadata.', error);
         notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
       }
     };
@@ -172,7 +172,7 @@ const BigButtonListReference = withRouter(
           );
         }
       } catch (error) {
-        console.error('BigButtonListReference - onDeleteDatasetSchema', error);
+        console.error('BigButtonListReference - onDeleteDatasetSchema.', error);
         if (error.response.status === 401) {
           notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
         }
@@ -191,7 +191,7 @@ const BigButtonListReference = withRouter(
       try {
         return await DataCollectionService.createReference(dataflowId, true);
       } catch (error) {
-        console.error('BigButtonListReference - onCreateReferenceDatasets', error);
+        console.error('BigButtonListReference - onCreateReferenceDatasets.', error);
         const {
           dataflow: { name: dataflowName }
         } = await getMetadata({ dataflowId });
@@ -216,7 +216,7 @@ const BigButtonListReference = withRouter(
       try {
         return await DataCollectionService.createReference(dataflowId, false);
       } catch (error) {
-        console.error('BigButtonListReference - onCreateReferenceDatasetsWithNoPKs', error);
+        console.error('BigButtonListReference - onCreateReferenceDatasetsWithNoPKs.', error);
         const {
           dataflow: { name: dataflowName }
         } = await getMetadata({ dataflowId });

@@ -105,7 +105,7 @@ const UserConfiguration = () => {
       const response = await UserService.updateAttributes(userProperties);
       return response;
     } catch (error) {
-      console.error('UserConfiguration - changeUserProperties', error);
+      console.error('UserConfiguration - changeUserProperties.', error);
       notificationContext.add({
         type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
       });

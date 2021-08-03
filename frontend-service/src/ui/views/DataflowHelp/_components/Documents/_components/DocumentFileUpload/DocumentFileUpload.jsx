@@ -162,7 +162,7 @@ const DocumentFileUpload = ({
           onUpload();
         }
       } catch (error) {
-        console.error('DocumentFileUpload - onConfirm', error);
+        console.error('DocumentFileUpload - onConfirm.', error);
         if (isEditForm) {
           notificationContext.add({
             type: 'DOCUMENT_EDITING_ERROR',

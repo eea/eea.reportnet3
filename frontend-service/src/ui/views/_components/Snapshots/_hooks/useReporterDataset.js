@@ -42,7 +42,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        console.error('useReporterDataset - onCreateSnapshot', error);
+        console.error('useReporterDataset - onCreateSnapshot.', error);
         notificationContext.add({ type: 'CREATE_BY_ID_REPORTER_ERROR', content: {} });
       }
     } finally {
@@ -58,7 +58,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        console.error('useReporterDataset - onDeleteSnapshot', error);
+        console.error('useReporterDataset - onDeleteSnapshot.', error);
         notificationContext.add({ type: 'DELETED_BY_ID_REPORTER_ERROR', content: {} });
       }
     } finally {
@@ -79,7 +79,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
-      console.error('useReporterDataset - onLoadSnapshotList', error);
+      console.error('useReporterDataset - onLoadSnapshotList.', error);
       notificationContext.add({ type: 'ALL_REPORTER_ERROR', content: {} });
       setIsLoadingSnapshotListData(false);
     }
@@ -93,7 +93,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        console.error('useReporterDataset - onRestoreSnapshot', error);
+        console.error('useReporterDataset - onRestoreSnapshot.', error);
         notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_FAILED_EVENT', content: {} });
       }
     } finally {

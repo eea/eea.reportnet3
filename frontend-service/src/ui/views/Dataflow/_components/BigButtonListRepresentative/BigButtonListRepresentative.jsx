@@ -75,7 +75,7 @@ export const BigButtonListRepresentative = ({
       downloadPdf(response.data);
       onCleanUpReceipt();
     } catch (error) {
-      console.error('BigButtonListRepresentative - onLoadReceiptData', error);
+      console.error('BigButtonListRepresentative - onLoadReceiptData.', error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });

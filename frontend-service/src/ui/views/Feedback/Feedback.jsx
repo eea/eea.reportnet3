@@ -157,7 +157,7 @@ export const Feedback = withRouter(({ match, history }) => {
       const name = await DataflowUtils.getDataflowName(dataflowId);
       dispatchFeedback({ type: 'SET_DATAFLOW_NAME', payload: name });
     } catch (error) {
-      console.error('Feedback - onGetDataflowName', error);
+      console.error('Feedback - onGetDataflowName.', error);
       notificationContext.add({
         type: 'DATAFLOW_DETAILS_ERROR',
         content: {}
@@ -201,7 +201,7 @@ export const Feedback = withRouter(({ match, history }) => {
       const { data } = await FeedbackService.loadMessages(dataflowId, page, dataProviderId);
       return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
     } catch (error) {
-      console.error('Feedback - onLoadMessages', error);
+      console.error('Feedback - onLoadMessages.', error);
     }
   };
 
@@ -233,7 +233,7 @@ export const Feedback = withRouter(({ match, history }) => {
           dispatchFeedback({ type: 'ON_SEND_MESSAGE', payload: { value: { ...messageCreated.data } } });
         }
       } catch (error) {
-        console.error('Feedback - onSendMessage', error);
+        console.error('Feedback - onSendMessage.', error);
       } finally {
         dispatchFeedback({ type: 'SET_IS_SENDING', payload: false });
       }

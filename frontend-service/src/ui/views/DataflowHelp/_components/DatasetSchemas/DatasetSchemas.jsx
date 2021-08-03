@@ -161,7 +161,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         setExtensionsOperationsList(!isUndefined(parsedExtensionsOperations) ? parsedExtensionsOperations : []);
       });
     } catch (error) {
-      console.error('DatasetSchemas - getExtensionsOperations', error);
+      console.error('DatasetSchemas - getExtensionsOperations.', error);
       const schemaError = {
         type: error.message
       };
@@ -231,7 +231,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         );
       });
     } catch (error) {
-      console.error('DatasetSchemas - getUniqueList', error);
+      console.error('DatasetSchemas - getUniqueList.', error);
       const schemaError = {
         type: error.message
       };
@@ -311,7 +311,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         );
       });
     } catch (error) {
-      console.error('DatasetSchemas - getValidationList', error);
+      console.error('DatasetSchemas - getValidationList.', error);
       const schemaError = {
         type: error.message
       };

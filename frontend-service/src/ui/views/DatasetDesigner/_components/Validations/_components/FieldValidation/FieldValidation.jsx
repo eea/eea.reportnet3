@@ -281,7 +281,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
       await ValidationService.create(datasetId, candidateRule);
       onHide();
     } catch (error) {
-      console.error('FieldValidation - onCreateValidationRule', error);
+      console.error('FieldValidation - onCreateValidationRule.', error);
       notificationContext.add({
         type: 'QC_RULE_CREATION_ERROR'
       });
@@ -300,7 +300,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
       }
       onHide();
     } catch (error) {
-      console.error('FieldValidation - onUpdateValidationRule', error);
+      console.error('FieldValidation - onUpdateValidationRule.', error);
       notificationContext.add({
         type: 'QC_RULE_UPDATING_ERROR'
       });

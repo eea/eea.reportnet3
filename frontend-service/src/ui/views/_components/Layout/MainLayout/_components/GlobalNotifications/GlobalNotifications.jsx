@@ -66,7 +66,7 @@ const GlobalNotifications = () => {
         DownloadFile(data, notification.content.datasetName);
       }
     } catch (error) {
-      console.error('GlobalNotifications - downloadExportDatasetFile', error);
+      console.error('GlobalNotifications - downloadExportDatasetFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
@@ -110,7 +110,7 @@ const GlobalNotifications = () => {
         });
       }
     } catch (error) {
-      console.error('GlobalNotifications - downloadExportFMEFile', error);
+      console.error('GlobalNotifications - downloadExportFMEFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
@@ -133,7 +133,7 @@ const GlobalNotifications = () => {
         DownloadFile(data, notification.content.nameFile);
       }
     } catch (error) {
-      console.error('GlobalNotifications - downloadValidationsFile', error);
+      console.error('GlobalNotifications - downloadValidationsFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();

@@ -40,7 +40,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        console.error('useDatasetDesigner - onCreateSnapshot', error);
+        console.error('useDatasetDesigner - onCreateSnapshot.', error);
         notificationContext.add({ type: 'CREATE_BY_ID_REPORTER_ERROR', content: { dataflowId, datasetId } });
       }
     } finally {
@@ -56,7 +56,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        console.error('useDatasetDesigner - onDeleteSnapshot', error);
+        console.error('useDatasetDesigner - onDeleteSnapshot.', error);
         notificationContext.add({ type: 'SNAPSHOT_DELETE_ERROR', content: { dataflowId, datasetId } });
       }
     } finally {
@@ -74,7 +74,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
-      console.error('useDatasetDesigner - onLoadSnapshotList', error);
+      console.error('useDatasetDesigner - onLoadSnapshotList.', error);
       notificationContext.add({ type: 'SNAPSHOT_ALL_DESIGNER_ERROR', content: { dataflowId, datasetId } });
     }
   };
@@ -87,7 +87,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        console.error('useDatasetDesigner - onRestoreSnapshot', error);
+        console.error('useDatasetDesigner - onRestoreSnapshot.', error);
         notificationContext.add({
           type: 'RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT',
           content: { dataflowId, datasetId }

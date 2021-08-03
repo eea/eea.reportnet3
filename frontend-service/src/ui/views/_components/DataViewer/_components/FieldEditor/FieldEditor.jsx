@@ -187,7 +187,7 @@ const FieldEditor = ({
       }
       setLinkItemsOptions(linkItems);
     } catch (error) {
-      console.error('FieldEditor - onFilter', error);
+      console.error('FieldEditor - onFilter.', error);
       notificationContext.add({
         type: 'GET_REFERENCED_LINK_VALUES_ERROR'
       });
@@ -740,7 +740,7 @@ const FieldEditor = ({
                     record
                   );
                 } catch (error) {
-                  console.error('FieldEditor - renderField - LINK', error);
+                  console.error('FieldEditor - renderField - LINK.', error);
                 }
               }}
               onFilterInputChangeBackend={onFilter}
@@ -814,7 +814,7 @@ const FieldEditor = ({
                   record
                 );
               } catch (error) {
-                console.error('FieldEditor - renderField - MULTISELECT_CODELIST', error);
+                console.error('FieldEditor - renderField - MULTISELECT_CODELIST.', error);
               }
             }}
             onFocus={e => {

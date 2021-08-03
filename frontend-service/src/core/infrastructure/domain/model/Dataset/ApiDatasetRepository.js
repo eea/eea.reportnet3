@@ -109,7 +109,7 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
     await apiDataset.statisticsById(datasetId);
   } catch (error) {
-    console.error('ApiDatasetRepository - errorStatisticsById', error);
+    console.error('ApiDatasetRepository - errorStatisticsById.', error);
   }
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
 

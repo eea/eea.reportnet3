@@ -508,7 +508,7 @@ export const FieldDesigner = ({
         validExtensions
       });
     } catch (error) {
-      console.error('FieldDesigner - onFieldAdd', error);
+      console.error('FieldDesigner - onFieldAdd.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
           notificationContext.add({
@@ -834,11 +834,11 @@ export const FieldDesigner = ({
           validExtensions
         });
       } else {
-        console.error('FieldDesigner - fieldUpdate');
+        console.error('FieldDesigner - fieldUpdate.');
         dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
       }
     } catch (error) {
-      console.error('FieldDesigner - fieldUpdate', error);
+      console.error('FieldDesigner - fieldUpdate.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
           notificationContext.add({

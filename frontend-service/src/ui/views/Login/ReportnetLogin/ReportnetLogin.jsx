@@ -59,7 +59,7 @@ const ReportnetLogin = ({ history }) => {
         userContext.onLogin(userObject);
         history.push(getUrl(routes.DATAFLOWS));
       } catch (error) {
-        console.error('ReportnetLogin - onLogin', error);
+        console.error('ReportnetLogin - onLogin.', error);
         notificationContext.add({
           type: 'USER_SERVICE_OLD_LOGIN_ERROR',
           content: {}

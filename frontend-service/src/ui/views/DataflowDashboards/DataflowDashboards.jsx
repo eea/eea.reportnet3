@@ -50,7 +50,7 @@ export const DataflowDashboards = withRouter(
         const { data } = await DataflowService.dataflowDetails(dataflowId);
         setDataflowName(data.name);
       } catch (error) {
-        console.error('DataflowDashboards - getDataflowName', error);
+        console.error('DataflowDashboards - getDataflowName.', error);
       }
     };
 
@@ -62,7 +62,7 @@ export const DataflowDashboards = withRouter(
           data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))
         );
       } catch (error) {
-        console.error('DataflowDashboards - onLoadDataSchemas', error);
+        console.error('DataflowDashboards - onLoadDataSchemas.', error);
         if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
           history.push(getUrl(routes.DATAFLOWS));
         }

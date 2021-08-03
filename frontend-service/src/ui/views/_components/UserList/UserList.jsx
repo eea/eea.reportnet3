@@ -50,7 +50,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
       setUserListData(response.data);
       setFilteredData(response.data);
     } catch (error) {
-      console.error('UserList - fetchData', error);
+      console.error('UserList - fetchData.', error);
       notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' });
     } finally {
       setIsLoading(false);

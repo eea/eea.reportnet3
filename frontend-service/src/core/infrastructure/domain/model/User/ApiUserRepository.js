@@ -210,7 +210,7 @@ const userRole = (user, entity) => {
 };
 
 const getToken = () => {
-  return userStorage.getTokens().accessToken;
+  return userStorage?.getTokens()?.accessToken;
 };
 
 export const ApiUserRepository = {

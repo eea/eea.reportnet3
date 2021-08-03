@@ -144,7 +144,7 @@ export const ManageUniqueConstraint = ({
         refreshList(true);
       }
     } catch (error) {
-      console.error('ManageUniqueConstraint - onCreateConstraint', error);
+      console.error('ManageUniqueConstraint - onCreateConstraint.', error);
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
     } finally {
       setIsCreating(false);
@@ -156,7 +156,7 @@ export const ManageUniqueConstraint = ({
       const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
       setDuplicatedList(response.data);
     } catch (error) {
-      console.error('ManageUniqueConstraint - onLoadUniquesList', error);
+      console.error('ManageUniqueConstraint - onLoadUniquesList.', error);
     }
   };
 
@@ -187,7 +187,7 @@ export const ManageUniqueConstraint = ({
           refreshList(true);
         }
       } catch (error) {
-        console.error('ManageUniqueConstraint - onUpdateConstraint', error);
+        console.error('ManageUniqueConstraint - onUpdateConstraint.', error);
         notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
       } finally {
         setIsUpdating(false);

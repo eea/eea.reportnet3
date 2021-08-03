@@ -59,7 +59,7 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
         setValidationDashboardData(buildDatasetDashboardObject(data, data.levelErrors));
       }
     } catch (error) {
-      console.error('DatasetValidationDashboard - onLoadDashboard', error);
+      console.error('DatasetValidationDashboard - onLoadDashboard.', error);
     } finally {
       setLoading(false);
     }
