@@ -15,7 +15,10 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const DataflowManagementForm = forwardRef(
-  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, refresh }, ref) => {
+  (
+    { data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, obligation, refresh },
+    ref
+  ) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
     const userContext = useContext(UserContext);
@@ -123,7 +126,7 @@ const DataflowManagementForm = forwardRef(
 
     return (
       <form ref={form}>
-        <fieldset>
+        <fieldset className={styles.fieldset}>
           <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
             <input
               autoComplete="off"

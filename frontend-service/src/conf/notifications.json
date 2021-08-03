@@ -88,6 +88,9 @@
           "key": "REFERENCE_DATAFLOW_CREATION_ERROR"
         },
         {
+          "key": "BUSINESS_DATAFLOW_CREATION_ERROR"
+        },
+        {
           "key": "SNAPSHOT_CREATION_ERROR",
           "navigateTo": {
             "section": "DATASET",
@@ -228,6 +231,13 @@
         },
         {
           "key": "REFERENCE_DATAFLOW_UPDATING_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOWS",
+            "parameters": ["dataflowName"]
+          }
+        },
+        {
+          "key": "BUSINESS_DATAFLOW_UPDATING_ERROR",
           "navigateTo": {
             "section": "DATAFLOWS",
             "parameters": ["dataflowName"]

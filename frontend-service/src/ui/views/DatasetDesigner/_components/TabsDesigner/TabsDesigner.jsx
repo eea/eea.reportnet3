@@ -375,6 +375,7 @@ export const TabsDesigner = withRouter(
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isErrorDialogVisible={isErrorDialogVisible}
+          name="TabsDesigner"
           onTabAdd={onTabAdd}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTableAdd}

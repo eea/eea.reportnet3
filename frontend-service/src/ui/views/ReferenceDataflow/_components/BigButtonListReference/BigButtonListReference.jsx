@@ -97,6 +97,7 @@ const BigButtonListReference = withRouter(
         notification => notification.key === 'NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT'
       );
       if (response) {
+        setIsCreatingReferenceDatasets(false);
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: true });
       }
     }, [notificationContext]);

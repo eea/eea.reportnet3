@@ -20,6 +20,9 @@ export const dataflowsReducer = (state, { type, payload }) => {
     case 'SET_LOADING':
       return { ...state, loadingStatus: { ...state.loadingStatus, [payload.tab]: payload.status } };
 
+    case 'ON_LOAD_OBLIGATION':
+      return { ...state, obligation: { id: payload.id, title: payload.title } };
+
     default:
       return state;
   }
