@@ -8,13 +8,21 @@ export const apiBusinessDataflow = {
   create: async (name, description, obligationId, groupCompaniesId, fmeUserId) => {
     return await HTTPRequester.post({
       url: getUrl(BusinessDataflowConfig.createDataflow),
-      data: { name, description, obligationId, type: 'BUSINESS', groupCompaniesId, fmeUserId }
+      data: { name, description, obligation: { obligationId }, type: 'BUSINESS', groupCompaniesId, fmeUserId }
     });
   },
 
-  edit: async (dataflowId, description, name, groupCompaniesId, fmeUserId) =>
+  edit: async (dataflowId, description, obligationId, name, groupCompaniesId, fmeUserId) =>
     await HTTPRequester.update({
       url: getUrl(BusinessDataflowConfig.createDataflow),
-      data: { description, id: dataflowId, name, type: 'BUSINESS', groupCompaniesId, fmeUserId }
+      data: {
+        description,
+        id: dataflowId,
+        obligation: { obligationId },
+        name,
+        type: 'BUSINESS',
+        groupCompaniesId,
+        fmeUserId
+      }
     })
 };

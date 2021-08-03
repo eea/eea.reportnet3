@@ -15,10 +15,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
 const DataflowManagementForm = forwardRef(
-  (
-    { data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, obligation, refresh },
-    ref
-  ) => {
+  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, refresh }, ref) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
     const userContext = useContext(UserContext);
@@ -98,11 +95,12 @@ const DataflowManagementForm = forwardRef(
                 userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
               }
             }
-            onCreate();
+            onCreate('isAddDialogVisible');
             onResetData();
           }
         } catch (error) {
           console.error('DataflowManagementForm - onConfirm.', error);
+
           if (error?.response?.data === 'Dataflow name already exists') {
             setErrors(previousErrors => {
               return {
