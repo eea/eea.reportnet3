@@ -116,9 +116,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   private EntityAccessService entityAccessService;
 
   /** The FME user repository. */
+  @Autowired
   private FMEUserRepository fmeUserRepository;
 
   /** The FME user mapper. */
+  @Autowired
   private FMEUserMapper fmeUserMapper;
 
   /**
