@@ -78,19 +78,18 @@ const Dataflows = withRouter(({ history, match }) => {
     setToCheckedObligation
   } = useReportingObligations();
 
-  const { activeIndex, isCustodian, isAdmin, loadingStatus } = dataflowsState;
+  const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
 
-  const tabMenuItems =
-    isCustodian || isAdmin
-      ? [
-          { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
-          { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
-          { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
-        ]
-      : [
-          { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
-          { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
-        ];
+  const tabMenuItems = isCustodian
+    ? [
+        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
+      ]
+    : [
+        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
+      ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
@@ -108,8 +107,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible:
-        (tabId !== 'business' && dataflowsState.isCustodian) || (tabId !== 'business' && dataflowsState.isAdmin),
+      isVisible: (tabId !== 'business' && isCustodian) || (tabId !== 'business' && isAdmin),
       label: 'createNewDataflow',
       onClick: () =>
         manageDialogs(tabId === 'dataflows' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible', true),
@@ -119,7 +117,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBusinessBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'business' && dataflowsState.isAdmin,
+      isVisible: tabId === 'business' && isAdmin,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
       title: 'createNewDataflow'
@@ -128,7 +126,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const userListBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'users',
-      isVisible: dataflowsState.isNationalCoordinator,
+      isVisible: isNationalCoordinator,
       label: 'allDataflowsUserList',
       onClick: () => manageDialogs('isUserListVisible', true),
       title: 'allDataflowsUserList'
@@ -246,7 +244,7 @@ const Dataflows = withRouter(({ history, match }) => {
         label={resources.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
-          setToCheckedObligation(); // sets previous and current obligation to selected
+          setToCheckedObligation();
         }}
       />
       <Button
