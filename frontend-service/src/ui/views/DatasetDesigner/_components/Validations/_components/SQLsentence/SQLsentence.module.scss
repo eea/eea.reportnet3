@@ -10,12 +10,12 @@
       width: 30%;
     }
     .sqlSentence {
+      margin-top: -1rem !important;
       display: flex;
       flex-direction: column;
       width: 66%;
       .title {
         font-size: 1rem;
-        margin: 0 0 1rem 0;
         color: var(--title-color);
         margin-bottom: 0.6rem;
         .sqlSentenceInfoBtn {
@@ -42,7 +42,7 @@
           }
         }
         .ccButton {
-          margin: 0 !important;
+          margin-top: -0.9em;
           margin-left: 0.4rem !important;
           border: 1px solid var(--c-custom-gray) !important;
           padding: 0.37rem 0.45rem;
