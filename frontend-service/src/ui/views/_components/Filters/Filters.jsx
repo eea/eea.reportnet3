@@ -432,7 +432,7 @@ export const Filters = ({
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <Dropdown
-        ariaLabel={property}
+        ariaLabel={resources.messages[property]}
         className={styles.dropdownFilter}
         filter={FiltersUtils.getOptionsTypes(data, property, dropDownList).length > 10}
         filterPlaceholder={resources.messages[property]}
