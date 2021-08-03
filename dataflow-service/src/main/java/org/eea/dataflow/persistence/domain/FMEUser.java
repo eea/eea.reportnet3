@@ -1,13 +1,10 @@
 package org.eea.dataflow.persistence.domain;
 
-import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.Getter;
@@ -30,10 +27,6 @@ public class FMEUser {
   @SequenceGenerator(name = "fme_user_id_seq", allocationSize = 1)
   @Column(name = "ID")
   private Long id;
-
-  /** The dataflows. */
-  @OneToMany(mappedBy = "fmeUser", cascade = CascadeType.ALL, orphanRemoval = false)
-  private List<Dataflow> dataflows;
 
   /** The user name. */
   @Column(name = "USER_NAME")
