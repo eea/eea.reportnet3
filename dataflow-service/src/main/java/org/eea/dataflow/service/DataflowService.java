@@ -65,6 +65,13 @@ public interface DataflowService {
    */
   List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
 
+  /**
+   * Gets the business dataflows.
+   *
+   * @param userId the user id
+   * @return the business dataflows
+   * @throws EEAException the EEA exception
+   */
   List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException;
 
 
@@ -106,6 +113,7 @@ public interface DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @return the long
    * @throws EEAException the EEA exception
    */
   Long createDataFlow(DataFlowVO dataflowVO) throws EEAException;

@@ -457,6 +457,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     }
   }
 
+  /**
+   * Find fme users.
+   *
+   * @return the list
+   */
   @Override
   @GetMapping(value = "/fmeUsers", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('ADMIN')")

@@ -18,7 +18,6 @@ import org.springframework.data.repository.query.Param;
 public interface DataflowRepository
     extends JpaRepository<Dataflow, Long>, DataflowExtendedRepository {
 
-
   /**
    * Find by status.
    *
@@ -83,6 +82,7 @@ public interface DataflowRepository
   /**
    * Find reference by id in order by status desc creation date desc.
    *
+   * @param status the status
    * @return the list
    */
   @Modifying
@@ -104,11 +104,22 @@ public interface DataflowRepository
       @Param("status") TypeStatusEnum status, @Param("ids") List<Long> ids);
 
 
+  /**
+   * Find business in order by status desc creation date desc.
+   *
+   * @return the list
+   */
   @Modifying
   @Query("select df from Dataflow df where df.type='BUSINESS' order by status, creationDate desc")
   List<Dataflow> findBusinessInOrderByStatusDescCreationDateDesc();
 
 
+  /**
+   * Find business and id in order by status desc creation date desc.
+   *
+   * @param ids the ids
+   * @return the list
+   */
   @Modifying
   @Query("select df from Dataflow df where df.type='BUSINESS' and df.id IN :ids order by status, creationDate desc")
   List<Dataflow> findBusinessAndIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
@@ -180,8 +191,19 @@ public interface DataflowRepository
    * The Interface IDatasetStatus.
    */
   public interface IDatasetStatus {
+
+    /**
+     * Gets the id.
+     *
+     * @return the id
+     */
     Long getId();
 
+    /**
+     * Gets the status.
+     *
+     * @return the status
+     */
     String getStatus();
   }
 
