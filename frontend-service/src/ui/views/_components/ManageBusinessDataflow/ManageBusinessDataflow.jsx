@@ -83,7 +83,7 @@ export const ManageBusinessDataflow = ({
       const providerTypes = await RepresentativeService.getGroupCompanies();
       setGroupOfCompanies(providerTypes.data);
     } catch (error) {
-      console.error('error on  RepresentativeService.getGroupCompanies', error);
+      console.error(error);
     }
   };
 
@@ -92,7 +92,7 @@ export const ManageBusinessDataflow = ({
       const fmeUsersList = await RepresentativeService.getFmeUsers();
       setFmeUsers(fmeUsersList.data);
     } catch (error) {
-      console.error('error on  RepresentativeService.getFmeUsers', error);
+      console.error(error);
     }
   };
 
