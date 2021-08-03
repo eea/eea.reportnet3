@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -112,7 +113,7 @@ public class Dataflow {
   private Long dataProviderGroupId;
 
   /** The fme user. */
-  @ManyToOne
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
   @JoinColumn(name = "FME_USER_ID")
   private FMEUser fmeUser;
 
