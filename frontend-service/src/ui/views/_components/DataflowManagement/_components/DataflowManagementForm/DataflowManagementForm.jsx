@@ -98,11 +98,12 @@ const DataflowManagementForm = forwardRef(
                 userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
               }
             }
-            onCreate();
+            onCreate('isAddDialogVisible');
             onResetData();
           }
         } catch (error) {
           console.error('DataflowManagementForm - onConfirm.', error);
+
           if (error?.response?.data === 'Dataflow name already exists') {
             setErrors(previousErrors => {
               return {
