@@ -541,6 +541,7 @@ const FieldValidation = ({ datasetId, tabs }) => {
           <TabView
             activeIndex={tabMenuActiveItem}
             className={styles.tabView}
+            name="FieldValidation"
             onTabChange={e => onTabChange(e.index)}
             renderActiveOnly={false}>
             {tabContents}
