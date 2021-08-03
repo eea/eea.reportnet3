@@ -621,7 +621,7 @@ export class Dropdown extends Component {
           tabIndex={this.props.tabIndex}
           type="text"
         />
-        <label htmlFor={this.props.inputId}>{this.props.ariaLabel}</label>
+        <label htmlFor={this.props.inputId}>{this.props.label}</label>
       </div>
     );
   }
