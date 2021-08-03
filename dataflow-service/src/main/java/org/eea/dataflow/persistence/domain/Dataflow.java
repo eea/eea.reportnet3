@@ -9,12 +9,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -113,9 +110,8 @@ public class Dataflow {
   private Long dataProviderGroupId;
 
   /** The fme user. */
-  @ManyToOne(optional = true, fetch = FetchType.LAZY)
-  @JoinColumn(name = "FME_USER_ID")
-  private FMEUser fmeUser;
+  @Column(name = "FME_USER_ID")
+  private Long fmeUserId;
 
   /**
    * Equals.

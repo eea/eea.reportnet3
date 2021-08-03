@@ -18,5 +18,4 @@ GRANT ALL ON SEQUENCE public.fme_user_id_seq TO testuser,dataflow,dataset,valida
 
 ALTER TABLE public.dataflow ADD column if not exists "dataprovider_group_id" int8 NULL;
 ALTER TABLE public.dataflow ADD column if not exists "fme_user_id" int8 NULL;
-ALTER TABLE public.dataflow ADD CONSTRAINT dataflow_fme_user_fkey FOREIGN KEY (fme_user_id) REFERENCES fme_user(id);
 
