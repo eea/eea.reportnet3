@@ -302,6 +302,15 @@ public class ContributorServiceImpl implements ContributorService {
         ResourceGroupEnum.REFERENCEDATASET_OBSERVER);
   }
 
+  /**
+   * Gets the resource custodian steward.
+   *
+   * @param dataflowId the dataflow id
+   * @param account the account
+   * @param resourcesProviders the resources providers
+   * @param role the role
+   * @return the resource custodian steward
+   */
   private void getResourceCustodianSteward(Long dataflowId, String account,
       List<ResourceAssignationVO> resourcesProviders, String role) {
     resourcesProviders.add(fillResourceAssignation(dataflowId, account,
