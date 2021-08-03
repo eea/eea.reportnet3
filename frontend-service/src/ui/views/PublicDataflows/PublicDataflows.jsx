@@ -65,7 +65,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
           <h1 className={styles.title}>Dataflows</h1>
           <div className={styles.dataflowsList}>
             {!isLoading ? (
-              publicDataflows.length != 0 ? (
+              publicDataflows.length !== 0 ? (
                 publicDataflows.map(dataflow => (
                   <PublicCard
                     animation

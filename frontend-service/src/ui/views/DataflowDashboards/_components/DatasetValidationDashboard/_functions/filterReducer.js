@@ -63,7 +63,7 @@ const onFilteringTables = (originalData, tableIds, reporterFilters, status) => {
   let tablesData = [];
   let labels = [];
 
-  if (isEmpty(originalData) || reporterFilters.length == originalData.labels.length) {
+  if (isEmpty(originalData) || reporterFilters.length === originalData.labels.length) {
     tablesData = [];
     labels = [];
   } else {
