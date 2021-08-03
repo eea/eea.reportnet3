@@ -329,7 +329,7 @@ export const ManageBusinessDataflow = ({
             name="fmeUsers"
             onChange={event => onSelectFmeUser(event.target.value)}
             onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
-            optionLabel="label" // Todo change to userName
+            optionLabel="username"
             options={fmeUsers}
             placeholder={resources.messages[`selectFmeUser`]}
             value={selectedFmeUser}
