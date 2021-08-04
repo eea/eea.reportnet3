@@ -36,8 +36,16 @@ export const DataflowDashboards = withRouter(
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
     const [dataflowName, setDataflowName] = useState('');
     const [dataSchema, setDataSchema] = useState();
+    const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_DASHBOARDS, dataflowId, history });
+    useBreadCrumbs({
+      currentPage: CurrentPage.DATAFLOW_DASHBOARDS,
+      dataflowId,
+      history,
+      isBusinessDataflow,
+      isLoading
+    });
 
     useEffect(() => {
       leftSideBarContext.removeModels();

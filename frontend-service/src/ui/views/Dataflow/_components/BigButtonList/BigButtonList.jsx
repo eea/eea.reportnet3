@@ -48,6 +48,7 @@ export const BigButtonList = ({
   dataflowState,
   dataProviderId,
   handleRedirect,
+  isBusinessDataflow,
   isLeadReporterOfCountry,
   onCleanUpReceipt,
   onSaveName,
@@ -645,6 +646,7 @@ export const BigButtonList = ({
             dataflowId={dataflowId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
+            isBusinessDataflow={isBusinessDataflow}
           />
         </Dialog>
       )}
@@ -693,7 +695,7 @@ export const BigButtonList = ({
         <ConfirmDialog
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
-          footerAddon={checkShowPublicInfo}
+          footerAddon={!dataflowState.isBusinessDataflow && checkShowPublicInfo}
           header={resources.messages['createDataCollection']}
           labelCancel={resources.messages['close']}
           labelConfirm={resources.messages['create']}

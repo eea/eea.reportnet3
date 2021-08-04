@@ -23,6 +23,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 
 const ComparisonExpression = ({
   expressionValues,
+  isBusinessDataflow,
   isDisabled,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -428,7 +429,9 @@ const ComparisonExpression = ({
     }
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const ccButtonValue = `${field2}{%R3_COUNTRY_CODE%}`;
+        const ccButtonValue = `${expressionValues.expressionValue}${
+          isBusinessDataflow ? config.COMPANY_CODE_KEYWORD : config.COUNTRY_CODE_KEYWORD
+        }`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
@@ -443,7 +446,11 @@ const ComparisonExpression = ({
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label={resourcesContext.messages['countryCodeAcronym']}
               onClick={() => onCCButtonClick(ccButtonValue)}
-              tooltip={resourcesContext.messages['matchStringTooltip']}
+              tooltip={
+                isBusinessDataflow
+                  ? resourcesContext.messages['matchStringCompanyTooltip']
+                  : resourcesContext.messages['matchStringTooltip']
+              }
               tooltipOptions={{ position: 'top' }}
             />
           </span>

@@ -47,9 +47,11 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const [dataflowName, setDataflowName] = useState();
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
+  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
   const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
@@ -82,7 +84,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
     }
   }, [userContext]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_HELP, dataflowId, history });
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_HELP, dataflowId, history, isBusinessDataflow, isLoading });
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
@@ -147,6 +149,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const { data } = await DataflowService.reporting(dataflowId);
+      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+      setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
           const allDatasets = [...data.referenceDatasets, ...data.datasets];

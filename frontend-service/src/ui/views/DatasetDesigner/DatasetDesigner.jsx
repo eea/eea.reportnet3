@@ -110,6 +110,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
+    isBusinessDataflow: false,
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
@@ -187,6 +188,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
     dataflowId,
     history,
+    isBusinessDataflow: designerState.isBusinessDataflow,
+    isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
   });
 
@@ -288,6 +291,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
+        isBusinessDataflow: false, // TODO WITH REAL DATA
         schemaName: metaData.dataset.name
       }
     });
@@ -1244,39 +1248,41 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   {resources.messages['referenceDataset']}
                 </label>
               </div>
-              <div>
-                <Checkbox
-                  ariaLabelledBy="available_in_public_view_label"
-                  checked={designerState.availableInPublic}
-                  disabled={isDesignDatasetEditorRead}
-                  id="available_in_public_view"
-                  inputId="available_in_public_view_checkbox"
-                  onChange={e => onChangeAvailableInPublicView(e.checked)}
-                  role="checkbox"
-                />
-                <label
-                  id="available_in_public_view_label"
-                  onClick={() => {
-                    if (!isDesignDatasetEditorRead) {
-                      designerDispatch({
-                        type: 'SET_AVAILABLE_PUBLIC_VIEW',
-                        payload: !designerState.availableInPublic
-                      });
-                      onChangeAvailableInPublicView(!designerState.availableInPublic);
-                    }
-                  }}
-                  style={{
-                    color: 'var(--main-font-color)',
-                    cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
-                    fontSize: '11pt',
-                    fontWeight: 'bold',
-                    marginLeft: '6px',
-                    marginRight: '6px',
-                    opacity: isDesignDatasetEditorRead ? 0.5 : 1
-                  }}>
-                  {resources.messages['availableInPublicView']}
-                </label>
-              </div>
+              {!designerState.isBusinessDataflow && (
+                <div>
+                  <Checkbox
+                    ariaLabelledBy="available_in_public_view_label"
+                    checked={designerState.availableInPublic}
+                    disabled={isDesignDatasetEditorRead}
+                    id="available_in_public_view"
+                    inputId="available_in_public_view_checkbox"
+                    onChange={e => onChangeAvailableInPublicView(e.checked)}
+                    role="checkbox"
+                  />
+                  <label
+                    id="available_in_public_view_label"
+                    onClick={() => {
+                      if (!isDesignDatasetEditorRead) {
+                        designerDispatch({
+                          type: 'SET_AVAILABLE_PUBLIC_VIEW',
+                          payload: !designerState.availableInPublic
+                        });
+                        onChangeAvailableInPublicView(!designerState.availableInPublic);
+                      }
+                    }}
+                    style={{
+                      color: 'var(--main-font-color)',
+                      cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
+                      fontSize: '11pt',
+                      fontWeight: 'bold',
+                      marginLeft: '6px',
+                      marginRight: '6px',
+                      opacity: isDesignDatasetEditorRead ? 0.5 : 1
+                    }}>
+                    {resources.messages['availableInPublicView']}
+                  </label>
+                </div>
+              )}
               <Button
                 className={`p-button-secondary ${
                   !isDataflowOpen && !isDesignDatasetEditorRead && !designerState.referenceDataset
@@ -1472,6 +1478,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
+            isBusinessDataflow={designerState.isBusinessDataflow}
             tabs={DatasetDesignerUtils.getTabs({
               datasetSchema: designerState.datasetSchema,
               datasetSchemas: designerState.datasetSchemas,

@@ -39,6 +39,7 @@ export const designerReducer = (state, { type, payload }) => {
         ...state,
         dataflowName: payload.dataflowName,
         datasetSchemaName: payload.schemaName,
+        isBusinessDataflow: payload.isBusinessDataflow,
         metaData: payload.metaData
       };
 

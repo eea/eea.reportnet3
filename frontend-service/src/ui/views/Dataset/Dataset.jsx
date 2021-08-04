@@ -95,6 +95,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
+  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
   const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
@@ -133,6 +134,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
     dataflowId,
     history,
+    isBusinessDataflow,
+    isLoading,
     metaData,
     referenceDataflowId: dataflowId
   });
@@ -601,6 +604,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onLoadDataflow = async () => {
     try {
       const { data } = await DataflowService.reporting(match.params.dataflowId);
+      setIsBusinessDataflow(false); // TODO WITH REAL DATA
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);

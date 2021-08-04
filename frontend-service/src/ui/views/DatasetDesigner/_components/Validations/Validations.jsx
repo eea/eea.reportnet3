@@ -6,18 +6,24 @@ import { RowValidation } from './_components/RowValidation';
 
 import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContext';
 
-export const Validations = ({ datasetSchema, datasetSchemas, tabs, datasetId }) => {
+export const Validations = ({ datasetSchema, datasetSchemas, isBusinessDataflow, tabs, datasetId }) => {
   const validationContext = useContext(ValidationContext);
 
   if (validationContext.level === 'field') {
-    return <FieldValidation datasetId={datasetId} tabs={tabs} />;
+    return <FieldValidation datasetId={datasetId} isBusinessDataflow={isBusinessDataflow} tabs={tabs} />;
   }
 
   if (validationContext.level === 'row') {
-    return <RowValidation datasetId={datasetId} tabs={tabs} />;
+    return <RowValidation datasetId={datasetId} isBusinessDataflow={isBusinessDataflow} tabs={tabs} />;
   }
 
   return (
-    <TableValidation datasetId={datasetId} datasetSchema={datasetSchema} datasetSchemas={datasetSchemas} tabs={tabs} />
+    <TableValidation
+      datasetId={datasetId}
+      datasetSchema={datasetSchema}
+      datasetSchemas={datasetSchemas}
+      isBusinessDataflow={isBusinessDataflow}
+      tabs={tabs}
+    />
   );
 };

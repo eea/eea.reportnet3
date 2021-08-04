@@ -48,6 +48,9 @@ export const Feedback = withRouter(({ match, history }) => {
     currentPage: 0,
     dataflowName: '',
     dataProviders: [],
+    isBusinessDataflow: false,
+    isCustodian: undefined,
+    isLoading: true,
     draggedFiles: null,
     importFileDialogVisible: false,
     isCustodian: undefined,
@@ -65,6 +68,7 @@ export const Feedback = withRouter(({ match, history }) => {
     currentPage,
     dataflowName,
     dataProviders,
+    isBusinessDataflow,
     draggedFiles,
     importFileDialogVisible,
     isCustodian,
@@ -78,7 +82,7 @@ export const Feedback = withRouter(({ match, history }) => {
   } = feedbackState;
 
   useEffect(() => {
-    onGetDataflowName();
+    onGetDataflowDetails();
     leftSideBarContext.removeModels();
   }, []);
 
@@ -132,7 +136,7 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   }, [messageToSend]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history });
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history, isBusinessDataflow, isLoading });
 
   const markMessagesAsRead = async data => {
     //mark unread messages as read
@@ -161,16 +165,20 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
   };
 
-  const onGetDataflowName = async () => {
+  const onGetDataflowDetails = async () => {
     try {
-      const name = await DataflowUtils.getDataflowName(dataflowId);
-      dispatchFeedback({ type: 'SET_DATAFLOW_NAME', payload: name });
+      const data = await DataflowUtils.getDataflowDetails(dataflowId);
+      const name = data.name;
+      const isBusinessDataflow = false; // TODO WITH REAL DATA
+      dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
       notificationContext.add({
         type: 'DATAFLOW_DETAILS_ERROR',
         content: {}
       });
+    } finally {
+      dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
     }
   };
 
@@ -187,7 +195,6 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onGetInitialMessages = async dataProviderId => {
-    dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
     const data = await onLoadMessages(dataProviderId, 0);
     await markMessagesAsRead(data);
 

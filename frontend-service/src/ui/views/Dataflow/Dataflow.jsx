@@ -82,6 +82,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
+    isBusinessDataflow: false,
     isCopyDataCollectionToEuDatasetLoading: false,
     isCustodian: false,
     isDataSchemaCorrect: [],
@@ -204,6 +205,7 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowId,
     dataflowStateData: dataflowState.data,
     history,
+    isBusinessDataflow: dataflowState.isBusinessDataflow,
     matchParams: match.params,
     representativeId
   });
@@ -252,7 +254,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageRequestersBtn: dataflowState.isCustodian,
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      showPublicInfoBtn: !isDesign && isLeadDesigner,
+      showPublicInfoBtn: !isDesign && isLeadDesigner && !dataflowState.isBusinessDataflow,
       usersListBtn:
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
@@ -486,6 +488,7 @@ const Dataflow = withRouter(({ history, match }) => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
+          isBusinessDataflow: false, // TODO WITH REAL DATA
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -808,6 +811,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
+          isBusinessDataflow={dataflowState.isBusinessDataflow}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
@@ -861,7 +865,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
-            footerAddon={dataflowState.anySchemaAvailableInPublic && checkRestrictFromPublic}
+            footerAddon={
+              dataflowState.anySchemaAvailableInPublic && !dataflowState.isBusinessDataflow && checkRestrictFromPublic
+            }
             header={resources.messages['confirmReleaseHeader']}
             labelCancel={resources.messages['no']}
             labelConfirm={resources.messages['yes']}
@@ -1068,6 +1074,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
+              isBusinessDataflow={dataflowState.isBusinessDataflow}
               representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
             />
           </Dialog>

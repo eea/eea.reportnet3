@@ -10,7 +10,7 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 
-export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
+export const SQLsentence = ({ creationFormState, isBusinessDataflow, onSetSQLsentence, level }) => {
   const resources = useContext(ResourcesContext);
 
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
@@ -44,10 +44,10 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
   };
 
   const onCCButtonClick = () => {
-    onSetSQLsentence('sqlSentence', `${creationFormState.candidateRule['sqlSentence']} ${countryCodeKeyword}`);
+    onSetSQLsentence('sqlSentence', `${creationFormState.candidateRule['sqlSentence']} ${codeKeyword}`);
   };
 
-  const countryCodeKeyword = `${config.COUNTRY_CODE_KEYWORD}`;
+  const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
 
   return (
     <div className={styles.section}>
@@ -68,7 +68,11 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label={resources.messages['countryCodeAcronym']}
               onClick={onCCButtonClick}
-              tooltip={resources.messages['matchStringTooltip']}
+              tooltip={
+                isBusinessDataflow
+                  ? resources.messages['matchStringCompanyTooltip']
+                  : resources.messages['matchStringTooltip']
+              }
               tooltipOptions={{ position: 'top' }}
             />
           </h3>
@@ -97,7 +101,11 @@ export const SQLsentence = ({ creationFormState, onSetSQLsentence, level }) => {
             dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceSpatialTypesNote'] }}></p>
           <p
             className={styles.levelHelp}
-            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceCountryCodeNote'] }}></p>
+            dangerouslySetInnerHTML={
+              isBusinessDataflow
+                ? { __html: resources.messages['sqlSentenceCompanyCodeNote'] }
+                : { __html: resources.messages['sqlSentenceCountryCodeNote'] }
+            }></p>
         </Dialog>
       )}
     </div>

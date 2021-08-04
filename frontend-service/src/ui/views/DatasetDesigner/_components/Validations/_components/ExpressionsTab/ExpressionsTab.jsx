@@ -10,6 +10,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const ExpressionsTab = ({
   componentName,
   creationFormState,
+  isBusinessDataflow,
   onAddNewExpression,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -29,6 +30,7 @@ export const ExpressionsTab = ({
               <ValidationExpressionSelector
                 expressionValues={expression}
                 fieldType={creationFormState.candidateRule.fieldType}
+                isBusinessDataflow={isBusinessDataflow}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionDelete}

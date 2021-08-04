@@ -9,14 +9,14 @@ export const euDatasetReducer = (state, { type, payload }) => {
         levelErrorTypes: payload.errorTypes
       };
 
-    case 'GET_DATAFLOW_NAME':
-      return { ...state, dataflowName: payload.name };
+    case 'GET_DATAFLOW_DETAILS':
+      return { ...state, dataflowName: payload.name, isBusinessDataflow: payload.isBusinessDataflow };
 
     case 'GET_EXPORT_EXTENSIONS_LIST':
       return { ...state, exportExtensionsList: payload.internalExtensionList };
 
     case 'GET_METADATA':
-      return { ...state, metaData: payload.metadata };
+      return { ...state, metaData: payload.metadata, isBusinessDataflow: payload.isBusinessDataflow };
 
     case 'HANDLE_DIALOGS':
       return { ...state, isDialogVisible: { ...state.isDialogVisible, [payload.dialog]: payload.value } };

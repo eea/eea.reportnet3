@@ -18,6 +18,7 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 export const ExpressionSelector = ({
   componentName,
   creationFormState,
+  isBusinessDataflow,
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
@@ -104,6 +105,7 @@ export const ExpressionSelector = ({
         <FieldComparison
           componentName={componentName}
           creationFormState={creationFormState}
+          isBusinessDataflow={isBusinessDataflow}
           onAddNewExpression={onAddNewExpression}
           onExpressionDelete={onExpressionDelete}
           onExpressionFieldUpdate={onExpressionFieldUpdate}
@@ -121,6 +123,7 @@ export const ExpressionSelector = ({
         <ExpressionsTab
           componentName={componentName}
           creationFormState={creationFormState}
+          isBusinessDataflow={isBusinessDataflow}
           onAddNewExpression={onAddNewExpression}
           onExpressionDelete={onExpressionDelete}
           onExpressionFieldUpdate={onExpressionFieldUpdate}
@@ -157,6 +160,7 @@ export const ExpressionSelector = ({
         <IfThenClause
           componentName={componentName}
           creationFormState={creationFormState}
+          isBusinessDataflow={isBusinessDataflow}
           onAddNewExpressionIf={onAddNewExpressionIf}
           onAddNewExpressionThen={onAddNewExpressionThen}
           onExpressionIfDelete={onExpressionIfDelete}
@@ -178,6 +182,7 @@ export const ExpressionSelector = ({
       return (
         <SQLsentence
           creationFormState={creationFormState}
+          isBusinessDataflow={isBusinessDataflow}
           level={validationContext.level}
           onSetSQLsentence={onSetSQLsentence}
         />

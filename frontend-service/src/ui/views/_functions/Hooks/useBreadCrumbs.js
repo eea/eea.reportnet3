@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useLayoutEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -16,6 +16,8 @@ export const useBreadCrumbs = ({
   dataflowId,
   dataflowStateData,
   history,
+  isBusinessDataflow = false,
+  isLoading,
   matchParams,
   metaData,
   representativeId,
@@ -23,6 +25,10 @@ export const useBreadCrumbs = ({
 }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resources = useContext(ResourcesContext);
+
+  useLayoutEffect(() => {
+    !isLoading && setBreadCrumbs();
+  }, [dataflowStateData, matchParams, metaData, isBusinessDataflow, isLoading]);
 
   const getDataCollectionCrumb = () => {
     return { label: resources.messages['dataCollection'], icon: 'dataCollection' };
@@ -33,7 +39,7 @@ export const useBreadCrumbs = ({
       command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
       icon: 'clone',
-      label: resources.messages['dataflow']
+      label: isBusinessDataflow ? resources.messages['businessDataflowCrumbLabel'] : resources.messages['dataflow']
     };
   };
 
@@ -290,8 +296,4 @@ export const useBreadCrumbs = ({
       ]);
     }
   };
-
-  useEffect(() => {
-    setBreadCrumbs();
-  }, [dataflowStateData, matchParams, metaData]);
 };

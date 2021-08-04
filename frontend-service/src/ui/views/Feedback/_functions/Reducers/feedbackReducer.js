@@ -25,10 +25,11 @@ export const feedbackReducer = (state, { type, payload }) => {
         messageToSend: '',
         newMessageAdded: true
       };
-    case 'SET_DATAFLOW_NAME':
+    case 'SET_DATAFLOW_DETAILS':
       return {
         ...state,
-        dataflowName: payload
+        dataflowName: payload.dataflowName,
+        isBusinessDataflow: payload.isBusinessDataflow
       };
     case 'SET_DATAPROVIDERS':
       return { ...state, dataProviders: payload };
