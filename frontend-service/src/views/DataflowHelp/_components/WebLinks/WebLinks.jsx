@@ -16,7 +16,7 @@ import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
-import { WebLinkService } from 'services/WebLink';
+import { WebLinkService } from 'services/WebLinkService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

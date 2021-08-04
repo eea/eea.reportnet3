@@ -1,7 +1,7 @@
 import { DataflowConfig } from './config/DataflowConfig';
 import { WebLinkConfig } from './config/WebLinkConfig';
 import { getUrl } from './_utils/UrlUtils';
-import { HTTPRequester } from './HTTPRequester';
+import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const webLinkRepository = {
   all: async dataflowId => {

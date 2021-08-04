@@ -19,9 +19,9 @@ import { TextUtils } from 'views/_functions/Utils/TextUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
-import { IntegrationService } from 'services/Integration';
-import { UniqueConstraintsService } from 'services/UniqueConstraints';
-import { ValidationService } from 'services/Validation';
+import { IntegrationService } from 'services/IntegrationService';
+import { UniqueConstraintsService } from 'services/UniqueConstraintsService';
+import { ValidationService } from 'services/ValidationService';
 
 const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resources = useContext(ResourcesContext);

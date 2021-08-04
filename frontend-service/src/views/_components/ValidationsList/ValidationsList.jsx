@@ -21,7 +21,7 @@ import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 
-import { ValidationService } from 'services/Validation';
+import { ValidationService } from 'services/ValidationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
