@@ -157,7 +157,7 @@ export const TabsDesigner = withRouter(
           })
         );
       } catch (error) {
-        console.error(`Error while loading schema ${error}`);
+        console.error('TabsDesigner - onLoadSchema.', error);
         if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
           history.push(getUrl(routes.DATAFLOWS, true));
         }
@@ -256,7 +256,7 @@ export const TabsDesigner = withRouter(
           getIsTableCreated(true);
         }
       } catch (error) {
-        console.error('Error during field Add: ', error);
+        console.error('TabsDesigner - addTable.', error);
         if (error?.response.status === 400) {
           if (error.response?.data?.message?.includes('name invalid')) {
             notificationContext.add({
@@ -330,7 +330,7 @@ export const TabsDesigner = withRouter(
           setTabs(inmTabs);
         }
       } catch (error) {
-        console.error('error', error);
+        console.error('TabsDesigner - deleteTable.', error);
       }
     };
 
@@ -467,7 +467,7 @@ export const TabsDesigner = withRouter(
           setTabs([...shiftedTabs]);
         }
       } catch (error) {
-        console.error(`There has been an error while ordering tables ${error}`);
+        console.error('TabsDesigner - reorderTable.', error);
       }
     };
 
@@ -483,7 +483,7 @@ export const TabsDesigner = withRouter(
           setTabs(inmTabs);
         }
       } catch (error) {
-        console.error('error', error);
+        console.error('TabsDesigner - updateTableName.', error);
         if (error?.response.status === 400) {
           if (error.response?.data?.message?.includes('name invalid')) {
             notificationContext.add({

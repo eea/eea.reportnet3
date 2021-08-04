@@ -385,7 +385,7 @@ const Dataflow = withRouter(({ history, match }) => {
         );
       }
     } catch (error) {
-      console.error(error);
+      console.error('Dataflow - onExportLeadReporters.', error);
       notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' });
     }
   };
@@ -542,6 +542,7 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       }
     } catch (error) {
+      console.error('Dataflow - onLoadReportingDataflow.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
       history.push(getUrl(routes.DATAFLOWS));
     } finally {
@@ -560,7 +561,7 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: true });
       }
     } catch (error) {
-      console.error(`Error while downloading the file: ${error}`);
+      console.error('Dataflow - onUploadLeadReporters.', error);
       notificationContext.add({ type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' });
     }
   };
@@ -610,7 +611,7 @@ const Dataflow = withRouter(({ history, match }) => {
       updatedTitles[index].schemaName = value;
       setUpdatedDatasetSchema(updatedTitles);
     } catch (error) {
-      console.error('error', error);
+      console.error('Dataflow - onSaveName.', error);
       if (error?.response?.status === 400) {
         notificationContext.add({ type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME', content: { schemaName: value } });
       }
@@ -629,7 +630,7 @@ const Dataflow = withRouter(({ history, match }) => {
         DownloadFile(data, `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Dataflow - onConfirmExport.', error);
       notificationContext.add({ type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT' });
     } finally {
       manageDialogs('isExportDialogVisible', false);
@@ -649,6 +650,7 @@ const Dataflow = withRouter(({ history, match }) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' });
       } else {
+        console.error('Dataflow - onConfirmRelease.', error);
         notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
       }
     } finally {
@@ -661,6 +663,7 @@ const Dataflow = withRouter(({ history, match }) => {
       const userObject = await UserService.refreshToken();
       userContext.onTokenRefresh(userObject);
     } catch (error) {
+      console.error('Dataflow - onRefreshToken.', error);
       notificationContext.add({ key: 'TOKEN_REFRESH_ERROR', content: {} });
       await UserService.logout();
       userContext.onLogout();
@@ -731,6 +734,7 @@ const Dataflow = withRouter(({ history, match }) => {
       );
       onLoadReportingDataflow();
     } catch (error) {
+      console.error('Dataflow - onConfirmUpdateIsReleaseable.', error);
       notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
       dataflowDispatch({
         type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
@@ -756,6 +760,7 @@ const Dataflow = withRouter(({ history, match }) => {
       );
       onLoadReportingDataflow();
     } catch (error) {
+      console.error('Dataflow - onConfirmUpdateShowPublicInfo.', error);
       notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
       dataflowDispatch({
         type: 'ON_ERROR_UPDATE_IS_RELEASABLE',

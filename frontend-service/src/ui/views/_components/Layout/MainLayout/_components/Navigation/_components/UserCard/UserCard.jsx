@@ -40,6 +40,7 @@ const UserCard = memo(() => {
             try {
               await UserService.logout();
             } catch (error) {
+              console.error('UserCard - logout.', error);
               notificationContext.add({
                 type: 'USER_LOGOUT_ERROR'
               });

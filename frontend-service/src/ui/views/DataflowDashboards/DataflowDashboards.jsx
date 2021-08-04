@@ -72,6 +72,7 @@ export const DataflowDashboards = withRouter(
           data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))
         );
       } catch (error) {
+        console.error('DataflowDashboards - onLoadDataSchemas.', error);
         if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
           history.push(getUrl(routes.DATAFLOWS));
         }

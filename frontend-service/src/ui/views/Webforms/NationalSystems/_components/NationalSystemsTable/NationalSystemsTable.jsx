@@ -66,7 +66,7 @@ export const NationalSystemsTable = ({
       setData(parseData(response.data.records, tables, schemaTables));
       setSchemaData(response.data);
     } catch (error) {
-      console.error('error', error);
+      console.error('NationalSystemsTable - onLoadTableData.', error);
     } finally {
       setIsLoading(false);
     }

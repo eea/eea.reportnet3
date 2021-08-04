@@ -85,6 +85,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
         }
         onCreate();
       } catch (error) {
+        console.error('NewDatasetSchemaForm - onConfirm.', error);
         const metadata = await MetadataUtils.getMetadata({ dataflowId });
         const {
           dataflow: { name: dataflowName }

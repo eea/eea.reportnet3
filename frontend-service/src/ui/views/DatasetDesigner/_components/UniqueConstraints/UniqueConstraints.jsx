@@ -107,6 +107,7 @@ export const UniqueConstraints = ({
         refreshList(true);
       }
     } catch (error) {
+      console.error('UniqueConstraints - onDeleteConstraint.', error);
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
       constraintsDispatch({ type: 'IS_DELETING', payload: false });
     } finally {
@@ -126,6 +127,7 @@ export const UniqueConstraints = ({
       setIsDuplicatedToManageUnique(false);
       refreshList(false);
     } catch (error) {
+      console.error('UniqueConstraints - onLoadConstraints.', error);
       notificationContext.add({ type: 'LOAD_UNIQUE_CONSTRAINTS_ERROR' });
     } finally {
       isLoading(false);

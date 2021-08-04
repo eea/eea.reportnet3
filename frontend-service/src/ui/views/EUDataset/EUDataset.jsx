@@ -112,6 +112,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
       euDatasetDispatch({ type: 'GET_DATAFLOW_DETAILS', payload: { name: data.name, isBusinessDataflow: true } }); // TODO WITH REAL DATA
     } catch (error) {
+      console.error('EUDataset - getDataflowName.', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
   };
@@ -158,6 +159,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
+      console.error('EUDataset - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
   };
@@ -180,6 +182,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
+      console.error('EUDataset - onExportDataInternalExtension.', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -249,8 +252,8 @@ export const EUDataset = withRouter(({ history, match }) => {
         }
       });
     } catch (error) {
+      console.error('EUDataset - onLoadDatasetSchema.', error);
       notificationContext.add({ type: 'ERROR_LOADING_EU_DATASET_SCHEMA' });
-
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }

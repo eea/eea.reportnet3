@@ -125,6 +125,7 @@ export const ManageIntegrations = ({
         payload: { data: await IntegrationService.getRepositories(datasetId) }
       });
     } catch (error) {
+      console.error('ManageIntegrations - getRepositories.', error);
       notificationContext.add({ type: 'ERROR_LOADING_REPOSITORIES' });
     } finally {
       isLoading(false);
@@ -139,6 +140,7 @@ export const ManageIntegrations = ({
           payload: { data: await IntegrationService.getProcesses(manageIntegrationsState.repository.value, datasetId) }
         });
       } catch (error) {
+        console.error('ManageIntegrations - getProcesses.', error);
         notificationContext.add({ type: 'ERROR_LOADING_PROCESSES' });
       }
     } else {
@@ -203,6 +205,7 @@ export const ManageIntegrations = ({
         refreshList(true);
       }
     } catch (error) {
+      console.error('ManageIntegrations - onCreateIntegration.', error);
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
       setIsCreating(false);
     } finally {
@@ -316,6 +319,7 @@ export const ManageIntegrations = ({
         refreshList(true);
       }
     } catch (error) {
+      console.error('ManageIntegrations - onUpdateIntegration.', error);
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
       setIsUpdating(false);
     } finally {

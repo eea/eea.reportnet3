@@ -48,7 +48,6 @@ export const ManageBusinessDataflow = ({
   resetObligations
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
-  const INPUT_MAX_LENGTH = 255;
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -83,7 +82,7 @@ export const ManageBusinessDataflow = ({
       const providerTypes = await RepresentativeService.getGroupCompanies();
       setGroupOfCompanies(providerTypes.data);
     } catch (error) {
-      console.error(error);
+      console.error('ManageBusinessDataflow - getGroupOfCompaniesList.', error);
     }
   };
 
@@ -92,7 +91,7 @@ export const ManageBusinessDataflow = ({
       const fmeUsersList = await RepresentativeService.getFmeUsers();
       setFmeUsers(fmeUsersList.data);
     } catch (error) {
-      console.error(error);
+      console.error('ManageBusinessDataflow - getFmeUsersList.', error);
     }
   };
 
@@ -103,7 +102,7 @@ export const ManageBusinessDataflow = ({
 
   const checkErrors = () => {
     let hasErrors = false;
-    if (description.length > INPUT_MAX_LENGTH) {
+    if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',
         hasErrors: true,
@@ -112,7 +111,7 @@ export const ManageBusinessDataflow = ({
       hasErrors = true;
     }
 
-    if (name.length > INPUT_MAX_LENGTH) {
+    if (name.length > config.INPUT_MAX_LENGTH) {
       handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameValidationMax'] });
       hasErrors = true;
     }
@@ -137,6 +136,7 @@ export const ManageBusinessDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       }
     } catch (error) {
+      console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();
@@ -152,6 +152,7 @@ export const ManageBusinessDataflow = ({
         const { status } = await BusinessDataflowService.edit(
           dataflowId,
           description,
+          obligation.id,
           name,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id
@@ -187,6 +188,7 @@ export const ManageBusinessDataflow = ({
         handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameExists'] });
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
+        console.error('ManageBusinessDataflow - onManageBusinessDataflow.', error);
         const notification = isEditing
           ? { type: 'BUSINESS_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
           : { type: 'BUSINESS_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
@@ -249,7 +251,7 @@ export const ManageBusinessDataflow = ({
           isEmpty(name) ||
           isEmpty(description) ||
           isNil(obligation.id) ||
-          isNil(selectedFmeUser.dataProviderGroupId) || // Todo change to userId
+          isNil(selectedFmeUser.id) ||
           isNil(selectedGroup.dataProviderGroupId) ||
           isSending
         }
@@ -328,7 +330,7 @@ export const ManageBusinessDataflow = ({
             name="fmeUsers"
             onChange={event => onSelectFmeUser(event.target.value)}
             onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
-            optionLabel="label" // Todo change to userName
+            optionLabel="username"
             options={fmeUsers}
             placeholder={resources.messages[`selectFmeUser`]}
             value={selectedFmeUser}

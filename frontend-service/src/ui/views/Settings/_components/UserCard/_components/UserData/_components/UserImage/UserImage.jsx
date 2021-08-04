@@ -6,7 +6,7 @@ import { config } from 'conf';
 
 import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
 
-import styles from './UserImg.module.scss';
+import styles from './UserImage.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'ui/views/_components/Button';
@@ -21,7 +21,7 @@ import { NotificationContext } from 'ui/views/_functions/Contexts/NotificationCo
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
 
-const UserImg = () => {
+const UserImage = () => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -89,6 +89,7 @@ const UserImg = () => {
         userContext.onUserFileUpload(splittedBase64Image);
       }
     } catch (error) {
+      console.error('UserImage - updateImage.', error);
       notificationContext.add({
         type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
       });
@@ -168,4 +169,4 @@ const UserImg = () => {
   );
 };
 
-export { UserImg };
+export { UserImage };

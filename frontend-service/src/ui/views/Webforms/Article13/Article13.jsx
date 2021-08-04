@@ -140,12 +140,12 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
         onUpdateData();
       }
     } catch (error) {
-      console.error('error', error);
       if (error.response.status === 423) {
         notificationContext.add({
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
+        console.error('Article13 - onAddPamsRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -177,6 +177,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
+        console.error('Article13 - onAddTableRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -232,7 +233,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
         }
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('Article13 - onLoadPamsData.', error);
     } finally {
       setIsLoading(false);
     }

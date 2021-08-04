@@ -487,32 +487,28 @@ export const FieldDesigner = ({
         type,
         validExtensions
       });
-      if (response.status < 200 || response.status > 299) {
-        console.error('Error during field Add');
-      } else {
-        dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
-        onNewFieldAdd({
-          codelistItems,
-          description,
-          fieldId: response.data,
-          fieldLinkValue: null,
-          maxSize,
-          name,
-          pk,
-          pkHasMultipleValues,
-          pkMustBeUsed,
-          readOnly,
-          recordId,
-          referencedField: !isNil(referencedField)
-            ? parseReferenceField(referencedField)
-            : fieldDesignerState.fieldLinkValue,
-          required,
-          type,
-          validExtensions
-        });
-      }
+      dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
+      onNewFieldAdd({
+        codelistItems,
+        description,
+        fieldId: response.data,
+        fieldLinkValue: null,
+        maxSize,
+        name,
+        pk,
+        pkHasMultipleValues,
+        pkMustBeUsed,
+        readOnly,
+        recordId,
+        referencedField: !isNil(referencedField)
+          ? parseReferenceField(referencedField)
+          : fieldDesignerState.fieldLinkValue,
+        required,
+        type,
+        validExtensions
+      });
     } catch (error) {
-      console.error('Error during field Add: ', error);
+      console.error('FieldDesigner - onFieldAdd.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
           notificationContext.add({
@@ -838,11 +834,11 @@ export const FieldDesigner = ({
           validExtensions
         });
       } else {
-        console.error('Error during field Update');
+        console.error('FieldDesigner - fieldUpdate.');
         dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
       }
     } catch (error) {
-      console.error(`Error during field Update: ${error}`);
+      console.error('FieldDesigner - fieldUpdate.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
           notificationContext.add({

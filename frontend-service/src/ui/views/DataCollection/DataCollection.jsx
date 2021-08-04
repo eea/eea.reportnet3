@@ -71,12 +71,8 @@ export const DataCollection = withRouter(({ match, history }) => {
   }, []);
 
   useEffect(() => {
-    try {
-      getDataflowName();
-      onLoadDataflowData();
-    } catch (error) {
-      console.error(error.response);
-    }
+    getDataflowName();
+    onLoadDataflowData();
   }, []);
 
   useEffect(() => {
@@ -94,6 +90,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
       setDataflowName(data.name);
     } catch (error) {
+      console.error('DataCollection - getDataflowName.', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
     }
   };
@@ -102,7 +99,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
-      console.error('METADATA error', error);
+      console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
   };
@@ -127,6 +124,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       await DatasetService.exportDataById(datasetId, fileType);
     } catch (error) {
+      console.error('DataCollection - onExportDataInternalExtension.', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -152,6 +150,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       setIsBusinessDataflow(true); // TODO WITH REAL DATA
       setIsLoading(false);
     } catch (error) {
+      console.error('DataCollection - onLoadDataflowData.', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -206,6 +205,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         })
       );
     } catch (error) {
+      console.error('DataCollection - onLoadDatasetSchema.', error);
       const metadata = await getMetadata({ dataflowId, datasetId });
       const {
         dataflow: { name: dataflowName },

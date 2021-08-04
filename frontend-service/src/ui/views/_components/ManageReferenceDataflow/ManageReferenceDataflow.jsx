@@ -44,7 +44,7 @@ export const ManageReferenceDataflow = ({
   onCreateDataflow
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
-  const INPUT_MAX_LENGTH = 255;
+
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -71,7 +71,7 @@ export const ManageReferenceDataflow = ({
 
   const checkErrors = () => {
     let hasErrors = false;
-    if (description.length > INPUT_MAX_LENGTH) {
+    if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',
         hasErrors: true,
@@ -80,7 +80,7 @@ export const ManageReferenceDataflow = ({
       hasErrors = true;
     }
 
-    if (name.length > INPUT_MAX_LENGTH) {
+    if (name.length > config.INPUT_MAX_LENGTH) {
       handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameValidationMax'] });
       hasErrors = true;
     }
@@ -102,6 +102,7 @@ export const ManageReferenceDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       }
     } catch (error) {
+      console.error('ManageReferenceDataflows - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();
@@ -140,6 +141,7 @@ export const ManageReferenceDataflow = ({
         handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameExists'] });
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
+        console.error('ManageReferenceDataflows - onManageReferenceDataflow.', error);
         const notification = isEditing
           ? { type: 'REFERENCE_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
           : { type: 'REFERENCE_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };

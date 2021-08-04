@@ -50,7 +50,7 @@ const ApiKeyDialog = ({
       const { data } = await DataflowService.getApiKey(dataflowId, dataProviderId, isCustodian);
       setApiKey(data);
     } catch (error) {
-      console.error('Error on getting Api key:', error);
+      console.error('ApiKeyDialog - onGetApiKey.', error);
     } finally {
       setIsKeyLoading(false);
     }
@@ -62,7 +62,7 @@ const ApiKeyDialog = ({
       const { data } = await DataflowService.generateApiKey(dataflowId, dataProviderId, isCustodian);
       setApiKey(data);
     } catch (error) {
-      console.error('Error on generating Api key:', error);
+      console.error('ApiKeyDialog - onGenerateApiKey.', error);
     } finally {
       setIsKeyLoading(false);
     }

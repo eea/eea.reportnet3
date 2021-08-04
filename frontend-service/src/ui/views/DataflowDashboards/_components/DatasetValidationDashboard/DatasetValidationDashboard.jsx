@@ -48,12 +48,6 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
     filterDispatch({ type: 'INIT_DATA', payload: validationDashboardData });
   }, [validationDashboardData]);
 
-  const onErrorLoadingDashboard = error => {
-    console.error('Dashboard error: ', error);
-    const errorResponse = error.response;
-    console.error('Dashboard errorResponse: ', errorResponse);
-  };
-
   const onLoadDashboard = async () => {
     try {
       const { data } = await DataflowService.datasetsValidationStatistics(dataflowId, datasetSchemaId);
@@ -65,7 +59,7 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
         setValidationDashboardData(buildDatasetDashboardObject(data, data.levelErrors));
       }
     } catch (error) {
-      onErrorLoadingDashboard(error);
+      console.error('DatasetValidationDashboard - onLoadDashboard.', error);
     } finally {
       setLoading(false);
     }
@@ -165,7 +159,7 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
           ticks: {
             min: 0,
             max: 100,
-            callback: (value, index, values) => `${value}%`
+            callback: value => `${value}%`
           },
           gridLines: { display: false }
         }

@@ -84,7 +84,7 @@ export const WebformView = ({
       const singleData = await WebformService.singlePamData(datasetId, selectedTable.pamsId);
       webformViewDispatch({ type: 'SET_SINGLE_CALCULATED_DATA', payload: singleData.data });
     } catch (error) {
-      console.error('error', error);
+      console.error('WebformView - getSingleData.', error);
     }
   };
 
