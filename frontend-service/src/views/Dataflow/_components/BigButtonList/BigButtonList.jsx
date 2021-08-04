@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 import remove from 'lodash/remove';
 
-import { DataflowConfig } from 'repositories/config/model/Dataflow';
+import { DataflowConfig } from 'repositories/config/DataflowConfig';
 
 import styles from './BigButtonList.module.scss';
 
@@ -22,12 +22,12 @@ import { ManageManualAcceptanceDataset } from 'views/Dataflow/_components/Manage
 import { ManualAcceptanceDatasets } from 'views/Dataflow/_components/ManualAcceptanceDatasets';
 import { NewDatasetSchemaForm } from 'views/_components/NewDatasetSchemaForm';
 
-import { ConfirmationReceiptService } from 'services/ConfirmationReceipt';
-import { DataCollectionService } from 'services/DataCollection';
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
-import { EuDatasetService } from 'services/EuDataset';
-import { IntegrationService } from 'services/Integration';
+import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService';
+import { DataCollectionService } from 'services/DataCollectionService';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
+import { EuDatasetService } from 'services/EuDatasetService';
+import { IntegrationService } from 'services/IntegrationService';
 import { ManageIntegrations } from 'views/_components/ManageIntegrations/ManageIntegrations';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';

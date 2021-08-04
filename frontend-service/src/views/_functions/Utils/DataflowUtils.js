@@ -1,4 +1,4 @@
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 
 const getDataflowDetails = async dataflowId => {
   const data = await DataflowService.dataflowDetails(dataflowId);

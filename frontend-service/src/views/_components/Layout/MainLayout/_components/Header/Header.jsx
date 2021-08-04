@@ -13,7 +13,7 @@ import logo from 'views/_assets/images/logos/logo.png';
 import styles from './Header.module.scss';
 import ReportnetPublicLogo from 'views/_assets/images/logos/reportnet_public_logo.svg';
 
-import { AccessPointWebConfig } from 'repositories/config';
+import { AccessPointConfig } from 'repositories/config/AccessPointConfig';
 
 import { routes } from 'conf/routes';
 
@@ -278,7 +278,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         label={resources.messages.login}
         onClick={() => {
           if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
-            window.location.href = AccessPointWebConfig.euloginUrl;
+            window.location.href = AccessPointConfig.euloginUrl;
           } else {
             history.push(getUrl(routes.LOGIN));
           }

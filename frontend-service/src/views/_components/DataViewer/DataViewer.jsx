@@ -9,7 +9,7 @@ import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
 import { config } from 'conf';
-import { DatasetConfig } from 'repositories/config/model/Dataset';
+import { DatasetConfig } from 'repositories/config/DatasetConfig';
 
 import styles from './DataViewer.module.scss';
 
@@ -34,8 +34,8 @@ import { IconTooltip } from 'views/_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { Map } from 'views/_components/Map';
 
-import { DatasetService } from 'services/Dataset';
-import { IntegrationService } from 'services/Integration';
+import { DatasetService } from 'services/DatasetService';
+import { IntegrationService } from 'services/IntegrationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

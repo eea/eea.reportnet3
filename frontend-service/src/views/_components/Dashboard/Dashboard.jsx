@@ -12,7 +12,7 @@ import { Chart } from 'primereact/chart';
 import { Spinner } from 'views/_components/Spinner';
 import { StatusList } from 'views/_components/StatusList';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 

@@ -213,7 +213,7 @@ const getToken = () => {
   return LocalUserStorageUtils?.getTokens()?.accessToken;
 };
 
-export const ApiUserRepository = {
+export const UserService = {
   getConfiguration,
   getToken,
   login,

@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { FeedbackConfig } from 'repositories/config/model/Feedback';
+import { FeedbackConfig } from 'repositories/config/FeedbackConfig';
 import { FeedbackReporterHelpConfig } from 'conf/help/feedback/reporter';
 import { FeedbackRequesterHelpConfig } from 'conf/help/feedback/requester';
 
@@ -18,8 +18,8 @@ import { ListMessages } from './_components/ListMessages';
 import { MainLayout } from 'views/_components/Layout';
 import { Title } from 'views/_components/Title';
 
-import { FeedbackService } from 'services/Feedback';
-import { RepresentativeService } from 'services/Representative';
+import { FeedbackService } from 'services/FeedbackService';
+import { RepresentativeService } from 'services/RepresentativeService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

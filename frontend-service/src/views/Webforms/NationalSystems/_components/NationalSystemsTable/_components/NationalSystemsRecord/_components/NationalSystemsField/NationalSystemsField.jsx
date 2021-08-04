@@ -8,7 +8,7 @@ import uniqBy from 'lodash/uniqBy';
 import uniqueId from 'lodash/uniqueId';
 
 import { config } from 'conf';
-import { DatasetConfig } from 'repositories/config/model/Dataset';
+import { DatasetConfig } from 'repositories/config/DatasetConfig';
 
 import styles from './NationalSystemsField.module.scss';
 
@@ -23,7 +23,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

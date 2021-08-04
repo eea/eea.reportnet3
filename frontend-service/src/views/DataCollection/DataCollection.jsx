@@ -7,7 +7,7 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './DataCollection.module.scss';
 
 import { config } from 'conf';
-import { DatasetConfig } from 'repositories/config/model/Dataset';
+import { DatasetConfig } from 'repositories/config/DatasetConfig';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
@@ -20,8 +20,8 @@ import { TabsSchema } from 'views/_components/TabsSchema';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

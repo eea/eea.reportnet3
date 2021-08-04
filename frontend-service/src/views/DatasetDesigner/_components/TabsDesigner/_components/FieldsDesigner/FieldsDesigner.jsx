@@ -5,7 +5,7 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { DatasetConfig } from 'repositories/config/model/Dataset';
+import { DatasetConfig } from 'repositories/config/DatasetConfig';
 
 import styles from './FieldsDesigner.module.scss';
 
@@ -20,7 +20,7 @@ import { FieldDesigner } from './_components/FieldDesigner';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Toolbar } from 'views/_components/Toolbar';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
