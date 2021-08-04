@@ -12,7 +12,7 @@ import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 

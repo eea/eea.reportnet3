@@ -46,7 +46,8 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReporterDataset';
 
-import { getUrl, TextUtils } from 'repositories/_utils';
+import { TextUtils } from 'repositories/_utils';
+import { getUrl } from 'repositories/_utils/UrlUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
 
 export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
