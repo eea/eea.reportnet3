@@ -7,6 +7,7 @@ import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './WebformView.module.scss';
 
@@ -239,7 +240,7 @@ export const WebformView = ({
     const headers = filteredTabs.map(tab => tab.header || tab.name);
     return data
       .filter(table => table.isVisible)
-      .map((webform, i) => {
+      .map(webform => {
         const isCreated = headers.includes(webform.name);
         return (
           <Button
@@ -248,7 +249,7 @@ export const WebformView = ({
             icon={!isCreated ? 'info' : 'table'}
             iconClasses={!isVisible[webform.title] ? 'info' : ''}
             iconPos={!isCreated ? 'right' : 'left'}
-            key={i}
+            key={uniqueId()}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}
             style={{ display: isReporting && !isCreated ? 'none' : '' }}

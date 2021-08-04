@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import pick from 'lodash/pick';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './LinkSelector.module.scss';
 
@@ -408,10 +409,10 @@ const LinkSelector = withRouter(
             <div className={`${styles.schemaWrapper} ${isExternalLink && styles.referenceDataflowSchemaWrapper}`}>
               {!isUndefined(datasetSchemas) &&
                 !isEmpty(datasetSchemas) &&
-                datasetSchemas.map((datasetSchema, i) => {
+                datasetSchemas.map(datasetSchema => {
                   return (
                     <ListBox
-                      key={`datasetSchema_${i}`}
+                      key={uniqueId('datasetSchema_')}
                       onChange={e => {
                         if (!isNil(e.value)) {
                           dispatchLinkSelector({ type: 'SET_LINK', payload: e.value });
