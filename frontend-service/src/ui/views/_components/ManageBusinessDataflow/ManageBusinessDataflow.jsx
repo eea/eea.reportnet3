@@ -249,7 +249,7 @@ export const ManageBusinessDataflow = ({
           isEmpty(name) ||
           isEmpty(description) ||
           isNil(obligation.id) ||
-          isNil(selectedFmeUser.dataProviderGroupId) || // Todo change to userId
+          isNil(selectedFmeUser) || // Todo change to userId
           isNil(selectedGroup.dataProviderGroupId) ||
           isSending
         }
@@ -326,12 +326,12 @@ export const ManageBusinessDataflow = ({
             ariaLabel="fmeUsers"
             className={styles.fmeUsersWrapper}
             name="fmeUsers"
-            onChange={event => onSelectFmeUser(event.target.value)}
+            onChange={event => onSelectFmeUser(event.target.value.username)}
             onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
-            optionLabel="label" // Todo change to userName
+            optionLabel="username" // Todo change to userName
             options={fmeUsers}
             placeholder={resources.messages[`selectFmeUser`]}
-            value={selectedFmeUser}
+            value={selectedFmeUser.username}
           />
         </div>
         <div className={`${styles.search}`}>

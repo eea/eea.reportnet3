@@ -20,6 +20,7 @@ import isNil from 'lodash/isNil';
 const ValidationExpression = ({
   expressionValues,
   fieldType,
+  isBusinessDataflow,
   isDisabled,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -244,7 +245,9 @@ const ValidationExpression = ({
 
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const ccButtonValue = `${expressionValues.expressionValue}{%R3_COUNTRY_CODE%}`;
+        const ccButtonValue = `${expressionValues.expressionValue}${
+          isBusinessDataflow ? config.COMPANY_CODE_KEYWORD : config.COUNTRY_CODE_KEYWORD
+        }`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
@@ -259,7 +262,11 @@ const ValidationExpression = ({
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label="CC"
               onClick={() => onCCButtonClick(ccButtonValue)}
-              tooltip={resourcesContext.messages['matchStringTooltip']}
+              tooltip={
+                isBusinessDataflow
+                  ? resourcesContext.messages['matchStringCompanyTooltip']
+                  : resourcesContext.messages['matchStringTooltip']
+              }
               tooltipOptions={{ position: 'top' }}
             />
           </span>
