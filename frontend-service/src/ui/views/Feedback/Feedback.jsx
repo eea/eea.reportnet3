@@ -195,10 +195,8 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onDrop = event => {
-    console.log('EE');
     let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
     dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
-    console.log(files);
     event.currentTarget.style.border = '';
     event.currentTarget.style.opacity = '';
   };

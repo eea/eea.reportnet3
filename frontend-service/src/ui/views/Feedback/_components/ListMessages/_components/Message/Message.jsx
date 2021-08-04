@@ -52,7 +52,7 @@ export const Message = ({
       // const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
       // DownloadFile(data, fileName);
     } catch (error) {
-      console.error('error', error);
+      console.error('Message - onFileDownload.', error);
     }
   };
 

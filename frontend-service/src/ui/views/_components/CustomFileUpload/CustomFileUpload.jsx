@@ -84,7 +84,6 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (!isNil(draggedFiles)) {
-      console.log(draggedFiles);
       dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: [...draggedFiles] } });
     }
   }, [draggedFiles]);
@@ -98,7 +97,6 @@ export const CustomFileUpload = ({
     }
 
     if (hasFiles()) {
-      console.log(state.files);
       const selectedExtension = state.files.map(
         file => file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name
       );
@@ -165,7 +163,6 @@ export const CustomFileUpload = ({
         }
       }
     }
-    console.log(_files.current);
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: _files.current } });
 
     if (onSelect) {
@@ -358,7 +355,6 @@ export const CustomFileUpload = ({
   };
 
   const renderFiles = () => {
-    console.log(state.files);
     return (
       <div className="p-fileupload-files">
         {state.files.map((file, index) => {
@@ -474,7 +470,6 @@ export const CustomFileUpload = ({
     let cancelButton;
 
     if (!auto) {
-      console.log(disabled, !hasFiles(), checkValidExtension(), state.isUploading);
       uploadButton = (
         <span data-for="invalidExtension" data-tip>
           <Button
