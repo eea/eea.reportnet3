@@ -1,7 +1,5 @@
 import { Fragment, useReducer, useRef } from 'react';
 
-import uuid from 'uuid';
-
 import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';
 import isNil from 'lodash/isNil';
@@ -280,7 +278,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
                     columnOptions={columnOptions}
                     excludeBottomBorder={index === length - 1}
                     expandAll={expandAll}
-                    key={uuid.v4()}
+                    key={uniqueId()}
                     property={proper}
                     propertyName={Object.getOwnPropertyNames(property)[index]}
                   />

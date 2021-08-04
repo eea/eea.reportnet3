@@ -1,6 +1,6 @@
 import { Fragment, memo } from 'react';
 
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import pushNotificationInfo from 'assets/images/gifs/pushNotificationInfo.gif';
 
@@ -21,7 +21,7 @@ const TitleWithItem = memo(
     title,
     tooltipInfo = 'Info tooltip'
   }) => {
-    const tooltipId = uuid.v4();
+    const tooltipId = uniqueId();
 
     return (
       <div className={styles.rowContainer}>
@@ -64,7 +64,7 @@ const TitleWithItem = memo(
         </div>
         <div className={styles.itemsContainer}>
           {items.map((item, i) => (
-            <div className={styles.itemContainer} key={uuid.v4()}>
+            <div className={styles.itemContainer} key={uniqueId()}>
               {item}
             </div>
           ))}

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import uuid from 'uuid';
+
 import uniqueId from 'lodash/uniqueId';
 
 import styles from './Dialog.module.scss';
@@ -48,7 +48,7 @@ export const Dialog = ({
   }, []);
 
   useEffect(() => {
-    const newDialogId = uuid.v4();
+    const newDialogId = uniqueId();
     setDialogId(newDialogId);
     dialogContext.add(newDialogId);
     return () => {

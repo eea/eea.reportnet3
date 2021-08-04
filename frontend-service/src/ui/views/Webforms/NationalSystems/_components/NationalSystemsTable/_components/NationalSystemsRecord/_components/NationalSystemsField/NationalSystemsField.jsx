@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqBy from 'lodash/uniqBy';
+import uniqueId from 'lodash/uniqueId';
 
 import { config } from 'conf';
 import { DatasetConfig } from 'conf/domain/model/Dataset';
@@ -318,10 +319,10 @@ export const NationalSystemsField = ({
 
   const renderValidations = validations =>
     validations &&
-    uniqBy(validations, element => [element.message, element.errorLevel].join()).map((validation, index) => (
+    uniqBy(validations, element => [element.message, element.errorLevel].join()).map(validation => (
       <IconTooltip
         className={`webform-validationErrors ${styles.validation}`}
-        key={index}
+        key={uniqueId()}
         levelError={validation.levelError}
         message={validation.message}
       />

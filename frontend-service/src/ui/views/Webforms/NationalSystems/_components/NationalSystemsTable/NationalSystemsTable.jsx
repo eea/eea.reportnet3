@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './NationalSystemsTable.module.scss';
 
@@ -77,8 +78,8 @@ export const NationalSystemsTable = ({
 
     return (
       <ul>
-        {errors.map((error, index) => (
-          <li key={index}>{error}</li>
+        {errors.map(error => (
+          <li key={uniqueId()}>{error}</li>
         ))}
       </ul>
     );
@@ -91,8 +92,8 @@ export const NationalSystemsTable = ({
   const renderRecords = () => {
     if (!isEmpty(errorMessages(schemaData, tables.name))) return renderErrors();
 
-    return data.map((record, index) => (
-      <Fragment key={index}>
+    return data.map(record => (
+      <Fragment key={uniqueId()}>
         <NationalSystemsRecord
           dataProviderId={dataProviderId}
           dataflowId={dataflowId}

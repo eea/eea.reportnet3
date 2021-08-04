@@ -1048,12 +1048,9 @@ const Dataflow = withRouter(({ history, match }) => {
             dialogHeader={`${resources.messages['importLeadReporters']}`}
             dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}
             dialogVisible={dataflowState.isImportLeadReportersVisible}
-            fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
-            mode="advanced"
-            multiple={false}
             name="file"
             onUpload={onUploadLeadReporters}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importLeadReporters, {

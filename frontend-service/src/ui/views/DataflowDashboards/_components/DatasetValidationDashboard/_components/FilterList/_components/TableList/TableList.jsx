@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './TableList.module.css';
 
@@ -9,7 +9,7 @@ const TableList = ({ datasetSchemaId, filterDispatch, tableFilters, tables }) =>
   return (
     <ul className={styles.list}>
       {tables.map(table => (
-        <li className={styles.listItem} key={uuid.v4()}>
+        <li className={styles.listItem} key={uniqueId()}>
           <TableListItem
             datasetSchemaId={datasetSchemaId}
             filterDispatch={filterDispatch}

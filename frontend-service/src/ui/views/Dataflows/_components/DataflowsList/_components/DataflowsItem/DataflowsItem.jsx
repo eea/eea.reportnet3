@@ -2,11 +2,10 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Link } from 'react-router-dom';
 
-import uuid from 'uuid';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './DataflowsItem.module.scss';
 
@@ -58,7 +57,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
     );
   };
 
-  const idTooltip = uuid.v4();
+  const idTooltip = uniqueId();
 
   return layout(
     <Fragment>

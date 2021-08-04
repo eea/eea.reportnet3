@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import uuid from 'uuid';
+
+import uniqueId from 'lodash/uniqueId';
 
 import { InputText } from 'ui/views/_components/InputText';
 
@@ -131,7 +132,7 @@ export class HeaderCell extends Component {
 
     let sortIconElement = this.renderSortIcon(sorted, sortOrder);
     if (this.props.filter) {
-      const id = uuid.v4();
+      const id = uniqueId();
       filterElement = this.props.filterElement || (
         <InputText
           className="p-column-filter"

@@ -1,5 +1,5 @@
 import isNil from 'lodash/isNil';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import { config } from 'conf';
 
@@ -12,7 +12,7 @@ export const getGroupFromDTO = (expression, allExpressions, parentOperator) => {
   const union = !isNil(parentOperator) ? reverseEquivalences[parentOperator] : '';
 
   const newExpression = {};
-  newExpression.expressionId = uuid.v4();
+  newExpression.expressionId = uniqueId;
   newExpression.group = false;
   newExpression.union = union;
   newExpression.operator = '';

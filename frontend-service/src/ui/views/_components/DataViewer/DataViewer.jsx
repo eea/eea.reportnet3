@@ -429,7 +429,7 @@ const DataViewer = withRouter(
 
         setIsLoading(false);
       } catch (error) {
-        console.error('DataViewer - onFetchData.');
+        console.error('DataViewer - onFetchData.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -658,7 +658,7 @@ const DataViewer = withRouter(
           setIsDeleteAttachmentVisible(false);
         }
       } catch (error) {
-        console.error('DataViewer - onConfirmDeleteAttachment.');
+        console.error('DataViewer - onConfirmDeleteAttachment.', error);
       }
     };
 
@@ -1019,7 +1019,7 @@ const DataViewer = withRouter(
             try {
               onSaveRecord(records.editedRecord);
             } catch (error) {
-              console.error('DataViewer - editRowDialogFooter.');
+              console.error('DataViewer - editRowDialogFooter.', error);
             }
           }}
         />
@@ -1347,12 +1347,9 @@ const DataViewer = withRouter(
             dialogHeader={`${resources.messages['uploadTable']}${tableName}`}
             dialogOnHide={() => setImportTableDialogVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
             dialogVisible={importTableDialogVisible}
-            fileLimit={1}
             infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
-            mode="advanced"
-            multiple={false}
             name="file"
             onError={onImportTableError}
             onUpload={onUpload}
@@ -1374,7 +1371,6 @@ const DataViewer = withRouter(
             dialogHeader={`${resources.messages['uploadAttachment']}`}
             dialogOnHide={() => setIsAttachFileVisible(false)}
             dialogVisible={isAttachFileVisible}
-            fileLimit={1}
             infoTooltip={infoAttachTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
@@ -1383,8 +1379,6 @@ const DataViewer = withRouter(
                 ? records.selectedMaxSize * 1000 * 1024
                 : config.MAX_ATTACHMENT_SIZE
             }
-            mode="advanced"
-            multiple={false}
             name="file"
             onUpload={onAttach}
             operation="PUT"

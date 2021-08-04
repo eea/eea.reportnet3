@@ -16,6 +16,54 @@
       .datetime {
         color: var(--gray-5);
       }
+      .messageAttachment {
+        background-color: var(--c-corporate-blue-lighter);
+        border-radius: 6px;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 14rem;
+        span {
+          color: var(--white);
+        }
+        .downloadFileButton {
+          margin-left: auto;
+          &:hover {
+            background-color: transparent;
+          }
+          span {
+            &:first-child {
+              display: none;
+            }
+            &:nth-child(2) {
+              font-size: 18pt;
+            }
+          }
+        }
+        .messageAttachmentFile {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          div {
+            span {
+              font-size: 10pt;
+            }
+          }
+          svg {
+            color: var(--white);
+            font-size: 16pt;
+          }
+        }
+        .messageAttachmentFileData {
+          margin-top: 0.5rem;
+          span {
+            color: var(--gray-15);
+            font-size: 8pt;
+            font-style: italic;
+          }
+        }
+      }
     }
     @media (max-width: 468px) {
       margin-right: 10px;
@@ -33,6 +81,54 @@
       }
       .datetime {
         color: var(--gray-75);
+      }
+      .messageAttachment {
+        background-color: var(--c-lilac-200);
+        border-radius: 6px;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 14rem;
+        span {
+          color: var(--c-lilac-400);
+        }
+        .downloadFileButton {
+          margin-left: auto;
+          &:hover {
+            background-color: transparent;
+          }
+          span {
+            &:first-child {
+              display: none;
+            }
+            &:nth-child(2) {
+              font-size: 18pt;
+            }
+          }
+        }
+        .messageAttachmentFile {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          div {
+            span {
+              font-size: 10pt;
+            }
+          }
+          svg {
+            color: var(--c-lilac-400);
+            font-size: 16pt;
+          }
+        }
+        .messageAttachmentFileData {
+          margin-top: 0.5rem;
+          span {
+            color: var(--c-lilac-400);
+            font-size: 8pt;
+            font-style: italic;
+          }
+        }
       }
     }
     @media (max-width: 468px) {

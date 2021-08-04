@@ -3,7 +3,7 @@ import { useContext, useEffect, useReducer, useRef } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './Filters.module.scss';
 
@@ -338,7 +338,7 @@ export const Filters = ({
   };
 
   const renderCalendarFilter = property => {
-    const inputId = uuid.v4();
+    const inputId = uniqueId();
     return (
       <span className={styles.input} key={property} ref={dateRef}>
         {renderOrderFilter(property)}

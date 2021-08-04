@@ -1602,12 +1602,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               setImportSelectedIntegrationId(null);
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
-            fileLimit={1}
             infoTooltip={infoExtensionsTooltip}
             invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
-            mode="advanced"
-            multiple={false}
             name="file"
             onError={onImportDatasetError}
             onUpload={onUpload}
