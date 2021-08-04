@@ -104,7 +104,10 @@ export const EUDataset = withRouter(({ history, match }) => {
   useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, isBusinessDataflow, isLoading, metaData });
 
   const callSetMetaData = async () => {
-    euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata: await getMetadata({ dataflowId, datasetId }) } });
+    euDatasetDispatch({
+      type: 'GET_METADATA',
+      payload: { metadata: await getMetadata({ dataflowId, datasetId }), isBusinessDataflow: false }
+    }); // TODO WITH REAL DATA
   };
 
   const getDataflowDetails = async () => {
@@ -287,6 +290,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     <TabsSchema
       hasCountryCode={true}
       hasWritePermissions={false}
+      isBusinessDataflow={euDatasetState.isBusinessDataflow}
       isExportable={false}
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}

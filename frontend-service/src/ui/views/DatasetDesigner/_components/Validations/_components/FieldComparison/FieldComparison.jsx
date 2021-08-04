@@ -10,6 +10,7 @@ import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext'
 export const FieldComparison = ({
   componentName,
   creationFormState,
+  isBusinessDataflow,
   onAddNewExpression,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -31,6 +32,7 @@ export const FieldComparison = ({
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
                 fieldType={creationFormState.candidateRule.fieldType}
+                isBusinessDataflow={isBusinessDataflow}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionDelete}

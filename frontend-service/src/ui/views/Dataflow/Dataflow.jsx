@@ -811,6 +811,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
+          isBusinessDataflow={dataflowState.isBusinessDataflow}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
@@ -1076,6 +1077,7 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
+              isBusinessDataflow={dataflowState.isBusinessDataflow}
               representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
             />
           </Dialog>

@@ -92,6 +92,7 @@ export const useSetColumns = (
   hasWebformWritePermissions,
   hasWritePermissions,
   initialCellValue,
+  isBusinessDataflow,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   onFileDeleteVisible,
@@ -431,7 +432,7 @@ export const useSetColumns = (
       <Column
         body={providerCodeTemplate}
         className={styles.providerCode}
-        header={resources.messages['countryCode']}
+        header={isBusinessDataflow ? resources.messages['companyCode'] : resources.messages['countryCode']}
         key="providerCode"
         sortable={false}
         style={{ width: '100px' }}

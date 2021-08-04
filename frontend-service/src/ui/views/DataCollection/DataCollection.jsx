@@ -235,6 +235,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     <TabsSchema
       hasCountryCode={true}
       hasWritePermissions={false}
+      isBusinessDataflow={isBusinessDataflow}
       isExportable={false}
       isFilterable={false}
       levelErrorTypes={levelErrorTypes}
