@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './PublicCard.module.scss';
 
@@ -23,7 +23,7 @@ export const PublicCard = ({
   subtitle,
   title
 }) => {
-  const idTooltip = uuid.v4();
+  const idTooltip = uniqueId();
   const baseRod3Url = 'https://rod.eionet.europa.eu';
 
   const onOpenTab = (e, url) => {

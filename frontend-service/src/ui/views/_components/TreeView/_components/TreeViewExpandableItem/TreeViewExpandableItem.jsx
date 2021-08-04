@@ -1,8 +1,7 @@
 import { Children, Fragment, useContext, useEffect, useState } from 'react';
 
-import uuid from 'uuid';
-
 import isUndefined from 'lodash/isUndefined';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './TreeViewExpandableItem.module.css';
 
@@ -46,7 +45,7 @@ const TreeViewExpandableItem = ({
       !isUndefined(item.type) && item.type === 'box' ? (
         <div
           className={styles.defaultHeaderItem}
-          key={uuid.v4()}
+          key={uniqueId()}
           style={{
             width: `${width}%`
           }}>
@@ -55,7 +54,7 @@ const TreeViewExpandableItem = ({
       ) : (
         <span
           className={styles.defaultHeaderItem}
-          key={uuid.v4()}
+          key={uniqueId()}
           style={{
             width: `${width}%`
           }}>
@@ -76,7 +75,7 @@ const TreeViewExpandableItem = ({
             } ${!isUndefined(button.iconSlashed) && button.iconSlashed ? styles.slashSpan : null}`}
             disabled={!isUndefined(button.disabled) ? button.disabled : false}
             icon={button.icon}
-            key={uuid.v4()}
+            key={uniqueId()}
             label={button.label}
             onClick={button.onClick}
             onMouseDown={button.onMouseDown}
@@ -95,7 +94,7 @@ const TreeViewExpandableItem = ({
           <Button
             className={`${button.className} ${styles.defaultInfoButton}`}
             icon={button.icon}
-            key={uuid.v4()}
+            key={uniqueId()}
             label={button.label}
             onClick={() => setIsOpen(true)}
             style={{ ...button.style, marginLeft: '0.5rem' }}

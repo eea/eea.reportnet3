@@ -22,7 +22,7 @@ import { reportingObligationReducer } from './_functions/Reducers/reportingOblig
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 import { RodUrl } from 'core/infrastructure/RodUrl';
 
-export const ReportingObligations = ({ getObligation, oblChecked }) => {
+export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -37,10 +37,10 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
     isLoading: false,
     isSearched: false,
     issues: [],
-    oblChoosed: {},
     organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
-    searchedData: []
+    searchedData: [],
+    selectedObligation: {}
   });
 
   useEffect(() => {
@@ -51,8 +51,8 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   }, []);
 
   useEffect(() => {
-    if (getObligation) getObligation(reportingObligationState.oblChoosed);
-  }, [reportingObligationState.oblChoosed]);
+    setCheckedObligation(reportingObligationState.selectedObligation);
+  }, [reportingObligationState.selectedObligation]);
 
   useEffect(() => {
     if (!isNil(reportingObligationState.filterBy)) {
@@ -108,6 +108,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       const countries = await ObligationService.getCountries();
       reportingObligationDispatch({ type: 'ON_LOAD_COUNTRIES', payload: { countries } });
     } catch (error) {
+      console.error('ReportingObligations - onLoadCountries.', error);
       notificationContext.add({ type: 'LOAD_COUNTRIES_ERROR' });
     }
   };
@@ -117,6 +118,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       const issues = await ObligationService.getIssues();
       reportingObligationDispatch({ type: 'ON_LOAD_ISSUES', payload: { issues } });
     } catch (error) {
+      console.error('ReportingObligations - onLoadIssues.', error);
       notificationContext.add({ type: 'LOAD_ISSUES_ERROR' });
     }
   };
@@ -126,6 +128,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       const organizations = await ObligationService.getOrganizations();
       reportingObligationDispatch({ type: 'ON_LOAD_ORGANIZATIONS', payload: { organizations } });
     } catch (error) {
+      console.error('ReportingObligations - onLoadOrganizations.', error);
       notificationContext.add({ type: 'LOAD_ORGANIZATIONS_ERROR' });
     }
   };
@@ -140,15 +143,16 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
           data: ReportingObligationUtils.initialValues(response, userContext.userProps.dateFormat),
           filteredData: ReportingObligationUtils.filteredInitialValues(
             response,
-            oblChecked.id,
+            obligationChecked.id,
             userContext.userProps.dateFormat
           ),
-          oblChoosed: oblChecked,
+          selectedObligation: obligationChecked,
           filterBy: filterData,
           pagination: { first: 0, rows: 10, page: 0 }
         }
       });
     } catch (error) {
+      console.error('ReportingObligations - onLoadReportingObligations.', error);
       notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' });
     } finally {
       isLoading(false);
@@ -160,16 +164,12 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const onOpenObligation = id => window.open(`${RodUrl.obligations}${id}`);
 
   const onSelectObl = rowData => {
-    const oblChoosed = { id: rowData.id, title: rowData.title };
-    reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { oblChoosed } });
+    const selectedObligation = { id: rowData.id, title: rowData.title };
+    reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { selectedObligation } });
   };
 
   const filterOptions = [
-    {
-      type: 'dropdown',
-      properties: [{ name: 'countries' }, { name: 'issues' }, { name: 'organizations' }]
-    },
-
+    { type: 'dropdown', properties: [{ name: 'countries' }, { name: 'issues' }, { name: 'organizations' }] },
     { type: 'date', properties: [{ name: 'expirationDate' }] }
   ];
 
@@ -182,7 +182,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
   const renderData = () =>
     userContext.userProps.listView ? (
       <TableView
-        checkedObligation={reportingObligationState.oblChoosed}
+        checkedObligation={reportingObligationState.selectedObligation}
         data={reportingObligationState.searchedData}
         onChangePagination={onChangePagination}
         onSelectObl={onSelectObl}
@@ -191,7 +191,7 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
       />
     ) : (
       <CardsView
-        checkedCard={reportingObligationState.oblChoosed}
+        checkedCard={reportingObligationState.selectedObligation}
         contentType={'Obligations'}
         data={reportingObligationState.searchedData}
         handleRedirect={onOpenObligation}
@@ -258,8 +258,9 @@ export const ReportingObligations = ({ getObligation, oblChecked }) => {
           }`}>
           <span>{`${resources.messages['selectedObligation']}: `}</span>
           {`${
-            !isEmpty(reportingObligationState.oblChoosed.title) && !isEmpty(reportingObligationState.oblChoosed)
-              ? reportingObligationState.oblChoosed.title
+            !isEmpty(reportingObligationState.selectedObligation.title) &&
+            !isEmpty(reportingObligationState.selectedObligation)
+              ? reportingObligationState.selectedObligation.title
               : '-'
           }`}
         </span>

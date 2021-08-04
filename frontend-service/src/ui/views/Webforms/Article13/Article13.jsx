@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './Article13.module.scss';
 
@@ -140,12 +141,12 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
         onUpdateData();
       }
     } catch (error) {
-      console.error('error', error);
       if (error.response.status === 423) {
         notificationContext.add({
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
+        console.error('Article13 - onAddPamsRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -177,6 +178,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
           type: 'GENERIC_BLOCKED_ERROR'
         });
       } else {
+        console.error('Article13 - onAddTableRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -232,7 +234,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
         }
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('Article13 - onLoadPamsData.', error);
     } finally {
       setIsLoading(false);
     }
@@ -291,16 +293,16 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
       <Fragment>
         <h4 className={styles.title}>{resources.messages['missingWebformTablesOrFieldsMissing']}</h4>
         <div className={styles.missingElements}>
-          {Object.keys(missingElements).map((key, i) => {
+          {Object.keys(missingElements).map(key => {
             const { fields, table } = missingElements[key];
 
             return (
               fields.some(field => field.isMissing) && (
-                <div key={i}>
+                <div key={uniqueId()}>
                   <span className={styles.tableTitle}>
                     <FontAwesomeIcon icon={AwesomeIcons('table')} /> {table.name}
                   </span>
-                  <ul>{fields.map((field, index) => field.isMissing && <li key={index}> {field.name}</li>)}</ul>
+                  <ul>{fields.map(field => field.isMissing && <li key={uniqueId()}> {field.name}</li>)}</ul>
                 </div>
               )
             );
@@ -322,18 +324,18 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
   return renderLayout(
     <Fragment>
       <ul className={styles.tableList}>
-        {Object.keys(tableList).map((list, i) => (
-          <li className={styles.tableListItem} key={i}>
+        {Object.keys(tableList).map(list => (
+          <li className={styles.tableListItem} key={uniqueId()}>
             <div className={styles.tableListTitleWrapper}>
               <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
             </div>
             <div className={styles.tableListContentWrapper}>
-              {tableList[list].map((items, i) => (
+              {tableList[list].map(items => (
                 <span
                   className={`${styles.tableListId} ${
                     items.recordId === selectedTable.recordId ? styles.selected : null
                   }`}
-                  key={i}
+                  key={uniqueId()}
                   onClick={() => {
                     article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
                     onSelectRecord(items.recordId, items.id);

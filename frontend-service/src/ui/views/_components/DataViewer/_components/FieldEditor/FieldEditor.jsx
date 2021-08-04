@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './FieldEditor.module.scss';
 
@@ -89,8 +89,8 @@ const FieldEditor = ({
 
   const { areEquals } = TextUtils;
 
-  const calendarId = uuid.v4();
-  const calendarWithDatetimeId = uuid.v4();
+  const calendarId = uniqueId();
+  const calendarWithDatetimeId = uniqueId();
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(getCodelistItemsWithEmptyOption());
@@ -187,7 +187,7 @@ const FieldEditor = ({
       }
       setLinkItemsOptions(linkItems);
     } catch (error) {
-      console.error(`Error getting referenced link values: ${error}`);
+      console.error('FieldEditor - onFilter.', error);
       notificationContext.add({
         type: 'GET_REFERENCED_LINK_VALUES_ERROR'
       });
@@ -740,7 +740,7 @@ const FieldEditor = ({
                     record
                   );
                 } catch (error) {
-                  console.error(error);
+                  console.error('FieldEditor - renderField - LINK.', error);
                 }
               }}
               onFilterInputChangeBackend={onFilter}
@@ -814,7 +814,7 @@ const FieldEditor = ({
                   record
                 );
               } catch (error) {
-                console.error(error);
+                console.error('FieldEditor - renderField - MULTISELECT_CODELIST.', error);
               }
             }}
             onFocus={e => {

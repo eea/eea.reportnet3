@@ -236,6 +236,7 @@ export const ShareRights = ({
         payload: { userRightList, clonedUserRightList: cloneDeep(userRightList) }
       });
     } catch (error) {
+      console.error('ShareRights - getAllUsers.', error);
       notificationContext.add({ type: getErrorNotificationKey });
     } finally {
       onResetAll();
@@ -267,6 +268,7 @@ export const ShareRights = ({
         onDataChange();
       }
     } catch (error) {
+      console.error('ShareRights - onDeleteUserRight.', error);
       notificationContext.add({ type: deleteErrorNotificationKey });
       onResetAll();
     } finally {

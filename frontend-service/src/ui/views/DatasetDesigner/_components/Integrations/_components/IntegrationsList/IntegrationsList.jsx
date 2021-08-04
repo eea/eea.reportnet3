@@ -110,6 +110,7 @@ export const IntegrationsList = ({
         refreshList(true);
       }
     } catch (error) {
+      console.error('IntegrationsList - onDeleteIntegration.', error);
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
       integrationListDispatch({ type: 'IS_DELETING', payload: false });
     } finally {
@@ -129,6 +130,7 @@ export const IntegrationsList = ({
       integrationsList(integrations);
       refreshList(false);
     } catch (error) {
+      console.error('IntegrationsList - onLoadIntegrations.', error);
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     } finally {
       isLoading(false);

@@ -109,7 +109,7 @@ const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
     await apiDataset.statisticsById(datasetId);
   } catch (error) {
-    console.error(error);
+    console.error('ApiDatasetRepository - errorStatisticsById.', error);
   }
   const datasetTablesDTO = await apiDataset.statisticsById(datasetId);
 
@@ -299,8 +299,7 @@ const isValidJSON = value => {
   if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
   try {
     JSON.parse(value);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
     return false;
   }
   return true;

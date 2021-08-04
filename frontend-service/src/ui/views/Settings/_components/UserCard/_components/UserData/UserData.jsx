@@ -7,7 +7,7 @@ import { getUrl } from 'core/infrastructure/CoreUtils';
 import { ResourcesContext } from 'ui/views/_functions/Contexts/ResourcesContext';
 import { routes } from 'ui/routes';
 import { UserContext } from 'ui/views/_functions/Contexts/UserContext';
-import { UserImg } from './_components/UserImg';
+import { UserImage } from './_components/UserImage';
 
 const UserData = () => {
   const userContext = useContext(UserContext);
@@ -16,7 +16,7 @@ const UserData = () => {
   return (
     <div className={styles.userDataContainer}>
       <div className={styles.userLogoBoxContainer}>
-        <UserImg />
+        <UserImage />
       </div>
       <div className={styles.userName}>
         {!isUndefined(userContext.firstName) && userContext.firstName !== ''

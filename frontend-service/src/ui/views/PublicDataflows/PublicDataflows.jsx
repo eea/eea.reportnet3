@@ -48,7 +48,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
       const publicData = await DataflowService.publicData();
       setPublicDataflows(publicData.data);
     } catch (error) {
-      console.error('error', error);
+      console.error('PublicDataflows - onLoadPublicDataflows.', error);
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +65,7 @@ export const PublicDataflows = withRouter(({ history, match }) => {
           <h1 className={styles.title}>Dataflows</h1>
           <div className={styles.dataflowsList}>
             {!isLoading ? (
-              publicDataflows.length != 0 ? (
+              publicDataflows.length !== 0 ? (
                 publicDataflows.map(dataflow => (
                   <PublicCard
                     animation

@@ -40,11 +40,11 @@ const all = async userData => {
   return dataflowsDTO;
 };
 
-const create = async (name, description, obligationId, type, groupCompaniesId, fmeUserId) =>
-  apiBusinessDataflow.create(name, description, obligationId, type, groupCompaniesId, fmeUserId);
+const create = async (name, description, obligationId, groupCompaniesId, fmeUserId) =>
+  apiBusinessDataflow.create(name, description, obligationId, groupCompaniesId, fmeUserId);
 
-const edit = async (dataflowId, description, name, type, groupCompaniesId, fmeUserId) =>
-  apiBusinessDataflow.edit(dataflowId, description, name, type, groupCompaniesId, fmeUserId);
+const edit = async (dataflowId, description, obligationId, name, groupCompaniesId, fmeUserId) =>
+  apiBusinessDataflow.edit(dataflowId, description, obligationId, name, groupCompaniesId, fmeUserId);
 
 const parseDataflowDTO = dataflowDTO =>
   new BusinessDataflow({

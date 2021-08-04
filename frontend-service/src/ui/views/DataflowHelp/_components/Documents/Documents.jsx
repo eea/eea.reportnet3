@@ -171,6 +171,7 @@ const Documents = ({
     try {
       await DocumentService.deleteDocument(documentData.id);
     } catch (error) {
+      console.error('Documents - onDeleteDocument.', error);
       notificationContext.add({
         type: 'DELETE_DOCUMENT_ERROR',
         content: {}
@@ -189,7 +190,7 @@ const Documents = ({
       const { data } = await DocumentService.downloadDocumentById(rowData.id);
       setFileToDownload(data);
     } catch (error) {
-      console.error(error.response);
+      console.error('Documents - onDownloadDocument.', error);
     } finally {
       setDownloadingId('');
     }

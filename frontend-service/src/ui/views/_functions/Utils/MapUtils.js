@@ -61,7 +61,7 @@ const isValidJSON = value => {
   if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
   try {
     JSON.parse(value);
-  } catch (e) {
+  } catch (error) {
     return false;
   }
   return true;

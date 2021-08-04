@@ -29,6 +29,7 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { DownloadFile } from 'ui/views/_components/DownloadFile';
 import { MainLayout } from 'ui/views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
+import { ReportingObligations } from 'ui/views/_components/ReportingObligations';
 import { RepresentativesList } from './_components/RepresentativesList';
 import { ShareRights } from 'ui/views/_components/ShareRights';
 import { Spinner } from 'ui/views/_components/Spinner';
@@ -51,6 +52,7 @@ import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 import { useBreadCrumbs } from 'ui/views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'ui/views/_functions/Hooks/useCheckNotifications';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
+import { useReportingObligations } from 'ui/views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { getUrl } from 'core/infrastructure/CoreUtils';
@@ -118,6 +120,16 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+
+  const {
+    obligation,
+    resetObligations,
+    setCheckedObligation,
+    setObligation,
+    setObligationToPrevious,
+    setPreviousObligation,
+    setToCheckedObligation
+  } = useReportingObligations();
 
   const uniqDataProviders = uniq(map(dataflowState.data.datasets, 'dataProviderId'));
 
@@ -371,7 +383,7 @@ const Dataflow = withRouter(({ history, match }) => {
         );
       }
     } catch (error) {
-      console.error(error);
+      console.error('Dataflow - onExportLeadReporters.', error);
       notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' });
     }
   };
@@ -455,13 +467,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
-      payload: {
-        hasWritePermissions,
-        isCustodian,
-        isObserver,
-        userRoles,
-        isNationalCoordinator
-      }
+      payload: { hasWritePermissions, isCustodian, isNationalCoordinator, isObserver, userRoles }
     });
   };
 
@@ -487,6 +493,10 @@ const Dataflow = withRouter(({ history, match }) => {
           status: dataflow.status
         }
       });
+
+      setCheckedObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });
+      setObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });
+      setPreviousObligation({ id: dataflow.obligation.obligationId, title: dataflow.obligation.title });
 
       if (!isEmpty(dataflow.designDatasets)) {
         dataflow.designDatasets.forEach((schema, idx) => {
@@ -529,6 +539,7 @@ const Dataflow = withRouter(({ history, match }) => {
         }
       }
     } catch (error) {
+      console.error('Dataflow - onLoadReportingDataflow.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
       history.push(getUrl(routes.DATAFLOWS));
     } finally {
@@ -547,7 +558,7 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: true });
       }
     } catch (error) {
-      console.error(`Error while downloading the file: ${error}`);
+      console.error('Dataflow - onUploadLeadReporters.', error);
       notificationContext.add({ type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' });
     }
   };
@@ -597,12 +608,9 @@ const Dataflow = withRouter(({ history, match }) => {
       updatedTitles[index].schemaName = value;
       setUpdatedDatasetSchema(updatedTitles);
     } catch (error) {
-      console.error('error', error);
+      console.error('Dataflow - onSaveName.', error);
       if (error?.response?.status === 400) {
-        notificationContext.add({
-          type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
-          content: { schemaName: value }
-        });
+        notificationContext.add({ type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME', content: { schemaName: value } });
       }
     }
   };
@@ -619,7 +627,7 @@ const Dataflow = withRouter(({ history, match }) => {
         DownloadFile(data, `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Dataflow - onConfirmExport.', error);
       notificationContext.add({ type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT' });
     } finally {
       manageDialogs('isExportDialogVisible', false);
@@ -639,6 +647,7 @@ const Dataflow = withRouter(({ history, match }) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' });
       } else {
+        console.error('Dataflow - onConfirmRelease.', error);
         notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} });
       }
     } finally {
@@ -651,10 +660,8 @@ const Dataflow = withRouter(({ history, match }) => {
       const userObject = await UserService.refreshToken();
       userContext.onTokenRefresh(userObject);
     } catch (error) {
-      notificationContext.add({
-        key: 'TOKEN_REFRESH_ERROR',
-        content: {}
-      });
+      console.error('Dataflow - onRefreshToken.', error);
+      notificationContext.add({ key: 'TOKEN_REFRESH_ERROR', content: {} });
       await UserService.logout();
       userContext.onLogout();
     }
@@ -680,6 +687,33 @@ const Dataflow = withRouter(({ history, match }) => {
     getImportExtensions.split(', ')
   ).join(', ')}`;
 
+  const onHideObligationDialog = () => {
+    manageDialogs('isReportingObligationsDialogVisible', false);
+    setObligationToPrevious();
+  };
+
+  const renderObligationFooter = () => (
+    <Fragment>
+      <Button
+        icon="check"
+        label={resources.messages['ok']}
+        onClick={() => {
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          setToCheckedObligation();
+        }}
+      />
+      <Button
+        className="p-button-secondary button-right-aligned p-button-animated-blink"
+        icon="cancel"
+        label={resources.messages['cancel']}
+        onClick={() => {
+          manageDialogs('isReportingObligationsDialogVisible', false);
+          setObligationToPrevious();
+        }}
+      />
+    </Fragment>
+  );
+
   const onConfirmUpdateIsReleaseable = async () => {
     manageDialogs('isReleaseableDialogVisible', false);
     try {
@@ -697,6 +731,7 @@ const Dataflow = withRouter(({ history, match }) => {
       );
       onLoadReportingDataflow();
     } catch (error) {
+      console.error('Dataflow - onConfirmUpdateIsReleaseable.', error);
       notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
       dataflowDispatch({
         type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
@@ -722,6 +757,7 @@ const Dataflow = withRouter(({ history, match }) => {
       );
       onLoadReportingDataflow();
     } catch (error) {
+      console.error('Dataflow - onConfirmUpdateShowPublicInfo.', error);
       notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
       dataflowDispatch({
         type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
@@ -1044,10 +1080,24 @@ const Dataflow = withRouter(({ history, match }) => {
           history={history}
           isEditForm={true}
           manageDialogs={manageDialogs}
+          obligation={obligation}
           onConfirmDeleteDataflow={onConfirmDeleteDataflow}
           onEditDataflow={onEditDataflow}
+          resetObligations={resetObligations}
+          setCheckedObligation={setCheckedObligation}
           state={dataflowState}
         />
+
+        {dataflowState.isReportingObligationsDialogVisible && (
+          <Dialog
+            footer={renderObligationFooter()}
+            header={resources.messages['reportingObligations']}
+            onHide={onHideObligationDialog}
+            style={{ width: '95%' }}
+            visible={dataflowState.isReportingObligationsDialogVisible}>
+            <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
+          </Dialog>
+        )}
 
         {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog

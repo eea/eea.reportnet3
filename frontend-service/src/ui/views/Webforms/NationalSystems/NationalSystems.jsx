@@ -1,5 +1,7 @@
 import { Fragment, useContext } from 'react';
 
+import uniqueId from 'lodash/uniqueId';
+
 import styles from './NationalSystems.module.scss';
 
 import { tables } from './nationalSystems.webform.json';
@@ -57,11 +59,11 @@ export const NationalSystems = ({ dataProviderId, dataflowId, datasetId, state }
 
   return (
     <div className={styles.nationalSystems}>
-      {tables.map((table, index) => {
+      {tables.map(table => {
         const schemaTable = schemaTables.filter(tab => areEquals(tab['tableSchemaName'], table['name']))[0];
 
         return (
-          <Fragment key={index}>
+          <Fragment key={uniqueId()}>
             <NationalSystemsTable
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}

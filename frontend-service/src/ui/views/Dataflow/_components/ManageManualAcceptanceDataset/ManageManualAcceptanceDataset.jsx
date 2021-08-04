@@ -1,12 +1,11 @@
 import { Fragment, useContext, useReducer } from 'react';
 import ReactTooltip from 'react-tooltip';
 
-import styles from './ManageManualAcceptanceDataset.module.scss';
-
-import uuid from 'uuid';
-
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
+import uniqueId from 'lodash/uniqueId';
+
+import styles from './ManageManualAcceptanceDataset.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
 import { Dialog } from 'ui/views/_components/Dialog';
@@ -77,6 +76,7 @@ export const ManageManualAcceptanceDataset = ({
         refreshManualAcceptanceDatasets(true);
       }
     } catch (error) {
+      console.error('ManageManualAcceptanceDataset - onUpdateDataset.', error);
       notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' });
     } finally {
       manageDialogs(false);
@@ -127,7 +127,7 @@ export const ManageManualAcceptanceDataset = ({
     </Dialog>
   );
 
-  const idTextArea = uuid.v4();
+  const idTextArea = uniqueId();
 
   const renderInputTextLayout = option => (
     <span>

@@ -184,10 +184,10 @@ export const BigButtonList = ({
     try {
       await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
-      console.error(error);
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
+        console.error('BigButtonList - cloneDatasetSchemas.', error);
         notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
       }
     }
@@ -242,6 +242,7 @@ export const BigButtonList = ({
     try {
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
+      console.error('BigButtonList - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
     }
   };
@@ -272,13 +273,12 @@ export const BigButtonList = ({
         showPublicInfo
       );
     } catch (error) {
-      console.error(error);
+      console.error('BigButtonList - onCreateDataCollections.', error);
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
 
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
-
       setIsActiveButton(true);
     } finally {
       setDataCollectionDialog(false);
@@ -330,6 +330,7 @@ export const BigButtonList = ({
       const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
       setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
+      console.error('BigButtonList - onLoadEuDatasetIntegration.', error);
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     }
   };
@@ -342,7 +343,7 @@ export const BigButtonList = ({
     try {
       return await DataCollectionService.update(dataflowId);
     } catch (error) {
-      console.error(error);
+      console.error('BigButtonList - onUpdateDataCollection.', error);
     }
   };
 
@@ -357,7 +358,7 @@ export const BigButtonList = ({
         setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
       }
     } catch (error) {
-      console.error(error.response);
+      console.error('BigButtonList - onDeleteDatasetSchema.', error);
       if (error.response.status === 401) {
         notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
       }
@@ -385,6 +386,7 @@ export const BigButtonList = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
       } else {
+        console.error('BigButtonList - onCopyDataCollectionToEuDataset.', error);
         notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
       }
     }
@@ -405,6 +407,7 @@ export const BigButtonList = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'EU_DATASET_LOCKED_ERROR' });
       } else {
+        console.error('BigButtonList - onExportEuDataset.', error);
         notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
       }
     }
@@ -418,7 +421,7 @@ export const BigButtonList = ({
       downloadPdf(response.data);
       onCleanUpReceipt();
     } catch (error) {
-      console.error(error);
+      console.error('BigButtonList - onLoadReceiptData.', error);
       notificationContext.add({
         type: 'LOAD_RECEIPT_DATA_ERROR'
       });
@@ -446,7 +449,7 @@ export const BigButtonList = ({
     try {
       await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
     } catch (error) {
-      console.error(error);
+      console.error('BigButtonList - onCreateDataCollectionsWithNotValids.', error);
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });

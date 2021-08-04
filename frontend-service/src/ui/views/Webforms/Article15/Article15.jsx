@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './Article15.module.scss';
 
@@ -91,7 +92,7 @@ export const Article15 = ({ dataProviderId, dataflowId, datasetId, isReporting, 
     const filteredTabs = article15State.data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
 
-    return article15State.data.map((webform, i) => {
+    return article15State.data.map(webform => {
       const isCreated = headers.includes(webform.name);
       const childHasErrors = webform.elements
         .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
@@ -100,7 +101,7 @@ export const Article15 = ({ dataProviderId, dataflowId, datasetId, isReporting, 
       const hasErrors = [webform.hasErrors].concat(childHasErrors);
 
       return (
-        <Fragment key={i}>
+        <Fragment key={uniqueId()}>
           <Button
             className={`${styles.headerButton} ${
               article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
@@ -113,7 +114,7 @@ export const Article15 = ({ dataProviderId, dataflowId, datasetId, isReporting, 
               !article15State.isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''
             }
             iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
-            key={i}
+            key={uniqueId()}
             label={webform.label}
             onClick={() => onChangeWebformTab(webform.name)}
             style={{ display: isReporting && !isCreated ? 'none' : '' }}

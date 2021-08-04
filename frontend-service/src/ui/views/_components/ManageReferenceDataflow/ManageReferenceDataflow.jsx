@@ -41,10 +41,10 @@ export const ManageReferenceDataflow = ({
   manageDialogs,
   metadata,
   onEditDataflow,
-  onManage
+  onCreateDataflow
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
-  const INPUT_MAX_LENGTH = 255;
+
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -71,7 +71,7 @@ export const ManageReferenceDataflow = ({
 
   const checkErrors = () => {
     let hasErrors = false;
-    if (description.length > INPUT_MAX_LENGTH) {
+    if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',
         hasErrors: true,
@@ -80,7 +80,7 @@ export const ManageReferenceDataflow = ({
       hasErrors = true;
     }
 
-    if (name.length > INPUT_MAX_LENGTH) {
+    if (name.length > config.INPUT_MAX_LENGTH) {
       handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameValidationMax'] });
       hasErrors = true;
     }
@@ -102,6 +102,7 @@ export const ManageReferenceDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
       }
     } catch (error) {
+      console.error('ManageReferenceDataflows - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();
@@ -132,7 +133,7 @@ export const ManageReferenceDataflow = ({
               userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
             }
           }
-          onManage();
+          onCreateDataflow('isReferencedDataflowDialogVisible');
         }
       }
     } catch (error) {
@@ -140,6 +141,7 @@ export const ManageReferenceDataflow = ({
         handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameExists'] });
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
+        console.error('ManageReferenceDataflows - onManageReferenceDataflow.', error);
         const notification = isEditing
           ? { type: 'REFERENCE_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
           : { type: 'REFERENCE_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
@@ -154,7 +156,6 @@ export const ManageReferenceDataflow = ({
   const renderDialogFooter = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
-        {/* {isEditing && state.isCustodian && state.status === config.dataflowStatus.DESIGN && ( */}
         {!isEditing && (
           <div className={styles.checkboxWrapper}>
             <Checkbox
@@ -199,7 +200,7 @@ export const ManageReferenceDataflow = ({
         onClick={() => onManageReferenceDataflow()}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
         icon={'cancel'}
         label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
         onClick={() => manageDialogs(dialogName, false)}

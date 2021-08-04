@@ -145,8 +145,7 @@ export const WebLinks = ({
         onLoadWebLinks();
       }
     } catch (error) {
-      console.error('Error on delete WebLink', error);
-
+      console.error('WebLinks - onDeleteWebLink.', error);
       notificationContext.add({
         type: 'DELETE_WEB_LINK_ERROR'
       });
@@ -199,8 +198,7 @@ export const WebLinks = ({
 
           onHideAddEditDialog();
         } catch (error) {
-          console.error('Error on save new WebLink: ', error);
-
+          console.error('WebLinks - onSaveRecord - add.', error);
           if (error.response.status === 400) {
             notificationContext.add({
               type: 'WRONG_WEB_LINK_ERROR'
@@ -228,8 +226,7 @@ export const WebLinks = ({
 
           onHideAddEditDialog();
         } catch (error) {
-          console.error('Error on update new WebLink: ', error);
-
+          console.error('WebLinks - onSaveRecord - update.', error);
           if (error.response.status === 400) {
             notificationContext.add({
               type: 'WRONG_WEB_LINK_ERROR'

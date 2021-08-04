@@ -116,6 +116,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
     try {
       await UserService.logout();
     } catch (error) {
+      console.error('LeftSideBar - userLogout.', error);
       notificationContext.add({ type: 'USER_LOGOUT_ERROR' });
     } finally {
       userContext.onLogout();

@@ -30,7 +30,7 @@ export const PrivateRoute = ({ component: Component, componentProps = {}, locati
     }
   };
 
-  if (window.env.REACT_APP_EULOGIN.toString() == 'true') {
+  if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
     if (userStorage.hasToken() || !isUndefined(userContext.id)) {
       userStorage.removeSessionStorageProperty('redirectUrl');
       return <Route path={path} render={props => checkRedirect(props)} />;

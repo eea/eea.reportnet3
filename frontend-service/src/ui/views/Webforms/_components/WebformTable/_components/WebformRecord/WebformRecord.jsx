@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqBy from 'lodash/uniqBy';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './WebformRecord.module.scss';
 
@@ -89,7 +90,7 @@ export const WebformRecord = ({
         handleDialogs('deleteRow', false);
       }
     } catch (error) {
-      console.error('error', error);
+      console.error('WebformRecord - onDeleteMultipleWebform.', error);
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
@@ -109,11 +110,11 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value, conditional } });
   };
 
-  const onSaveField = async (option, value, recordId) => {
+  const onSaveField = async () => {
     try {
       await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
     } catch (error) {
-      console.error('error', error);
+      console.error('WebformRecord - onSaveField.', error);
     }
   };
 
@@ -183,7 +184,7 @@ export const WebformRecord = ({
   };
 
   const renderElements = (elements = [], fieldsBlock = false) => {
-    return elements.map((element, i) => {
+    return elements.map(element => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
@@ -193,7 +194,7 @@ export const WebformRecord = ({
 
         if (isSubtable()) {
           return (
-            <div className={styles.fieldsBlock} key={i}>
+            <div className={styles.fieldsBlock} key={uniqueId()}>
               {element.elementsRecords
                 .filter(record => elements[0].recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
@@ -202,7 +203,7 @@ export const WebformRecord = ({
         }
 
         return (
-          <div className={styles.fieldsBlock} key={i}>
+          <div className={styles.fieldsBlock} key={uniqueId()}>
             {element.elementsRecords.map(record => renderElements(record.elements))}
           </div>
         );
@@ -220,7 +221,7 @@ export const WebformRecord = ({
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={i} style={fieldStyle}>
+            <div className={styles.field} key={uniqueId()} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -273,10 +274,10 @@ export const WebformRecord = ({
                 {element.validations &&
                   uniqBy(element.validations, element => {
                     return [element.message, element.errorLevel].join();
-                  }).map((validation, index) => (
+                  }).map(validation => (
                     <IconTooltip
                       className={'webform-validationErrors'}
-                      key={index}
+                      key={uniqueId()}
                       levelError={validation.levelError}
                       message={validation.message}
                     />
@@ -308,7 +309,9 @@ export const WebformRecord = ({
         return (
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable} key={i}>
+            <div
+              className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}
+              key={uniqueId()}>
               {!element.showInsideParentTable && (
                 <div className={styles.title}>
                   <h3>

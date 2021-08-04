@@ -115,7 +115,7 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
       userContext.onToggleSettingsLoaded(true);
       userContext.onToggleTypeView(userConfiguration.listView);
     } catch (error) {
-      console.error(error);
+      console.error('MainLayout - getUserConfiguration.', error);
       userContext.onToggleSettingsLoaded(false);
       notifications.add({
         type: 'GET_CONFIGURATION_USER_SERVICE_ERROR'
@@ -136,6 +136,7 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
           const userObject = await UserService.refreshToken();
           userContext.onTokenRefresh(userObject);
         } catch (error) {
+          console.error('MainLayout - fetchData.', error);
           notifications.add({
             key: 'TOKEN_REFRESH_ERROR',
             content: {}

@@ -17,7 +17,6 @@ import { Dialog } from 'ui/views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'ui/views/_components/InputText';
 import ReactTooltip from 'react-tooltip';
-import { ReportingObligations } from './_components/ReportingObligations';
 
 import { DataflowService } from 'core/services/Dataflow';
 
@@ -34,10 +33,13 @@ export const DataflowManagement = ({
   dataflowId,
   history,
   isEditForm,
+  manageDialogs,
+  obligation,
+  onConfirmDeleteDataflow,
   onCreateDataflow,
   onEditDataflow,
-  onConfirmDeleteDataflow,
-  manageDialogs,
+  resetObligations,
+  setCheckedObligation,
   state
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -51,14 +53,7 @@ export const DataflowManagement = ({
     description: isEditForm ? state.description : '',
     isSubmitting: false,
     name: isEditForm ? state.name : '',
-    obligation:
-      isEditForm && state.obligations
-        ? { id: state.obligations.obligationId, title: state.obligations.title }
-        : { id: null, title: '' },
-    obligationPrevState:
-      isEditForm && state.obligations
-        ? { id: state.obligations.obligationId, title: state.obligations.title }
-        : { id: null, title: '' },
+    obligation,
     pinDataflow: false,
     isReleasable: state.isReleasable
   };
@@ -69,13 +64,21 @@ export const DataflowManagement = ({
   );
 
   useEffect(() => {
+    if (isEditForm) {
+      onLoadObligation({ id: state.obligations.obligationId, title: state.obligations.title });
+      setCheckedObligation({ id: state.obligations.obligationId, title: state.obligations.title });
+    }
+  }, [state]);
+
+  useEffect(() => {
+    onLoadObligation(obligation);
+  }, [obligation]);
+
+  useEffect(() => {
     if (!isNil(deleteInputRef.current) && state.isDeleteDialogVisible) deleteInputRef.current.element.focus();
   }, [state.isDeleteDialogVisible]);
 
   const secondaryDialog = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
-
-  const getPrevState = data =>
-    dataflowManagementDispatch({ type: 'PREV_STATE', payload: { id: data.id, title: data.title } });
 
   const onSubmit = value => dataflowManagementDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
@@ -98,13 +101,9 @@ export const DataflowManagement = ({
   };
 
   const onHideDataflowDialog = () => {
-    manageDialogs(secondaryDialog, false);
     onResetData();
-  };
-
-  const onHideObligationDialog = () => {
-    manageDialogs('isRepObDialogVisible', false);
-    onResetObl();
+    resetObligations();
+    manageDialogs(secondaryDialog, false);
   };
 
   const onLoadData = ({ name, description }) =>
@@ -116,16 +115,14 @@ export const DataflowManagement = ({
   const onResetData = () =>
     dataflowManagementDispatch({ type: 'RESET_STATE', payload: { resetData: dataflowManagementInitialState } });
 
-  const onResetObl = () =>
-    dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: dataflowManagementState.obligationPrevState });
-
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(dataflowManagementState.pinDataflow);
+    manageDialogs(secondaryDialog, false);
   };
 
   const renderCancelButton = action => (
     <Button
-      className="p-button-secondary button-right-aligned p-button-animated-blink"
+      className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
       icon="cancel"
       label={isEditForm ? resources.messages['cancel'] : resources.messages['close']}
       onClick={() => action()}
@@ -199,33 +196,8 @@ export const DataflowManagement = ({
     </Fragment>
   );
 
-  const renderOblFooter = () => (
-    <Fragment>
-      <Button
-        icon="check"
-        label={resources.messages['ok']}
-        onClick={() => {
-          manageDialogs('isRepObDialogVisible', false);
-          getPrevState(dataflowManagementState.obligation);
-        }}
-      />
-      {renderCancelButton(onHideObligationDialog)}
-    </Fragment>
-  );
-
   return (
     <Fragment>
-      {state.isRepObDialogVisible && (
-        <Dialog
-          footer={renderOblFooter()}
-          header={resources.messages['reportingObligations']}
-          onHide={() => onHideObligationDialog()}
-          style={{ width: '95%' }}
-          visible={state.isRepObDialogVisible}>
-          <ReportingObligations getObligation={onLoadObligation} oblChecked={dataflowManagementState.obligation} />
-        </Dialog>
-      )}
-
       {(state.isAddDialogVisible || state.isEditDialogVisible) && (
         <Dialog
           className={styles.dialog}
@@ -238,10 +210,11 @@ export const DataflowManagement = ({
             dataflowId={dataflowId}
             getData={onLoadData}
             isEditForm={isEditForm}
+            obligation={dataflowManagementState.obligation}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onResetData={onResetData}
-            onSearch={() => manageDialogs('isRepObDialogVisible', true)}
+            onSearch={() => manageDialogs('isReportingObligationsDialogVisible', true)}
             onSubmit={onSubmit}
             ref={formRef}
             refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}

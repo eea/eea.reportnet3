@@ -106,6 +106,7 @@ const ValidationsList = withRouter(
           onUpdateData();
         }
       } catch (error) {
+        console.error('ValidationsList - onDeleteValidation.', error);
         notificationContext.add({ type: 'DELETE_RULE_ERROR' });
         validationId('');
       } finally {
@@ -155,7 +156,7 @@ const ValidationsList = withRouter(
           })
         );
       } catch (error) {
-        console.error(error);
+        console.error('ValidationsList - onLoadValidationsList.', error);
         notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' });
       } finally {
         updatedRuleId = null;

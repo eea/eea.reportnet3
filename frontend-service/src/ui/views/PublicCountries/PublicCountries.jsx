@@ -51,7 +51,7 @@ export const PublicCountries = withRouter(({ history }) => {
           e.preventDefault();
           history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
         }}>
-        <ReactCountryFlag aria-label={country.name} className={styles.flag} countryCode={country.code} svg />
+        <ReactCountryFlag aria-label={country.name} className={styles.flag} countryCode={country.flag} svg />
 
         <div className={styles.titleWrap}>
           <h3>{country.name}</h3>

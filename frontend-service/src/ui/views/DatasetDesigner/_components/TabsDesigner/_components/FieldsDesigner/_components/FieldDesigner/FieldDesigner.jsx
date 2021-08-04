@@ -487,32 +487,28 @@ export const FieldDesigner = ({
         type,
         validExtensions
       });
-      if (response.status < 200 || response.status > 299) {
-        console.error('Error during field Add');
-      } else {
-        dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
-        onNewFieldAdd({
-          codelistItems,
-          description,
-          fieldId: response.data,
-          fieldLinkValue: null,
-          maxSize,
-          name,
-          pk,
-          pkHasMultipleValues,
-          pkMustBeUsed,
-          readOnly,
-          recordId,
-          referencedField: !isNil(referencedField)
-            ? parseReferenceField(referencedField)
-            : fieldDesignerState.fieldLinkValue,
-          required,
-          type,
-          validExtensions
-        });
-      }
+      dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
+      onNewFieldAdd({
+        codelistItems,
+        description,
+        fieldId: response.data,
+        fieldLinkValue: null,
+        maxSize,
+        name,
+        pk,
+        pkHasMultipleValues,
+        pkMustBeUsed,
+        readOnly,
+        recordId,
+        referencedField: !isNil(referencedField)
+          ? parseReferenceField(referencedField)
+          : fieldDesignerState.fieldLinkValue,
+        required,
+        type,
+        validExtensions
+      });
     } catch (error) {
-      console.error('Error during field Add: ', error);
+      console.error('FieldDesigner - onFieldAdd.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
           notificationContext.add({
@@ -838,11 +834,11 @@ export const FieldDesigner = ({
           validExtensions
         });
       } else {
-        console.error('Error during field Update');
+        console.error('FieldDesigner - fieldUpdate.');
         dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
       }
     } catch (error) {
-      console.error(`Error during field Update: ${error}`);
+      console.error('FieldDesigner - fieldUpdate.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
           notificationContext.add({
@@ -879,7 +875,7 @@ export const FieldDesigner = ({
   );
 
   const renderCheckboxes = () => (
-    <div className="requiredAndPKCheckboxes">
+    <div className={styles.requiredAndPKCheckboxes}>
       {!addField ? (
         <FontAwesomeIcon
           aria-label={resources.messages['moveField']}
@@ -911,7 +907,6 @@ export const FieldDesigner = ({
             onPKChange(e.checked);
           }
         }}
-        style={{ width: '35px' }}
         tooltip={
           !isNil(fieldDesignerState.fieldTypeValue) &&
           !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
@@ -942,7 +937,6 @@ export const FieldDesigner = ({
         onChange={e => {
           onRequiredChange(e.checked);
         }}
-        style={{ width: '70px' }}
         tooltip={
           Boolean(fieldDesignerState.fieldPKValue)
             ? resources.messages['disabledRequiredPK']
@@ -965,7 +959,6 @@ export const FieldDesigner = ({
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
         onChange={e => onReadOnlyChange(e.checked)}
-        style={{ width: '90px' }}
       />
     </div>
   );
@@ -1097,7 +1090,7 @@ export const FieldDesigner = ({
     <Fragment>
       <InputText
         autoFocus={false}
-        className={`${styles.inputField} ${
+        className={`${styles.inputField} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}
@@ -1158,7 +1151,7 @@ export const FieldDesigner = ({
       <Dropdown
         appendTo={document.body}
         ariaLabel={'fieldType'}
-        className={`${styles.dropdownFieldType} ${
+        className={`${styles.dropdownFieldType} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}

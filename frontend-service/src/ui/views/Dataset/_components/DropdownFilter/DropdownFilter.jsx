@@ -274,15 +274,15 @@ class DropdownFilter extends Component {
         }}
         style={this.state.style}>
         <ul>
-          {fields.map((field, i) => (
+          {fields.map(field => (
             <li className={styles.selectNone} key={`parent_${field.key}`}>
               <div
                 className={!field.checked ? styles.isNotChecked : ''}
-                onClick={e => {
+                onClick={() => {
                   this.updateChecked(field.key);
                 }}>
                 <FontAwesomeIcon
-                  ariaLabel={field.label.toLowerCase()}
+                  aria-label={field.label.toLowerCase()}
                   className={styles.checkboxIcon}
                   icon={field.checked ? AwesomeIcons('checkedSquare') : AwesomeIcons('square')}
                   role="presentation"
@@ -309,7 +309,6 @@ class DropdownFilter extends Component {
                   )
                 ) : null}
                 <LevelError type={field.label.toLowerCase()} />
-                {/* {field.label} */}
               </div>
             </li>
           ))}

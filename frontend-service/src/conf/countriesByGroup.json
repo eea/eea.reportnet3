@@ -2,245 +2,304 @@
   "eeaCountries": [
     {
       "name": "Austria",
-      "code": "AT"
+      "code": "AT",
+      "flag": "AT"
     },
     {
       "name": "Belgium",
-      "code": "BE"
+      "code": "BE",
+      "flag": "BE"
     },
     {
       "name": "Bulgaria",
-      "code": "BG"
+      "code": "BG",
+      "flag": "BG"
     },
     {
       "name": "Croatia",
-      "code": "HR"
+      "code": "HR",
+      "flag": "HR"
     },
     {
       "name": "Cyprus",
-      "code": "CY"
+      "code": "CY",
+      "flag": "CY"
     },
     {
       "name": "Czechia",
-      "code": "CZ"
+      "code": "CZ",
+      "flag": "CZ"
     },
     {
       "name": "Denmark",
-      "code": "DK"
+      "code": "DK",
+      "flag": "DK"
     },
     {
       "name": "Estonia",
-      "code": "EE"
+      "code": "EE",
+      "flag": "EE"
     },
     {
       "name": "Finland",
-      "code": "FI"
+      "code": "FI",
+      "flag": "FI"
     },
     {
       "name": "France",
-      "code": "FR"
+      "code": "FR",
+      "flag": "FR"
     },
     {
       "name": "Germany",
-      "code": "DE"
+      "code": "DE",
+      "flag": "DE"
     },
     {
       "name": "Greece",
-      "code": "GR"
+      "code": "EL",
+      "flag": "GR"
     },
     {
       "name": "Hungary",
-      "code": "HU"
+      "code": "HU",
+      "flag": "HU"
     },
     {
       "name": "Iceland",
-      "code": "IS"
+      "code": "IS",
+      "flag": "IS"
     },
     {
       "name": "Ireland",
-      "code": "IE"
+      "code": "IE",
+      "flag": "IE"
     },
     {
       "name": "Italy",
-      "code": "IT"
+      "code": "IT",
+      "flag": "IT"
     },
     {
       "name": "Latvia",
-      "code": "LV"
+      "code": "LV",
+      "flag": "LV"
     },
     {
       "name": "Liechtenstein",
-      "code": "LI"
+      "code": "LI",
+      "flag": "LI"
     },
     {
       "name": "Lithuania",
-      "code": "LT"
+      "code": "LT",
+      "flag": "LT"
     },
     {
       "name": "Luxembourg",
-      "code": "LU"
+      "code": "LU",
+      "flag": "LU"
     },
     {
       "name": "Malta",
-      "code": "MT"
+      "code": "MT",
+      "flag": "MT"
     },
     {
       "name": "Netherlands",
-      "code": "NL"
+      "code": "NL",
+      "flag": "NL"
     },
     {
       "name": "Norway",
-      "code": "NO"
+      "code": "NO",
+      "flag": "NO"
     },
     {
       "name": "Poland",
-      "code": "PL"
+      "code": "PL",
+      "flag": "PL"
     },
     {
       "name": "Portugal",
-      "code": "PT"
+      "code": "PT",
+      "flag": "PT"
     },
     {
       "name": "Romania",
-      "code": "RO"
+      "code": "RO",
+      "flag": "RO"
     },
     {
       "name": "Slovakia",
-      "code": "SK"
+      "code": "SK",
+      "flag": "SK"
     },
     {
       "name": "Slovenia",
-      "code": "SI"
+      "code": "SI",
+      "flag": "SI"
     },
     {
       "name": "Spain",
-      "code": "ES"
+      "code": "ES",
+      "flag": "ES"
     },
     {
       "name": "Sweden",
-      "code": "SE"
+      "code": "SE",
+      "flag": "SE"
     },
     {
       "name": "Switzerland",
-      "code": "CH"
+      "code": "CH",
+      "flag": "CH"
     },
     {
       "name": "Turkey",
-      "code": "TR"
+      "code": "TR",
+      "flag": "TR"
     }
   ],
   "associates": [
     {
       "name": "Iceland",
-      "code": "IS"
+      "code": "IS",
+      "flag": "IS"
     },
     {
       "name": "Liechtenstein",
-      "code": "LI"
+      "code": "LI",
+      "flag": "LI"
     },
     {
       "name": "Norway",
-      "code": "NO"
+      "code": "NO",
+      "flag": "NO"
     },
     {
       "name": "Switzerland",
-      "code": "CH"
+      "code": "CH",
+      "flag": "CH"
     },
     {
       "name": "Turkey",
-      "code": "TR"
+      "code": "TR",
+      "flag": "TR"
     }
   ],
   "cooperatingCountries": [
     {
       "name": "Albania",
-      "code": "AL"
+      "code": "AL",
+      "flag": "AL"
     },
     {
       "name": "Bosnia and Herzegovina",
-      "code": "BA"
+      "code": "BA",
+      "flag": "BA"
     },
     {
       "name": "Kosovo (UNSCR 1244/99)",
-      "code": "XK"
+      "code": "XK",
+      "flag": "XK"
     },
     {
       "name": "Montenegro",
-      "code": "ME"
+      "code": "ME",
+      "flag": "ME"
     },
     {
       "name": "North Macedonia",
-      "code": "MK"
+      "code": "MK",
+      "flag": "MK"
     },
     {
       "name": "Serbia",
-      "code": "RS"
+      "code": "RS",
+      "flag": "RS"
     }
   ],
   "otherCountries": [
     {
       "name": "Andorra",
-      "code": "AD"
+      "code": "AD",
+      "flag": "AD"
     },
     {
       "name": "Armenia",
-      "code": "AM"
+      "code": "AM",
+      "flag": "AM"
     },
     {
       "name": "Azerbaijan",
-      "code": "AZ"
+      "code": "AZ",
+      "flag": "AZ"
     },
     {
       "name": "Belarus",
-      "code": "BY"
+      "code": "BY",
+      "flag": "BY"
     },
     {
       "name": "Georgia",
-      "code": "GE"
+      "code": "GE",
+      "flag": "GE"
     },
     {
       "name": "Gibraltar",
-      "code": "GI"
+      "code": "GI",
+      "flag": "GI"
     },
     {
       "name": "Kazakhstan",
-      "code": "KZ"
+      "code": "KZ",
+      "flag": "KZ"
     },
     {
       "name": "Kyrgyzstan",
-      "code": "KG"
+      "code": "KG",
+      "flag": "KG"
     },
     {
       "name": "Moldova",
-      "code": "MD"
+      "code": "MD",
+      "flag": "MD"
     },
     {
       "name": "Monaco",
-      "code": "MC"
+      "code": "MC",
+      "flag": "MC"
     },
     {
       "name": "Russia",
-      "code": "RU"
+      "code": "RU",
+      "flag": "RU"
     },
     {
       "name": "Tajikistan",
-      "code": "TJ"
+      "code": "TJ",
+      "flag": "TJ"
     },
     {
       "name": "Turkmenistan",
-      "code": "TM"
+      "code": "TM",
+      "flag": "TM"
     },
     {
       "name": "Ukraine",
-      "code": "UA"
+      "code": "UA",
+      "flag": "UA"
     },
     {
       "name": "United Kingdom",
-      "code": "GB"
+      "code": "GB",
+      "flag": "GB"
     },
     {
       "name": "Uzbekistan",
-      "code": "UZ"
+      "code": "UZ",
+      "flag": "UZ"
     }
   ]
 }

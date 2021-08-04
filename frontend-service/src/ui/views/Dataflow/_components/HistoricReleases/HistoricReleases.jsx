@@ -93,6 +93,7 @@ export const HistoricReleases = ({ dataflowId, dataProviderId, datasetId, histor
       });
       getCountryCode(historicReleases);
     } catch (error) {
+      console.error('HistoricReleases - onLoadHistoricReleases.', error);
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
     } finally {
       isLoading(false);

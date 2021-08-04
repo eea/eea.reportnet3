@@ -1,2 +1,7 @@
-export const Create = ({ businessDataflowRepository }) => async (name, description, type) =>
-  businessDataflowRepository.create(name, description, type);
+export const Create = ({ businessDataflowRepository }) => async (
+  name,
+  description,
+  obligationId,
+  groupCompaniesId,
+  fmeUserId
+) => businessDataflowRepository.create(name, description, obligationId, groupCompaniesId, fmeUserId);

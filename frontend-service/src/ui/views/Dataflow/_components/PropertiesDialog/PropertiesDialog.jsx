@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './PropertiesDialog.module.scss';
 
@@ -60,7 +60,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
             </TreeViewExpandableItem>
           </div>
           {parsedObligationsData.map((data, i) => (
-            <div key={uuid.v4()} style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+            <div key={uniqueId()} style={{ marginTop: '2rem', marginBottom: '1rem' }}>
               <TreeViewExpandableItem
                 buttons={[
                   {
