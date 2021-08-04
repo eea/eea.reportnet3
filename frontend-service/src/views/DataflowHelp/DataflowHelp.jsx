@@ -18,10 +18,10 @@ import { TabView } from 'views/_components/TabView';
 import { Title } from 'views/_components/Title';
 import { WebLinks } from './_components/WebLinks';
 
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
-import { DocumentService } from 'services/Document';
-import { WebLinkService } from 'services/WebLink';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
+import { DocumentService } from 'services/DocumentService';
+import { WebLinkService } from 'services/WebLinkService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

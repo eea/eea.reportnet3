@@ -1,7 +1,7 @@
 import includes from 'lodash/includes';
 import isNil from 'lodash/isNil';
 
-import { Representative } from 'entities/Representative/Representative';
+import { Representative } from 'entities/Representative';
 
 export const reducer = (state, { type, payload }) => {
   const emptyRepresentative = new Representative({ dataProviderId: '', leadReporters: [] });

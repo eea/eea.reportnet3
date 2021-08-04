@@ -21,8 +21,8 @@ import { Spinner } from 'views/_components/Spinner';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 import { Title } from 'views/_components/Title';
 
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

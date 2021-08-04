@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useReducer } from 'react';
 
 import { useSnapshotReducer } from './useSnapshotReducer';
-import { SnapshotService } from 'services/Snapshot';
+import { SnapshotService } from 'services/SnapshotService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
 const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {

@@ -2,7 +2,7 @@ import { Fragment, memo } from 'react';
 
 import uniqueId from 'lodash/uniqueId';
 
-import pushNotificationInfo from 'assets/images/gifs/pushNotificationInfo.gif';
+import pushNotificationInfo from 'views/_assets/images/gifs/pushNotificationInfo.gif';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

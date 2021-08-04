@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { config } from 'conf';
 
-import defaultAvatar from 'assets/images/avatars/defaultAvatar.png';
+import defaultAvatar from 'views/_assets/images/avatars/defaultAvatar.png';
 
 import styles from './UserImage.module.scss';
 

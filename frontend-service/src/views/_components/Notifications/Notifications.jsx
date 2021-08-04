@@ -6,8 +6,8 @@ import DOMPurify from 'dompurify';
 
 import styles from './Notifications.module.scss';
 
-import logo from 'assets/images/logos/logo.png';
-import logoError from 'assets/images/logos/logo_error.png';
+import logo from 'views/_assets/images/logos/logo.png';
+import logoError from 'views/_assets/images/logos/logo_error.png';
 import { Button } from 'views/_components/Button';
 import { Growl } from 'views/_components/Growl';
 

@@ -12,7 +12,7 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { RodUrl } from 'repositories/RodUrl';
+import { RodUrl } from 'repositories/config/RodUrl';
 
 export const TableView = ({
   checkedObligation,

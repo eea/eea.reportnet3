@@ -13,7 +13,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
-import { RodUrl } from 'repositories/RodUrl';
+import { RodUrl } from 'repositories/config/RodUrl';
 
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   const resources = useContext(ResourcesContext);

@@ -33,10 +33,10 @@ import { Toolbar } from 'views/_components/Toolbar';
 import { ValidationViewer } from 'views/_components/ValidationViewer';
 import { Webforms } from 'views/Webforms';
 
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
-import { IntegrationService } from 'services/Integration';
-import { ValidationService } from 'services/Validation';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
+import { IntegrationService } from 'services/IntegrationService';
+import { ValidationService } from 'services/ValidationService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

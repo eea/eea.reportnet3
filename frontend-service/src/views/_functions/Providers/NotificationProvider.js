@@ -5,7 +5,7 @@ import { routes } from 'conf/routes';
 
 import camelCase from 'lodash/camelCase';
 
-import { NotificationService } from 'services/Notification';
+import { NotificationService } from 'services/NotificationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext.js';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

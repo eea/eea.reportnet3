@@ -9,7 +9,7 @@ import isUndefined from 'lodash/isUndefined';
 import styles from './DatasetDesigner.module.scss';
 
 import { config } from 'conf';
-import { DatasetConfig } from 'repositories/config/model/Dataset';
+import { DatasetConfig } from 'repositories/config/DatasetConfig';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
 import WebformsConfig from 'conf/webforms.config.json';
@@ -38,10 +38,10 @@ import { ValidationsList } from 'views/_components/ValidationsList';
 import { ValidationViewer } from 'views/_components/ValidationViewer';
 import { Webforms } from 'views/Webforms';
 
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
-import { IntegrationService } from 'services/Integration';
-import { ValidationService } from 'services/Validation';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
+import { IntegrationService } from 'services/IntegrationService';
+import { ValidationService } from 'services/ValidationService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

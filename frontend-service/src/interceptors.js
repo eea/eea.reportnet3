@@ -1,14 +1,14 @@
 import axios from 'axios';
 
-import { UserConfig } from 'repositories/config/model/User';
+import { UserConfig } from 'repositories/config/UserConfig';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { HTTPRequester } from 'repositories/_utils/HTTPRequester';
 
-import { userStorage } from 'entities/User/UserStorage';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
 axios.interceptors.request.use(
   config => {
-    const tokens = userStorage.getTokens();
+    const tokens = LocalUserStorageUtils.getTokens();
     if (tokens) {
       config.headers['Authorization'] = 'Bearer ' + tokens.accessToken;
     }
@@ -29,7 +29,7 @@ axios.interceptors.response.use(
 
     if (error?.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const { refreshToken } = userStorage.getTokens();
+      const { refreshToken } = LocalUserStorageUtils.getTokens();
 
       return HTTPRequester.post({
         url: getUrl(UserConfig.refreshToken, { refreshToken })
@@ -37,8 +37,8 @@ axios.interceptors.response.use(
         const { accessToken, refreshToken } = res.data;
 
         if (res.status >= 200 && res.status <= 299) {
-          userStorage.setPropertyToSessionStorage({ accessToken, refreshToken });
-          axios.defaults.headers.common['Authorization'] = 'Bearer ' + userStorage.getTokens().accessToken;
+          LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
+          axios.defaults.headers.common['Authorization'] = 'Bearer ' + LocalUserStorageUtils.getTokens().accessToken;
 
           return axios(originalRequest);
         }

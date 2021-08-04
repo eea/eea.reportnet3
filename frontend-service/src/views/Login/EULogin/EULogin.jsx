@@ -3,14 +3,14 @@ import { useEffect, useState, useContext } from 'react';
 import isNil from 'lodash/isNil';
 
 import styles from './EULogin.module.css';
-import logo from 'assets/images/logos/logo-spinner.gif';
+import logo from 'views/_assets/images/logos/logo-spinner.gif';
 
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
-import { userStorage } from 'entities/User/UserStorage';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
 const EULogin = ({ location, history }) => {
   const [isLoading] = useState(true);
@@ -23,9 +23,9 @@ const EULogin = ({ location, history }) => {
       if (code && !userContext.isLoggedOut) {
         const userObject = await UserService.login(code);
         userContext.onLogin(userObject);
-        const rnLocalStorage = userStorage.getSessionStorage();
+        const rnLocalStorage = LocalUserStorageUtils.getSessionStorage();
         if (!isNil(rnLocalStorage?.redirectUrl)) {
-          userStorage.removeSessionStorageProperty('redirectUrl');
+          LocalUserStorageUtils.removeSessionStorageProperty('redirectUrl');
           window.location.href = rnLocalStorage.redirectUrl;
         } else {
           history.push(getUrl(routes.DATAFLOWS));

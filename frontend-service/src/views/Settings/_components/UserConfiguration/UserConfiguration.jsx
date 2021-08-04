@@ -4,16 +4,16 @@ import styles from './userConfiguration.module.scss';
 
 import uniqueId from 'lodash/uniqueId';
 
-import DarkGray from 'assets/images/layers/DarkGray.png';
-import Gray from 'assets/images/layers/Gray.png';
-import Imagery from 'assets/images/layers/Imagery.png';
-import ImageryClarity from 'assets/images/layers/ImageryClarity.png';
-import ImageryFirefly from 'assets/images/layers/ImageryFirefly.png';
-import NationalGeographic from 'assets/images/layers/NationalGeographic.png';
-import Oceans from 'assets/images/layers/Oceans.png';
-import ShadedRelief from 'assets/images/layers/ShadedRelief.png';
-import Streets from 'assets/images/layers/Streets.png';
-import Topographic from 'assets/images/layers/Topographic.png';
+import DarkGray from 'views/_assets/images/layers/DarkGray.png';
+import Gray from 'views/_assets/images/layers/Gray.png';
+import Imagery from 'views/_assets/images/layers/Imagery.png';
+import ImageryClarity from 'views/_assets/images/layers/ImageryClarity.png';
+import ImageryFirefly from 'views/_assets/images/layers/ImageryFirefly.png';
+import NationalGeographic from 'views/_assets/images/layers/NationalGeographic.png';
+import Oceans from 'views/_assets/images/layers/Oceans.png';
+import ShadedRelief from 'views/_assets/images/layers/ShadedRelief.png';
+import Streets from 'views/_assets/images/layers/Streets.png';
+import Topographic from 'views/_assets/images/layers/Topographic.png';
 
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputSwitch } from 'views/_components/InputSwitch';

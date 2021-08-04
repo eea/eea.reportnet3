@@ -1,6 +1,6 @@
 import isNil from 'lodash/isNil';
 
-import { Validation } from 'entities/Validation/Validation';
+import { Validation } from 'entities/Validation';
 
 import { parseDatasetRelationFromDTO } from './parseDatasetRelationFromDTO';
 import { parseExpressionFromDTO } from './parseExpressionFromDTO';

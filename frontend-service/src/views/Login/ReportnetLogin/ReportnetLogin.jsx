@@ -5,14 +5,14 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './ReportnetLogin.module.scss';
 
-import logo from 'assets/images/logos/logo.png';
+import logo from 'views/_assets/images/logos/logo.png';
 
 import { Button } from 'views/_components/Button';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';

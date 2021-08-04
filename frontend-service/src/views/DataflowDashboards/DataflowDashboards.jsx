@@ -14,7 +14,7 @@ import { ReleasedDatasetsDashboard } from './_components/ReleasedDatasetsDashboa
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
-import { userStorage } from 'entities/User/UserStorage';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -253,7 +253,7 @@ export const CustomFileUpload = ({
     }
 
     xhr.open(operation, nUrl, true);
-    const tokens = userStorage.getTokens();
+    const tokens = LocalUserStorageUtils.getTokens();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (onBeforeSend) {

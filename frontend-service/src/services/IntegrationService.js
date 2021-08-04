@@ -4,7 +4,7 @@ import sortBy from 'lodash/sortBy';
 
 import { integrationRepository } from 'repositories/IntegrationRepository';
 
-import { Integration } from 'entities/Integration/Integration';
+import { Integration } from 'entities/Integration';
 
 const all = async (dataflowId, datasetSchemaId) => {
   const integrationsDTO = await integrationRepository.all(parseDatasetSchemaId(datasetSchemaId, dataflowId));

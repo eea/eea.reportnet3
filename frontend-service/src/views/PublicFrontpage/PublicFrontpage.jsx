@@ -12,8 +12,8 @@ import styles from './PublicFrontpage.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
-import Illustration from 'assets/images/logos/public_illustration.png';
-import logo from 'assets/images/logos/logo.png';
+import Illustration from 'views/_assets/images/logos/public_illustration.png';
+import logo from 'views/_assets/images/logos/logo.png';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';

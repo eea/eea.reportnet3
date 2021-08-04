@@ -20,7 +20,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
-import { RodUrl } from 'repositories/RodUrl';
+import { RodUrl } from 'repositories/config/RodUrl';
 
 export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
   const notificationContext = useContext(NotificationContext);
