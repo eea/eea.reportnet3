@@ -1625,10 +1625,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   public boolean checkIfSchemasHavePk(List<DesignDatasetVO> designs) {
     return designs.stream()
-        .noneMatch(design -> datasetSchemaService.getDataSchemaById(design.getDatasetSchema())
+        .allMatch(design -> datasetSchemaService.getDataSchemaById(design.getDatasetSchema())
             .getTableSchemas().stream()
-            .noneMatch(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
-                .noneMatch(fieldSchema -> !Boolean.TRUE.equals(fieldSchema.getPk()))));
+            .allMatch(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
+                .anyMatch(fieldSchema -> Boolean.TRUE.equals(fieldSchema.getPk()))));
   }
 
 }
