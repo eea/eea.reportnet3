@@ -211,7 +211,7 @@ const Chips = ({
         <InputText
           aria-hidden={disabled || isMaxedOut()}
           aria-labelledby={ariaLabelledBy}
-          className={hasErrors ? styles.chipsTokenError : ''}
+          className={hasErrors ? styles.chipsTokenError : null}
           disabled={disabled || isMaxedOut()}
           id={name}
           keyfilter={forbiddenChar ? (pasteSeparator === ',' ? 'noComma' : 'noSemicolon') : ''}

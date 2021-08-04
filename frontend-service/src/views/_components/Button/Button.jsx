@@ -42,7 +42,7 @@ export const Button = ({
         tabIndex={tabIndex}
         type={type}
         value={value}>
-        {icon ? <Icon icon={icon} /> : ''}
+        {icon ? <Icon icon={icon} /> : null}
         <span className="srOnly">{value}</span>
         {label}
       </button>

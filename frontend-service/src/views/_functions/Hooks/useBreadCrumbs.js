@@ -1,4 +1,4 @@
-import { useContext, useEffect, useLayoutEffect } from 'react';
+import { useContext, useLayoutEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';

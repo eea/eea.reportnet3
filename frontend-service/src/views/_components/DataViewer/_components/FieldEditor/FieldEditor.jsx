@@ -580,7 +580,9 @@ const FieldEditor = ({
         return (
           <div className={styles.pointWrapper}>
             <label
-              className={isNil(value) || value === '' || !isValidJSON || differentTypes ? styles.nonEditableData : ''}>
+              className={
+                isNil(value) || value === '' || !isValidJSON || differentTypes ? styles.nonEditableData : null
+              }>
               {!isNil(value) && value !== '' && isValidJSON && !differentTypes
                 ? JSON.parse(value).geometry.coordinates.join(', ')
                 : differentTypes

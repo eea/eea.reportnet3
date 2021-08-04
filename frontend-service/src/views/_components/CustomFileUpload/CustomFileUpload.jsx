@@ -413,7 +413,7 @@ export const CustomFileUpload = ({
         />
         <label htmlFor="replaceCheckbox">
           <span
-            className={replaceCheckDisabled && styles.replaceCheckboxSpanDisabled}
+            className={replaceCheckDisabled ? styles.replaceCheckboxSpanDisabled : null}
             onClick={() =>
               !replaceCheckDisabled && dispatch({ type: 'UPLOAD_PROPERTY', payload: { replace: !state.replace } })
             }>

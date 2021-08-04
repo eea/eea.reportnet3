@@ -444,7 +444,7 @@ export const useSetColumns = (
     let editCol = (
       <Column
         body={row => actionTemplate(row)}
-        className={isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : ''}
+        className={isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : null}
         header={resources.messages['actions']}
         key="actions"
         sortable={false}
@@ -455,7 +455,7 @@ export const useSetColumns = (
     let validationCol = (
       <Column
         body={validationsTemplate}
-        className={isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : ''}
+        className={isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : null}
         field="validations"
         header={resources.messages['validationsDataColumn']}
         key="recordValidation"

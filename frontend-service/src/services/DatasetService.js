@@ -457,17 +457,17 @@ const schemaById = async datasetId => {
   return datasetSchemaDTO;
 };
 
-const tableDataById = async (
+const tableDataById = async ({
   datasetId,
-  tableSchemaId,
+  fields = undefined,
+  fieldSchemaId = undefined,
+  levelError = null,
   pageNum,
   pageSize,
-  fields,
-  levelError,
-  ruleId,
-  fieldSchemaId,
-  value
-) => {
+  ruleId = undefined,
+  tableSchemaId,
+  value = ''
+}) => {
   const tableDataDTO = await datasetRepository.tableDataById(
     datasetId,
     tableSchemaId,

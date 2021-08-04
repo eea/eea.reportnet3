@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
@@ -996,9 +995,9 @@ const Dataflow = withRouter(({ history, match }) => {
               role="checkbox"
             />
             <label className={styles.isReleasableLabel} htmlFor="isReleasableCheckbox">
-              <a onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
+              <span className={styles.pointer} onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
                 {resources.messages['isReleasableDataflowCheckboxLabel']}
-              </a>
+              </span>
             </label>
           </ConfirmDialog>
         )}
@@ -1028,7 +1027,8 @@ const Dataflow = withRouter(({ history, match }) => {
               role="checkbox"
             />
             <label className={styles.showPublicInfo} htmlFor="showPublicInfoCheckbox">
-              <a
+              <span
+                className={styles.pointer}
                 onClick={() =>
                   dataflowDispatch({
                     type: 'SET_SHOW_PUBLIC_INFO',
@@ -1036,7 +1036,7 @@ const Dataflow = withRouter(({ history, match }) => {
                   })
                 }>
                 {resources.messages['showPublicInfoDataflowCheckboxLabel']}
-              </a>
+              </span>
             </label>
           </ConfirmDialog>
         )}

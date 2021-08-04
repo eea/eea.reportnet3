@@ -608,7 +608,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setIsBusinessDataflow(false); // TODO WITH REAL DATA
       let dataset = [];
       if (isTestDataset) {
-        dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+        dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
       } else if (isReferenceDataset) {
         dataset = data.referenceDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
         setIsDatasetUpdatable(dataset.updatable);
@@ -624,7 +624,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         }
       }
 
-      setDataset(dataset[0]);
+      setDataset(dataset);
     } catch (error) {
       console.error('Dataset - onLoadDataflow.', error);
       const {
@@ -1250,9 +1250,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             role="checkbox"
           />
           <label className={styles.checkboxLabel} htmlFor="referenceDatasetUpdatableCheckbox">
-            <a onClick={() => setIsDatasetUpdatable(!isDatasetUpdatable)}>
+            <span className={styles.pointer} onClick={() => setIsDatasetUpdatable(!isDatasetUpdatable)}>
               {resources.messages['unlockReferenceDatasetLabel']}
-            </a>
+            </span>
           </label>
         </ConfirmDialog>
       )}
