@@ -49,16 +49,18 @@ export const DataflowDashboards = withRouter(
 
     useEffect(() => {
       leftSideBarContext.removeModels();
-      getDataflowName();
+      getDataflowDetails();
       onLoadDataSchemas();
     }, []);
 
-    const getDataflowName = async () => {
+    const getDataflowDetails = async () => {
       try {
         const { data } = await DataflowService.dataflowDetails(dataflowId);
+        setIsBusinessDataflow(false); //TODO WITH REAL DATA
         setDataflowName(data.name);
+        setIsLoading(false);
       } catch (error) {
-        console.error('DataflowDashboards - getDataflowName.', error);
+        console.error('DataflowDashboards - getDataflowDetails.', error);
       }
     };
 
