@@ -16,9 +16,9 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { NewDatasetSchemaForm } from 'views/_components/NewDatasetSchemaForm';
 
-import { DataCollectionService } from 'services/DataCollection';
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
+import { DataCollectionService } from 'services/DataCollectionService';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

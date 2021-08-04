@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 const getGroupValidations = (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {
   let validations = [];

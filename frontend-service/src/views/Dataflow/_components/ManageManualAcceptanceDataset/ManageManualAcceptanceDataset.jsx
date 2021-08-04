@@ -15,7 +15,7 @@ import { RadioButton } from 'views/_components/RadioButton';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { manageManualAcceptanceDatasetReducer } from './_functions/Reducers/manageManualAcceptanceDatasetReducer';
 

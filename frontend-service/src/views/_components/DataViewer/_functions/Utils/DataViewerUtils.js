@@ -4,7 +4,7 @@ import isUndefined from 'lodash/isUndefined';
 import isEmpty from 'lodash/isEmpty';
 import pick from 'lodash/pick';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 const editLargeStringWithDots = (string, length) => {
   if (string.length > length) {

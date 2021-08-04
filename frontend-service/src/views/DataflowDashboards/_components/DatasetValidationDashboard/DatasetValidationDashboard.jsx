@@ -16,7 +16,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { filterReducer } from './_functions/filterReducer';
 
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 import { ErrorUtils } from 'views/_functions/Utils';
 
 export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datasetSchemaName, isVisible }) => {

@@ -16,7 +16,7 @@ import { routes } from 'conf/routes';
 import { TabView } from 'views/_components/TabView';
 import { TabPanel } from 'views/_components/TabView/_components/TabPanel';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

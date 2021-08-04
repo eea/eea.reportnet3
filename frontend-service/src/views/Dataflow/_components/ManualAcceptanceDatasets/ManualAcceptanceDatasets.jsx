@@ -13,7 +13,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

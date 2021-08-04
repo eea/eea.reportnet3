@@ -13,8 +13,8 @@ import { InputSwitch } from 'views/_components/InputSwitch';
 import { Spinner } from 'views/_components/Spinner';
 import { TableViewSchemas } from './_components/TableViewSchemas';
 
-import { DataflowService } from 'services/Dataflow';
-import { ReferenceDataflowService } from 'services/ReferenceDataflow';
+import { DataflowService } from 'services/DataflowService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

@@ -1,4 +1,4 @@
-import { businessDataflowRepository } from 'repositories/BusinessDataflow/BusinessDataflowRepository';
+import { businessDataflowRepository } from 'repositories/BusinessDataflowRepository';
 
 const create = async (name, description, obligationId, groupCompaniesId, fmeUserId) =>
   businessDataflowRepository.create(name, description, obligationId, groupCompaniesId, fmeUserId);

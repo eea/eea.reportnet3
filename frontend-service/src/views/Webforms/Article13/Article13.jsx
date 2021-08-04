@@ -16,8 +16,8 @@ import { TableManagement } from './_components/TableManagement';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { WebformView } from './_components/WebformView';
 
-import { DatasetService } from 'services/Dataset';
-import { WebformService } from 'services/Webform';
+import { DatasetService } from 'services/DatasetService';
+import { WebformService } from 'services/WebformService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

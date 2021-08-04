@@ -7,8 +7,8 @@ import styles from './DataflowManagementForm.module.scss';
 import { Button } from 'views/_components/Button';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
 
-import { DataflowService } from 'services/Dataflow';
-import { UserService } from 'services/User';
+import { DataflowService } from 'services/DataflowService';
+import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

@@ -9,7 +9,9 @@ import { ReferenceDataflow } from 'entities/ReferenceDataflow';
 
 import { config } from 'conf';
 
-import { CoreUtils, TextUtils, UserRoleUtils } from 'repositories/_utils';
+import { CoreUtils } from 'repositories/_utils/CoreUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const parseDatasetListDTO = datasetsDTO => {
   if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {

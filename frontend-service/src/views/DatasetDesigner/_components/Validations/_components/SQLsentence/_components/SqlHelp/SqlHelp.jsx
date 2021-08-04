@@ -9,7 +9,7 @@ import styles from './SqlHelp.module.scss';
 
 import { SqlHelpListBox } from './_components/SqlHelpListBox';
 
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 
 import { parseDatasetSchemas } from './_functions/Utils/parseDatasetSchemas';
 import { parseHelpItem } from './_functions/Utils/parseHelpItem';

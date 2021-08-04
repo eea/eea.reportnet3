@@ -15,7 +15,7 @@ import { IconTooltip } from 'views/_components/IconTooltip';
 
 import { WebformField } from './_components/WebformField';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

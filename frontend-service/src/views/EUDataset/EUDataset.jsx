@@ -17,8 +17,8 @@ import { TabsSchema } from 'views/_components/TabsSchema';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

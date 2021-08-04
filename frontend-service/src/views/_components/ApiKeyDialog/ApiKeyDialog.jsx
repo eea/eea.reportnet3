@@ -8,7 +8,7 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 import { TooltipUtils } from 'views/_functions/Utils/TooltipUtils';
 
 const ApiKeyDialog = ({

@@ -18,10 +18,10 @@ import { MainLayout } from 'views/_components/Layout';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
 
-import { DataflowService } from 'services/Dataflow';
-import { BusinessDataflowService } from 'services/BusinessDataflow/BusinessDataflowService';
-import { ReferenceDataflowService } from 'services/ReferenceDataflow';
-import { UserService } from 'services/User';
+import { DataflowService } from 'services/DataflowService';
+import { BusinessDataflowService } from 'services/BusinessDataflowService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
+import { UserService } from 'services/UserService';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';

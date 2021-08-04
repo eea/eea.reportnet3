@@ -25,7 +25,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { MetadataUtils } from 'views/_functions/Utils';
 

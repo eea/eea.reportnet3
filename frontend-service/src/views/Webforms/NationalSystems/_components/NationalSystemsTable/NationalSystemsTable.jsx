@@ -11,7 +11,7 @@ import { IconTooltip } from 'views/_components/IconTooltip';
 import { NationalSystemsRecord } from './_components/NationalSystemsRecord';
 import { Spinner } from 'views/_components/Spinner';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 

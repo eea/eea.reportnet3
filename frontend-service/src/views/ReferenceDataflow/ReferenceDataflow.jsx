@@ -19,9 +19,9 @@ import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 import { ShareRights } from 'views/_components/ShareRights';
 
-import { DatasetService } from 'services/Dataset';
-import { ReferenceDataflowService } from 'services/ReferenceDataflow';
-import { UserService } from 'services/User';
+import { DatasetService } from 'services/DatasetService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
+import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

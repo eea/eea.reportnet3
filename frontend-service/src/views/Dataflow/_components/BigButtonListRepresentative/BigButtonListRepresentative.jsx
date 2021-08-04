@@ -6,13 +6,14 @@ import styles from '../BigButtonList/BigButtonList.module.scss';
 
 import { BigButton } from 'views/_components/BigButton';
 import { Button } from 'views/_components/Button';
-import { ConfirmationReceiptService } from 'services/ConfirmationReceipt';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { HistoricReleases } from 'views/Dataflow/_components/HistoricReleases';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService';
 
 import { bigButtonListRepresentativeReducer } from './_functions/Reducers/bigButtonListRepresentativeReducer';
 

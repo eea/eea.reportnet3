@@ -16,8 +16,8 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { ListBox } from 'views/DatasetDesigner/_components/ListBox';
 import { Spinner } from 'views/_components/Spinner';
 
-import { DataflowService } from 'services/Dataflow';
-import { ReferenceDataflowService } from 'services/ReferenceDataflow';
+import { DataflowService } from 'services/DataflowService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 

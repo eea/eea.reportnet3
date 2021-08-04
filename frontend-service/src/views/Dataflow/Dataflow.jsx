@@ -15,7 +15,7 @@ import { DataflowDraftRequesterHelpConfig } from 'conf/help/dataflow/requester/d
 import { DataflowReporterHelpConfig } from 'conf/help/dataflow/reporter';
 import { DataflowRequesterHelpConfig } from 'conf/help/dataflow/requester';
 import { routes } from 'conf/routes';
-import { RepresentativeConfig } from 'repositories/config/model/Representative';
+import { RepresentativeConfig } from 'repositories/config/RepresentativeConfig';
 
 import { ApiKeyDialog } from 'views/_components/ApiKeyDialog';
 import { BigButtonList } from './_components/BigButtonList';
@@ -36,10 +36,10 @@ import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 import { UserList } from 'views/_components/UserList';
 
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
-import { RepresentativeService } from 'services/Representative';
-import { UserService } from 'services/User';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
+import { RepresentativeService } from 'services/RepresentativeService';
+import { UserService } from 'services/UserService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

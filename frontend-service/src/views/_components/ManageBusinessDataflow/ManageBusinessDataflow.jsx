@@ -20,8 +20,8 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
-import { BusinessDataflowService } from 'services/BusinessDataflow/BusinessDataflowService';
-import { RepresentativeService } from 'services/Representative';
+import { BusinessDataflowService } from 'services/BusinessDataflowService';
+import { RepresentativeService } from 'services/RepresentativeService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

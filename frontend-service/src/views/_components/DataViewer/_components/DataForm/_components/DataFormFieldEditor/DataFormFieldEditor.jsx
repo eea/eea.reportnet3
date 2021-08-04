@@ -19,7 +19,7 @@ import { InputTextarea } from 'views/_components/InputTextarea';
 import { Map } from 'views/_components/Map';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

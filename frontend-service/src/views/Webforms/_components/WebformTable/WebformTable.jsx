@@ -10,7 +10,7 @@ import { GroupedRecordValidations } from 'views/Webforms/_components/GroupedReco
 import { Spinner } from 'views/_components/Spinner';
 import { WebformRecord } from './_components/WebformRecord';
 
-import { DatasetService } from 'services/Dataset';
+import { DatasetService } from 'services/DatasetService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

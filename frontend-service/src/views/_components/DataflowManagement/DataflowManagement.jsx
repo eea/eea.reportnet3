@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import ReactTooltip from 'react-tooltip';
 
-import { DataflowService } from 'services/Dataflow';
+import { DataflowService } from 'services/DataflowService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
