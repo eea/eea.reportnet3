@@ -436,7 +436,7 @@ public class FileTreatmentHelper implements DisposableBean {
           rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
               delimiter);
         } catch (Exception e) {
-          LOG_ERROR.error("RN3-Import: Unexpected error", e);
+          LOG_ERROR.error("RN3-Import: Unexpected error. {}", e.getMessage(), e);
         }
       });
     }
