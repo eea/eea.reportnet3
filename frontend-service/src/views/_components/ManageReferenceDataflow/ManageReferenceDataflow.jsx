@@ -31,7 +31,7 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 import { UserService } from 'services/UserService';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReferenceDataflow = ({
   dataflowId,

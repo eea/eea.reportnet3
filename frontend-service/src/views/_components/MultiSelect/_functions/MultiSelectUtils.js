@@ -1,6 +1,6 @@
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export default class MultiSelectUtils {
   static filter(value, fields, filterValue, filterMatchMode) {

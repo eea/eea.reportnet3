@@ -30,8 +30,10 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { nationalSystemsFieldReducer } from './_functions/Reducers/nationalSystemsFieldReducer';
 
+import { RecordUtils } from 'views/_functions/Utils';
+
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { RecordUtils, TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const NationalSystemsField = ({
   dataProviderId,

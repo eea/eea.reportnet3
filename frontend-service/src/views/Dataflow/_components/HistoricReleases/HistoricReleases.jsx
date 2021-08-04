@@ -25,7 +25,7 @@ import { HistoricReleaseService } from 'services/HistoricReleaseService';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const HistoricReleases = ({
   dataflowId,

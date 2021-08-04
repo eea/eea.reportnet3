@@ -13,7 +13,9 @@ import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { MetadataUtils, TextUtils } from 'views/_functions/Utils';
+import { MetadataUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdateData, setNewDatasetDialog }) => {
   const { hideLoading, showLoading } = useContext(LoadingContext);

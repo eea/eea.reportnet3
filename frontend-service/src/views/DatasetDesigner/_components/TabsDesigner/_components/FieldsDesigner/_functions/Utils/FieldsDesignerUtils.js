@@ -1,6 +1,6 @@
 import isNil from 'lodash/isNil';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const arrayShift = (arr, initialIdx, endIdx) => {
   const element = arr[initialIdx];

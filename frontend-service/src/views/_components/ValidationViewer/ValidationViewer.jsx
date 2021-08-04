@@ -28,7 +28,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { validationReducer } from './_functions/Reducers/validationReducer';
 
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const ValidationViewer = memo(
   ({

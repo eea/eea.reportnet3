@@ -27,8 +27,10 @@ import { webformFieldReducer } from './_functions/Reducers/webformFieldReducer';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { PaMsUtils } from './_functions/Utils/PaMsUtils';
-import { RecordUtils, TextUtils } from 'views/_functions/Utils';
+import { RecordUtils } from 'views/_functions/Utils';
 import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_components/WebformRecord/_functions/Utils/WebformRecordUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformField = ({
   columnsSchema,

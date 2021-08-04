@@ -42,7 +42,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const BigButtonList = ({
   dataflowState,

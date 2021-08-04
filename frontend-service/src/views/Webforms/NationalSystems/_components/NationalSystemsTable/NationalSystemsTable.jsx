@@ -16,7 +16,8 @@ import { DatasetService } from 'services/DatasetService';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { NationalSystemsTableUtils } from './_functions/Utils/NationalSystemsTableUtils';
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const NationalSystemsTable = ({
   dataProviderId,

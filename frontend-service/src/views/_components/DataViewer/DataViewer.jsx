@@ -53,9 +53,11 @@ import {
 } from './_functions/Hooks/DataViewerHooks';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { ExtensionUtils, MetadataUtils, RecordUtils, TextUtils } from 'views/_functions/Utils';
-import { getUrl } from 'repositories/_utils/UrlUtils';
+import { ExtensionUtils, MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
+
+import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const DataViewer = withRouter(
   ({

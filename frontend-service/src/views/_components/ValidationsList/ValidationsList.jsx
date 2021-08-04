@@ -32,7 +32,7 @@ import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const ValidationsList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {

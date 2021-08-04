@@ -4,7 +4,8 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selectedValue) => {
   const initialValues = {};

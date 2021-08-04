@@ -23,9 +23,10 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
 import { MetadataUtils } from 'views/_functions/Utils';
-import { TextUtils } from 'views/_functions/Utils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformRecord = ({
   addingOnTableSchemaId,

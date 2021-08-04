@@ -1,4 +1,4 @@
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const fieldDesignerReducer = (state, { type, payload }) => {
   switch (type) {

@@ -1,4 +1,4 @@
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export default class ObjectUtils {
   static equals(obj1, obj2, field) {

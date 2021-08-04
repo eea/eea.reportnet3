@@ -15,7 +15,8 @@ import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 

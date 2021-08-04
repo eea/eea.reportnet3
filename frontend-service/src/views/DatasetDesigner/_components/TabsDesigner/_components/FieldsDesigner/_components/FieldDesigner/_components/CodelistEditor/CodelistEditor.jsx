@@ -8,7 +8,7 @@ import { Dialog } from 'views/_components/Dialog';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveCodelist, selectedCodelist, type }) => {
   const resources = useContext(ResourcesContext);

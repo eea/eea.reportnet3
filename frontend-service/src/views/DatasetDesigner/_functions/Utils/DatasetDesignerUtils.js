@@ -3,7 +3,7 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import cloneDeep from 'lodash/cloneDeep';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const getCountPKUseInAllSchemas = (fieldPkId, datasetSchemas) => {
   let referencedFields = 0;

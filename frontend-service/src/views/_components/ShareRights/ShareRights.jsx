@@ -29,7 +29,7 @@ import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ShareRights = ({
   addConfirmHeader,

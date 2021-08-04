@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isNil from 'lodash/isNil';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const parseData = (dataRecords = [], tables, schemaTables) => {
   const records = dataRecords.map(record => {

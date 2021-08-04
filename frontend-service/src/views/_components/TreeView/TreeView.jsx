@@ -18,7 +18,7 @@ import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
 import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const TreeView = ({ className = '', columnOptions = {}, expandAll = true, property, propertyName }) => {
   const dataTableRef = useRef();

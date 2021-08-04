@@ -24,9 +24,11 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { tableManagementReducer } from './_functions/Reducers/tableManagementReducer';
 
 import { DataViewerUtils } from 'views/_components/DataViewer/_functions/Utils/DataViewerUtils';
-import { MetadataUtils, RecordUtils, TextUtils } from 'views/_functions/Utils';
+import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const TableManagement = ({
   dataflowId,
@@ -501,7 +503,6 @@ export const TableManagement = ({
               datasetId={datasetId}
               editDialogVisible={isDialogVisible.manageRows}
               onChangeForm={onEditFormInput}
-              records={tableManagementState.records}
               selectedRecord={selectedRecord}
               tableColumns={tableColumns}
             />

@@ -5,10 +5,10 @@ import isNil from 'lodash/isNil';
 
 import { WebformDataFormFieldEditor } from './_components/WebformDataFormFieldEditor';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, records, selectedRecord, tableColumns }) => {
-  const editWebformRecordForm = colsSchema.map((column, i) => {
+export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, selectedRecord, tableColumns }) => {
+  const editWebformRecordForm = colsSchema.map(column => {
     if (!isNil(selectedRecord) && !isEmpty(selectedRecord)) {
       const field = selectedRecord.dataRow.filter(r => Object.keys(r.fieldData)[0] === column.field)[0];
       const fieldTitle = tableColumns.filter(tableColumn => tableColumn.field === column.header)[0];

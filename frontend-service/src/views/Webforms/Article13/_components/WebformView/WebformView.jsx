@@ -25,7 +25,8 @@ import { WebformService } from 'services/WebformService';
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
-import { TextUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformView = ({
   data,

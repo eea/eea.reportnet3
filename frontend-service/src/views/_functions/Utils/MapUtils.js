@@ -3,7 +3,7 @@ import flattenDeep from 'lodash/flattenDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const changeIncorrectCoordinates = record => {
   const baseJson = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[]}, "properties": {"srid": "EPSG:4326"}}`;

@@ -28,7 +28,7 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 import { useLockBodyScroll } from 'views/_functions/Hooks/useLockBodyScroll';
 
 import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUtils';
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageIntegrations = ({
   dataflowId,

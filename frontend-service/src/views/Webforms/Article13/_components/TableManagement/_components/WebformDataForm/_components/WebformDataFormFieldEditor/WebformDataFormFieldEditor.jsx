@@ -9,7 +9,9 @@ import { MultiSelect } from 'views/_components/MultiSelect';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { RecordUtils, TextUtils } from 'views/_functions/Utils';
+import { RecordUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const WebformDataFormFieldEditor = ({
   autoFocus = false,

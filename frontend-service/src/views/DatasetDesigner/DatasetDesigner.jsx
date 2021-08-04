@@ -56,9 +56,11 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'views/_components/Snapshots/_hooks/useDatasetDesigner';
 
-import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils, TextUtils } from 'views/_functions/Utils';
+import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
+
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false, match }) => {
   const {

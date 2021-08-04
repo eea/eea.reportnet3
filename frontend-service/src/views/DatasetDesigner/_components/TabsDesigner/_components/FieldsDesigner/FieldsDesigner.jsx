@@ -27,8 +27,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
-import { MetadataUtils, TextUtils } from 'views/_functions/Utils';
+import { MetadataUtils } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldsDesigner = ({
   dataflowId,

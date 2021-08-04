@@ -23,7 +23,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const LinkSelector = withRouter(
   ({

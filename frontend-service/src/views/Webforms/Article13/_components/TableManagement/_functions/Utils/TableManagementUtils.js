@@ -3,7 +3,8 @@ import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
 
 import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
   const filteredSchemaColumn = tableSchemaColumns.filter(tableSchemaColumn =>

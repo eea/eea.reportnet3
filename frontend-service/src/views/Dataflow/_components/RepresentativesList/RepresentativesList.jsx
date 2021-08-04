@@ -26,7 +26,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { reducer } from './_functions/Reducers/representativeReducer.js';
 
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
-import { TextUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const RepresentativesList = ({
   dataflowId,

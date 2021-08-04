@@ -27,7 +27,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { dataflowManagementReducer } from './_functions/Reducers/dataflowManagementReducer';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowManagement = ({
   dataflowId,

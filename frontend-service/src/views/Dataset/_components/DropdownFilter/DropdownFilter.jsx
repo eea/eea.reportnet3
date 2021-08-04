@@ -12,7 +12,7 @@ import styles from './DropdownFilter.module.scss';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 class DropdownFilter extends Component {
   static defaultProps = {

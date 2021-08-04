@@ -26,7 +26,8 @@ import { ApplyFilterUtils } from './_functions/Utils/ApplyFilterUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
-import { TextUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Filters = ({
   className,

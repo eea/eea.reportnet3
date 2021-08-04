@@ -21,8 +21,10 @@ import { DatasetService } from 'services/DatasetService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { MetadataUtils, RecordUtils, TextUtils } from 'views/_functions/Utils';
+import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 proj4.defs([
   ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],

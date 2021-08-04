@@ -26,7 +26,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { MapUtils, MetadataUtils, RecordUtils, TextUtils } from 'views/_functions/Utils';
+import { MapUtils, MetadataUtils, RecordUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const DataFormFieldEditor = ({
   autoFocus,

@@ -5,7 +5,7 @@ import isNull from 'lodash/isNull';
 import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const allAttachments = colsSchema => {
   const notAttachment = colsSchema.filter(col => !TextUtils.areEquals(col.type, 'ATTACHMENT'));

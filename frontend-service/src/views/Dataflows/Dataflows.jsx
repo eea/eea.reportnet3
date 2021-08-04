@@ -1,4 +1,4 @@
-import { useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -33,13 +33,14 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
-import { CurrentPage, TextUtils } from 'views/_functions/Utils';
+import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
-import { Fragment } from 'react';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {

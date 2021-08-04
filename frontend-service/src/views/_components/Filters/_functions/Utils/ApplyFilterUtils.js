@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
 const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();

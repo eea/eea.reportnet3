@@ -2,7 +2,9 @@ import cloneDeep from 'lodash/cloneDeep';
 import isUndefined from 'lodash/isUndefined';
 
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
-import { RecordUtils, TextUtils } from 'views/_functions/Utils';
+import { RecordUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const recordReducer = (state, { type, payload }) => {
   const getRecordIdByIndex = (tableData, recordIdx) => {

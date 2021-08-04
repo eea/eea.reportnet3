@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { webformRepository } from 'repositories/WebformRepository';
 
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const addPamsRecords = async (datasetId, tables, pamId, type) => {
   return await webformRepository.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));

@@ -15,7 +15,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
 const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }) => {

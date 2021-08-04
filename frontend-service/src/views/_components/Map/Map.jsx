@@ -24,7 +24,9 @@ import newMarkerIcon from 'views/_assets/images/logos/newMarker.png';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-import { MapUtils, TextUtils } from 'views/_functions/Utils';
+import { MapUtils } from 'views/_functions/Utils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 let DefaultIcon = L.icon({
   iconUrl: icon,

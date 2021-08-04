@@ -24,7 +24,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { DatasetDesignerUtils } from 'views/DatasetDesigner/_functions/Utils/DatasetDesignerUtils';
 import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const TabsDesigner = withRouter(
   ({

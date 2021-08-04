@@ -18,8 +18,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
 import { MetadataUtils } from 'views/_functions/Utils';
-import { TextUtils } from 'views/_functions/Utils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformTable = ({
   calculateSingle,

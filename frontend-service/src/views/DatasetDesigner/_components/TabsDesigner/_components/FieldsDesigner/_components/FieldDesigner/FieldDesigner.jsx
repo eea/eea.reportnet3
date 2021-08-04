@@ -28,7 +28,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
-import { TextUtils } from 'views/_functions/Utils/TextUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldDesigner = ({
   addField = false,

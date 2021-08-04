@@ -25,8 +25,10 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { article13Reducer } from './_functions/Reducers/article13Reducer';
 
 import { Article13Utils } from './_functions/Utils/Article13Utils';
-import { MetadataUtils, TextUtils } from 'views/_functions/Utils';
+import { MetadataUtils } from 'views/_functions/Utils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, isReporting, state }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;

@@ -1,7 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import lowerFirst from 'lodash/lowerFirst';
 
-import { TextUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const requiredFields = ['Id', 'IsGroup', 'ShortDescription', 'Title'];
 
