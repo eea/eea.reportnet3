@@ -21,7 +21,7 @@ export const Message = ({
     fileSize: '23Mb'
   },
   hasSeparator,
-  isAttachment = true,
+  isAttachment = false,
   message
 }) => {
   const resources = useContext(ResourcesContext);
