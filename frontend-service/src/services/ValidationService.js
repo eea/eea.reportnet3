@@ -4,9 +4,7 @@ import isUndefined from 'lodash/isUndefined';
 
 import { validationRepository } from 'repositories/ValidationRepository';
 
-import { getCreationComparisonDTO } from './_utils/getCreationComparisonDTO';
-import { getCreationDTO } from './_utils/getCreationDTO';
-import { parseDataValidationRulesDTO } from './_utils/parseDataValidationRulesDTO';
+import { ValidationUtils } from './_utils/ValidationUtils';
 
 const create = async (datasetSchemaId, validationRule) => {
   const { expressions } = validationRule;
@@ -21,7 +19,9 @@ const create = async (datasetSchemaId, validationRule) => {
     thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
     type: 'FIELD',
     whenCondition:
-      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence) ? getCreationDTO(expressions) : null
+      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
+        ? ValidationUtils.getCreationDTO(expressions)
+        : null
   };
   return await validationRepository.create(datasetSchemaId, validation);
 };
@@ -70,12 +70,15 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
   if (expressionType === 'ifThenClause') {
     validation.whenCondition = {
       operator: 'RECORD_IF',
-      params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
+      params: [
+        ValidationUtils.getCreationComparisonDTO(expressionsIf),
+        ValidationUtils.getCreationComparisonDTO(expressionsThen)
+      ]
     };
   }
 
   if (expressionType === 'fieldComparison') {
-    validation.whenCondition = getCreationComparisonDTO(expressions);
+    validation.whenCondition = ValidationUtils.getCreationComparisonDTO(expressions);
   }
 
   return await validationRepository.create(datasetSchemaId, validation);
@@ -98,7 +101,7 @@ const getAll = async (datasetSchemaId, reporting = false) => {
   if (reporting) {
     validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled === true);
   }
-  const validationsData = parseDataValidationRulesDTO(validationsListDTO.data.rules);
+  const validationsData = ValidationUtils.parseDataValidationRulesDTO(validationsListDTO.data.rules);
   validationsList.entityTypes = validationsData.entityTypes;
   validationsList.validations = validationsData.validations;
 
@@ -123,7 +126,9 @@ const update = async (datasetId, validationRule) => {
   };
   if (!validationRule.automatic) {
     validation.whenCondition =
-      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence) ? getCreationDTO(expressions) : null;
+      isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
+        ? ValidationUtils.getCreationDTO(expressions)
+        : null;
   }
   return await validationRepository.update(datasetId, validation);
 };
@@ -147,12 +152,15 @@ const updateRowRule = async (datasetId, validationRule) => {
     if (expressionType === 'ifThenClause') {
       validation.whenCondition = {
         operator: 'RECORD_IF',
-        params: [getCreationComparisonDTO(expressionsIf), getCreationComparisonDTO(expressionsThen)]
+        params: [
+          ValidationUtils.getCreationComparisonDTO(expressionsIf),
+          ValidationUtils.getCreationComparisonDTO(expressionsThen)
+        ]
       };
     }
 
     if (expressionType === 'fieldComparison') {
-      validation.whenCondition = getCreationComparisonDTO(expressions);
+      validation.whenCondition = ValidationUtils.getCreationComparisonDTO(expressions);
     }
   }
   return await validationRepository.update(datasetId, validation);

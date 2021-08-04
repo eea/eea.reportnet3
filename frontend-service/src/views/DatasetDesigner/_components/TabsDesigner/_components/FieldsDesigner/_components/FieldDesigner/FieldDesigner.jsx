@@ -875,7 +875,7 @@ export const FieldDesigner = ({
   );
 
   const renderCheckboxes = () => (
-    <div className={styles.requiredAndPKCheckboxes}>
+    <div>
       {!addField ? (
         <FontAwesomeIcon
           aria-label={resources.messages['moveField']}
