@@ -158,7 +158,7 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await DataflowUtils.getDataflowDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = true; // TODO WITH REAL DATA
+      const isBusinessDataflow = false; // TODO WITH REAL DATA
       dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);

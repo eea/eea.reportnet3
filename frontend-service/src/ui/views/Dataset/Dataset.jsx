@@ -604,7 +604,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onLoadDataflow = async () => {
     try {
       const { data } = await DataflowService.reporting(match.params.dataflowId);
-      setIsBusinessDataflow(true); // TODO WITH REAL DATA
+      setIsBusinessDataflow(false); // TODO WITH REAL DATA
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);

@@ -149,7 +149,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const { data } = await DataflowService.reporting(dataflowId);
-      setIsBusinessDataflow(true); // TODO WITH REAL DATA
+      setIsBusinessDataflow(false); // TODO WITH REAL DATA
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {

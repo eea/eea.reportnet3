@@ -59,7 +59,7 @@ export const DataflowDashboards = withRouter(
 
     const getDataflowDetails = async () => {
       const { data } = await DataflowService.dataflowDetails(dataflowId);
-      setIsBusinessDataflow(true); //TODO WITH REAL DATA
+      setIsBusinessDataflow(false); //TODO WITH REAL DATA
       setDataflowName(data.name);
       setIsLoading(false);
     };

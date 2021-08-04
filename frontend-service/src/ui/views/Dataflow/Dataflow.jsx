@@ -488,7 +488,7 @@ const Dataflow = withRouter(({ history, match }) => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
-          isBusinessDataflow: true, // TODO WITH REAL DATA
+          isBusinessDataflow: false, // TODO WITH REAL DATA
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,

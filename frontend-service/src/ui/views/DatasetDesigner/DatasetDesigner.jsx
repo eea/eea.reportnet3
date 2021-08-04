@@ -291,7 +291,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
-        isBusinessDataflow: true, // TODO WITH REAL DATA
+        isBusinessDataflow: false, // TODO WITH REAL DATA
         schemaName: metaData.dataset.name
       }
     });
