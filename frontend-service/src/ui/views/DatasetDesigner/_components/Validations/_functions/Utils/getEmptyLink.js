@@ -1,7 +1,7 @@
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 export const getEmptyLink = () => {
-  const linkId = uuid.v4();
+  const linkId = uniqueId();
   return {
     linkId,
     originField: '',

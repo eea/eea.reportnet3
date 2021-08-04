@@ -1,5 +1,5 @@
 import isNil from 'lodash/isNil';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 export const parseDatasetRelationFromDTO = integrityVO => {
   if (!isNil(integrityVO)) {
@@ -10,7 +10,7 @@ export const parseDatasetRelationFromDTO = integrityVO => {
       referencedDatasetSchema: { code: integrityVO.referencedDatasetSchemaId, label: '' },
       links: integrityVO.originFields.map((originField, i) => {
         return {
-          linkId: uuid.v4(),
+          linkId: uniqueId(),
           originField: { code: originField, label: '' },
           referencedField: { code: integrityVO.referencedFields[i], label: '' }
         };

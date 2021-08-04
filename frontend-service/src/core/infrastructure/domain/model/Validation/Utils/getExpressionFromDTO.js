@@ -1,6 +1,6 @@
 import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import { config } from 'conf';
 
@@ -9,7 +9,7 @@ import { getExpressionOperatorType } from './getExpressionOperatorType';
 export const getExpressionFromDTO = (expression, allExpressions, parentUnion) => {
   const union = !isNil(parentUnion) ? config.validations.reverseEquivalences[parentUnion] : '';
   const newExpression = {};
-  newExpression.expressionId = uuid.v4();
+  newExpression.expressionId = uniqueId();
   newExpression.group = false;
   newExpression.union = union;
   newExpression.operatorValue = config.validations.reverseEquivalences[expression.operator];

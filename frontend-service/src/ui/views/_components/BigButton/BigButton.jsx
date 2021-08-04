@@ -3,7 +3,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './BigButton.module.scss';
 
@@ -50,7 +50,7 @@ export const BigButton = ({
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
   const menuBigButtonRef = useRef();
-  const tooltipId = uuid.v4();
+  const tooltipId = uniqueId();
 
   useEffect(() => {
     setButtonsTitle(caption);

@@ -1,7 +1,7 @@
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 export const getEmptyExpression = () => {
-  const expressionId = uuid.v4();
+  const expressionId = uniqueId();
   return {
     expressionId,
     group: false,

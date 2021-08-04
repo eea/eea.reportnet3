@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './FieldEditor.module.scss';
 
@@ -89,8 +89,8 @@ const FieldEditor = ({
 
   const { areEquals } = TextUtils;
 
-  const calendarId = uuid.v4();
-  const calendarWithDatetimeId = uuid.v4();
+  const calendarId = uniqueId();
+  const calendarWithDatetimeId = uniqueId();
 
   useEffect(() => {
     if (!isUndefined(colsSchema)) setCodelistItemsOptions(getCodelistItemsWithEmptyOption());

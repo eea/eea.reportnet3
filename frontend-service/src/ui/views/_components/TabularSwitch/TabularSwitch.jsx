@@ -1,6 +1,6 @@
 import { useEffect, useReducer } from 'react';
 
-import uuid from 'uuid';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './TabularSwitch.module.scss';
 
@@ -58,7 +58,7 @@ const TabularSwitch = ({
       {elements.map(element => (
         <div
           className={`${styles.tabItem} ${views[element] ? styles.selected : null}`}
-          key={uuid.v4()}
+          key={uniqueId()}
           onClick={() => onSwitchView(element)}>
           <p className={styles.tabLabel}>{element}</p>
         </div>
