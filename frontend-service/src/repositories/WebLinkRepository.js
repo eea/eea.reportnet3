@@ -3,7 +3,7 @@ import { WebLinkConfig } from './config/WebLinkConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './HTTPRequester';
 
-export const linkRepository = {
+export const webLinkRepository = {
   all: async dataflowId => {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
   },

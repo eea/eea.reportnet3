@@ -1,5 +1,5 @@
 import { documentRepository } from 'repositories/DocumentRepository';
-import { Document } from 'entities/Document/Document';
+import { Document } from 'entities/Document';
 
 import { config } from 'conf/index';
 

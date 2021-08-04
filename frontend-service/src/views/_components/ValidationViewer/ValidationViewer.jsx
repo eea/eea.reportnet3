@@ -20,8 +20,8 @@ import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
-import { DatasetService } from 'services/Dataset';
-import { ValidationService } from 'services/Validation';
+import { DatasetService } from 'services/DatasetService';
+import { ValidationService } from 'services/ValidationService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';

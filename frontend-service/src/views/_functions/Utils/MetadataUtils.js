@@ -1,5 +1,5 @@
-import { DataflowService } from 'services/Dataflow';
-import { DatasetService } from 'services/Dataset';
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
 
 const getDataflowMetadata = async dataflowId => {
   try {
