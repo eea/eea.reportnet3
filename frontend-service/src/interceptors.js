@@ -1,11 +1,10 @@
 import axios from 'axios';
 
-import { UserConfig } from 'conf/domain/model/User';
-import { getUrl } from './core/infrastructure/CoreUtils';
+import { UserConfig } from 'repositories/config/model/User';
+import { getUrl } from 'repositories/_utils/UrlUtils';
+import { HTTPRequester } from 'repositories/_utils/HTTPRequester';
 
-import { userStorage } from 'core/domain/model/User/UserStorage';
-
-import { HTTPRequester } from 'core/infrastructure/HTTPRequester';
+import { userStorage } from 'entities/User/UserStorage';
 
 axios.interceptors.request.use(
   config => {
