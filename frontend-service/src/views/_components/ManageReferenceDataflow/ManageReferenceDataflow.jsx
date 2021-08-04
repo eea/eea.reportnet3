@@ -19,7 +19,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
-import { ReferenceDataflowService } from 'services/ReferenceDataflow';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -28,7 +28,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'views/_functions/Utils';

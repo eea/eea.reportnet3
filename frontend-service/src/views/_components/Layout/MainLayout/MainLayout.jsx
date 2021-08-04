@@ -21,7 +21,7 @@ import { NotificationsList } from './_components/NotificationsList';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { useSocket } from 'views/_components/Layout/MainLayout/_hooks';
 

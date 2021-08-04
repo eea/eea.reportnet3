@@ -20,7 +20,7 @@ import { WebformTable } from 'views/Webforms/_components/WebformTable';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { WebformService } from 'services/Webform';
+import { WebformService } from 'services/WebformService';
 
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 

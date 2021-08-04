@@ -39,12 +39,12 @@ import { UserList } from 'views/_components/UserList';
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 import { RepresentativeService } from 'services/RepresentativeService';
+import { SnapshotService } from 'services/SnapshotService';
 import { UserService } from 'services/UserService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { SnapshotService } from 'services/Snapshot';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';

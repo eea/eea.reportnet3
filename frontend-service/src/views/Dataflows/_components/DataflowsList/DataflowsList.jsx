@@ -13,7 +13,7 @@ import { Filters } from 'views/_components/Filters';
 import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
 import { Spinner } from 'views/_components/Spinner';
 
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

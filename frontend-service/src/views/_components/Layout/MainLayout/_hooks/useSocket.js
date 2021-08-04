@@ -8,7 +8,7 @@ import { config } from 'conf';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 const useSocket = () => {
   const notificationContext = useContext(NotificationContext);

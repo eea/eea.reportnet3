@@ -11,7 +11,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
-import { IntegrationService } from 'services/Integration';
+import { IntegrationService } from 'services/IntegrationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

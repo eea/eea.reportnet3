@@ -10,7 +10,7 @@ import { routes } from 'conf/routes';
 import { LeftSideBarButton } from './_components/LeftSideBarButton';
 
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';

@@ -19,7 +19,7 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputSwitch } from 'views/_components/InputSwitch';
 import { TitleWithItem } from 'views/_components/TitleWithItem';
 
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

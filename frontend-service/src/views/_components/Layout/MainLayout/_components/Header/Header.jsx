@@ -23,7 +23,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { EuHeader } from 'views/_components/Layout/MainLayout/_components/EuHeader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 import { InputSwitch } from 'views/_components/InputSwitch';
 
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';

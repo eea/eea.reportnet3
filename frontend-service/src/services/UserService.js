@@ -25,7 +25,7 @@ const login = async code => {
     preferredUsername: userDTO.data.preferredUsername,
     tokenExpireTime: userDTO.data.accessTokenExpiration
   });
-  LocalUUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
+  LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
   const userInfoDTO = await userRepository.userInfo(userDTO.data.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
@@ -37,8 +37,8 @@ const login = async code => {
 };
 
 const logout = async () => {
-  const currentTokens = LocalUUtils.getTokens();
-  LocalUUtils.remove();
+  const currentTokens = LocalUserStorageUtils.getTokens();
+  LocalUserStorageUtils.remove();
   if (currentTokens) {
     const response = await userRepository.logout(currentTokens.refreshToken);
     return response;
@@ -162,7 +162,7 @@ const oldLogin = async (userName, password) => {
     preferredUsername: userDTO.data.preferredUsername,
     tokenExpireTime: userDTO.data.accessTokenExpiration
   });
-  LocalUUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
+  LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
   const userInfoDTO = await userRepository.userInfo(userDTO.data.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
@@ -175,7 +175,7 @@ const oldLogin = async (userName, password) => {
 
 const refreshToken = async () => {
   try {
-    const currentTokens = LocalUUtils.getTokens();
+    const currentTokens = LocalUserStorageUtils.getTokens();
     const userDTO = await userRepository.refreshToken(currentTokens.refreshToken);
     const { accessToken, refreshToken } = userDTO.data;
     const user = new User({
@@ -186,7 +186,7 @@ const refreshToken = async () => {
       preferredUsername: userDTO.data.preferredUsername,
       tokenExpireTime: userDTO.data.accessTokenExpiration
     });
-    LocalUUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
+    LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
     const userInfoDTO = await userRepository.userInfo(userDTO.data.userId);
     user.email = userInfoDTO.data.email;
     user.firstName = userInfoDTO.data.firstName;
@@ -196,7 +196,7 @@ const refreshToken = async () => {
     timeOut((remain - 10) * 1000);
     return user;
   } catch (error) {
-    LocalUUtils.remove();
+    LocalUserStorageUtils.remove();
   }
 };
 

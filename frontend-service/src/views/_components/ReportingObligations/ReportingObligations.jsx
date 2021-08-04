@@ -11,7 +11,7 @@ import { InputSwitch } from 'views/_components/InputSwitch';
 import { Spinner } from 'views/_components/Spinner';
 import { TableView } from './_components/TableView';
 
-import { ObligationService } from 'services/Obligation';
+import { ObligationService } from 'services/ObligationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

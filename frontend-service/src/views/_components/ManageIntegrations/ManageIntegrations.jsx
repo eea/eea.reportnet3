@@ -20,7 +20,7 @@ import { Spinner } from 'views/_components/Spinner';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { IntegrationService } from 'services/Integration';
+import { IntegrationService } from 'services/IntegrationService';
 
 import { manageIntegrationsReducer } from './_functions/Reducers/manageIntegrationsReducer';
 

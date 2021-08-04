@@ -1,6 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 
-import { webformRepository } from 'repositories/webformRepository';
+import { webformRepository } from 'repositories/WebformRepository';
 
 import { TextUtils } from 'views/_functions/Utils';
 

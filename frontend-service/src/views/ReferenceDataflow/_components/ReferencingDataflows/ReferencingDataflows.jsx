@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import styles from './ReferencingDataflows.module.scss';
 
-import { ReferenceDataflowService } from 'services/ReferenceDataflow';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { referencingDataflowsReducer } from './_functions/referencingDataflowsReducer';
 

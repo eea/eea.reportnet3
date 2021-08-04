@@ -2,8 +2,8 @@ import { useContext, useEffect } from 'react';
 
 import { DownloadFile } from 'views/_components/DownloadFile';
 
-import { DatasetService } from 'services/Dataset';
-import { ValidationService } from 'services/Validation';
+import { DatasetService } from 'services/DatasetService';
+import { ValidationService } from 'services/ValidationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 

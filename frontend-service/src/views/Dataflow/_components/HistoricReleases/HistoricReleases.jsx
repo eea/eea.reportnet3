@@ -21,7 +21,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { HistoricReleaseService } from 'services/HistoricRelease';
+import { HistoricReleaseService } from 'services/HistoricReleaseService';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 

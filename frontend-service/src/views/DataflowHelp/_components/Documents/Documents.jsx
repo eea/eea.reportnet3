@@ -22,7 +22,7 @@ import { Icon } from 'views/_components/Icon';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 
-import { DocumentService } from 'services/Document';
+import { DocumentService } from 'services/DocumentService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

@@ -16,7 +16,7 @@ import { ExpressionSelector } from 'views/DatasetDesigner/_components/Validation
 import { TabView, TabPanel } from 'primereact/tabview';
 import ReactTooltip from 'react-tooltip';
 
-import { ValidationService } from 'services/Validation';
+import { ValidationService } from 'services/ValidationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

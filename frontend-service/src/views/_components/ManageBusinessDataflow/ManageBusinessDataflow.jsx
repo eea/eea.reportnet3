@@ -30,7 +30,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'views/_functions/Utils';

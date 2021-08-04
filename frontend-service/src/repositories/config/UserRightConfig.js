@@ -1,4 +1,4 @@
-export const UserConfig = {
+export const UserRightConfig = {
   allReporters: '/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}',
   allRequesters: '/contributor/requester/dataflow/{:dataflowId}',
   deleteReporter: '/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}',

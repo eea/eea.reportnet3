@@ -9,7 +9,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { Icon } from 'views/_components/Icon';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-import { UserService } from 'services/User';
+import { UserService } from 'services/UserService';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 

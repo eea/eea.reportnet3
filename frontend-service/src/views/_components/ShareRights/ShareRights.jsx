@@ -17,7 +17,8 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { Filters } from 'views/_components/Filters';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
-import { UserRightService } from 'services/UserRight';
+
+import { UserRightService } from 'services/UserRightService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

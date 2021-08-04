@@ -10,7 +10,7 @@ import { Button } from 'views/_components/Button';
 import { Dropdown } from 'views/_components/Dropdown';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
 
-import { DocumentService } from 'services/Document';
+import { DocumentService } from 'services/DocumentService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
