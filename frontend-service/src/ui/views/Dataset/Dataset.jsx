@@ -1157,12 +1157,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             setImportSelectedIntegrationId(null);
           }}
           dialogVisible={isImportDatasetDialogVisible}
-          fileLimit={1}
           infoTooltip={infoExtensionsTooltip}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
-          mode="advanced"
-          multiple={false}
           name="file"
           onError={onImportDatasetError}
           onUpload={onUpload}

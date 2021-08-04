@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
@@ -8,10 +7,11 @@ import uniqueId from 'lodash/uniqueId';
 import styles from './BigButton.module.scss';
 
 import { config } from 'conf';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DropdownButton } from 'ui/views/_components/DropdownButton';
 import { DropDownMenu } from 'ui/views/_components/DropdownButton/_components/DropDownMenu';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'ui/views/_components/Icon';
 import { InputText } from 'ui/views/_components/InputText';
 import ReactTooltip from 'react-tooltip';

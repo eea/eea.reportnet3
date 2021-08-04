@@ -36,12 +36,22 @@
 
 .p-fileupload-row {
   display: table-row;
+  div {
+    label {
+      font-size: 11pt;
+    }
+  }
 }
 
-.p-fileupload-row > div {
-  display: table-cell;
-  padding: 0.5em 1em;
-  vertical-align: middle;
+.p-fileupload-row {
+  > div {
+    display: table-cell;
+    padding: 0.5em 1em;
+    vertical-align: middle;
+  }
+  div {
+    color: var(--main-font-color);
+  }
 }
 
 .p-fileupload-content .p-progressbar {
@@ -182,4 +192,8 @@
 .replaceCheckboxSpanDisabled {
   cursor: not-allowed !important;
   color: var(--gray-50) !important;
+}
+.iconPreview {
+  font-size: 20pt;
+  color: var(--main-font-color);
 }

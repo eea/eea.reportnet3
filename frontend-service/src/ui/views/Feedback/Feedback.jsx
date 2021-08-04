@@ -4,12 +4,14 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { FeedbackConfig } from 'conf/domain/model/Feedback';
 import { FeedbackReporterHelpConfig } from 'conf/help/feedback/reporter';
 import { FeedbackRequesterHelpConfig } from 'conf/help/feedback/requester';
 
 import styles from './Feedback.module.scss';
 
 import { Button } from 'ui/views/_components/Button';
+import { CustomFileUpload } from 'ui/views/_components/CustomFileUpload';
 import { InputTextarea } from 'ui/views/_components/InputTextarea';
 import { ListBox } from 'ui/views/DatasetDesigner/_components/ListBox';
 import { ListMessages } from './_components/ListMessages';
@@ -30,6 +32,7 @@ import { feedbackReducer } from './_functions/Reducers/feedbackReducer';
 
 import { CurrentPage } from 'ui/views/_functions/Utils';
 import { DataflowUtils } from 'ui/views/_functions/Utils/DataflowUtils';
+import { getUrl } from 'core/infrastructure/CoreUtils';
 
 export const Feedback = withRouter(({ match, history }) => {
   const {
@@ -45,7 +48,10 @@ export const Feedback = withRouter(({ match, history }) => {
     currentPage: 0,
     dataflowName: '',
     dataProviders: [],
+    draggedFiles: null,
+    importFileDialogVisible: false,
     isCustodian: undefined,
+    isDragging: false,
     isLoading: false,
     isSending: false,
     messages: [],
@@ -59,7 +65,10 @@ export const Feedback = withRouter(({ match, history }) => {
     currentPage,
     dataflowName,
     dataProviders,
+    draggedFiles,
+    importFileDialogVisible,
     isCustodian,
+    isDragging,
     isLoading,
     isSending,
     messages,
@@ -185,6 +194,35 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
   };
 
+  const onDrop = event => {
+    let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
+    dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
+    event.currentTarget.style.border = '';
+    event.currentTarget.style.opacity = '';
+  };
+
+  const onDragLeave = event => {
+    dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
+    event.currentTarget.style.border = '';
+    event.currentTarget.style.opacity = '';
+    // event.currentTarget.innerText = '';
+    event.preventDefault();
+  };
+
+  const onDragOver = event => {
+    if (isCustodian) {
+      dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: true });
+      event.currentTarget.style.border = 'var(--drag-and-drop-div-wide-border)';
+      event.currentTarget.style.opacity = 'var(--drag-and-drop-div-low-opacity)';
+    }
+  };
+
+  const onImportFileError = async ({ xhr }) => {
+    if (xhr.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+    }
+  };
+
   const onKeyChange = event => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -244,6 +282,25 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'ON_UPDATE_NEW_MESSAGE_ADDED', payload });
   };
 
+  const onUpload = async () => {
+    dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false });
+    // const {
+    //   dataflow: { name: dataflowName },
+    //   dataset: { name: datasetName }
+    // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    // notificationContext.add({
+    //   type: 'DATASET_DATA_LOADING_INIT',
+    //   content: {
+    //     datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+    //     title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
+    //     datasetLoading: resources.messages['datasetLoading'],
+    //     dataflowName,
+    //     datasetName
+    //   }
+    // });
+    dispatchFeedback({ type: 'RESET_DRAGGED_FILES' });
+  };
+
   const layout = children => {
     return (
       <MainLayout>
@@ -275,10 +332,18 @@ export const Feedback = withRouter(({ match, history }) => {
               value={selectedDataProvider}></ListBox>
           </div>
         )}
+        {isCustodian && !isEmpty(selectedDataProvider) && isDragging && (
+          <span className={styles.dragAndDropFileMessage}>{resources.messages['dragAndDropFileMessage']}</span>
+        )}
         <div
           className={`${styles.listMessagesWrapper} ${
             isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
-          }`}>
+          }`}
+          onDragLeave={isCustodian && !isEmpty(selectedDataProvider) && onDragLeave}
+          onDragOver={isCustodian && !isEmpty(selectedDataProvider) && onDragOver}
+          onDrop={isCustodian && !isEmpty(selectedDataProvider) && onDrop}
+          // onDragStart={onDragStart}
+        >
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             className={`feedback-messages-help-step`}
@@ -316,10 +381,24 @@ export const Feedback = withRouter(({ match, history }) => {
                 }
                 value={messageToSend}
               />
+              {/* <Button
+                className={`${
+                  (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
+                } p-button-secondary ${styles.attachFileMessageButton}`}
+                disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
+                icon="clipboard"
+                iconPos="right"
+                label={resources.messages['uploadAttachment']}
+                onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
+              /> */}
               <Button
-                className={`p-button-animated-right-blink p-button-primary ${styles.sendMessageButton}`}
+                className={`${
+                  messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
+                    ? ''
+                    : 'p-button-animated-right-blink'
+                } p-button-primary ${styles.sendMessageButton}`}
                 disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
-                icon={'comment'}
+                icon="comment"
                 iconPos="right"
                 label={resources.messages['send']}
                 onClick={() => onSendMessage(messageToSend)}
@@ -328,6 +407,31 @@ export const Feedback = withRouter(({ match, history }) => {
           )}
         </div>
       </div>
+      {importFileDialogVisible && (
+        <CustomFileUpload
+          accept="*"
+          chooseLabel={resources.messages['selectFile']}
+          className={styles.FileUpload}
+          dialogClassName={styles.Dialog}
+          dialogHeader={`${resources.messages['uploadAttachment']} to ${selectedDataProvider.label}`}
+          dialogOnHide={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false })}
+          dialogVisible={importFileDialogVisible}
+          draggedFiles={draggedFiles}
+          infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} any`}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          isDialog={true}
+          name="file"
+          onError={onImportFileError}
+          onUpload={onUpload}
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(FeedbackConfig.importFile, {
+            dataflowId,
+            providerId:
+              isCustodian && !isEmpty(selectedDataProvider)
+                ? selectedDataProvider.dataProviderId
+                : parseInt(representativeId)
+          })}`}
+        />
+      )}
     </Fragment>
   );
 });
