@@ -111,15 +111,16 @@ export const useLeftSideBar = (
             : 'dataflowUsersList'
       };
 
+      //DON'T SORT ALPHABETICALLY
       const allButtons = [
-        apiKeyBtn,
-        editBtn,
-        exportSchemaBtn,
-        manageReportersBtn,
-        manageRequestersBtn,
         propertiesBtn,
+        editBtn,
         releaseableBtn,
         showPublicInfoBtn,
+        exportSchemaBtn,
+        apiKeyBtn,
+        manageRequestersBtn,
+        manageReportersBtn,
         userListBtn
       ];
 
