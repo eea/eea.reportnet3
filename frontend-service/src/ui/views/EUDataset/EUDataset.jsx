@@ -104,7 +104,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   const callSetMetaData = async () => {
     euDatasetDispatch({
       type: 'GET_METADATA',
-      payload: { metadata: await getMetadata({ dataflowId, datasetId }), isBusinessDataflow: true }
+      payload: { metadata: await getMetadata({ dataflowId, datasetId }), isBusinessDataflow: false }
     }); // TODO WITH REAL DATA
   };
 

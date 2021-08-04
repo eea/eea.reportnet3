@@ -148,7 +148,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       if (!isEmpty(firstDataCollection)) {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
-      setIsBusinessDataflow(true); // TODO WITH REAL DATA
+      setIsBusinessDataflow(false); // TODO WITH REAL DATA
     } catch (error) {
       const {
         dataflow: { name: dataflowName },
