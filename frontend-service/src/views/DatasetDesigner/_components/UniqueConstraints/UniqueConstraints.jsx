@@ -11,7 +11,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
-import { UniqueConstraintsService } from 'services/UniqueConstraints';
+import { UniqueConstraintsService } from 'services/UniqueConstraintsService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

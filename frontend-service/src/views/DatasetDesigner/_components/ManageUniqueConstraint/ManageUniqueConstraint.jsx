@@ -11,7 +11,7 @@ import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { ListBox } from 'views/DatasetDesigner/_components/ListBox';
 
-import { UniqueConstraintsService } from 'services/UniqueConstraints';
+import { UniqueConstraintsService } from 'services/UniqueConstraintsService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

@@ -9,7 +9,7 @@ import { config as generalConfig } from 'conf';
 
 import { Notification } from 'entities/Notification';
 
-import { TextUtils } from 'repositories/_utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 const all = async () => {};

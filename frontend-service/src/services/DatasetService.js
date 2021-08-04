@@ -15,7 +15,7 @@ import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 import { Validation } from 'entities/Validation';
 
-import { CoreUtils } from 'repositories/_utils';
+import { CoreUtils } from 'repositories/_utils/CoreUtils';
 
 const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   const datasetTableFieldDesign = new DatasetTableField({});

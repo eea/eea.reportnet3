@@ -5,7 +5,7 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { AccessPointWebConfig } from 'repositories/config';
+import { AccessPointConfig } from 'repositories/config/AccessPointConfig';
 import { routes } from 'conf/routes';
 
 import { RouteUtils } from 'views/_functions/Utils';
@@ -46,7 +46,7 @@ export const PrivateRoute = ({ component: Component, componentProps = {}, locati
           />
         );
       }
-      window.location.href = AccessPointWebConfig.euloginUrl;
+      window.location.href = AccessPointConfig.euloginUrl;
     }
   } else {
     return (

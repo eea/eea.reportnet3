@@ -23,7 +23,9 @@ import { Obligation } from 'entities/Obligation';
 import { Representative } from 'entities/Representative';
 import { WebLink } from 'entities/WebLink';
 
-import { CoreUtils, TextUtils, UserRoleUtils } from 'repositories/_utils';
+import { CoreUtils } from 'repositories/_utils/CoreUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const all = async userData => {
   const dataflowsDTO = await dataflowRepository.all();
