@@ -10,7 +10,6 @@
     "@fortawesome/react-fontawesome": "^0.1.15",
     "@stomp/stompjs": "^6.1.0",
     "axios": "^0.21.1",
-    "bootstrap": "^4.3.1",
     "chart.js": "^2.9.4",
     "classnames": "^2.2.6",
     "dayjs": "^1.9.1",
