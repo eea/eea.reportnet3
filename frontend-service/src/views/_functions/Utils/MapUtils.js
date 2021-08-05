@@ -10,7 +10,9 @@ const changeIncorrectCoordinates = record => {
   record.dataRow.forEach(row => {
     if (row.fieldData.type === 'POINT') {
       const parsedJSON = JSON.parse(
-        !isNil(Object.values(row.fieldData)[0]) ? Object.values(row.fieldData)[0] : baseJson
+        !isNil(Object.values(row.fieldData)[0]) && !isEmpty(Object.values(row.fieldData)[0])
+          ? Object.values(row.fieldData)[0]
+          : baseJson
       );
       const value = !isNil(row.fieldData[Object.keys(row.fieldData)[0]])
         ? row.fieldData[Object.keys(row.fieldData)[0]]
