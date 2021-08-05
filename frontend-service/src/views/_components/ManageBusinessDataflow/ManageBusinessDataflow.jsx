@@ -251,7 +251,7 @@ export const ManageBusinessDataflow = ({
           isEmpty(name) ||
           isEmpty(description) ||
           isNil(obligation.id) ||
-          isNil(selectedFmeUser.dataProviderGroupId) || // Todo change to userId
+          isNil(selectedFmeUser.id) ||
           isNil(selectedGroup.dataProviderGroupId) ||
           isSending
         }
@@ -330,7 +330,7 @@ export const ManageBusinessDataflow = ({
             name="fmeUsers"
             onChange={event => onSelectFmeUser(event.target.value)}
             onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
-            optionLabel="label"
+            optionLabel="username"
             options={fmeUsers}
             placeholder={resources.messages[`selectFmeUser`]}
             value={selectedFmeUser}
