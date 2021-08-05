@@ -43,16 +43,12 @@ export const FieldsDesigner = ({
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isReferenceDataset,
-  isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
-  onChangeIsValidationSelected,
   onChangeTableProperties,
   onHideSelectGroupedValidation,
   onLoadTableData,
-  recordPositionId,
-  selectedRecordErrorId,
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -76,7 +72,6 @@ export const FieldsDesigner = ({
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
   const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
@@ -379,15 +374,11 @@ export const FieldsDesigner = ({
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
-          isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
-          onChangeIsValidationSelected={onChangeIsValidationSelected}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
-          recordPositionId={recordPositionId}
           reporting={false}
-          selectedRecordErrorId={selectedRecordErrorId}
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
@@ -607,7 +598,6 @@ export const FieldsDesigner = ({
   const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const onExportTableSchema = async fileType => {
-    setIsLoadingFile(true);
     try {
       setExportTableSchemaName(createTableName(table.tableSchemaName, fileType));
       const { data } = await DatasetService.exportTableSchemaById(
@@ -633,8 +623,6 @@ export const FieldsDesigner = ({
           tableName: designerState.tableName
         }
       });
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 

@@ -97,9 +97,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     dataViewerOptions: {
       isGroupedValidationDeleted: false,
       isGroupedValidationSelected: false,
-      isValidationSelected: false,
-      recordPositionId: -1,
-      selectedRecordErrorId: -1,
       selectedRuleId: '',
       selectedRuleLevelError: '',
       selectedRuleMessage: '',
@@ -496,9 +493,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     }
   };
 
-  const onChangeIsValidationSelected = options =>
-    designerDispatch({ type: 'SET_IS_VALIDATION_SELECTED', payload: options });
-
   const onChangeReference = (tabs, datasetSchemaId) => {
     const inmDatasetSchemas = [...designerState.datasetSchemas];
     const datasetSchemaIndex = DatasetDesignerUtils.getIndexById(datasetSchemaId, inmDatasetSchemas);
@@ -749,7 +743,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         ...dataViewerOptions,
         isGroupedValidationDeleted: false,
         isGroupedValidationSelected: true,
-        recordPositionId: -1,
         selectedRuleId,
         selectedRuleLevelError,
         selectedRuleMessage,
@@ -1448,19 +1441,15 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
             isReferenceDataset={designerState.referenceDataset}
-            isValidationSelected={dataViewerOptions.isValidationSelected}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
-            onChangeIsValidationSelected={onChangeIsValidationSelected}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
             onUpdateSchema={onUpdateSchema}
             onUpdateTable={onUpdateTable}
-            recordPositionId={dataViewerOptions.recordPositionId}
             schemaImported={schemaImported}
-            selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
             selectedRuleId={dataViewerOptions.selectedRuleId}
             selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
             selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
@@ -1468,7 +1457,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             setActiveTableSchemaId={tabSchemaId =>
               designerDispatch({
                 type: 'SET_DATAVIEWER_OPTIONS',
-                payload: { ...dataViewerOptions, tableSchemaId: tabSchemaId, selectedRecordErrorId: -1 }
+                payload: { ...dataViewerOptions, tableSchemaId: tabSchemaId }
               })
             }
             tableSchemaId={dataViewerOptions.tableSchemaId}

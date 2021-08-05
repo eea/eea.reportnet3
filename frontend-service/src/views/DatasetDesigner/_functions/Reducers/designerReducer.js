@@ -19,7 +19,6 @@ export const designerReducer = (state, { type, payload }) => {
         datasetStatistics: payload.datasetStatistics,
         dataViewerOptions: {
           ...state.dataViewerOptions,
-          selectedRecordErrorId: -1,
           tableSchemaId:
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')
@@ -149,9 +148,6 @@ export const designerReducer = (state, { type, payload }) => {
           activeIndex: payload.activeIndex,
           isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
           isGroupedValidationSelected: payload.isGroupedValidationSelected,
-          isValidationSelected: false,
-          recordPositionId: -1,
-          selectedRecordErrorId: -1,
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
@@ -169,9 +165,6 @@ export const designerReducer = (state, { type, payload }) => {
           activeIndex: payload.activeIndex,
           isGroupedValidationDeleted: payload.isGroupedValidationDeleted,
           isGroupedValidationSelected: payload.isGroupedValidationSelected,
-          isValidationSelected: payload.isValidationSelected,
-          recordPositionId: payload.recordPositionId,
-          selectedRecordErrorId: payload.selectedRecordErrorId,
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
@@ -186,16 +179,6 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_IS_VALIDATIONS_TABULAR_VIEW':
       return { ...state, isValidationsTabularView: payload.isValidationsTabularView };
-
-    case 'SET_IS_VALIDATION_SELECTED':
-      return {
-        ...state,
-        dataViewerOptions: {
-          ...state.dataViewerOptions,
-          isValidationSelected: payload.isValidationSelected,
-          isGroupedValidationSelected: payload.isGroupedValidationSelected
-        }
-      };
 
     case 'TOGGLE_DASHBOARD_VISIBILITY':
       return { ...state, dashDialogVisible: payload };

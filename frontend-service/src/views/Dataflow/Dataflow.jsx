@@ -23,7 +23,7 @@ import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { DataflowManagement } from 'views/_components/DataflowManagement';
+import { ManageReportingDataflow } from 'views/_components/ManageReportingDataflow';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
@@ -1082,7 +1082,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 
-        <DataflowManagement
+        <ManageReportingDataflow
           dataflowId={dataflowId}
           history={history}
           isEditForm={true}

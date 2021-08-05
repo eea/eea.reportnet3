@@ -73,9 +73,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [dataViewerOptions, setDataViewerOptions] = useState({
     isGroupedValidationDeleted: false,
     isGroupedValidationSelected: false,
-    isValidationSelected: false,
-    recordPositionId: -1,
-    selectedRecordErrorId: -1,
     selectedRuleId: '',
     selectedRuleLevelError: '',
     selectedRuleMessage: '',
@@ -416,14 +413,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     }
   };
 
-  const onChangeIsValidationSelected = options => {
-    setDataViewerOptions({
-      ...dataViewerOptions,
-      isGroupedValidationSelected: options.isGroupedValidationSelected,
-      isValidationSelected: options.isValidationSelected
-    });
-  };
-
   const onConfirmDelete = async () => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
@@ -758,8 +747,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       ...dataViewerOptions,
       isGroupedValidationDeleted: true,
       isGroupedValidationSelected: false,
-      isValidationSelected: false,
-      recordPositionId: -1,
       selectedRuleMessage: '',
       selectedRuleLevelError: '',
       selectedRuleId: ''
@@ -775,8 +762,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       ...dataViewerOptions,
       isGroupedValidationDeleted: false,
       isGroupedValidationSelected: true,
-      recordPositionId: -1,
-      selectedRecordErrorId: -1,
       selectedRuleId,
       selectedRuleLevelError,
       selectedRuleMessage,
@@ -1076,15 +1061,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
           isReferenceDataset={isReferenceDataset || isReferenceDatasetRegularDataflow}
           isReportingWebform={isReportingWebform}
-          isValidationSelected={dataViewerOptions.isValidationSelected}
           levelErrorTypes={levelErrorTypes}
-          onChangeIsValidationSelected={onChangeIsValidationSelected}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          recordPositionId={dataViewerOptions.recordPositionId}
           reporting={true}
-          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
           selectedRuleId={dataViewerOptions.selectedRuleId}
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}

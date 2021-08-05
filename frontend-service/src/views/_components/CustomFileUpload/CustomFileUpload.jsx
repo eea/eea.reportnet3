@@ -27,7 +27,6 @@ export const CustomFileUpload = ({
   chooseLabel = 'Choose',
   className = null,
   dialogClassName = null,
-  dialogFooter = null,
   dialogHeader = null,
   dialogOnHide = null,
   dialogVisible = null,
@@ -40,7 +39,6 @@ export const CustomFileUpload = ({
   invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
   isDialog = false,
-  manageDialogs,
   maxFileSize = null,
   mode = 'advanced',
   multiple = false,
@@ -492,6 +490,7 @@ export const CustomFileUpload = ({
     }
 
     if (hasFiles()) {
+      // eslint-disable-next-line no-native-reassign
       FileList = renderFiles();
     }
 
