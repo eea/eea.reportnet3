@@ -1040,7 +1040,7 @@
     "text": "Text",
     "textFieldFormatRestriction": "Maximum of 10000 characters",
     "theme": "Theme",
-    "thereAreNoDataflows": "There are no pending dataflows",
+    "thereAreNoReportingDataflows": "There are no reporting dataflows",
     "thereAreNoReferenceDataflows": "There are no reference dataflows",
     "title": "Title",
     "titleDashboard": "Error/Warning dashboard",

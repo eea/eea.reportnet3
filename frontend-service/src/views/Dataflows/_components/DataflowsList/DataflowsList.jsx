@@ -186,7 +186,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
         reference: 'thereAreNoReferenceDataflows',
-        dataflows: 'thereAreNoDataflows'
+        reporting: 'thereAreNoReportingDataflows'
       };
 
       return <div className={styles.noDataflows}>{resources.messages[emptyDataflowsMessage[visibleTab]]}</div>;
