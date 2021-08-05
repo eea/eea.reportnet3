@@ -11,7 +11,7 @@ import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'views/_components/Button';
-import { DataflowManagement } from 'views/_components/DataflowManagement';
+import { ManageReportingDataflow } from 'views/_components/ManageReportingDataflow';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
@@ -313,7 +313,7 @@ const Dataflows = withRouter(({ history, match }) => {
         />
       )}
 
-      <DataflowManagement
+      <ManageReportingDataflow
         isEditForm={false}
         manageDialogs={manageDialogs}
         obligation={obligation}
