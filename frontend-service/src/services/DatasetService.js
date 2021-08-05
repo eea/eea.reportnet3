@@ -172,7 +172,7 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
     });
   });
   valuesWithValidations.forEach(item => {
-    if (item != null && item != undefined && !item.every(value => value === 0)) {
+    if (!isNil(item) && !item.every(value => value === 0)) {
       tableStatisticValuesWithSomeError.push(item);
     }
   });
