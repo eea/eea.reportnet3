@@ -4,10 +4,7 @@ const onSwitchAnimate = views =>
     .indexOf(true);
 
 const parseViews = (elements, value) => {
-  const viewTypes = elements.reduce((a, b) => ((a[b] = false), a), {});
-  viewTypes[value] = true;
-
-  return viewTypes;
+  return elements.reduce((a, key) => Object.assign(a, { [key]: value === key }), {});
 };
 
 export const TabularSwitchUtils = { onSwitchAnimate, parseViews };

@@ -95,17 +95,17 @@ export const WebformView = ({
     switch (field.name.toLowerCase()) {
       case 'unionpolicyother':
         fields = combinationFieldRender('otherUnionPolicy');
-        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
+        return <ul>{fields?.map(field => !isEmpty(field) && <li key={uniqueId()}>{field}</li>)}</ul>;
       case 'ghgaffected':
       case 'sectoraffected':
       case 'policyinstrument':
       case 'policyimpacting':
       case 'otherpolicyinstrument':
         fields = combinationFieldRender(field.name);
-        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
+        return <ul>{fields?.map(field => !isEmpty(field) && <li key={uniqueId()}>{field}</li>)}</ul>;
       case 'pamnames':
         fields = combinationFieldRender('paMName', 'id');
-        return <ul>{fields?.map(field => !isEmpty(field) && <li>{field}</li>)}</ul>;
+        return <ul>{fields?.map(field => !isEmpty(field) && <li key={uniqueId()}>{field}</li>)}</ul>;
       case 'statusimplementation':
         return tableFieldRender(field.name, [
           'implementationperiodstart',

@@ -16,10 +16,9 @@ const parseData = (dataRecords = [], tables, schemaTables) => {
 const parseElements = (elements = [], fields = []) => {
   const result = cloneDeep(elements);
 
-  elements.map((element, index) => {
+  elements.forEach((element, index) => {
     Object.keys(element).forEach(key => {
       const value = fields.find(field => TextUtils.areEquals(field['name'], element[key]));
-
       result[index][key] = value ? value : element[key];
     });
   });

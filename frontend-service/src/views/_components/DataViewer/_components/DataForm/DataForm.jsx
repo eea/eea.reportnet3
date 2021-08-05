@@ -161,6 +161,8 @@ const DataForm = ({
             }
           }
         }
+
+        return null;
       })
     ) : (
       <span className={styles.allAttachmentMessage}>{resources.messages['allAttachmentOrComplexGeom']}</span>
@@ -243,6 +245,8 @@ const DataForm = ({
             }
           }
         }
+
+        return null;
       })
     ) : (
       <span className={styles.allAttachmentMessage}>{resources.messages['allAttachmentOrComplexGeom']}</span>

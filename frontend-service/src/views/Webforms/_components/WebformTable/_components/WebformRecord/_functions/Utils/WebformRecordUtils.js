@@ -83,7 +83,7 @@ const parseNewRecordData = (columnsSchema, data) => {
     if (!isUndefined(columnsSchema)) {
       for (const column of columnsSchema) {
         if (column.type === 'BLOCK') {
-          column.elementsRecords[0].elements.map(element => {
+          column.elementsRecords[0].elements.forEach(element => {
             fields.push({
               fieldData: { [element.fieldSchemaId]: null, type: element.type, fieldSchemaId: element.fieldSchemaId }
             });

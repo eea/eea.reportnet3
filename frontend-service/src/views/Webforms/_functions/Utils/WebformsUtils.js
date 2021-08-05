@@ -228,7 +228,7 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
 const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStatistics) => {
   const data = mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
 
-  data.map(table => {
+  data.forEach(table => {
     table.hasErrors =
       !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
         ? {
@@ -239,7 +239,6 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStati
     if (table.records) {
       table.records[0].fields = table.records[0].fields.map(field => {
         const { fieldId, recordId, type } = field;
-
         return { fieldSchema: fieldId, fieldType: type, recordSchemaId: recordId, ...field };
       });
     }

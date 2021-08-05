@@ -33,6 +33,7 @@ const onSortData = (data, order, property, sortCategory) => {
       const orderValue = order !== 1 ? -1 : 1;
       return textA < textB ? orderValue : textA > textB ? -orderValue : 0;
     }
+    return 0;
   });
 };
 

@@ -38,6 +38,8 @@ const parseListOfSinglePams = (columns = [], records = []) => {
       ) {
         return getSingleRecordOption(singleRecord);
       }
+
+      return null;
     })
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 

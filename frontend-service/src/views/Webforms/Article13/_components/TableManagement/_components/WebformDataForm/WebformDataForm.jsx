@@ -51,6 +51,8 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, selectedR
         </Fragment>
       );
     }
+    console.log('MAP2');
+    return null;
   });
 
   return editWebformRecordForm;
