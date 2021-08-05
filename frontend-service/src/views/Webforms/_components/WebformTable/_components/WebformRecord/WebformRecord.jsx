@@ -91,10 +91,10 @@ export const WebformRecord = ({
         handleDialogs('deleteRow', false);
       }
     } catch (error) {
-      console.error('WebformRecord - onDeleteMultipleWebform.', error);
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
+        console.error('WebformRecord - onDeleteMultipleWebform.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
