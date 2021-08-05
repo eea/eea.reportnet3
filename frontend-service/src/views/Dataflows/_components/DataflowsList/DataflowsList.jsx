@@ -75,7 +75,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = intersection(
       inmUserProperties.pinnedDataflows,
-      [...dataToFilter.dataflows, ...dataToFilter.reference].map(data => data.id.toString())
+      [...dataToFilter.reporting, ...dataToFilter.reference].map(data => data.id.toString())
     );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
