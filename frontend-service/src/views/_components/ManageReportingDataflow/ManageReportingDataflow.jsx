@@ -120,7 +120,6 @@ export const ManageReportingDataflow = ({
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
-    manageDialogs(secondaryDialog, false);
   };
 
   const renderCancelButton = action => (
