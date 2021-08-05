@@ -2,41 +2,41 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-d
 
 import styles from './App.module.css';
 
-import { routes } from 'ui/routes';
+import { routes } from 'conf/routes';
 
-import { DataCollection } from 'ui/views/DataCollection';
-import { Dataflow } from 'ui/views/Dataflow';
-import { ReferenceDataflow } from 'ui/views/ReferenceDataflow';
-import { DataflowDashboards } from 'ui/views/DataflowDashboards/DataflowDashboards';
-import { DataflowHelp } from 'ui/views/DataflowHelp/DataflowHelp';
-import { Dataflows } from 'ui/views/Dataflows';
-import { Dataset } from 'ui/views/Dataset';
-import { DatasetDesigner } from 'ui/views/DatasetDesigner/DatasetDesigner';
-import { EUDataset } from 'ui/views/EUDataset';
-import { EULogin } from 'ui/views/Login/EULogin';
-import { Feedback } from 'ui/views/Feedback';
-import { Notifications } from 'ui/views/_components/Notifications';
-import { PrivacyStatement } from 'ui/views/PrivacyStatement';
-import { PrivateRoute } from 'ui/views/_components/PrivateRoute';
-import { PublicCountries } from 'ui/views/PublicCountries';
-import { PublicCountryInformation } from 'ui/views/PublicCountryInformation';
-import { PublicDataflowInformation } from 'ui/views/PublicDataflowInformation';
-import { PublicDataflows } from 'ui/views/PublicDataflows';
-import { PublicFrontpage } from 'ui/views/PublicFrontpage';
-import { PublicRoute } from 'ui/views/_components/PublicRoute';
-import { ReportnetLogin } from 'ui/views/Login/ReportnetLogin';
-import { ScrollToTop } from 'ui/views/_components/ScrollToTop';
-import { Settings } from 'ui/views/Settings';
+import { DataCollection } from 'views/DataCollection';
+import { Dataflow } from 'views/Dataflow';
+import { ReferenceDataflow } from 'views/ReferenceDataflow';
+import { DataflowDashboards } from 'views/DataflowDashboards/DataflowDashboards';
+import { DataflowHelp } from 'views/DataflowHelp/DataflowHelp';
+import { Dataflows } from 'views/Dataflows';
+import { Dataset } from 'views/Dataset';
+import { DatasetDesigner } from 'views/DatasetDesigner/DatasetDesigner';
+import { EUDataset } from 'views/EUDataset';
+import { EULogin } from 'views/Login/EULogin';
+import { Feedback } from 'views/Feedback';
+import { Notifications } from 'views/_components/Notifications';
+import { PrivacyStatement } from 'views/PrivacyStatement';
+import { PrivateRoute } from 'views/_components/PrivateRoute';
+import { PublicCountries } from 'views/PublicCountries';
+import { PublicCountryInformation } from 'views/PublicCountryInformation';
+import { PublicDataflowInformation } from 'views/PublicDataflowInformation';
+import { PublicDataflows } from 'views/PublicDataflows';
+import { PublicFrontpage } from 'views/PublicFrontpage';
+import { PublicRoute } from 'views/_components/PublicRoute';
+import { ReportnetLogin } from 'views/Login/ReportnetLogin';
+import { ScrollToTop } from 'views/_components/ScrollToTop';
+import { Settings } from 'views/Settings';
 
-import { BreadCrumbProvider } from 'ui/views/_functions/Providers/BreadCrumbProvider';
-import { DialogProvider } from 'ui/views/_functions/Providers/DialogProvider';
-import { LeftSideBarProvider } from 'ui/views/_functions/Providers/LeftSideBarProvider';
-import { LoadingProvider } from 'ui/views/_functions/Providers/LoadingProvider';
-import { NotificationProvider } from 'ui/views/_functions/Providers/NotificationProvider';
-import { ResourcesProvider } from 'ui/views/_functions/Providers/ResourcesProvider';
-import { ThemeProvider } from 'ui/views/_functions/Providers/ThemeProvider';
-import { UserProvider } from 'ui/views/_functions/Providers/UserProvider';
-import { ValidationProvider } from 'ui/views/_functions/Providers/ValidationProvider';
+import { BreadCrumbProvider } from 'views/_functions/Providers/BreadCrumbProvider';
+import { DialogProvider } from 'views/_functions/Providers/DialogProvider';
+import { LeftSideBarProvider } from 'views/_functions/Providers/LeftSideBarProvider';
+import { LoadingProvider } from 'views/_functions/Providers/LoadingProvider';
+import { NotificationProvider } from 'views/_functions/Providers/NotificationProvider';
+import { ResourcesProvider } from 'views/_functions/Providers/ResourcesProvider';
+import { ThemeProvider } from 'views/_functions/Providers/ThemeProvider';
+import { UserProvider } from 'views/_functions/Providers/UserProvider';
+import { ValidationProvider } from 'views/_functions/Providers/ValidationProvider';
 
 const App = () => {
   return (

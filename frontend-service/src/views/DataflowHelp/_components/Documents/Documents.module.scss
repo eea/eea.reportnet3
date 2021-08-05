@@ -1,0 +1,79 @@
+@import '_styles/mixins';
+
+.crudColumn {
+  text-align: center;
+}
+
+.documentsToolbar {
+  border: 0px !important;
+}
+
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--documenticon-color);
+}
+
+.downloadIcon svg:hover {
+  animation: downloadFile 0.75s infinite;
+}
+
+.downloadIconArrow {
+  position: absolute;
+}
+.downloadIconArrow:hover {
+  position: absolute;
+}
+
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}
+
+.emptyTableHeader {
+  display: none;
+  :global .p-column-title {
+    display: none;
+  }
+}
+
+.iconStyle {
+  text-align: center;
+}
+
+.deleteRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  @include shadow-0em;
+  color: var(--errors) !important;
+  margin-left: 3px !important;
+}
+
+.documentsEditButtons {
+  display: flex;
+  justify-content: center;
+}
+
+.editRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+}
+
+.noDataWrapper {
+  display: flex;
+  justify-content: center;
+  h4 {
+    font-style: italic;
+  }
+}
+
+@keyframes downloadFile {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(50%);
+  }
+}
