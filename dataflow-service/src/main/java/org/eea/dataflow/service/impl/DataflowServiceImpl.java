@@ -296,21 +296,24 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    boolean userAdmin = isAdmin();
 
     // Get user's dataflows sorted by status and creation date
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty()) {
-      dataflowRepository.findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources)
-          .forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
+    if ((null != idsResources && !idsResources.isEmpty()) || userAdmin) {
+      List<Dataflow> dataflows = userAdmin
+          ? dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc()
+          : dataflowRepository.findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
       try {
         getOpenedObligations(dataflowVOs);
       } catch (FeignException e) {
@@ -319,7 +322,6 @@ public class DataflowServiceImpl implements DataflowService {
             e.getMessage(), e);
       }
     }
-
     return dataflowVOs;
   }
 
@@ -821,11 +823,13 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @return true, if is admin
    */
+  @Override
   public boolean isAdmin() {
     String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
     return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
         .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
   }
+
   /**
    * Sets the reportings.
    *
