@@ -2,7 +2,7 @@ import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useStat
 
 import isNil from 'lodash/isNil';
 
-import styles from './DataflowManagementForm.module.scss';
+import styles from './ManageReportingDataflowForm.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
@@ -14,7 +14,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const DataflowManagementForm = forwardRef(
+const ManageReportingDataflowForm = forwardRef(
   ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, refresh }, ref) => {
     const notificationContext = useContext(NotificationContext);
     const resources = useContext(ResourcesContext);
@@ -99,7 +99,7 @@ const DataflowManagementForm = forwardRef(
             onResetData();
           }
         } catch (error) {
-          console.error('DataflowManagementForm - onConfirm.', error);
+          console.error('ManageReportingDataflowForm - onConfirm.', error);
 
           if (error?.response?.data === 'Dataflow name already exists') {
             setErrors(previousErrors => {
@@ -205,4 +205,4 @@ const DataflowManagementForm = forwardRef(
   }
 );
 
-export { DataflowManagementForm };
+export { ManageReportingDataflowForm };

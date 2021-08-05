@@ -1,4 +1,4 @@
-export const dataflowManagementReducer = (state, { type, payload }) => {
+export const reportingDataflowReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
