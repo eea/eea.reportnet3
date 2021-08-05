@@ -13,7 +13,6 @@ import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
-  activeIndex = 0,
   buttonsList = undefined,
   dataProviderId,
   hasWritePermissions = false,
@@ -25,15 +24,11 @@ export const TabsSchema = ({
   isGroupedValidationSelected,
   isReferenceDataset,
   isReportingWebform,
-  isValidationSelected,
   levelErrorTypes,
-  onChangeIsValidationSelected,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
-  recordPositionId,
   reporting,
-  selectedRecordErrorId,
   selectedRuleId,
   selectedRuleLevelError,
   selectedTableSchemaId,
@@ -61,15 +56,11 @@ export const TabsSchema = ({
                   isGroupedValidationSelected={isGroupedValidationSelected}
                   isReferenceDataset={isReferenceDataset}
                   isReportingWebform={isReportingWebform}
-                  isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
-                  onChangeIsValidationSelected={onChangeIsValidationSelected}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
-                  recordPositionId={table.id === tableSchemaId ? recordPositionId : -1}
                   reporting={reporting}
-                  selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}

@@ -49,14 +49,13 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaAllTables: [],
     datasetSchemaId: null,
     datasetSchemaName: '',
-    dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
+    dataViewerOptions: { activeIndex: null },
     exportExtensionsList: [],
     isBusinessDataflow: false,
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
     isGroupedValidationSelected: false,
-    isValidationSelected: false,
     levelErrorTypes: [],
     metaData: {},
     tableSchema: undefined,
@@ -72,7 +71,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     isBusinessDataflow,
     isLoading,
     isGroupedValidationSelected,
-    isValidationSelected,
     levelErrorTypes,
     metaData,
     tableSchema,
@@ -270,8 +268,6 @@ export const EUDataset = withRouter(({ history, match }) => {
   const onTabChange = table =>
     euDatasetDispatch({ type: 'ON_TAB_CHANGE', payload: { tableSchemaId: table.tableSchemaId } });
 
-  const onSetIsValidationSelected = value => euDatasetDispatch({ type: 'IS_VALIDATION_SELECTED', payload: { value } });
-
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -294,13 +290,9 @@ export const EUDataset = withRouter(({ history, match }) => {
       isExportable={false}
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}
-      isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
       onTabChange={table => onTabChange(table)}
-      recordPositionId={dataViewerOptions.recordPositionId}
-      selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
-      setIsValidationSelected={onSetIsValidationSelected}
       showWriteButtons={false}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}

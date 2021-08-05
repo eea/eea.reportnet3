@@ -43,16 +43,12 @@ export const FieldsDesigner = ({
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isReferenceDataset,
-  isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
-  onChangeIsValidationSelected,
   onChangeTableProperties,
   onHideSelectGroupedValidation,
   onLoadTableData,
-  recordPositionId,
-  selectedRecordErrorId,
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -378,15 +374,11 @@ export const FieldsDesigner = ({
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
-          isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
-          onChangeIsValidationSelected={onChangeIsValidationSelected}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
-          recordPositionId={recordPositionId}
           reporting={false}
-          selectedRecordErrorId={selectedRecordErrorId}
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
