@@ -51,18 +51,10 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
+  "browserslist": [
+    "defaults",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "@babel/core": "^7.15.0",
     "eslint-config-prettier": "^8.1.0",
