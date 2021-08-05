@@ -57,7 +57,6 @@ const ValidationViewer = memo(
       levelError: []
     });
     const [filtered, setFiltered] = useState(false);
-    const [filteredData, setFilteredData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
@@ -340,10 +339,6 @@ const ValidationViewer = memo(
       onLoadEntitiesTypes();
     };
 
-    const onLoadFilteredData = fetchedData => {
-      setFilteredData(fetchedData);
-    };
-
     const onLoadLevelErrorsTypes = () => {
       const allLevelErrorsFilterList = [];
 
@@ -559,7 +554,6 @@ const ValidationViewer = memo(
             <Filters
               data={fetchedData}
               filterByList={filterBy}
-              getFilteredData={onLoadFilteredData}
               options={filterOptions}
               sendData={onLoadFilteredValidations}
               validations
