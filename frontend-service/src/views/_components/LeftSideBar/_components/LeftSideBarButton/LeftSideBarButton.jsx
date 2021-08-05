@@ -18,13 +18,17 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     if (notificationContext.newNotification) {
       setAnimate(true);
     } else {
       setTimeout(() => {
-        setAnimate(false);
+        if (isMounted) setAnimate(false);
       }, 600);
     }
+    return () => {
+      isMounted = false;
+    };
   }, [notificationContext.newNotification]);
 
   const defaultLayout = (
