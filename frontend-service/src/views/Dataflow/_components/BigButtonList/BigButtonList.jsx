@@ -540,6 +540,7 @@ export const BigButtonList = ({
     handleRedirect,
     isActiveButton,
     isCloningDataflow,
+    isImportingDataflow,
     isLeadReporterOfCountry,
     onCloneDataflow,
     onImportSchema,

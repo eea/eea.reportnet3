@@ -95,6 +95,8 @@ const DataViewer = withRouter(
     tableReadOnly,
     tableSchemaColumns
   }) => {
+    const levelErrorAllTypes = ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'];
+
     const userContext = useContext(UserContext);
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
@@ -120,14 +122,7 @@ const DataViewer = withRouter(
     const [isPasting, setIsPasting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isValidationShown, setIsValidationShown] = useState(false);
-    const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
-      'CORRECT',
-      'INFO',
-      'WARNING',
-      'ERROR',
-      'BLOCKER'
-    ]);
-    const [levelErrorValidations, setLevelErrorValidations] = useState([]);
+    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
     const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
     const [valueFilter, setValueFilter] = useState();
 
@@ -293,17 +288,13 @@ const DataViewer = withRouter(
     }, [addDialogVisible]);
 
     useEffect(() => {
-      setLevelErrorValidations(levelErrorTypesWithCorrects);
-    }, [levelErrorTypesWithCorrects]);
-
-    useEffect(() => {
       setRecordErrorPositionId(recordPositionId);
     }, [recordPositionId]);
 
     useEffect(() => {
       if (isValidationSelected) {
         setIsFilterValidationsActive(false);
-        setLevelErrorValidations(levelErrorTypesWithCorrects);
+        setLevelErrorValidations(levelErrorAllTypes);
         onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }
     }, [isValidationSelected]);
@@ -368,14 +359,6 @@ const DataViewer = withRouter(
       }
     };
 
-    const removeSelectAllFromList = levelErrorValidations => {
-      levelErrorValidations = levelErrorValidations
-        .map(error => error.toUpperCase())
-        .filter(error => error !== 'SELECTALL')
-        .join(',');
-      return levelErrorValidations;
-    };
-
     const filterDataResponse = data => {
       const dataFiltered = DataViewerUtils.parseData(data);
       if (dataFiltered.length > 0) {
@@ -386,8 +369,19 @@ const DataViewer = withRouter(
       setFetchedData(dataFiltered);
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules, valueFilter = '') => {
-      levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
+    const onFetchData = async (
+      sField,
+      sOrder,
+      fRow,
+      nRows,
+      levelErrorValidationsItems,
+      groupedRules,
+      valueFilter = ''
+    ) => {
+      levelErrorValidationsItems = levelErrorValidationsItems
+        .map(error => error.toUpperCase())
+        .filter(error => error !== 'SELECTALL')
+        .join(',');
       setIsLoading(true);
       try {
         let fields;
@@ -400,7 +394,7 @@ const DataViewer = withRouter(
           pageNum: Math.floor(fRow / nRows),
           pageSize: nRows,
           fields,
-          levelError: levelErrorValidations,
+          levelError: levelErrorValidationsItems,
           ruleId: tableId === selectedTableSchemaId ? groupedRules : undefined,
           value: valueFilter
         });
@@ -451,7 +445,7 @@ const DataViewer = withRouter(
       records,
       dispatchSort,
       onFetchData,
-      levelErrorTypesWithCorrects
+      levelErrorAllTypes
     );
 
     useEffect(() => {
@@ -570,7 +564,7 @@ const DataViewer = withRouter(
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
 
-      setIsFilterValidationsActive(filteredKeysWithoutSelectAll.length !== levelErrorTypesWithCorrects.length);
+      setIsFilterValidationsActive(filteredKeysWithoutSelectAll.length !== levelErrorAllTypes.length);
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
       setLevelErrorValidations(filteredKeysWithoutSelectAll);
 
@@ -633,10 +627,10 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
       } catch (error) {
-        console.error('DataViewer - onConfirmDeleteTable.', error);
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
+          console.error('DataViewer - onConfirmDeleteTable.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
@@ -1199,7 +1193,7 @@ const DataViewer = withRouter(
           isGroupedValidationSelected={isGroupedValidationSelected}
           isLoading={isLoading}
           isValidationSelected={isValidationSelected}
-          levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
+          levelErrorTypesWithCorrects={levelErrorAllTypes}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onRefresh={onRefresh}
           onSetVisible={onSetVisible}

@@ -76,7 +76,6 @@ export const FieldsDesigner = ({
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
   const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
@@ -607,7 +606,6 @@ export const FieldsDesigner = ({
   const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const onExportTableSchema = async fileType => {
-    setIsLoadingFile(true);
     try {
       setExportTableSchemaName(createTableName(table.tableSchemaName, fileType));
       const { data } = await DatasetService.exportTableSchemaById(
@@ -633,8 +631,6 @@ export const FieldsDesigner = ({
           tableName: designerState.tableName
         }
       });
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 
