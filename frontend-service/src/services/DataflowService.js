@@ -17,7 +17,7 @@ import { Dataset } from 'entities/Dataset';
 import { DatasetTable } from 'entities/DatasetTable';
 import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
-import { EuDataset } from 'entities/EuDataset';
+import { EUDataset } from 'entities/EUDatasetAux';
 import { LegalInstrument } from 'entities/LegalInstrument';
 import { Obligation } from 'entities/Obligation';
 import { Representative } from 'entities/Representative';
@@ -405,7 +405,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
-    euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
+    euDatasets: parseEUDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     isReleasable: dataflowDTO.releasable,
@@ -446,19 +446,19 @@ const parseDataCollectionDTO = dataCollectionDTO => {
   });
 };
 
-const parseEuDatasetListDTO = euDatasetsDTO => {
+const parseEUDatasetListDTO = euDatasetsDTO => {
   if (!isNull(euDatasetsDTO) && !isUndefined(euDatasetsDTO)) {
     const euDatasets = [];
     euDatasetsDTO.forEach(euDatasetDTO => {
-      euDatasets.push(parseEuDatasetDTO(euDatasetDTO));
+      euDatasets.push(parseEUDatasetDTO(euDatasetDTO));
     });
     return euDatasets;
   }
   return;
 };
 
-const parseEuDatasetDTO = euDatasetDTO => {
-  return new EuDataset({
+const parseEUDatasetDTO = euDatasetDTO => {
+  return new EUDataset({
     creationDate: euDatasetDTO.creationDate,
     euDatasetId: euDatasetDTO.id,
     euDatasetName: euDatasetDTO.dataSetName,
