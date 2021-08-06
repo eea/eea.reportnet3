@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqBy from 'lodash/uniqBy';
-import uniqueId from 'lodash/uniqueId';
 
 import styles from './WebformRecord.module.scss';
 
@@ -12,7 +11,6 @@ import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { GroupedRecordValidations } from 'views/Webforms/_components/GroupedRecordValidations';
 import { IconTooltip } from 'views/_components/IconTooltip';
-
 import { WebformField } from './_components/WebformField';
 
 import { DatasetService } from 'services/DatasetService';
@@ -23,8 +21,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
 import { MetadataUtils } from 'views/_functions/Utils';
-import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
+import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -32,8 +30,8 @@ export const WebformRecord = ({
   addingOnTableSchemaId,
   calculateSingle,
   columnsSchema,
-  dataProviderId,
   dataflowId,
+  dataProviderId,
   datasetId,
   datasetSchemaId,
   hasFields,
@@ -45,8 +43,8 @@ export const WebformRecord = ({
   onAddMultipleWebform,
   onRefresh,
   onTabChange,
-  onUpdateSinglesList,
   onUpdatePamsValue,
+  onUpdateSinglesList,
   pamsRecords,
   record,
   tableId,
@@ -185,17 +183,15 @@ export const WebformRecord = ({
   };
 
   const renderElements = (elements = [], fieldsBlock = false) => {
-    return elements.map((element, i) => {
+    return elements.map(element => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
-        const isSubtable = () => {
-          return element.elementsRecords.length > 1;
-        };
+        const isSubTable = () => element.elementsRecords.length > 1;
 
-        if (isSubtable()) {
+        if (isSubTable()) {
           return (
-            <div className={styles.fieldsBlock} key={i}>
+            <div className={styles.fieldsBlock} key={element.recordId}>
               {element.elementsRecords
                 .filter(record => elements[0].recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
@@ -204,7 +200,7 @@ export const WebformRecord = ({
         }
 
         return (
-          <div className={styles.fieldsBlock} key={i}>
+          <div className={styles.fieldsBlock} key={element.recordId}>
             {element.elementsRecords.map(record => renderElements(record.elements))}
           </div>
         );
@@ -222,7 +218,7 @@ export const WebformRecord = ({
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={i} style={fieldStyle}>
+            <div className={styles.field} key={element.recordId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -275,10 +271,10 @@ export const WebformRecord = ({
                 {element.validations &&
                   uniqBy(element.validations, element => {
                     return [element.message, element.errorLevel].join();
-                  }).map((validation, index) => (
+                  }).map(validation => (
                     <IconTooltip
                       className={'webform-validationErrors'}
-                      key={index}
+                      key={validation.id}
                       levelError={validation.levelError}
                       message={validation.message}
                     />
@@ -310,7 +306,9 @@ export const WebformRecord = ({
         return (
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable} key={i}>
+            <div
+              className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}
+              key={element.recordId}>
               {!element.showInsideParentTable && (
                 <div className={styles.title}>
                   <h3>
@@ -367,7 +365,7 @@ export const WebformRecord = ({
                         datasetSchemaId={datasetSchemaId}
                         isAddingMultiple={isAddingMultiple}
                         isGroup={isGroup}
-                        key={record.recordId}
+                        key={element.recordId}
                         multipleRecords={element.multipleRecords}
                         newRecord={webformRecordState.newRecord}
                         onAddMultipleWebform={onAddMultipleWebform}
