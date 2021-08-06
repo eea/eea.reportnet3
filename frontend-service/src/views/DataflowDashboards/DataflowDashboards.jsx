@@ -22,6 +22,7 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowDashboards = withRouter(
   ({
@@ -56,7 +57,7 @@ export const DataflowDashboards = withRouter(
     const getDataflowDetails = async () => {
       try {
         const { data } = await DataflowService.dataflowDetails(dataflowId);
-        setIsBusinessDataflow(false); //TODO WITH REAL DATA
+        setIsBusinessDataflow(TextUtils.areEquals(data.type, 'BUSINESS')); // TODO TEST WITH REAL DATA
         setDataflowName(data.name);
         setIsLoading(false);
       } catch (error) {

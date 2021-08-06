@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataCollection = withRouter(({ match, history }) => {
   const {
@@ -147,7 +148,8 @@ export const DataCollection = withRouter(({ match, history }) => {
       if (!isEmpty(firstDataCollection)) {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, 'BUSINESS')); // TODO TEST WITH REAL DATA
       setIsLoading(false);
     } catch (error) {
       console.error('DataCollection - onLoadDataflowData.', error);
