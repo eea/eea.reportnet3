@@ -26,7 +26,7 @@ import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService'
 import { DataCollectionService } from 'services/DataCollectionService';
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
-import { EUDatasetService } from 'services/EUDatasetServiceAux';
+import { EUDatasetService } from 'services/EUDatasetService';
 import { IntegrationService } from 'services/IntegrationService';
 import { ManageIntegrations } from 'views/_components/ManageIntegrations/ManageIntegrations';
 

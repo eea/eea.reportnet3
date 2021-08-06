@@ -17,7 +17,7 @@ import { Dataset } from 'entities/Dataset';
 import { DatasetTable } from 'entities/DatasetTable';
 import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
-import { EUDataset } from 'entities/EUDatasetAux';
+import { EUDataset } from 'entities/EUDataset';
 import { LegalInstrument } from 'entities/LegalInstrument';
 import { Obligation } from 'entities/Obligation';
 import { Representative } from 'entities/Representative';

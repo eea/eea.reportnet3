@@ -1,4 +1,4 @@
-import { EUDatasetRepository } from 'repositories/EUDatasetRepositoryAux';
+import { EUDatasetRepository } from 'repositories/EUDatasetRepository';
 
 export const EUDatasetService = {
   copyFromDataCollection: async dataflowId => await EUDatasetRepository.copyFromDataCollection(dataflowId),
