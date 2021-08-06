@@ -158,9 +158,11 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
+  /** The data provider group repository. */
   @Autowired
   private DataProviderGroupRepository dataProviderGroupRepository;
 
+  /** The fme user repository. */
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
@@ -297,6 +299,13 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
 
+  /**
+   * Gets the business dataflows.
+   *
+   * @param userId the user id
+   * @return the business dataflows
+   * @throws EEAException the EEA exception
+   */
   @Override
   public List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException {
 
@@ -490,7 +499,7 @@ public class DataflowServiceImpl implements DataflowService {
       }
       if (!fmeUserRepository.existsById(dataflowVO.getFmeUserId())) {
         LOG.info("The User fme: {} don't exists.", dataflowVO.getFmeUserId());
-        throw new EEAException(EEAErrorMessage.USER_NOTFOUND);
+        throw new EEAException(EEAErrorMessage.USERFME_NOTFOUND);
       }
     }
     dataflowVO.setCreationDate(new Date());
