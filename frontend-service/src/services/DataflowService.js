@@ -419,6 +419,7 @@ const parseDataflowDTO = dataflowDTO =>
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
+    type: dataflowDTO.type,
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
