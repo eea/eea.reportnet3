@@ -43,20 +43,16 @@ export const TabsDesigner = withRouter(
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isReferenceDataset,
-    isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
     match,
-    onChangeIsValidationSelected,
     onChangeReference,
     onHideSelectGroupedValidation,
     onLoadTableData,
     onTabChange,
     onUpdateSchema,
     onUpdateTable,
-    recordPositionId,
     schemaImported = false,
-    selectedRecordErrorId,
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
@@ -191,7 +187,6 @@ export const TabsDesigner = withRouter(
     const onTabClicked = event => {
       if (event.header !== '') {
         setActiveTableSchemaId(event.tableSchemaId);
-        onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }
     };
 
@@ -418,18 +413,14 @@ export const TabsDesigner = withRouter(
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isReferenceDataset={isReferenceDataset}
-                        isValidationSelected={isValidationSelected}
                         key={tab.index}
                         manageDialogs={manageDialogs}
                         manageUniqueConstraint={manageUniqueConstraint}
                         onChangeFields={onChangeFields}
-                        onChangeIsValidationSelected={onChangeIsValidationSelected}
                         onChangeReference={onChangeReference}
                         onChangeTableProperties={onChangeTableProperties}
                         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                         onLoadTableData={onLoadTableData}
-                        recordPositionId={tab.tableSchemaId === tableSchemaId ? recordPositionId : -1}
-                        selectedRecordErrorId={tab.tableSchemaId === tableSchemaId ? selectedRecordErrorId : -1}
                         selectedRuleId={selectedRuleId}
                         selectedRuleLevelError={selectedRuleLevelError}
                         selectedRuleMessage={selectedRuleMessage}

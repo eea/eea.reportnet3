@@ -45,12 +45,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
 
-import {
-  useContextMenu,
-  useLoadColsSchemasAndColumnOptions,
-  useRecordErrorPosition,
-  useSetColumns
-} from './_functions/Hooks/DataViewerHooks';
+import { useContextMenu, useLoadColsSchemasAndColumnOptions, useSetColumns } from './_functions/Hooks/DataViewerHooks';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
 import { ExtensionUtils, MetadataUtils, RecordUtils } from 'views/_functions/Utils';
@@ -73,16 +68,12 @@ const DataViewer = withRouter(
     isGroupedValidationSelected,
     isReferenceDataset,
     isReportingWebform,
-    isValidationSelected,
     match: {
       params: { datasetId, dataflowId }
     },
-    onChangeIsValidationSelected,
     onHideSelectGroupedValidation,
     onLoadTableData,
-    recordPositionId,
     reporting,
-    selectedRecordErrorId,
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
@@ -95,6 +86,8 @@ const DataViewer = withRouter(
     tableReadOnly,
     tableSchemaColumns
   }) => {
+    const levelErrorAllTypes = ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'];
+
     const userContext = useContext(UserContext);
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
@@ -119,16 +112,7 @@ const DataViewer = withRouter(
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [isValidationShown, setIsValidationShown] = useState(false);
-    const [levelErrorTypesWithCorrects, setLevelErrorTypesWithCorrects] = useState([
-      'CORRECT',
-      'INFO',
-      'WARNING',
-      'ERROR',
-      'BLOCKER'
-    ]);
-    const [levelErrorValidations, setLevelErrorValidations] = useState([]);
-    const [recordErrorPositionId, setRecordErrorPositionId] = useState(recordPositionId);
+    const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
     const [valueFilter, setValueFilter] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
@@ -293,22 +277,6 @@ const DataViewer = withRouter(
     }, [addDialogVisible]);
 
     useEffect(() => {
-      setLevelErrorValidations(levelErrorTypesWithCorrects);
-    }, [levelErrorTypesWithCorrects]);
-
-    useEffect(() => {
-      setRecordErrorPositionId(recordPositionId);
-    }, [recordPositionId]);
-
-    useEffect(() => {
-      if (isValidationSelected) {
-        setIsFilterValidationsActive(false);
-        setLevelErrorValidations(levelErrorTypesWithCorrects);
-        onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
-      }
-    }, [isValidationSelected]);
-
-    useEffect(() => {
       if (records.isRecordDeleted) {
         onRefresh();
         setConfirmDeleteVisible(false);
@@ -368,14 +336,6 @@ const DataViewer = withRouter(
       }
     };
 
-    const removeSelectAllFromList = levelErrorValidations => {
-      levelErrorValidations = levelErrorValidations
-        .map(error => error.toUpperCase())
-        .filter(error => error !== 'SELECTALL')
-        .join(',');
-      return levelErrorValidations;
-    };
-
     const filterDataResponse = data => {
       const dataFiltered = DataViewerUtils.parseData(data);
       if (dataFiltered.length > 0) {
@@ -386,8 +346,19 @@ const DataViewer = withRouter(
       setFetchedData(dataFiltered);
     };
 
-    const onFetchData = async (sField, sOrder, fRow, nRows, levelErrorValidations, groupedRules, valueFilter = '') => {
-      levelErrorValidations = removeSelectAllFromList(levelErrorValidations);
+    const onFetchData = async (
+      sField,
+      sOrder,
+      fRow,
+      nRows,
+      levelErrorValidationsItems,
+      groupedRules,
+      valueFilter = ''
+    ) => {
+      levelErrorValidationsItems = levelErrorValidationsItems
+        .map(error => error.toUpperCase())
+        .filter(error => error !== 'SELECTALL')
+        .join(',');
       setIsLoading(true);
       try {
         let fields;
@@ -400,7 +371,7 @@ const DataViewer = withRouter(
           pageNum: Math.floor(fRow / nRows),
           pageSize: nRows,
           fields,
-          levelError: levelErrorValidations,
+          levelError: levelErrorValidationsItems,
           ruleId: tableId === selectedTableSchemaId ? groupedRules : undefined,
           value: valueFilter
         });
@@ -445,45 +416,23 @@ const DataViewer = withRouter(
       }
     };
 
-    useRecordErrorPosition(
-      recordErrorPositionId,
-      dispatchRecords,
-      records,
-      dispatchSort,
-      onFetchData,
-      levelErrorTypesWithCorrects
-    );
-
     useEffect(() => {
-      if (recordErrorPositionId === -1) {
-        if (!isValidationShown && levelErrorValidations.length > 0) {
-          onFetchData(
-            sort.sortField,
-            sort.sortOrder,
-            0,
-            records.recordsPerPage,
-            levelErrorValidations,
-            selectedRuleId,
-            valueFilter
-          );
-        } else {
-          if (isValidationShown) {
-            onFetchData(
-              sort.sortField,
-              sort.sortOrder,
-              0,
-              records.recordsPerPage,
-              levelErrorValidations,
-              selectedRuleId,
-              valueFilter
-            );
-          }
-        }
-      }
-    }, [levelErrorValidations]);
-
-    useEffect(() => {
+      onFetchData(
+        sort.sortField,
+        sort.sortOrder,
+        0,
+        records.recordsPerPage,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
       if (!isNil(valueFilter)) {
+        setPrevFilterValue(valueFilter);
+      }
+    }, [levelErrorValidations, valueFilter]);
+
+    useEffect(() => {
+      if (selectedRuleId !== '' || isGroupedValidationDeleted) {
         onFetchData(
           sort.sortField,
           sort.sortOrder,
@@ -493,25 +442,8 @@ const DataViewer = withRouter(
           selectedRuleId,
           valueFilter
         );
-        setPrevFilterValue(valueFilter);
       }
-    }, [valueFilter]);
-
-    useEffect(() => {
-      if (recordErrorPositionId === -1) {
-        if (selectedRuleId !== '' || isGroupedValidationDeleted) {
-          onFetchData(
-            sort.sortField,
-            sort.sortOrder,
-            0,
-            records.recordsPerPage,
-            levelErrorValidations,
-            selectedRuleId,
-            valueFilter
-          );
-        }
-      }
-    }, [selectedRuleId, recordErrorPositionId]);
+    }, [selectedRuleId]);
 
     useEffect(() => {
       if (confirmPasteVisible && !isUndefined(records.pastedRecords) && records.pastedRecords.length > 0) {
@@ -550,15 +482,10 @@ const DataViewer = withRouter(
       }
       return false;
     };
-    const hideValidationFilter = () => setIsValidationShown(false);
 
     const showGroupedValidationFilter = groupedBy => {
       setIsFilterValidationsActive(groupedBy);
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-
-      if (recordErrorPositionId !== -1) {
-        setRecordErrorPositionId(-1);
-      }
     };
 
     const showValueFilter = value => {
@@ -570,14 +497,9 @@ const DataViewer = withRouter(
       // length of errors in data schema rules of validation
       const filteredKeysWithoutSelectAll = filteredKeys.filter(key => key !== 'selectAll');
 
-      setIsFilterValidationsActive(filteredKeysWithoutSelectAll.length !== levelErrorTypesWithCorrects.length);
+      setIsFilterValidationsActive(filteredKeysWithoutSelectAll.length !== levelErrorAllTypes.length);
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
       setLevelErrorValidations(filteredKeysWithoutSelectAll);
-
-      if (recordErrorPositionId !== -1) {
-        setRecordErrorPositionId(-1);
-      }
-      setIsValidationShown(true);
     };
 
     const onAttach = async value => {
@@ -633,10 +555,10 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
       } catch (error) {
-        console.error('DataViewer - onConfirmDeleteTable.', error);
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
         } else {
+          console.error('DataViewer - onConfirmDeleteTable.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
@@ -1099,14 +1021,6 @@ const DataViewer = withRouter(
         selectedCRS={records.crs}></Map>
     );
 
-    const rowClassName = rowData => {
-      let id = rowData.dataRow.filter(record => Object.keys(record.fieldData)[0] === 'id')[0].fieldData.id;
-      return {
-        'p-highlight': id === selectedRecordErrorId && !isGroupedValidationSelected,
-        'p-highlight-contextmenu': ''
-      };
-    };
-
     const requiredTemplate = rowData => {
       return (
         <div className={styles.requiredTemplateWrapper}>
@@ -1190,7 +1104,6 @@ const DataViewer = withRouter(
           hasWritePermissions={
             (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
           }
-          hideValidationFilter={hideValidationFilter}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={isExportable}
@@ -1198,8 +1111,7 @@ const DataViewer = withRouter(
           isFilterable={isFilterable}
           isGroupedValidationSelected={isGroupedValidationSelected}
           isLoading={isLoading}
-          isValidationSelected={isValidationSelected}
-          levelErrorTypesWithCorrects={levelErrorTypesWithCorrects}
+          levelErrorTypesWithCorrects={levelErrorAllTypes}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onRefresh={onRefresh}
           onSetVisible={onSetVisible}
@@ -1213,7 +1125,6 @@ const DataViewer = withRouter(
           setColumns={setColumns}
           setDeleteDialogVisible={setDeleteDialogVisible}
           setImportTableDialogVisible={setImportTableDialogVisible}
-          setRecordErrorPositionId={setRecordErrorPositionId}
           showGroupedValidationFilter={showGroupedValidationFilter}
           showValidationFilter={showValidationFilter}
           showValueFilter={showValueFilter}
@@ -1272,7 +1183,6 @@ const DataViewer = withRouter(
             ref={datatableRef}
             reorderableColumns={true}
             resizableColumns={true}
-            rowClassName={rowClassName}
             rows={records.recordsPerPage}
             rowsPerPageOptions={[5, 10, 20, 100]}
             scrollHeight="70vh"
