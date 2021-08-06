@@ -10,11 +10,7 @@ export const DataCollectionRepository = {
         stopAndNotifySQLErrors,
         showPublicInfo
       }),
-
-      data: {
-        idDataflow: dataflowId,
-        dueDate: endDate
-      }
+      data: { idDataflow: dataflowId, dueDate: endDate }
     }),
 
   createReference: async (dataflowId, stopAndNotifyPKError) => {
