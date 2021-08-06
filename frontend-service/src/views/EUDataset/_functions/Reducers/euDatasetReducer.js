@@ -30,9 +30,6 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'IS_VALIDATION_SELECTED':
-      return { ...state, isValidationSelected: payload.value };
-
     case 'ON_HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
 

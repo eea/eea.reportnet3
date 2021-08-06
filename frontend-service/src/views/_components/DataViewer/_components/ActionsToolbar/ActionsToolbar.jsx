@@ -34,7 +34,6 @@ const ActionsToolbar = ({
   dataflowId,
   datasetId,
   hasWritePermissions,
-  hideValidationFilter,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isExportable,
@@ -42,7 +41,6 @@ const ActionsToolbar = ({
   isFilterValidationsActive,
   isGroupedValidationSelected,
   isLoading,
-  isValidationSelected,
   levelErrorTypesWithCorrects,
   onHideSelectGroupedValidation,
   onSetVisible,
@@ -100,12 +98,6 @@ const ActionsToolbar = ({
       });
     }
   }, [isGroupedValidationSelected]);
-
-  useEffect(() => {
-    if (isValidationSelected) {
-      dispatchFilter({ type: 'SET_VALIDATION_FILTER', payload: { levelErrors: getLevelErrorFilters() } });
-    }
-  }, [isValidationSelected]);
 
   useEffect(() => {
     if (!isUndefined(exportTableData)) {
@@ -295,7 +287,6 @@ const ActionsToolbar = ({
               className={!isLoading ? 'p-button-animated-blink' : null}
               disabled={isLoading}
               filters={validationDropdown}
-              hide={hideValidationFilter}
               id="filterValidationDropdown"
               onShow={e => {
                 getExportButtonPosition(e);
