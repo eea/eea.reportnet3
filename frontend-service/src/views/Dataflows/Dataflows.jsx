@@ -179,7 +179,7 @@ const Dataflows = withRouter(({ history, match }) => {
       }
 
       if (TextUtils.areEquals(tabId, 'business')) {
-        const { data } = await BusinessDataflowService.getAll(userContext.contextRoles);
+        const { data } = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {
