@@ -882,7 +882,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
 
     try {
-      await ValidationService.generateFile(datasetId);
+      await ValidationService.generateShowValidationsFile(datasetId);
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });

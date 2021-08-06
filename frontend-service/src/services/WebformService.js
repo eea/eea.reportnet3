@@ -4,11 +4,13 @@ import { WebformRepository } from 'repositories/WebformRepository';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const addPamsRecords = async (datasetId, tables, pamId, type) => {
-  return await WebformRepository.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
-};
+export const WebformService = {
+  addPamsRecords: async (datasetId, tables, pamId, type) => {
+    return await WebformRepository.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
+  },
 
-const singlePamData = async (datasetId, groupPaMId) => await WebformRepository.singlePamData(datasetId, groupPaMId);
+  singlePamData: async (datasetId, groupPaMId) => await WebformRepository.singlePamData(datasetId, groupPaMId)
+};
 
 const parsePamTables = (tables, pamId, type) => {
   return tables.map(table => ({
@@ -40,5 +42,3 @@ const getPamFieldValue = (fieldName, pamId, type) => {
 
   return null;
 };
-
-export const WebformService = { addPamsRecords, singlePamData };
