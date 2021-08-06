@@ -18,8 +18,10 @@ import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
+import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
@@ -155,6 +157,12 @@ public class DataflowServiceImpl implements DataflowService {
   /** The reference dataset controller zuul. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  @Autowired
+  private DataProviderGroupRepository dataProviderGroupRepository;
+
+  @Autowired
+  private FMEUserRepository fmeUserRepository;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -474,12 +482,22 @@ public class DataflowServiceImpl implements DataflowService {
     if (dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
-    } else {
-      dataflowVO.setCreationDate(new Date());
-      dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-      dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
-      LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
     }
+    if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
+      if (!dataProviderGroupRepository.existsById(dataflowVO.getDataProviderGroupId())) {
+        LOG.info("The company group : {} don't exists.", dataflowVO.getDataProviderGroupId());
+        throw new EEAException(EEAErrorMessage.COMPANY_GROUP_NOTFOUND);
+      }
+      if (!fmeUserRepository.existsById(dataflowVO.getFmeUserId())) {
+        LOG.info("The User fme: {} don't exists.", dataflowVO.getFmeUserId());
+        throw new EEAException(EEAErrorMessage.USER_NOTFOUND);
+      }
+    }
+    dataflowVO.setCreationDate(new Date());
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
+    LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
+
     // With that method we create the group in keycloack
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));

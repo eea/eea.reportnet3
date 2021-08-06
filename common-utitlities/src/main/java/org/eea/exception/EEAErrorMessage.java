@@ -343,6 +343,9 @@ public final class EEAErrorMessage {
   public static final String NO_PK_REFERENCE_DATAFLOW =
       "There aren't primary keys in the reference dataflow";
 
+  /** The Constant COMPANY_GROUP_NOTFOUND: {@value}. */
+  public static final String COMPANY_GROUP_NOTFOUND = "The company group selected is not found";
+
   /**
    * Instantiates a new EEA error message.
    */

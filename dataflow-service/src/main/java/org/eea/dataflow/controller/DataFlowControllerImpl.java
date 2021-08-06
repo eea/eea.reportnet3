@@ -248,7 +248,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @PostMapping("/{dataflowId}/contributor/add")
   @ApiOperation(value = "Add one Contributor to a Dataflow")
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
@@ -272,7 +272,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @DeleteMapping("{dataflowId}/contributor/remove")
   @ApiOperation(value = "Remove one Contributor from a Dataflow")
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
@@ -363,7 +363,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update a Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
