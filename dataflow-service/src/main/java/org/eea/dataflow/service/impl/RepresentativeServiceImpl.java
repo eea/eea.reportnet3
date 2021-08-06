@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataflow.mapper.DataProviderGroupMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.FMEUserMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
@@ -33,6 +34,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
+import org.eea.interfaces.vo.dataflow.DataProviderGroupVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
@@ -94,6 +96,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The lead reporter mapper. */
   @Autowired
   private LeadReporterMapper leadReporterMapper;
+
+  /** The data provider group mapper. */
+  @Autowired
+  private DataProviderGroupMapper dataProviderGroupMapper;
 
   /** The user management controller zull. */
   @Autowired
@@ -341,6 +347,40 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       List<Long> dataProviderIdList) {
     return representativeMapper.entityListToClass(representativeRepository
         .findByDataflowIdAndDataProviderIdIn(dataflowId, dataProviderIdList));
+  }
+
+  /**
+   * Find data provider group by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data provider group VO
+   * @throws Exception
+   */
+  @Override
+  public DataProviderGroupVO findDataProviderGroupByDataflowId(Long dataflowId)
+      throws EEAException {
+    Dataflow dataflowFound = dataflowRepository.findById(dataflowId).orElse(null);
+    DataProviderGroup dataProviderGroup;
+
+    if (dataflowFound != null) {
+      try {
+        dataProviderGroup = dataProviderGroupRepository
+            .findById(dataflowFound.getDataProviderGroupId()).orElse(null);
+      } catch (Exception e) {
+        LOG.error("Cannot find Data provider group for Dataflow with provided Id: {}", dataflowId);
+        throw new EEAException(
+            "Data provider group associated with the provided Dataflow id is null. "
+                + e.getMessage());
+      }
+    }
+
+    else {
+      LOG.error(
+          "Cannot find Dataflow with dataflowId: {} when trying to find its Data provider group.",
+          dataflowId);
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    return dataProviderGroupMapper.entityToClass(dataProviderGroup);
   }
 
   /**

@@ -10,6 +10,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
+import org.eea.interfaces.vo.dataflow.DataProviderGroupVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
@@ -251,6 +252,24 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public List<DataProviderVO> findDataProvidersByIds(@ApiParam(value = "Dataproviders List",
       type = "Long List") @RequestParam("id") List<Long> dataProviderIds) {
     return representativeService.findDataProvidersByIds(dataProviderIds);
+  }
+
+  /**
+   * Find dataProviderGroupVO based on Dataflow id.
+   *
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataProviderGroupVO findDataProviderGroupByDataflowId(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+
+    try {
+      return representativeService.findDataProviderGroupByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 
   /**

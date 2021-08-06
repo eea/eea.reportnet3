@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
+import org.eea.interfaces.vo.dataflow.DataProviderGroupVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
@@ -63,6 +64,15 @@ public interface RepresentativeController {
   @GetMapping(value = "/dataProvider/companyGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderCodeVO> findAllDataProviderCompanyType();
 
+  /**
+   * Find dataProviderGroupVO based on Dataflow id.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataProviderGroupVO findDataProviderGroupByDataflowId(
+      @PathVariable("dataflowId") Long dataflowId);
 
 
   /**
