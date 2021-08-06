@@ -195,7 +195,7 @@ export const HistoricReleases = ({
       type: 'checkbox',
       properties: [
         { name: 'isDataCollectionReleased', label: resources.messages['onlyReleasedDataCollectionCheckboxLabel'] },
-        { name: 'isEUReleased', label: resources.messages['onlyReleasedEuDatasetCheckboxLabel'] }
+        { name: 'isEUReleased', label: resources.messages['onlyReleasedEUDatasetCheckboxLabel'] }
       ]
     }
   ];

@@ -2,7 +2,7 @@ import { SnapshotConfig } from './config/SnapshotConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const snapshotRepository = {
+export const SnapshotRepository = {
   allDesigner: async datasetSchemaId => {
     return await HTTPRequester.get({ url: getUrl(SnapshotConfig.loadSnapshotsListDesigner, { datasetSchemaId }) });
   },

@@ -9,7 +9,7 @@ import sortBy from 'lodash/sortBy';
 
 import { config } from 'conf';
 
-import { dataflowRepository } from 'repositories/DataflowRepository';
+import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataCollection } from 'entities/DataCollection';
 import { Dataflow } from 'entities/Dataflow';
@@ -17,7 +17,7 @@ import { Dataset } from 'entities/Dataset';
 import { DatasetTable } from 'entities/DatasetTable';
 import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
-import { EuDataset } from 'entities/EuDataset';
+import { EUDataset } from 'entities/EUDataset';
 import { LegalInstrument } from 'entities/LegalInstrument';
 import { Obligation } from 'entities/Obligation';
 import { Representative } from 'entities/Representative';
@@ -28,7 +28,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const all = async userData => {
-  const dataflowsDTO = await dataflowRepository.all();
+  const dataflowsDTO = await DataflowRepository.all();
   const dataflows = !userData ? dataflowsDTO.data : [];
 
   if (userData) {
@@ -62,14 +62,14 @@ const all = async userData => {
 };
 
 const create = async (name, description, obligationId, type) => {
-  return await dataflowRepository.create(name, description, obligationId, type);
+  return await DataflowRepository.create(name, description, obligationId, type);
 };
 
 const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
-  await dataflowRepository.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
+  await DataflowRepository.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
 
 const datasetsValidationStatistics = async (dataflowId, datasetSchemaId) => {
-  const datasetsDashboardsDataDTO = await dataflowRepository.datasetsValidationStatistics(dataflowId, datasetSchemaId);
+  const datasetsDashboardsDataDTO = await DataflowRepository.datasetsValidationStatistics(dataflowId, datasetSchemaId);
   datasetsDashboardsDataDTO.data.sort((a, b) => {
     let datasetName_A = a.nameDataSetSchema;
     let datasetName_B = b.nameDataSetSchema;
@@ -187,7 +187,7 @@ const datasetsValidationStatistics = async (dataflowId, datasetSchemaId) => {
 };
 
 const datasetsFinalFeedback = async dataflowId => {
-  const datasetsFinalFeedbackDTO = await dataflowRepository.datasetsFinalFeedback(dataflowId);
+  const datasetsFinalFeedbackDTO = await DataflowRepository.datasetsFinalFeedback(dataflowId);
   datasetsFinalFeedbackDTO.data = datasetsFinalFeedbackDTO.data.map(dataset => {
     return {
       dataProviderName: dataset.dataSetName,
@@ -202,7 +202,7 @@ const datasetsFinalFeedback = async dataflowId => {
 };
 
 const datasetsReleasedStatus = async dataflowId => {
-  const datasetsReleasedStatusDTO = await dataflowRepository.datasetsReleasedStatus(dataflowId);
+  const datasetsReleasedStatusDTO = await DataflowRepository.datasetsReleasedStatus(dataflowId);
   datasetsReleasedStatusDTO.data.sort((a, b) => {
     let datasetName_A = a.dataSetName;
     let datasetName_B = b.dataSetName;
@@ -232,18 +232,18 @@ const datasetsReleasedStatus = async dataflowId => {
 };
 
 const dataflowDetails = async dataflowId => {
-  const dataflowDetails = await dataflowRepository.dataflowDetails(dataflowId);
+  const dataflowDetails = await DataflowRepository.dataflowDetails(dataflowId);
   dataflowDetails.data = parseDataflowDTO(dataflowDetails.data);
 
   return dataflowDetails;
 };
 
-const deleteById = async dataflowId => await dataflowRepository.deleteById(dataflowId);
+const deleteById = async dataflowId => await DataflowRepository.deleteById(dataflowId);
 
-const downloadById = async dataflowId => await dataflowRepository.downloadById(dataflowId);
+const downloadById = async dataflowId => await DataflowRepository.downloadById(dataflowId);
 
 const getAllSchemas = async dataflowId => {
-  const datasetSchemasDTO = await dataflowRepository.allSchemas(dataflowId);
+  const datasetSchemasDTO = await DataflowRepository.allSchemas(dataflowId);
   const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {
     const dataset = new Dataset({
       datasetSchemaDescription: datasetSchemaDTO.description,
@@ -316,10 +316,10 @@ const getAllSchemas = async dataflowId => {
 };
 
 const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
-  await dataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian);
+  await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian);
 
 const getPublicDataflowsByCountryCode = async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
-  const publicDataflowsByCountryCodeResponse = await dataflowRepository.getPublicDataflowsByCountryCode(
+  const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
     countryCode,
     sortOrder,
     pageNum,
@@ -336,7 +336,7 @@ const getPublicDataflowsByCountryCode = async (countryCode, sortOrder, pageNum, 
 };
 
 const getPublicDataflowData = async dataflowId => {
-  const publicDataflowDataDTO = await dataflowRepository.getPublicDataflowData(dataflowId);
+  const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
   const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
 
   publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
@@ -346,33 +346,33 @@ const getPublicDataflowData = async dataflowId => {
 };
 
 const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
-  await dataflowRepository.generateApiKey(dataflowId, dataProviderId, isCustodian);
+  await DataflowRepository.generateApiKey(dataflowId, dataProviderId, isCustodian);
 
 const getPercentageOfValue = (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2));
 
 const getAllDataflowsUserList = async () => {
-  const usersListDTO = await dataflowRepository.getAllDataflowsUserList();
+  const usersListDTO = await DataflowRepository.getAllDataflowsUserList();
   const usersList = parseAllDataflowsUserList(usersListDTO.data);
   usersListDTO.data = sortBy(usersList, ['dataflowName', 'role']);
   return usersListDTO;
 };
 
 const getRepresentativesUsersList = async dataflowId => {
-  const response = await dataflowRepository.getRepresentativesUsersList(dataflowId);
+  const response = await DataflowRepository.getRepresentativesUsersList(dataflowId);
   const usersList = parseCountriesUserList(response.data);
   response.data = sortBy(usersList, 'country');
   return response;
 };
 
 const getUserList = async (dataflowId, representativeId) => {
-  const response = await dataflowRepository.getUserList(dataflowId, representativeId);
+  const response = await DataflowRepository.getUserList(dataflowId, representativeId);
   const usersList = parseUsersList(response.data);
   response.data = sortBy(usersList, 'role');
   return response;
 };
 
 const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
-  return await dataflowRepository.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
+  return await DataflowRepository.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
 };
 
 const parseDataflowListDTO = dataflowsDTO => {
@@ -405,7 +405,7 @@ const parseDataflowDTO = dataflowDTO =>
     description: dataflowDTO.description,
     designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: parseDocumentListDTO(dataflowDTO.documents),
-    euDatasets: parseEuDatasetListDTO(dataflowDTO.euDatasets),
+    euDatasets: parseEUDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: dataflowDTO.id,
     isReleasable: dataflowDTO.releasable,
@@ -421,7 +421,7 @@ const parseDataflowDTO = dataflowDTO =>
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
     type: dataflowDTO.type,
     userRole: dataflowDTO.userRole,
-    weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
+    webLinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
 
 const parseDataCollectionListDTO = dataCollectionsDTO => {
@@ -447,19 +447,19 @@ const parseDataCollectionDTO = dataCollectionDTO => {
   });
 };
 
-const parseEuDatasetListDTO = euDatasetsDTO => {
+const parseEUDatasetListDTO = euDatasetsDTO => {
   if (!isNull(euDatasetsDTO) && !isUndefined(euDatasetsDTO)) {
     const euDatasets = [];
     euDatasetsDTO.forEach(euDatasetDTO => {
-      euDatasets.push(parseEuDatasetDTO(euDatasetDTO));
+      euDatasets.push(parseEUDatasetDTO(euDatasetDTO));
     });
     return euDatasets;
   }
   return;
 };
 
-const parseEuDatasetDTO = euDatasetDTO => {
-  return new EuDataset({
+const parseEUDatasetDTO = euDatasetDTO => {
+  return new EUDataset({
     creationDate: euDatasetDTO.creationDate,
     euDatasetId: euDatasetDTO.id,
     euDatasetName: euDatasetDTO.dataSetName,
@@ -654,7 +654,7 @@ const parseWebLinkListDTO = webLinksDTO => {
 const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 
 const publicData = async () => {
-  const publicDataflows = await dataflowRepository.publicData();
+  const publicDataflows = await DataflowRepository.publicData();
 
   publicDataflows.data = publicDataflows.data.map(
     publicDataflow =>
@@ -679,7 +679,7 @@ const sortDatasetTypeByName = (a, b) => {
 };
 
 const reporting = async dataflowId => {
-  const reportingDataflowDTO = await dataflowRepository.reporting(dataflowId);
+  const reportingDataflowDTO = await DataflowRepository.reporting(dataflowId);
   const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
   dataflow.testDatasets.sort(sortDatasetTypeByName);
   dataflow.datasets.sort(sortDatasetTypeByName);
@@ -690,10 +690,10 @@ const reporting = async dataflowId => {
   return reportingDataflowDTO;
 };
 
-const schemasValidation = async dataflowId => await dataflowRepository.schemasValidation(dataflowId);
+const schemasValidation = async dataflowId => await DataflowRepository.schemasValidation(dataflowId);
 
 const update = async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) => {
-  return await dataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo);
+  return await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo);
 };
 
 export const DataflowService = {

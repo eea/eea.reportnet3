@@ -117,7 +117,7 @@ export const ManageIntegrations = ({
     try {
       manageIntegrationsDispatch({
         type: 'GET_REPOSITORIES',
-        payload: { data: await IntegrationService.getRepositories(datasetId) }
+        payload: { data: await IntegrationService.getFMERepositories(datasetId) }
       });
     } catch (error) {
       console.error('ManageIntegrations - getRepositories.', error);
@@ -132,7 +132,9 @@ export const ManageIntegrations = ({
       try {
         manageIntegrationsDispatch({
           type: 'GET_PROCESSES',
-          payload: { data: await IntegrationService.getProcesses(manageIntegrationsState.repository.value, datasetId) }
+          payload: {
+            data: await IntegrationService.getFMEProcesses(manageIntegrationsState.repository.value, datasetId)
+          }
         });
       } catch (error) {
         console.error('ManageIntegrations - getProcesses.', error);
@@ -193,12 +195,10 @@ export const ManageIntegrations = ({
     setIsCreating(true);
     try {
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
-      const response = await IntegrationService.create(manageIntegrationsState);
-      if (response.status >= 200 && response.status <= 299) {
-        onCloseModal();
-        onUpdateData();
-        refreshList(true);
-      }
+      await IntegrationService.create(manageIntegrationsState);
+      onCloseModal();
+      onUpdateData();
+      refreshList(true);
     } catch (error) {
       console.error('ManageIntegrations - onCreateIntegration.', error);
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
@@ -306,13 +306,10 @@ export const ManageIntegrations = ({
       setIsIntegrationManaging('isIntegrationEditing', true);
       setIsUpdating(true);
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
-      const response = await IntegrationService.update(manageIntegrationsState);
-
-      if (response.status >= 200 && response.status <= 299) {
-        onCloseModal();
-        onUpdateData();
-        refreshList(true);
-      }
+      await IntegrationService.update(manageIntegrationsState);
+      onCloseModal();
+      onUpdateData();
+      refreshList(true);
     } catch (error) {
       console.error('ManageIntegrations - onUpdateIntegration.', error);
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });

@@ -401,7 +401,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
-      await ValidationService.updateDatasetRule(datasetId, candidateRule);
+      await ValidationService.updateTableRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
       }

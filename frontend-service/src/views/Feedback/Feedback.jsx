@@ -145,7 +145,7 @@ export const Feedback = withRouter(({ match, history }) => {
         .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
 
       if (!isEmpty(unreadMessages)) {
-        await FeedbackService.markAsRead(dataflowId, unreadMessages);
+        await FeedbackService.markMessagesAsRead(dataflowId, unreadMessages);
       }
     }
   };
@@ -242,7 +242,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onLoadMessages = async (dataProviderId, page) => {
     try {
-      const { data } = await FeedbackService.loadMessages(dataflowId, page, dataProviderId);
+      const { data } = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
       return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
     } catch (error) {
       console.error('Feedback - onLoadMessages.', error);
@@ -250,11 +250,11 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadDataProviders = async () => {
-    const allRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-    const responseAllDataProviders = await RepresentativeService.allDataProviders(allRepresentatives.group);
+    const responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+    const responseDataProviders = await RepresentativeService.getDataProviders(responseRepresentatives.group);
 
-    const filteredDataProviders = responseAllDataProviders.filter(dataProvider =>
-      allRepresentatives.representatives.some(
+    const filteredDataProviders = responseDataProviders.filter(dataProvider =>
+      responseRepresentatives.representatives.some(
         representative => representative.dataProviderId === dataProvider.dataProviderId
       )
     );
@@ -266,7 +266,7 @@ export const Feedback = withRouter(({ match, history }) => {
     if (message.trim() !== '') {
       try {
         dispatchFeedback({ type: 'SET_IS_SENDING', payload: true });
-        const messageCreated = await FeedbackService.create(
+        const messageCreated = await FeedbackService.createMessage(
           dataflowId,
           message,
           isCustodian && !isEmpty(selectedDataProvider)

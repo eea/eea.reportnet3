@@ -3,7 +3,7 @@ import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
-import { businessDataflowRepository } from 'repositories/BusinessDataflowRepository';
+import { BusinessDataflowRepository } from 'repositories/BusinessDataflowRepository';
 
 import { BusinessDataflow } from 'entities/BusinessDataflow';
 import { LegalInstrument } from 'entities/LegalInstrument';
@@ -14,13 +14,13 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const create = async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>
-  businessDataflowRepository.create(name, description, obligationId, dataProviderGroupId, fmeUserId);
+  BusinessDataflowRepository.create(name, description, obligationId, dataProviderGroupId, fmeUserId);
 
 const edit = async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId) =>
-  businessDataflowRepository.edit(dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId);
+  BusinessDataflowRepository.edit(dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId);
 
 const getAll = async (accessRole, contextRoles) => {
-  const businessDataflowsDTO = await businessDataflowRepository.all();
+  const businessDataflowsDTO = await BusinessDataflowRepository.all();
 
   const businessDataflows = !accessRole ? businessDataflowsDTO.data : [];
 

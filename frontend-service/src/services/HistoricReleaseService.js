@@ -1,19 +1,18 @@
 import isNil from 'lodash/isNil';
 
-import { historicReleaseRepository } from 'repositories/HistoricReleaseRepository';
+import { HistoricReleaseRepository } from 'repositories/HistoricReleaseRepository';
 import { HistoricRelease } from 'entities/HistoricRelease';
 
 const allHistoricReleases = async datasetId => {
-  const response = await historicReleaseRepository.allHistoricReleases(datasetId);
+  const response = await HistoricReleaseRepository.allHistoricReleases(datasetId);
   response.data = parseReleases(response.data);
 
   return response;
 };
 
 const allRepresentativeHistoricReleases = async (dataflowId, dataProviderId) => {
-  const response = await historicReleaseRepository.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
+  const response = await HistoricReleaseRepository.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
   response.data = parseReleases(response.data);
-
   return response;
 };
 

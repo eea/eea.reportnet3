@@ -132,17 +132,15 @@ export const ManageUniqueConstraint = ({
     try {
       setIsUniqueConstraintCreating(true);
       setIsCreating(true);
-      const response = await UniqueConstraintsService.create(
+      await UniqueConstraintsService.create(
         dataflowId,
         datasetSchemaId,
         selectedFields.map(field => field.value),
         selectedTable.value
       );
-      if (response.status >= 200 && response.status <= 299) {
-        manageDialogs('isManageUniqueConstraintDialogVisible', false);
-        onResetValues();
-        refreshList(true);
-      }
+      manageDialogs('isManageUniqueConstraintDialogVisible', false);
+      onResetValues();
+      refreshList(true);
     } catch (error) {
       console.error('ManageUniqueConstraint - onCreateConstraint.', error);
       notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
@@ -153,8 +151,8 @@ export const ManageUniqueConstraint = ({
 
   const onLoadUniquesList = async () => {
     try {
-      const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
-      setDuplicatedList(response.data);
+      const uniqueConstraintList = await UniqueConstraintsService.getAll(dataflowId, datasetSchemaId);
+      setDuplicatedList(uniqueConstraintList);
     } catch (error) {
       console.error('ManageUniqueConstraint - onLoadUniquesList.', error);
     }
@@ -174,18 +172,16 @@ export const ManageUniqueConstraint = ({
       try {
         setIsUpdating(true);
         setIsUniqueConstraintUpdating(true);
-        const response = await UniqueConstraintsService.update(
+        await UniqueConstraintsService.update(
           dataflowId,
           datasetSchemaId,
           selectedFields.map(field => field.value),
           selectedTable.value,
           uniqueId
         );
-        if (response.status >= 200 && response.status <= 299) {
-          manageDialogs('isManageUniqueConstraintDialogVisible', false);
-          onResetValues();
-          refreshList(true);
-        }
+        manageDialogs('isManageUniqueConstraintDialogVisible', false);
+        onResetValues();
+        refreshList(true);
       } catch (error) {
         console.error('ManageUniqueConstraint - onUpdateConstraint.', error);
         notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });

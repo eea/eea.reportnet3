@@ -65,16 +65,13 @@ export const ManageManualAcceptanceDataset = ({
 
   const onUpdateDataset = async () => {
     try {
-      const response = await DatasetService.updateDatasetFeedbackStatus(
+      await DatasetService.updateDatasetFeedbackStatus(
         dataflowId,
         datasetId,
         manageManualAcceptanceDatasetState.datasetMessage,
         manageManualAcceptanceDatasetState.datasetFeedbackStatus
       );
-
-      if (response.status >= 200 && response.status <= 299) {
-        refreshManualAcceptanceDatasets(true);
-      }
+      refreshManualAcceptanceDatasets(true);
     } catch (error) {
       console.error('ManageManualAcceptanceDataset - onUpdateDataset.', error);
       notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' });

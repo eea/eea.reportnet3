@@ -197,7 +197,7 @@ export const ShareRights = ({
           return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
 
         case methodTypes.GET_ALL:
-          return await UserRightService.allReporters(dataflowId, dataProvider);
+          return await UserRightService.getReporters(dataflowId, dataProvider);
 
         case methodTypes.UPDATE:
           return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
@@ -213,7 +213,7 @@ export const ShareRights = ({
           return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
 
         case methodTypes.GET_ALL:
-          return await UserRightService.allRequesters(dataflowId);
+          return await UserRightService.getRequesters(dataflowId);
 
         case methodTypes.UPDATE:
           return await UserRightService.updateRequester(userRight, dataflowId);

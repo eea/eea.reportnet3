@@ -174,7 +174,7 @@ const Dataflows = withRouter(({ history, match }) => {
       }
 
       if (TextUtils.areEquals(tabId, 'reference')) {
-        const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
+        const { data } = await ReferenceDataflowService.getAll(userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
 

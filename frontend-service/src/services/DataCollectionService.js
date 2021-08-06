@@ -1,7 +1,7 @@
-import { dataCollectionRepository } from 'repositories/DataCollectionRepository';
+import { DataCollectionRepository } from 'repositories/DataCollectionRepository';
 
 const create = async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo) => {
-  return await dataCollectionRepository.create(
+  return await DataCollectionRepository.create(
     dataflowId,
     endDate,
     isManualTechnicalAcceptance,
@@ -11,11 +11,11 @@ const create = async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndN
 };
 
 const createReference = async (dataflowId, stopAndNotifyPKError) => {
-  return await dataCollectionRepository.createReference(dataflowId, stopAndNotifyPKError);
+  return await DataCollectionRepository.createReference(dataflowId, stopAndNotifyPKError);
 };
 
 const update = async dataflowId => {
-  return await dataCollectionRepository.update(dataflowId);
+  return await DataCollectionRepository.update(dataflowId);
 };
 
 export const DataCollectionService = {
