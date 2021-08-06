@@ -220,6 +220,7 @@ const UserConfiguration = () => {
       <InputSwitch
         aria-label="pushNotifications"
         checked={userContext.userProps.pushNotifications}
+        className={styles.inputSwitchWrapper}
         onChange={async e => {
           userContext.onTogglePushNotifications(e.value);
           const inmUserProperties = { ...userContext.userProps };

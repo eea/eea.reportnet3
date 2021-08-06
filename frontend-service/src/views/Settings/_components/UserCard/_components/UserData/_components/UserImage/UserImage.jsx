@@ -137,7 +137,7 @@ const UserImage = () => {
       {isAvatarDialogVisible && (
         <Dialog
           header={resources.messages['selectImage']}
-          onHide={e => setIsAvatarDialogVisible(false)}
+          onHide={() => setIsAvatarDialogVisible(false)}
           style={{ width: '80%' }}
           visible={isAvatarDialogVisible}>
           <div className={styles.gridContainer}>{listOfImages()}</div>
