@@ -346,6 +346,9 @@ public final class EEAErrorMessage {
   /** The Constant COMPANY_GROUP_NOTFOUND: {@value}. */
   public static final String COMPANY_GROUP_NOTFOUND = "The company group selected is not found";
 
+  /** The Constant USERFME_NOTFOUND: {@value}. */
+  public static final String USERFME_NOTFOUND = "The user for fme access is not found";
+
   /**
    * Instantiates a new EEA error message.
    */
