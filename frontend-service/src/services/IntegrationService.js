@@ -6,46 +6,6 @@ import { IntegrationRepository } from 'repositories/IntegrationRepository';
 
 import { Integration } from 'entities/Integration';
 
-const all = async (dataflowId, datasetSchemaId) => {
-  const integrationsDTO = await IntegrationRepository.all(parseDatasetSchemaId(datasetSchemaId, dataflowId));
-  return parseIntegrationsList(integrationsDTO.data);
-};
-
-const allExtensionsOperations = async (dataflowId, datasetSchemaId) => {
-  const integrationsDTO = await IntegrationRepository.allExtensionsOperations(
-    parseDatasetSchemaId(datasetSchemaId, dataflowId)
-  );
-  return parseIntegrationsOperationsExtensionsList(integrationsDTO.data);
-};
-const create = async integration => IntegrationRepository.create(parseManageIntegration(integration));
-
-const deleteById = async (dataflowId, integrationId) =>
-  await IntegrationRepository.deleteById(dataflowId, integrationId);
-
-const findEUDatasetIntegration = async datasetSchemaId => {
-  const eUDatasetIntegrationsDTO = await IntegrationRepository.findEUDatasetIntegration(datasetSchemaId);
-  return parseIntegration(eUDatasetIntegrationsDTO.data);
-};
-const getProcesses = async (repositoryName, datasetId) => {
-  const processes = await IntegrationRepository.getProcesses(repositoryName, datasetId);
-  return parseProcessList(processes.data);
-};
-
-const getRepositories = async datasetId => {
-  const repositories = await IntegrationRepository.getRepositories(datasetId);
-  return parseRepositoryList(repositories.data);
-};
-
-const update = async integration => IntegrationRepository.update(parseManageIntegration(integration));
-
-const parseDatasetSchemaId = (datasetSchemaId, dataflowId) => {
-  const integration = new Integration();
-
-  integration.internalParameters = { dataflowId, datasetSchemaId };
-
-  return integration;
-};
-
 const parseExternalParameters = parameterDTO => {
   const externalParameters = {};
   for (let index = 0; index < parameterDTO.length; index++) {
@@ -55,37 +15,30 @@ const parseExternalParameters = parameterDTO => {
   return externalParameters;
 };
 
-const parseIntegration = integration => {
-  const integrationDTO = new Integration();
-  integrationDTO.externalParameters = integration.externalParameters;
-  integrationDTO.integrationDescription = integration.description;
-  integrationDTO.integrationId = integration.id;
-  integrationDTO.integrationName = integration.name;
-  integrationDTO.internalParameters = integration.internalParameters;
-  integrationDTO.operation = integration.operation;
-  integrationDTO.operationName = integration.operation.split('_').join(' ');
-  integrationDTO.tool = integration.tool;
+const parseDatasetSchemaId = (datasetSchemaId, dataflowId) =>
+  new Integration({
+    internalParameters: { dataflowId, datasetSchemaId }
+  });
 
-  return integrationDTO;
+const parseIntegration = integration =>
+  new Integration({
+    externalParameters: integration.externalParameters,
+    integrationDescription: integration.description,
+    integrationId: integration.id,
+    integrationName: integration.name,
+    internalParameters: integration.internalParameters,
+    operation: integration.operation,
+    operationName: integration.operation.split('_').join(' '),
+    tool: integration.tool
+  });
+
+const parseIntegrationsList = (integrations = []) => {
+  const integrationsDTO = integrations.map(integration => parseIntegration(integration));
+  return sortBy(integrationsDTO, ['integrationId']);
 };
 
-const parseIntegrationsList = integrations => {
-  if (!isNil(integrations)) {
-    const integrationsDTO = [];
-    integrations.forEach(integration => integrationsDTO.push(parseIntegration(integration)));
-    return sortBy(integrationsDTO, ['integrationId']);
-  }
-  return;
-};
-
-const parseIntegrationsOperationsExtensionsList = integrations => {
-  if (!isNil(integrations)) {
-    const integrationsDTO = [];
-    integrations.forEach(integration => integrationsDTO.push(parseIntegrationOperationExtension(integration)));
-    return integrationsDTO;
-  }
-  return;
-};
+const parseIntegrationsOperationsExtensionsList = (integrations = []) =>
+  integrations.map(integration => parseIntegrationOperationExtension(integration));
 
 const parseManageIntegration = integration => {
   const integrationToSave = {};
@@ -132,17 +85,40 @@ const parseKeyValue = list => {
   return listDTO;
 };
 
-const runIntegration = async (integrationId, datasetId, replaceData) =>
-  await IntegrationRepository.runIntegration(integrationId, datasetId, replaceData);
-
 export const IntegrationService = {
-  all,
-  allExtensionsOperations,
-  create,
-  deleteById,
-  findEUDatasetIntegration,
-  getProcesses,
-  getRepositories,
-  runIntegration,
-  update
+  getAll: async (dataflowId, datasetSchemaId) => {
+    const integrationsDTO = await IntegrationRepository.getAll(parseDatasetSchemaId(datasetSchemaId, dataflowId));
+    return parseIntegrationsList(integrationsDTO.data);
+  },
+
+  getAllExtensionsOperations: async (dataflowId, datasetSchemaId) => {
+    const integrationsDTO = await IntegrationRepository.getAllExtensionsOperations(
+      parseDatasetSchemaId(datasetSchemaId, dataflowId)
+    );
+    return parseIntegrationsOperationsExtensionsList(integrationsDTO.data);
+  },
+
+  getEUDatasetIntegration: async datasetSchemaId => {
+    const eUDatasetIntegrationsDTO = await IntegrationRepository.getEUDatasetIntegration(datasetSchemaId);
+    return parseIntegration(eUDatasetIntegrationsDTO.data);
+  },
+
+  getFMEProcesses: async (repositoryName, datasetId) => {
+    const processes = await IntegrationRepository.getFMEProcesses(repositoryName, datasetId);
+    return parseProcessList(processes.data);
+  },
+
+  getFMERepositories: async datasetId => {
+    const repositories = await IntegrationRepository.getFMERepositories(datasetId);
+    return parseRepositoryList(repositories.data);
+  },
+
+  create: async integration => IntegrationRepository.create(parseManageIntegration(integration)),
+
+  delete: async (dataflowId, integrationId) => await IntegrationRepository.delete(dataflowId, integrationId),
+
+  update: async integration => IntegrationRepository.update(parseManageIntegration(integration)),
+
+  runIntegration: async (integrationId, datasetId, replaceData) =>
+    await IntegrationRepository.runIntegration(integrationId, datasetId, replaceData)
 };

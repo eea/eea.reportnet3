@@ -326,7 +326,7 @@ export const BigButtonList = ({
 
   const onLoadEUDatasetIntegration = async datasetSchemaId => {
     try {
-      const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
+      const euDatasetExportIntegration = await IntegrationService.getEUDatasetIntegration(datasetSchemaId);
       setExportEUDatasetIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
       console.error('BigButtonList - onLoadEUDatasetIntegration.', error);
@@ -351,11 +351,9 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      const { status } = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
-      if (status >= 200 && status <= 299) {
-        onUpdateData();
-        setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
-      }
+      await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
+      onUpdateData();
+      setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
     } catch (error) {
       console.error('BigButtonList - onDeleteDatasetSchema.', error);
       if (error.response.status === 401) {
@@ -375,10 +373,8 @@ export const BigButtonList = ({
     setIsCopyDataCollectionToEUDatasetLoading(true);
 
     try {
-      const response = await EUDatasetService.copyFromDataCollection(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
-      }
+      await EUDatasetService.copyFromDataCollection(dataflowId);
+      notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
     } catch (error) {
       setIsCopyDataCollectionToEUDatasetLoading(false);
 
@@ -396,10 +392,8 @@ export const BigButtonList = ({
     setIsExportEUDatasetLoading(true);
 
     try {
-      const response = await EUDatasetService.export(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
-      }
+      await EUDatasetService.export(dataflowId);
+      notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
     } catch (error) {
       setIsExportEUDatasetLoading(false);
 

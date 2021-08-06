@@ -22,17 +22,17 @@ export const RepresentativeService = {
   createLeadReporter: async (leadReporterAccount, representativeId, dataflowId) =>
     await RepresentativeRepository.createLeadReporter(leadReporterAccount, representativeId, dataflowId),
 
-  getAllDataProviders: async dataProviderGroup => {
+  getDataProviders: async dataProviderGroup => {
     let response = [];
-    const dataProvidersDTO = await RepresentativeRepository.getAllDataProviders(dataProviderGroup.dataProviderGroupId);
+    const dataProvidersDTO = await RepresentativeRepository.getDataProviders(dataProviderGroup.dataProviderGroupId);
     response = dataProvidersDTO.data.map(dataProvider => {
       return { dataProviderId: dataProvider.id, label: dataProvider.label };
     });
     return response;
   },
 
-  getAllRepresentatives: async dataflowId => {
-    const representativesDTO = await RepresentativeRepository.getAllRepresentatives(dataflowId);
+  getRepresentatives: async dataflowId => {
+    const representativesDTO = await RepresentativeRepository.getRepresentatives(dataflowId);
 
     const representativesList = !isEmpty(representativesDTO.data)
       ? representativesDTO.data.map(

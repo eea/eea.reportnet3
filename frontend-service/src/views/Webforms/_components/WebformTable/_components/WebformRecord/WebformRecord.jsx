@@ -79,15 +79,13 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
 
     try {
-      const response = await DatasetService.deleteRecordById(
+      await DatasetService.deleteRecordById(
         datasetId,
         selectedRecordId,
         webformRecordState.record?.elements?.some(element => element.deleteInCascade)
       );
-      if (response.status >= 200 && response.status <= 299) {
-        onRefresh();
-        handleDialogs('deleteRow', false);
-      }
+      onRefresh();
+      handleDialogs('deleteRow', false);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });

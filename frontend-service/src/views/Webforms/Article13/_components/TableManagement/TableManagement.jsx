@@ -190,10 +190,8 @@ export const TableManagement = ({
     const deleteCascade = true;
 
     try {
-      const response = await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId, deleteCascade);
-      if (response.status >= 200 && response.status <= 299) {
-        onRefresh();
-      }
+      await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId, deleteCascade);
+      onRefresh();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({

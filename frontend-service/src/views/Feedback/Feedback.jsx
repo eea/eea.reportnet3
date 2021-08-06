@@ -249,11 +249,11 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadDataProviders = async () => {
-    const allRepresentatives = await RepresentativeService.getAllRepresentatives(dataflowId);
-    const responseAllDataProviders = await RepresentativeService.getAllDataProviders(allRepresentatives.group);
+    const responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+    const responseDataProviders = await RepresentativeService.getDataProviders(responseRepresentatives.group);
 
-    const filteredDataProviders = responseAllDataProviders.filter(dataProvider =>
-      allRepresentatives.representatives.some(
+    const filteredDataProviders = responseDataProviders.filter(dataProvider =>
+      responseRepresentatives.representatives.some(
         representative => representative.dataProviderId === dataProvider.dataProviderId
       )
     );

@@ -3,27 +3,16 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const ObligationRepository = {
-  getCountries: async () =>
-    await HTTPRequester.get({
-      url: getUrl(ObligationConfig.countries)
-    }),
+  getCountries: async () => await HTTPRequester.get({ url: getUrl(ObligationConfig.getCountries) }),
 
-  getIssues: async () =>
-    await HTTPRequester.get({
-      url: getUrl(ObligationConfig.issues)
-    }),
+  getIssues: async () => await HTTPRequester.get({ url: getUrl(ObligationConfig.getIssues) }),
 
-  getOrganizations: async () =>
-    await HTTPRequester.get({
-      url: getUrl(ObligationConfig.organizations)
-    }),
-  obligationById: async obligationId =>
-    await HTTPRequester.get({
-      url: getUrl(ObligationConfig.obligationById, { obligationId })
-    }),
+  getOrganizations: async () => await HTTPRequester.get({ url: getUrl(ObligationConfig.getOrganizations) }),
 
-  openedObligations: async (countryId = '', dateFrom = '', dateTo = '', issueId = '', organizationId = '') =>
+  get: async obligationId => await HTTPRequester.get({ url: getUrl(ObligationConfig.get, { obligationId }) }),
+
+  getOpen: async (countryId = '', dateFrom = '', dateTo = '', issueId = '', organizationId = '') =>
     await HTTPRequester.get({
-      url: getUrl(ObligationConfig.openedObligations, { countryId, dateFrom, dateTo, issueId, organizationId })
+      url: getUrl(ObligationConfig.getOpen, { countryId, dateFrom, dateTo, issueId, organizationId })
     })
 };

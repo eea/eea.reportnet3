@@ -368,7 +368,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
+      const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       console.error('Dataset - getFileExtensions.', error);

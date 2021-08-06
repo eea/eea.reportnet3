@@ -15,11 +15,11 @@ export const RepresentativeRepository = {
       data: { email: leadReporterAccount }
     }),
 
-  getAllDataProviders: async dataProviderGroupId =>
-    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getAllDataProviders, { dataProviderGroupId }) }),
+  getDataProviders: async dataProviderGroupId =>
+    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getDataProviders, { dataProviderGroupId }) }),
 
-  getAllRepresentatives: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getAllRepresentatives, { dataflowId: dataflowId }) }),
+  getRepresentatives: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getRepresentatives, { dataflowId: dataflowId }) }),
 
   deleteRepresentative: async (representativeId, dataflowId) =>
     await HTTPRequester.delete({

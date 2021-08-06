@@ -13,7 +13,6 @@ const allHistoricReleases = async datasetId => {
 const allRepresentativeHistoricReleases = async (dataflowId, dataProviderId) => {
   const response = await HistoricReleaseRepository.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
   response.data = parseReleases(response.data);
-
   return response;
 };
 

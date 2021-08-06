@@ -129,7 +129,7 @@ const RepresentativesList = ({
 
   const getInitialData = async () => {
     await getGroupCountries();
-    await getAllRepresentatives();
+    await getRepresentatives();
 
     if (!isEmpty(formState.representatives)) {
       await getAllDataProviders();
@@ -137,17 +137,17 @@ const RepresentativesList = ({
     }
   };
 
-  const getAllRepresentatives = async () => {
+  const getRepresentatives = async () => {
     try {
-      let responseAllRepresentatives = await RepresentativeService.getAllRepresentatives(dataflowId);
-      const parsedLeadReporters = parseLeadReporters(responseAllRepresentatives.representatives);
+      let responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+      const parsedLeadReporters = parseLeadReporters(responseRepresentatives.representatives);
 
       formDispatcher({
         type: 'INITIAL_LOAD',
-        payload: { response: responseAllRepresentatives, parsedLeadReporters }
+        payload: { response: responseRepresentatives, parsedLeadReporters }
       });
     } catch (error) {
-      console.error('RepresentativesList - getAllRepresentatives.', error);
+      console.error('RepresentativesList - getRepresentatives.', error);
       notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' });
     }
   };
@@ -250,11 +250,8 @@ const RepresentativesList = ({
   const onDeleteLeadReporter = async () => {
     setIsDeleting(true);
     try {
-      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
-
-      if (response.status >= 200 && response.status <= 299) {
-        formDispatcher({ type: 'REFRESH' });
-      }
+      await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
+      formDispatcher({ type: 'REFRESH' });
     } catch (error) {
       console.error('RepresentativesList - onDeleteLeadReporter.', error);
       notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
