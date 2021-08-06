@@ -191,7 +191,7 @@ export const UserService = {
       tokenExpireTime: userDTO.data.accessTokenExpiration
     });
     LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-    const userInfoDTO = await UserRepository.userInfo(userDTO.data.userId);
+    const userInfoDTO = await UserRepository.getUserInfo(userDTO.data.userId);
     user.email = userInfoDTO.data.email;
     user.firstName = userInfoDTO.data.firstName;
     user.lastName = userInfoDTO.data.lastName;
