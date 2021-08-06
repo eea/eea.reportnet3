@@ -185,7 +185,7 @@ export const WebformRecord = ({
   };
 
   const renderElements = (elements = [], fieldsBlock = false) => {
-    return elements.map(element => {
+    return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
@@ -195,7 +195,7 @@ export const WebformRecord = ({
 
         if (isSubtable()) {
           return (
-            <div className={styles.fieldsBlock} key={uniqueId()}>
+            <div className={styles.fieldsBlock} key={i}>
               {element.elementsRecords
                 .filter(record => elements[0].recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
@@ -204,7 +204,7 @@ export const WebformRecord = ({
         }
 
         return (
-          <div className={styles.fieldsBlock} key={uniqueId()}>
+          <div className={styles.fieldsBlock} key={i}>
             {element.elementsRecords.map(record => renderElements(record.elements))}
           </div>
         );
@@ -222,7 +222,7 @@ export const WebformRecord = ({
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={uniqueId()} style={fieldStyle}>
+            <div className={styles.field} key={i} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -275,10 +275,10 @@ export const WebformRecord = ({
                 {element.validations &&
                   uniqBy(element.validations, element => {
                     return [element.message, element.errorLevel].join();
-                  }).map(validation => (
+                  }).map((validation, index) => (
                     <IconTooltip
                       className={'webform-validationErrors'}
-                      key={uniqueId()}
+                      key={index}
                       levelError={validation.levelError}
                       message={validation.message}
                     />
@@ -310,9 +310,7 @@ export const WebformRecord = ({
         return (
           !isSubTableVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div
-              className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}
-              key={uniqueId()}>
+            <div className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable} key={i}>
               {!element.showInsideParentTable && (
                 <div className={styles.title}>
                   <h3>
