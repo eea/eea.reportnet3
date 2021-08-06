@@ -1,42 +1,36 @@
-import { documentRepository } from 'repositories/DocumentRepository';
+import { DocumentRepository } from 'repositories/DocumentRepository';
 import { Document } from 'entities/Document';
 
 import { config } from 'conf/index';
 
-const all = async dataflowId => {
-  const response = await documentRepository.all(dataflowId);
-  response.data.documents = response.data.documents.map(
-    documentDTO =>
-      new Document({
-        category: documentDTO.category,
-        date: documentDTO.date,
-        description: documentDTO.description,
-        id: documentDTO.id,
-        isPublic: documentDTO.isPublic,
-        language: getCountryName(documentDTO.language),
-        size: documentDTO.size,
-        title: documentDTO.name,
-        url: documentDTO.url
-      })
-  );
+export const DocumentService = {
+  getAll: async dataflowId => {
+    const response = await DocumentRepository.getAll(dataflowId);
+    return response.data.documents.map(
+      documentDTO =>
+        new Document({
+          category: documentDTO.category,
+          date: documentDTO.date,
+          description: documentDTO.description,
+          id: documentDTO.id,
+          isPublic: documentDTO.isPublic,
+          language: config.languages.filter(language => language.code === documentDTO.language).map(name => name.name),
+          size: documentDTO.size,
+          title: documentDTO.name,
+          url: documentDTO.url
+        })
+    );
+  },
 
-  return response;
+  download: async documentId => await DocumentRepository.download(documentId),
+
+  upload: async (dataflowId, description, language, file, isPublic) => {
+    return await DocumentRepository.upload(dataflowId, description, language, file, isPublic);
+  },
+
+  update: async (dataflowId, description, language, file, isPublic, documentId) => {
+    return await DocumentRepository.update(dataflowId, description, language, file, isPublic, documentId);
+  },
+
+  delete: async documentId => await DocumentRepository.delete(documentId)
 };
-
-const downloadDocumentById = async documentId => await documentRepository.downloadById(documentId);
-
-const uploadDocument = async (dataflowId, description, language, file, isPublic) => {
-  return await documentRepository.upload(dataflowId, description, language, file, isPublic);
-};
-
-const editDocument = async (dataflowId, description, language, file, isPublic, documentId) => {
-  return await documentRepository.editDocument(dataflowId, description, language, file, isPublic, documentId);
-};
-
-const deleteDocument = async documentId => await documentRepository.deleteDocument(documentId);
-
-const getCountryName = countryCode => {
-  return config.languages.filter(language => language.code === countryCode).map(name => name.name);
-};
-
-export const DocumentService = { all, deleteDocument, downloadDocumentById, editDocument, uploadDocument };

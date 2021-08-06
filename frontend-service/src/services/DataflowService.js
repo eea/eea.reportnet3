@@ -420,7 +420,7 @@ const parseDataflowDTO = dataflowDTO =>
     status: dataflowDTO.status,
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
     userRole: dataflowDTO.userRole,
-    weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
+    webLinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
 
 const parseDataCollectionListDTO = dataCollectionsDTO => {
@@ -706,12 +706,12 @@ export const DataflowService = {
   deleteById,
   downloadById,
   generateApiKey,
+  getAllDataflowsUserList,
   getAllSchemas,
   getApiKey,
-  getAllDataflowsUserList,
-  getRepresentativesUsersList,
   getPublicDataflowData,
   getPublicDataflowsByCountryCode,
+  getRepresentativesUsersList,
   getUserList,
   newEmptyDatasetSchema,
   publicData,

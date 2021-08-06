@@ -3,8 +3,8 @@ import { WebLinkConfig } from './config/WebLinkConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const webLinkRepository = {
-  all: async dataflowId => {
+export const WebLinkRepository = {
+  getAll: async dataflowId => {
     return await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
   },
 
@@ -15,8 +15,8 @@ export const webLinkRepository = {
     });
   },
 
-  deleteWebLink: async webLinkToDelete => {
-    return await HTTPRequester.delete({ url: getUrl(WebLinkConfig.delete, { weblinkId: webLinkToDelete.id }) });
+  delete: async webLinkId => {
+    return await HTTPRequester.delete({ url: getUrl(WebLinkConfig.delete, { webLinkId }) });
   },
 
   update: async (dataflowId, webLinkToEdit) => {

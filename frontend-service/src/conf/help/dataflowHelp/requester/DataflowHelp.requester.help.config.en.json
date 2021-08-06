@@ -6,7 +6,7 @@
     },
     {
       "content": "Add the web links to external resources relevant to the reporting",
-      "target": ".dataflowHelp-weblinks-help-step"
+      "target": ".dataflowHelp-webLinks-help-step"
     },
     {
       "content": "View the information on the dataset schema – QC rules, table and field names and descriptions",
