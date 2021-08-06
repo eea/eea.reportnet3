@@ -4,7 +4,7 @@ import { IntegrationConfig } from './config/IntegrationConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const integrationRepository = {
+export const IntegrationRepository = {
   all: async integration =>
     await HTTPRequester.update({
       url: getUrl(IntegrationConfig.all),

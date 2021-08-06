@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 
 import { config } from 'conf/index';
 
-import { userRepository } from 'repositories/UserRepository';
+import { UserRepository } from 'repositories/UserRepository';
 import { User } from 'entities/User';
 import { LocalUserStorageUtils } from './_utils/LocalUserStorageUtils';
 
@@ -15,7 +15,7 @@ const timeOut = time => {
 };
 
 const login = async code => {
-  const userDTO = await userRepository.login(code);
+  const userDTO = await UserRepository.login(code);
   const { accessToken, refreshToken } = userDTO.data;
   const user = new User({
     accessRole: userDTO.data.roles,
@@ -26,7 +26,7 @@ const login = async code => {
     tokenExpireTime: userDTO.data.accessTokenExpiration
   });
   LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-  const userInfoDTO = await userRepository.userInfo(userDTO.data.userId);
+  const userInfoDTO = await UserRepository.userInfo(userDTO.data.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
@@ -40,14 +40,14 @@ const logout = async () => {
   const currentTokens = LocalUserStorageUtils.getTokens();
   LocalUserStorageUtils.remove();
   if (currentTokens) {
-    const response = await userRepository.logout(currentTokens.refreshToken);
+    const response = await UserRepository.logout(currentTokens.refreshToken);
     return response;
   }
   return;
 };
 
 const userInfo = async userId => {
-  const userDTO = await userRepository.userInfo(userId);
+  const userDTO = await UserRepository.userInfo(userId);
   const user = new User({
     email: userDTO.email,
     firstName: userDTO.firstName,
@@ -58,7 +58,7 @@ const userInfo = async userId => {
 };
 
 const getConfiguration = async () => {
-  const userConfigurationDTO = await userRepository.configuration();
+  const userConfigurationDTO = await UserRepository.configuration();
   return parseConfigurationDTO(userConfigurationDTO);
 };
 
@@ -148,10 +148,10 @@ const parseConfigurationDTO = userConfigurationDTO => {
   return userConfiguration;
 };
 
-const updateAttributes = async attributes => await userRepository.updateAttributes(attributes);
+const updateAttributes = async attributes => await UserRepository.updateAttributes(attributes);
 
 const oldLogin = async (userName, password) => {
-  const userDTO = await userRepository.oldLogin(userName, password);
+  const userDTO = await UserRepository.oldLogin(userName, password);
 
   const { accessToken, refreshToken } = userDTO.data;
   const user = new User({
@@ -163,7 +163,7 @@ const oldLogin = async (userName, password) => {
     tokenExpireTime: userDTO.data.accessTokenExpiration
   });
   LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-  const userInfoDTO = await userRepository.userInfo(userDTO.data.userId);
+  const userInfoDTO = await UserRepository.userInfo(userDTO.data.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
@@ -176,7 +176,7 @@ const oldLogin = async (userName, password) => {
 const refreshToken = async () => {
   try {
     const currentTokens = LocalUserStorageUtils.getTokens();
-    const userDTO = await userRepository.refreshToken(currentTokens.refreshToken);
+    const userDTO = await UserRepository.refreshToken(currentTokens.refreshToken);
     const { accessToken, refreshToken } = userDTO.data;
     const user = new User({
       accessRole: userDTO.data.roles,
@@ -187,7 +187,7 @@ const refreshToken = async () => {
       tokenExpireTime: userDTO.data.accessTokenExpiration
     });
     LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-    const userInfoDTO = await userRepository.userInfo(userDTO.data.userId);
+    const userInfoDTO = await UserRepository.userInfo(userDTO.data.userId);
     user.email = userInfoDTO.data.email;
     user.firstName = userInfoDTO.data.firstName;
     user.lastName = userInfoDTO.data.lastName;

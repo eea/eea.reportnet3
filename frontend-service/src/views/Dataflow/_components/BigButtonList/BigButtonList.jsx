@@ -375,7 +375,7 @@ export const BigButtonList = ({
     setIsCopyDataCollectionToEuDatasetLoading(true);
 
     try {
-      const response = await EuDatasetService.copyDataCollection(dataflowId);
+      const response = await EuDatasetService.copyFromDataCollection(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
       }
@@ -396,7 +396,7 @@ export const BigButtonList = ({
     setIsExportEuDatasetLoading(true);
 
     try {
-      const response = await EuDatasetService.exportEuDataset(dataflowId);
+      const response = await EuDatasetService.export(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
       }

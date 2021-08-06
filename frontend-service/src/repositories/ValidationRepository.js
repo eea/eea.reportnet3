@@ -2,7 +2,7 @@ import { ValidationConfig } from './config/ValidationConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const validationRepository = {
+export const ValidationRepository = {
   create: async (datasetSchemaId, validationRule) =>
     await HTTPRequester.update({
       url: getUrl(ValidationConfig.create, { datasetId: datasetSchemaId }),

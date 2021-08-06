@@ -2,7 +2,7 @@ import { ReferenceDataflowConfig } from './config/ReferenceDataflowConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const referenceDataflowRepository = {
+export const ReferenceDataflowRepository = {
   all: async () => await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.all) }),
 
   create: async (name, description, type) => {

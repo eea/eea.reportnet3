@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { referenceDataflowRepository } from 'repositories/ReferenceDataflowRepository';
+import { ReferenceDataflowRepository } from 'repositories/ReferenceDataflowRepository';
 
 import { Dataset } from 'entities/Dataset';
 import { ReferenceDataflow } from 'entities/ReferenceDataflow';
@@ -70,7 +70,7 @@ const sortDataflows = dataflowDTOs => {
 };
 
 const all = async (userData = []) => {
-  const dataflowsDTO = await referenceDataflowRepository.all();
+  const dataflowsDTO = await ReferenceDataflowRepository.all();
   const userRoles = [];
   const dataflows = [];
 
@@ -96,16 +96,16 @@ const all = async (userData = []) => {
   return dataflowsDTO;
 };
 
-const create = async (name, description, type) => referenceDataflowRepository.create(name, description, type);
+const create = async (name, description, type) => ReferenceDataflowRepository.create(name, description, type);
 
 const deleteReferenceDataflow = async referenceDataflowId =>
-  referenceDataflowRepository.deleteReferenceDataflow(referenceDataflowId);
+  ReferenceDataflowRepository.deleteReferenceDataflow(referenceDataflowId);
 
 const edit = async (dataflowId, description, name, type) =>
-  referenceDataflowRepository.edit(dataflowId, description, name, type);
+  ReferenceDataflowRepository.edit(dataflowId, description, name, type);
 
 const getReferencingDataflows = async referenceDataflowId => {
-  const referenceDataflowDTO = await referenceDataflowRepository.getReferencingDataflows(referenceDataflowId);
+  const referenceDataflowDTO = await ReferenceDataflowRepository.getReferencingDataflows(referenceDataflowId);
 
   return referenceDataflowDTO;
 };
@@ -117,7 +117,7 @@ const sortDatasetTypeByName = (a, b) => {
 };
 
 const referenceDataflow = async referenceDataflowId => {
-  const referenceDataflowDTO = await referenceDataflowRepository.referenceDataflow(referenceDataflowId);
+  const referenceDataflowDTO = await ReferenceDataflowRepository.referenceDataflow(referenceDataflowId);
   const dataflow = parseDataflowDTO(referenceDataflowDTO.data);
   dataflow.datasets.sort(sortDatasetTypeByName);
   dataflow.designDatasets.sort(sortDatasetTypeByName);

@@ -1,14 +1,14 @@
 import isEmpty from 'lodash/isEmpty';
 
-import { webformRepository } from 'repositories/WebformRepository';
+import { WebformRepository } from 'repositories/WebformRepository';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const addPamsRecords = async (datasetId, tables, pamId, type) => {
-  return await webformRepository.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
+  return await WebformRepository.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
 };
 
-const singlePamData = async (datasetId, groupPaMId) => await webformRepository.singlePamData(datasetId, groupPaMId);
+const singlePamData = async (datasetId, groupPaMId) => await WebformRepository.singlePamData(datasetId, groupPaMId);
 
 const parsePamTables = (tables, pamId, type) => {
   return tables.map(table => ({

@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import { obligationRepository } from 'repositories/ObligationRepository';
+import { ObligationRepository } from 'repositories/ObligationRepository';
 
 import { Country } from 'entities/Country';
 import { Issue } from 'entities/Issue';
@@ -11,22 +11,22 @@ import { Obligation } from 'entities/Obligation';
 import { Organization } from 'entities/Organization';
 
 const getCountries = async () => {
-  const countriesDTO = await obligationRepository.getCountries();
+  const countriesDTO = await ObligationRepository.getCountries();
   return parseCountryList(countriesDTO.data);
 };
 
 const getIssues = async () => {
-  const issuesDTO = await obligationRepository.getIssues();
+  const issuesDTO = await ObligationRepository.getIssues();
   return parseIssueList(issuesDTO.data);
 };
 
 const getOrganizations = async () => {
-  const clientsDTO = await obligationRepository.getOrganizations();
+  const clientsDTO = await ObligationRepository.getOrganizations();
   return parseOrganizationList(clientsDTO.data);
 };
 
 const obligationById = async obligationId => {
-  const obligationByIdDTO = await obligationRepository.obligationById(obligationId);
+  const obligationByIdDTO = await ObligationRepository.obligationById(obligationId);
   return parseObligation(obligationByIdDTO.data);
 };
 
@@ -37,7 +37,7 @@ const opened = async filterData => {
     const dateTo = filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
     const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
     const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
-    const openedObligationsDTO = await obligationRepository.openedObligations(
+    const openedObligationsDTO = await ObligationRepository.openedObligations(
       countryId,
       dateFrom,
       dateTo,
@@ -46,7 +46,7 @@ const opened = async filterData => {
     );
     return parseObligationList(openedObligationsDTO.data);
   } else {
-    const openedObligationsDTO = await obligationRepository.openedObligations();
+    const openedObligationsDTO = await ObligationRepository.openedObligations();
     return parseObligationList(openedObligationsDTO.data);
   }
 };

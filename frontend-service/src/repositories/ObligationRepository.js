@@ -2,7 +2,7 @@ import { ObligationConfig } from './config/ObligationConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const obligationRepository = {
+export const ObligationRepository = {
   getCountries: async () =>
     await HTTPRequester.get({
       url: getUrl(ObligationConfig.countries)

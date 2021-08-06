@@ -5,8 +5,8 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
-import { datasetRepository } from 'repositories/DatasetRepository';
-import { validationRepository } from 'repositories/ValidationRepository';
+import { DatasetRepository } from 'repositories/DatasetRepository';
+import { ValidationRepository } from 'repositories/ValidationRepository';
 
 import { Dataset } from 'entities/Dataset';
 import { DatasetError } from 'entities/DatasetError';
@@ -35,7 +35,7 @@ const addRecordFieldDesign = async (datasetId, datasetTableRecordField) => {
   datasetTableFieldDesign.type = datasetTableRecordField.type;
   datasetTableFieldDesign.validExtensions = datasetTableRecordField.validExtensions;
 
-  return await datasetRepository.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
+  return await DatasetRepository.addRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
 
 const addRecordsById = async (datasetId, tableSchemaId, records) => {
@@ -64,55 +64,55 @@ const addRecordsById = async (datasetId, tableSchemaId, records) => {
     datasetTableRecords.push(datasetTableRecord);
   });
 
-  return await datasetRepository.addRecordsById(datasetId, tableSchemaId, datasetTableRecords);
+  return await DatasetRepository.addRecordsById(datasetId, tableSchemaId, datasetTableRecords);
 };
 
 const addTableDesign = async (datasetId, tableSchemaName) =>
-  await datasetRepository.addTableDesign(datasetId, tableSchemaName);
+  await DatasetRepository.addTableDesign(datasetId, tableSchemaName);
 
 const createValidation = (entityType, id, levelError, message) =>
   new Validation({ date: new Date(Date.now()).toString(), entityType, id, levelError, message });
 
-const deleteDataById = async datasetId => await datasetRepository.deleteDataById(datasetId);
+const deleteDataById = async datasetId => await DatasetRepository.deleteDataById(datasetId);
 
-const deleteFileData = async (datasetId, fieldId) => await datasetRepository.deleteFileData(datasetId, fieldId);
+const deleteFileData = async (datasetId, fieldId) => await DatasetRepository.deleteFileData(datasetId, fieldId);
 
 const deleteRecordFieldDesign = async (datasetId, recordId) =>
-  await datasetRepository.deleteRecordFieldDesign(datasetId, recordId);
+  await DatasetRepository.deleteRecordFieldDesign(datasetId, recordId);
 
 const deleteRecordById = async (datasetId, recordId, deleteInCascade) =>
-  await datasetRepository.deleteRecordById(datasetId, recordId, deleteInCascade);
+  await DatasetRepository.deleteRecordById(datasetId, recordId, deleteInCascade);
 
-const deleteSchemaById = async datasetId => await datasetRepository.deleteSchemaById(datasetId);
+const deleteSchemaById = async datasetId => await DatasetRepository.deleteSchemaById(datasetId);
 
 const deleteTableDataById = async (datasetId, tableId) =>
-  await datasetRepository.deleteTableDataById(datasetId, tableId);
+  await DatasetRepository.deleteTableDataById(datasetId, tableId);
 
 const deleteTableDesign = async (datasetId, tableSchemaId) =>
-  await datasetRepository.deleteTableDesign(datasetId, tableSchemaId);
+  await DatasetRepository.deleteTableDesign(datasetId, tableSchemaId);
 
 const downloadExportDatasetFile = async (datasetId, fileName) =>
-  await datasetRepository.downloadExportDatasetFile(datasetId, fileName);
+  await DatasetRepository.downloadExportDatasetFile(datasetId, fileName);
 
 const downloadExportFile = async (datasetId, fileName, providerId) =>
-  await datasetRepository.downloadExportFile(datasetId, fileName, providerId);
+  await DatasetRepository.downloadExportFile(datasetId, fileName, providerId);
 
 const downloadFileData = async (dataflowId, datasetId, fieldId, dataProviderId) =>
-  await datasetRepository.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
+  await DatasetRepository.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
 
 const downloadDatasetFileData = async (dataflowId, dataProviderId, fileName) =>
-  await datasetRepository.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+  await DatasetRepository.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
 
 const downloadReferenceDatasetFileData = async (dataflowId, fileName) =>
-  await datasetRepository.downloadReferenceDatasetFileData(dataflowId, fileName);
+  await DatasetRepository.downloadReferenceDatasetFileData(dataflowId, fileName);
 
 const errorStatisticsById = async (datasetId, tableSchemaNames) => {
   try {
-    await datasetRepository.statisticsById(datasetId);
+    await DatasetRepository.statisticsById(datasetId);
   } catch (error) {
     console.error('ApiDatasetRepository - errorStatisticsById.', error);
   }
-  const datasetTablesDTO = await datasetRepository.statisticsById(datasetId);
+  const datasetTablesDTO = await DatasetRepository.statisticsById(datasetId);
 
   //Sort by schema order
   datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort((a, b) => {
@@ -179,22 +179,22 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
-const exportDataById = async (datasetId, fileType) => await datasetRepository.exportDataById(datasetId, fileType);
+const exportDataById = async (datasetId, fileType) => await DatasetRepository.exportDataById(datasetId, fileType);
 
 const exportDatasetDataExternal = async (datasetId, integrationId) => {
-  return await datasetRepository.exportDatasetDataExternal(datasetId, integrationId);
+  return await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId);
 };
 
 const exportTableDataById = async (datasetId, tableSchemaId, fileType) => {
-  return await datasetRepository.exportTableDataById(datasetId, tableSchemaId, fileType);
+  return await DatasetRepository.exportTableDataById(datasetId, tableSchemaId, fileType);
 };
 
 const exportTableSchemaById = async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
-  return await datasetRepository.exportTableSchemaById(datasetId, datasetSchemaId, tableSchemaId, fileType);
+  return await DatasetRepository.exportTableSchemaById(datasetId, datasetSchemaId, tableSchemaId, fileType);
 };
 
 const getMetaData = async datasetId => {
-  const datasetTableDataDTO = await datasetRepository.getMetaData(datasetId);
+  const datasetTableDataDTO = await DatasetRepository.getMetaData(datasetId);
   datasetTableDataDTO.data = new Dataset({
     datasetFeedbackStatus:
       !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),
@@ -214,7 +214,7 @@ const getReferencedFieldValues = async (
   datasetSchemaId,
   resultsNumber
 ) => {
-  const referencedFieldValuesDTO = await datasetRepository.getReferencedFieldValues(
+  const referencedFieldValuesDTO = await DatasetRepository.getReferencedFieldValues(
     datasetId,
     fieldSchemaId,
     searchToken,
@@ -252,7 +252,7 @@ const groupedErrorsById = async (
   typeEntitiesFilter,
   tablesFilter
 ) => {
-  const datasetErrorsDTO = await datasetRepository.groupedErrorsById(
+  const datasetErrorsDTO = await DatasetRepository.groupedErrorsById(
     datasetId,
     pageNum,
     pageSize,
@@ -307,11 +307,11 @@ const isValidJSON = value => {
 };
 
 const orderFieldSchema = async (datasetId, position, fieldSchemaId) => {
-  return await datasetRepository.orderFieldSchema(datasetId, position, fieldSchemaId);
+  return await DatasetRepository.orderFieldSchema(datasetId, position, fieldSchemaId);
 };
 
 const orderTableSchema = async (datasetId, position, tableSchemaId) => {
-  return await datasetRepository.orderTableSchema(datasetId, position, tableSchemaId);
+  return await DatasetRepository.orderTableSchema(datasetId, position, tableSchemaId);
 };
 
 const parseValue = (type, value, feToBe = false) => {
@@ -389,8 +389,8 @@ const parseValue = (type, value, feToBe = false) => {
 };
 
 const schemaById = async datasetId => {
-  const datasetSchemaDTO = await datasetRepository.schemaById(datasetId);
-  const rulesDTO = await validationRepository.getAll(datasetSchemaDTO.data.idDataSetSchema);
+  const datasetSchemaDTO = await DatasetRepository.schemaById(datasetId);
+  const rulesDTO = await ValidationRepository.getAll(datasetSchemaDTO.data.idDataSetSchema);
 
   const dataset = new Dataset({
     availableInPublic: datasetSchemaDTO.data.availableInPublic,
@@ -468,7 +468,7 @@ const tableDataById = async ({
   tableSchemaId,
   value = ''
 }) => {
-  const tableDataDTO = await datasetRepository.tableDataById(
+  const tableDataDTO = await DatasetRepository.tableDataById(
     datasetId,
     tableSchemaId,
     pageNum,
@@ -546,7 +546,7 @@ const updateFieldById = async (datasetId, fieldSchemaId, fieldId, fieldType, fie
   datasetTableField.type = fieldType;
   datasetTableField.value = parseValue(fieldType, fieldValue, true);
 
-  return await datasetRepository.updateFieldById(datasetId, datasetTableField, updateInCascade);
+  return await DatasetRepository.updateFieldById(datasetId, datasetTableField, updateInCascade);
 };
 
 const updateRecordFieldDesign = async (datasetId, record) => {
@@ -566,7 +566,7 @@ const updateRecordFieldDesign = async (datasetId, record) => {
   datasetTableFieldDesign.type = record.type;
   datasetTableFieldDesign.validExtensions = record.validExtensions;
 
-  return await datasetRepository.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
+  return await DatasetRepository.updateRecordFieldDesign(datasetId, datasetTableFieldDesign);
 };
 
 const updateRecordsById = async (datasetId, record, updateInCascade) => {
@@ -590,14 +590,14 @@ const updateRecordsById = async (datasetId, record, updateInCascade) => {
   datasetTableRecord.idRecordSchema = record.recordSchemaId;
   datasetTableRecord.id = record.recordId;
   //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-  return await datasetRepository.updateRecordsById(datasetId, [datasetTableRecord], updateInCascade);
+  return await DatasetRepository.updateRecordsById(datasetId, [datasetTableRecord], updateInCascade);
 };
 
 const updateReferenceDatasetStatus = async (datasetId, updatable) =>
-  await datasetRepository.updateReferenceDatasetStatus(datasetId, updatable);
+  await DatasetRepository.updateReferenceDatasetStatus(datasetId, updatable);
 
 const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedbackStatus) => {
-  return await datasetRepository.updateDatasetFeedbackStatus(
+  return await DatasetRepository.updateDatasetFeedbackStatus(
     dataflowId,
     datasetId,
     message,
@@ -606,11 +606,11 @@ const updateDatasetFeedbackStatus = async (dataflowId, datasetId, message, feedb
 };
 
 const updateDatasetSchemaDesign = async (datasetId, datasetSchema) => {
-  return await datasetRepository.updateDatasetSchemaById(datasetId, datasetSchema);
+  return await DatasetRepository.updateDatasetSchemaById(datasetId, datasetSchema);
 };
 
 const updateSchemaNameById = async (datasetId, datasetSchemaName) =>
-  await datasetRepository.updateSchemaNameById(datasetId, datasetSchemaName);
+  await DatasetRepository.updateSchemaNameById(datasetId, datasetSchemaName);
 
 const updateTableDescriptionDesign = async (
   tableSchemaToPrefill,
@@ -621,7 +621,7 @@ const updateTableDescriptionDesign = async (
   tableSchemaNotEmpty,
   tableSchemaFixedNumber
 ) => {
-  return await datasetRepository.updateTableDescriptionDesign(
+  return await DatasetRepository.updateTableDescriptionDesign(
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
@@ -633,13 +633,13 @@ const updateTableDescriptionDesign = async (
 };
 
 const updateTableNameDesign = async (tableSchemaId, tableSchemaName, datasetId) => {
-  return await datasetRepository.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
+  return await DatasetRepository.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
 };
 
-const validateDataById = async datasetId => await datasetRepository.validateById(datasetId);
+const validateDataById = async datasetId => await DatasetRepository.validateById(datasetId);
 
 const validateSqlRules = async (datasetId, datasetSchemaId) => {
-  return await datasetRepository.validateSqlRules(datasetId, datasetSchemaId);
+  return await DatasetRepository.validateSqlRules(datasetId, datasetSchemaId);
 };
 
 // const getPercentage = valArr => {

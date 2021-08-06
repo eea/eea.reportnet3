@@ -2,7 +2,7 @@ import { DataCollectionConfig } from './config/DataCollectionConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const dataCollectionRepository = {
+export const DataCollectionRepository = {
   create: async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo) =>
     await HTTPRequester.post({
       url: getUrl(DataCollectionConfig.createDataCollection, {

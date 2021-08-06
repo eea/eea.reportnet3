@@ -2,7 +2,7 @@ import { BusinessDataflowConfig } from './config/BusinessDataflowConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const businessDataflowRepository = {
+export const BusinessDataflowRepository = {
   all: async () => await HTTPRequester.get({ url: getUrl(BusinessDataflowConfig.all) }),
 
   create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) => {

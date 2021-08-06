@@ -1,7 +1,7 @@
-import { euDatasetRepository } from 'repositories/EuDatasetRepository';
+import { EuDatasetRepository } from 'repositories/EuDatasetRepository';
 
-const copyDataCollection = async dataflowId => await euDatasetRepository.copyDataCollection(dataflowId);
+export const EuDatasetService = {
+  copyFromDataCollection: async dataflowId => await EuDatasetRepository.copyFromDataCollection(dataflowId),
 
-const exportEuDataset = async dataflowId => await euDatasetRepository.exportEuDataset(dataflowId);
-
-export const EuDatasetService = { copyDataCollection, exportEuDataset };
+  export: async dataflowId => await EuDatasetRepository.export(dataflowId)
+};

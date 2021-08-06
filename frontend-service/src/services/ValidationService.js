@@ -2,7 +2,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import { validationRepository } from 'repositories/ValidationRepository';
+import { ValidationRepository } from 'repositories/ValidationRepository';
 
 import { ValidationUtils } from './_utils/ValidationUtils';
 
@@ -23,7 +23,7 @@ const create = async (datasetSchemaId, validationRule) => {
         ? ValidationUtils.getCreationDTO(expressions)
         : null
   };
-  return await validationRepository.create(datasetSchemaId, validation);
+  return await ValidationRepository.create(datasetSchemaId, validation);
 };
 
 const createTableRule = async (datasetSchemaId, validationRule) => {
@@ -49,7 +49,7 @@ const createTableRule = async (datasetSchemaId, validationRule) => {
     type: 'TABLE',
     whenCondition: null
   };
-  return await validationRepository.create(datasetSchemaId, validation);
+  return await ValidationRepository.create(datasetSchemaId, validation);
 };
 
 const createRowRule = async (datasetSchemaId, validationRule) => {
@@ -81,15 +81,15 @@ const createRowRule = async (datasetSchemaId, validationRule) => {
     validation.whenCondition = ValidationUtils.getCreationComparisonDTO(expressions);
   }
 
-  return await validationRepository.create(datasetSchemaId, validation);
+  return await ValidationRepository.create(datasetSchemaId, validation);
 };
 
-const deleteById = async (datasetSchemaId, ruleId) => await validationRepository.deleteById(datasetSchemaId, ruleId);
+const deleteById = async (datasetSchemaId, ruleId) => await ValidationRepository.deleteById(datasetSchemaId, ruleId);
 
-const downloadFile = async (datasetId, fileName) => await validationRepository.downloadFile(datasetId, fileName);
+const downloadFile = async (datasetId, fileName) => await ValidationRepository.downloadFile(datasetId, fileName);
 
 const getAll = async (datasetSchemaId, reporting = false) => {
-  const validationsListDTO = await validationRepository.getAll(datasetSchemaId);
+  const validationsListDTO = await ValidationRepository.getAll(datasetSchemaId);
   if (isUndefined(validationsListDTO.data) || isEmpty(validationsListDTO.data.rules)) {
     return;
   }
@@ -108,7 +108,7 @@ const getAll = async (datasetSchemaId, reporting = false) => {
   return validationsList;
 };
 
-const generateFile = async datasetId => await validationRepository.generateFile(datasetId);
+const generateFile = async datasetId => await ValidationRepository.generateFile(datasetId);
 
 const update = async (datasetId, validationRule) => {
   const { expressions } = validationRule;
@@ -130,7 +130,7 @@ const update = async (datasetId, validationRule) => {
         ? ValidationUtils.getCreationDTO(expressions)
         : null;
   }
-  return await validationRepository.update(datasetId, validation);
+  return await ValidationRepository.update(datasetId, validation);
 };
 
 const updateRowRule = async (datasetId, validationRule) => {
@@ -163,7 +163,7 @@ const updateRowRule = async (datasetId, validationRule) => {
       validation.whenCondition = ValidationUtils.getCreationComparisonDTO(expressions);
     }
   }
-  return await validationRepository.update(datasetId, validation);
+  return await ValidationRepository.update(datasetId, validation);
 };
 
 const updateDatasetRule = async (datasetId, validationRule) => {
@@ -195,7 +195,7 @@ const updateDatasetRule = async (datasetId, validationRule) => {
         : null;
   }
 
-  return await validationRepository.update(datasetId, validation);
+  return await ValidationRepository.update(datasetId, validation);
 };
 
 export const ValidationService = {

@@ -2,7 +2,7 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 import { UniqueConstraintsConfig } from './config/UniqueConstraintsConfig';
 
-export const uniqueConstraintsRepository = {
+export const UniqueConstraintsRepository = {
   all: async (dataflowId, datasetSchemaId) => {
     return await HTTPRequester.get({ url: getUrl(UniqueConstraintsConfig.all, { dataflowId, datasetSchemaId }) });
   },

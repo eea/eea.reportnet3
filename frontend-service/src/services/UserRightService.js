@@ -1,4 +1,4 @@
-import { userRightRepository } from 'repositories/UserRightRepository';
+import { UserRightRepository } from 'repositories/UserRightRepository';
 import { UserRight } from 'entities/UserRight';
 
 import sortBy from 'lodash/sortBy';
@@ -14,27 +14,27 @@ const parseUserRightListDTO = userRightListDTO => {
 };
 
 const allReporters = async (dataflowId, dataProviderId) => {
-  const userRightListDTO = await userRightRepository.allReporters(dataflowId, dataProviderId);
+  const userRightListDTO = await UserRightRepository.allReporters(dataflowId, dataProviderId);
   return parseUserRightListDTO(userRightListDTO);
 };
 
 const allRequesters = async (dataflowId, dataProviderId) => {
-  const userRightListDTO = await userRightRepository.allRequesters(dataflowId, dataProviderId);
+  const userRightListDTO = await UserRightRepository.allRequesters(dataflowId, dataProviderId);
   return parseUserRightListDTO(userRightListDTO);
 };
 
 const deleteReporter = async (userRight, dataflowId, dataProviderId) => {
-  return await userRightRepository.deleteReporter(userRight, dataflowId, dataProviderId);
+  return await UserRightRepository.deleteReporter(userRight, dataflowId, dataProviderId);
 };
 const deleteRequester = async (userRight, dataflowId, dataProviderId) => {
-  return await userRightRepository.deleteRequester(userRight, dataflowId, dataProviderId);
+  return await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId);
 };
 
 const updateReporter = async (userRight, dataflowId, dataProviderId) => {
-  return await userRightRepository.updateReporter(userRight, dataflowId, dataProviderId);
+  return await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId);
 };
 const updateRequester = async (userRight, dataflowId) => {
-  return await userRightRepository.updateRequester(userRight, dataflowId);
+  return await UserRightRepository.updateRequester(userRight, dataflowId);
 };
 
 export const UserRightService = {

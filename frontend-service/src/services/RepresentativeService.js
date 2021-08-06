@@ -1,21 +1,21 @@
 import isEmpty from 'lodash/isEmpty';
 import sortBy from 'lodash/sortBy';
 
-import { representativeRepository } from 'repositories/RepresentativeRepository';
+import { RepresentativeRepository } from 'repositories/RepresentativeRepository';
 import { Representative } from 'entities/Representative';
 import { LeadReporter } from 'entities/LeadReporter';
 
 const add = async (dataflowId, providerAccount, dataProviderId) => {
-  return await representativeRepository.add(dataflowId, providerAccount, dataProviderId);
+  return await RepresentativeRepository.add(dataflowId, providerAccount, dataProviderId);
 };
 
 const addLeadReporter = async (leadReporterAccount, representativeId, dataflowId) => {
-  return await representativeRepository.addLeadReporter(leadReporterAccount, representativeId, dataflowId);
+  return await RepresentativeRepository.addLeadReporter(leadReporterAccount, representativeId, dataflowId);
 };
 
 const allDataProviders = async dataProviderGroup => {
   let response = [];
-  const dataProvidersDTO = await representativeRepository.allDataProviders(dataProviderGroup.dataProviderGroupId);
+  const dataProvidersDTO = await RepresentativeRepository.allDataProviders(dataProviderGroup.dataProviderGroupId);
   response = dataProvidersDTO.data.map(dataProvider => {
     return { dataProviderId: dataProvider.id, label: dataProvider.label };
   });
@@ -23,7 +23,7 @@ const allDataProviders = async dataProviderGroup => {
 };
 
 const allRepresentatives = async dataflowId => {
-  const representativesDTO = await representativeRepository.allRepresentatives(dataflowId);
+  const representativesDTO = await RepresentativeRepository.allRepresentatives(dataflowId);
 
   const representativesList = !isEmpty(representativesDTO.data)
     ? representativesDTO.data.map(
@@ -60,29 +60,29 @@ const parseLeadReporters = (leadReporters = []) =>
   );
 
 const deleteById = async (representativeId, dataflowId) =>
-  await representativeRepository.deleteById(representativeId, dataflowId);
+  await RepresentativeRepository.deleteById(representativeId, dataflowId);
 
 const deleteLeadReporter = async (leadReporterId, dataflowId) =>
-  await representativeRepository.deleteLeadReporter(leadReporterId, dataflowId);
+  await RepresentativeRepository.deleteLeadReporter(leadReporterId, dataflowId);
 
 const downloadById = async dataflowId => {
-  return await representativeRepository.downloadById(dataflowId);
+  return await RepresentativeRepository.downloadById(dataflowId);
 };
 
 const downloadTemplateById = async dataProviderGroupId =>
-  await representativeRepository.downloadTemplateById(dataProviderGroupId);
+  await RepresentativeRepository.downloadTemplateById(dataProviderGroupId);
 
-const getFmeUsers = async () => await representativeRepository.getFmeUsers();
+const getFmeUsers = async () => await RepresentativeRepository.getFmeUsers();
 
-const getGroupCompanies = async () => await representativeRepository.getGroupCompanies();
+const getGroupCompanies = async () => await RepresentativeRepository.getGroupCompanies();
 
-const getGroupProviders = async () => await representativeRepository.getGroupProviders();
+const getGroupProviders = async () => await RepresentativeRepository.getGroupProviders();
 
 const updateDataProviderId = async (representativeId, dataProviderId) =>
-  await representativeRepository.updateDataProviderId(representativeId, dataProviderId);
+  await RepresentativeRepository.updateDataProviderId(representativeId, dataProviderId);
 
 const updateLeadReporter = async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
-  await representativeRepository.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId, dataflowId);
+  await RepresentativeRepository.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId, dataflowId);
 
 export const RepresentativeService = {
   add,

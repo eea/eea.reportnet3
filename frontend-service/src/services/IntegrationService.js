@@ -2,41 +2,41 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import sortBy from 'lodash/sortBy';
 
-import { integrationRepository } from 'repositories/IntegrationRepository';
+import { IntegrationRepository } from 'repositories/IntegrationRepository';
 
 import { Integration } from 'entities/Integration';
 
 const all = async (dataflowId, datasetSchemaId) => {
-  const integrationsDTO = await integrationRepository.all(parseDatasetSchemaId(datasetSchemaId, dataflowId));
+  const integrationsDTO = await IntegrationRepository.all(parseDatasetSchemaId(datasetSchemaId, dataflowId));
   return parseIntegrationsList(integrationsDTO.data);
 };
 
 const allExtensionsOperations = async (dataflowId, datasetSchemaId) => {
-  const integrationsDTO = await integrationRepository.allExtensionsOperations(
+  const integrationsDTO = await IntegrationRepository.allExtensionsOperations(
     parseDatasetSchemaId(datasetSchemaId, dataflowId)
   );
   return parseIntegrationsOperationsExtensionsList(integrationsDTO.data);
 };
-const create = async integration => integrationRepository.create(parseManageIntegration(integration));
+const create = async integration => IntegrationRepository.create(parseManageIntegration(integration));
 
 const deleteById = async (dataflowId, integrationId) =>
-  await integrationRepository.deleteById(dataflowId, integrationId);
+  await IntegrationRepository.deleteById(dataflowId, integrationId);
 
 const findEUDatasetIntegration = async datasetSchemaId => {
-  const eUDatasetIntegrationsDTO = await integrationRepository.findEUDatasetIntegration(datasetSchemaId);
+  const eUDatasetIntegrationsDTO = await IntegrationRepository.findEUDatasetIntegration(datasetSchemaId);
   return parseIntegration(eUDatasetIntegrationsDTO.data);
 };
 const getProcesses = async (repositoryName, datasetId) => {
-  const processes = await integrationRepository.getProcesses(repositoryName, datasetId);
+  const processes = await IntegrationRepository.getProcesses(repositoryName, datasetId);
   return parseProcessList(processes.data);
 };
 
 const getRepositories = async datasetId => {
-  const repositories = await integrationRepository.getRepositories(datasetId);
+  const repositories = await IntegrationRepository.getRepositories(datasetId);
   return parseRepositoryList(repositories.data);
 };
 
-const update = async integration => integrationRepository.update(parseManageIntegration(integration));
+const update = async integration => IntegrationRepository.update(parseManageIntegration(integration));
 
 const parseDatasetSchemaId = (datasetSchemaId, dataflowId) => {
   const integration = new Integration();
@@ -133,7 +133,7 @@ const parseKeyValue = list => {
 };
 
 const runIntegration = async (integrationId, datasetId, replaceData) =>
-  await integrationRepository.runIntegration(integrationId, datasetId, replaceData);
+  await IntegrationRepository.runIntegration(integrationId, datasetId, replaceData);
 
 export const IntegrationService = {
   all,

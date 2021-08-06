@@ -2,7 +2,7 @@ import { UserRightConfig } from './config/UserRightConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-const userRightRepository = {
+export const UserRightRepository = {
   allRequesters: async dataflowId => {
     const response = await HTTPRequester.get({
       url: getUrl(UserRightConfig.allRequesters, { dataflowId })
@@ -59,5 +59,3 @@ const userRightRepository = {
     return response;
   }
 };
-
-export { userRightRepository };

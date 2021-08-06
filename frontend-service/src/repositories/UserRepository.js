@@ -40,55 +40,28 @@ const parseUserImage = data => {
   }
 };
 
-export const userRepository = {
-  login: async code =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.login, {
-        code
-      })
-    }),
+export const UserRepository = {
+  login: async code => await HTTPRequester.post({ url: getUrl(UserConfig.login, { code }) }),
 
   oldLogin: async (userName, password) =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.oldLogin, {
-        userName,
-        password
-      })
-    }),
+    await HTTPRequester.post({ url: getUrl(UserConfig.oldLogin, { userName, password }) }),
 
   configuration: async () => {
-    const response = await HTTPRequester.get({
-      url: getUrl(UserConfig.configuration)
-    });
+    const response = await HTTPRequester.get({ url: getUrl(UserConfig.configuration) });
     return parseUserImage(response.data);
   },
 
   updateAttributes: async userConfiguration =>
     await HTTPRequester.update({
       url: getUrl(UserConfig.updateConfiguration),
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       data: parseUserConfiguration(userConfiguration)
     }),
-  logout: async refreshToken =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.logout, {
-        refreshToken
-      })
-    }),
+
+  logout: async refreshToken => await HTTPRequester.post({ url: getUrl(UserConfig.logout, { refreshToken }) }),
 
   refreshToken: async refreshToken =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.refreshToken, {
-        refreshToken
-      })
-    }),
+    await HTTPRequester.post({ url: getUrl(UserConfig.refreshToken, { refreshToken }) }),
 
-  userInfo: async userId =>
-    await HTTPRequester.get({
-      url: getUrl(UserConfig.userInfo, {
-        userId
-      })
-    })
+  userInfo: async userId => await HTTPRequester.get({ url: getUrl(UserConfig.userInfo, { userId }) })
 };

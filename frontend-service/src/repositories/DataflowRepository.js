@@ -2,7 +2,7 @@ import { DataflowConfig } from './config/DataflowConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const dataflowRepository = {
+export const DataflowRepository = {
   all: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflows) }),
 
   allSchemas: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.allSchemas, { dataflowId }) }),

@@ -1,36 +1,36 @@
-import { snapshotRepository } from 'repositories/SnapshotRepository';
+import { SnapshotRepository } from 'repositories/SnapshotRepository';
 import { Snapshot } from 'entities/Snapshot';
 
-const allDesigner = async datasetSchemaId => parseSnapshotList(await snapshotRepository.allDesigner(datasetSchemaId));
+const allDesigner = async datasetSchemaId => parseSnapshotList(await SnapshotRepository.allDesigner(datasetSchemaId));
 
 const createByIdDesigner = async (datasetId, datasetSchemaId, description) => {
-  return await snapshotRepository.createByIdDesigner(datasetId, datasetSchemaId, description);
+  return await SnapshotRepository.createByIdDesigner(datasetId, datasetSchemaId, description);
 };
 
 const deleteByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  return await snapshotRepository.deleteByIdDesigner(datasetSchemaId, snapshotId);
+  return await SnapshotRepository.deleteByIdDesigner(datasetSchemaId, snapshotId);
 };
 
 const restoreByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  return await snapshotRepository.restoreByIdDesigner(datasetSchemaId, snapshotId);
+  return await SnapshotRepository.restoreByIdDesigner(datasetSchemaId, snapshotId);
 };
 
-const allReporter = async datasetId => parseSnapshotList(await snapshotRepository.allReporter(datasetId));
+const allReporter = async datasetId => parseSnapshotList(await SnapshotRepository.allReporter(datasetId));
 
 const createByIdReporter = async (datasetId, description, isReleased) => {
-  return await snapshotRepository.createByIdReporter(datasetId, description, isReleased);
+  return await SnapshotRepository.createByIdReporter(datasetId, description, isReleased);
 };
 
 const deleteByIdReporter = async (datasetId, snapshotId) => {
-  return await snapshotRepository.deleteByIdReporter(datasetId, snapshotId);
+  return await SnapshotRepository.deleteByIdReporter(datasetId, snapshotId);
 };
 
 const restoreByIdReporter = async (dataflowId, datasetId, snapshotId) => {
-  return await snapshotRepository.restoreByIdReporter(dataflowId, datasetId, snapshotId);
+  return await SnapshotRepository.restoreByIdReporter(dataflowId, datasetId, snapshotId);
 };
 
 const releaseDataflow = async (dataflowId, dataProviderId, restrictFromPublic) => {
-  return await snapshotRepository.releaseDataflow(dataflowId, dataProviderId, restrictFromPublic);
+  return await SnapshotRepository.releaseDataflow(dataflowId, dataProviderId, restrictFromPublic);
 };
 
 const parseSnapshotList = response => {
