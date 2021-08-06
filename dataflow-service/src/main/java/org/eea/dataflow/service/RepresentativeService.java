@@ -57,12 +57,13 @@ public interface RepresentativeService {
    */
   List<DataProviderVO> getAllDataProviderByGroupId(Long groupId);
 
+
   /**
    * Find data provider group by dataflow id.
    *
    * @param dataflowId the dataflow id
    * @return the data provider group VO
-   * @throws Exception
+   * @throws EEAException the EEA exception
    */
   DataProviderGroupVO findDataProviderGroupByDataflowId(Long dataflowId) throws EEAException;
 

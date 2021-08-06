@@ -349,12 +349,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         .findByDataflowIdAndDataProviderIdIn(dataflowId, dataProviderIdList));
   }
 
+
   /**
    * Find data provider group by dataflow id.
    *
    * @param dataflowId the dataflow id
    * @return the data provider group VO
-   * @throws Exception
+   * @throws EEAException the EEA exception
    */
   @Override
   public DataProviderGroupVO findDataProviderGroupByDataflowId(Long dataflowId)

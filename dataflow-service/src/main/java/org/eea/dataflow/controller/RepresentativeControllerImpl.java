@@ -254,10 +254,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeService.findDataProvidersByIds(dataProviderIds);
   }
 
+
   /**
-   * Find dataProviderGroupVO based on Dataflow id.
+   * Find data provider group by dataflow id.
    *
-   * @return the list
+   * @param dataflowId the dataflow id
+   * @return the data provider group VO
    */
   @Override
   @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
