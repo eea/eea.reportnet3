@@ -142,7 +142,7 @@ const DocumentFileUpload = ({
       try {
         if (isEditForm) {
           setIsUpdating(true);
-          await DocumentService.editDocument(
+          await DocumentService.update(
             dataflowId,
             inputs.description,
             inputs.lang.value,
@@ -152,7 +152,7 @@ const DocumentFileUpload = ({
           );
           onUpload();
         } else {
-          await DocumentService.uploadDocument(
+          await DocumentService.upload(
             dataflowId,
             inputs.description,
             inputs.lang.value,

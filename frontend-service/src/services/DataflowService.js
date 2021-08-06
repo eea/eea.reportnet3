@@ -420,7 +420,7 @@ const parseDataflowDTO = dataflowDTO =>
     status: dataflowDTO.status,
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
     userRole: dataflowDTO.userRole,
-    weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
+    webLinks: parseWebLinkListDTO(dataflowDTO.weblinks)
   });
 
 const parseDataCollectionListDTO = dataCollectionsDTO => {

@@ -100,7 +100,7 @@ const useBigButtonList = ({
           true
         )
       ),
-    helpClassName: 'dataflow-documents-weblinks-help-step',
+    helpClassName: 'dataflow-documents-webLinks-help-step',
     onWheel: getUrl(
       routes.DOCUMENTS,
       {

@@ -139,7 +139,7 @@ export const WebLinks = ({
     setDeletingId(id);
 
     try {
-      const { status } = await WebLinkService.deleteWebLink(webLinksState.webLink);
+      const { status } = await WebLinkService.delete(id);
 
       if (status >= 200 && status <= 299) {
         onLoadWebLinks();
@@ -316,10 +316,10 @@ export const WebLinks = ({
   return (
     <Fragment>
       {isToolbarVisible && (
-        <Toolbar className={styles.weblinksToolbar}>
+        <Toolbar className={styles.webLinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-weblink-upload-help-step`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-webLink-upload-help-step`}
               icon="add"
               id="addWebLinkButton"
               label={resources.messages['add']}
