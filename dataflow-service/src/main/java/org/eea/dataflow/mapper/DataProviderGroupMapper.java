@@ -11,24 +11,4 @@ import org.mapstruct.Mapper;
  */
 @Mapper(componentModel = "spring")
 public interface DataProviderGroupMapper extends IMapper<DataProviderGroup, DataProviderGroupVO> {
-
-
-  /**
-   * Class to entity.
-   *
-   * @param model the model
-   * @return the data provider group
-   */
-  @Override
-  DataProviderGroup classToEntity(DataProviderGroupVO model);
-
-
-  /**
-   * Entity to class.
-   *
-   * @param entity the entity
-   * @return the data provider group VO
-   */
-  @Override
-  DataProviderGroupVO entityToClass(DataProviderGroup entity);
 }
