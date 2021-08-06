@@ -444,7 +444,7 @@ export const TabsDesigner = withRouter(
         const inmTabs = [...tabs];
         const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
         const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-        const tableOrdered = await DatasetService.orderTableDesign(
+        const tableOrdered = await DatasetService.orderTableSchema(
           datasetId,
           draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
           tabs[draggedTabIdx].tableSchemaId
@@ -469,8 +469,9 @@ export const TabsDesigner = withRouter(
         if (status >= 200 && status <= 299) {
           const inmTabs = [...tabs];
           inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-          inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
-            tableSchemaName;
+          inmTabs[
+            TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
+          ].tableSchemaName = tableSchemaName;
           setTabs(inmTabs);
         }
       } catch (error) {
