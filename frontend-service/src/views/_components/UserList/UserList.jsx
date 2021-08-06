@@ -1,5 +1,4 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -16,12 +15,7 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const UserList = ({
-  dataflowId,
-  areBusinessDataflows = false,
-  isBusinessDataflow = false,
-  representativeId
-}) => {
+export const UserList = ({ dataflowId, isBusinessDataflow = false, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -170,9 +164,4 @@ export const UserList = ({
       )}
     </div>
   );
-};
-
-UserList.propTypes = {
-  dataflowId: PropTypes.number,
-  representativeId: PropTypes.number
 };

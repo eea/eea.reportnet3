@@ -57,7 +57,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     activeIndex: 0,
     business: [],
-    dataflows: [],
+    reporting: [],
     isAddDialogVisible: false,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
@@ -67,7 +67,7 @@ const Dataflows = withRouter(({ history, match }) => {
     isRepObDialogVisible: false,
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
-    loadingStatus: { dataflows: true, reference: true },
+    loadingStatus: { reporting: true, business: true, reference: true },
     reference: []
   });
 

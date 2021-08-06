@@ -1206,7 +1206,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               }
               onKeyDown={e => onKeyChange(e)}
               placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
-              value={datasetDescription || ''}
+              value={datasetDescription}
             />
 
             <div className={styles.datasetConfigurationButtons}>

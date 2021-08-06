@@ -182,6 +182,8 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   };
 
   const renderContent = () => {
+    if (isLoading) return <Spinner style={{ top: 0 }} />;
+
     if (isEmpty(content[visibleTab])) {
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
@@ -203,8 +205,6 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
     );
   };
-
-  if (isLoading) return <Spinner />;
 
   return (
     <div className={`${styles.wrap} ${className}`}>
