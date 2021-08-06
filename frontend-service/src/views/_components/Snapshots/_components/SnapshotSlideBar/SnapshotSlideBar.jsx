@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 
 import styles from './SnapshotSliderBar.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
@@ -74,7 +76,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
   };
 
   const hasCorrectDescriptionLength = description => {
-    return description.length > 0 && description.length <= 255;
+    return description.length > 0 && description.length <= config.MAX_ATTACHMENT_SIZE;
   };
 
   const onConfirmClick = () => {
@@ -122,7 +124,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                 className={styles.formField}
                 collapsedHeight={90}
                 id="createSnapshotDescription"
-                maxLength={255}
+                maxLength={config.INPUT_MAX_LENGTH}
                 name="createSnapshotDescription"
                 onChange={e => setInputValue(e.target.value)}
                 onKeyDown={e => onPressEnter(e)}
@@ -146,7 +148,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="saveCopy" place="left">
                 {inputValue.length === 0
                   ? resources.messages['snapshotsEmptyDescription']
-                  : inputValue.length > 255
+                  : inputValue.length > config.INPUT_MAX_LENGTH
                   ? resources.messages['snapshotsWrongLengthDescription']
                   : resources.messages.createSnapshotTooltip}
               </ReactTooltip>

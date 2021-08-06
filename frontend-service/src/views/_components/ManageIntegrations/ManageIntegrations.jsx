@@ -82,8 +82,13 @@ export const ManageIntegrations = ({
   });
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
-  const { isDuplicatedIntegrationName, isDuplicatedParameter, isFormEmpty, isParameterEditing, printError } =
-    ManageIntegrationsUtils;
+  const {
+    isDuplicatedIntegrationName,
+    isDuplicatedParameter,
+    isFormEmpty,
+    isParameterEditing,
+    printError
+  } = ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
@@ -501,7 +506,7 @@ export const ManageIntegrations = ({
                 ? config.MAX_FILE_EXTENSION_LENGTH
                 : option === 'name'
                 ? config.MAX_INTEGRATION_NAME_LENGTH
-                : 255
+                : config.INPUT_MAX_LENGTH
             }
             onChange={event => onFillField(event.target.value, option)}
             onKeyDown={event => onSaveKeyDown(event)}

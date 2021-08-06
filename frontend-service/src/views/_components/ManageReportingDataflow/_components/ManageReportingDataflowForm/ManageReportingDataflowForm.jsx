@@ -4,6 +4,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './ManageReportingDataflowForm.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
 
@@ -39,7 +41,7 @@ const ManageReportingDataflowForm = forwardRef(
       handleSubmit: onConfirm
     }));
 
-    const checkIsCorrectLength = inputValue => inputValue.length <= 255;
+    const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
     const checkIsEmptyInput = inputValue => inputValue.trim() === '';
 
@@ -179,7 +181,7 @@ const ManageReportingDataflowForm = forwardRef(
             </label>
             {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
           </div>
-
+          <div></div>
           <div className={`${styles.search}`}>
             <Button icon="search" label={resources.messages['searchObligations']} onClick={onSearch} />
             <input

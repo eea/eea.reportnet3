@@ -252,7 +252,7 @@ export const ManageReportingDataflow = ({
               autoFocus={true}
               className={`${styles.inputText}`}
               id={'deleteDataflow'}
-              maxLength={255}
+              maxLength={config.INPUT_MAX_LENGTH}
               name={resources.messages['deleteDataflowButton']}
               onChange={event => onConfirmDeleteDataflow(event)}
               ref={deleteInputRef}

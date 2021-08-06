@@ -377,7 +377,7 @@ export const ManageBusinessDataflow = ({
             <InputText
               className={`${styles.inputText}`}
               id="deleteDataflow"
-              maxLength={255}
+              maxLength={config.INPUT_MAX_LENGTH}
               name={resources.messages['deleteDataflowButton']}
               onChange={event => setDeleteInput(event.target.value)}
               ref={deleteInputRef}

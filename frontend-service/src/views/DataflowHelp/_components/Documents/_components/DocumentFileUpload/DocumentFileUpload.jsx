@@ -68,7 +68,7 @@ const DocumentFileUpload = ({
     return inputValue.trim() === '';
   };
 
-  const checkIsCorrectLength = inputValue => inputValue.length <= 255;
+  const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
   const checkIsEmptyFile = inputUpload => {
     return inputUpload.files.length === 0;
@@ -199,7 +199,7 @@ const DocumentFileUpload = ({
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
             id={'descriptionDocumentFileUpload'}
-            maxLength={255}
+            maxLength={config.INPUT_MAX_LENGTH}
             name={resources.messages['description']}
             onBlur={() => checkInputForErrors('description')}
             onChange={e => {
