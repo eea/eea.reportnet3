@@ -114,7 +114,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
-        payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, 'BUSINESS') }
+        payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS) }
       }); // TODO TEST WITH REAL DATA
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);

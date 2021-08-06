@@ -5,6 +5,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataflowDashboards.module.css';
 
+import { config } from 'conf';
+
 import { routes } from 'conf/routes';
 
 import { Button } from 'views/_components/Button';
@@ -57,7 +59,7 @@ export const DataflowDashboards = withRouter(
     const getDataflowDetails = async () => {
       try {
         const { data } = await DataflowService.dataflowDetails(dataflowId);
-        setIsBusinessDataflow(TextUtils.areEquals(data.type, 'BUSINESS')); // TODO TEST WITH REAL DATA
+        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
         setDataflowName(data.name);
         setIsLoading(false);
       } catch (error) {
