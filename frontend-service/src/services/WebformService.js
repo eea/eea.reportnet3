@@ -4,14 +4,6 @@ import { WebformRepository } from 'repositories/WebformRepository';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const WebformService = {
-  addPamsRecords: async (datasetId, tables, pamId, type) => {
-    return await WebformRepository.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
-  },
-
-  singlePamData: async (datasetId, groupPaMId) => await WebformRepository.singlePamData(datasetId, groupPaMId)
-};
-
 const parsePamTables = (tables, pamId, type) => {
   return tables.map(table => ({
     idTableSchema: table.tableSchemaId,
@@ -41,4 +33,12 @@ const getPamFieldValue = (fieldName, pamId, type) => {
   if (TextUtils.areEquals(fieldName, 'Id_SectorObjectives')) return `${pamId}_1`;
 
   return null;
+};
+
+export const WebformService = {
+  addPamsRecords: async (datasetId, tables, pamId, type) => {
+    return await WebformRepository.addPamsRecords(datasetId, parsePamTables(tables, pamId, type));
+  },
+
+  singlePamData: async (datasetId, groupPaMId) => await WebformRepository.singlePamData(datasetId, groupPaMId)
 };

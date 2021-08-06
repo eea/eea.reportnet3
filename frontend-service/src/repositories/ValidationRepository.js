@@ -13,7 +13,9 @@ export const ValidationRepository = {
     await HTTPRequester.delete({ url: getUrl(ValidationConfig.delete, { datasetSchemaId, ruleId }) }),
 
   downloadShowValidationsFile: async (datasetId, fileName) =>
-    await HTTPRequester.get({ url: getUrl(ValidationConfig.downloadShowValidationsFile, { datasetId, fileName }) }),
+    await HTTPRequester.download({
+      url: getUrl(ValidationConfig.downloadShowValidationsFile, { datasetId, fileName })
+    }),
 
   generateShowValidationsFile: async datasetId => {
     return await HTTPRequester.post({ url: getUrl(ValidationConfig.generateShowValidationsFile, { datasetId }) });
