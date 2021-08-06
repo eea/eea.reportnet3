@@ -3,64 +3,46 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const RepresentativeRepository = {
-  add: async (dataflowId, dataProviderGroupId, dataProviderId) =>
+  createDataProvider: async (dataflowId, dataProviderGroupId, dataProviderId) =>
     await HTTPRequester.post({
-      url: getUrl(RepresentativeConfig.add, {
-        dataflowId
-      }),
-      data: {
-        dataProviderId,
-        dataProviderGroupId
-      }
+      url: getUrl(RepresentativeConfig.createDataProvider, { dataflowId }),
+      data: { dataProviderId, dataProviderGroupId }
     }),
-  addLeadReporter: async (leadReporterAccount, representativeId, dataflowId) =>
+
+  createLeadReporter: async (leadReporterAccount, representativeId, dataflowId) =>
     await HTTPRequester.post({
-      url: getUrl(RepresentativeConfig.addLeadReporter, { representativeId, dataflowId }),
+      url: getUrl(RepresentativeConfig.createLeadReporter, { representativeId, dataflowId }),
       data: { email: leadReporterAccount }
     }),
-  allDataProviders: async dataProviderGroupId =>
-    await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.allDataProviders, {
-        dataProviderGroupId
-      })
-    }),
-  allRepresentatives: async dataflowId =>
-    await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.allRepresentatives, {
-        dataflowId: dataflowId
-      })
-    }),
-  deleteById: async (representativeId, dataflowId) =>
+
+  getAllDataProviders: async dataProviderGroupId =>
+    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getAllDataProviders, { dataProviderGroupId }) }),
+
+  getAllRepresentatives: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getAllRepresentatives, { dataflowId: dataflowId }) }),
+
+  deleteRepresentative: async (representativeId, dataflowId) =>
     await HTTPRequester.delete({
-      url: getUrl(RepresentativeConfig.deleteById, {
-        representativeId,
-        dataflowId
-      })
+      url: getUrl(RepresentativeConfig.deleteRepresentative, { representativeId, dataflowId })
     }),
+
   deleteLeadReporter: async (leadReporterId, dataflowId) =>
     await HTTPRequester.delete({
       url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId, dataflowId })
     }),
-  downloadById: async dataflowId =>
-    await HTTPRequester.download({
-      url: getUrl(RepresentativeConfig.exportRepresentatives, { dataflowId })
-    }),
-  downloadTemplateById: async dataProviderGroupId =>
-    await HTTPRequester.download({
-      url: getUrl(RepresentativeConfig.exportRepresentativesTemplate, { dataProviderGroupId })
-    }),
-  getFmeUsers: async () =>
-    await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.getFmeUsers, {})
-    }),
-  getGroupCompanies: async () =>
-    await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.getGroupCompanies, {})
-    }),
-  getGroupProviders: async () =>
-    await HTTPRequester.get({
-      url: getUrl(RepresentativeConfig.getGroupProviders, {})
-    }),
+
+  exportFile: async dataflowId =>
+    await HTTPRequester.download({ url: getUrl(RepresentativeConfig.exportFile, { dataflowId }) }),
+
+  exportTemplateFile: async dataProviderGroupId =>
+    await HTTPRequester.download({ url: getUrl(RepresentativeConfig.exportTemplateFile, { dataProviderGroupId }) }),
+
+  getFmeUsers: async () => await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getFmeUsers, {}) }),
+
+  getGroupCompanies: async () => await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getGroupCompanies, {}) }),
+
+  getGroupCountries: async () => await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getGroupCountries, {}) }),
+
   updateDataProviderId: async (representativeId, dataProviderId) =>
     await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateDataProviderId, {}),
@@ -69,6 +51,7 @@ export const RepresentativeRepository = {
         dataProviderId: dataProviderId
       }
     }),
+
   updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
     await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateLeadReporter, { dataflowId }),

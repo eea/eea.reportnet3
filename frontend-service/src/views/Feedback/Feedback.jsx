@@ -249,8 +249,8 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadDataProviders = async () => {
-    const allRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-    const responseAllDataProviders = await RepresentativeService.allDataProviders(allRepresentatives.group);
+    const allRepresentatives = await RepresentativeService.getAllRepresentatives(dataflowId);
+    const responseAllDataProviders = await RepresentativeService.getAllDataProviders(allRepresentatives.group);
 
     const filteredDataProviders = responseAllDataProviders.filter(dataProvider =>
       allRepresentatives.representatives.some(

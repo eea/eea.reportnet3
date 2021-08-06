@@ -376,7 +376,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onExportLeadReporters = async () => {
     try {
-      const { data } = await RepresentativeService.downloadById(dataflowId);
+      const { data } = await RepresentativeService.exportFile(dataflowId);
       if (!isNil(data)) {
         DownloadFile(
           data,
