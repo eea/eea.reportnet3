@@ -69,68 +69,57 @@ const sortDataflows = dataflowDTOs => {
   return dataflows;
 };
 
-const all = async (userData = []) => {
-  const dataflowsDTO = await ReferenceDataflowRepository.all();
-  const userRoles = [];
-  const dataflows = [];
-
-  const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
-
-  dataflowsRoles.map((item, index) => {
-    const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-    return (userRoles[index] = {
-      id: parseInt(item.replace(/\D/g, '')),
-      userRole: UserRoleUtils.getUserRoleLabel(role)
-    });
-  });
-
-  dataflowsDTO.data.forEach(dataflow => {
-    const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-    const role = isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles;
-
-    dataflows.push({ ...dataflow, ...role.find(item => item.id === dataflow.id) });
-  });
-
-  dataflowsDTO.data = sortDataflows(dataflows);
-
-  return dataflowsDTO;
-};
-
-const create = async (name, description, type) => ReferenceDataflowRepository.create(name, description, type);
-
-const deleteReferenceDataflow = async referenceDataflowId =>
-  ReferenceDataflowRepository.deleteReferenceDataflow(referenceDataflowId);
-
-const edit = async (dataflowId, description, name, type) =>
-  ReferenceDataflowRepository.edit(dataflowId, description, name, type);
-
-const getReferencingDataflows = async referenceDataflowId => {
-  const referenceDataflowDTO = await ReferenceDataflowRepository.getReferencingDataflows(referenceDataflowId);
-
-  return referenceDataflowDTO;
-};
-
 const sortDatasetTypeByName = (a, b) => {
   let datasetName_A = a.datasetSchemaName;
   let datasetName_B = b.datasetSchemaName;
   return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
 };
 
-const referenceDataflow = async referenceDataflowId => {
-  const referenceDataflowDTO = await ReferenceDataflowRepository.referenceDataflow(referenceDataflowId);
-  const dataflow = parseDataflowDTO(referenceDataflowDTO.data);
-  dataflow.datasets.sort(sortDatasetTypeByName);
-  dataflow.designDatasets.sort(sortDatasetTypeByName);
-  referenceDataflowDTO.data = dataflow;
-
-  return referenceDataflowDTO;
-};
-
 export const ReferenceDataflowService = {
-  all,
-  create,
-  deleteReferenceDataflow,
-  edit,
-  getReferencingDataflows,
-  referenceDataflow
+  getAll: async (userData = []) => {
+    const dataflowsDTO = await ReferenceDataflowRepository.getAll();
+    const userRoles = [];
+    const dataflows = [];
+
+    const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
+
+    dataflowsRoles.map((item, index) => {
+      const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
+      return (userRoles[index] = {
+        id: parseInt(item.replace(/\D/g, '')),
+        userRole: UserRoleUtils.getUserRoleLabel(role)
+      });
+    });
+
+    dataflowsDTO.data.forEach(dataflow => {
+      const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
+      const role = isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles;
+
+      dataflows.push({ ...dataflow, ...role.find(item => item.id === dataflow.id) });
+    });
+
+    dataflowsDTO.data = sortDataflows(dataflows);
+
+    return dataflowsDTO;
+  },
+
+  create: async (name, description, type) => ReferenceDataflowRepository.create(name, description, type),
+
+  delete: async referenceDataflowId => ReferenceDataflowRepository.delete(referenceDataflowId),
+
+  update: async (dataflowId, description, name, type) =>
+    ReferenceDataflowRepository.update(dataflowId, description, name, type),
+
+  getReferencingDataflows: async referenceDataflowId =>
+    await ReferenceDataflowRepository.getReferencingDataflows(referenceDataflowId),
+
+  getReferenceDataflow: async referenceDataflowId => {
+    const referenceDataflowDTO = await ReferenceDataflowRepository.referenceDataflow(referenceDataflowId);
+    const dataflow = parseDataflowDTO(referenceDataflowDTO.data);
+    dataflow.datasets.sort(sortDatasetTypeByName);
+    dataflow.designDatasets.sort(sortDatasetTypeByName);
+    referenceDataflowDTO.data = dataflow;
+
+    return referenceDataflowDTO;
+  }
 };

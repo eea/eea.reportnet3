@@ -70,7 +70,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
   const onLoadDataflows = async () => {
     try {
       if (isReferenceDataflow) {
-        const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
+        const { data } = await ReferenceDataflowService.getAll(userContext.contextRoles);
         cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
       } else {
         const { data } = await DataflowService.all(userContext.contextRoles);
