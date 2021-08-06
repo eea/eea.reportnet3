@@ -366,7 +366,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (dataflowFound != null) {
       try {
         dataProviderGroup = dataProviderGroupRepository
-            .findById(dataflowFound.getDataProviderGroupId()).orElse(null);
+            .findById(dataflowFound.getDataProviderGroupId()).orElse(new DataProviderGroup());
       } catch (Exception e) {
         LOG.error("Cannot find Data provider group for Dataflow with provided Id: {}", dataflowId);
         throw new EEAException(
