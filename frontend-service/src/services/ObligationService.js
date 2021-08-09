@@ -116,5 +116,7 @@ export const ObligationService = {
       const openedObligationsDTO = await ObligationRepository.getOpen();
       return parseObligationList(openedObligationsDTO.data);
     }
-  }
+  },
+
+  parseObligation
 };

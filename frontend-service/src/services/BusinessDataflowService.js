@@ -1,17 +1,16 @@
 import dayjs from 'dayjs';
-import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
 import { BusinessDataflowRepository } from 'repositories/BusinessDataflowRepository';
 
 import { BusinessDataflow } from 'entities/BusinessDataflow';
-import { LegalInstrument } from 'entities/LegalInstrument';
-import { Obligation } from 'entities/Obligation';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
+
+import { ObligationService } from 'services/ObligationService';
 
 const parseDataflowDTOs = dataflowDTOs => {
   const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
@@ -31,46 +30,11 @@ const parseDataflowDTO = dataflowDTO =>
     id: dataflowDTO.id,
     isReleasable: dataflowDTO.releasable,
     name: dataflowDTO.name,
-    obligation: parseObligationDTO(dataflowDTO.obligation),
+    obligation: ObligationService.parseObligation(dataflowDTO.obligation),
     status: dataflowDTO.status,
     type: dataflowDTO.type,
     userRole: dataflowDTO.userRole
   });
-
-  return dataflow;
-};
-
-const parseObligationDTO = obligationDTO => {
-  if (!isNil(obligationDTO)) {
-    return new Obligation({
-      comment: obligationDTO.comment,
-      countries: obligationDTO.countries,
-      description: obligationDTO.description,
-      expirationDate: !isNil(obligationDTO.nextDeadline)
-        ? dayjs(obligationDTO.nextDeadline).format('YYYY-MM-DD')
-        : null,
-      issues: obligationDTO.issues,
-      legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
-      obligationId: obligationDTO.obligationId,
-      reportingFrequency: obligationDTO.reportFreq,
-      reportingFrequencyDetail: obligationDTO.reportFreqDetail,
-      title: obligationDTO.oblTitle,
-      validSince: obligationDTO.validSince,
-      validTo: obligationDTO.validTo
-    });
-  }
-};
-
-const parseLegalInstrument = legalInstrumentDTO => {
-  if (!isNil(legalInstrumentDTO)) {
-    return new LegalInstrument({
-      alias: legalInstrumentDTO.sourceAlias,
-      id: legalInstrumentDTO.sourceId,
-      title: legalInstrumentDTO.sourceTitle
-    });
-  }
-  return;
-};
 
 export const BusinessDataflowService = {
   getAll: async (accessRole, contextRoles) => {
