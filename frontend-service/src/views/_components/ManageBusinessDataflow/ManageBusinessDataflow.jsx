@@ -47,7 +47,7 @@ export const ManageBusinessDataflow = ({
   onEditDataflow,
   resetObligations
 }) => {
-  const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
+  const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
