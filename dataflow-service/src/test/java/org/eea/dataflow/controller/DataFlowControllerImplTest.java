@@ -19,6 +19,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -302,6 +303,15 @@ public class DataFlowControllerImplTest {
     ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
     assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, value.getBody());
     assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+  }
+
+  @Test
+  public void createDataFlowNotAdminThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.BUSINESS);
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.UNAUTHORIZED, value.getBody());
+    assertEquals(HttpStatus.UNAUTHORIZED, value.getStatusCode());
   }
 
   /**
@@ -681,8 +691,18 @@ public class DataFlowControllerImplTest {
   @Test
   public void findReferenceDataflowsTest() throws EEAException {
     when(dataflowService.getReferenceDataflows(Mockito.any())).thenReturn(new ArrayList<>());
-    dataFlowControllerImpl.findReferenceDataflows();
-    assertEquals("fail", new ArrayList<>(), dataflowService.getReferenceDataflows(Mockito.any()));
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findReferenceDataflows());
   }
 
+  @Test
+  public void findBusinessDataflowsTest() throws EEAException {
+    when(dataflowService.getBusinessDataflows(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findBusinessDataflows());
+  }
+
+  @Test
+  public void findBusinessDataflowsExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).getBusinessDataflows(Mockito.any());
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findBusinessDataflows());
+  }
 }
