@@ -1,1 +1,0 @@
-export { apiDataCollection } from './ApiDataCollection';

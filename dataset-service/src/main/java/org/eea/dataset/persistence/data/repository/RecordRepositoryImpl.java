@@ -318,7 +318,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(FIELD_VALUE, fieldValue);
       }
       // Searches in the table occurrences where any column value matches fieldValue
-      else if (null == fieldSchema && null != fieldValue) {
+      else if (null == fieldSchema && StringUtils.isNotBlank(fieldValue)) {
         query2.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
       }
       if (!errorList.isEmpty()) {
