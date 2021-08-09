@@ -290,7 +290,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
-        isBusinessDataflow: false, // TODO WITH REAL DATA
+        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS), // TODO TEST WITH REAL DATA
         schemaName: metaData.dataset.name
       }
     });
@@ -448,8 +448,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return statistics.data;
+      return await DatasetService.getStatistics(datasetId, tableSchemaNames);
     } catch (error) {
       console.error('DatasetDesigner - getStatisticsById.', error);
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
@@ -481,7 +480,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onChangeAvailableInPublicView = async checked => {
     try {
       designerDispatch({ type: 'SET_AVAILABLE_PUBLIC_VIEW', payload: checked });
-      await DatasetService.updateDatasetSchemaDesign(datasetId, { availableInPublic: checked });
+      await DatasetService.updateDatasetDesign(datasetId, { availableInPublic: checked });
     } catch (error) {
       console.error('DatasetDesigner - onChangeAvailableInPublicView.', error);
     }
@@ -490,7 +489,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onChangeReferenceDataset = async checked => {
     try {
       designerDispatch({ type: 'SET_REFERENCE_DATASET', payload: checked });
-      await DatasetService.updateDatasetSchemaDesign(datasetId, { referenceDataset: checked });
+      await DatasetService.updateDatasetDesign(datasetId, { referenceDataset: checked });
     } catch (error) {
       console.error('DatasetDesigner - onChangeReferenceDataset.', error);
     }
@@ -605,7 +604,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('DatasetDesigner - onExportDataInternalExtension.', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
@@ -678,37 +677,35 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
-        const dataset = await DatasetService.schemaById(datasetId);
+        const dataset = await DatasetService.getSchema(datasetId);
         const tableSchemaList = [];
-        dataset.data.tables.forEach(table =>
-          tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId })
-        );
+        dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
 
         const datasetStatisticsDTO = await getStatisticsById(
           datasetId,
-          dataset.data.tables.map(tableSchema => tableSchema.tableSchemaName)
+          dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
 
         setIsLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
           payload: {
-            availableInPublic: dataset.data.availableInPublic,
-            datasetSchema: dataset.data,
+            availableInPublic: dataset.availableInPublic,
+            datasetSchema: dataset,
             datasetStatistics: datasetStatisticsDTO,
-            description: dataset.data.datasetSchemaDescription,
-            levelErrorTypes: dataset.data.levelErrorTypes,
-            previousWebform: WebformsConfig.filter(item => item.value === dataset.data.webform)[0],
-            referenceDataset: dataset.data.referenceDataset,
-            schemaId: dataset.data.datasetSchemaId,
-            tables: dataset.data.tables,
+            description: dataset.datasetSchemaDescription,
+            levelErrorTypes: dataset.levelErrorTypes,
+            previousWebform: WebformsConfig.filter(item => item.value === dataset.webform)[0],
+            referenceDataset: dataset.referenceDataset,
+            schemaId: dataset.datasetSchemaId,
+            tables: dataset.tables,
             schemaTables: tableSchemaList,
-            webform: WebformsConfig.filter(item => item.value === dataset.data.webform)[0]
+            webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
           }
         });
       };
       const getDatasetSchemas = async () => {
-        const { data } = await DataflowService.getAllSchemas(dataflowId);
+        const data = await DataflowService.getSchemas(dataflowId);
         designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: data } });
       };
 
@@ -771,7 +768,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onUpdateDescription = async description => {
     try {
       const descriptionObject = { description: description };
-      await DatasetService.updateDatasetSchemaDesign(datasetId, descriptionObject);
+      await DatasetService.updateDatasetDesign(datasetId, descriptionObject);
     } catch (error) {
       console.error('DatasetDesigner - onUpdateDescription.', error);
     }
@@ -780,7 +777,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onUpdateWebform = async () => {
     try {
       const webformObject = { webform: { name: designerState.selectedWebform.value } };
-      await DatasetService.updateDatasetSchemaDesign(datasetId, webformObject);
+      await DatasetService.updateDatasetDesign(datasetId, webformObject);
       onLoadSchema();
     } catch (error) {
       console.error('DatasetDesigner - onUpdateWebform.', error);

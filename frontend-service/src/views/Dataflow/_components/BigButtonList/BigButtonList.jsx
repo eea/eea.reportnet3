@@ -181,7 +181,7 @@ export const BigButtonList = ({
     setIsCloningDataflow(true);
 
     try {
-      await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
+      await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -351,7 +351,7 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
+      await DatasetService.deleteSchema(dataflowState.designDatasetSchemas[index].datasetId);
       onUpdateData();
       setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
     } catch (error) {

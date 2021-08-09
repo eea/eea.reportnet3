@@ -18,6 +18,7 @@ import { ListMessages } from './_components/ListMessages';
 import { MainLayout } from 'views/_components/Layout';
 import { Title } from 'views/_components/Title';
 
+import { DataflowService } from 'services/DataflowService';
 import { FeedbackService } from 'services/FeedbackService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
@@ -31,8 +32,8 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { feedbackReducer } from './_functions/Reducers/feedbackReducer';
 
 import { CurrentPage } from 'views/_functions/Utils';
-import { DataflowUtils } from 'views/_functions/Utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Feedback = withRouter(({ match, history }) => {
   const {
@@ -165,9 +166,9 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetDataflowDetails = async () => {
     try {
-      const data = await DataflowUtils.getDataflowDetails(dataflowId);
+      const data = await DataflowService.getDataflowDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = false; // TODO WITH REAL DATA
+      const isBusinessDataflow = TextUtils.areEquals(data.data.type, config.dataflowType.BUSINESS); // TODO TEST WITH REAL DATA
       dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);

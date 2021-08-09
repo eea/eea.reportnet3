@@ -1,25 +1,11 @@
 import { DocumentRepository } from 'repositories/DocumentRepository';
-import { Document } from 'entities/Document';
 
-import { config } from 'conf/index';
+import { DocumentUtils } from 'services/_utils/DocumentUtils';
 
 export const DocumentService = {
   getAll: async dataflowId => {
     const response = await DocumentRepository.getAll(dataflowId);
-    return response.data.documents.map(
-      documentDTO =>
-        new Document({
-          category: documentDTO.category,
-          date: documentDTO.date,
-          description: documentDTO.description,
-          id: documentDTO.id,
-          isPublic: documentDTO.isPublic,
-          language: config.languages.filter(language => language.code === documentDTO.language).map(name => name.name),
-          size: documentDTO.size,
-          title: documentDTO.name,
-          url: documentDTO.url
-        })
-    );
+    return DocumentUtils.parseDocumentListDTO(response.data.documents);
   },
 
   download: async documentId => await DocumentRepository.download(documentId),

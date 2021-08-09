@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataCollection = withRouter(({ match, history }) => {
   const {
@@ -87,7 +88,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const getDataflowName = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
+      const data = await DataflowService.getDataflowDetails(match.params.dataflowId);
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataCollection - getDataflowName.', error);
@@ -122,7 +123,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('DataCollection - onExportDataInternalExtension.', error);
       const {
@@ -139,7 +140,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onLoadDataflowData = async () => {
     try {
-      const { data } = await DataflowService.reporting(match.params.dataflowId);
+      const data = await DataflowService.getReportingDatasets(match.params.dataflowId);
       const dataCollection = data
         ? data.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
         : [];
@@ -147,7 +148,8 @@ export const DataCollection = withRouter(({ match, history }) => {
       if (!isEmpty(firstDataCollection)) {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
       setIsLoading(false);
     } catch (error) {
       console.error('DataCollection - onLoadDataflowData.', error);
@@ -170,11 +172,11 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       setLoading(true);
-      const datasetSchema = await DatasetService.schemaById(datasetId);
-      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];
       setTableSchema(
-        datasetSchema.data.tables.map(tableSchema => {
+        datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
             id: tableSchema['tableSchemaId'],
@@ -184,7 +186,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         })
       );
       setTableSchemaColumns(
-        datasetSchema.data.tables.map(table => {
+        datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
             return {
               codelistItems: field['codelistItems'],
@@ -218,7 +220,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         }
       } = error;
       const datasetError = { type: '', content: { dataflowId, datasetId, dataflowName, datasetName } };
-      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.dataSchema, { datasetId }))) {
+      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.getSchema, { datasetId }))) {
         datasetError.type = 'SCHEMA_BY_ID_ERROR';
       } else {
         datasetError.type = 'ERROR_STATISTICS_BY_ID_ERROR';

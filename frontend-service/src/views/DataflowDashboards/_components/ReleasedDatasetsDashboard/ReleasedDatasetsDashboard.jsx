@@ -31,7 +31,7 @@ export const ReleasedDatasetsDashboard = dataflowId => {
 
   const onLoadDashboard = async () => {
     try {
-      const { data } = await DataflowService.datasetsReleasedStatus(dataflowId.dataflowId);
+      const data = await DataflowService.getDatasetsReleasedStatus(dataflowId.dataflowId);
       setReleasedDashboardData(buildReleasedDashboardObject(data));
     } catch (error) {
       console.error('ReleasedDatasetsDashboard - onLoadDashboard.', error);

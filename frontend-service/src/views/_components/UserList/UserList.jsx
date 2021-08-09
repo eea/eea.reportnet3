@@ -36,18 +36,17 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
 
   const fetchData = async () => {
     try {
-      let response;
+      let userData;
       setIsLoading(true);
       if (isNil(representativeId) && isNil(dataflowId)) {
-        response = await DataflowService.getAllDataflowsUserList();
+        userData = await DataflowService.getAllDataflowsUserList();
       } else if (isNil(representativeId) && !isNil(dataflowId)) {
-        response = await DataflowService.getRepresentativesUsersList(dataflowId);
+        userData = await DataflowService.getRepresentativesUsersList(dataflowId);
       } else {
-        response = await DataflowService.getUserList(dataflowId, representativeId);
+        userData = await DataflowService.getUserList(dataflowId, representativeId);
       }
-
-      setUserListData(response.data);
-      setFilteredData(response.data);
+      setUserListData(userData);
+      setFilteredData(userData);
     } catch (error) {
       console.error('UserList - fetchData.', error);
       notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' });

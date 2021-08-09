@@ -57,7 +57,7 @@ export const NationalSystemsTable = ({
         ? getFieldSchemaColumnIdByHeader(schemaTables.records, tables.sortBy)
         : undefined;
 
-      const response = await DatasetService.tableDataById({
+      const tableData = await DatasetService.getTableData({
         datasetId,
         tableSchemaId: schemaTables?.tableSchemaId,
         pageSize: 100,
@@ -65,8 +65,8 @@ export const NationalSystemsTable = ({
         levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
       });
 
-      setData(parseData(response.data.records, tables, schemaTables));
-      setSchemaData(response.data);
+      setData(parseData(tableData.records, tables, schemaTables));
+      setSchemaData(tableData);
     } catch (error) {
       console.error('NationalSystemsTable - onLoadTableData.', error);
     } finally {

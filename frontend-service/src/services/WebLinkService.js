@@ -1,11 +1,11 @@
 import { WebLinkRepository } from 'repositories/WebLinkRepository';
 
-import { WebLink } from 'entities/WebLink';
+import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 export const WebLinkService = {
   getAll: async dataflowId => {
     const response = await WebLinkRepository.getAll(dataflowId);
-    return response.data.weblinks.map(webLinkDTO => new WebLink(webLinkDTO));
+    return WebLinksUtils.parseWebLinkListDTO(response.data.weblinks);
   },
 
   create: async (dataflowId, webLinkToCreate) => await WebLinkRepository.create(dataflowId, webLinkToCreate),

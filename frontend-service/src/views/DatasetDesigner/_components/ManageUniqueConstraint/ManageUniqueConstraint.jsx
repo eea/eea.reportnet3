@@ -11,7 +11,7 @@ import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { ListBox } from 'views/DatasetDesigner/_components/ListBox';
 
-import { UniqueConstraintsService } from 'services/UniqueConstraintsService';
+import { UniqueConstraintService } from 'services/UniqueConstraintService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -132,7 +132,7 @@ export const ManageUniqueConstraint = ({
     try {
       setIsUniqueConstraintCreating(true);
       setIsCreating(true);
-      await UniqueConstraintsService.create(
+      await UniqueConstraintService.create(
         dataflowId,
         datasetSchemaId,
         selectedFields.map(field => field.value),
@@ -151,7 +151,7 @@ export const ManageUniqueConstraint = ({
 
   const onLoadUniquesList = async () => {
     try {
-      const uniqueConstraintList = await UniqueConstraintsService.getAll(dataflowId, datasetSchemaId);
+      const uniqueConstraintList = await UniqueConstraintService.getAll(dataflowId, datasetSchemaId);
       setDuplicatedList(uniqueConstraintList);
     } catch (error) {
       console.error('ManageUniqueConstraint - onLoadUniquesList.', error);
@@ -172,7 +172,7 @@ export const ManageUniqueConstraint = ({
       try {
         setIsUpdating(true);
         setIsUniqueConstraintUpdating(true);
-        await UniqueConstraintsService.update(
+        await UniqueConstraintService.update(
           dataflowId,
           datasetSchemaId,
           selectedFields.map(field => field.value),

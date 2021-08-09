@@ -2,18 +2,8 @@ import isEmpty from 'lodash/isEmpty';
 import sortBy from 'lodash/sortBy';
 
 import { RepresentativeRepository } from 'repositories/RepresentativeRepository';
-import { Representative } from 'entities/Representative';
-import { LeadReporter } from 'entities/LeadReporter';
 
-const parseLeadReporters = (leadReporters = []) =>
-  leadReporters.map(
-    leadReporter =>
-      new LeadReporter({
-        account: leadReporter.email,
-        id: leadReporter.id,
-        representativeId: leadReporter.representativeId
-      })
-  );
+import { RepresentativeUtils } from 'services/_utils/RepresentativeUtils';
 
 export const RepresentativeService = {
   createDataProvider: async (dataflowId, providerAccount, dataProviderId) =>
@@ -34,20 +24,7 @@ export const RepresentativeService = {
   getRepresentatives: async dataflowId => {
     const representativesDTO = await RepresentativeRepository.getRepresentatives(dataflowId);
 
-    const representativesList = !isEmpty(representativesDTO.data)
-      ? representativesDTO.data.map(
-          representativeDTO =>
-            new Representative({
-              dataProviderGroupId: representativeDTO.dataProviderGroupId,
-              dataProviderId: representativeDTO.dataProviderId,
-              hasDatasets: representativeDTO.hasDatasets,
-              id: representativeDTO.id,
-              isReceiptDownloaded: representativeDTO.receiptDownloaded,
-              isReceiptOutdated: representativeDTO.receiptOutdated,
-              leadReporters: parseLeadReporters(representativeDTO.leadReporters)
-            })
-        )
-      : [];
+    const representativesList = RepresentativeUtils.parseRepresentativeListDTO(representativesDTO.data);
 
     const dataToConsume = {
       group: !isEmpty(representativesDTO.data)

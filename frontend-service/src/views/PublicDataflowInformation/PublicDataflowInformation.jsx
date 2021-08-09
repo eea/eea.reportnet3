@@ -241,9 +241,9 @@ export const PublicDataflowInformation = withRouter(
         let fileContent;
 
         if (!isNil(dataProviderId)) {
-          fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+          fileContent = await DatasetService.downloadPublicDatasetFile(dataflowId, dataProviderId, fileName);
         } else {
-          fileContent = await DatasetService.downloadReferenceDatasetFileData(dataflowId, fileName);
+          fileContent = await DatasetService.downloadPublicReferenceDatasetFileData(dataflowId, fileName);
         }
         DownloadFile(fileContent.data, fileName);
       } catch (error) {
@@ -262,7 +262,7 @@ export const PublicDataflowInformation = withRouter(
 
     const onLoadDataflowData = async () => {
       try {
-        const { data } = await DataflowService.getPublicDataflowData(dataflowId);
+        const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
         parseDataflowData(data.datasets);
         setReferenceDatasets(data.referenceDatasets);

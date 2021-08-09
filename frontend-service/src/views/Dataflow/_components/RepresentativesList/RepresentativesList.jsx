@@ -23,7 +23,7 @@ import { RepresentativeService } from 'services/RepresentativeService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { reducer } from './_functions/Reducers/representativeReducer.js';
+import { reducer } from './_functions/Reducers/representativeReducer';
 
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
@@ -111,7 +111,7 @@ const RepresentativesList = ({
   const getAllDataProviders = async () => {
     const { representatives, selectedDataProviderGroup } = formState;
     try {
-      const responseAllDataProviders = await RepresentativeService.getAllDataProviders(selectedDataProviderGroup);
+      const responseAllDataProviders = await RepresentativeService.getDataProviders(selectedDataProviderGroup);
 
       const providersNoSelect = [...responseAllDataProviders];
       if (representatives.length <= responseAllDataProviders.length) {

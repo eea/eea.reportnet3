@@ -169,17 +169,17 @@ const Dataflows = withRouter(({ history, match }) => {
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const { data } = await DataflowService.all(userContext.contextRoles);
+        const data = await DataflowService.getAll(userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
       }
 
       if (TextUtils.areEquals(tabId, 'reference')) {
-        const { data } = await ReferenceDataflowService.getAll(userContext.contextRoles);
+        const data = await ReferenceDataflowService.getAll(userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
 
       if (TextUtils.areEquals(tabId, 'business')) {
-        const { data } = await BusinessDataflowService.getAll(userContext.contextRoles);
+        const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {

@@ -378,7 +378,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getDatasetData = async () => {
     try {
-      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      const metadata = await DatasetService.getMetaData(datasetId);
       setDatasetSchemaId(metadata.datasetSchemaId);
       setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
       setDataProviderId(metadata.dataProviderId);
@@ -405,7 +405,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getDataflowName = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
+      const data = await DataflowService.getDataflowDetails(match.params.dataflowId);
       setDataflowName(data.name);
     } catch (error) {
       console.error('Dataset - getDataflowName.', error);
@@ -417,7 +417,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       setDeleteDialogVisible(false);
-      await DatasetService.deleteDataById(datasetId);
+      await DatasetService.deleteData(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -584,7 +584,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('Dataset - onExportDataInternalExtension.', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
@@ -593,8 +593,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onLoadDataflow = async () => {
     try {
-      const { data } = await DataflowService.reporting(match.params.dataflowId);
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+      const data = await DataflowService.getReportingDatasets(match.params.dataflowId);
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
@@ -645,13 +645,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
-      setDatasetSchemaAllTables(datasetSchema.data.tables);
-      setDatasetSchemaName(datasetSchema.data.datasetSchemaName);
-      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
-      setWebformData(datasetSchema.data.webform);
-      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.data.webform));
-      return datasetSchema.data;
+      const datasetSchema = await DatasetService.getSchema(datasetId);
+      setDatasetSchemaAllTables(datasetSchema.tables);
+      setDatasetSchemaName(datasetSchema.datasetSchemaName);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
+      setWebformData(datasetSchema.webform);
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
+      return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
@@ -659,8 +659,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return datasetStatistics.data;
+      return await DatasetService.getStatistics(datasetId, tableSchemaNames);
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }

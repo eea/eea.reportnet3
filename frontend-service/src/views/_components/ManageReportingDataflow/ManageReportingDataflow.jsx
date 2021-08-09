@@ -86,13 +86,9 @@ export const ManageReportingDataflow = ({
     manageDialogs('isDeleteDialogVisible', false);
     showLoading();
     try {
-      const response = await DataflowService.deleteById(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        history.push(getUrl(routes.DATAFLOWS));
-        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-      } else {
-        throw new Error(`Delete dataflow error with this status: ', ${response.status}`);
-      }
+      await DataflowService.delete(dataflowId);
+      history.push(getUrl(routes.DATAFLOWS));
+      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
