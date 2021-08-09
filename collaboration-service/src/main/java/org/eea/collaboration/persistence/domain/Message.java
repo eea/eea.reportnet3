@@ -3,11 +3,14 @@ package org.eea.collaboration.persistence.domain;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import lombok.Data;
 
 /**
@@ -52,4 +55,9 @@ public class Message {
   /** The user name. */
   @Column(name = "user_name")
   private String userName;
+
+  /** The type. */
+  @Column(name = "TYPE")
+  @Enumerated(EnumType.STRING)
+  private MessageTypeEnum type;
 }
