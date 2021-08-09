@@ -1,40 +1,12 @@
-import dayjs from 'dayjs';
-
 import { config } from 'conf';
 
 import { BusinessDataflowRepository } from 'repositories/BusinessDataflowRepository';
 
-import { ObligationUtils } from 'services/_utils/ObligationUtils';
-
-import { BusinessDataflow } from 'entities/BusinessDataflow';
+import { BusinessDataflowUtils } from 'services/_utils/BusinessDataflowUtils';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
-
-const parseDataflowDTOs = dataflowDTOs => {
-  const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
-  dataflows.sort((a, b) => {
-    const deadline_1 = a.expirationDate;
-    const deadline_2 = b.expirationDate;
-    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
-  });
-  return dataflows;
-};
-
-const parseDataflowDTO = dataflowDTO =>
-  new BusinessDataflow({
-    creationDate: dataflowDTO.creationDate,
-    description: dataflowDTO.description,
-    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
-    id: dataflowDTO.id,
-    isReleasable: dataflowDTO.releasable,
-    name: dataflowDTO.name,
-    obligation: ObligationUtils.parseObligation(dataflowDTO.obligation),
-    status: dataflowDTO.status,
-    type: dataflowDTO.type,
-    userRole: dataflowDTO.userRole
-  });
 
 export const BusinessDataflowService = {
   getAll: async (accessRole, contextRoles) => {
@@ -80,7 +52,7 @@ export const BusinessDataflowService = {
         });
       }
     }
-    return parseDataflowDTOs(businessDataflows);
+    return BusinessDataflowUtils.parseSortedBusinessDataflowListDTO(businessDataflows);
   },
 
   create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>

@@ -71,6 +71,8 @@ export const CoreUtils = (() => {
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
+    getPercentageOfValue: (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2)),
+
     isDuplicatedInObject: (array, property) => {
       let isDuplicated = false,
         testObject = {};
