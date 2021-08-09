@@ -345,7 +345,7 @@ const ActionsToolbar = ({
           <span className={`p-float-label ${styles.label}`}>
             <InputText
               className={styles.inputFilter}
-              id="value_filter_input"
+              id={`value_filter_input_${tableId}`}
               name={resources.messages['valueFilter']}
               onChange={event => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: event.target.value })}
               onKeyDown={onSearchKeyEvent}
@@ -367,7 +367,7 @@ const ActionsToolbar = ({
             />
             <label
               className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}
-              htmlFor="value_filter_input">
+              htmlFor={`value_filter_input_${tableId}`}>
               {resources.messages['valueFilter']}
             </label>
           </span>
