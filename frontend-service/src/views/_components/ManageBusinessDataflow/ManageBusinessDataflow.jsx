@@ -21,6 +21,7 @@ import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
+import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
@@ -47,7 +48,7 @@ export const ManageBusinessDataflow = ({
   onEditDataflow,
   resetObligations
 }) => {
-  const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
+  const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -61,6 +62,18 @@ export const ManageBusinessDataflow = ({
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
   const [groupOfCompanies, setGroupOfCompanies] = useState([]);
   const [fmeUsers, setFmeUsers] = useState([]);
+
+  useEffect(() => {
+    if (isEditing) {
+      setSelectedFmeUser(fmeUsers.filter(user => user.id === metadata.fmeUserId)[0]);
+    }
+  }, [fmeUsers]);
+
+  useEffect(() => {
+    if (isEditing) {
+      setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === metadata.dataProviderGroupId)[0]);
+    }
+  }, [groupOfCompanies]);
 
   const [errors, setErrors] = useState({
     description: { hasErrors: false, message: '' },
@@ -130,7 +143,7 @@ export const ManageBusinessDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await BusinessDataflowService.deleteReferenceDataflow(dataflowId);
+      const response = await DataflowService.delete(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
@@ -149,7 +162,7 @@ export const ManageBusinessDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await BusinessDataflowService.edit(
+        const { status } = await BusinessDataflowService.update(
           dataflowId,
           description,
           obligation.id,
@@ -242,8 +255,8 @@ export const ManageBusinessDataflow = ({
           !isEmpty(name) &&
           !isEmpty(description) &&
           !isNil(obligation.id) &&
-          !isNil(selectedFmeUser.id) &&
-          !isNil(selectedGroup.dataProviderGroupId) &&
+          !isNil(selectedFmeUser?.id) &&
+          !isNil(selectedGroup?.dataProviderGroupId) &&
           !isSending &&
           'p-button-animated-blink'
         }`}
@@ -251,8 +264,8 @@ export const ManageBusinessDataflow = ({
           isEmpty(name) ||
           isEmpty(description) ||
           isNil(obligation.id) ||
-          isNil(selectedFmeUser.id) ||
-          isNil(selectedGroup.dataProviderGroupId) ||
+          isNil(selectedFmeUser?.id) ||
+          isNil(selectedGroup?.dataProviderGroupId) ||
           isSending
         }
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
