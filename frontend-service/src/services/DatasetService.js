@@ -184,9 +184,6 @@ export const DatasetService = {
   createTableDesign: async (datasetId, tableSchemaName) =>
     await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
 
-  createValidation: (entityType, id, levelError, message) =>
-    new Validation({ date: new Date(Date.now()).toString(), entityType, id, levelError, message }),
-
   deleteData: async datasetId => await DatasetRepository.deleteData(datasetId),
 
   deleteAttachment: async (datasetId, fieldId) => await DatasetRepository.deleteAttachment(datasetId, fieldId),
