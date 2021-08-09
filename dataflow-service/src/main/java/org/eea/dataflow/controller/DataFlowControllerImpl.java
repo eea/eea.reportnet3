@@ -188,7 +188,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Business Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
