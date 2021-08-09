@@ -111,7 +111,7 @@ const RepresentativesList = ({
   const getAllDataProviders = async () => {
     const { representatives, selectedDataProviderGroup } = formState;
     try {
-      const responseAllDataProviders = await RepresentativeService.getAllDataProviders(selectedDataProviderGroup);
+      const responseAllDataProviders = await RepresentativeService.getDataProviders(selectedDataProviderGroup);
 
       const providersNoSelect = [...responseAllDataProviders];
       if (representatives.length <= responseAllDataProviders.length) {
